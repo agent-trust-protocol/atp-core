@@ -4,7 +4,7 @@ This directory contains sophisticated examples demonstrating advanced agent-to-a
 
 ## 🏗️ Architecture Overview
 
-The Agent Trust Protocol enables:
+The Agent Trust Protocol™ enables:
 - **Decentralized Identity**: DID-based agent authentication
 - **Trust Networks**: Dynamic trust relationship establishment  
 - **Capability Sharing**: Secure delegation of agent capabilities
@@ -223,14 +223,14 @@ Future marketplace features:
 
 ## 🤔 Answering Your MCP Question
 
-**Regarding MCP Integration**: The Agent Trust Protocol is designed to be **highly complementary** to MCP:
+**Regarding MCP Integration**: The Agent Trust Protocol™ is designed to be **highly complementary** to MCP:
 
 ### Current State
-ATP provides the **trust layer** that MCP doesn't have - enabling secure, identity-verified tool sharing between agents.
+ATP™ provides the **trust layer** that MCP doesn't have - enabling secure, identity-verified tool sharing between agents.
 
 ### Future Integration
 - **MCP as Transport**: Could use MCP's efficient transport for agent communication
-- **ATP as Trust Layer**: Provides DID authentication and capability validation for MCP tools
+- **ATP™ as Trust Layer**: Provides DID authentication and capability validation for MCP tools
 - **Hybrid Architecture**: Best of both protocols for comprehensive agent ecosystems
 
 ### Quick Connection Benefits
@@ -239,7 +239,7 @@ ATP provides the **trust layer** that MCP doesn't have - enabling secure, identi
 - **Capability Discovery**: Find and request tools across trusted networks
 - **Economic Models**: Token-based tool access and marketplace dynamics
 
-The examples here show how ATP could enhance MCP with decentralized trust, while MCP could provide efficient tool execution for ATP agents.
+The examples here show how ATP™ could enhance MCP with decentralized trust, while MCP could provide efficient tool execution for ATP™ agents.
 
 ---
 

@@ -1,4 +1,4 @@
-# Agent Trust Protocol (ATP)
+# Agent Trust Protocol™ (ATP™)
 
 **Open protocol for secure, decentralized AI agent authentication and trust**
 
@@ -8,9 +8,9 @@ Created and developed by **Larry Lewis**, Sovr INC DBA SovrLabs
 [![GitHub](https://img.shields.io/github/stars/bigblackcoder/agent-trust-protocol)](https://github.com/bigblackcoder/agent-trust-protocol)
 [![Contributors](https://img.shields.io/github/contributors/bigblackcoder/agent-trust-protocol)](https://github.com/bigblackcoder/agent-trust-protocol/graphs/contributors)
 
-## 🤖 What is ATP?
+## 🤖 What is ATP™?
 
-The Agent Trust Protocol (ATP) establishes a comprehensive trust layer for AI agent ecosystems using decentralized identity, verifiable credentials, and cryptographic authentication. It bridges the security gap in agent-to-agent communication, providing a foundational trust infrastructure that complements emerging protocols like MCP (Model Context Protocol).
+The Agent Trust Protocol™ (ATP™) establishes a comprehensive trust layer for AI agent ecosystems using decentralized identity, verifiable credentials, and cryptographic authentication. It bridges the security gap in agent-to-agent communication, providing a foundational trust infrastructure that complements emerging protocols like MCP (Model Context Protocol).
 
 ## 🎯 Key Features
 
@@ -87,11 +87,11 @@ npm run test:simple
 
 ## 🏗️ Architecture
 
-ATP consists of modular microservices that can be deployed independently:
+ATP™ consists of modular microservices that can be deployed independently:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     Agent Trust Protocol                        │
+│                   Agent Trust Protocol™                        │
 ├─────────────┬─────────────────┬─────────────────┬───────────────┤
 │Identity Svc │    VC Service   │Permission Svc   │  RPC Gateway  │
 │   (DIDs)    │  (Credentials)  │  (Capabilities) │(Communication)│
@@ -148,12 +148,12 @@ ATP consists of modular microservices that can be deployed independently:
 
 ## 🔗 MCP Integration Strategy
 
-ATP provides the trust foundation that MCP currently lacks:
+ATP™ provides the trust foundation that MCP currently lacks:
 
 ### Current Benefits
 - **DID Authentication**: Secure agent identity for MCP sessions
 - **Trust Validation**: Multi-level relationship management for tool access
-- **Capability Tokens**: ATP permissions authorize MCP tool usage  
+- **Capability Tokens**: ATP™ permissions authorize MCP tool usage  
 - **Decentralized Discovery**: Find tools across verified agent networks
 
 ### Future Roadmap
@@ -238,7 +238,7 @@ npm run test:integration
 
 ## 🤲 Contributing
 
-We welcome contributions from the community! ATP is designed to be a foundational protocol for the AI agent ecosystem.
+We welcome contributions from the community! ATP™ is designed to be a foundational protocol for the AI agent ecosystem.
 
 ### How to Contribute
 1. **Fork the repository** and create a feature branch
@@ -260,9 +260,9 @@ We welcome contributions from the community! ATP is designed to be a foundationa
 - **Security Enhancements**: Cryptographic improvements and threat modeling
 - **Developer Tools**: SDKs, CLIs, and debugging utilities
 
-## 🌟 Why ATP Matters
+## 🌟 Why ATP™ Matters
 
-As AI agents become more autonomous and interconnected, establishing trust between agents becomes critical infrastructure. ATP provides the missing security layer that enables:
+As AI agents become more autonomous and interconnected, establishing trust between agents becomes critical infrastructure. ATP™ provides the missing security layer that enables:
 
 ### For Developers
 - **Secure Foundation**: Build multi-agent applications with confidence
@@ -301,7 +301,7 @@ Copyright 2024 Larry Lewis, Sovr INC DBA SovrLabs
 
 ## 🙏 Acknowledgments
 
-ATP builds upon excellent prior work and standards:
+ATP™ builds upon excellent prior work and standards:
 
 - **[W3C DID Working Group](https://www.w3.org/2019/did-wg/)** - Decentralized Identifiers specification
 - **[W3C Verifiable Credentials](https://www.w3.org/TR/vc-data-model/)** - Verifiable Credentials data model
@@ -309,7 +309,7 @@ ATP builds upon excellent prior work and standards:
 - **[JSON-RPC 2.0](https://www.jsonrpc.org/specification)** - Lightweight remote procedure call protocol
 - **[Node.js Community](https://nodejs.org/)** - JavaScript runtime and ecosystem
 
-Special thanks to the open source community for the foundational technologies that make ATP possible.
+Special thanks to the open source community for the foundational technologies that make ATP™ possible.
 
 ---
 
