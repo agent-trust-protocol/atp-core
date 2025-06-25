@@ -1,6 +1,7 @@
 import { DIDDocument, DIDRegistrationRequest, DIDRegistrationResponse, Service } from '../models/did.js';
 import { CryptoUtils } from '../utils/crypto.js';
 import { StorageService } from './storage.js';
+import { TrustLevel, TrustLevelManager } from '@atp/shared';
 
 export class IdentityService {
   constructor(private storage: StorageService) {}
@@ -16,7 +17,9 @@ export class IdentityService {
     const verificationMethodId = `${did}#key-1`;
     
     const document: DIDDocument = {
-      '@context': ['https://www.w3.org/ns/did/v1', 'https://w3id.org/security/suites/ed25519-2020/v1'],
+      '@context': [
+'https://www.w3.org/ns/did/v1', 
+'https://w3id.org/security/suites/ed25519-2020/v1'      ],
       id: did,
       verificationMethod: [{
         id: verificationMethodId,
@@ -32,6 +35,15 @@ export class IdentityService {
       service: request.services || [],
       created: now,
       updated: now,
+      metadata: {
+        protocol: 'Agent Trust Protocol™',
+        version: '1.0.0',
+        trustLevel: TrustLevel.UNTRUSTED,
+        additionalInfo: {
+          createdBy: 'ATP Identity Service',
+          initialTrustLevel: TrustLevel.UNTRUSTED,
+        },
+      },
     };
 
     await this.storage.storeDIDDocument(document);
@@ -100,5 +112,62 @@ export class IdentityService {
 
   async listDIDs(): Promise<string[]> {
     return await this.storage.listDIDs();
+  }
+
+  async updateTrustLevel(did: string, trustLevel: string): Promise<DIDDocument | null> {
+    const existingDoc = await this.storage.getDIDDocument(did);
+    if (!existingDoc) {
+      return null;
+    }
+
+    // Validate trust level
+    if (!TrustLevelManager.validateTrustLevel(trustLevel)) {
+      throw new Error(`Invalid trust level: ${trustLevel}`);
+    }
+
+    const updatedDocument: DIDDocument = {
+      ...existingDoc,
+      metadata: {
+        ...(existingDoc.metadata || {
+          protocol: 'Agent Trust Protocol™',
+          version: '1.0.0',
+        }),
+        trustLevel: trustLevel as TrustLevel,
+        additionalInfo: {
+          ...existingDoc.metadata?.additionalInfo,
+          lastTrustLevelUpdate: new Date().toISOString(),
+          previousTrustLevel: existingDoc.metadata?.trustLevel,
+        },
+      },
+      updated: new Date().toISOString(),
+    };
+
+    await this.storage.storeDIDDocument(updatedDocument);
+    return updatedDocument;
+  }
+
+  async getTrustLevelInfo(did: string): Promise<{
+    currentLevel: TrustLevel;
+    capabilities: string[];
+    nextLevel: TrustLevel | null;
+    upgradeRequirements: string[];
+  } | null> {
+    const document = await this.storage.getDIDDocument(did);
+    if (!document || !document.metadata?.trustLevel) {
+      return null;
+    }
+
+    const currentLevel = document.metadata.trustLevel as TrustLevel;
+    const nextLevel = TrustLevelManager.getNextLevel(currentLevel);
+    const upgradeRequirements = nextLevel 
+      ? TrustLevelManager.getUpgradeRequirements(currentLevel, nextLevel)
+      : [];
+
+    return {
+      currentLevel,
+      capabilities: TrustLevelManager.hasCapability(currentLevel, 'read-public') ? ['read-public'] : [],
+      nextLevel,
+      upgradeRequirements,
+    };
   }
 }

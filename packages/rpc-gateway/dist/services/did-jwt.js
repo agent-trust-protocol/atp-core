@@ -1,0 +1,175 @@
+import { SignJWT, jwtVerify } from 'jose';
+import { initializeCrypto } from '@atp/shared';
+import * as ed25519 from '@noble/ed25519';
+initializeCrypto();
+export class DIDJWTService {
+    constructor() { }
+    async createDIDJWT(payload, privateKeyHex, did, expiresIn = '1h') {
+        const privateKeyBytes = Buffer.from(privateKeyHex, 'hex');
+        // Create a JWT with Ed25519 algorithm
+        const jwt = await new SignJWT(payload)
+            .setProtectedHeader({
+            alg: 'EdDSA',
+            typ: 'JWT',
+            kid: `${did}#key-1`,
+        })
+            .setIssuedAt()
+            .setIssuer(did)
+            .setSubject(did)
+            .setAudience('atp-gateway')
+            .setExpirationTime(expiresIn)
+            .sign(privateKeyBytes);
+        return jwt;
+    }
+    async verifyDIDJWT(jwt) {
+        try {
+            // Decode the JWT header to get the kid
+            const [headerBase64] = jwt.split('.');
+            const header = JSON.parse(Buffer.from(headerBase64, 'base64url').toString());
+            if (!header.kid) {
+                console.warn('JWT missing kid in header');
+                return null;
+            }
+            // Extract DID from kid
+            const did = header.kid.split('#')[0];
+            // Resolve DID to get public key
+            const didDocument = await this.resolveDID(did);
+            if (!didDocument) {
+                console.warn('Could not resolve DID from JWT');
+                return null;
+            }
+            const publicKey = this.extractPublicKey(didDocument);
+            if (!publicKey) {
+                console.warn('Could not extract public key from DID document');
+                return null;
+            }
+            const publicKeyBytes = Buffer.from(publicKey, 'hex');
+            // Verify the JWT
+            const { payload } = await jwtVerify(jwt, publicKeyBytes, {
+                issuer: did,
+                audience: 'atp-gateway',
+            });
+            return payload;
+        }
+        catch (error) {
+            console.error('DID-JWT verification failed:', error);
+            return null;
+        }
+    }
+    async createAuthChallenge(did) {
+        const nonce = this.generateNonce();
+        const challenge = {
+            did,
+            nonce,
+            timestamp: Date.now(),
+            challenge: 'atp-auth-challenge',
+        };
+        return Buffer.from(JSON.stringify(challenge)).toString('base64url');
+    }
+    async verifyAuthResponse(challenge, response, signature, did) {
+        try {
+            // Decode challenge
+            const challengeData = JSON.parse(Buffer.from(challenge, 'base64url').toString());
+            // Verify timestamp (within 5 minutes)
+            const now = Date.now();
+            if (Math.abs(now - challengeData.timestamp) > 5 * 60 * 1000) {
+                console.warn('Challenge timestamp expired');
+                return false;
+            }
+            // Verify DID matches
+            if (challengeData.did !== did) {
+                console.warn('DID mismatch in challenge');
+                return false;
+            }
+            // Resolve DID to get public key
+            const didDocument = await this.resolveDID(did);
+            if (!didDocument) {
+                return false;
+            }
+            const publicKey = this.extractPublicKey(didDocument);
+            if (!publicKey) {
+                return false;
+            }
+            // Verify signature
+            const message = `${challenge}:${response}`;
+            const messageBytes = Buffer.from(message, 'utf8');
+            const signatureBytes = Buffer.from(signature, 'hex');
+            const publicKeyBytes = Buffer.from(publicKey, 'hex');
+            return await ed25519.verify(signatureBytes, messageBytes, publicKeyBytes);
+        }
+        catch (error) {
+            console.error('Auth response verification failed:', error);
+            return false;
+        }
+    }
+    async resolveDID(did) {
+        try {
+            // Call identity service to resolve DID
+            const response = await fetch(`http://localhost:3001/identity/${encodeURIComponent(did)}`);
+            if (!response.ok) {
+                return null;
+            }
+            const result = await response.json();
+            return result.success ? result.data : null;
+        }
+        catch (error) {
+            console.error('Failed to resolve DID:', error);
+            return null;
+        }
+    }
+    extractPublicKey(didDocument) {
+        try {
+            const verificationMethod = didDocument.verificationMethod?.[0];
+            if (!verificationMethod) {
+                return null;
+            }
+            // Extract public key from multibase encoding
+            const multibase = verificationMethod.publicKeyMultibase;
+            if (!multibase || !multibase.startsWith('z')) {
+                return null;
+            }
+            // Decode base58 and remove ed25519 prefix
+            const decoded = this.base58decode(multibase.slice(1));
+            if (decoded.length < 2) {
+                return null;
+            }
+            // Remove ed25519 prefix (0xed, 0x01)
+            const publicKeyBytes = decoded.slice(2);
+            return Buffer.from(publicKeyBytes).toString('hex');
+        }
+        catch (error) {
+            console.error('Failed to extract public key:', error);
+            return null;
+        }
+    }
+    base58decode(str) {
+        const alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+        let num = BigInt(0);
+        let multi = BigInt(1);
+        for (let i = str.length - 1; i >= 0; i--) {
+            const char = str[i];
+            const charIndex = alphabet.indexOf(char);
+            if (charIndex === -1) {
+                throw new Error('Invalid base58 character');
+            }
+            num += BigInt(charIndex) * multi;
+            multi *= 58n;
+        }
+        // Convert to bytes
+        const bytes = [];
+        while (num > 0) {
+            bytes.unshift(Number(num % 256n));
+            num = num / 256n;
+        }
+        // Add leading zeros
+        for (let i = 0; i < str.length && str[i] === '1'; i++) {
+            bytes.unshift(0);
+        }
+        return new Uint8Array(bytes);
+    }
+    generateNonce() {
+        const bytes = new Uint8Array(16);
+        crypto.getRandomValues(bytes);
+        return Buffer.from(bytes).toString('hex');
+    }
+}

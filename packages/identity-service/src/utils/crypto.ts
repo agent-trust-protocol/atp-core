@@ -37,7 +37,7 @@ export class CryptoUtils {
   static generateDID(publicKeyHex: string): string {
     const publicKeyBytes = Buffer.from(publicKeyHex, 'hex');
     const multibase = this.encodeMultibase(publicKeyBytes);
-    return `did:key:${multibase}`;
+    return `did:atp:${multibase}`;
   }
 
   static encodeMultibase(bytes: Buffer): string {

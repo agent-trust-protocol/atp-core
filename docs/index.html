@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Trust Protocol™ - Documentation</title>
+    <meta name="description" content="Complete documentation for Agent Trust Protocol™ - Secure AI agent interactions with DID-based identity, verifiable credentials, and immutable audit trails.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            padding: 60px 0;
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+
+        .quick-links {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn.primary {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+
+        .btn.primary:hover {
+            background: #45a049;
+        }
+
+        .content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .card-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-link:hover {
+            text-decoration: underline;
+        }
+
+        .features {
+            margin: 60px 0;
+        }
+
+        .features h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 40px 0;
+            margin-top: 60px;
+        }
+
+        .footer a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .quick-links {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🛡️ Agent Trust Protocol™</div>
+            <div class="tagline">Secure AI Agent Interactions with DID-Based Identity & Immutable Audit Trails</div>
+            <div class="status-badge">✅ Phase 1 - Public Release Ready</div>
+            
+            <div class="quick-links">
+                <a href="./DEVELOPER_ONBOARDING.md" class="btn primary">🚀 Quick Start Guide</a>
+                <a href="./API_REFERENCE.md" class="btn">📡 API Reference</a>
+                <a href="./architecture.md" class="btn">🏗️ Architecture</a>
+                <a href="./security.md" class="btn">🔐 Security</a>
+            </div>
+        </header>
+
+        <div class="content">
+            <h1>Welcome to ATP™ Documentation</h1>
+            <p>The <strong>Agent Trust Protocol™</strong> provides a comprehensive framework for secure, trustworthy AI agent interactions. Built with enterprise-grade security, DID-based identity management, and immutable audit trails.</p>
+
+            <div class="features">
+                <h2>🎯 Core Features</h2>
+                <div class="feature-grid">
+                    <div class="feature">
+                        <div class="feature-icon">🆔</div>
+                        <h3>DID-Based Identity</h3>
+                        <p>Decentralized identifiers with cryptographic authentication</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🏆</div>
+                        <h3>5-Tier Trust System</h3>
+                        <p>Untrusted → Basic → Verified → Premium → Enterprise</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🔐</div>
+                        <h3>End-to-End Encryption</h3>
+                        <p>AES-256-GCM with Ed25519 digital signatures</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">📋</div>
+                        <h3>Immutable Audit Logs</h3>
+                        <p>IPFS storage with hash-linked integrity chains</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🔗</div>
+                        <h3>Protocol Integrations</h3>
+                        <p>MCP, A2A, and custom protocol support</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🐳</div>
+                        <h3>Production Ready</h3>
+                        <p>Docker deployment with monitoring & scaling</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="card">
+                    <h3>🚀 Quick Start</h3>
+                    <p>Get up and running with ATP™ in 5 minutes. Install prerequisites, start services, and register your first agent.</p>
+                    <a href="./DEVELOPER_ONBOARDING.md#-quick-start-5-minutes" class="card-link">
+                        Start Building →
+                    </a>
+                </div>
+
+                <div class="card">
+                    <h3>🏗️ Architecture Guide</h3>
+                    <p>Understand the 6-component microservices architecture: Identity, Credentials, Permissions, Gateway, Audit, and Protocols.</p>
+                    <a href="./architecture.md" class="card-link">
+                        View Architecture →
+                    </a>
+                </div>
+
+                <div class="card">
+                    <h3>📡 API Reference</h3>
+                    <p>Complete API documentation with endpoints, authentication methods, error codes, and SDK usage examples.</p>
+                    <a href="./API_REFERENCE.md" class="card-link">
+                        Browse APIs →
+                    </a>
+                </div>
+
+                <div class="card">
+                    <h3>🔐 Security Guide</h3>
+                    <p>Learn about mTLS authentication, DID certificates, encryption standards, and compliance features.</p>
+                    <a href="./security.md" class="card-link">
+                        Security Details →
+                    </a>
+                </div>
+
+                <div class="card">
+                    <h3>🛠️ Development Examples</h3>
+                    <p>Ready-to-use code examples for agent registration, authentication, audit logging, and protocol integrations.</p>
+                    <a href="./DEVELOPER_ONBOARDING.md#%EF%B8%8F-development-examples" class="card-link">
+                        View Examples →
+                    </a>
+                </div>
+
+                <div class="card">
+                    <h3>🧪 Testing & Integration</h3>
+                    <p>Comprehensive testing templates, integration scripts, and end-to-end validation approaches.</p>
+                    <a href="./DEVELOPER_ONBOARDING.md#-testing-your-integration" class="card-link">
+                        Testing Guide →
+                    </a>
+                </div>
+            </div>
+
+            <div style="margin: 60px 0; padding: 40px; background: #f0f8ff; border-radius: 15px; text-align: center;">
+                <h2>🎉 Ready to Get Started?</h2>
+                <p style="font-size: 1.1rem; margin: 20px 0; color: #555;">Join the ATP™ developer community and build secure, trustworthy AI agents.</p>
+                <div style="margin-top: 30px;">
+                    <a href="./DEVELOPER_ONBOARDING.md" class="btn primary" style="margin: 0 10px;">📖 Developer Guide</a>
+                    <a href="#staging-environment" class="btn" style="margin: 0 10px;">🔧 Try Live Demo</a>
+                </div>
+            </div>
+
+            <div id="staging-environment" style="margin: 40px 0; padding: 30px; background: #f8f9fa; border-radius: 15px;">
+                <h2>🌟 Live Staging Environment</h2>
+                <p>Test ATP™ features in our live staging environment:</p>
+                <div style="margin: 20px 0;">
+                    <strong>Infrastructure Services:</strong><br>
+                    • PostgreSQL Database: <code>localhost:5432</code><br>
+                    • IPFS Storage: <code>localhost:5001</code> (API), <code>localhost:8080</code> (Gateway)<br>
+                    • Prometheus Monitoring: <code>localhost:9090</code>
+                </div>
+                <div style="margin: 20px 0;">
+                    <strong>ATP™ API Services:</strong><br>
+                    • Identity Service: <code>localhost:3001</code><br>
+                    • RPC Gateway: <code>localhost:3000</code><br>
+                    • Audit Logger: <code>localhost:3005</code><br>
+                    • Protocol Integrations: <code>localhost:3006</code>
+                </div>
+                <p style="margin: 15px 0;"><strong>Test Command:</strong></p>
+                <code style="background: #e9ecef; padding: 10px; border-radius: 5px; display: block;">
+                    curl http://localhost:3001/health
+                </code>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2025 Agent Trust Protocol™. Licensed under MIT.</p>
+            <p>Created by Larry Lewis, <a href="#">Sovr INC DBA SovrLabs</a></p>
+            <p style="margin-top: 20px;">
+                <a href="https://github.com/agent-trust-protocol/atp">GitHub</a> •
+                <a href="#support">Support</a> •
+                <a href="#community">Community</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Add smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add loading animations
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.card').forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

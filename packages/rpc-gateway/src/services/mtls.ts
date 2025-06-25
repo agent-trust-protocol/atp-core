@@ -1,0 +1,391 @@
+import https from 'https';
+import fs from 'fs';
+import { TLSSocket } from 'tls';
+import { IncomingMessage } from 'http';
+import { DIDCertificateAuthority, DIDCertificate } from './did-ca.js';
+import { ATPEncryptionService } from '@atp/shared';
+
+export interface MTLSConfig {
+  ca: string[];
+  cert: string;
+  key: string;
+  requestCert: boolean;
+  rejectUnauthorized: boolean;
+}
+
+export interface ClientCertificate {
+  subject: any;
+  issuer: any;
+  valid_from: string;
+  valid_to: string;
+  fingerprint: string;
+  fingerprint256: string;
+  did?: string;
+  // ATP™ Enhanced fields
+  didCertificate?: DIDCertificate;
+  trustLevel?: string;
+  verified?: boolean;
+  verificationError?: string;
+}
+
+export class MTLSService {
+  private config: MTLSConfig;
+  private didCA: DIDCertificateAuthority;
+
+  constructor(config: MTLSConfig, didCA?: DIDCertificateAuthority) {
+    this.config = config;
+    this.didCA = didCA || new DIDCertificateAuthority('did:atp:ca:gateway');
+  }
+
+  createHTTPSServer(app: any): https.Server {
+    const tlsOptions = {
+      ca: this.config.ca,
+      cert: this.config.cert,
+      key: this.config.key,
+      requestCert: this.config.requestCert,
+      rejectUnauthorized: this.config.rejectUnauthorized,
+    };
+
+    return https.createServer(tlsOptions, app);
+  }
+
+  extractClientCertificate(req: IncomingMessage): ClientCertificate | null {
+    const socket = req.socket as TLSSocket;
+    
+    if (!socket.authorized && this.config.rejectUnauthorized) {
+      console.warn('Client certificate not authorized:', socket.authorizationError);
+      return null;
+    }
+
+    const cert = socket.getPeerCertificate();
+    if (!cert || Object.keys(cert).length === 0) {
+      return null;
+    }
+
+    // Extract DID from certificate subject or SAN
+    const did = this.extractDIDFromCertificate(cert);
+
+    return {
+      subject: cert.subject,
+      issuer: cert.issuer,
+      valid_from: cert.valid_from,
+      valid_to: cert.valid_to,
+      fingerprint: cert.fingerprint,
+      fingerprint256: cert.fingerprint256,
+      did,
+    };
+  }
+
+  async validateClientCertificate(certificate: ClientCertificate): Promise<boolean> {
+    try {
+      // Enhanced certificate validation with DID-CA integration
+      const validationResult = await this.performEnhancedCertificateValidation(certificate);
+      
+      // Update certificate with validation results
+      certificate.verified = validationResult.valid;
+      certificate.trustLevel = validationResult.trustLevel;
+      certificate.verificationError = validationResult.error;
+      certificate.didCertificate = validationResult.didCertificate;
+
+      return validationResult.valid;
+    } catch (error) {
+      console.error('Certificate validation failed:', error);
+      certificate.verified = false;
+      certificate.verificationError = `Validation error: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      return false;
+    }
+  }
+
+  private async performEnhancedCertificateValidation(certificate: ClientCertificate): Promise<{
+    valid: boolean;
+    trustLevel?: string;
+    error?: string;
+    didCertificate?: any;
+  }> {
+    // Check certificate validity period
+    const now = new Date();
+    const validFrom = new Date(certificate.valid_from);
+    const validTo = new Date(certificate.valid_to);
+
+    if (now < validFrom || now > validTo) {
+      return { valid: false, error: 'Certificate validity period check failed' };
+    }
+
+    // If DID is present, validate through DID-CA system
+    if (certificate.did) {
+      const didValidation = await this.validateDIDCertificate(certificate);
+      if (!didValidation.valid) {
+        return didValidation;
+      }
+
+      // Verify certificate fingerprint matches DID document service endpoint
+      const isValidBinding = await this.verifyDIDCertificateBinding(
+        certificate.did,
+        certificate.fingerprint256
+      );
+      
+      if (!isValidBinding) {
+        return { valid: false, error: 'DID-certificate binding verification failed' };
+      }
+
+      return didValidation;
+    }
+
+    // For non-DID certificates, perform standard validation
+    const isRevoked = await this.checkCertificateRevocation(certificate.fingerprint256);
+    if (isRevoked) {
+      return { valid: false, error: 'Certificate has been revoked' };
+    }
+
+    return { valid: true, trustLevel: 'BASIC' };
+  }
+
+  private async validateDIDCertificate(certificate: ClientCertificate): Promise<{
+    valid: boolean;
+    trustLevel?: string;
+    error?: string;
+    didCertificate?: any;
+  }> {
+    try {
+      // Get DID certificates from CA
+      const didCertificates = await this.didCA.getCertificateByDID(certificate.did!);
+      
+      if (!didCertificates || didCertificates.length === 0) {
+        return { valid: false, error: 'No DID certificates found' };
+      }
+
+      // Find matching certificate by fingerprint or public key
+      const matchingCert = didCertificates.find(cert => 
+        cert.fingerprint === certificate.fingerprint256 ||
+        this.certificateMatchesPublicKey(certificate, cert.publicKey)
+      );
+
+      if (!matchingCert) {
+        return { valid: false, error: 'No matching DID certificate found' };
+      }
+
+      // Verify the DID certificate through CA
+      const verification = await this.didCA.verifyCertificate(matchingCert);
+      
+      if (!verification.valid) {
+        return { 
+          valid: false, 
+          error: verification.reason || 'DID certificate verification failed' 
+        };
+      }
+
+      return {
+        valid: true,
+        trustLevel: verification.trustLevel,
+        didCertificate: matchingCert
+      };
+    } catch (error) {
+      return { 
+        valid: false, 
+        error: `DID certificate validation error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+      };
+    }
+  }
+
+  private certificateMatchesPublicKey(certificate: ClientCertificate, publicKey: string): boolean {
+    try {
+      // Extract public key from X.509 certificate and compare
+      // This is a simplified check - in production, you'd need proper ASN.1 parsing
+      const certFingerprint = certificate.fingerprint256;
+      const keyHash = require('crypto').createHash('sha256').update(publicKey).digest('hex');
+      
+      // For now, we'll rely on fingerprint matching as the primary method
+      return certFingerprint.toLowerCase().includes(keyHash.slice(0, 16).toLowerCase());
+    } catch (error) {
+      console.warn('Public key matching failed:', error);
+      return false;
+    }
+  }
+
+  private extractDIDFromCertificate(cert: any): string | null {
+    try {
+      // Try to extract DID from subject CN
+      if (cert.subject?.CN?.startsWith('did:atp:')) {
+        return cert.subject.CN;
+      }
+
+      // Try to extract DID from subject alternative names
+      if (cert.subjectaltname) {
+        const sans = cert.subjectaltname.split(', ');
+        for (const san of sans) {
+          if (san.startsWith('URI:did:atp:')) {
+            return san.replace('URI:', '');
+          }
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Failed to extract DID from certificate:', error);
+      return null;
+    }
+  }
+
+  private async resolveDID(did: string): Promise<any> {
+    try {
+      const response = await fetch(`http://localhost:3001/identity/${encodeURIComponent(did)}`);
+      if (!response.ok) {
+        return null;
+      }
+      
+      const result = await response.json() as any;
+      return result.success ? result.data : null;
+    } catch (error) {
+      console.error('Failed to resolve DID:', error);
+      return null;
+    }
+  }
+
+  private async verifyDIDCertificateBinding(did: string, fingerprint: string): Promise<boolean> {
+    try {
+      const didDocument = await this.resolveDID(did);
+      if (!didDocument) {
+        return false;
+      }
+
+      // Look for service with type 'TLSCertificate' that matches fingerprint
+      const tlsServices = didDocument.service?.filter((s: any) => 
+        s.type === 'TLSCertificate' || s.type === 'X509Certificate'
+      );
+
+      if (!tlsServices || tlsServices.length === 0) {
+        return false;
+      }
+
+      // Check if any service matches the certificate fingerprint
+      for (const service of tlsServices) {
+        if (service.serviceEndpoint?.fingerprint === fingerprint) {
+          return true;
+        }
+      }
+
+      return false;
+    } catch (error) {
+      console.error('DID-certificate binding verification failed:', error);
+      return false;
+    }
+  }
+
+  private async checkCertificateRevocation(fingerprint: string): Promise<boolean> {
+    // Placeholder for certificate revocation checking
+    // In production, implement CRL or OCSP checking
+    try {
+      // Check against internal revocation list
+      // This could be stored in the audit logger or a dedicated service
+      const response = await fetch(`http://localhost:3005/audit/events?action=certificate-revoked&resource=${fingerprint}`);
+      if (response.ok) {
+        const result = await response.json() as any;
+        return result.events && result.events.length > 0;
+      }
+      return false;
+    } catch (error) {
+      console.warn('Could not check certificate revocation status:', error);
+      return false;
+    }
+  }
+
+  // Helper methods for certificate management
+  async issueDIDCertificate(did: string, publicKey: string, trustLevel: string): Promise<any> {
+    try {
+      const request = {
+        subjectDID: did,
+        publicKey,
+        requestedTrustLevel: trustLevel as any,
+        keyUsage: ['digitalSignature', 'keyEncipherment'],
+        validityPeriod: 365, // 1 year
+        proof: {
+          challenge: `cert-request-${Date.now()}`,
+          signature: await this.generateProofSignature(publicKey, `cert-request-${Date.now()}`)
+        }
+      };
+
+      return await this.didCA.issueCertificate(request);
+    } catch (error) {
+      console.error('Failed to issue DID certificate:', error);
+      throw error;
+    }
+  }
+
+  async revokeDIDCertificate(certificateId: string, reason: string, revokerDID: string): Promise<void> {
+    try {
+      await this.didCA.revokeCertificate(certificateId, reason, revokerDID);
+      
+      // Log the revocation event
+      await this.logCertificateEvent('certificate-revoked', {
+        certificateId,
+        reason,
+        revokerDID
+      });
+    } catch (error) {
+      console.error('Failed to revoke DID certificate:', error);
+      throw error;
+    }
+  }
+
+  getDIDCAStats(): any {
+    return this.didCA.getStats();
+  }
+
+  getDIDCACertificate(): any {
+    return this.didCA.getCACertificate();
+  }
+
+  getRevocationList(): any {
+    return this.didCA.getRevocationList();
+  }
+
+  private async generateProofSignature(publicKey: string, challenge: string): Promise<string> {
+    try {
+      // In production, this would be signed by the actual private key
+      // For now, we'll create a mock signature
+      const { ATPEncryptionService } = await import('@atp/shared');
+      const keyPair = await ATPEncryptionService.generateKeyPair();
+      return await ATPEncryptionService.sign(challenge, keyPair.privateKey);
+    } catch (error) {
+      console.warn('Failed to generate proof signature:', error);
+      return 'mock-signature';
+    }
+  }
+
+  private async logCertificateEvent(action: string, details: Record<string, any>): Promise<void> {
+    try {
+      await fetch('http://localhost:3005/audit/log', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          source: 'mtls-service',
+          action,
+          resource: 'certificate-management',
+          actor: 'rpc-gateway',
+          details,
+        }),
+      });
+    } catch (error) {
+      console.warn('Failed to log certificate event:', error);
+    }
+  }
+
+  static loadTLSConfig(configPath: string): MTLSConfig {
+    try {
+      const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+      
+      return {
+        ca: config.ca.map((caPath: string) => fs.readFileSync(caPath, 'utf8')),
+        cert: fs.readFileSync(config.cert, 'utf8'),
+        key: fs.readFileSync(config.key, 'utf8'),
+        requestCert: config.requestCert ?? true,
+        rejectUnauthorized: config.rejectUnauthorized ?? false,
+      };
+    } catch (error) {
+      console.error('Failed to load TLS configuration:', error);
+      throw error;
+    }
+  }
+}

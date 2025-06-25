@@ -20,6 +20,12 @@ export class RPCService {
             methods: ['perm.grant', 'perm.check', 'perm.revoke'],
             description: 'Permission management service',
         });
+        this.registerService({
+            name: 'audit',
+            endpoint: 'http://localhost:3005',
+            methods: ['audit.log', 'audit.query', 'audit.verify'],
+            description: 'Audit Logger service',
+        });
     }
     registerService(config) {
         const service = {
@@ -34,8 +40,22 @@ export class RPCService {
     }
     async handleRequest(request, clientDid) {
         const [serviceName, methodName] = request.method.split('.', 2);
+        const startTime = Date.now();
+        // Log the RPC request to audit service
+        await this.logAuditEvent({
+            source: 'rpc-gateway',
+            action: 'rpc-request',
+            resource: request.method,
+            actor: clientDid,
+            details: {
+                requestId: request.id,
+                method: request.method,
+                params: request.params,
+                timestamp: startTime,
+            },
+        });
         if (!serviceName || !methodName) {
-            return {
+            const errorResponse = {
                 jsonrpc: '2.0',
                 error: {
                     code: -32601,
@@ -44,10 +64,22 @@ export class RPCService {
                 },
                 id: request.id,
             };
+            await this.logAuditEvent({
+                source: 'rpc-gateway',
+                action: 'rpc-error',
+                resource: request.method,
+                actor: clientDid,
+                details: {
+                    requestId: request.id,
+                    error: errorResponse.error,
+                    duration: Date.now() - startTime,
+                },
+            });
+            return errorResponse;
         }
         const service = this.services.get(serviceName);
         if (!service) {
-            return {
+            const errorResponse = {
                 jsonrpc: '2.0',
                 error: {
                     code: -32601,
@@ -56,9 +88,21 @@ export class RPCService {
                 },
                 id: request.id,
             };
+            await this.logAuditEvent({
+                source: 'rpc-gateway',
+                action: 'rpc-error',
+                resource: request.method,
+                actor: clientDid,
+                details: {
+                    requestId: request.id,
+                    error: errorResponse.error,
+                    duration: Date.now() - startTime,
+                },
+            });
+            return errorResponse;
         }
         if (!service.methods.has(request.method)) {
-            return {
+            const errorResponse = {
                 jsonrpc: '2.0',
                 error: {
                     code: -32601,
@@ -67,13 +111,38 @@ export class RPCService {
                 },
                 id: request.id,
             };
+            await this.logAuditEvent({
+                source: 'rpc-gateway',
+                action: 'rpc-error',
+                resource: request.method,
+                actor: clientDid,
+                details: {
+                    requestId: request.id,
+                    error: errorResponse.error,
+                    duration: Date.now() - startTime,
+                },
+            });
+            return errorResponse;
         }
         try {
             const response = await this.proxyRequest(service, request, clientDid);
+            // Log successful response
+            await this.logAuditEvent({
+                source: 'rpc-gateway',
+                action: 'rpc-response',
+                resource: request.method,
+                actor: clientDid,
+                details: {
+                    requestId: request.id,
+                    success: !response.error,
+                    duration: Date.now() - startTime,
+                    responseSize: JSON.stringify(response).length,
+                },
+            });
             return response;
         }
         catch (error) {
-            return {
+            const errorResponse = {
                 jsonrpc: '2.0',
                 error: {
                     code: -32603,
@@ -82,6 +151,19 @@ export class RPCService {
                 },
                 id: request.id,
             };
+            await this.logAuditEvent({
+                source: 'rpc-gateway',
+                action: 'rpc-error',
+                resource: request.method,
+                actor: clientDid,
+                details: {
+                    requestId: request.id,
+                    error: errorResponse.error,
+                    duration: Date.now() - startTime,
+                    exception: error instanceof Error ? error.message : String(error),
+                },
+            });
+            return errorResponse;
         }
     }
     async proxyRequest(service, request, clientDid) {
@@ -156,6 +238,12 @@ export class RPCService {
                 'revoke': '/perm/revoke',
                 'list': '/perm/list',
             },
+            'audit': {
+                'log': '/audit/log',
+                'query': '/audit/events',
+                'verify': '/audit/integrity',
+                'stats': '/audit/stats',
+            },
         };
         return endpointMap[serviceName]?.[methodName] || `/${serviceName}/${methodName}`;
     }
@@ -187,5 +275,29 @@ export class RPCService {
             };
         }
         return status;
+    }
+    async logAuditEvent(event) {
+        try {
+            // Don't log audit events for the audit service itself to avoid recursion
+            if (event.resource.startsWith('audit.')) {
+                return;
+            }
+            const auditService = this.services.get('audit');
+            if (!auditService || !auditService.healthy) {
+                console.warn('Audit service not available, skipping audit log');
+                return;
+            }
+            await fetch(`${auditService.endpoint}/audit/log`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(event),
+            });
+        }
+        catch (error) {
+            console.warn('Failed to log audit event:', error);
+            // Don't throw error to avoid disrupting main functionality
+        }
     }
 }

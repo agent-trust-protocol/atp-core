@@ -32,7 +32,7 @@ export class CryptoUtils {
     static generateDID(publicKeyHex) {
         const publicKeyBytes = Buffer.from(publicKeyHex, 'hex');
         const multibase = this.encodeMultibase(publicKeyBytes);
-        return `did:key:${multibase}`;
+        return `did:atp:${multibase}`;
     }
     static encodeMultibase(bytes) {
         const ed25519Prefix = Buffer.from([0xed, 0x01]);

@@ -100,4 +100,58 @@ export class IdentityController {
             });
         }
     }
+    async updateTrustLevel(req, res) {
+        try {
+            const { did } = req.params;
+            const { trustLevel } = req.body;
+            if (!trustLevel) {
+                res.status(400).json({
+                    success: false,
+                    error: 'Trust level is required',
+                });
+                return;
+            }
+            const document = await this.identityService.updateTrustLevel(did, trustLevel);
+            if (!document) {
+                res.status(404).json({
+                    success: false,
+                    error: 'DID not found',
+                });
+                return;
+            }
+            res.json({
+                success: true,
+                data: document,
+            });
+        }
+        catch (error) {
+            res.status(500).json({
+                success: false,
+                error: error instanceof Error ? error.message : 'Unknown error',
+            });
+        }
+    }
+    async getTrustLevelInfo(req, res) {
+        try {
+            const { did } = req.params;
+            const trustInfo = await this.identityService.getTrustLevelInfo(did);
+            if (!trustInfo) {
+                res.status(404).json({
+                    success: false,
+                    error: 'DID not found or trust level not set',
+                });
+                return;
+            }
+            res.json({
+                success: true,
+                data: trustInfo,
+            });
+        }
+        catch (error) {
+            res.status(500).json({
+                success: false,
+                error: error instanceof Error ? error.message : 'Unknown error',
+            });
+        }
+    }
 }

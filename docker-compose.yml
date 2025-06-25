@@ -56,6 +56,47 @@ services:
       retries: 3
     restart: unless-stopped
 
+  audit-logger:
+    build:
+      context: .
+      dockerfile: docker/audit-logger.Dockerfile
+    ports:
+      - "3005:3005"
+    environment:
+      - PORT=3005
+      - DB_PATH=/data/audit.db
+      - IPFS_URL=http://ipfs:5001
+    volumes:
+      - audit_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  protocol-integrations:
+    build:
+      context: .
+      dockerfile: docker/protocol-integrations.Dockerfile
+    ports:
+      - "3006:3006"
+      - "3007:3007"
+      - "3008:3008"
+    environment:
+      - PORT=3006
+      - MCP_PORT=3007
+      - A2A_PORT=3008
+    depends_on:
+      - identity-service
+      - audit-logger
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
   rpc-gateway:
     build:
       context: .
@@ -70,6 +111,8 @@ services:
       - identity-service
       - vc-service
       - permission-service
+      - audit-logger
+      - protocol-integrations
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
@@ -90,12 +133,26 @@ services:
       - identity-service
       - vc-service
       - permission-service
+      - audit-logger
+      - protocol-integrations
+    restart: unless-stopped
+
+  ipfs:
+    image: ipfs/go-ipfs:latest
+    ports:
+      - "4001:4001"
+      - "5001:5001"
+      - "8080:8080"
+    volumes:
+      - ipfs_data:/data/ipfs
     restart: unless-stopped
 
 volumes:
   identity_data:
   vc_data:
   permission_data:
+  audit_data:
+  ipfs_data:
 
 networks:
   default:

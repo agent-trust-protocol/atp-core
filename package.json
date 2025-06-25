@@ -17,21 +17,6 @@
     "name": "Larry Lewis",
     "email": "larry@sovrlabs.com",
     "url": "https://sovrlabs.com"
-  }The Missing Security Layer for AI Agent Ecosystems - Decentralized identity, verifiable credentials, and trust-based permissions for secure AI agent interactions",
-  "keywords": ["ai", "agents", "trust", "did", "verifiable-credentials", "security", "authentication", "mcp", "a2a"],
-  "license": "Apache-2.0",
-  "homepage": "https://atp.dev",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/agent-trust-protocol/atp.git"
-  },
-  "bugs": {
-    "url": "https://github.com/agent-trust-protocol/atp/issues"
-  },
-  "author": {
-    "name": "Larry Lewis",
-    "email": "larry@sovrlabs.com",
-    "url": "https://sovrlabs.com"
   },
   "workspaces": [
     "packages/*"

@@ -31,6 +31,22 @@ export declare const ServiceSchema: z.ZodObject<{
     type: string;
     serviceEndpoint: string;
 }>;
+export declare const MetadataSchema: z.ZodObject<{
+    protocol: z.ZodString;
+    version: z.ZodString;
+    trustLevel: z.ZodString;
+    additionalInfo: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
+}, "strip", z.ZodTypeAny, {
+    protocol: string;
+    version: string;
+    trustLevel: string;
+    additionalInfo?: Record<string, any> | undefined;
+}, {
+    protocol: string;
+    version: string;
+    trustLevel: string;
+    additionalInfo?: Record<string, any> | undefined;
+}>;
 export declare const DIDDocumentSchema: z.ZodObject<{
     '@context': z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     id: z.ZodString;
@@ -73,6 +89,22 @@ export declare const DIDDocumentSchema: z.ZodObject<{
     }>, "many">>;
     created: z.ZodString;
     updated: z.ZodString;
+    metadata: z.ZodOptional<z.ZodObject<{
+        protocol: z.ZodString;
+        version: z.ZodString;
+        trustLevel: z.ZodString;
+        additionalInfo: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
+    }, "strip", z.ZodTypeAny, {
+        protocol: string;
+        version: string;
+        trustLevel: string;
+        additionalInfo?: Record<string, any> | undefined;
+    }, {
+        protocol: string;
+        version: string;
+        trustLevel: string;
+        additionalInfo?: Record<string, any> | undefined;
+    }>>;
 }, "strip", z.ZodTypeAny, {
     id: string;
     '@context': string[];
@@ -95,6 +127,12 @@ export declare const DIDDocumentSchema: z.ZodObject<{
     }[];
     created: string;
     updated: string;
+    metadata?: {
+        protocol: string;
+        version: string;
+        trustLevel: string;
+        additionalInfo?: Record<string, any> | undefined;
+    } | undefined;
 }, {
     id: string;
     created: string;
@@ -117,6 +155,12 @@ export declare const DIDDocumentSchema: z.ZodObject<{
         type: string;
         serviceEndpoint: string;
     }[] | undefined;
+    metadata?: {
+        protocol: string;
+        version: string;
+        trustLevel: string;
+        additionalInfo?: Record<string, any> | undefined;
+    } | undefined;
 }>;
 export declare const KeyPairSchema: z.ZodObject<{
     did: z.ZodString;
@@ -139,6 +183,7 @@ export declare const KeyPairSchema: z.ZodObject<{
 }>;
 export type VerificationMethod = z.infer<typeof VerificationMethodSchema>;
 export type Service = z.infer<typeof ServiceSchema>;
+export type Metadata = z.infer<typeof MetadataSchema>;
 export type DIDDocument = z.infer<typeof DIDDocumentSchema>;
 export type KeyPair = z.infer<typeof KeyPairSchema>;
 export interface DIDRegistrationRequest {

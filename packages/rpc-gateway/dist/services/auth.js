@@ -1,5 +1,47 @@
+import { DIDJWTService } from './did-jwt.js';
 export class AuthService {
-    constructor() { }
+    didJWTService;
+    mtlsService;
+    constructor(mtlsService) {
+        this.didJWTService = new DIDJWTService();
+        this.mtlsService = mtlsService;
+    }
+    async authenticateRequest(req, authHeader) {
+        const context = {
+            authenticated: false,
+            authMethod: 'none',
+        };
+        // Try mTLS authentication first
+        if (this.mtlsService) {
+            const certificate = this.mtlsService.extractClientCertificate(req);
+            if (certificate) {
+                const isValid = await this.mtlsService.validateClientCertificate(certificate);
+                if (isValid) {
+                    context.authenticated = true;
+                    context.authMethod = 'mtls';
+                    context.certificate = certificate;
+                    context.did = certificate.did;
+                    await this.enrichContextWithDIDInfo(context);
+                    return context;
+                }
+            }
+        }
+        // Try DID-JWT authentication
+        if (authHeader?.startsWith('Bearer ')) {
+            const jwt = authHeader.substring(7);
+            const payload = await this.didJWTService.verifyDIDJWT(jwt);
+            if (payload) {
+                context.authenticated = true;
+                context.authMethod = 'did-jwt';
+                context.jwt = payload;
+                context.did = payload.did;
+                context.capabilities = payload.capabilities;
+                context.trustLevel = payload.trustLevel;
+                return context;
+            }
+        }
+        return context;
+    }
     async verifyAuth(authData) {
         try {
             // Verify timestamp (within 5 minutes)
@@ -28,6 +70,26 @@ export class AuthService {
         catch (error) {
             console.error('Authentication verification failed:', error);
             return false;
+        }
+    }
+    async createAuthChallenge(did) {
+        return await this.didJWTService.createAuthChallenge(did);
+    }
+    async verifyAuthResponse(challenge, response, signature, did) {
+        return await this.didJWTService.verifyAuthResponse(challenge, response, signature, did);
+    }
+    async enrichContextWithDIDInfo(context) {
+        if (!context.did) {
+            return;
+        }
+        try {
+            const didDocument = await this.resolveDID(context.did);
+            if (didDocument?.metadata) {
+                context.trustLevel = didDocument.metadata.trustLevel;
+            }
+        }
+        catch (error) {
+            console.warn('Could not enrich auth context with DID info:', error);
         }
     }
     async resolveDID(did) {
@@ -110,5 +172,26 @@ export class AuthService {
             bytes.unshift(0);
         }
         return new Uint8Array(bytes);
+    }
+    isAuthorized(context, requiredCapability, minimumTrustLevel) {
+        if (!context.authenticated) {
+            return false;
+        }
+        // Check capability requirement
+        if (requiredCapability && context.capabilities) {
+            if (!context.capabilities.includes(requiredCapability)) {
+                return false;
+            }
+        }
+        // Check trust level requirement
+        if (minimumTrustLevel && context.trustLevel) {
+            const trustLevels = ['untrusted', 'basic', 'verified', 'premium', 'enterprise'];
+            const currentLevel = trustLevels.indexOf(context.trustLevel);
+            const requiredLevel = trustLevels.indexOf(minimumTrustLevel);
+            if (currentLevel < requiredLevel) {
+                return false;
+            }
+        }
+        return true;
     }
 }

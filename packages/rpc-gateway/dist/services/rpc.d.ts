@@ -17,4 +17,5 @@ export declare class RPCService {
         healthy: boolean;
         lastCheck: number;
     }>;
+    private logAuditEvent;
 }

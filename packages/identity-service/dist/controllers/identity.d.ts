@@ -8,4 +8,6 @@ export declare class IdentityController {
     getDocument(req: Request, res: Response): Promise<void>;
     rotateKeys(req: Request, res: Response): Promise<void>;
     list(req: Request, res: Response): Promise<void>;
+    updateTrustLevel(req: Request, res: Response): Promise<void>;
+    getTrustLevelInfo(req: Request, res: Response): Promise<void>;
 }

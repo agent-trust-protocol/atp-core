@@ -11,6 +11,12 @@ export const ServiceSchema = z.object({
     type: z.string(),
     serviceEndpoint: z.string(),
 });
+export const MetadataSchema = z.object({
+    protocol: z.string(),
+    version: z.string(),
+    trustLevel: z.string(),
+    additionalInfo: z.record(z.any()).optional(),
+});
 export const DIDDocumentSchema = z.object({
     '@context': z.array(z.string()).default(['https://www.w3.org/ns/did/v1']),
     id: z.string(),
@@ -23,6 +29,7 @@ export const DIDDocumentSchema = z.object({
     service: z.array(ServiceSchema).default([]),
     created: z.string(),
     updated: z.string(),
+    metadata: MetadataSchema.optional(),
 });
 export const KeyPairSchema = z.object({
     did: z.string(),
