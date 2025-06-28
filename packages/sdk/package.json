@@ -1,0 +1,107 @@
+{
+  "name": "@atp/sdk",
+  "version": "1.0.0",
+  "description": "Official TypeScript SDK for Agent Trust Protocol™ - Build secure, verifiable, and trustworthy applications with decentralized identity, verifiable credentials, and robust access control",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "npm run clean && npm run build:types && npm run build:esm && npm run build:cjs",
+    "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist",
+    "build:esm": "tsc --module esnext --outDir dist --target es2020",
+    "build:cjs": "tsc --module commonjs --moduleResolution node --outDir dist/cjs --target es2018 && mv dist/cjs/index.js dist/index.cjs && rm -rf dist/cjs",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext .ts --fix",
+    "lint:check": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "clean": "rm -rf dist coverage",
+    "docs": "typedoc src/index.ts --out docs/api-generated",
+    "examples": "node examples/index.js",
+    "prepublishOnly": "npm run lint:check && npm run test && npm run build",
+    "release": "npm run prepublishOnly && npm publish",
+    "release:beta": "npm run prepublishOnly && npm publish --tag beta",
+    "release:alpha": "npm run prepublishOnly && npm publish --tag alpha"
+  },
+  "keywords": [
+    "agent-trust-protocol",
+    "atp",
+    "ai-agents",
+    "decentralized-identity",
+    "verifiable-credentials",
+    "trust-management",
+    "secure-communication",
+    "blockchain-audit",
+    "zero-knowledge-proofs",
+    "mfa"
+  ],
+  "author": "ATP™ Development Team",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bigblackcoder/agent-trust-protocol.git",
+    "directory": "packages/sdk"
+  },
+  "homepage": "https://atp.dev",
+  "bugs": {
+    "url": "https://github.com/bigblackcoder/agent-trust-protocol/issues"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "did-jwt": "^7.4.0",
+    "did-resolver": "^4.1.0",
+    "@noble/ed25519": "^2.0.0",
+    "@noble/hashes": "^1.3.0",
+    "zod": "^3.22.0",
+    "ws": "^8.14.0",
+    "eventemitter3": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "prettier": "^3.0.0",
+    "typedoc": "^0.25.0",
+    "rimraf": "^5.0.0",
+    "rollup": "^4.0.0",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-commonjs": "^25.0.0"
+  },
+  "peerDependencies": {
+    "@atp/shared": "^0.1.0"
+  },
+  "files": [
+    "dist/**/*",
+    "docs/**/*",
+    "examples/**/*",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,172 @@
+name: Publish Package
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+        - prerelease
+      tag:
+        description: 'Tag for prerelease (alpha, beta, rc)'
+        required: false
+        default: 'beta'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        registry-url: 'https://registry.npmjs.org'
+        
+    - name: Install dependencies
+      run: npm ci
+      working-directory: packages/sdk
+      
+    - name: Run full test suite
+      run: |
+        npm run lint:check
+        npm run format:check
+        npm run test:coverage
+        npm run build
+      working-directory: packages/sdk
+      
+    - name: Validate package
+      run: npm pack --dry-run
+      working-directory: packages/sdk
+
+  publish:
+    needs: validate
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        registry-url: 'https://registry.npmjs.org'
+        
+    - name: Configure Git
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        
+    - name: Install dependencies
+      run: npm ci
+      working-directory: packages/sdk
+      
+    - name: Version bump (manual dispatch)
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        if [ "${{ github.event.inputs.release_type }}" = "prerelease" ]; then
+          npm version prerelease --preid=${{ github.event.inputs.tag }}
+        else
+          npm version ${{ github.event.inputs.release_type }}
+        fi
+      working-directory: packages/sdk
+      
+    - name: Build package
+      run: npm run build
+      working-directory: packages/sdk
+      
+    - name: Generate docs
+      run: npm run docs
+      working-directory: packages/sdk
+      
+    - name: Publish to npm (latest)
+      if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_type != 'prerelease')
+      run: npm publish
+      working-directory: packages/sdk
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        
+    - name: Publish to npm (prerelease)
+      if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_type == 'prerelease'
+      run: npm publish --tag ${{ github.event.inputs.tag }}
+      working-directory: packages/sdk
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        
+    - name: Create GitHub release (manual dispatch)
+      if: github.event_name == 'workflow_dispatch'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.version.outputs.version }}
+        release_name: Release v${{ steps.version.outputs.version }}
+        body: |
+          ## Changes
+          
+          See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/packages/sdk/CHANGELOG.md) for detailed changes.
+          
+          ## Installation
+          
+          ```bash
+          npm install @atp/sdk@${{ steps.version.outputs.version }}
+          ```
+        draft: false
+        prerelease: ${{ github.event.inputs.release_type == 'prerelease' }}
+        
+    - name: Update documentation site
+      if: success()
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: packages/sdk/docs/api-generated
+        destination_dir: api
+        
+    - name: Notify team
+      if: success()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: success
+        text: |
+          🎉 ATP™ SDK v${{ steps.version.outputs.version }} has been published!
+          
+          📦 Package: https://www.npmjs.com/package/@atp/sdk
+          📚 Docs: https://docs.atp.dev
+          🔗 Release: ${{ github.event.release.html_url }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  post-publish:
+    needs: publish
+    runs-on: ubuntu-latest
+    if: success()
+    
+    steps:
+    - name: Update dependent packages
+      run: |
+        echo "Trigger updates for dependent packages"
+        # Add webhook calls to update downstream packages
+        
+    - name: Update package registry metadata
+      run: |
+        echo "Update package metadata and badges"
+        # Update shields.io badges, package descriptions, etc.

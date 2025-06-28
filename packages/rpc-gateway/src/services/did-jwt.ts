@@ -216,7 +216,17 @@ export class DIDJWTService {
 
   private generateNonce(): string {
     const bytes = new Uint8Array(16);
-    crypto.getRandomValues(bytes);
+    try {
+      // Try Node.js crypto first since this is a server-side service
+      const crypto = require('crypto');
+      const buffer = crypto.randomBytes(16);
+      bytes.set(buffer);
+    } catch {
+      // Fallback to generating pseudo-random bytes
+      for (let i = 0; i < 16; i++) {
+        bytes[i] = Math.floor(Math.random() * 256);
+      }
+    }
     return Buffer.from(bytes).toString('hex');
   }
 }

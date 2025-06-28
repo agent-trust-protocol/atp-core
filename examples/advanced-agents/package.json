@@ -14,6 +14,7 @@
     "demo:collaboration": "node dist/collaborative-agents-demo.js"
   },
   "dependencies": {
+    "@atp/sdk": "file:../../packages/sdk",
     "axios": "^1.10.0",
     "ws": "^8.18.2",
     "@types/ws": "^8.18.1"

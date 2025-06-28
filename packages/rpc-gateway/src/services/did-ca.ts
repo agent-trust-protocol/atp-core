@@ -53,23 +53,23 @@ export interface CertificateRevocationList {
  * Issues and manages certificates for mutual authentication
  */
 export class DIDCertificateAuthority {
-  private caCertificate: DIDCertificate;
+  private caCertificate!: DIDCertificate;
   private caPrivateKey: string;
   private certificates: Map<string, DIDCertificate> = new Map();
-  private revocationList: CertificateRevocationList;
+  private revocationList!: CertificateRevocationList;
 
   constructor(
     private caDID: string,
     caPrivateKey?: string
   ) {
-    this.caPrivateKey = caPrivateKey || this.generateCAKeyPair();
+    this.caPrivateKey = caPrivateKey || 'temp-key';
     this.initializeCA();
   }
 
-  private generateCAKeyPair(): string {
+  private async generateCAKeyPair(): Promise<string> {
     // In production, this would use a secure key generation process
-    const keyPair = ATPEncryptionService.generateKeyPair();
-    return keyPair.then(kp => kp.privateKey).catch(() => 'ca-private-key-placeholder');
+    const keyPair = await ATPEncryptionService.generateKeyPair();
+    return keyPair.privateKey;
   }
 
   private async initializeCA(): Promise<void> {

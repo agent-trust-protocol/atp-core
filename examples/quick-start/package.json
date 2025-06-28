@@ -1,0 +1,14 @@
+{
+  "name": "atp-quick-start-examples",
+  "version": "1.0.0",
+  "description": "ATP™ Quick Start Examples",
+  "type": "module",
+  "scripts": {
+    "test": "node example-agent.js",
+    "demo": "node example-agent.js"
+  },
+  "dependencies": {
+    "@atp/sdk": "file:../../packages/sdk",
+    "node-fetch": "^3.3.0"
+  }
+}
