@@ -1,6 +1,7 @@
 {
   "name": "agent-trust-protocol",
   "version": "0.1.0",
+  "type": "module",
   "private": false,
   "description": "The Missing Security Layer for AI Agent Ecosystems - Decentralized identity, verifiable credentials, and trust-based permissions for secure AI agent interactions",
   "keywords": ["ai", "agents", "trust", "did", "verifiable-credentials", "security", "authentication", "mcp", "a2a"],

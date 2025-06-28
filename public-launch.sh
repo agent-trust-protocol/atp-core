@@ -64,13 +64,44 @@ fi
 
 # Check Python for docs server
 if command -v python3 &> /dev/null; then
+    PYTHON_CMD="python3"
     PYTHON_VERSION=$(python3 --version)
     log_success "Python3 detected: $PYTHON_VERSION"
 elif command -v python &> /dev/null; then
+    PYTHON_CMD="python"
     PYTHON_VERSION=$(python --version)
     log_success "Python detected: $PYTHON_VERSION"
 else
     log_warning "Python not found. Documentation server may not work."
+    PYTHON_CMD=""
+fi
+
+# Install markdown module if Python is available
+if [ -n "$PYTHON_CMD" ]; then
+    log_info "Checking Python markdown module..."
+    if ! $PYTHON_CMD -c "import markdown" 2>/dev/null; then
+        log_info "Installing Python markdown module..."
+        if command -v pip3 &> /dev/null; then
+            # Try user install first, then with system packages flag for macOS
+            pip3 install markdown --user 2>/dev/null || pip3 install markdown --break-system-packages 2>/dev/null || pip3 install markdown 2>/dev/null
+        elif command -v pip &> /dev/null; then
+            pip install markdown --user 2>/dev/null || pip install markdown --break-system-packages 2>/dev/null || pip install markdown 2>/dev/null
+        elif command -v pipx &> /dev/null; then
+            log_info "Using pipx to install markdown..."
+            pipx install markdown 2>/dev/null || true
+        else
+            log_warning "pip not found. Please install markdown module manually: pip install markdown"
+        fi
+        
+        # Verify installation
+        if $PYTHON_CMD -c "import markdown" 2>/dev/null; then
+            log_success "Python markdown module installed successfully"
+        else
+            log_warning "Markdown module installation may have failed. Documentation server might not work properly."
+        fi
+    else
+        log_success "Python markdown module is installed"
+    fi
 fi
 
 log_success "Prerequisites verified"
