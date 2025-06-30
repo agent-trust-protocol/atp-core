@@ -1,8 +1,8 @@
+import { BaseStorage, DatabaseConfig } from '@atp/shared';
 import { PermissionGrant, PolicyRule } from '../models/permission.js';
-export declare class StorageService {
-    private db;
-    constructor(dbPath?: string);
-    private initTables;
+export declare class StorageService extends BaseStorage {
+    constructor(config: DatabaseConfig);
+    initialize(): Promise<void>;
     storeGrant(grant: PermissionGrant): Promise<void>;
     getGrant(grantId: string): Promise<PermissionGrant | null>;
     getGrantsForSubject(subject: string): Promise<PermissionGrant[]>;
@@ -12,5 +12,5 @@ export declare class StorageService {
     removePolicyRule(ruleId: string): Promise<void>;
     listPolicyRules(): Promise<PolicyRule[]>;
     private rowToGrant;
-    close(): void;
 }
+//# sourceMappingURL=storage.d.ts.map

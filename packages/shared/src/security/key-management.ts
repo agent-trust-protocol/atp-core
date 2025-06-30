@@ -395,7 +395,7 @@ export class ATPKeyManager {
   }> {
     const status: Array<any> = [];
 
-    for (const purpose of this.currentKeys.keys()) {
+    for (const purpose of Array.from(this.currentKeys.keys())) {
       const key = this.getCurrentKey(purpose);
       if (!key) continue;
 
@@ -431,7 +431,7 @@ export class ATPKeyManager {
    * Cleanup timers when shutting down
    */
   cleanup(): void {
-    for (const timer of this.rotationTimers.values()) {
+    for (const timer of Array.from(this.rotationTimers.values())) {
       clearTimeout(timer);
     }
     this.rotationTimers.clear();

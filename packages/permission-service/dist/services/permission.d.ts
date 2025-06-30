@@ -16,3 +16,4 @@ export declare class PermissionService {
     private scopeMatches;
     loadPolicyRules(): Promise<void>;
 }
+//# sourceMappingURL=permission.d.ts.map

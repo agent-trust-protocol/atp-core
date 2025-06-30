@@ -26,3 +26,4 @@ export declare class SimpleAgent {
     getDID(): string | null;
     isAuthenticated(): boolean;
 }
+//# sourceMappingURL=agent.d.ts.map

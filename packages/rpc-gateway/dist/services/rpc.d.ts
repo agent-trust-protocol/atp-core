@@ -19,3 +19,4 @@ export declare class RPCService {
     }>;
     private logAuditEvent;
 }
+//# sourceMappingURL=rpc.d.ts.map

@@ -1,8 +1,8 @@
+import { BaseStorage, DatabaseConfig } from '@atp/shared';
 import { DIDDocument, KeyPair } from '../models/did.js';
-export declare class StorageService {
-    private db;
-    constructor(dbPath?: string);
-    private initTables;
+export declare class StorageService extends BaseStorage {
+    constructor(config: DatabaseConfig);
+    initialize(): Promise<void>;
     storeDIDDocument(document: DIDDocument): Promise<void>;
     getDIDDocument(did: string): Promise<DIDDocument | null>;
     storeKeyPair(keyPair: KeyPair): Promise<void>;
@@ -12,5 +12,5 @@ export declare class StorageService {
         privateKey: string;
     }>;
     listDIDs(): Promise<string[]>;
-    close(): void;
 }
+//# sourceMappingURL=storage.d.ts.map

@@ -155,7 +155,7 @@ export class BaseAgent {
         this.pendingRequests.delete(message.id);
         
         if (message.error) {
-          pending.reject(new Error(message.error.message));
+          pending.reject(new Error(message.error instanceof Error ? message.error.message : String(message.error)));
         } else {
           pending.resolve(message.result);
         }

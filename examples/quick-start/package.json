@@ -8,7 +8,6 @@
     "demo": "node example-agent.js"
   },
   "dependencies": {
-    "@atp/sdk": "file:../../packages/sdk",
     "node-fetch": "^3.3.0"
   }
 }

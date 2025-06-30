@@ -135,7 +135,7 @@ export async function demonstrateCollaborativeAgents(): Promise<void> {
       const workflowResult = await coordinator.orchestrateWorkflow(complexWorkflow);
       console.log(`✅ Workflow ${workflowResult} completed successfully`);
     } catch (error) {
-      console.log(`⚠️ Workflow encountered issues: ${error.message}`);
+      console.log(`⚠️ Workflow encountered issues: ${error instanceof Error ? error.message : String(error)}`);
     }
     
     console.log('\n--- Phase 5: Agent Capability Sharing ---');
@@ -220,7 +220,7 @@ export async function demonstrateCollaborativeAgents(): Promise<void> {
     console.log('✅ Security validation throughout pipeline');
     
   } catch (error) {
-    console.error('❌ Collaborative agents demo failed:', error.message);
+    console.error('❌ Collaborative agents demo failed:', error instanceof Error ? error.message : String(error));
   } finally {
     // Cleanup remaining agents
     console.log('\n🧹 Cleaning up agents...');

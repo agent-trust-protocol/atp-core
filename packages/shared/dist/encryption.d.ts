@@ -1,3 +1,5 @@
+/// <reference types="node" />
+/// <reference types="node" />
 export interface EncryptedData {
     data: string;
     iv: string;
@@ -37,6 +39,14 @@ export declare class ATPEncryptionService {
      * Generate a cryptographically secure random key
      */
     static generateKey(): Buffer;
+    /**
+     * Encrypt data with a specific key (for key manager integration)
+     */
+    static encryptWithKey(data: string | Buffer, key: Buffer): string;
+    /**
+     * Decrypt data with a specific key (for key manager integration)
+     */
+    static decryptWithKey(encryptedData: string, key: Buffer): string;
     /**
      * Generate initialization vector
      */
@@ -129,3 +139,4 @@ export declare class ATPEncryptionService {
      */
     static verifyHMAC(data: string, hmac: string, key: Buffer): boolean;
 }
+//# sourceMappingURL=encryption.d.ts.map

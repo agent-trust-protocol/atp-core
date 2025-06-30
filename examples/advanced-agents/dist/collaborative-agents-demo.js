@@ -107,7 +107,7 @@ export async function demonstrateCollaborativeAgents() {
             console.log(`✅ Workflow ${workflowResult} completed successfully`);
         }
         catch (error) {
-            console.log(`⚠️ Workflow encountered issues: ${error.message}`);
+            console.log(`⚠️ Workflow encountered issues: ${error instanceof Error ? error.message : String(error)}`);
         }
         console.log('\n--- Phase 5: Agent Capability Sharing ---');
         // Demonstrate capability sharing between agents
@@ -172,7 +172,7 @@ export async function demonstrateCollaborativeAgents() {
         console.log('✅ Security validation throughout pipeline');
     }
     catch (error) {
-        console.error('❌ Collaborative agents demo failed:', error.message);
+        console.error('❌ Collaborative agents demo failed:', error instanceof Error ? error.message : String(error));
     }
     finally {
         // Cleanup remaining agents

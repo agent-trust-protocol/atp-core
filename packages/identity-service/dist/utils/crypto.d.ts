@@ -1,3 +1,5 @@
+/// <reference types="node" />
+/// <reference types="node" />
 export declare class CryptoUtils {
     static generateKeyPair(): Promise<{
         publicKey: string;
@@ -10,3 +12,4 @@ export declare class CryptoUtils {
     static base58Encode(buffer: Buffer): string;
     static sha256(data: string): string;
 }
+//# sourceMappingURL=crypto.d.ts.map

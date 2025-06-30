@@ -86,3 +86,4 @@ export interface ServiceProxy {
     healthy: boolean;
     lastHealthCheck: number;
 }
+//# sourceMappingURL=rpc.d.ts.map

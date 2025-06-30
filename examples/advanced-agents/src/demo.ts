@@ -108,7 +108,7 @@ async function runAllDemos(): Promise<void> {
     console.log('\n🎉 All demonstrations completed successfully!');
     
   } catch (error) {
-    console.error('\n❌ Demo execution failed:', error.message);
+    console.error('\n❌ Demo execution failed:', error instanceof Error ? error.message : String(error));
   }
 }
 
@@ -129,7 +129,7 @@ async function main(): Promise<void> {
         try {
           await demonstrateCollaborativeAgents();
         } catch (error) {
-          console.error('❌ Demo failed:', error.message);
+          console.error('❌ Demo failed:', error instanceof Error ? error.message : String(error));
         }
         break;
         
@@ -138,7 +138,7 @@ async function main(): Promise<void> {
         try {
           await demonstrateMCPIntegration();
         } catch (error) {
-          console.error('❌ Demo failed:', error.message);
+          console.error('❌ Demo failed:', error instanceof Error ? error.message : String(error));
         }
         break;
         
@@ -147,7 +147,7 @@ async function main(): Promise<void> {
         try {
           await demonstrateAgentMarketplace();
         } catch (error) {
-          console.error('❌ Demo failed:', error.message);
+          console.error('❌ Demo failed:', error instanceof Error ? error.message : String(error));
         }
         break;
         

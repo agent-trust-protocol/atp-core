@@ -6,3 +6,4 @@ export declare class TokenService {
     validateCapabilityToken(token: string): Promise<TokenValidationResult>;
     refreshToken(token: string, newExpiresAt: number): Promise<string | null>;
 }
+//# sourceMappingURL=token.d.ts.map

@@ -11,3 +11,4 @@ export declare class IdentityController {
     updateTrustLevel(req: Request, res: Response): Promise<void>;
     getTrustLevelInfo(req: Request, res: Response): Promise<void>;
 }
+//# sourceMappingURL=identity.d.ts.map

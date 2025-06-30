@@ -2,7 +2,7 @@ FROM node:18-alpine AS base
 WORKDIR /app
 
 # Install build dependencies
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 python3-dev py3-setuptools make g++
 
 # Copy package files
 COPY package.json package-lock.json lerna.json ./

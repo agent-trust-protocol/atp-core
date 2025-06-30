@@ -1,8 +1,8 @@
+import { BaseStorage, DatabaseConfig } from '@atp/shared';
 import { VerifiableCredential, CredentialSchema } from '../models/credential.js';
-export declare class StorageService {
-    private db;
-    constructor(dbPath?: string);
-    private initTables;
+export declare class StorageService extends BaseStorage {
+    constructor(config: DatabaseConfig);
+    initialize(): Promise<void>;
     storeCredential(credential: VerifiableCredential): Promise<void>;
     getCredential(credentialId: string): Promise<VerifiableCredential | null>;
     revokeCredential(credentialId: string): Promise<void>;
@@ -11,5 +11,5 @@ export declare class StorageService {
     getSchema(schemaId: string): Promise<CredentialSchema | null>;
     getSchemaByName(name: string): Promise<CredentialSchema | null>;
     listSchemas(): Promise<CredentialSchema[]>;
-    close(): void;
 }
+//# sourceMappingURL=storage.d.ts.map

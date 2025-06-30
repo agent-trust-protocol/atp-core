@@ -19,3 +19,4 @@ export declare class CredentialService {
     private canonicalizeCredential;
     private getPublicKeyForDID;
 }
+//# sourceMappingURL=credential.d.ts.map

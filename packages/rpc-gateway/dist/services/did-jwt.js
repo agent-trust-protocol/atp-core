@@ -1,4 +1,5 @@
 import { SignJWT, jwtVerify } from 'jose';
+import { randomBytes } from 'crypto';
 import { initializeCrypto } from '@atp/shared';
 import * as ed25519 from '@noble/ed25519';
 initializeCrypto();
@@ -168,8 +169,18 @@ export class DIDJWTService {
         return new Uint8Array(bytes);
     }
     generateNonce() {
-        const bytes = new Uint8Array(16);
-        crypto.getRandomValues(bytes);
-        return Buffer.from(bytes).toString('hex');
+        try {
+            // Use Node.js crypto since this is a server-side service
+            const buffer = randomBytes(16);
+            return buffer.toString('hex');
+        }
+        catch {
+            // Fallback to generating pseudo-random bytes
+            const bytes = new Uint8Array(16);
+            for (let i = 0; i < 16; i++) {
+                bytes[i] = Math.floor(Math.random() * 256);
+            }
+            return Buffer.from(bytes).toString('hex');
+        }
     }
 }

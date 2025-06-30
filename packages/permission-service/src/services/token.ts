@@ -6,12 +6,15 @@ export class TokenService {
   constructor(private secretKey: string) {}
 
   async createCapabilityToken(capability: CapabilityToken): Promise<string> {
-    const payload = {
+    const payload: any = {
       ...capability,
       iat: Math.floor(capability.issuedAt / 1000),
       exp: Math.floor(capability.expiresAt / 1000),
-      nbf: capability.notBefore ? Math.floor(capability.notBefore / 1000) : undefined,
     };
+    
+    if (capability.notBefore) {
+      payload.nbf = Math.floor(capability.notBefore / 1000);
+    }
 
     return jwt.sign(payload, this.secretKey, {
       algorithm: 'HS256',

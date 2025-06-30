@@ -7,3 +7,4 @@ export declare class WeatherAgent extends SimpleAgent {
     requestWeatherPermission(targetAgentDid: string, city: string): Promise<void>;
     getAvailableLocations(): string[];
 }
+//# sourceMappingURL=weather-agent.d.ts.map

@@ -145,3 +145,4 @@ export interface TokenValidationResult {
     payload?: CapabilityToken;
     error?: string;
 }
+//# sourceMappingURL=permission.d.ts.map

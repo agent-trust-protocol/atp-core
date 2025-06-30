@@ -8,13 +8,17 @@ const port = process.env.PORT || 3003;
 const secretKey = process.env.JWT_SECRET || 'atp-default-secret-key-change-in-production';
 app.use(cors());
 app.use(express.json());
-const storage = new StorageService(process.env.DB_PATH);
+// PostgreSQL configuration
+const dbConfig = {
+    connectionString: process.env.DATABASE_URL || 'postgresql://atp_user:password@localhost:5432/atp_production',
+    ssl: process.env.NODE_ENV === 'production',
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
+};
+const storage = new StorageService(dbConfig);
 const permissionService = new PermissionService(storage, secretKey);
 const permissionController = new PermissionController(permissionService);
-// Initialize with default policy rules
-permissionService.loadPolicyRules().then(() => {
-    console.log('Policy rules loaded');
-});
 app.post('/perm/grant', (req, res) => permissionController.grant(req, res));
 app.post('/perm/check', (req, res) => permissionController.check(req, res));
 app.post('/perm/validate', (req, res) => permissionController.validateToken(req, res));
@@ -23,10 +27,39 @@ app.delete('/perm/revoke/:grantId', (req, res) => permissionController.revoke(re
 app.post('/perm/policy/rules', (req, res) => permissionController.addPolicyRule(req, res));
 app.delete('/perm/policy/rules/:ruleId', (req, res) => permissionController.removePolicyRule(req, res));
 app.get('/perm/policy/rules', (req, res) => permissionController.listPolicyRules(req, res));
-app.get('/health', (req, res) => {
-    res.json({ status: 'healthy', service: 'permission-service' });
+app.get('/health', async (req, res) => {
+    try {
+        const dbHealth = await storage.healthCheck();
+        res.json({
+            status: dbHealth.healthy ? 'healthy' : 'unhealthy',
+            service: 'permission-service',
+            database: dbHealth
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            status: 'unhealthy',
+            service: 'permission-service',
+            error: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
 });
-app.listen(port, () => {
-    console.log(`Permission Service running on port ${port}`);
-});
+// Initialize storage and start server
+async function startServer() {
+    try {
+        await storage.initialize();
+        console.log('Database connection established');
+        // Initialize with default policy rules
+        await permissionService.loadPolicyRules();
+        console.log('Policy rules loaded');
+        app.listen(port, () => {
+            console.log(`Permission Service running on port ${port}`);
+        });
+    }
+    catch (error) {
+        console.error('Failed to start Permission Service:', error);
+        process.exit(1);
+    }
+}
+startServer();
 export { StorageService, PermissionService, PermissionController };

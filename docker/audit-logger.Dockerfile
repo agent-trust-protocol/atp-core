@@ -1,34 +1,44 @@
-FROM node:18-alpine
-
+# Build stage
+FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY packages/audit-logger/package*.json ./packages/audit-logger/
-COPY packages/shared/package*.json ./packages/shared/
+# Install build dependencies including Python and setuptools
+RUN apk add --no-cache python3 python3-dev py3-setuptools make g++
 
-# Install dependencies
-RUN npm ci --only=production
+# Copy package files and install dependencies
+COPY package.json package-lock.json lerna.json ./
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/audit-logger/package.json ./packages/audit-logger/
+RUN npm ci
 
-# Copy source code
-COPY packages/audit-logger ./packages/audit-logger
+# Copy source code and build
 COPY packages/shared ./packages/shared
+COPY packages/audit-logger ./packages/audit-logger
 COPY tsconfig.json ./
+RUN npm run build --workspace=@atp/shared
+RUN npm run build --workspace=@atp/audit-logger
 
-# Build shared package
-WORKDIR /app/packages/shared
-RUN npm run build
+# Install production dependencies only
+RUN npm ci --omit=dev
 
-# Build audit logger
-WORKDIR /app/packages/audit-logger
-RUN npm run build
+# Production stage
+FROM node:18-alpine AS production
+WORKDIR /app
 
-# Expose port
+# Copy built application and production dependencies
+COPY --from=builder /app/packages/audit-logger/dist ./dist
+COPY --from=builder /app/packages/audit-logger/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
+
+# Copy shared package directly to ensure it's available
+COPY --from=builder /app/packages/shared/dist ./node_modules/@atp/shared/dist
+COPY --from=builder /app/packages/shared/package.json ./node_modules/@atp/shared/
+
+# Create data directory
+RUN mkdir -p /data && chown -R node:node /data
+
+USER node
+
 EXPOSE 3005
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3005/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
-
-# Start the service
-CMD ["npm", "start"]
+CMD ["node", "dist/index.js"]

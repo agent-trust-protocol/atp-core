@@ -16,3 +16,4 @@ export declare class DIDJWTService {
     private base58decode;
     private generateNonce;
 }
+//# sourceMappingURL=did-jwt.d.ts.map

@@ -1,124 +1,131 @@
-import Database from 'better-sqlite3';
-export class StorageService {
-    db;
-    constructor(dbPath = ':memory:') {
-        this.db = new Database(dbPath);
-        this.initTables();
+import { BaseStorage } from '@atp/shared';
+export class StorageService extends BaseStorage {
+    constructor(config) {
+        super(config);
     }
-    initTables() {
-        this.db.exec(`
-      CREATE TABLE IF NOT EXISTS permission_grants (
-        id TEXT PRIMARY KEY,
-        grantor TEXT NOT NULL,
-        grantee TEXT NOT NULL,
-        scopes TEXT NOT NULL,
-        resource TEXT,
-        conditions TEXT,
-        expires_at INTEGER,
-        created_at INTEGER NOT NULL,
-        revoked_at INTEGER
-      );
-
-      CREATE TABLE IF NOT EXISTS policy_rules (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        condition TEXT NOT NULL,
-        effect TEXT NOT NULL CHECK (effect IN ('allow', 'deny')),
-        priority INTEGER NOT NULL,
-        active BOOLEAN NOT NULL DEFAULT TRUE,
-        created_at INTEGER NOT NULL
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_grants_grantee ON permission_grants(grantee);
-      CREATE INDEX IF NOT EXISTS idx_grants_grantor ON permission_grants(grantor);
-      CREATE INDEX IF NOT EXISTS idx_grants_expires ON permission_grants(expires_at);
-      CREATE INDEX IF NOT EXISTS idx_policy_priority ON policy_rules(priority DESC);
-    `);
+    async initialize() {
+        await this.ensureConnection();
+        // Tables are created by init-db.sql, just verify connection
     }
     async storeGrant(grant) {
-        const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO permission_grants 
-      (id, grantor, grantee, scopes, resource, conditions, expires_at, created_at, revoked_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-        stmt.run(grant.id, grant.grantor, grant.grantee, JSON.stringify(grant.scopes), grant.resource || null, grant.conditions ? JSON.stringify(grant.conditions) : null, grant.expiresAt || null, grant.createdAt, grant.revokedAt || null);
+        const query = `
+      INSERT INTO atp_permissions.grants 
+      (subject_did, resource, action, granted_by, granted_at, expires_at, status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      ON CONFLICT (id) DO UPDATE SET
+        resource = EXCLUDED.resource,
+        action = EXCLUDED.action,
+        expires_at = EXCLUDED.expires_at,
+        status = EXCLUDED.status
+    `;
+        // Map the grant to the PostgreSQL schema structure
+        await this.db.query(query, [
+            grant.grantee,
+            grant.resource || 'default',
+            grant.scopes.join(','), // Convert scopes array to string
+            grant.grantor,
+            this.toISOString(grant.createdAt),
+            grant.expiresAt ? this.toISOString(grant.expiresAt) : null,
+            grant.revokedAt ? 'revoked' : 'active'
+        ]);
     }
     async getGrant(grantId) {
-        const stmt = this.db.prepare(`
-      SELECT id, grantor, grantee, scopes, resource, conditions, expires_at, created_at, revoked_at
-      FROM permission_grants WHERE id = ?
-    `);
-        const row = stmt.get(grantId);
-        if (!row) {
+        const query = `
+      SELECT id, subject_did, resource, action, granted_by, granted_at, expires_at, status
+      FROM atp_permissions.grants WHERE id = $1
+    `;
+        const result = await this.db.query(query, [grantId]);
+        if (result.rows.length === 0) {
             return null;
         }
-        return this.rowToGrant(row);
+        return this.rowToGrant(result.rows[0]);
     }
     async getGrantsForSubject(subject) {
-        const stmt = this.db.prepare(`
-      SELECT id, grantor, grantee, scopes, resource, conditions, expires_at, created_at, revoked_at
-      FROM permission_grants WHERE grantee = ? AND revoked_at IS NULL
-      ORDER BY created_at DESC
-    `);
-        const rows = stmt.all(subject);
-        return rows.map(row => this.rowToGrant(row));
+        const query = `
+      SELECT id, subject_did, resource, action, granted_by, granted_at, expires_at, status
+      FROM atp_permissions.grants WHERE subject_did = $1 AND status = 'active'
+      ORDER BY granted_at DESC
+    `;
+        const result = await this.db.query(query, [subject]);
+        return result.rows.map((row) => this.rowToGrant(row));
     }
     async getGrantsByGrantor(grantor) {
-        const stmt = this.db.prepare(`
-      SELECT id, grantor, grantee, scopes, resource, conditions, expires_at, created_at, revoked_at
-      FROM permission_grants WHERE grantor = ?
-      ORDER BY created_at DESC
-    `);
-        const rows = stmt.all(grantor);
-        return rows.map(row => this.rowToGrant(row));
+        const query = `
+      SELECT id, subject_did, resource, action, granted_by, granted_at, expires_at, status
+      FROM atp_permissions.grants WHERE granted_by = $1
+      ORDER BY granted_at DESC
+    `;
+        const result = await this.db.query(query, [grantor]);
+        return result.rows.map((row) => this.rowToGrant(row));
     }
     async revokeGrant(grantId) {
-        const stmt = this.db.prepare(`
-      UPDATE permission_grants SET revoked_at = ? WHERE id = ?
-    `);
-        stmt.run(Date.now(), grantId);
+        const query = `
+      UPDATE atp_permissions.grants SET status = 'revoked' WHERE id = $1
+    `;
+        await this.db.query(query, [grantId]);
     }
     async storePolicyRule(rule) {
-        const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO policy_rules 
-      (id, name, condition, effect, priority, active, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `);
-        stmt.run(rule.id, rule.name, rule.condition, rule.effect, rule.priority, rule.active, Date.now());
+        const query = `
+      INSERT INTO atp_permissions.policies 
+      (policy_id, name, description, policy_document, trust_level_required, created_by, status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      ON CONFLICT (policy_id) DO UPDATE SET
+        name = EXCLUDED.name,
+        description = EXCLUDED.description,
+        policy_document = EXCLUDED.policy_document,
+        updated_at = NOW()
+    `;
+        const policyDocument = {
+            condition: rule.condition,
+            effect: rule.effect,
+            priority: rule.priority,
+            active: rule.active
+        };
+        await this.db.query(query, [
+            rule.id,
+            rule.name,
+            `Policy rule: ${rule.name}`,
+            this.safeJsonStringify(policyDocument),
+            'BASIC', // Default trust level
+            'system', // Default creator
+            rule.active ? 'active' : 'inactive'
+        ]);
     }
     async removePolicyRule(ruleId) {
-        const stmt = this.db.prepare('DELETE FROM policy_rules WHERE id = ?');
-        stmt.run(ruleId);
+        const query = 'UPDATE atp_permissions.policies SET status = $1 WHERE policy_id = $2';
+        await this.db.query(query, ['inactive', ruleId]);
     }
     async listPolicyRules() {
-        const stmt = this.db.prepare(`
-      SELECT id, name, condition, effect, priority, active
-      FROM policy_rules ORDER BY priority DESC
-    `);
-        const rows = stmt.all();
-        return rows.map(row => ({
-            id: row.id,
-            name: row.name,
-            condition: row.condition,
-            effect: row.effect,
-            priority: row.priority,
-            active: Boolean(row.active),
-        }));
+        const query = `
+      SELECT policy_id, name, policy_document, status
+      FROM atp_permissions.policies WHERE status = 'active'
+      ORDER BY created_at DESC
+    `;
+        const result = await this.db.query(query);
+        return result.rows.map((row) => {
+            // PostgreSQL JSONB returns objects, not strings
+            const policyDoc = row.policy_document || {};
+            return {
+                id: row.policy_id,
+                name: row.name,
+                condition: policyDoc.condition || '',
+                effect: policyDoc.effect || 'deny',
+                priority: policyDoc.priority || 0,
+                active: row.status === 'active',
+            };
+        });
     }
     rowToGrant(row) {
         return {
-            id: row.id,
-            grantor: row.grantor,
-            grantee: row.grantee,
-            scopes: JSON.parse(row.scopes),
+            id: row.id || `grant_${Date.now()}`,
+            grantor: row.granted_by,
+            grantee: row.subject_did,
+            scopes: row.action && typeof row.action === 'string' ? row.action.split(',') : [],
             resource: row.resource,
-            conditions: row.conditions ? JSON.parse(row.conditions) : undefined,
-            expiresAt: row.expires_at,
-            createdAt: row.created_at,
-            revokedAt: row.revoked_at,
+            conditions: undefined, // Not stored in current schema
+            expiresAt: row.expires_at ? new Date(row.expires_at).getTime() : undefined,
+            createdAt: new Date(row.granted_at).getTime(),
+            revokedAt: row.status === 'revoked' ? Date.now() : undefined,
         };
-    }
-    close() {
-        this.db.close();
     }
 }

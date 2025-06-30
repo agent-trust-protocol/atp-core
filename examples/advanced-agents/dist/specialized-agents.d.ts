@@ -43,3 +43,4 @@ export declare class TaskCoordinatorAgent extends BaseAgent {
     getActiveTasks(): any[];
     getRegisteredAgents(): any[];
 }
+//# sourceMappingURL=specialized-agents.d.ts.map

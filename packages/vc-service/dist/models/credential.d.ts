@@ -378,3 +378,4 @@ export interface VerificationResult {
         schema: boolean;
     };
 }
+//# sourceMappingURL=credential.d.ts.map

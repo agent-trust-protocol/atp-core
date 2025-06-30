@@ -195,3 +195,4 @@ export interface DIDRegistrationResponse {
     document: DIDDocument;
     privateKey?: string;
 }
+//# sourceMappingURL=did.d.ts.map

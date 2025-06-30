@@ -1,21 +1,25 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022"],
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "allowImportingTsExtensions": false,
-    "noEmit": false,
-    "declaration": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "noEmit": true,
+    "rootDir": ".",
+    "skipLibCheck": true
   },
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+  "files": [],
+  "include": [],
+  "exclude": [
+    "**/*"
+  ],
+  "references": [
+    { "path": "./packages/shared" },
+    { "path": "./packages/audit-logger" },
+    { "path": "./packages/identity-service" },
+    { "path": "./packages/permission-service" },
+    { "path": "./packages/vc-service" },
+    { "path": "./packages/rpc-gateway" },
+    { "path": "./packages/protocol-integrations" },
+    { "path": "./packages/sdk" },
+    { "path": "./examples/simple-agent" },
+    { "path": "./examples/advanced-agents" }
+  ]
 }

@@ -10,3 +10,4 @@ export declare class CredentialController {
     getSchema(req: Request, res: Response): Promise<void>;
     listSchemas(req: Request, res: Response): Promise<void>;
 }
+//# sourceMappingURL=credential.d.ts.map

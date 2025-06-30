@@ -1,4 +1,4 @@
-import { randomBytes, createCipheriv, createDecipheriv, scrypt, timingSafeEqual } from 'crypto';
+import { randomBytes, createCipheriv, createDecipheriv, scrypt, timingSafeEqual, createHash, createHmac } from 'crypto';
 import { promisify } from 'util';
 import * as ed25519 from '@noble/ed25519';
 const scryptAsync = promisify(scrypt);
@@ -21,6 +21,35 @@ export class ATPEncryptionService {
      */
     static generateKey() {
         return randomBytes(this.KEY_LENGTH);
+    }
+    /**
+     * Encrypt data with a specific key (for key manager integration)
+     */
+    static encryptWithKey(data, key) {
+        const iv = randomBytes(this.IV_LENGTH);
+        const cipher = createCipheriv(this.ALGORITHM, key, iv);
+        const dataBuffer = typeof data === 'string' ? Buffer.from(data, 'utf8') : data;
+        let encrypted = cipher.update(dataBuffer);
+        encrypted = Buffer.concat([encrypted, cipher.final()]);
+        const tag = cipher.getAuthTag();
+        // Combine IV + tag + encrypted data
+        const combined = Buffer.concat([iv, tag, encrypted]);
+        return combined.toString('base64');
+    }
+    /**
+     * Decrypt data with a specific key (for key manager integration)
+     */
+    static decryptWithKey(encryptedData, key) {
+        const combined = Buffer.from(encryptedData, 'base64');
+        // Extract IV, tag, and encrypted data
+        const iv = combined.subarray(0, this.IV_LENGTH);
+        const tag = combined.subarray(this.IV_LENGTH, this.IV_LENGTH + this.TAG_LENGTH);
+        const encrypted = combined.subarray(this.IV_LENGTH + this.TAG_LENGTH);
+        const decipher = createDecipheriv(this.ALGORITHM, key, iv);
+        decipher.setAuthTag(tag);
+        let decrypted = decipher.update(encrypted);
+        decrypted = Buffer.concat([decrypted, decipher.final()]);
+        return decrypted.toString('utf8');
     }
     /**
      * Generate initialization vector
@@ -239,15 +268,13 @@ export class ATPEncryptionService {
      * Hash data using SHA-256 for integrity verification
      */
     static hash(data) {
-        const crypto = require('crypto');
-        return crypto.createHash('sha256').update(data).digest('hex');
+        return createHash('sha256').update(data).digest('hex');
     }
     /**
      * Generate HMAC for message authentication
      */
     static generateHMAC(data, key) {
-        const crypto = require('crypto');
-        return crypto.createHmac('sha256', key).update(data).digest('hex');
+        return createHmac('sha256', key).update(data).digest('hex');
     }
     /**
      * Verify HMAC

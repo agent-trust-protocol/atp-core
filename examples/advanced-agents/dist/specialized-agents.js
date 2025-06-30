@@ -104,7 +104,7 @@ export class DataAnalysisAgent extends BaseAgent {
             await this.sendResponse(id, result);
         }
         catch (error) {
-            await this.sendError(id, { code: -32000, message: error.message });
+            await this.sendError(id, { code: -32000, message: error instanceof Error ? error instanceof Error ? error.message : String(error) : String(error) });
         }
     }
     async handleDataSharing(params, id) {
@@ -225,7 +225,7 @@ export class SecurityAgent extends BaseAgent {
             await this.sendResponse(id, result);
         }
         catch (error) {
-            await this.sendError(id, { code: -32000, message: error.message });
+            await this.sendError(id, { code: -32000, message: error instanceof Error ? error instanceof Error ? error.message : String(error) : String(error) });
         }
     }
     async handleThreatAnalysis(params, id) {
@@ -299,8 +299,9 @@ export class TaskCoordinatorAgent extends BaseAgent {
                 this.updateTaskProgress(workflowId, i + 1);
             }
             catch (error) {
-                console.error(`❌ Step ${i + 1} failed:`, error.message);
-                this.markTaskFailed(workflowId, error.message);
+                const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : String(error);
+                console.error(`❌ Step ${i + 1} failed:`, errorMessage);
+                this.markTaskFailed(workflowId, errorMessage);
                 throw error;
             }
         }
@@ -358,7 +359,7 @@ export class TaskCoordinatorAgent extends BaseAgent {
             await this.sendResponse(id, { workflowId, status: 'started' });
         }
         catch (error) {
-            await this.sendError(id, { code: -32000, message: error.message });
+            await this.sendError(id, { code: -32000, message: error instanceof Error ? error.message : String(error) });
         }
     }
     async handleWorkflowExecution(params, id) {
@@ -368,7 +369,7 @@ export class TaskCoordinatorAgent extends BaseAgent {
             await this.sendResponse(id, { workflowId: result, status: 'completed' });
         }
         catch (error) {
-            await this.sendError(id, { code: -32000, message: error.message });
+            await this.sendError(id, { code: -32000, message: error instanceof Error ? error.message : String(error) });
         }
     }
     async handleAgentRegistration(params, id) {

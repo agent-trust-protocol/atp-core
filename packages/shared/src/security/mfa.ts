@@ -1,5 +1,5 @@
 import { randomBytes, createHmac, timingSafeEqual } from 'crypto';
-import { encode as base32Encode, decode as base32Decode } from 'hi-base32';
+import { base32 } from '@scure/base';
 import { ATPEncryptionService } from '../encryption.js';
 
 export interface MFASecretKey {
@@ -185,7 +185,7 @@ export class ATPMFAService {
    * Generate TOTP token for given secret and time slice
    */
   private generateTOTP(secret: string, timeSlice: number): string {
-    const key = base32Decode(secret.replace(/\s/g, '').toUpperCase());
+    const key = base32.decode(secret.replace(/\s/g, '').toUpperCase());
     const time = Buffer.alloc(8);
     time.writeUInt32BE(Math.floor(timeSlice / 0x100000000), 0);
     time.writeUInt32BE(timeSlice & 0xffffffff, 4);
@@ -205,7 +205,7 @@ export class ATPMFAService {
    */
   private generateSecret(): string {
     const buffer = randomBytes(20);
-    return base32Encode(buffer).replace(/=/g, '');
+    return base32.encode(buffer).replace(/=/g, '');
   }
 
   /**

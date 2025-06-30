@@ -17,3 +17,4 @@ export declare class IdentityService {
         upgradeRequirements: string[];
     } | null>;
 }
+//# sourceMappingURL=identity.d.ts.map

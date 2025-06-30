@@ -11,17 +11,26 @@ export class DIDCertificateAuthority {
     caPrivateKey;
     certificates = new Map();
     revocationList;
+    isInitialized = false;
     constructor(caDID, caPrivateKey) {
         this.caDID = caDID;
-        this.caPrivateKey = caPrivateKey || this.generateCAKeyPair();
-        this.initializeCA();
+        this.caPrivateKey = caPrivateKey || 'temp-key';
+        // Don't call initializeCA() in constructor - it should be called explicitly
     }
-    generateCAKeyPair() {
+    async ensureInitialized() {
+        if (!this.isInitialized) {
+            await this.initializeCA();
+        }
+    }
+    async generateCAKeyPair() {
         // In production, this would use a secure key generation process
-        const keyPair = ATPEncryptionService.generateKeyPair();
-        return keyPair.then(kp => kp.privateKey).catch(() => 'ca-private-key-placeholder');
+        const keyPair = await ATPEncryptionService.generateKeyPair();
+        return keyPair.privateKey;
     }
     async initializeCA() {
+        if (this.isInitialized) {
+            return;
+        }
         // Create self-signed CA certificate
         const caKeyPair = await ATPEncryptionService.generateKeyPair();
         this.caPrivateKey = caKeyPair.privateKey;
@@ -60,9 +69,11 @@ export class DIDCertificateAuthority {
             nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
             signature: await ATPEncryptionService.sign(JSON.stringify({ issuerDID: this.caDID, revokedCertificates: [] }), this.caPrivateKey),
         };
+        this.isInitialized = true;
         console.log(`ATP™ DID-CA initialized: ${this.caDID}`);
     }
     async issueCertificate(request) {
+        await this.ensureInitialized();
         // Verify the certificate request
         await this.verifyCertificateRequest(request);
         // Check trust level authorization
@@ -118,16 +129,18 @@ export class DIDCertificateAuthority {
         // Update certificate status
         certificate.status = 'revoked';
         // Add to revocation list
-        this.revocationList.revokedCertificates.push({
-            certificateId,
-            revocationDate: new Date().toISOString(),
-            reason,
-        });
-        // Update revocation list signature
-        this.revocationList.signature = await ATPEncryptionService.sign(JSON.stringify({
-            issuerDID: this.revocationList.issuerDID,
-            revokedCertificates: this.revocationList.revokedCertificates,
-        }), this.caPrivateKey);
+        if (this.revocationList) {
+            this.revocationList.revokedCertificates.push({
+                certificateId,
+                revocationDate: new Date().toISOString(),
+                reason,
+            });
+            // Update revocation list signature
+            this.revocationList.signature = await ATPEncryptionService.sign(JSON.stringify({
+                issuerDID: this.revocationList.issuerDID,
+                revokedCertificates: this.revocationList.revokedCertificates,
+            }), this.caPrivateKey);
+        }
         // Log revocation
         await this.logCertificateEvent('certificate-revoked', {
             certificateId,
@@ -176,7 +189,7 @@ export class DIDCertificateAuthority {
             return { valid: false, reason: 'Invalid certificate signature' };
         }
         // Check revocation list
-        const isRevoked = this.revocationList.revokedCertificates.some(revoked => revoked.certificateId === certificate.certificateId);
+        const isRevoked = this.revocationList?.revokedCertificates.some(revoked => revoked.certificateId === certificate.certificateId);
         if (isRevoked) {
             return { valid: false, reason: 'Certificate revoked' };
         }
@@ -220,7 +233,7 @@ export class DIDCertificateAuthority {
     }
     canIssueTrustLevel(requestedLevel) {
         // CA can issue certificates up to its own trust level
-        const caLevel = this.caCertificate.trustLevel;
+        const caLevel = this.caCertificate?.trustLevel || TrustLevel.BASIC;
         return TrustLevelManager.isAuthorized(caLevel, requestedLevel);
     }
     getExtendedKeyUsage(trustLevel) {
@@ -238,7 +251,7 @@ export class DIDCertificateAuthority {
         }
     }
     async getCAPublicKey() {
-        return this.caCertificate.publicKey;
+        return this.caCertificate?.publicKey || '';
     }
     async logCertificateEvent(action, details) {
         try {

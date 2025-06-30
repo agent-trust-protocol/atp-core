@@ -36,8 +36,8 @@ export class MTLSService {
             valid_from: cert.valid_from,
             valid_to: cert.valid_to,
             fingerprint: cert.fingerprint,
-            fingerprint256: cert.fingerprint256,
-            did,
+            fingerprint256: cert.fingerprint256 ?? undefined,
+            did: did || undefined,
         };
     }
     async validateClientCertificate(certificate) {
@@ -125,6 +125,9 @@ export class MTLSService {
             // Extract public key from X.509 certificate and compare
             // This is a simplified check - in production, you'd need proper ASN.1 parsing
             const certFingerprint = certificate.fingerprint256;
+            if (!certFingerprint) {
+                return false;
+            }
             const keyHash = require('crypto').createHash('sha256').update(publicKey).digest('hex');
             // For now, we'll rely on fingerprint matching as the primary method
             return certFingerprint.toLowerCase().includes(keyHash.slice(0, 16).toLowerCase());

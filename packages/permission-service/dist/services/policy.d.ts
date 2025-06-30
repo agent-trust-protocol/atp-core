@@ -19,3 +19,4 @@ export declare class PolicyEngine {
     private createSafeContext;
     getDefaultRules(): PolicyRule[];
 }
+//# sourceMappingURL=policy.d.ts.map

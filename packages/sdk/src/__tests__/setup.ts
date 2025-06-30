@@ -3,20 +3,20 @@
  */
 
 // Mock WebSocket for Node.js environment
-global.WebSocket = jest.fn(() => ({
+(global as any).WebSocket = jest.fn(() => ({
   readyState: 1,
   send: jest.fn(),
   close: jest.fn(),
   on: jest.fn(),
   addEventListener: jest.fn(),
   removeEventListener: jest.fn()
-})) as any;
+}));
 
 // Mock fetch for Node.js environment
-global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
+(global as any).fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 // Mock performance API
-global.performance = {
+(global as any).performance = {
   now: jest.fn(() => Date.now()),
   mark: jest.fn(),
   measure: jest.fn(),
@@ -24,16 +24,16 @@ global.performance = {
   getEntriesByType: jest.fn(() => []),
   clearMarks: jest.fn(),
   clearMeasures: jest.fn()
-} as any;
+};
 
 // Mock AbortSignal
-global.AbortSignal = {
+(global as any).AbortSignal = {
   timeout: jest.fn((delay: number) => {
     const controller = new AbortController();
     setTimeout(() => controller.abort(), delay);
     return controller.signal;
   })
-} as any;
+};
 
 // Reset all mocks before each test
 beforeEach(() => {

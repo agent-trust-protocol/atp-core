@@ -120,7 +120,7 @@ export class DataAnalysisAgent extends BaseAgent {
       const result = await this.analyzeData(params.dataset, params.analysisType);
       await this.sendResponse(id, result);
     } catch (error) {
-      await this.sendError(id, { code: -32000, message: error.message });
+      await this.sendError(id, { code: -32000, message: error instanceof Error ? error instanceof Error ? error.message : String(error) : String(error) });
     }
   }
 
@@ -262,7 +262,7 @@ export class SecurityAgent extends BaseAgent {
       const result = await this.performSecurityScan(params.target, params.scanType);
       await this.sendResponse(id, result);
     } catch (error) {
-      await this.sendError(id, { code: -32000, message: error.message });
+      await this.sendError(id, { code: -32000, message: error instanceof Error ? error instanceof Error ? error.message : String(error) : String(error) });
     }
   }
 
@@ -349,8 +349,9 @@ export class TaskCoordinatorAgent extends BaseAgent {
         await this.executeWorkflowStep(step, workflowId);
         this.updateTaskProgress(workflowId, i + 1);
       } catch (error) {
-        console.error(`❌ Step ${i + 1} failed:`, error.message);
-        this.markTaskFailed(workflowId, error.message);
+        const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : String(error);
+        console.error(`❌ Step ${i + 1} failed:`, errorMessage);
+        this.markTaskFailed(workflowId, errorMessage);
         throw error;
       }
     }
@@ -418,7 +419,7 @@ export class TaskCoordinatorAgent extends BaseAgent {
       const workflowId = await this.orchestrateWorkflow(params.workflow);
       await this.sendResponse(id, { workflowId, status: 'started' });
     } catch (error) {
-      await this.sendError(id, { code: -32000, message: error.message });
+      await this.sendError(id, { code: -32000, message: error instanceof Error ? error.message : String(error) });
     }
   }
 
@@ -429,7 +430,7 @@ export class TaskCoordinatorAgent extends BaseAgent {
       const result = await this.orchestrateWorkflow(params.workflow);
       await this.sendResponse(id, { workflowId: result, status: 'completed' });
     } catch (error) {
-      await this.sendError(id, { code: -32000, message: error.message });
+      await this.sendError(id, { code: -32000, message: error instanceof Error ? error.message : String(error) });
     }
   }
 

@@ -30,8 +30,8 @@ export declare class BaseAgent {
     credentials: AgentCredential[];
     trustNetwork: Map<string, TrustRelationship>;
     ws: WebSocket | null;
-    private config;
-    private messageHandlers;
+    protected config: AgentConfig;
+    protected messageHandlers: Map<string, Function>;
     private pendingRequests;
     constructor(config: AgentConfig);
     private generateKeyPair;
@@ -60,3 +60,4 @@ export declare class BaseAgent {
     getCapabilities(): string[];
     getCredentials(): AgentCredential[];
 }
+//# sourceMappingURL=base-agent.d.ts.map

@@ -53,17 +53,24 @@ export interface CertificateRevocationList {
  * Issues and manages certificates for mutual authentication
  */
 export class DIDCertificateAuthority {
-  private caCertificate!: DIDCertificate;
+  private caCertificate?: DIDCertificate;
   private caPrivateKey: string;
   private certificates: Map<string, DIDCertificate> = new Map();
-  private revocationList!: CertificateRevocationList;
+  private revocationList?: CertificateRevocationList;
+  private isInitialized: boolean = false;
 
   constructor(
     private caDID: string,
     caPrivateKey?: string
   ) {
     this.caPrivateKey = caPrivateKey || 'temp-key';
-    this.initializeCA();
+    // Don't call initializeCA() in constructor - it should be called explicitly
+  }
+
+  private async ensureInitialized(): Promise<void> {
+    if (!this.isInitialized) {
+      await this.initializeCA();
+    }
   }
 
   private async generateCAKeyPair(): Promise<string> {
@@ -73,6 +80,10 @@ export class DIDCertificateAuthority {
   }
 
   private async initializeCA(): Promise<void> {
+    if (this.isInitialized) {
+      return;
+    }
+
     // Create self-signed CA certificate
     const caKeyPair = await ATPEncryptionService.generateKeyPair();
     this.caPrivateKey = caKeyPair.privateKey;
@@ -123,10 +134,13 @@ export class DIDCertificateAuthority {
       ),
     };
 
+    this.isInitialized = true;
     console.log(`ATP™ DID-CA initialized: ${this.caDID}`);
   }
 
   async issueCertificate(request: CertificateRequest): Promise<DIDCertificate> {
+    await this.ensureInitialized();
+    
     // Verify the certificate request
     await this.verifyCertificateRequest(request);
 
@@ -201,20 +215,22 @@ export class DIDCertificateAuthority {
     certificate.status = 'revoked';
 
     // Add to revocation list
-    this.revocationList.revokedCertificates.push({
-      certificateId,
-      revocationDate: new Date().toISOString(),
-      reason,
-    });
+    if (this.revocationList) {
+      this.revocationList.revokedCertificates.push({
+        certificateId,
+        revocationDate: new Date().toISOString(),
+        reason,
+      });
 
-    // Update revocation list signature
-    this.revocationList.signature = await ATPEncryptionService.sign(
-      JSON.stringify({
-        issuerDID: this.revocationList.issuerDID,
-        revokedCertificates: this.revocationList.revokedCertificates,
-      }),
-      this.caPrivateKey
-    );
+      // Update revocation list signature
+      this.revocationList.signature = await ATPEncryptionService.sign(
+        JSON.stringify({
+          issuerDID: this.revocationList.issuerDID,
+          revokedCertificates: this.revocationList.revokedCertificates,
+        }),
+        this.caPrivateKey
+      );
+    }
 
     // Log revocation
     await this.logCertificateEvent('certificate-revoked', {
@@ -282,7 +298,7 @@ export class DIDCertificateAuthority {
     }
 
     // Check revocation list
-    const isRevoked = this.revocationList.revokedCertificates.some(
+    const isRevoked = this.revocationList?.revokedCertificates.some(
       revoked => revoked.certificateId === certificate.certificateId
     );
 
@@ -306,11 +322,11 @@ export class DIDCertificateAuthority {
     );
   }
 
-  getRevocationList(): CertificateRevocationList {
+  getRevocationList(): CertificateRevocationList | undefined {
     return this.revocationList;
   }
 
-  getCACertificate(): DIDCertificate {
+  getCACertificate(): DIDCertificate | undefined {
     return this.caCertificate;
   }
 
@@ -346,7 +362,7 @@ export class DIDCertificateAuthority {
 
   private canIssueTrustLevel(requestedLevel: TrustLevel): boolean {
     // CA can issue certificates up to its own trust level
-    const caLevel = this.caCertificate.trustLevel;
+    const caLevel = this.caCertificate?.trustLevel || TrustLevel.BASIC;
     return TrustLevelManager.isAuthorized(caLevel, requestedLevel);
   }
 
@@ -366,7 +382,7 @@ export class DIDCertificateAuthority {
   }
 
   private async getCAPublicKey(): Promise<string> {
-    return this.caCertificate.publicKey;
+    return this.caCertificate?.publicKey || '';
   }
 
   private async logCertificateEvent(action: string, details: Record<string, any>): Promise<void> {

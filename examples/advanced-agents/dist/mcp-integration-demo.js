@@ -172,7 +172,7 @@ export class MCPIntegratedAgent extends BaseAgent {
             }
         }
         catch (error) {
-            console.error(`❌ Error delegating tool:`, error.message);
+            console.error(`❌ Error delegating tool:`, error instanceof Error ? error.message : String(error));
             return false;
         }
     }
@@ -193,7 +193,7 @@ export class MCPIntegratedAgent extends BaseAgent {
             }
         }
         catch (error) {
-            console.error(`❌ Error requesting MCP capability:`, error.message);
+            console.error(`❌ Error requesting MCP capability:`, error instanceof Error ? error.message : String(error));
             return [];
         }
     }
@@ -306,7 +306,7 @@ export class MCPIntegratedAgent extends BaseAgent {
             await this.sendResponse(id, result);
         }
         catch (error) {
-            await this.sendError(id, { code: -32000, message: error.message });
+            await this.sendError(id, { code: -32000, message: error instanceof Error ? error.message : String(error) });
         }
     }
     async handleMCPCapabilityRequest(params, id) {
@@ -387,7 +387,7 @@ export async function demonstrateMCPIntegration() {
         console.log(`Coordinator Agent: ${coordinatorAgent.getMCPTools().length} tools, ${coordinatorAgent.getDelegatedTools().length} delegated tools`);
     }
     catch (error) {
-        console.error('❌ MCP Integration demo failed:', error.message);
+        console.error('❌ MCP Integration demo failed:', error instanceof Error ? error.message : String(error));
     }
     finally {
         // Cleanup

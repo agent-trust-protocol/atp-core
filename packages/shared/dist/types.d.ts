@@ -127,3 +127,4 @@ export interface ServiceConfig {
     dbPath?: string;
     corsOrigins?: string[];
 }
+//# sourceMappingURL=types.d.ts.map

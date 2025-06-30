@@ -48,11 +48,13 @@ export interface CertificateRevocationList {
  */
 export declare class DIDCertificateAuthority {
     private caDID;
-    private caCertificate;
+    private caCertificate?;
     private caPrivateKey;
     private certificates;
-    private revocationList;
+    private revocationList?;
+    private isInitialized;
     constructor(caDID: string, caPrivateKey?: string);
+    private ensureInitialized;
     private generateCAKeyPair;
     private initializeCA;
     issueCertificate(request: CertificateRequest): Promise<DIDCertificate>;
@@ -64,8 +66,8 @@ export declare class DIDCertificateAuthority {
     }>;
     getCertificate(certificateId: string): Promise<DIDCertificate | null>;
     getCertificateByDID(did: string): Promise<DIDCertificate[]>;
-    getRevocationList(): CertificateRevocationList;
-    getCACertificate(): DIDCertificate;
+    getRevocationList(): CertificateRevocationList | undefined;
+    getCACertificate(): DIDCertificate | undefined;
     private verifyCertificateRequest;
     private canIssueTrustLevel;
     private getExtendedKeyUsage;
@@ -79,3 +81,4 @@ export declare class DIDCertificateAuthority {
         certificatesByTrustLevel: Record<string, number>;
     };
 }
+//# sourceMappingURL=did-ca.d.ts.map

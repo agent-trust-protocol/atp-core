@@ -10,6 +10,7 @@ services:
     environment:
       - PORT=3001
       - DB_PATH=/data/identity.db
+      - DATABASE_URL=postgresql://atp_user:staging-password-change-in-production@agent-trust-protocol-1-postgres-1:5432/atp_staging
     volumes:
       - identity_data:/data
     healthcheck:
@@ -28,6 +29,7 @@ services:
     environment:
       - PORT=3002
       - DB_PATH=/data/vc.db
+      - DATABASE_URL=postgresql://atp_user:staging-password-change-in-production@agent-trust-protocol-1-postgres-1:5432/atp_staging
     volumes:
       - vc_data:/data
     healthcheck:
@@ -47,6 +49,7 @@ services:
       - PORT=3003
       - DB_PATH=/data/permission.db
       - JWT_SECRET=your-secret-key-change-in-production
+      - DATABASE_URL=postgresql://atp_user:staging-password-change-in-production@agent-trust-protocol-1-postgres-1:5432/atp_staging
     volumes:
       - permission_data:/data
     healthcheck:
@@ -66,6 +69,7 @@ services:
       - PORT=3005
       - DB_PATH=/data/audit.db
       - IPFS_URL=http://ipfs:5001
+      - DATABASE_URL=postgresql://atp_user:staging-password-change-in-production@agent-trust-protocol-1-postgres-1:5432/atp_staging
     volumes:
       - audit_data:/data
     healthcheck:

@@ -1,0 +1,11 @@
+{
+  "ca": [
+    "/app/ssl/ca-certificate.pem"
+  ],
+  "cert": "/app/ssl/atp-certificate.pem",
+  "key": "/app/ssl/atp-private-key.pem",
+  "requestCert": true,
+  "rejectUnauthorized": false,
+  "environment": "development",
+  "description": "ATP™ Development TLS Configuration - Self-signed certificates for local development"
+} 

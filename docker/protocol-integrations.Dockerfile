@@ -2,13 +2,16 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+# Install build dependencies
+RUN apk add --no-cache python3 make g++
+
 # Copy package files
 COPY package*.json ./
 COPY packages/protocol-integrations/package*.json ./packages/protocol-integrations/
 COPY packages/shared/package*.json ./packages/shared/
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies (including dev dependencies for building)
+RUN npm ci
 
 # Copy source code
 COPY packages/protocol-integrations ./packages/protocol-integrations

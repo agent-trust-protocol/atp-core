@@ -1,95 +1,102 @@
-import Database from 'better-sqlite3';
+import { BaseStorage, DatabaseConfig } from '@atp/shared';
 import { DIDDocument, KeyPair } from '../models/did.js';
 import { CryptoUtils } from '../utils/crypto.js';
 
-export class StorageService {
-  private db: Database.Database;
-
-  constructor(dbPath: string = ':memory:') {
-    this.db = new Database(dbPath);
-    this.initTables();
+export class StorageService extends BaseStorage {
+  constructor(config: DatabaseConfig) {
+    super(config);
   }
 
-  private initTables(): void {
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS did_documents (
-        did TEXT PRIMARY KEY,
-        document TEXT NOT NULL,
-        created_at TEXT NOT NULL,
-        updated_at TEXT NOT NULL
-      );
-
-      CREATE TABLE IF NOT EXISTS key_pairs (
-        did TEXT PRIMARY KEY,
-        public_key TEXT NOT NULL,
-        private_key TEXT NOT NULL,
-        created_at TEXT NOT NULL,
-        rotated_at TEXT,
-        FOREIGN KEY (did) REFERENCES did_documents (did)
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_did_created ON did_documents(created_at);
-      CREATE INDEX IF NOT EXISTS idx_key_created ON key_pairs(created_at);
-    `);
+  async initialize(): Promise<void> {
+    await this.ensureConnection();
+    // Tables are created by init-db.sql, just verify connection
   }
 
   async storeDIDDocument(document: DIDDocument): Promise<void> {
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO did_documents (did, document, created_at, updated_at)
-      VALUES (?, ?, ?, ?)
-    `);
+    const query = `
+      INSERT INTO atp_identity.did_documents (did, document, created_at, updated_at)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT (did) DO UPDATE SET
+        document = EXCLUDED.document,
+        updated_at = EXCLUDED.updated_at
+    `;
     
-    stmt.run(
+    await this.db.query(query, [
       document.id,
-      JSON.stringify(document),
-      document.created,
-      document.updated
-    );
+      this.safeJsonStringify(document),
+      this.toISOString(document.created),
+      this.toISOString(document.updated)
+    ]);
   }
 
   async getDIDDocument(did: string): Promise<DIDDocument | null> {
-    const stmt = this.db.prepare('SELECT document FROM did_documents WHERE did = ?');
-    const row = stmt.get(did) as { document: string } | undefined;
+    const query = 'SELECT document FROM atp_identity.did_documents WHERE did = $1';
+    const result = await this.db.query(query, [did]);
     
-    if (!row) {
+    if (result.rows.length === 0) {
       return null;
     }
     
-    return JSON.parse(row.document) as DIDDocument;
+    // PostgreSQL JSONB returns objects directly, not JSON strings
+    const document = result.rows[0].document;
+    return typeof document === 'string' ? this.safeJsonParse<DIDDocument>(document) : document as DIDDocument;
   }
 
   async storeKeyPair(keyPair: KeyPair): Promise<void> {
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO key_pairs (did, public_key, private_key, created_at, rotated_at)
-      VALUES (?, ?, ?, ?, ?)
-    `);
+    // Store public key in agents table, private key needs separate secure storage
+    const agentQuery = `
+      INSERT INTO atp_identity.agents (did, public_key, created_at, updated_at)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT (did) DO UPDATE SET
+        public_key = EXCLUDED.public_key,
+        updated_at = EXCLUDED.updated_at
+    `;
     
-    stmt.run(
+    await this.db.query(agentQuery, [
       keyPair.did,
       keyPair.publicKey,
-      keyPair.privateKey,
-      keyPair.created,
-      keyPair.rotated || null
-    );
+      this.toISOString(keyPair.created),
+      this.toISOString(keyPair.rotated || keyPair.created)
+    ]);
+
+    // Store private key in metadata (encrypted in production)
+    const metadataQuery = `
+      UPDATE atp_identity.agents 
+      SET metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb
+      WHERE did = $1
+    `;
+    
+    const privateKeyMetadata = {
+      privateKey: keyPair.privateKey,
+      keyRotated: keyPair.rotated || null
+    };
+    
+    await this.db.query(metadataQuery, [
+      keyPair.did,
+      this.safeJsonStringify(privateKeyMetadata)
+    ]);
   }
 
   async getKeyPair(did: string): Promise<KeyPair | null> {
-    const stmt = this.db.prepare(`
-      SELECT did, public_key, private_key, created_at, rotated_at
-      FROM key_pairs WHERE did = ?
-    `);
-    const row = stmt.get(did) as any;
+    const query = `
+      SELECT did, public_key, metadata, created_at, updated_at
+      FROM atp_identity.agents WHERE did = $1
+    `;
+    const result = await this.db.query(query, [did]);
     
-    if (!row) {
+    if (result.rows.length === 0) {
       return null;
     }
     
+    const row = result.rows[0];
+    const metadata = this.safeJsonParse<any>(row.metadata) || {};
+    
     return {
       did: row.did,
-      publicKey: row.public_key,  
-      privateKey: row.private_key,
+      publicKey: row.public_key,
+      privateKey: metadata.privateKey || '',
       created: row.created_at,
-      rotated: row.rotated_at,
+      rotated: metadata.keyRotated,
     };
   }
 
@@ -97,24 +104,38 @@ export class StorageService {
     const keyPair = await CryptoUtils.generateKeyPair();
     const now = new Date().toISOString();
     
-    const stmt = this.db.prepare(`
-      UPDATE key_pairs 
-      SET public_key = ?, private_key = ?, rotated_at = ?
-      WHERE did = ?
-    `);
+    // Update public key in agents table
+    const updateAgentQuery = `
+      UPDATE atp_identity.agents 
+      SET public_key = $1, updated_at = $2
+      WHERE did = $3
+    `;
     
-    stmt.run(keyPair.publicKey, keyPair.privateKey, now, did);
+    await this.db.query(updateAgentQuery, [keyPair.publicKey, now, did]);
+    
+    // Update private key in metadata
+    const updateMetadataQuery = `
+      UPDATE atp_identity.agents 
+      SET metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb
+      WHERE did = $1
+    `;
+    
+    const privateKeyMetadata = {
+      privateKey: keyPair.privateKey,
+      keyRotated: now
+    };
+    
+    await this.db.query(updateMetadataQuery, [
+      did,
+      this.safeJsonStringify(privateKeyMetadata)
+    ]);
     
     return keyPair;
   }
 
   async listDIDs(): Promise<string[]> {
-    const stmt = this.db.prepare('SELECT did FROM did_documents ORDER BY created_at DESC');
-    const rows = stmt.all() as { did: string }[];
-    return rows.map(row => row.did);
-  }
-
-  close(): void {
-    this.db.close();
+    const query = 'SELECT did FROM atp_identity.did_documents ORDER BY created_at DESC';
+    const result = await this.db.query(query);
+    return result.rows.map((row: any) => row.did);
   }
 }

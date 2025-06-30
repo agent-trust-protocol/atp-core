@@ -59,7 +59,7 @@ export class ATPZKProofService {
     const nonce = this.generateRandomBigInt();
     
     // Commitment: R = g^nonce
-    const commitment = this.generateCommitment(nonce, 0n);
+    const commitment = this.generateCommitment(nonce, BigInt(0));
     
     // Challenge: c = H(R || publicKey || message)
     const challenge = this.generateChallenge(commitment, publicKey);
@@ -311,7 +311,7 @@ export class ATPZKProofService {
 
     const combinedResponse = proofs
       .map(p => BigInt('0x' + p.response))
-      .reduce((acc, response) => acc + response, 0n)
+      .reduce((acc, response) => acc + response, BigInt(0))
       .toString(16);
 
     return {
@@ -452,8 +452,8 @@ export class ATPZKProofService {
     // Simplified boundary proof
     // In practice, this would use proper range proof techniques
     const valueCommitment = this.generateCommitment(BigInt(value), blinding);
-    const minCommitment = this.generateCommitment(BigInt(min), 0n);
-    const maxCommitment = this.generateCommitment(BigInt(max), 0n);
+    const minCommitment = this.generateCommitment(BigInt(min), BigInt(0));
+    const maxCommitment = this.generateCommitment(BigInt(max), BigInt(0));
     
     const challenge = this.generateChallenge(
       valueCommitment,

@@ -12,3 +12,4 @@ export declare class PermissionController {
     removePolicyRule(req: Request, res: Response): Promise<void>;
     listPolicyRules(req: Request, res: Response): Promise<void>;
 }
+//# sourceMappingURL=permission.d.ts.map

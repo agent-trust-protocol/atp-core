@@ -92,7 +92,7 @@ async function runAllDemos() {
         console.log('\n🎉 All demonstrations completed successfully!');
     }
     catch (error) {
-        console.error('\n❌ Demo execution failed:', error.message);
+        console.error('\n❌ Demo execution failed:', error instanceof Error ? error.message : String(error));
     }
 }
 async function main() {
@@ -110,7 +110,7 @@ async function main() {
                     await demonstrateCollaborativeAgents();
                 }
                 catch (error) {
-                    console.error('❌ Demo failed:', error.message);
+                    console.error('❌ Demo failed:', error instanceof Error ? error.message : String(error));
                 }
                 break;
             case '2':
@@ -119,7 +119,7 @@ async function main() {
                     await demonstrateMCPIntegration();
                 }
                 catch (error) {
-                    console.error('❌ Demo failed:', error.message);
+                    console.error('❌ Demo failed:', error instanceof Error ? error.message : String(error));
                 }
                 break;
             case '3':
@@ -128,7 +128,7 @@ async function main() {
                     await demonstrateAgentMarketplace();
                 }
                 catch (error) {
-                    console.error('❌ Demo failed:', error.message);
+                    console.error('❌ Demo failed:', error instanceof Error ? error.message : String(error));
                 }
                 break;
             case '4':

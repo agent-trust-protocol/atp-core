@@ -1,3 +1,5 @@
+/// <reference types="node" />
+/// <reference types="node" />
 import https from 'https';
 import { IncomingMessage } from 'http';
 import { DIDCertificateAuthority, DIDCertificate } from './did-ca.js';
@@ -14,7 +16,7 @@ export interface ClientCertificate {
     valid_from: string;
     valid_to: string;
     fingerprint: string;
-    fingerprint256: string;
+    fingerprint256?: string;
     did?: string;
     didCertificate?: DIDCertificate;
     trustLevel?: string;
@@ -44,3 +46,4 @@ export declare class MTLSService {
     private logCertificateEvent;
     static loadTLSConfig(configPath: string): MTLSConfig;
 }
+//# sourceMappingURL=mtls.d.ts.map

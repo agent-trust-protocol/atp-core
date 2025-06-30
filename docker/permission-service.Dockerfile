@@ -2,7 +2,7 @@ FROM node:18-alpine AS base
 WORKDIR /app
 
 # Install build dependencies
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 python3-dev py3-setuptools make g++
 
 # Copy package files
 COPY package.json package-lock.json lerna.json ./
@@ -25,10 +25,16 @@ RUN npm run build --workspace=@atp/permission-service
 FROM node:18-alpine AS production
 WORKDIR /app
 
+# Install runtime dependencies
+RUN apk add --no-cache curl
+
 # Copy built application
 COPY --from=base /app/packages/permission-service/dist ./dist
 COPY --from=base /app/packages/permission-service/package.json ./
 COPY --from=base /app/node_modules ./node_modules
+# Copy shared package
+COPY --from=base /app/packages/shared/dist ./node_modules/@atp/shared/dist
+COPY --from=base /app/packages/shared/package.json ./node_modules/@atp/shared/
 
 # Create data directory
 RUN mkdir -p /data && chown -R node:node /data

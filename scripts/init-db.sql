@@ -46,6 +46,35 @@ CREATE TABLE IF NOT EXISTS atp_identity.did_documents (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Multi-Factor Authentication Tables
+CREATE TABLE IF NOT EXISTS atp_identity.mfa_configs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    did VARCHAR(255) NOT NULL REFERENCES atp_identity.agents(did) ON DELETE CASCADE,
+    method VARCHAR(50) NOT NULL, -- 'totp', 'hardware', 'sms', 'email'
+    secret_encrypted TEXT, -- For TOTP secrets
+    backup_codes_encrypted TEXT, -- JSON array of encrypted backup codes
+    hardware_public_key TEXT, -- For hardware keys (FIDO2/WebAuthn)
+    hardware_challenge TEXT, -- Temporary challenge data
+    qr_code TEXT, -- QR code URL for TOTP setup
+    status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'active', 'disabled'
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    confirmed_at TIMESTAMP WITH TIME ZONE,
+    last_used_at TIMESTAMP WITH TIME ZONE,
+    disabled_at TIMESTAMP WITH TIME ZONE,
+    UNIQUE(did, method)
+);
+
+CREATE TABLE IF NOT EXISTS atp_identity.mfa_audit_log (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    did VARCHAR(255) NOT NULL,
+    action VARCHAR(100) NOT NULL, -- 'setup', 'verification_success', 'verification_failed', 'disabled'
+    method VARCHAR(50) NOT NULL, -- 'totp', 'backup', 'hardware'
+    ip_address INET,
+    user_agent TEXT,
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    details JSONB
+);
+
 -- Verifiable Credentials Tables
 CREATE TABLE IF NOT EXISTS atp_credentials.credentials (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -153,6 +182,15 @@ CREATE INDEX IF NOT EXISTS idx_agents_did ON atp_identity.agents(did);
 CREATE INDEX IF NOT EXISTS idx_agents_trust_level ON atp_identity.agents(trust_level);
 CREATE INDEX IF NOT EXISTS idx_agents_status ON atp_identity.agents(status);
 CREATE INDEX IF NOT EXISTS idx_agents_created_at ON atp_identity.agents(created_at);
+
+CREATE INDEX IF NOT EXISTS idx_mfa_configs_did ON atp_identity.mfa_configs(did);
+CREATE INDEX IF NOT EXISTS idx_mfa_configs_method ON atp_identity.mfa_configs(method);
+CREATE INDEX IF NOT EXISTS idx_mfa_configs_status ON atp_identity.mfa_configs(status);
+CREATE INDEX IF NOT EXISTS idx_mfa_configs_last_used ON atp_identity.mfa_configs(last_used_at);
+
+CREATE INDEX IF NOT EXISTS idx_mfa_audit_did ON atp_identity.mfa_audit_log(did);
+CREATE INDEX IF NOT EXISTS idx_mfa_audit_action ON atp_identity.mfa_audit_log(action);
+CREATE INDEX IF NOT EXISTS idx_mfa_audit_timestamp ON atp_identity.mfa_audit_log(timestamp);
 
 CREATE INDEX IF NOT EXISTS idx_credentials_issuer ON atp_credentials.credentials(issuer_did);
 CREATE INDEX IF NOT EXISTS idx_credentials_subject ON atp_credentials.credentials(subject_did);

@@ -21,3 +21,4 @@ export declare class WebSocketService {
     private generateClientId;
     private startCleanupInterval;
 }
+//# sourceMappingURL=websocket.d.ts.map

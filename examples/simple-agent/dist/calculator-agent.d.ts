@@ -7,3 +7,4 @@ export declare class CalculatorAgent extends SimpleAgent {
     grantCalculationPermission(targetAgentDid: string, operations: string[]): Promise<void>;
     getSupportedOperations(): string[];
 }
+//# sourceMappingURL=calculator-agent.d.ts.map

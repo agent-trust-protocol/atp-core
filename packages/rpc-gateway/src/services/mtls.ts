@@ -71,7 +71,7 @@ export class MTLSService {
       valid_from: cert.valid_from,
       valid_to: cert.valid_to,
       fingerprint: cert.fingerprint,
-      fingerprint256: cert.fingerprint256 || undefined,
+      fingerprint256: cert.fingerprint256 ?? undefined,
       did: did || undefined,
     };
   }

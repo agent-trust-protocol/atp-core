@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { AuthMessage } from '../models/rpc.js';
 import { DIDJWTPayload } from './did-jwt.js';
 import { MTLSService, ClientCertificate } from './mtls.js';
@@ -26,3 +27,4 @@ export declare class AuthService {
     private base58decode;
     isAuthorized(context: AuthContext, requiredCapability?: string, minimumTrustLevel?: string): boolean;
 }
+//# sourceMappingURL=auth.d.ts.map
