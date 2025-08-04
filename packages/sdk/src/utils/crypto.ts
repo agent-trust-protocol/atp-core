@@ -1,6 +1,10 @@
 import * as ed25519 from '@noble/ed25519';
 import { sha256 } from '@noble/hashes/sha256';
+import { sha512 } from '@noble/hashes/sha512';
 import { randomBytes } from 'crypto';
+
+// Configure @noble/ed25519 to use SHA-512
+ed25519.etc.sha512Sync = (...m) => sha512(ed25519.etc.concatBytes(...m));
 
 /**
  * Cryptographic utilities for ATP™ SDK

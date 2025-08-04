@@ -5,8 +5,6 @@
 
 // Jest setup file to polyfill Web Crypto API for Node.js
 import { webcrypto } from 'crypto';
-import * as ed25519 from '@noble/ed25519';
-import { sha512 } from '@noble/hashes/sha512';
 
 // Polyfill Web Crypto API for @noble/ed25519
 if (!globalThis.crypto) {
@@ -18,11 +16,7 @@ if (!globalThis.crypto.getRandomValues) {
   globalThis.crypto.getRandomValues = webcrypto.getRandomValues.bind(webcrypto);
 }
 
-// Configure @noble/ed25519 to use SHA-512
-ed25519.etc.sha512Sync = (...m) => sha512(ed25519.etc.concatBytes(...m));
-
-// Global test timeout
-jest.setTimeout(10000);
+// Global test timeout is configured in jest.config.cjs (testTimeout: 10000)
 
 // Store original console methods
 const originalConsoleError = console.error;
@@ -31,7 +25,7 @@ const originalConsoleWarn = console.warn;
 // Setup before each test
 beforeEach(() => {
   // Suppress expected warnings and experimental messages
-  console.error = jest.fn((message) => {
+  console.error = ((originalError) => (message) => {
     if (
       typeof message === 'string' && 
       (message.includes('ExperimentalWarning:') || 
@@ -40,15 +34,15 @@ beforeEach(() => {
     ) {
       return; // Suppress these warnings
     }
-    originalConsoleError(message);
-  });
+    originalError(message);
+  })(originalConsoleError);
   
-  console.warn = jest.fn((message) => {
+  console.warn = ((originalWarn) => (message) => {
     if (typeof message === 'string' && message.includes('Warning:')) {
       return; // Suppress warnings
     }
-    originalConsoleWarn(message);
-  });
+    originalWarn(message);
+  })(originalConsoleWarn);
 });
 
 // Cleanup after each test
@@ -56,10 +50,6 @@ afterEach(() => {
   // Restore console methods
   console.error = originalConsoleError;
   console.warn = originalConsoleWarn;
-  
-  // Clear all timers and mocks
-  jest.clearAllTimers();
-  jest.clearAllMocks();
 });
 
 // Global cleanup after all tests
@@ -78,9 +68,8 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
-// Export test configuration
+// Export test configuration (optional, only if needed elsewhere)
 export const testConfig = {
   timeout: 10000,
-  cryptoAvailable: !!globalThis.crypto,
-  ed25519Configured: !!ed25519.etc.sha512Sync
+  cryptoAvailable: !!globalThis.crypto
 };

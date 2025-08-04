@@ -1,7 +1,7 @@
 #!/usr/bin/env ts-node
 
-import { WeatherAgent } from '../simple-agent/src/weather-agent';
-import { CalculatorAgent } from '../simple-agent/src/calculator-agent';
+import { WeatherAgent } from '../simple-agent/src/weather-agent.js';
+import { CalculatorAgent } from '../simple-agent/src/calculator-agent.js';
 
 async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -11,7 +11,7 @@ async function runDemo() {
   console.log('🚀 Starting Agent Trust Protocol Demo');
   console.log('=====================================\n');
 
-  const gatewayUrl = 'ws://localhost:8080/rpc';
+  const gatewayUrl = 'ws://localhost:8081/rpc';
 
   // Initialize agents
   console.log('📡 Initializing agents...');

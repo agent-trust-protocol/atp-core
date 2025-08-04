@@ -1,7 +1,7 @@
 {
+  "type": "module",
   "name": "agent-trust-protocol",
   "version": "0.1.0",
-  "type": "module",
   "private": false,
   "description": "Agent Trust Protocol Core - Quantum-safe security protocol for AI agents with decentralized identity, verifiable credentials, and trust-based permissions",
   "keywords": [

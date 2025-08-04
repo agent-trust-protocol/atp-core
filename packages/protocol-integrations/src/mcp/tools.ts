@@ -200,6 +200,48 @@ export const EXAMPLE_TOOLS: ATPMCPTool[] = [
   },
 
   {
+    name: 'policy_deploy',
+    description: 'Deploy quantum-safe trust policy to ATP Gateway',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        policy: {
+          type: 'object',
+          properties: {
+            if: { type: 'object' },
+            then: { type: 'string' },
+            rules: { type: 'array' }
+          }
+        },
+        orgId: {
+          type: 'string',
+          pattern: '^did:atp:org:'
+        },
+        quantumSignature: {
+          type: 'string',
+          description: 'Dilithium-based policy signature using hybrid Ed25519 + CRYSTALS-Dilithium'
+        }
+      },
+      required: ['policy', 'orgId', 'quantumSignature']
+    },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        deployedAt: { type: 'string', format: 'date-time' },
+        policyHash: { type: 'string' },
+        gatewayResponse: { type: 'object' }
+      }
+    },
+    trustLevelRequired: TrustLevel.VERIFIED,
+    capabilities: ['policy-management', 'quantum-safe-operations'],
+    auditRequired: true,
+    rateLimits: {
+      requestsPerMinute: 10,
+      requestsPerHour: 100
+    }
+  },
+
+  {
     name: 'atp_identity_lookup',
     description: 'Look up ATP™ agent identity information',
     inputSchema: {

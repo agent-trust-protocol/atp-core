@@ -40,14 +40,24 @@ export class ATPMFAService {
 
   private config: MFAConfig;
   private usedTokens: Set<string> = new Set();
+  private cleanupInterval: NodeJS.Timeout;
 
   constructor(config: Partial<MFAConfig> = {}) {
     this.config = { ...ATPMFAService.DEFAULT_CONFIG, ...config };
     
     // Cleanup used tokens every hour
-    setInterval(() => {
+    this.cleanupInterval = setInterval(() => {
       this.usedTokens.clear();
     }, 60 * 60 * 1000);
+  }
+
+  /**
+   * Cleanup resources (for testing)
+   */
+  cleanup(): void {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+    }
   }
 
   /**
@@ -301,10 +311,5 @@ export class ATPMFAService {
     return Math.min(score, 1.0);
   }
 
-  /**
-   * Clean up expired tokens and challenges
-   */
-  cleanup(): void {
-    this.usedTokens.clear();
-  }
+
 }

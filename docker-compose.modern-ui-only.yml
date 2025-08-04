@@ -1,0 +1,136 @@
+version: '3.8'
+
+services:
+  # Modern UI Frontend
+  atp-ui-modern:
+    build:
+      context: ./ui-modern
+      dockerfile: Dockerfile.production
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - ATP_API_URL=http://mock-api:3001
+      - ATP_QUANTUM_URL=http://mock-quantum:3008
+    depends_on:
+      - mock-api
+      - mock-quantum
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  # Mock API Service (for demonstration)
+  mock-api:
+    image: node:18-alpine
+    ports:
+      - "3001:3001"
+    working_dir: /app
+    command: >
+      sh -c "npm install -g json-server &&
+             echo '{\"health\": \"ok\", \"services\": {\"gateway\": \"healthy\", \"identity\": \"healthy\", \"permission\": \"healthy\", \"vc\": \"healthy\", \"audit\": \"healthy\"}}' > /app/db.json &&
+             json-server --watch /app/db.json --port 3001 --host 0.0.0.0"
+    volumes:
+      - ./mock-data:/app
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  # Mock Quantum Service (for demonstration)
+  mock-quantum:
+    image: node:18-alpine
+    ports:
+      - "3008:3008"
+    working_dir: /app
+    command: >
+      sh -c "npm install -g http-server &&
+             echo '{\"health\": \"ok\", \"quantum\": \"enabled\", \"dilithium\": \"level3\"}' > /app/health.json &&
+             http-server -p 3008 -a 0.0.0.0 /app"
+    volumes:
+      - ./mock-data:/app
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=atp_production
+      - POSTGRES_USER=atp_user
+      - POSTGRES_PASSWORD=atp_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3006:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  # Load Balancer
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.production.modern.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - atp-ui-modern
+      - mock-api
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  atp-network:
+    driver: bridge 

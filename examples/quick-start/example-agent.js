@@ -1,6 +1,8 @@
 // ATP™ Example Agent - Basic Integration
 // =====================================
 
+import fetch from 'node-fetch';
+
 const agentConfig = {
   name: 'My First ATP Agent',
   type: 'assistant',
@@ -10,7 +12,7 @@ const agentConfig = {
 const baseUrls = {
   identity: 'http://localhost:3001',
   gateway: 'http://localhost:3000',
-  audit: 'http://localhost:3005'
+  audit: 'http://localhost:3004'
 };
 
 // Example 1: Register Agent Identity
@@ -95,11 +97,9 @@ async function runExample() {
 }
 
 // Export for use in other scripts
-if (typeof module !== 'undefined') {
-  module.exports = { registerAgent, logActivity, checkGatewayStatus };
-}
+export { registerAgent, logActivity, checkGatewayStatus };
 
 // Run if called directly
-if (typeof require !== 'undefined' && require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   runExample();
 }

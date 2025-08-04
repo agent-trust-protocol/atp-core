@@ -8,33 +8,59 @@
 
 > **🌐 Looking for enterprise information?** Visit our [commercial website](https://github.com/bigblackcoder/agent-trust-protocol-website) for pricing, pilot programs, and enterprise features.
 
+> **🚀 Try the Live Demo!** Experience ATP™ Enterprise UI: [https://480de8e2ca61.ngrok-free.app](https://480de8e2ca61.ngrok-free.app)
+
 Created and developed by **Larry Lewis**, Sovr INC. (Sovrlabs)
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![GitHub](https://img.shields.io/github/stars/bigblackcoder/agent-trust-protocol)](https://github.com/bigblackcoder/agent-trust-protocol)
 [![Contributors](https://img.shields.io/github/contributors/bigblackcoder/agent-trust-protocol)](https://github.com/bigblackcoder/agent-trust-protocol/graphs/contributors)
 [![Quantum-Safe](https://img.shields.io/badge/Quantum--Safe-CRYSTALS--Dilithium-purple.svg)](https://pq-crystals.org/dilithium/)
-[![Production Ready](https://img.shields.io/badge/Production%20Ready-100%25-brightgreen.svg)](https://github.com/bigblackcoder/agent-trust-protocol)
-[![Launch Status](https://img.shields.io/badge/Status-LIVE%20NOW!-success.svg)](https://github.com/bigblackcoder/agent-trust-protocol)
+[![Enterprise Ready](https://img.shields.io/badge/Enterprise%20Ready-100%25-brightgreen.svg)](https://github.com/bigblackcoder/agent-trust-protocol)
+[![npm](https://img.shields.io/badge/npm%20package-coming%20soon-yellow.svg)](https://www.npmjs.com/)
+
+> **⚠️ Developer Notice**: The simplified 3-line SDK shown below is coming soon! Currently, you need to run the full development environment. See [Developer Setup](#developer-setup) for current instructions.
 
 ---
 
-## 🚀 **Quick Start**
-
-```bash
-# Install the SDK
-npm install @atp/sdk
-
-# Run a simple agent
-node examples/simple-agent/index.js
-```
+## 🚀 **Quick Start (Coming Soon!)**
 
 ```typescript
-// Create quantum-safe agent identity
+// 🔜 COMING SOON: Simple 3-line SDK
+// npm install @atp/sdk
 const agent = await Agent.create('MyBot');
 await agent.send(otherAgent, 'Quantum-secured message!');
 console.log(`Trust score: ${await agent.getTrustScore(otherAgent)}`);
 ```
+
+## 🔧 **Developer Setup (Current Method)**
+
+Currently, ATP requires running the full development environment:
+
+```bash
+# Prerequisites: Node.js 18+, PostgreSQL, Docker (optional)
+
+# Clone the repository
+git clone https://github.com/bigblackcoder/agent-trust-protocol.git
+cd agent-trust-protocol
+
+# Install dependencies
+npm install
+
+# Set up PostgreSQL database
+createdb atp_dev
+
+# Start ATP services (5 microservices)
+./start-services.sh
+
+# In another terminal, run example agents
+cd examples/simple-agent
+npm install
+npm run build
+npm start
+```
+
+> **Note**: We're working on hosted ATP services and a simplified SDK to enable the 3-line quick start experience shown above.
 
 ---
 
@@ -62,26 +88,46 @@ ATP provides a complete security layer for AI agents through five core services:
 ✅ **First protocol combining DIDs + Quantum-Safe signatures for agents**  
 ✅ **First trust scoring system for AI agent reputation**  
 ✅ **First security wrapper for MCP (Model Context Protocol)**  
-✅ **First unified security layer for all agent frameworks**
+✅ **First unified security layer for all agent frameworks**  
+🏛️ **W3C Community Group**: [Joining AI Agent Protocol CG](docs/AI_AGENT_PROTOCOL_CG_PROPOSAL.md)
 
-## 🎯 Production Readiness: 100% ✅
+## 🎯 **Strategic Position**
 
-**ATP is now fully production-ready with comprehensive testing and validation:**
+ATP serves as the **Security Foundation** for the emerging Agentic Web:
 
-| Component | Status | Score | Details |
-|-----------|--------|-------|---------|
-| 🏗️ **Core Infrastructure** | ✅ READY | 100% | All services operational |
-| 🔐 **Authentication System** | ✅ READY | 100% | Complete DID-based auth flow |
-| 🗄️ **Database Integration** | ✅ READY | 100% | PostgreSQL configured |
-| 🧪 **Testing Framework** | ✅ READY | 100% | Jest with clean execution |
-| 🛡️ **Security Features** | ✅ READY | 100% | Quantum-safe cryptography |
-| 📊 **Monitoring** | ✅ READY | 100% | Prometheus metrics active |
+- **🔗 Complements ANP**: Provides quantum-safe security layer for W3C's Agent Network Protocol
+- **🌉 Protocol Bridge**: Universal security standard across MCP, A2A, ACP, and ANP
+- **🛡️ Missing Piece**: Fills critical security gaps in current agent protocol specifications
+- **⚡ Production Ready**: Working implementation while others are still in specification phase
 
-**🚀 Quick Production Test:**
-```bash
-node simple-production-test.js
-# Expected: 🏆 OVERALL PRODUCTION READINESS: 100.0%
-```
+## 📊 Current Status
+
+### ✅ **What's Ready Now**
+
+| Component | Status | Details |
+|-----------|--------|---------|
+| 🏢 **Enterprise UI** | ✅ LIVE | Full glassmorphic UI with quantum-safe demos |
+| 🏗️ **Core Infrastructure** | ✅ READY | All 5 microservices operational |
+| 🔐 **Quantum-Safe Crypto** | ✅ READY | Ed25519 + Dilithium hybrid signatures |
+| 🛡️ **Security Features** | ✅ READY | DIDs, VCs, trust scoring, audit logs |
+| 📊 **Production Architecture** | ✅ READY | PostgreSQL, WebSocket RPC, mTLS |
+| 🎨 **Visual Policy Editor** | ✅ READY | Drag-and-drop trust policy creation |
+
+### 🔄 **What's Coming Soon**
+
+| Component | Status | Timeline |
+|-----------|--------|----------|
+| 📦 **NPM Package** | 🔄 In Progress | 1-2 weeks |
+| 🚀 **3-Line Quick Start** | 🔄 In Progress | 2-3 weeks |
+| ☁️ **Hosted ATP Services** | 📋 Planned | 3-4 weeks |
+| 📚 **Developer Tutorials** | 📋 Planned | 3-4 weeks |
+| 🔌 **MCP Integration** | 📋 Planned | 4-6 weeks |
+
+### 🎯 **For Different Users**
+
+- **Enterprise Users**: ✅ Ready to deploy! Full production system available
+- **Developers**: 🔄 Full setup required (simplified SDK coming soon)
+- **Researchers**: ✅ Explore our quantum-safe implementation today
 
 
 
@@ -590,15 +636,34 @@ As AI agents become more autonomous and interconnected, establishing trust betwe
 - **Security Innovation**: ✅ Trust Scoring for AI Agents
 - **Time to Integration**: <5 minutes
 
-## 🔗 Related Repositories
+## 🔗 Repository Structure
 
-This is part of the Agent Trust Protocol ecosystem:
+ATP™ follows the **MongoDB OpenCore Model** with separated repositories:
 
-- **[agent-trust-protocol](https://github.com/bigblackcoder/agent-trust-protocol)** (this repo) - Core protocol implementation (open source)
-- **[agent-trust-protocol-website](https://github.com/bigblackcoder/agent-trust-protocol-website)** - Commercial website, marketing, and enterprise pilot programs
-- **[agent-trust-protocol-enterprise](https://github.com/bigblackcoder/agent-trust-protocol-enterprise)** - Enterprise extensions and commercial features (private)
+### 🔓 **Core Protocol** (This Repository)
+- **[agent-trust-protocol](https://github.com/bigblackcoder/agent-trust-protocol)** - Open source core protocol
+- **Focus**: Pure protocol implementation, SDKs, and developer tools
+- **License**: Apache 2.0 - Free forever
+- **Audience**: Developers, researchers, open source community
 
-> **🏢 Enterprise Features**: Advanced monitoring, compliance reporting, priority support, and custom integrations are available in the enterprise repository. [Learn more →](https://github.com/bigblackcoder/agent-trust-protocol-website)
+### 🌐 **Marketing Website**
+- **[agent-trust-protocol-website](https://github.com/bigblackcoder/agent-trust-protocol-website)** - Commercial website and marketing
+- **Focus**: Pricing pages, enterprise features, lead generation
+- **Contains**: Next.js website with OpenCore pricing model
+- **Audience**: Enterprise buyers, marketing, sales teams
+
+### 💼 **Enterprise Extensions** (Coming Soon)
+- **[agent-trust-protocol-enterprise](https://github.com/bigblackcoder/agent-trust-protocol-enterprise)** - Enterprise features (private)
+- **Focus**: Advanced monitoring, compliance, enterprise SSO
+- **License**: Commercial - Enterprise customers only
+- **Audience**: Enterprise customers with support contracts
+
+## 🏢 Enterprise Information
+
+For **enterprise features, pricing, and sales information**, visit:
+- **Website**: [agent-trust-protocol-website](https://github.com/bigblackcoder/agent-trust-protocol-website)
+- **Live Demo**: https://480de8e2ca61.ngrok-free.app
+- **Contact**: sales@sovrlabs.com
 
 ---
 
