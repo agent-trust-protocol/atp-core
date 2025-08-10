@@ -3,6 +3,9 @@ import cors from 'cors';
 import { StorageService } from './services/storage.js';
 import { PermissionService } from './services/permission.js';
 import { PermissionController } from './controllers/permission.js';
+import { VisualPolicyStorageService } from '@atp/shared';
+import { PolicyController } from './controllers/policy.js';
+import { PolicyEvaluationController } from './controllers/evaluation.js';
 const app = express();
 const port = process.env.PORT || 3003;
 const secretKey = process.env.JWT_SECRET || 'atp-default-secret-key-change-in-production';
@@ -17,8 +20,11 @@ const dbConfig = {
     connectionTimeoutMillis: 2000,
 };
 const storage = new StorageService(dbConfig);
+const visualPolicyStorage = new VisualPolicyStorageService(dbConfig);
 const permissionService = new PermissionService(storage, secretKey);
 const permissionController = new PermissionController(permissionService);
+const policyController = new PolicyController(visualPolicyStorage);
+const evaluationController = new PolicyEvaluationController(visualPolicyStorage);
 app.post('/perm/grant', (req, res) => permissionController.grant(req, res));
 app.post('/perm/check', (req, res) => permissionController.check(req, res));
 app.post('/perm/validate', (req, res) => permissionController.validateToken(req, res));
@@ -27,6 +33,15 @@ app.delete('/perm/revoke/:grantId', (req, res) => permissionController.revoke(re
 app.post('/perm/policy/rules', (req, res) => permissionController.addPolicyRule(req, res));
 app.delete('/perm/policy/rules/:ruleId', (req, res) => permissionController.removePolicyRule(req, res));
 app.get('/perm/policy/rules', (req, res) => permissionController.listPolicyRules(req, res));
+// Visual Policy CRUD
+app.post('/policies', (req, res) => policyController.create(req, res));
+app.get('/policies', (req, res) => policyController.list(req, res));
+app.get('/policies/:id', (req, res) => policyController.get(req, res));
+app.put('/policies/:id', (req, res) => policyController.update(req, res));
+app.delete('/policies/:id', (req, res) => policyController.remove(req, res));
+// Policy Evaluation endpoints
+app.post('/policies/evaluate', (req, res) => evaluationController.evaluate(req, res));
+app.post('/policies/simulate', (req, res) => evaluationController.simulate(req, res));
 app.get('/health', async (req, res) => {
     try {
         const dbHealth = await storage.healthCheck();
@@ -48,6 +63,7 @@ app.get('/health', async (req, res) => {
 async function startServer() {
     try {
         await storage.initialize();
+        await visualPolicyStorage.initialize();
         console.log('Database connection established');
         // Initialize with default policy rules
         await permissionService.loadPolicyRules();

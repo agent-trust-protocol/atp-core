@@ -23,15 +23,84 @@ Created and developed by **Larry Lewis**, Sovr INC. (Sovrlabs)
 
 ---
 
-## 🚀 **Quick Start (Coming Soon!)**
+## 🚀 **Quick Start (SDK + APIs)**
 
-```typescript
-// 🔜 COMING SOON: Simple 3-line SDK
-// npm install @atp/sdk
-const agent = await Agent.create('MyBot');
-await agent.send(otherAgent, 'Quantum-secured message!');
-console.log(`Trust score: ${await agent.getTrustScore(otherAgent)}`);
+### Option A — Use running mocks (no Docker required)
+
+```bash
+# Terminal A: start mocks (already included in repo)
+node mock-identity-service.js &   # http://localhost:3001
+node mock-permission-service.js & # http://localhost:3003
+node mock-audit-service.js &      # http://localhost:3006
+
+# Terminal B: run UI (or your app) with envs
+export NEXT_PUBLIC_ATP_IDENTITY_URL=http://localhost:3001
+export NEXT_PUBLIC_ATP_PERMISSION_URL=http://localhost:3003
+export NEXT_PUBLIC_ATP_AUDIT_URL=http://localhost:3006
+npm --prefix website-repo run dev
+
+# Optional: run Node quickstart
+node examples/sdk-quickstart/index.js
 ```
+
+### Option B — Call APIs directly (curl)
+
+```bash
+# List policies
+curl http://localhost:3003/policies | jq
+
+# Simulate a policy decision
+curl -s -X POST http://localhost:3003/policies/simulate \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "policyDocument": {"id":"policy-1"},
+        "context": {
+          "agentDID":"did:atp:test:alice",
+          "trustLevel":"verified",
+          "tool":{"id":"db","type":"write","sensitivity":"low"},
+          "requestedAction":"write",
+          "organizationId":"org-1"
+        }
+      }' | jq
+
+# Identity list
+curl http://localhost:3001/identity | jq
+
+# Audit stats
+curl http://localhost:3006/audit/stats | jq
+```
+
+### Option C — Programmatic (Node.js)
+
+```ts
+// npm i node-fetch
+import fetch from 'node-fetch'
+
+const base = {
+  identity: process.env.ATP_ID || 'http://localhost:3001',
+  permission: process.env.ATP_PERM || 'http://localhost:3003',
+  audit: process.env.ATP_AUD || 'http://localhost:3006'
+}
+
+// fetch policies
+const pol = await (await fetch(`${base.permission}/policies`)).json()
+console.log('policies:', pol.policies?.length)
+
+// simulate
+const sim = await (await fetch(`${base.permission}/policies/simulate`, {
+  method: 'POST', headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ policyDocument:{id:'policy-1'}, context:{ trustLevel:'verified' }})
+})).json()
+console.log('decision:', sim.decision)
+```
+
+### Postman Collection
+
+Import `collections/atp-quick-pass.postman_collection.json` and set (if needed):
+
+- identity_base = http://localhost:3001
+- permission_base = http://localhost:3003
+- audit_base = http://localhost:3006
 
 ## 🔧 **Developer Setup (Current Method)**
 

@@ -2,7 +2,7 @@
  * Tests for CryptoUtils
  */
 
-import { CryptoUtils } from '../../utils/crypto.js';
+import { CryptoUtils } from '../../utils/crypto';
 
 describe('CryptoUtils', () => {
   describe('generateKeyPair', () => {

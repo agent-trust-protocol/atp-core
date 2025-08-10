@@ -1,0 +1,222 @@
+# Claude Code Subagents Configuration for ATP
+# Version: 1.0.0
+# Last Updated: 2025-08-09
+
+agents:
+  master_coordinator:
+    name: ATP-MASTER-COORDINATOR
+    type: orchestrator
+    capabilities:
+      - project_analysis
+      - task_routing
+      - progress_monitoring
+      - bmad_coordination
+    triggers:
+      - user_request
+      - scheduled_check
+      - error_detection
+    delegates_to:
+      - BUILD-AGENT
+      - UI-AGENT
+      - API-AGENT
+      - SECURITY-AGENT
+      - INTEGRATION-AGENT
+
+  build_agent:
+    name: BUILD-AGENT
+    type: specialized
+    focus: Production build and deployment
+    capabilities:
+      - build_analysis
+      - docker_optimization
+      - ci_cd_pipeline
+      - dependency_management
+    bmad_agents:
+      primary: dev
+      secondary: [qa, architect]
+    current_tasks:
+      - BUILD-FIX.1.1: "Ensure PostCSS toolchain in production"
+      - BUILD-FIX.1.2: "Resolve TypeScript path aliases"
+      - BUILD-FIX.1.3: "Fix Docker multi-stage builds"
+      - BUILD-FIX.1.4: "Implement CI build guards"
+    tools:
+      - Bash
+      - MultiEdit
+      - Docker
+      - npm/yarn
+    success_criteria:
+      - "npm run build succeeds"
+      - "Docker image builds without errors"
+      - "CI pipeline passes all checks"
+      - "Zero TypeScript compilation errors"
+
+  ui_agent:
+    name: UI-AGENT
+    type: specialized
+    focus: Frontend development and UX
+    capabilities:
+      - react_development
+      - shadcn_ui_integration
+      - react_flow_implementation
+      - responsive_design
+    bmad_agents:
+      primary: ux-expert
+      secondary: [dev, po]
+    current_tasks:
+      - UI-MOD.3.1: "Scaffold React Flow canvas for policy editor"
+      - UI-MOD.3.2: "Implement node palette and drag-drop"
+      - UI-MOD.3.3: "Add policy JSON schema validation"
+    tools:
+      - mcp__shadcn-ui__*
+      - MultiEdit
+      - React DevTools
+      - TailwindCSS
+    success_criteria:
+      - "Components render without errors"
+      - "Responsive design works on all viewports"
+      - "Accessibility standards met (WCAG 2.1)"
+      - "Performance metrics within targets"
+
+  api_agent:
+    name: API-AGENT
+    type: specialized
+    focus: Backend microservices and APIs
+    capabilities:
+      - express_api_development
+      - database_operations
+      - service_orchestration
+      - api_documentation
+    bmad_agents:
+      primary: architect
+      secondary: [dev, qa]
+    current_tasks:
+      - POL-API.1: "Implement policy CRUD endpoints"
+      - POL-API.2: "Add versioning and audit trails"
+    tools:
+      - MultiEdit
+      - Bash
+      - PostgreSQL client
+      - Jest testing
+    success_criteria:
+      - "All API tests pass"
+      - "OpenAPI documentation complete"
+      - "Response times < 200ms"
+      - "Security validation passed"
+
+  security_agent:
+    name: SECURITY-AGENT
+    type: specialized
+    focus: Quantum-safe cryptography and security
+    capabilities:
+      - pqc_implementation
+      - did_management
+      - audit_logging
+      - security_scanning
+    bmad_agents:
+      primary: architect
+      secondary: [analyst, qa]
+    current_tasks:
+      - "Re-enable IPFS with Helia"
+      - "Implement quantum-safe signatures"
+      - "Audit trail immutability"
+    tools:
+      - Cryptographic libraries
+      - Security scanners
+      - IPFS/Helia
+      - Audit tools
+    success_criteria:
+      - "Zero critical vulnerabilities"
+      - "Quantum-safe algorithms implemented"
+      - "Audit trails verifiable"
+      - "DID authentication working"
+
+  integration_agent:
+    name: INTEGRATION-AGENT
+    type: specialized
+    focus: End-to-end workflows and SDK
+    capabilities:
+      - sdk_validation
+      - e2e_testing
+      - mcp_protocol
+      - workflow_automation
+    bmad_agents:
+      primary: qa
+      secondary: [dev, sm]
+    current_tasks:
+      - "Validate SDK 3-line integration"
+      - "E2E agent workflow smoke test"
+      - "MCP protocol verification"
+    tools:
+      - SDK testing framework
+      - E2E test runners
+      - MCP tools
+      - Integration monitors
+    success_criteria:
+      - "SDK integration works in 3 lines"
+      - "E2E flows complete successfully"
+      - "MCP communication verified"
+      - "Performance benchmarks met"
+
+# Handoff Protocol Configuration
+handoff_protocol:
+  trigger_conditions:
+    - task_complexity: "high"
+    - requires_specialization: true
+    - multi_agent_needed: true
+  
+  message_format:
+    type: "AgentMessage"
+    fields:
+      - from: "string"
+      - to: "string"
+      - task_id: "string"
+      - priority: "enum[critical,high,normal,low]"
+      - payload: "object"
+      - timestamp: "ISO8601"
+  
+  coordination:
+    state_storage: ".cursor/scratchpad.md"
+    progress_tracking: "TodoWrite tool"
+    status_board: "PROJECT_STATUS_BOARD.md"
+    audit_log: "packages/audit-logger"
+
+# Activation Scripts
+activation:
+  commands:
+    start_track_a: |
+      claude-code activate BUILD-AGENT
+      bmad-method --agent dev --task "BUILD-FIX.1"
+    
+    start_track_b: |
+      claude-code activate UI-AGENT
+      bmad-method --agent ux-expert --task "UI-MOD.3"
+    
+    start_track_c: |
+      claude-code activate API-AGENT
+      bmad-method --agent architect --task "POL-API"
+    
+    full_orchestration: |
+      claude-code activate ATP-MASTER-COORDINATOR
+      bmad-method --mode team --agents "all"
+
+# Monitoring Configuration
+monitoring:
+  metrics:
+    - build_success_rate
+    - test_coverage_percentage
+    - api_response_time
+    - security_scan_results
+    - deployment_frequency
+  
+  alerts:
+    - condition: "build_failure"
+      action: "activate BUILD-AGENT"
+    - condition: "test_coverage < 80%"
+      action: "activate bmad-qa"
+    - condition: "security_vulnerability"
+      action: "activate SECURITY-AGENT"
+  
+  reporting:
+    frequency: "on_completion"
+    format: "markdown"
+    destination: ".cursor/scratchpad.md"

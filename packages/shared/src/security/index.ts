@@ -3,4 +3,7 @@ export * from './key-management.js';
 export * from './zkp.js';
 export * from './blockchain-audit.js';
 export * from './security-testing.js';
+export * from './rate-limiter.js';
+export * from './request-validator.js';
+export * from './api-security.js';
 export * from '../encryption.js';

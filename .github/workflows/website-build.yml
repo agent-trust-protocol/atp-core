@@ -1,0 +1,58 @@
+name: Website Build (Next.js)
+
+on:
+  push:
+    paths:
+      - 'website-repo/**'
+      - '.github/workflows/website-build.yml'
+  pull_request:
+    paths:
+      - 'website-repo/**'
+
+concurrency:
+  group: website-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: website-repo/package-lock.json
+
+      - name: Install dependencies
+        working-directory: website-repo
+        run: npm ci --include=dev
+
+      - name: Build
+        working-directory: website-repo
+        run: npm run build
+
+      - name: Lint
+        working-directory: website-repo
+        run: npm run lint
+
+      - name: Type check
+        working-directory: website-repo
+        run: npx tsc --noEmit
+
+      - name: Test Docker build
+        working-directory: website-repo
+        run: |
+          docker build -t atp-website:test .
+          docker run --rm -d --name atp-website-test -p 3001:3000 atp-website:test
+          sleep 10
+          curl -f http://localhost:3001/api/health || exit 1
+          docker stop atp-website-test
+
+      - name: Audit (non-blocking)
+        working-directory: website-repo
+        run: npm audit --production || true
+

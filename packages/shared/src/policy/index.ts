@@ -13,3 +13,6 @@ export * from './policy-utils.js';
 
 // Export policy evaluation engine
 export * from './policy-evaluator.js';
+
+// Export policy storage service
+export * from './visual-policy-storage.js';
