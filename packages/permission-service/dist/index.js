@@ -3,7 +3,7 @@ import cors from 'cors';
 import { StorageService } from './services/storage.js';
 import { PermissionService } from './services/permission.js';
 import { PermissionController } from './controllers/permission.js';
-import { VisualPolicyStorageService } from '@atp/shared';
+import { VisualPolicyStorageService, createCache, createPerformanceOptimizer } from '@atp/shared';
 import { PolicyController } from './controllers/policy.js';
 import { PolicyEvaluationController } from './controllers/evaluation.js';
 const app = express();
@@ -19,11 +19,22 @@ const dbConfig = {
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
 };
+// Redis Cache configuration
+const cacheConfig = {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379'),
+    password: process.env.REDIS_PASSWORD,
+    db: parseInt(process.env.REDIS_DB || '0'),
+    keyPrefix: 'atp:permission',
+    ttl: parseInt(process.env.CACHE_TTL || '300') // 5 minutes default
+};
+const cache = createCache(cacheConfig);
+const performanceOptimizer = createPerformanceOptimizer(cache);
 const storage = new StorageService(dbConfig);
 const visualPolicyStorage = new VisualPolicyStorageService(dbConfig);
 const permissionService = new PermissionService(storage, secretKey);
 const permissionController = new PermissionController(permissionService);
-const policyController = new PolicyController(visualPolicyStorage);
+const policyController = new PolicyController(visualPolicyStorage, cache, performanceOptimizer);
 const evaluationController = new PolicyEvaluationController(visualPolicyStorage);
 app.post('/perm/grant', (req, res) => permissionController.grant(req, res));
 app.post('/perm/check', (req, res) => permissionController.check(req, res));

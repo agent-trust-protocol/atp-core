@@ -1,4 +1,5 @@
 import { PolicyRule, PermissionGrant, Scope } from '../models/permission.js';
+import { Parser } from 'expr-eval';
 
 export interface PolicyContext {
   subject: string;
@@ -46,18 +47,25 @@ export class PolicyEngine {
     }
 
     return {
-      allowed: true,
-      reason: 'No applicable policy rules found - default allow',
+      allowed: false,
+      reason: 'No applicable policy rules found - default deny',
     };
   }
 
   private evaluateRule(rule: PolicyRule, context: PolicyContext): boolean | null {
     try {
       const safeContext = this.createSafeContext(context);
-      const func = new Function('context', `return ${rule.condition}`);
-      const result = func(safeContext);
+      
+      // Use safe expression parser instead of new Function()
+      const parser = new Parser();
+      const expr = parser.parse(rule.condition);
+      
+      // Evaluate with limited context to prevent code injection
+      const result = expr.evaluate(safeContext);
+      
       return typeof result === 'boolean' ? result : null;
     } catch (error) {
+      console.error('Policy evaluation error:', error);
       return null;
     }
   }

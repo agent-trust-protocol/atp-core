@@ -1,4 +1,5 @@
 import { DIDJWTService } from './did-jwt.js';
+import { nonceService } from '@atp/shared/dist/security/nonce-service.js';
 export class AuthService {
     didJWTService;
     mtlsService;
@@ -44,10 +45,15 @@ export class AuthService {
     }
     async verifyAuth(authData) {
         try {
-            // Verify timestamp (within 5 minutes)
+            // Validate nonce to prevent replay attacks
+            if (!authData.nonce || !await nonceService.validateNonce(authData.did, authData.nonce, authData.timestamp)) {
+                console.warn('Invalid or replayed nonce');
+                return false;
+            }
+            // Verify timestamp (reduced to 1 minute for better security)
             const now = Date.now();
             const timestampDiff = Math.abs(now - authData.timestamp);
-            if (timestampDiff > 5 * 60 * 1000) {
+            if (timestampDiff > 60 * 1000) { // Reduced from 5 minutes to 1 minute
                 console.warn('Authentication timestamp too old');
                 return false;
             }

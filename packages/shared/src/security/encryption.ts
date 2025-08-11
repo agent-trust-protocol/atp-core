@@ -75,7 +75,7 @@ export class EncryptionService {
       
       // Create decipher
       const decipher = crypto.createDecipheriv(this.algorithm, this.encryptionKey, iv);
-      decipher.setAuthTag(authTag);
+      (decipher as any).setAuthTag(authTag);
       
       // Decrypt data
       const decrypted = Buffer.concat([

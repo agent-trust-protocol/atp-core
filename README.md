@@ -33,10 +33,13 @@ console.log(`Trust: ${await agent.getTrustScore('did:atp:other')}`); // Line 3: 
 ### 📦 **Installation**
 
 ```bash
-npm install @atp/sdk
+# Clone the repository to use the 3-line SDK
+git clone https://github.com/bigblackcoder/agent-trust-protocol.git
+cd agent-trust-protocol
+npm install
 ```
 
-*Note: SDK requires ATP services running locally. Use the quick start options below to get started.*
+*Note: SDK requires ATP services running locally. NPM package coming soon. Use the quick start options below to get started.*
 
 ---
 
@@ -145,7 +148,7 @@ npm run build
 npm start
 ```
 
-> **Note**: We're working on hosted ATP services and a simplified SDK to enable the 3-line quick start experience shown above.
+> **Note**: The 3-line SDK works locally now. We're working on hosted ATP services and NPM package publication.
 
 ---
 
@@ -203,7 +206,7 @@ ATP serves as the **Security Foundation** for the emerging Agentic Web:
 | Component | Status | Timeline |
 |-----------|--------|----------|
 | 📦 **NPM Package** | 🔄 In Progress | 1-2 weeks |
-| 🚀 **3-Line Quick Start** | 🔄 In Progress | 2-3 weeks |
+| 🚀 **3-Line Quick Start** | ✅ READY | Works locally now |
 | ☁️ **Hosted ATP Services** | 📋 Planned | 3-4 weeks |
 | 📚 **Developer Tutorials** | 📋 Planned | 3-4 weeks |
 | 🔌 **MCP Integration** | 📋 Planned | 4-6 weeks |
@@ -211,7 +214,7 @@ ATP serves as the **Security Foundation** for the emerging Agentic Web:
 ### 🎯 **For Different Users**
 
 - **Enterprise Users**: ✅ Ready to deploy! Full production system available
-- **Developers**: 🔄 Full setup required (simplified SDK coming soon)
+- **Developers**: ✅ 3-Line SDK ready! (NPM package coming soon)
 - **Researchers**: ✅ Explore our quantum-safe implementation today
 
 
@@ -805,4 +808,3 @@ npm run test
   <img src="assets/images/atp-favicon-logo-agent.png" alt="ATP Agent Logo" width="100"/>
 </p>
 
-*Created by Larry Lewis, Co-Founder & CTO Hierloom|Founder of Sovr INC*

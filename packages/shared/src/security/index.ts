@@ -7,3 +7,5 @@ export * from './rate-limiter.js';
 export * from './request-validator.js';
 export * from './api-security.js';
 export * from '../encryption.js';
+export * from './encryption.js';
+export * from './nonce-service.js';

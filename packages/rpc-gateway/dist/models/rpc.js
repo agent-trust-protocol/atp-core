@@ -7,6 +7,7 @@ export const AuthMessageSchema = z.object({
     did: z.string(),
     proof: z.string(),
     timestamp: z.number(),
+    nonce: z.string(), // Required nonce for replay protection
 });
 export const SubscriptionSchema = z.object({
     id: z.string(),

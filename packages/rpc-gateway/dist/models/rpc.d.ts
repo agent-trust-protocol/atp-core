@@ -14,14 +14,17 @@ export declare const AuthMessageSchema: z.ZodObject<{
     did: z.ZodString;
     proof: z.ZodString;
     timestamp: z.ZodNumber;
+    nonce: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     did: string;
     proof: string;
     timestamp: number;
+    nonce: string;
 }, {
     did: string;
     proof: string;
     timestamp: number;
+    nonce: string;
 }>;
 export declare const SubscriptionSchema: z.ZodObject<{
     id: z.ZodString;

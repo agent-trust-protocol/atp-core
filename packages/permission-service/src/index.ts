@@ -41,7 +41,7 @@ const visualPolicyStorage = new VisualPolicyStorageService(dbConfig);
 const permissionService = new PermissionService(storage, secretKey);
 const permissionController = new PermissionController(permissionService);
 const policyController = new PolicyController(visualPolicyStorage, cache, performanceOptimizer);
-const evaluationController = new PolicyEvaluationController(visualPolicyStorage, cache, performanceOptimizer);
+const evaluationController = new PolicyEvaluationController(visualPolicyStorage);
 
 app.post('/perm/grant', (req, res) => permissionController.grant(req, res));
 app.post('/perm/check', (req, res) => permissionController.check(req, res));

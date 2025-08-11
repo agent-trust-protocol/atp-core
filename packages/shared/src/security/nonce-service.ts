@@ -16,7 +16,7 @@ export class NonceService {
   private redis: Redis;
   private windowSizeMs: number;
   private cleanupIntervalMs: number;
-  private cleanupTimer?: NodeJS.Timer;
+  private cleanupTimer?: NodeJS.Timeout;
 
   constructor(config: NonceConfig = {}) {
     this.windowSizeMs = config.windowSizeMs || 60 * 1000; // 1 minute default
@@ -24,8 +24,9 @@ export class NonceService {
     
     // Connect to Redis
     this.redis = new Redis(config.redisUrl || process.env.REDIS_URL || 'redis://localhost:6379', {
-      retryDelayOnFailover: 100,
       maxRetriesPerRequest: 3,
+      connectTimeout: 10000,
+      lazyConnect: true
     });
 
     // Start cleanup timer
