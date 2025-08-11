@@ -8,7 +8,7 @@
 
 > **🌐 Looking for enterprise information?** Visit our [commercial website](https://github.com/bigblackcoder/agent-trust-protocol-website) for pricing, pilot programs, and enterprise features.
 
-> **🚀 Try the Live Demo!** Experience ATP™ Enterprise UI: [https://480de8e2ca61.ngrok-free.app](https://480de8e2ca61.ngrok-free.app)
+> **🌐 Production Ready!** Visit [agenttrustprotocol.com](https://agenttrustprotocol.com) | Developer Portal: [agenttrust.dev](https://agenttrust.dev)
 
 Created and developed by **Larry Lewis**, Sovr INC. (Sovrlabs)
 
@@ -17,9 +17,27 @@ Created and developed by **Larry Lewis**, Sovr INC. (Sovrlabs)
 [![Contributors](https://img.shields.io/github/contributors/bigblackcoder/agent-trust-protocol)](https://github.com/bigblackcoder/agent-trust-protocol/graphs/contributors)
 [![Quantum-Safe](https://img.shields.io/badge/Quantum--Safe-CRYSTALS--Dilithium-purple.svg)](https://pq-crystals.org/dilithium/)
 [![Enterprise Ready](https://img.shields.io/badge/Enterprise%20Ready-100%25-brightgreen.svg)](https://github.com/bigblackcoder/agent-trust-protocol)
-[![npm](https://img.shields.io/badge/npm%20package-coming%20soon-yellow.svg)](https://www.npmjs.com/)
+[![SDK Ready](https://img.shields.io/badge/3--Line%20SDK-Ready-brightgreen.svg)](./packages/sdk/)
 
-> **⚠️ Developer Notice**: The simplified 3-line SDK shown below is coming soon! Currently, you need to run the full development environment. See [Developer Setup](#developer-setup) for current instructions.
+## ✨ **3-Line SDK Now Available!**
+
+```typescript
+import { Agent } from '@atp/sdk';
+
+const agent = await Agent.create('MyBot');                            // Line 1: Create quantum-safe agent
+await agent.send('did:atp:other-agent', 'Hello, quantum world!');    // Line 2: Send secure message
+console.log(`Trust: ${await agent.getTrustScore('did:atp:other')}`); // Line 3: Check trust score
+```
+
+**That's it!** You now have a quantum-safe AI agent with decentralized identity, secure messaging, and trust scoring.
+
+### 📦 **Installation**
+
+```bash
+npm install @atp/sdk
+```
+
+*Note: SDK requires ATP services running locally. Use the quick start options below to get started.*
 
 ---
 
