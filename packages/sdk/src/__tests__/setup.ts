@@ -17,6 +17,16 @@ import { jest } from '@jest/globals';
 // Mock fetch for Node.js environment
 (global as any).fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
+// Mock WebCrypto API for Node.js environment
+import { webcrypto } from 'crypto';
+(global as any).crypto = {
+  ...webcrypto,
+  getRandomValues: (buffer: ArrayBufferView) => {
+    const bytes = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+    return webcrypto.getRandomValues(bytes);
+  }
+};
+
 // Mock performance API
 (global as any).performance = {
   now: jest.fn(() => Date.now()),

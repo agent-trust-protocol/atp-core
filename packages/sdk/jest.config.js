@@ -14,12 +14,18 @@ export default {
         module: 'esnext',
         target: 'es2020'
       }
+    }],
+    '^.+\\.js$': ['ts-jest', {
+      useESM: true
     }]
   },
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@/(.*)$': '<rootDir>/src/$1'
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(@noble|uint8arrays|@sindresorhus)/)'
+  ],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
