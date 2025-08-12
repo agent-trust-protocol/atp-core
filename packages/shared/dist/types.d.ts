@@ -31,14 +31,14 @@ export declare const APIResponseSchema: z.ZodObject<{
     timestamp: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     success: boolean;
-    error?: string | undefined;
     timestamp?: string | undefined;
     data?: any;
+    error?: string | undefined;
 }, {
     success: boolean;
-    error?: string | undefined;
     timestamp?: string | undefined;
     data?: any;
+    error?: string | undefined;
 }>;
 export declare const AuditEventSchema: z.ZodObject<{
     id: z.ZodString;
@@ -49,21 +49,21 @@ export declare const AuditEventSchema: z.ZodObject<{
     timestamp: z.ZodString;
     signature: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    type: "DID_CREATED" | "DID_RESOLVED" | "VC_ISSUED" | "VC_VERIFIED" | "PERMISSION_GRANTED" | "PERMISSION_REVOKED" | "RPC_INVOKED";
     timestamp: string;
+    type: "DID_CREATED" | "DID_RESOLVED" | "VC_ISSUED" | "VC_VERIFIED" | "PERMISSION_GRANTED" | "PERMISSION_REVOKED" | "RPC_INVOKED";
+    id: string;
     actor: string;
-    metadata?: Record<string, any> | undefined;
-    target?: string | undefined;
     signature?: string | undefined;
+    target?: string | undefined;
+    metadata?: Record<string, any> | undefined;
 }, {
-    id: string;
-    type: "DID_CREATED" | "DID_RESOLVED" | "VC_ISSUED" | "VC_VERIFIED" | "PERMISSION_GRANTED" | "PERMISSION_REVOKED" | "RPC_INVOKED";
     timestamp: string;
+    type: "DID_CREATED" | "DID_RESOLVED" | "VC_ISSUED" | "VC_VERIFIED" | "PERMISSION_GRANTED" | "PERMISSION_REVOKED" | "RPC_INVOKED";
+    id: string;
     actor: string;
-    metadata?: Record<string, any> | undefined;
-    target?: string | undefined;
     signature?: string | undefined;
+    target?: string | undefined;
+    metadata?: Record<string, any> | undefined;
 }>;
 export declare const RPCRequestSchema: z.ZodObject<{
     jsonrpc: z.ZodLiteral<"2.0">;
@@ -72,13 +72,13 @@ export declare const RPCRequestSchema: z.ZodObject<{
     id: z.ZodUnion<[z.ZodString, z.ZodNumber]>;
 }, "strip", z.ZodTypeAny, {
     id: string | number;
-    method: string;
     jsonrpc: "2.0";
+    method: string;
     params?: any;
 }, {
     id: string | number;
-    method: string;
     jsonrpc: "2.0";
+    method: string;
     params?: any;
 }>;
 export declare const RPCResponseSchema: z.ZodObject<{
