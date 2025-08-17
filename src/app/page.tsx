@@ -1,0 +1,326 @@
+import Link from "next/link"
+import Image from "next/image"
+import { BrandLogo } from "@/components/ui/brand-logo"
+
+// Force dynamic rendering for this page due to interactive components
+export const dynamic = 'force-dynamic'
+import { 
+  Shield, 
+  Users, 
+  Activity, 
+  BarChart3, 
+  Settings, 
+  FileText,
+  ArrowRight,
+  Zap,
+  Globe,
+  Building,
+  CheckCircle,
+  Award,
+  Sparkles,
+  Network,
+  Lock,
+  Eye,
+  TrendingUp
+} from "lucide-react"
+import { AnimatedIcon, IconWithBadge, FloatingIcon } from "@/components/ui/animated-icon"
+import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon, SecureConnectionIcon, PolicyFlowIcon } from "@/components/ui/atp-icons"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { QuantumSignatureDemo } from "@/components/atp/quantum-signature-demo"
+import { TrustLevelDemo } from "@/components/atp/trust-level-demo"
+import { MonitoringDemo } from "@/components/atp/monitoring-demo"
+import { QuickAccess } from "@/components/ui/quick-access"
+
+export default function HomePage() {
+  return (
+    <div className="min-h-screen relative">
+      {/* Enhanced Hero Section */}
+      <div className="relative overflow-hidden bg-background">
+        <div className="absolute inset-0 pointer-events-none" />
+        <div className="container mx-auto px-4 py-20 sm:py-24 lg:py-32 relative">
+          <div className="text-center max-w-5xl mx-auto space-y-12">
+          <div className="flex items-center justify-center mb-8 animate-fade-in-up">
+            <div className="relative w-40 h-24 sm:w-56 sm:h-32 lg:w-72 lg:h-40 mb-4 atp-quantum-glow rounded-2xl bg-gradient-to-br from-primary/5 to-secondary/5 dark:from-primary/15 dark:to-secondary/15 flex items-center justify-center border border-primary/20 dark:border-cyan-400/30">
+              <BrandLogo variant="lockup" size={320} className="animate-in zoom-in-50 duration-1000" alt="Agent Trust Protocol Official Logo" />
+              {/* Enhanced dark mode backdrop */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-transparent via-cyan-400/5 to-blue-500/5 dark:from-cyan-400/15 dark:via-blue-500/10 dark:to-purple-500/15 pointer-events-none" />
+            </div>
+          </div>
+              <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-extralight leading-tight animate-fade-in-up text-foreground dark:text-white">
+                World's First <span className="atp-gradient-text font-semibold">Quantum-Safe</span>
+            <br />
+            AI Agent Protocol
+          </h1>
+              <p className="text-xl sm:text-2xl text-foreground/90 dark:text-gray-200 max-w-4xl mx-auto leading-relaxed animate-fade-in-up">
+            Enterprise-grade security with <strong className="text-foreground dark:text-white">visual policy management</strong> and <span className="text-foreground dark:text-cyan-300 font-medium">real-time monitoring</span>. Trust your AI agents with quantum-level protection.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4 mb-4 animate-fade-in-up">
+            <Badge className="bg-[hsl(var(--atp-quantum))]/10 dark:bg-[hsl(var(--atp-quantum))]/20 text-[hsl(var(--atp-quantum))] dark:text-cyan-300 border-[hsl(var(--atp-quantum))]/20 dark:border-cyan-400/30 px-4 py-2 text-sm font-medium backdrop-blur-sm"><Sparkles size={14} className="mr-2" />Open Source</Badge>
+            <Badge className="bg-[hsl(var(--atp-primary))]/10 dark:bg-[hsl(var(--atp-primary))]/20 text-[hsl(var(--atp-primary))] dark:text-blue-300 border-[hsl(var(--atp-primary))]/20 dark:border-blue-400/30 px-4 py-2 text-sm font-medium backdrop-blur-sm"><Globe size={14} className="mr-2" />Enterprise Ready</Badge>
+            <Badge className="bg-atp-electric-cyan/10 dark:bg-atp-electric-cyan/20 text-atp-electric-cyan dark:text-cyan-200 border-atp-electric-cyan/20 dark:border-cyan-300/30 px-4 py-2 text-sm font-medium backdrop-blur-sm"><Award size={14} className="mr-2" />Production Ready</Badge>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-in-up">
+            <Button asChild size="lg" className="bg-gradient-to-r from-[hsl(var(--atp-quantum))] to-[hsl(var(--atp-primary))] text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
+              <Link href="/dashboard"><Activity className="h-5 w-5 mr-3" />Try Live Demo</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="border-2 border-atp-electric-cyan/30 hover:bg-atp-electric-cyan/10 hover:border-atp-electric-cyan/50 hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
+              <a href="https://github.com/bigblackcoder/agent-trust-protocol" target="_blank" rel="noopener noreferrer"><FileText className="h-5 w-5 mr-3" />View on GitHub</a>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="border-2 border-purple-500/30 hover:bg-purple-500/10 hover:border-purple-500/50 hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
+              <Link href="/enterprise"><Building className="h-5 w-5 mr-3" />Enterprise</Link>
+            </Button>
+          </div>
+          
+          <div className="mt-8 p-6 bg-gradient-to-r from-[hsl(var(--atp-surface))]/50 to-[hsl(var(--atp-surface))]/80 rounded-2xl border border-border/50 backdrop-blur-sm animate-fade-in-up">
+            <p className="text-base text-muted-foreground text-center">🎉 <strong className="text-foreground">100% Open Source</strong> • Apache 2.0 License • <a href="https://github.com/bigblackcoder/agent-trust-protocol" className="text-atp-electric-cyan hover:text-atp-electric-cyan/80 hover:underline" target="_blank" rel="noopener noreferrer">Free Forever</a> • Enterprise Support Available</p>
+          </div>
+
+          {/* Quick Access */}
+          <QuickAccess />
+        </div>
+        {/* Close hero wrapper */}
+      </div>
+
+      {/* Feature Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-12 lg:mb-16">
+                      <Card className="glass atp-trust-indicator hover:scale-105 transition-all duration-300">
+              <CardHeader className="pt-6">
+                <div className="relative p-3 rounded-xl w-fit mb-4">
+                  <div className="absolute inset-0 atp-gradient-primary rounded-xl opacity-90" />
+                  <div className="relative z-10">
+                    <QuantumShieldIcon size={24} gradient className="text-white animate-in zoom-in-50 duration-500" />
+                  </div>
+                </div>
+                <CardTitle className="font-display text-xl mb-2">Quantum-Safe Security</CardTitle>
+                <CardDescription className="text-foreground/70">
+                  Ed25519 + Dilithium hybrid cryptography for post-quantum security
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-foreground/60 mb-4 leading-relaxed">
+                  Advanced cryptographic protection against quantum computing threats with minimal performance overhead.
+                </p>
+                <Button asChild variant="outline" size="sm" className="glass border-atp-quantum-blue/30 hover:bg-atp-quantum-blue/10">
+                  <Link href="/enterprise">
+                    Learn More
+                    <ArrowRight size={12} className="ml-1" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+                      <Card className="glass atp-trust-indicator hover:scale-105 transition-all duration-300">
+              <CardHeader className="pt-6">
+                <div className="relative p-3 rounded-xl w-fit mb-4">
+                  <div className="absolute inset-0 atp-gradient-secondary rounded-xl opacity-90" />
+                  <div className="relative z-10">
+                    <TrustNetworkIcon size={24} gradient className="text-white animate-pulse" />
+                  </div>
+                </div>
+                <CardTitle className="font-display text-xl mb-2">Trust Level Management</CardTitle>
+                <CardDescription className="text-foreground/70">
+                  Dynamic trust evaluation and agent capability management
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-foreground/60 mb-4 leading-relaxed">
+                  Multi-level trust system with automatic progression and capability-based access control.
+                </p>
+                <Button asChild variant="outline" size="sm" className="glass border-atp-emerald/30 hover:bg-atp-emerald/10">
+                  <Link href="/dashboard">
+                    Explore Trust Levels
+                    <ArrowRight size={12} className="ml-1" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+                      <Card className="glass atp-trust-indicator hover:scale-105 transition-all duration-300">
+              <CardHeader className="pt-6">
+                <div className="relative p-3 rounded-xl w-fit mb-4">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl opacity-90" />
+                  <TrendingUp className="relative z-10 text-white" size={24} />
+                </div>
+                <CardTitle className="font-display text-xl mb-2">Monitoring Dashboard</CardTitle>
+                <CardDescription className="text-foreground/70">
+                  Interactive monitoring UI with demo capabilities (Backend in development)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-foreground/60 mb-4 leading-relaxed">
+                  Professional monitoring interface ready for integration. Full real-time monitoring coming soon.
+                </p>
+                <Button asChild variant="outline" size="sm" className="glass border-purple-500/30 hover:bg-purple-500/10">
+                  <Link href="/monitoring">
+                    View Metrics
+                    <ArrowRight size={12} className="ml-1" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+                      <Card className="glass atp-trust-indicator hover:scale-105 transition-all duration-300">
+              <CardHeader className="pt-6">
+                <div className="relative p-3 rounded-xl w-fit mb-4">
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl opacity-90" />
+                  <div className="relative z-10">
+                    <PolicyFlowIcon size={24} gradient className="text-white" />
+                  </div>
+                </div>
+                <CardTitle className="font-display text-xl mb-2">Visual Policy Editor</CardTitle>
+                <CardDescription className="text-foreground/70">
+                  Drag-and-drop policy creation with no-code interface
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-foreground/60 mb-4 leading-relaxed">
+                  Create complex trust policies visually with real-time validation and simulation.
+                </p>
+                <Button asChild variant="outline" size="sm" className="glass border-orange-500/30 hover:bg-orange-500/10">
+                  <Link href="/policy-editor">
+                    Create Policy
+                    <ArrowRight size={12} className="ml-1" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+                      <Card className="glass atp-trust-indicator hover:scale-105 transition-all duration-300">
+              <CardHeader>
+                <div className="relative p-3 rounded-xl w-fit mb-2">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl opacity-90" />
+                  <Building className="relative z-10 text-white" size={24} />
+                </div>
+                <CardTitle className="font-display text-xl">Enterprise Features</CardTitle>
+                <CardDescription className="text-foreground/70">
+                  Multi-tenant architecture with compliance and audit logging
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-foreground/60 mb-4 leading-relaxed">
+                  SOC 2, ISO 27001, GDPR, and HIPAA compliance with comprehensive audit trails.
+                </p>
+                <Button asChild variant="outline" size="sm" className="glass border-indigo-500/30 hover:bg-indigo-500/10">
+                  <Link href="/policies">
+                    Manage Policies
+                    <ArrowRight size={12} className="ml-1" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+                      <Card className="glass atp-trust-indicator hover:scale-105 transition-all duration-300">
+              <CardHeader>
+                <div className="relative p-3 rounded-xl w-fit mb-2">
+                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 to-red-500 rounded-xl opacity-90" />
+                  <Zap className="relative z-10 text-white icon-glow" size={24} />
+                </div>
+                <CardTitle className="font-display text-xl">High Performance</CardTitle>
+                <CardDescription className="text-foreground/70">
+                  Optimized for high-throughput AI agent interactions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-foreground/60 mb-4 leading-relaxed">
+                  Sub-millisecond response times with horizontal scaling and load balancing.
+                </p>
+                <Button asChild variant="outline" size="sm" className="glass border-yellow-500/30 hover:bg-yellow-500/10">
+                  <Link href="/dashboard">
+                    View Performance
+                    <ArrowRight size={12} className="ml-1" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+        </div>
+
+        {/* Demo Section */}
+        <div className="space-y-8">
+          <div className="text-center mb-8">
+            <h2 className="font-display text-3xl lg:text-4xl font-light mb-4 atp-gradient-text">Interactive Demos</h2>
+            <p className="text-foreground/70 max-w-2xl mx-auto leading-relaxed">
+              Experience ATP's quantum-safe capabilities with these interactive demonstrations
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            <Card className="glass atp-trust-indicator">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 font-display text-xl">
+                  <div className="icon-glow">
+                    <QuantumKeyIcon size={20} gradient />
+                  </div>
+                  Quantum-Safe Signatures
+                </CardTitle>
+                <CardDescription className="text-foreground/70">
+                  Generate and verify quantum-safe signatures in real-time
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <QuantumSignatureDemo />
+              </CardContent>
+            </Card>
+
+            <Card className="glass atp-trust-indicator">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 font-display text-xl">
+                  <div className="animate-pulse">
+                    <TrustNetworkIcon size={20} gradient />
+                  </div>
+                  Trust Level System
+                </CardTitle>
+                <CardDescription className="text-foreground/70">
+                  Register agents and manage trust levels dynamically
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TrustLevelDemo />
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="glass atp-trust-indicator">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 font-display text-xl">
+                <div className="animate-pulse">
+                  <SecureConnectionIcon size={20} gradient />
+                </div>
+                Real-Time Monitoring
+              </CardTitle>
+              <CardDescription className="text-foreground/70">
+                Live system metrics and performance monitoring
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MonitoringDemo />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* CTA Section */}
+        <div className="text-center mt-12 lg:mt-16 p-6 sm:p-8 glass-intense rounded-2xl border-0 atp-quantum-glow text-white">
+          <h2 className="font-display text-3xl lg:text-4xl font-light mb-4">Ready to Get Started?</h2>
+          <p className="text-lg sm:text-xl mb-8 text-white/90 leading-relaxed">
+            Join the future of <span className="text-atp-electric-cyan font-medium">quantum-safe</span> AI agent interactions
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button asChild size="lg" className="atp-gradient-primary hover:scale-105 transition-all duration-300 w-full sm:w-auto">
+              <Link href="/dashboard">
+                <Activity className="h-4 w-4 mr-2" />
+                Launch Dashboard
+              </Link>
+            </Button>
+            <Button asChild size="lg" className="atp-gradient-secondary hover:scale-105 transition-all duration-300 w-full sm:w-auto">
+              <Link href="/policy-editor">
+                <FileText className="h-4 w-4 mr-2" />
+                Try Policy Editor
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
