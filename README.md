@@ -6,9 +6,13 @@
 
 **🔐 The world's first quantum-safe security protocol for AI agents**
 
-> **🌐 Looking for enterprise information?** Visit our [commercial website](https://github.com/bigblackcoder/agent-trust-protocol-website) for pricing, pilot programs, and enterprise features.
+## 🌐 **Quick Links**
 
-> **🌐 Production Ready!** Visit [agenttrustprotocol.com](https://agenttrustprotocol.com) | Developer Portal: [agenttrust.dev](https://agenttrust.dev)
+| **Enterprise** | **Developers** | **Community** |
+|:---:|:---:|:---:|
+| [agenttrustprotocol.com](https://agenttrustprotocol.com) | [Documentation](https://docs.agenttrustprotocol.com) | [GitHub Discussions](https://github.com/bigblackcoder/agent-trust-protocol/discussions) |
+| Enterprise Features | API Reference | Report Issues |
+| Pricing & Plans | Integration Guides | Contribute |
 
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -18,17 +22,24 @@
 [![Enterprise Ready](https://img.shields.io/badge/Enterprise%20Ready-100%25-brightgreen.svg)](https://github.com/bigblackcoder/agent-trust-protocol)
 [![SDK Ready](https://img.shields.io/badge/3--Line%20SDK-Ready-brightgreen.svg)](./packages/sdk/)
 
-## ✨ **3-Line SDK Now Available!**
+## 💡 **What Can You Build?**
+
+With ATP, developers can create:
+- **Secure AI Agents** - Quantum-safe communication between AI systems
+- **Trust Networks** - Verifiable reputation systems for agents
+- **Policy Engines** - Fine-grained access control for AI actions
+- **Audit Systems** - Complete traceability of agent interactions
+- **Multi-Agent Systems** - Orchestrated AI agent collaborations
+
+## ✨ **Simple 3-Line Integration**
 
 ```typescript
 import { Agent } from 'atp-sdk';
 
-const agent = await Agent.create('MyBot');                            // Line 1: Create quantum-safe agent
-await agent.send('did:atp:other-agent', 'Hello, quantum world!');    // Line 2: Send secure message
-console.log(`Trust: ${await agent.getTrustScore('did:atp:other')}`); // Line 3: Check trust score
+const agent = await Agent.create('MyBot');                            // Create quantum-safe agent
+await agent.send('did:atp:other-agent', 'Hello, quantum world!');    // Send secure message
+console.log(`Trust: ${await agent.getTrustScore('did:atp:other')}`); // Check trust score
 ```
-
-**That's it!** You now have a quantum-safe AI agent with decentralized identity, secure messaging, and trust scoring.
 
 ### 📦 **Installation**
 
@@ -40,9 +51,14 @@ npm install atp-sdk
 
 ---
 
-## 🚀 **Quick Start (SDK + APIs)**
+## 🚀 **Quick Start for Developers**
 
-### Option A — Use running mocks (no Docker required)
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Docker (optional, for full services)
+
+### Option 1: Quick Development Setup (Recommended)
 
 ```bash
 # Terminal A: start mocks
@@ -807,8 +823,9 @@ npm run test
 <p align="center">
   <b>Securing the Agentic Web, One Trust Relationship at a Time</b><br>
   <a href="https://github.com/bigblackcoder/agent-trust-protocol">⭐ Star us on GitHub</a> •
-  <a href="https://agenttrust.dev">📖 Read the Docs</a> •
-  <a href="https://discord.com/channels/1388272814645186740/1388272815446163478">💬 Join Discord</a>
+  <a href="https://docs.agenttrustprotocol.com">📖 Documentation</a> •
+  <a href="https://agenttrustprotocol.com">🏢 Enterprise</a> •
+  <a href="https://github.com/bigblackcoder/agent-trust-protocol/discussions">💬 Community</a>
 </p>
 
 <p align="center">
