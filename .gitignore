@@ -82,3 +82,51 @@ root@*
 # Backup and temporary deployment files
 *.tar.gz
 *.bak
+
+# Developer Documentation and Internal Files
+*-DEPLOYMENT-*.md
+*-CHECKLIST*.md
+*-GUIDE*.md
+*-STEPS*.md
+*-SUMMARY*.md
+*-FLOW*.md
+*-TESTING*.md
+*-STATUS*.md
+*-AUDIT*.md
+BACKEND-ARCHITECTURE-*.md
+CUSTOMER-SIGNUP-*.md
+ENTERPRISE-CUSTOMER-*.md
+PORTAL-STATUS-*.md
+AUTHENTICATION-FLOW-*.md
+SECURITY-AUDIT-*.md
+
+# Test files and development scripts
+test-*.js
+test-*.sh
+*-test.js
+mock-*.js
+mock-*.cjs
+start-workflow-*.js
+health-monitor.sh
+monitor-health.sh
+restart-services.sh
+update-server-*.sh
+add-ssh-key.sh
+
+# Additional AI Development Tools
+.github/chatmodes/
+.trae/
+.windsurf/
+.gitignore.security
+
+# Build cache and temporary files
+**/.next/cache/
+**/.next/
+**/tsconfig.tsbuildinfo
+**/dist/
+**/*.tsbuildinfo
+
+# Package manager files in subdirectories
+packages/*/node_modules/
+packages/*/dist/
+packages/*/build/
