@@ -31,14 +31,20 @@ With ATP, developers can create:
 - **Audit Systems** - Complete traceability of agent interactions
 - **Multi-Agent Systems** - Orchestrated AI agent collaborations
 
-## ✨ **Simple 3-Line Integration**
+## ✨ **Simple Integration (Production Ready!)**
 
-```typescript
-import { Agent } from 'atp-sdk';
+```javascript
+const { Agent, ATPClient, createQuickConfig } = require('atp-sdk');
 
-const agent = await Agent.create('MyBot');                            // Create quantum-safe agent
-await agent.send('did:atp:other-agent', 'Hello, quantum world!');    // Send secure message
-console.log(`Trust: ${await agent.getTrustScore('did:atp:other')}`); // Check trust score
+// Option 1: Quick Agent API (3 lines)
+const agent = new Agent('MyBot');
+await agent.initialize();  // Auto-connects to ATP services
+console.log('Agent ready:', agent.did);
+
+// Option 2: Full ATPClient for advanced usage
+const config = createQuickConfig('http://localhost:3000');
+const client = new ATPClient(config);
+const policies = await client.permissions.listPolicies();
 ```
 
 ### 📦 **Installation**
