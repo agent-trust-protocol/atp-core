@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL || 'http://localhost:3007'
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
+    const searchParams = request.nextUrl.searchParams
     
     let monitoringUrl = `${MONITORING_SERVICE_URL}/api/monitoring/metrics`
     

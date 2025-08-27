@@ -62,14 +62,14 @@ export default function HomePage() {
             <Badge className="bg-atp-electric-cyan/10 dark:bg-atp-electric-cyan/20 text-atp-electric-cyan dark:text-cyan-200 border-atp-electric-cyan/20 dark:border-cyan-300/30 px-4 py-2 text-sm font-medium backdrop-blur-sm"><Award size={14} className="mr-2" />Production Ready</Badge>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-in-up">
+            <Button asChild size="lg" className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
+              <Link href="/signup"><Zap className="h-5 w-5 mr-3" />Start Free Trial</Link>
+            </Button>
             <Button asChild size="lg" className="bg-gradient-to-r from-[hsl(var(--atp-quantum))] to-[hsl(var(--atp-primary))] text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
               <Link href="/dashboard"><Activity className="h-5 w-5 mr-3" />Try Live Demo</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="border-2 border-atp-electric-cyan/30 hover:bg-atp-electric-cyan/10 hover:border-atp-electric-cyan/50 hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
-              <a href="https://github.com/bigblackcoder/agent-trust-protocol" target="_blank" rel="noopener noreferrer"><FileText className="h-5 w-5 mr-3" />View on GitHub</a>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="border-2 border-purple-500/30 hover:bg-purple-500/10 hover:border-purple-500/50 hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
-              <Link href="/enterprise"><Building className="h-5 w-5 mr-3" />Enterprise</Link>
+              <Link href="/login"><Lock className="h-5 w-5 mr-3" />Customer Login</Link>
             </Button>
           </div>
           

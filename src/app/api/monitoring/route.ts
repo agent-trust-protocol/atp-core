@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL || 'http://localhost:3007'
 
 // Workflow data
@@ -135,7 +137,7 @@ async function handleWorkflowRequest(searchParams: URLSearchParams) {
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
+    const searchParams = request.nextUrl.searchParams
     const endpoint = searchParams.get('endpoint') || 'dashboard'
     
     // Handle workflow endpoints

@@ -70,7 +70,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                const theme = localStorage.getItem('atp-theme') || 'system';
+                const theme = localStorage.getItem('atp-ui-theme') || 'light';
                 const root = document.documentElement;
                 
                 if (theme === 'system') {
@@ -88,7 +88,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} ${interTight.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
-        <ThemeProvider defaultTheme="system" storageKey="atp-theme">
+        <ThemeProvider defaultTheme="light" storageKey="atp-ui-theme">
           <Navbar />
           <main className="relative">
             {children}

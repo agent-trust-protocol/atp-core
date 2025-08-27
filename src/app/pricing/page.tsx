@@ -54,7 +54,7 @@ export default function PricingPage() {
           </div>
 
           {/* Pricing Tiers */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8 mb-16">
             
             {/* Open Source Core */}
             <Card className="glass border border-border/50 backdrop-blur-xl relative group hover:scale-105 transition-all duration-300">
@@ -102,7 +102,7 @@ export default function PricingPage() {
                   </div>
                   <div className="flex items-start gap-3">
                     <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Up to 10 agents</span>
+                    <span className="text-sm">Up to 10 agents, 5K requests</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
@@ -122,6 +122,100 @@ export default function PricingPage() {
               </CardContent>
             </Card>
 
+            {/* Startup */}
+            <Card className="glass border border-border/50 backdrop-blur-xl relative group hover:scale-105 transition-all duration-300">
+              <CardHeader className="text-center pt-8 pb-6">
+                <div className="relative p-3 rounded-xl w-fit mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl opacity-90" />
+                  <Zap className="relative z-10 text-white" size={32} />
+                </div>
+                <CardTitle className="font-display text-xl mb-2">Startup</CardTitle>
+                <CardDescription className="text-muted-foreground mb-4">
+                  Growing teams and small businesses
+                </CardDescription>
+                <div className="text-center">
+                  <div className="text-4xl font-bold atp-gradient-text mb-1">$250</div>
+                  <div className="text-xs text-muted-foreground">per month ($3K/year)</div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-3 mb-6">
+                  <div className="text-xs font-semibold text-green-400 uppercase mb-3 text-center">Everything in Open Source, plus:</div>
+                  <div className="flex items-start gap-2">
+                    <Check size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs">SaaS hosted platform</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs">Up to 25 agents, 25K requests</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs">Email support</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs">5GB storage</span>
+                  </div>
+                </div>
+                <Button asChild className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:scale-105 transition-all duration-300 h-12 text-sm font-semibold">
+                  <Link href="/enterprise/contact">
+                    <ArrowRight className="h-4 w-4 mr-2" />
+                    Get Started
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Professional */}
+            <Card className="glass border border-border/50 backdrop-blur-xl relative group hover:scale-105 transition-all duration-300">
+              <CardHeader className="text-center pt-8 pb-6">
+                <div className="relative p-3 rounded-xl w-fit mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl opacity-90" />
+                  <Users className="relative z-10 text-white" size={32} />
+                </div>
+                <CardTitle className="font-display text-xl mb-2">Professional</CardTitle>
+                <CardDescription className="text-muted-foreground mb-4">
+                  Growing organizations & mid-market
+                </CardDescription>
+                <div className="text-center">
+                  <div className="text-4xl font-bold atp-gradient-text mb-1">$1.5K</div>
+                  <div className="text-xs text-muted-foreground">per month ($18K/year)</div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-3 mb-6">
+                  <div className="text-xs font-semibold text-blue-400 uppercase mb-3 text-center">Everything in Startup, plus:</div>
+                  <div className="flex items-start gap-2">
+                    <Check size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs">Up to 100 agents, 250K requests</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs">Advanced analytics</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs">Priority support</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs">50GB storage</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs">Compliance frameworks</span>
+                  </div>
+                </div>
+                <Button asChild className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:scale-105 transition-all duration-300 h-12 text-sm font-semibold">
+                  <Link href="/enterprise/contact">
+                    <ArrowRight className="h-4 w-4 mr-2" />
+                    Get Started
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
             {/* Enterprise Edition */}
             <Card className="glass border-2 border-cyan-500/30 backdrop-blur-xl relative scale-105 group hover:scale-110 transition-all duration-300 shadow-xl">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
@@ -135,45 +229,45 @@ export default function PricingPage() {
                   <div className="absolute inset-0 atp-gradient-secondary rounded-xl opacity-90" />
                   <Building className="relative z-10 text-white" size={36} />
                 </div>
-                <CardTitle className="font-display text-2xl mb-3">Enterprise Edition</CardTitle>
+                <CardTitle className="font-display text-2xl mb-3">Enterprise</CardTitle>
                 <CardDescription className="text-muted-foreground mb-6">
-                  Advanced features for production deployment
+                  Large organizations & Fortune 500
                 </CardDescription>
                 <div className="text-center">
                   <div className="text-5xl font-bold atp-gradient-text mb-2">$50K</div>
-                  <div className="text-sm text-muted-foreground">per year, per organization</div>
+                  <div className="text-sm text-muted-foreground">per year minimum</div>
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="space-y-4 mb-8">
-                  <div className="text-xs font-semibold text-cyan-400 uppercase mb-4 text-center">Everything in Open Source, plus:</div>
+                  <div className="text-xs font-semibold text-cyan-400 uppercase mb-4 text-center">Everything in Professional, plus:</div>
                   <div className="flex items-start gap-3">
                     <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Advanced monitoring dashboard</span>
+                    <span className="text-sm">Up to 1,000+ agents, 2.5M requests</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Enterprise SSO & RBAC</span>
+                    <span className="text-sm">Enterprise SSO/SAML & RBAC</span>
                   </div>
                   <div className="flex items-start gap-3">
-                    <Clock size={18} className="text-blue-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Compliance reporting (SOC 2 In Progress)</span>
+                    <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">SOC2, HIPAA, GDPR compliance</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
                     <span className="text-sm">High availability clustering</span>
                   </div>
                   <div className="flex items-start gap-3">
-                    <Clock size={18} className="text-blue-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">24/7 priority support (Scaling with demand)</span>
+                    <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">Behavioral analytics with ML</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Custom integrations</span>
+                    <span className="text-sm">24/7 dedicated support & SLA</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Professional services</span>
+                    <span className="text-sm">Custom integrations & services</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
@@ -189,68 +283,6 @@ export default function PricingPage() {
               </CardContent>
             </Card>
 
-            {/* ATP Cloud */}
-            <Card className="glass border border-border/50 backdrop-blur-xl relative group hover:scale-105 transition-all duration-300">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 shadow-lg">
-                  <Cloud size={14} className="mr-2" />
-                  Coming Soon
-                </Badge>
-              </div>
-              <CardHeader className="text-center pt-16 pb-8">
-                <div className="relative p-4 rounded-xl w-fit mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl opacity-90" />
-                  <Cloud className="relative z-10 text-white" size={36} />
-                </div>
-                <CardTitle className="font-display text-2xl mb-3">ATP Cloud</CardTitle>
-                <CardDescription className="text-muted-foreground mb-6">
-                  Hosted quantum-safe agent infrastructure
-                </CardDescription>
-                <div className="text-center">
-                  <div className="text-5xl font-bold atp-gradient-text mb-2">$0.50</div>
-                  <div className="text-sm text-muted-foreground">per agent per month</div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-4 mb-8">
-                  <div className="text-xs font-semibold text-purple-400 uppercase mb-4 text-center">Coming Q2 2025:</div>
-                  <div className="flex items-start gap-3">
-                    <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Zero setup deployment</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Global edge network</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Automatic scaling</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Built-in compliance</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">99.9% SLA guarantee</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Free tier: 100 agents</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Pay-as-you-scale</span>
-                  </div>
-                </div>
-                <Button asChild variant="outline" className="w-full border-2 border-purple-500/30 hover:bg-purple-500/10 hover:border-purple-500/50 hover:scale-105 transition-all duration-300 h-14 px-8 text-lg font-semibold">
-                  <Link href="/dashboard">
-                    <Globe className="h-5 w-5 mr-3" />
-                    Join Waitlist
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
           </div>
 
           {/* Feature Comparison */}

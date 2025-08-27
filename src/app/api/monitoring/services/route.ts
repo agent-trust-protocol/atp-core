@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL || 'http://localhost:3007'
 
 export async function GET(request: NextRequest) {

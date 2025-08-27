@@ -22,8 +22,14 @@ export function Navbar() {
             </div>
           </Link>
 
-          {/* Theme Toggle + Contact Sales CTA */}
+          {/* Navigation Links + Theme Toggle + Contact Sales CTA */}
           <div className="flex items-center gap-3">
+            <Link 
+              href="/cloud" 
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-muted/50"
+            >
+              Cloud Dashboard
+            </Link>
             <ThemeToggle />
             <Button asChild size="sm" className="atp-gradient-secondary text-white shadow-quantum hover:scale-105 transition-transform">
               <Link href="/contact">Contact Sales</Link>

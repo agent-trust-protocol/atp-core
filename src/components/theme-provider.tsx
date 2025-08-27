@@ -16,7 +16,7 @@ type ThemeProviderState = {
 }
 
 const initialState: ThemeProviderState = {
-  theme: 'system',
+  theme: 'light',
   setTheme: () => null,
 }
 
@@ -24,7 +24,7 @@ const ThemeProviderContext = React.createContext<ThemeProviderState>(initialStat
 
 export function ThemeProvider({
   children,
-  defaultTheme = 'system',
+  defaultTheme = 'light',
   storageKey = 'atp-ui-theme',
   ...props
 }: ThemeProviderProps) {
@@ -37,7 +37,21 @@ export function ThemeProvider({
     if (storedTheme) {
       setTheme(storedTheme)
     }
-  }, [storageKey])
+    
+    // Listen for system theme changes when theme is set to 'system'
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleSystemThemeChange = () => {
+      if (theme === 'system') {
+        const root = window.document.documentElement
+        root.classList.remove('light', 'dark')
+        root.classList.add(mediaQuery.matches ? 'dark' : 'light')
+      }
+    }
+    
+    mediaQuery.addListener(handleSystemThemeChange)
+    
+    return () => mediaQuery.removeListener(handleSystemThemeChange)
+  }, [storageKey, theme])
 
   React.useEffect(() => {
     if (!mounted) return

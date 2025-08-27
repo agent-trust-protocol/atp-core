@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'standalone', // Enable standalone output for Docker
+  // output: 'standalone', // Enable standalone output for Docker
   env: {
     ATP_API_URL: process.env.ATP_API_URL || 'http://localhost:3000',
     ATP_QUANTUM_URL: process.env.ATP_QUANTUM_URL || 'http://localhost:3008',
@@ -11,9 +11,42 @@ const nextConfig = {
   },
   // Increase timeout for static generation to prevent premature termination
   staticPageGenerationTimeout: 180,
-  // Disable static optimization for pages with client components
+  // Performance optimizations
+  swcMinify: true,
+  // Optimize module resolution
+  modularizeImports: {
+    '@radix-ui': {
+      transform: '@radix-ui/{{member}}',
+    },
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
+    },
+  },
+  // Experimental optimizations
   experimental: {
-    forceSwcTransforms: true,
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+  },
+  // Webpack optimizations
+  webpack: (config, { dev, isServer }) => {
+    // Optimize in development
+    if (dev && !isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            vendor: {
+              name: 'vendor',
+              chunks: 'all',
+              test: /node_modules/,
+            },
+          },
+        },
+      };
+    }
+    return config;
   },
 }
 
