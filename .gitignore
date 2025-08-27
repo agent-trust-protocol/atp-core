@@ -130,3 +130,19 @@ add-ssh-key.sh
 packages/*/node_modules/
 packages/*/dist/
 packages/*/build/
+
+# Development-specific packages and components
+packages/atp-support-agent/
+packages/protocol-integrations/src/acp/
+packages/protocol-integrations/src/agp/
+packages/protocol-integrations/src/federation/
+packages/shared/src/auth/
+packages/shared/src/clustering/
+packages/shared/src/compliance/
+packages/shared/src/monitoring/behavioral-analytics.ts
+packages/shared/src/security/quantum-safe.ts
+src/components/
+src/workflow-engine/
+
+# Deployment and configuration files
+deploy.sh
