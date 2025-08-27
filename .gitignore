@@ -93,12 +93,17 @@ root@*
 *-TESTING*.md
 *-STATUS*.md
 *-AUDIT*.md
+*-PRODUCTION-*.md
+*-READY.md
+*-REPORT*.md
 BACKEND-ARCHITECTURE-*.md
 CUSTOMER-SIGNUP-*.md
 ENTERPRISE-CUSTOMER-*.md
 PORTAL-STATUS-*.md
 AUTHENTICATION-FLOW-*.md
 SECURITY-AUDIT-*.md
+ATP-TESTING-*.md
+100-PERCENT-*.md
 
 # Test files and development scripts
 test-*.js
