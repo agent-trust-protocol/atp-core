@@ -228,3 +228,5 @@ src/workflow-engine/
 
 # Deployment and configuration files
 deploy.sh
+Users/
+**/.docker/config.json
