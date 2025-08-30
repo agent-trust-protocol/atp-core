@@ -1,0 +1,93 @@
+{
+  "type": "module",
+  "name": "agent-trust-protocol",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Agent Trust Protocol Core - Quantum-safe security protocol for AI agents with decentralized identity, verifiable credentials, and trust-based permissions",
+  "keywords": [
+    "ai",
+    "agents",
+    "trust",
+    "did",
+    "verifiable-credentials",
+    "security",
+    "authentication",
+    "mcp",
+    "a2a",
+    "quantum-safe",
+    "post-quantum",
+    "dilithium",
+    "hybrid-cryptography"
+  ],
+  "license": "Apache-2.0",
+  "homepage": "https://atp.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agent-trust-protocol/atp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/agent-trust-protocol/atp/issues"
+  },
+  "author": {
+    "name": "Larry Lewis",
+    "email": "llewis@agenttrustprotocol.com",
+    "url": "https://sovrlabs.com"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "lerna run build",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
+    "test:verbose": "NODE_OPTIONS='--experimental-vm-modules' jest --verbose",
+    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
+    "test:coverage": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
+    "test:debug": "NODE_OPTIONS='--experimental-vm-modules' jest --detectOpenHandles --verbose",
+    "test:lerna": "lerna run test",
+    "lint": "lerna run lint",
+    "clean": "lerna run clean",
+    "dev": "lerna run dev --parallel",
+    "start:quantum-safe": "node quantum-safe-server-improved-v2.js",
+    "start:standalone": "node quantum-safe-server-standalone-v2.js",
+    "start:https": "USE_HTTPS=true node quantum-safe-server-improved-v2.js",
+    "client": "node claude-atp-client-v2.js",
+    "test:quantum": "jest test/quantum-crypto-utils.test.js test/quantum-safe-server.test.js test/claude-atp-client.test.js",
+    "test:integration": "jest test/integration.test.js",
+    "test:all": "node test-quantum-safe-integration.js"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.5",
+    "@babel/preset-env": "^7.23.5",
+    "@testing-library/react": "^16.3.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "babel-jest": "^29.7.0",
+    "eslint": "^8.0.0",
+    "jest": "^30.0.4",
+    "lerna": "^7.0.0",
+    "ts-jest": "^29.4.0",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "atp-sdk": "^1.0.0",
+    "cors": "^2.8.5",
+    "cron": "^4.3.3",
+    "cron-parser": "^5.3.0",
+    "date-fns": "^4.1.0",
+    "drizzle-kit": "^0.31.4",
+    "drizzle-orm": "^0.44.4",
+    "expr-eval": "^2.0.2",
+    "express": "^5.1.0",
+    "fast-xml-parser": "^5.2.5",
+    "immer": "^10.1.1",
+    "postgres": "^3.4.7",
+    "uuid": "^11.1.0",
+    "zod": "^4.0.17",
+    "zustand": "^5.0.7"
+  }
+}

@@ -1,0 +1,24 @@
+Agent Trust Protocol™ SDK
+Copyright 2024 Agent Trust Protocol™ Foundation
+
+This product includes software developed by the Agent Trust Protocol™ Foundation.
+
+Agent Trust Protocol™ and ATP™ are trademarks of the Agent Trust Protocol™ Foundation.
+
+This software includes the following components:
+
+Third-party Dependencies:
+- axios: MIT License (c) 2014-present Matt Zabriskie
+- did-jwt: Apache 2.0 License (c) ConsenSys AG
+- @noble/ed25519: MIT License (c) Paul Miller
+- @noble/hashes: MIT License (c) Paul Miller
+- zod: MIT License (c) Colin McDonnell
+- ws: MIT License (c) Einar Otto Stangvik
+- eventemitter3: MIT License (c) Arnout Kazemier
+
+For complete license information, see the LICENSE file.
+
+This software is provided "AS IS" without warranties or conditions of any kind.
+
+For more information about the Agent Trust Protocol™, visit:
+https://atp.dev

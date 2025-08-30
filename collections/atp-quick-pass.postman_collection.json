@@ -1,0 +1,56 @@
+{
+  "info": {
+    "name": "ATP Quick Pass",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "atp-quick-pass-collection"
+  },
+  "variable": [
+    { "key": "identity_base", "value": "http://localhost:3001" },
+    { "key": "permission_base", "value": "http://localhost:3003" },
+    { "key": "audit_base", "value": "http://localhost:3006" }
+  ],
+  "item": [
+    {
+      "name": "Identity: List DIDs",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{identity_base}}/identity", "host": ["{{identity_base}}"], "path": ["identity"] }
+      }
+    },
+    {
+      "name": "Permission: Get Policies",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{permission_base}}/policies", "host": ["{{permission_base}}"], "path": ["policies"] }
+      }
+    },
+    {
+      "name": "Permission: Simulate Decision",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"policyDocument\": { \"id\": \"policy-1\" },\n  \"context\": {\n    \"agentDID\": \"did:atp:test:alice\",\n    \"trustLevel\": \"verified\",\n    \"tool\": { \"id\": \"db\", \"type\": \"write\", \"sensitivity\": \"low\" },\n    \"requestedAction\": \"write\",\n    \"organizationId\": \"org-1\"\n  }\n}"
+        },
+        "url": { "raw": "{{permission_base}}/policies/simulate", "host": ["{{permission_base}}"], "path": ["policies","simulate"] }
+      }
+    },
+    {
+      "name": "Audit: Stats",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{audit_base}}/audit/stats", "host": ["{{audit_base}}"], "path": ["audit","stats"] }
+      }
+    },
+    {
+      "name": "Audit: Events",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{audit_base}}/audit/events?limit=50", "host": ["{{audit_base}}"], "path": ["audit","events"], "query": [{"key":"limit","value":"50"}] }
+      }
+    }
+  ]
+}
+
+

@@ -1,0 +1,7 @@
+{
+  "ca": ["./certs/ca-cert.pem"],
+  "cert": "./certs/server-cert.pem",
+  "key": "./certs/server-key.pem",
+  "requestCert": true,
+  "rejectUnauthorized": true
+}

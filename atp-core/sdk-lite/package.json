@@ -1,0 +1,48 @@
+{
+  "name": "@atp/sdk-lite",
+  "version": "1.0.0",
+  "description": "Ultra-lightweight SDK for Agent Trust Protocol",
+  "main": "dist/sdk.js",
+  "types": "dist/sdk.d.ts",
+  "type": "module",
+  "files": [
+    "dist/**/*",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "example": "npm run build && node example.js",
+    "size": "npm run build && du -sh dist/",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": [
+    "atp",
+    "agent",
+    "trust",
+    "protocol",
+    "quantum-safe",
+    "did",
+    "sdk"
+  ],
+  "author": "ATP Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agent-trust-protocol/atp-core.git",
+    "directory": "sdk-lite"
+  },
+  "homepage": "https://atp.dev",
+  "bugs": {
+    "url": "https://github.com/agent-trust-protocol/atp-core/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "sideEffects": false
+}
