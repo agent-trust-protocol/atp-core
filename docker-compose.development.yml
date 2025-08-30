@@ -1,0 +1,65 @@
+version: '3.8'
+
+# ATP™ Development Docker Compose Configuration with HTTPS
+# Uses development TLS certificates for local testing
+
+services:
+  # Core ATP™ Services
+  rpc-gateway:
+    build: ./packages/rpc-gateway
+    ports:
+      - "3000:3000"
+      - "3443:3443"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - HTTPS_PORT=3443
+      - WS_PORT=8081
+      - IDENTITY_SERVICE_URL=http://identity-service:3001
+      - VC_SERVICE_URL=http://vc-service:3002
+      - PERMISSION_SERVICE_URL=http://permission-service:3003
+      - AUDIT_SERVICE_URL=http://audit-logger:3005
+      - PROTOCOL_INTEGRATIONS_URL=http://protocol-integrations:3006
+      - TLS_CONFIG_PATH=/app/config/tls.development.json
+      - JWT_SECRET=dev_jwt_secret_not_for_production_use_only
+      - SERVICE_ENCRYPTION_KEY=dev_service_key_32_bytes_not_secure_fedcba9876543210
+      - LOG_LEVEL=debug
+      - CORS_ORIGIN=https://localhost,http://localhost:3000,http://localhost:8000
+    volumes:
+      - ./ssl:/app/ssl:ro
+      - ./config:/app/config:ro
+      - ./secrets:/app/secrets:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-k", "https://localhost:3443/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  # Simple nginx for HTTPS termination testing
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.development.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - rpc-gateway
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-k", "https://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+networks:
+  atp-network:
+    driver: bridge 

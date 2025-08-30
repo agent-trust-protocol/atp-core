@@ -1,0 +1,26 @@
+{
+  "name": "@atp/advanced-agents",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Advanced agent-to-agent communication examples for Agent Trust Protocol",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "demo": "node dist/demo.js",
+    "demo:mcp": "node dist/mcp-integration-demo.js",
+    "demo:marketplace": "node dist/agent-marketplace-demo.js",
+    "demo:collaboration": "node dist/collaborative-agents-demo.js"
+  },
+  "dependencies": {
+    "@atp/sdk": "file:../../packages/sdk",
+    "axios": "^1.10.0",
+    "ws": "^8.18.2",
+    "@types/ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^18.0.0"
+  }
+}

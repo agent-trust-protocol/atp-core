@@ -1,0 +1,310 @@
+services:
+  # Core ATP™ Services
+  identity-service:
+    build: ./packages/identity-service
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=3001
+      - DATABASE_URL=${DATABASE_URL}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - JWT_SECRET=${JWT_SECRET}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - identity_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  vc-service:
+    build: ./packages/vc-service
+    ports:
+      - "${VC_SERVICE_PORT:-3002}:3002"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=3002
+      - DATABASE_URL=${VC_DB_URL}
+      - IDENTITY_SERVICE_URL=${IDENTITY_SERVICE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - SERVICE_ENCRYPTION_KEY=${SERVICE_ENCRYPTION_KEY}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+    volumes:
+      - vc_data:/data
+      - ./ssl:/app/ssl:ro
+      - ./secrets:/app/secrets:ro
+    depends_on:
+      identity-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: ${HEALTH_CHECK_INTERVAL:-30s}
+      timeout: ${HEALTH_CHECK_TIMEOUT:-10s}
+      retries: ${HEALTH_CHECK_RETRIES:-3}
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  permission-service:
+    build: ./packages/permission-service
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=3003
+      - DATABASE_URL=${DATABASE_URL}
+      - IDENTITY_SERVICE_URL=http://identity-service:3001
+      - VC_SERVICE_URL=http://vc-service:3002
+      - JWT_SECRET=${JWT_SECRET}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+    volumes:
+      - permission_data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      identity-service:
+        condition: service_healthy
+      vc-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  audit-logger:
+    build: ./packages/audit-logger
+    ports:
+      - "${AUDIT_LOGGER_PORT:-3005}:3005"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=3005
+      - DATABASE_URL=${DATABASE_URL}
+      - IPFS_API_URL=${IPFS_API_URL}
+      - AUDIT_ENCRYPTION_KEY=${AUDIT_ENCRYPTION_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+    volumes:
+      - audit_data:/data
+      - ./ssl:/app/ssl:ro
+      - ./secrets:/app/secrets:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ipfs:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
+      interval: ${HEALTH_CHECK_INTERVAL:-30s}
+      timeout: ${HEALTH_CHECK_TIMEOUT:-10s}
+      retries: ${HEALTH_CHECK_RETRIES:-3}
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  rpc-gateway:
+    build: ./packages/rpc-gateway
+    ports:
+      - "${RPC_GATEWAY_PORT:-3000}:3000"
+      - "${RPC_GATEWAY_HTTPS_PORT:-3443}:3443"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=3000
+      - HTTPS_PORT=3443
+      - WS_PORT=8081
+      - IDENTITY_SERVICE_URL=${IDENTITY_SERVICE_URL}
+      - VC_SERVICE_URL=${VC_SERVICE_URL}
+      - PERMISSION_SERVICE_URL=${PERMISSION_SERVICE_URL}
+      - AUDIT_SERVICE_URL=${AUDIT_SERVICE_URL}
+      - PROTOCOL_INTEGRATIONS_URL=${PROTOCOL_INTEGRATIONS_URL}
+      - TLS_CONFIG_PATH=/app/config/tls.production.json
+      - JWT_SECRET=${JWT_SECRET}
+      - SERVICE_ENCRYPTION_KEY=${SERVICE_ENCRYPTION_KEY}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+    volumes:
+      - ./ssl:/app/ssl:ro
+      - ./config:/app/config:ro
+      - ./secrets:/app/secrets:ro
+    depends_on:
+      - identity-service
+      - vc-service
+      - permission-service
+      - audit-logger
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-k", "https://localhost:3443/health"]
+      interval: ${HEALTH_CHECK_INTERVAL:-30s}
+      timeout: ${HEALTH_CHECK_TIMEOUT:-10s}
+      retries: ${HEALTH_CHECK_RETRIES:-3}
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  protocol-integrations:
+    build: ./packages/protocol-integrations
+    ports:
+      - "3006:3006"
+      - "3007:3007"
+      - "3008:3008"
+    environment:
+      - NODE_ENV=staging
+      - MCP_PORT=3006
+      - A2A_PORT=3007
+      - BRIDGE_PORT=3008
+      - IDENTITY_SERVICE_URL=http://identity-service:3001
+      - GATEWAY_URL=http://rpc-gateway:3000
+    depends_on:
+      - identity-service
+      - rpc-gateway
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  # Infrastructure Services
+  ipfs:
+    image: ipfs/kubo:latest
+    ports:
+      - "4001:4001"
+      - "5001:5001"
+      - "8080:8080"
+    environment:
+      - IPFS_PROFILE=server
+    volumes:
+      - ipfs_data:/data/ipfs
+    command: |
+      sh -c "
+        ipfs init --profile=server &&
+        ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '[\"*\"]' &&
+        ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '[\"GET\", \"POST\", \"PUT\", \"DELETE\"]' &&
+        ipfs config --json API.HTTPHeaders.Access-Control-Allow-Headers '[\"Authorization\", \"Content-Type\"]' &&
+        ipfs daemon --migrate=true
+      "
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-atp_production}
+      - POSTGRES_USER=atp_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U atp_user -d ${POSTGRES_DB:-atp_production}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  # Monitoring & Observability
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  # Load Balancer & Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    environment:
+      - NGINX_ENVSUBST_TEMPLATE_SUFFIX=.template
+    volumes:
+      - ./nginx/nginx.production.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./docs:/usr/share/nginx/html/docs:ro
+    depends_on:
+      - rpc-gateway
+      - identity-service
+      - vc-service
+      - permission-service
+      - audit-logger
+      - protocol-integrations
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-k", "https://localhost/health"]
+      interval: ${HEALTH_CHECK_INTERVAL:-30s}
+      timeout: ${HEALTH_CHECK_TIMEOUT:-10s}
+      retries: ${HEALTH_CHECK_RETRIES:-3}
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+volumes:
+  identity_data:
+    driver: local
+  vc_data:
+    driver: local
+  permission_data:
+    driver: local
+  audit_data:
+    driver: local
+  ipfs_data:
+    driver: local
+  postgres_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  atp-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

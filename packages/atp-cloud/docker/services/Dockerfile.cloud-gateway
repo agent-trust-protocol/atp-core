@@ -1,0 +1,49 @@
+# ATP Cloud Gateway Dockerfile
+# ⚠️  INTERNAL TESTING ONLY - NOT FOR PRODUCTION USE
+
+FROM node:20-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+COPY tsconfig*.json ./
+RUN npm ci --only=production
+
+# Copy source code
+COPY src ./src
+
+# Build TypeScript
+RUN npm run build:services
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S atp-cloud -u 1001
+
+# Set ownership
+RUN chown -R atp-cloud:nodejs /app
+USER atp-cloud
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "
+    const http = require('http');
+    const options = { host: 'localhost', port: 3010, path: '/health', timeout: 2000 };
+    const request = http.request(options, (res) => {
+      if (res.statusCode === 200) {
+        process.exit(0);
+      } else {
+        process.exit(1);
+      }
+    });
+    request.on('error', () => process.exit(1));
+    request.on('timeout', () => process.exit(1));
+    request.end();
+  "
+
+# Expose port
+EXPOSE 3010
+
+# Start command
+CMD ["node", "dist/cloud-gateway/index.js"]

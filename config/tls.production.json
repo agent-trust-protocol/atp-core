@@ -1,0 +1,23 @@
+{
+  "ca": [
+    "/app/ssl/ca-certificate.pem"
+  ],
+  "cert": "/app/ssl/atp-certificate.pem",
+  "key": "/app/ssl/atp-private-key.pem",
+  "requestCert": true,
+  "rejectUnauthorized": true,
+  "environment": "production",
+  "description": "ATP™ Production TLS Configuration - Production-grade certificates with strict validation",
+  "security": {
+    "minVersion": "TLSv1.2",
+    "maxVersion": "TLSv1.3",
+    "ciphers": [
+      "ECDHE-RSA-AES256-GCM-SHA384",
+      "ECDHE-RSA-AES128-GCM-SHA256",
+      "ECDHE-RSA-AES256-SHA384",
+      "ECDHE-RSA-AES128-SHA256"
+    ],
+    "honorCipherOrder": true,
+    "sessionTimeout": 300
+  }
+} 

@@ -1,0 +1,79 @@
+{
+  "environment": "development",
+  "services": {
+    "identity": {
+      "url": "http://localhost:3001",
+      "port": 3001,
+      "replicas": 1
+    },
+    "credentials": {
+      "url": "http://localhost:3002", 
+      "port": 3002,
+      "replicas": 1
+    },
+    "permissions": {
+      "url": "http://localhost:3003",
+      "port": 3003,
+      "replicas": 1
+    },
+    "audit": {
+      "url": "http://localhost:3006",
+      "port": 3006,
+      "replicas": 1
+    },
+    "monitoring": {
+      "url": "http://localhost:3007",
+      "port": 3007,
+      "replicas": 1
+    }
+  },
+  "cloud": {
+    "gateway": {
+      "port": 3010,
+      "cors": {
+        "origin": "*",
+        "credentials": true
+      }
+    },
+    "tenantService": {
+      "port": 3011
+    },
+    "analyticsService": {
+      "port": 3012
+    },
+    "dashboard": {
+      "port": 3013
+    }
+  },
+  "database": {
+    "mongodb": {
+      "url": "mongodb://localhost:27017",
+      "database": "atp_cloud_dev"
+    },
+    "redis": {
+      "url": "redis://localhost:6379",
+      "keyPrefix": "atp:cloud:dev:"
+    }
+  },
+  "auth": {
+    "jwtSecret": "development-jwt-secret-change-in-production",
+    "apiKeyPrefix": "atp_dev_"
+  },
+  "billing": {
+    "stripeSecretKey": "",
+    "webhookSecret": ""
+  },
+  "limits": {
+    "defaultRateLimit": {
+      "requests": 1000,
+      "window": 3600
+    },
+    "maxTenants": 100,
+    "maxApiKeysPerTenant": 5
+  },
+  "logging": {
+    "level": "debug",
+    "console": true,
+    "file": false
+  }
+}

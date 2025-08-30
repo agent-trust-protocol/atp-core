@@ -1,0 +1,80 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_OWNER: ${{ github.repository_owner }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push website image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./website-repo
+          file: ./website-repo/Dockerfile.prod
+          push: true
+          tags: ghcr.io/${{ env.IMAGE_OWNER }}/atp-website:latest
+
+      - name: Build and push identity-service image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./packages/identity-service
+          file: ./packages/identity-service/Dockerfile.prod
+          push: true
+          tags: ghcr.io/${{ env.IMAGE_OWNER }}/atp-identity:latest
+
+      - name: Build and push permission-service image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./packages/permission-service
+          file: ./packages/permission-service/Dockerfile.prod
+          push: true
+          tags: ghcr.io/${{ env.IMAGE_OWNER }}/atp-permission:latest
+
+      - name: Build and push audit-logger image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./packages/audit-logger
+          file: ./packages/audit-logger/Dockerfile.prod
+          push: true
+          tags: ghcr.io/${{ env.IMAGE_OWNER }}/atp-audit:latest
+
+      - name: Build and push vc-service image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./packages/vc-service
+          file: ./packages/vc-service/Dockerfile.prod
+          push: true
+          tags: ghcr.io/${{ env.IMAGE_OWNER }}/atp-vc:latest
+
+      - name: Build and push rpc-gateway image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./packages/rpc-gateway
+          file: ./packages/rpc-gateway/Dockerfile.prod
+          push: true
+          tags: ghcr.io/${{ env.IMAGE_OWNER }}/atp-gateway:latest
+
+

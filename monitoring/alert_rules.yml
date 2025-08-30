@@ -1,0 +1,181 @@
+# Alert Rules for Quantum-Safe ATP Production Monitoring
+groups:
+  - name: atp-quantum-safe-alerts
+    rules:
+      # High Priority Alerts
+      - alert: ATPServerDown
+        expr: up{job="atp-quantum-safe-server"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: quantum-safe-server
+        annotations:
+          summary: "ATP Quantum-Safe Server is down"
+          description: "The ATP Quantum-Safe Server has been down for more than 1 minute."
+          runbook_url: "https://docs.atp.com/runbooks/server-down"
+
+      - alert: QuantumSafeSecurityBreach
+        expr: atp_security_threat_level > 8
+        for: 0s
+        labels:
+          severity: critical
+          service: security
+        annotations:
+          summary: "High-severity security threat detected"
+          description: "Security threat level is {{ $value }}, immediate attention required."
+          runbook_url: "https://docs.atp.com/runbooks/security-breach"
+
+      - alert: DatabaseConnectionFailure
+        expr: atp_database_connection_errors > 10
+        for: 2m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "Database connection failures detected"
+          description: "{{ $value }} database connection errors in the last 2 minutes."
+
+      - alert: HighMemoryUsage
+        expr: (atp_memory_usage_bytes / atp_memory_limit_bytes) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+          service: quantum-safe-server
+        annotations:
+          summary: "High memory usage on ATP server"
+          description: "Memory usage is {{ $value }}% of available memory."
+
+      - alert: HighCPUUsage
+        expr: atp_cpu_usage_percent > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: quantum-safe-server
+        annotations:
+          summary: "High CPU usage on ATP server"
+          description: "CPU usage is {{ $value }}% for more than 5 minutes."
+
+      # Performance Alerts
+      - alert: HighResponseTime
+        expr: atp_request_duration_seconds{quantile="0.95"} > 1.0
+        for: 3m
+        labels:
+          severity: warning
+          service: performance
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s for more than 3 minutes."
+
+      - alert: QuantumSafeOverheadHigh
+        expr: atp_quantum_safe_overhead_percent > 60
+        for: 5m
+        labels:
+          severity: warning
+          service: performance
+        annotations:
+          summary: "Quantum-safe overhead is higher than expected"
+          description: "Quantum-safe cryptography overhead is {{ $value }}%, exceeding 60% threshold."
+
+      - alert: ConnectionPoolExhausted
+        expr: atp_connection_pool_active / atp_connection_pool_max > 0.9
+        for: 2m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+          description: "{{ $value }}% of database connections are in use."
+
+      # Security Alerts
+      - alert: FailedAuthenticationAttempts
+        expr: increase(atp_auth_failures_total[5m]) > 50
+        for: 1m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "High number of failed authentication attempts"
+          description: "{{ $value }} failed authentication attempts in the last 5 minutes."
+
+      - alert: SuspiciousAgentActivity
+        expr: atp_suspicious_agent_score > 7
+        for: 1m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "Suspicious agent activity detected"
+          description: "Agent {{ $labels.agent_did }} has suspicious activity score of {{ $value }}."
+
+      - alert: CertificateExpiringSoon
+        expr: (atp_certificate_expiry_timestamp - time()) / 86400 < 30
+        for: 1h
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "Certificate {{ $labels.certificate }} expires in {{ $value }} days."
+
+      # Business Logic Alerts
+      - alert: LowTrustLevelAgents
+        expr: atp_agents_trust_level{level="basic"} / atp_agents_total > 0.8
+        for: 10m
+        labels:
+          severity: info
+          service: business
+        annotations:
+          summary: "High percentage of basic trust level agents"
+          description: "{{ $value }}% of agents have basic trust level."
+
+      - alert: PilotProgramMetrics
+        expr: atp_pilot_program_success_rate < 0.6
+        for: 1h
+        labels:
+          severity: warning
+          service: business
+        annotations:
+          summary: "Pilot program success rate below target"
+          description: "Pilot program success rate is {{ $value }}, below 60% target."
+
+  - name: infrastructure-alerts
+    rules:
+      - alert: PostgreSQLDown
+        expr: up{job="postgresql"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "PostgreSQL database is down"
+          description: "PostgreSQL has been down for more than 1 minute."
+
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: cache
+        annotations:
+          summary: "Redis cache is down"
+          description: "Redis has been down for more than 1 minute."
+
+      - alert: DiskSpaceHigh
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 10
+        for: 5m
+        labels:
+          severity: critical
+          service: infrastructure
+        annotations:
+          summary: "Low disk space"
+          description: "Disk space is {{ $value }}% full."
+
+      - alert: NetworkLatencyHigh
+        expr: atp_network_latency_ms > 100
+        for: 3m
+        labels:
+          severity: warning
+          service: network
+        annotations:
+          summary: "High network latency"
+          description: "Network latency is {{ $value }}ms for more than 3 minutes."
