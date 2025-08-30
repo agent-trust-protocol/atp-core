@@ -10,16 +10,16 @@
 
 | **Enterprise** | **Developers** | **Community** |
 |:---:|:---:|:---:|
-| [agenttrustprotocol.com](https://agenttrustprotocol.com) | [Documentation](https://docs.agenttrustprotocol.com) | [GitHub Discussions](https://github.com/bigblackcoder/agent-trust-protocol/discussions) |
+| [agenttrustprotocol.com](https://agenttrustprotocol.com) | [Documentation](https://docs.agenttrustprotocol.com) | [GitHub Discussions](https://github.com/agent-trust-protocol/core/discussions) |
 | Enterprise Features | API Reference | Report Issues |
 | Pricing & Plans | Integration Guides | Contribute |
 
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![GitHub](https://img.shields.io/github/stars/bigblackcoder/agent-trust-protocol)](https://github.com/bigblackcoder/agent-trust-protocol)
-[![Contributors](https://img.shields.io/github/contributors/bigblackcoder/agent-trust-protocol)](https://github.com/bigblackcoder/agent-trust-protocol/graphs/contributors)
+[![GitHub](https://img.shields.io/github/stars/agent-trust-protocol/core)](https://github.com/agent-trust-protocol/core)
+[![Contributors](https://img.shields.io/github/contributors/agent-trust-protocol/core)](https://github.com/agent-trust-protocol/core/graphs/contributors)
 [![Quantum-Safe](https://img.shields.io/badge/Quantum--Safe-CRYSTALS--Dilithium-purple.svg)](https://pq-crystals.org/dilithium/)
-[![Enterprise Ready](https://img.shields.io/badge/Enterprise%20Ready-100%25-brightgreen.svg)](https://github.com/bigblackcoder/agent-trust-protocol)
+[![Enterprise Ready](https://img.shields.io/badge/Enterprise%20Ready-100%25-brightgreen.svg)](https://github.com/agent-trust-protocol/core)
 [![SDK Ready](https://img.shields.io/badge/3--Line%20SDK-Ready-brightgreen.svg)](./packages/sdk/)
 
 ## 💡 **What Can You Build?**
@@ -148,7 +148,7 @@ Currently, ATP requires running the full development environment:
 # Prerequisites: Node.js 18+, PostgreSQL, Docker (optional)
 
 # Clone the repository
-git clone https://github.com/bigblackcoder/agent-trust-protocol.git
+git clone https://github.com/agent-trust-protocol/core.git
 cd agent-trust-protocol
 
 # Install dependencies
@@ -283,7 +283,7 @@ ATP serves as the **Security Foundation** for the emerging Agentic Web:
 
 ```bash
 # Clone and start all services
-git clone https://github.com/bigblackcoder/agent-trust-protocol.git
+git clone https://github.com/agent-trust-protocol/core.git
 cd agent-trust-protocol && docker compose up -d
 
 # Verify services (should all return 200 OK)
@@ -737,7 +737,7 @@ As AI agents become more autonomous and interconnected, establishing trust betwe
 
 ### Tracking Our Journey
 - **Launch Date**: [LAUNCHING THIS WEEK]
-- **GitHub Stars**: ![GitHub stars](https://img.shields.io/github/stars/bigblackcoder/agent-trust-protocol)
+- **GitHub Stars**: ![GitHub stars](https://img.shields.io/github/stars/agent-trust-protocol/core)
 - **npm Downloads**: ![npm downloads](https://img.shields.io/npm/dw/atp-sdk)
 - **First in Industry**: ✅ Quantum-Safe Agent Protocol
 - **Security Innovation**: ✅ Trust Scoring for AI Agents
@@ -748,19 +748,19 @@ As AI agents become more autonomous and interconnected, establishing trust betwe
 ATP™ follows the **MongoDB OpenCore Model** with separated repositories:
 
 ### 🔓 **Core Protocol** (This Repository)
-- **[agent-trust-protocol](https://github.com/bigblackcoder/agent-trust-protocol)** - Open source core protocol
+- **[agent-trust-protocol](https://github.com/agent-trust-protocol/core)** - Open source core protocol
 - **Focus**: Pure protocol implementation, SDKs, and developer tools
 - **License**: Apache 2.0 - Free forever
 - **Audience**: Developers, researchers, open source community
 
 ### 🌐 **Marketing Website**
-- **[agent-trust-protocol-website](https://github.com/bigblackcoder/agent-trust-protocol-website)** - Commercial website and marketing
+- **[agent-trust-protocol-website](https://github.com/agent-trust-protocol/core-website)** - Commercial website and marketing
 - **Focus**: Pricing pages, enterprise features, lead generation
 - **Contains**: Next.js website with OpenCore pricing model
 - **Audience**: Enterprise buyers, marketing, sales teams
 
 ### 💼 **Enterprise Extensions** (Coming Soon)
-- **[agent-trust-protocol-enterprise](https://github.com/bigblackcoder/agent-trust-protocol-enterprise)** - Enterprise features (private)
+- **[agent-trust-protocol-enterprise](https://github.com/agent-trust-protocol/core-enterprise)** - Enterprise features (private)
 - **Focus**: Advanced monitoring, compliance, enterprise SSO
 - **License**: Commercial - Enterprise customers only
 - **Audience**: Enterprise customers with support contracts
@@ -768,7 +768,7 @@ ATP™ follows the **MongoDB OpenCore Model** with separated repositories:
 ## 🏢 Enterprise Information
 
 For **enterprise features, pricing, and sales information**, visit:
-- **Website**: [agent-trust-protocol-website](https://github.com/bigblackcoder/agent-trust-protocol-website)
+- **Website**: [agent-trust-protocol-website](https://github.com/agent-trust-protocol/core-website)
 - **Live Demo**: https://480de8e2ca61.ngrok-free.app
 - **Contact**: sales@agenttrustprotocol.com
 
@@ -820,7 +820,7 @@ Special thanks to the open source community for the foundational technologies th
 ## 🚀 Get Started Today
 
 ```bash
-git clone https://github.com/bigblackcoder/agent-trust-protocol.git
+git clone https://github.com/agent-trust-protocol/core.git
 cd agent-trust-protocol
 npm install
 npm run test
@@ -828,11 +828,11 @@ npm run test
 
 <p align="center">
   <b>Securing the Agentic Web, One Trust Relationship at a Time</b><br>
-  <a href="https://github.com/bigblackcoder/agent-trust-protocol">⭐ Star us on GitHub</a> •
+  <a href="https://github.com/agent-trust-protocol/core">⭐ Star us on GitHub</a> •
   <a href="https://docs.agenttrustprotocol.com">📖 Documentation</a> •
   <a href="https://agenttrustprotocol.com">🏢 Enterprise</a> •
   <a href="https://agenttrustprotocol.com/support">🤖 AI Support</a> •
-  <a href="https://github.com/bigblackcoder/agent-trust-protocol/discussions">💬 Community</a>
+  <a href="https://github.com/agent-trust-protocol/core/discussions">💬 Community</a>
 </p>
 
 ## 🆘 **Need Help?**
@@ -840,7 +840,7 @@ npm run test
 - **🤖 AI Support Agent:** [agenttrustprotocol.com/support](https://agenttrustprotocol.com/support) (24/7 instant help)
 - **📧 Enterprise Support:** support@agenttrustprotocol.com
 - **🛡️ Security Issues:** security@agenttrustprotocol.com
-- **💬 Community:** [GitHub Discussions](https://github.com/bigblackcoder/agent-trust-protocol/discussions)
+- **💬 Community:** [GitHub Discussions](https://github.com/agent-trust-protocol/core/discussions)
 - **📋 Full Support Guide:** [SUPPORT.md](./SUPPORT.md)
 
 <p align="center">

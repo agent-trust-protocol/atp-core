@@ -326,7 +326,7 @@ An ATP implementation MUST:
 ### 13.2 Reference Implementation
 
 The reference implementation is available at:
-https://github.com/bigblackcoder/agent-trust-protocol
+https://github.com/agent-trust-protocol/core
 
 ## 14. Test Vectors
 

@@ -28,7 +28,7 @@
 - W3C standards compliance
 - Self-hosted deployment
 
-**GitHub Repository**: https://github.com/bigblackcoder/agent-trust-protocol
+**GitHub Repository**: https://github.com/agent-trust-protocol/core
 
 ### 💼 **Enterprise Edition** (Paid)
 **What Enterprises Pay For:**

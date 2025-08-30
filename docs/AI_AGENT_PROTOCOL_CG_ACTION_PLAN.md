@@ -201,7 +201,7 @@
 - **Primary**: Larry Lewis (larry@sovrlabs.com)
 - **Technical**: ATP Development Team
 - **Demo**: https://480de8e2ca61.ngrok-free.app
-- **Code**: https://github.com/bigblackcoder/agent-trust-protocol
+- **Code**: https://github.com/agent-trust-protocol/core
 
 ## Next Immediate Actions
 

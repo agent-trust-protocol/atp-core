@@ -2,7 +2,7 @@
 
 **Date**: January 2025  
 **Proposer**: Larry Lewis, Sovr INC. (larry@sovrlabs.com)  
-**GitHub**: https://github.com/bigblackcoder/agent-trust-protocol  
+**GitHub**: https://github.com/agent-trust-protocol/core  
 **Live Demo**: https://480de8e2ca61.ngrok-free.app
 
 ## Executive Summary
@@ -156,7 +156,7 @@ interface ANPSecurityModule {
 ### 2. **Reference Implementation**
 ```bash
 # Try ATP's ANP-compatible security layer
-git clone https://github.com/bigblackcoder/agent-trust-protocol
+git clone https://github.com/agent-trust-protocol/core
 cd agent-trust-protocol
 ./start-services.sh
 
@@ -223,7 +223,7 @@ The CG white paper identifies key challenges. Here's how ATP addresses each:
 
 ### For CG Members
 1. **Try the Demo**: https://480de8e2ca61.ngrok-free.app
-2. **Review the Code**: https://github.com/bigblackcoder/agent-trust-protocol
+2. **Review the Code**: https://github.com/agent-trust-protocol/core
 3. **Test the SDK**: `npm install @atp/sdk`
 4. **Join Discussion**: larry@sovrlabs.com
 
@@ -250,5 +250,5 @@ With ATP, the CG can:
 **Next Steps**: Schedule ATP presentation at next AI Agent Protocol CG meeting
 
 **Contact**: Larry Lewis - larry@sovrlabs.com  
-**GitHub**: https://github.com/bigblackcoder/agent-trust-protocol  
+**GitHub**: https://github.com/agent-trust-protocol/core  
 **Demo**: https://480de8e2ca61.ngrok-free.app

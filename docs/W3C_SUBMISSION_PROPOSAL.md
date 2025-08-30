@@ -207,7 +207,7 @@ Q2 2026: W3C Recommendation Vote
 ## Resources
 
 - **Live Demo**: https://480de8e2ca61.ngrok-free.app
-- **GitHub**: https://github.com/bigblackcoder/agent-trust-protocol
+- **GitHub**: https://github.com/agent-trust-protocol/core
 - **Specification**: docs/W3C_ATP_SPECIFICATION.md
 - **Reference SDK**: packages/sdk/
 

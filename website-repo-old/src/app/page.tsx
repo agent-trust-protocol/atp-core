@@ -78,7 +78,7 @@ export default function HomePage() {
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="glass border-atp-electric-cyan/30 hover:bg-atp-electric-cyan/10 hover:scale-105 transition-all duration-300 w-full sm:w-auto">
-              <a href="https://github.com/bigblackcoder/agent-trust-protocol" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/agent-trust-protocol/core" target="_blank" rel="noopener noreferrer">
                 <FileText className="h-4 w-4 mr-2" />
                 View on GitHub
               </a>
@@ -94,7 +94,7 @@ export default function HomePage() {
           <div className="mt-6 p-4 glass rounded-lg border border-atp-electric-cyan/20 animate-fade-in-up">
             <p className="text-sm text-foreground/70 text-center">
               🎉 <strong>100% Open Source</strong> • Apache 2.0 License • 
-              <a href="https://github.com/bigblackcoder/agent-trust-protocol" className="text-atp-electric-cyan hover:underline" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/agent-trust-protocol/core" className="text-atp-electric-cyan hover:underline" target="_blank" rel="noopener noreferrer">
                 Free Forever
               </a> • Enterprise Support Available
             </p>

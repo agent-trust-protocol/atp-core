@@ -28,7 +28,7 @@ Currently, ATP services need to be running locally. Hosted services coming soon!
 
 ```bash
 # Clone and start ATP services
-git clone https://github.com/bigblackcoder/agent-trust-protocol.git
+git clone https://github.com/agent-trust-protocol/core.git
 cd agent-trust-protocol
 ./start-services.sh
 ```

@@ -99,7 +99,7 @@ export default function PricingPage() {
                 </div>
               </div>
               <Button asChild className="w-full atp-gradient-primary">
-                <a href="https://github.com/bigblackcoder/agent-trust-protocol" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/agent-trust-protocol/core" target="_blank" rel="noopener noreferrer">
                   <Download className="h-4 w-4 mr-2" />
                   Get Started Free
                 </a>
@@ -403,7 +403,7 @@ export default function PricingPage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button asChild size="lg" className="atp-gradient-primary hover:scale-105 transition-all duration-300">
-              <a href="https://github.com/bigblackcoder/agent-trust-protocol" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/agent-trust-protocol/core" target="_blank" rel="noopener noreferrer">
                 <Download className="h-4 w-4 mr-2" />
                 Start Free
               </a>

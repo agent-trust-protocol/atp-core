@@ -51,12 +51,12 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bigblackcoder/agent-trust-protocol.git",
+    "url": "git+https://github.com/agent-trust-protocol/core.git",
     "directory": "packages/sdk"
   },
   "homepage": "https://atp.dev",
   "bugs": {
-    "url": "https://github.com/bigblackcoder/agent-trust-protocol/issues"
+    "url": "https://github.com/agent-trust-protocol/core/issues"
   },
   "dependencies": {
     "axios": "^1.6.0",

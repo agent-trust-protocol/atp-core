@@ -20,7 +20,7 @@ Thank you for your interest in contributing to the Agent Trust Protocol! We're e
 ### Development Setup
 ```bash
 # Clone the repository
-git clone https://github.com/bigblackcoder/agent-trust-protocol.git
+git clone https://github.com/agent-trust-protocol/core.git
 cd agent-trust-protocol
 
 # Install dependencies

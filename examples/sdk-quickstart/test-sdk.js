@@ -69,7 +69,7 @@ async function testSDK() {
     console.log('='.repeat(50));
     console.log('\n📦 ATP SDK v1.0.0 is working perfectly!');
     console.log('🌐 Install: npm install atp-sdk');
-    console.log('📚 Docs: https://github.com/bigblackcoder/agent-trust-protocol\n');
+    console.log('📚 Docs: https://github.com/agent-trust-protocol/core\n');
     
   } catch (error) {
     console.error('❌ Test failed:', error.message);
