@@ -1,0 +1,100 @@
+# 🛡️ Agent Trust Protocol™ - Production Docker Container
+# Optimized multi-stage build for enterprise deployment
+
+FROM node:18-alpine AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    git \
+    curl \
+    && rm -rf /var/cache/apk/*
+
+# Copy package files
+COPY package*.json ./
+COPY lerna.json ./
+
+# Copy workspace packages
+COPY packages/ ./packages/
+
+# Install all dependencies (including dev dependencies for build)
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Build the application
+RUN npm run build || echo "No build step configured"
+
+# Production stage
+FROM node:18-alpine AS production
+
+# Set working directory
+WORKDIR /app
+
+# Install runtime dependencies only
+RUN apk add --no-cache \
+    curl \
+    dumb-init \
+    && rm -rf /var/cache/apk/*
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S atp && \
+    adduser -S atp -u 1001
+
+# Copy package files
+COPY package*.json ./
+COPY lerna.json ./
+
+# Copy workspace packages
+COPY packages/ ./packages/
+
+# Install production dependencies only
+RUN npm install --omit=dev && \
+    npm cache clean --force
+
+# Copy built application from builder stage
+COPY --from=builder --chown=atp:atp /app/dist ./dist/ || echo "No dist directory"
+COPY --chown=atp:atp . .
+
+# Remove unnecessary files for production
+RUN rm -rf .git .github docs examples scripts tests *.md
+
+# Set ownership to non-root user
+RUN chown -R atp:atp /app
+USER atp
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-3000}/health || exit 1
+
+# Expose port
+EXPOSE 3000
+
+# Environment variables
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV ATP_LOG_LEVEL=info
+ENV ATP_QUANTUM_SAFE=true
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+# Start the quantum-safe server
+CMD ["npm", "run", "start:quantum-safe"]
+
+# Metadata
+LABEL maintainer="Larry Lewis <llewis@agenttrustprotocol.com>"
+LABEL version="1.0.0"
+LABEL description="Agent Trust Protocol™ - Production Quantum-Safe AI Agent Security"
+LABEL org.opencontainers.image.title="ATP Production Server"
+LABEL org.opencontainers.image.description="Production-ready quantum-safe server for enterprise AI agent security"
+LABEL org.opencontainers.image.url="https://agenttrustprotocol.com"
+LABEL org.opencontainers.image.source="https://github.com/agent-trust-protocol/core"
+LABEL org.opencontainers.image.vendor="SovrLabs"
+LABEL org.opencontainers.image.licenses="Apache-2.0"
