@@ -106,7 +106,7 @@ export default function DocsPage() {
                     <div className="text-muted-foreground mb-2"># Install ATP SDK</div>
                     <div className="text-foreground">npm install @atp/sdk</div>
                     <div className="text-muted-foreground mt-2"># Or clone repository</div>
-                    <div className="text-foreground">git clone https://github.com/bigblackcoder/agent-trust-protocol.git</div>
+                    <div className="text-foreground">git clone https://github.com/agent-trust-protocol/core.git</div>
                   </div>
                   <Button asChild variant="outline" size="sm" className="w-full glass border-atp-electric-cyan/30 hover:bg-atp-electric-cyan/10 hover:border-atp-electric-cyan/50 hover:scale-105 transition-all duration-300">
                     <Link href="/examples">
@@ -344,7 +344,7 @@ export default function DocsPage() {
                       </div>
                     </div>
                     <Button asChild variant="outline" size="sm" className="w-full">
-                      <a href="https://github.com/bigblackcoder/agent-trust-protocol" target="_blank" rel="noopener noreferrer">
+                      <a href="https://github.com/agent-trust-protocol/core" target="_blank" rel="noopener noreferrer">
                         <Download size={16} className="mr-2" />
                         Docker Setup
                       </a>
@@ -749,7 +749,7 @@ export default function DocsPage() {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Button asChild variant="outline" className="h-12">
-                    <a href="https://github.com/bigblackcoder/agent-trust-protocol/discussions" target="_blank" rel="noopener noreferrer">
+                    <a href="https://github.com/agent-trust-protocol/core/discussions" target="_blank" rel="noopener noreferrer">
                       <ExternalLink size={16} className="mr-2" />
                       GitHub Discussions
                     </a>
@@ -780,7 +780,7 @@ export default function DocsPage() {
               </Link>
             </Button>
             <Button asChild size="lg" className="atp-gradient-secondary hover:scale-105 transition-all duration-300 w-full sm:w-auto">
-              <a href="https://github.com/bigblackcoder/agent-trust-protocol" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/agent-trust-protocol/core" target="_blank" rel="noopener noreferrer">
                 <Download className="h-4 w-4 mr-2" />
                 Download ATP
               </a>

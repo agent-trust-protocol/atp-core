@@ -2,7 +2,7 @@
 
 **Marketing website and enterprise portal for Agent Trust Protocol**
 
-> This repository contains the commercial website, pricing pages, and enterprise portal for ATP™. For the core protocol implementation, see [agent-trust-protocol](https://github.com/bigblackcoder/agent-trust-protocol).
+> This repository contains the commercial website, pricing pages, and enterprise portal for ATP™. For the core protocol implementation, see [agent-trust-protocol](https://github.com/agent-trust-protocol/core).
 
 ## 🌐 Live Website
 
@@ -99,9 +99,9 @@ npm start
 ## 🔗 Related Repositories
 
 ATP™ ecosystem:
-- **[agent-trust-protocol](https://github.com/bigblackcoder/agent-trust-protocol)** - Core protocol (open source)
-- **[agent-trust-protocol-website](https://github.com/bigblackcoder/agent-trust-protocol-website)** - This repository
-- **[agent-trust-protocol-enterprise](https://github.com/bigblackcoder/agent-trust-protocol-enterprise)** - Enterprise features (private)
+- **[agent-trust-protocol](https://github.com/agent-trust-protocol/core)** - Core protocol (open source)
+- **[agent-trust-protocol-website](https://github.com/agent-trust-protocol/core-website)** - This repository
+- **[agent-trust-protocol-enterprise](https://github.com/agent-trust-protocol/core-enterprise)** - Enterprise features (private)
 
 ## 📊 Key Pages
 
@@ -205,7 +205,7 @@ This website code is licensed under the Apache License 2.0.
 
 <p align="center">
   <b>ATP™ - Securing the Agentic Web</b><br>
-  <a href="https://github.com/bigblackcoder/agent-trust-protocol">⭐ Core Protocol</a> •
+  <a href="https://github.com/agent-trust-protocol/core">⭐ Core Protocol</a> •
   <a href="https://agenttrust.dev">🌐 Website</a> •
   <a href="mailto:llewis@agenttrustprotocol.com">💼 Enterprise Sales</a>
 </p>

@@ -13,7 +13,7 @@ import { Progress } from '@/components/ui/progress';
 
 export default function CustomerPortal() {
   const router = useRouter();
-  const [tenant, setTenant] = useState(null);
+  const [tenant, setTenant] = useState<{ name?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   
   // Move all state declarations to the top

@@ -74,7 +74,7 @@ export default function HomePage() {
           </div>
           
           <div className="mt-8 p-6 bg-gradient-to-r from-[hsl(var(--atp-surface))]/50 to-[hsl(var(--atp-surface))]/80 rounded-2xl border border-border/50 backdrop-blur-sm animate-fade-in-up">
-            <p className="text-base text-muted-foreground text-center">🎉 <strong className="text-foreground">100% Open Source</strong> • Apache 2.0 License • <a href="https://github.com/bigblackcoder/agent-trust-protocol" className="text-atp-electric-cyan hover:text-atp-electric-cyan/80 hover:underline" target="_blank" rel="noopener noreferrer">Free Forever</a> • Enterprise Support Available</p>
+            <p className="text-base text-muted-foreground text-center">🎉 <strong className="text-foreground">100% Open Source</strong> • Apache 2.0 License • <a href="https://github.com/agent-trust-protocol/core" className="text-atp-electric-cyan hover:text-atp-electric-cyan/80 hover:underline" target="_blank" rel="noopener noreferrer">Free Forever</a> • Enterprise Support Available</p>
           </div>
 
           {/* Quick Access */}

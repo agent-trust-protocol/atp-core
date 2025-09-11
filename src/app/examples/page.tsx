@@ -196,7 +196,7 @@ export default function ExamplesPage() {
                 </CardHeader>
                 <CardContent>
                   <Button asChild className="w-full bg-gradient-to-r from-[hsl(var(--atp-quantum))] to-[hsl(var(--atp-primary))] text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-                    <a href="https://github.com/bigblackcoder/agent-trust-protocol/tree/main/examples/quickstart" target="_blank" rel="noopener noreferrer">
+                    <a href="https://github.com/agent-trust-protocol/core/tree/main/examples/quickstart" target="_blank" rel="noopener noreferrer">
                       <GitBranch size={16} className="mr-2" />
                       View on GitHub
                     </a>
@@ -648,7 +648,7 @@ export default function ExamplesPage() {
                       </Link>
                     </Button>
                     <Button asChild variant="outline" size="sm" className="flex-1">
-                      <a href="https://github.com/bigblackcoder/agent-trust-protocol/tree/main/examples/chatbot" target="_blank" rel="noopener noreferrer">
+                      <a href="https://github.com/agent-trust-protocol/core/tree/main/examples/chatbot" target="_blank" rel="noopener noreferrer">
                         <GitBranch size={14} className="mr-2" />
                         Code
                       </a>
@@ -689,7 +689,7 @@ export default function ExamplesPage() {
                       </Link>
                     </Button>
                     <Button asChild variant="outline" size="sm" className="flex-1">
-                      <a href="https://github.com/bigblackcoder/agent-trust-protocol/tree/main/examples/multi-agent" target="_blank" rel="noopener noreferrer">
+                      <a href="https://github.com/agent-trust-protocol/core/tree/main/examples/multi-agent" target="_blank" rel="noopener noreferrer">
                         <GitBranch size={14} className="mr-2" />
                         Code
                       </a>
@@ -730,7 +730,7 @@ export default function ExamplesPage() {
                       </Link>
                     </Button>
                     <Button asChild variant="outline" size="sm" className="flex-1">
-                      <a href="https://github.com/bigblackcoder/agent-trust-protocol/tree/main/examples/enterprise-gateway" target="_blank" rel="noopener noreferrer">
+                      <a href="https://github.com/agent-trust-protocol/core/tree/main/examples/enterprise-gateway" target="_blank" rel="noopener noreferrer">
                         <GitBranch size={14} className="mr-2" />
                         Code
                       </a>
@@ -812,7 +812,7 @@ export default function ExamplesPage() {
                       </Link>
                     </Button>
                     <Button asChild variant="outline" size="sm" className="flex-1">
-                      <a href="https://github.com/bigblackcoder/agent-trust-protocol/tree/main/examples/langchain" target="_blank" rel="noopener noreferrer">
+                      <a href="https://github.com/agent-trust-protocol/core/tree/main/examples/langchain" target="_blank" rel="noopener noreferrer">
                         <GitBranch size={14} className="mr-2" />
                         Code
                       </a>
@@ -853,7 +853,7 @@ export default function ExamplesPage() {
                       </Link>
                     </Button>
                     <Button asChild variant="outline" size="sm" className="flex-1">
-                      <a href="https://github.com/bigblackcoder/agent-trust-protocol/tree/main/examples/policy-editor" target="_blank" rel="noopener noreferrer">
+                      <a href="https://github.com/agent-trust-protocol/core/tree/main/examples/policy-editor" target="_blank" rel="noopener noreferrer">
                         <GitBranch size={14} className="mr-2" />
                         Code
                       </a>
@@ -1234,7 +1234,7 @@ export default function ExamplesPage() {
               </Link>
             </Button>
             <Button asChild size="lg" className="atp-gradient-secondary hover:scale-105 transition-all duration-300 w-full sm:w-auto">
-              <a href="https://github.com/bigblackcoder/agent-trust-protocol" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/agent-trust-protocol/core" target="_blank" rel="noopener noreferrer">
                 <GitBranch className="h-4 w-4 mr-2" />
                 Clone Repository
               </a>

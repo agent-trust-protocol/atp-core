@@ -1,7 +1,4 @@
-import { LiveAgentDashboard } from "@/components/atp/live-agent-dashboard"
-import { LivePolicyDashboard } from "@/components/atp/live-policy-dashboard"
-import { EnterpriseDashboard } from "@/components/atp/enterprise-dashboard"
-import { EnhancedDashboard } from "@/components/atp/enhanced-dashboard"
+import { DemoDashboard } from "@/components/atp/demo-dashboard"
 import { Subnav } from "@/components/ui/subnav"
 import { Activity, Shield, Building2, BarChart3, GitBranch } from "lucide-react"
 import type { Metadata } from 'next'
@@ -92,12 +89,8 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-        <div className="space-y-16">
-          <LiveAgentDashboard />
-          <LivePolicyDashboard />
-          <EnhancedDashboard />
-          <EnterpriseDashboard />
-        </div>
+        {/* Demo Dashboard - replacing live data */}
+        <DemoDashboard />
       </div>
     </div>
   )
