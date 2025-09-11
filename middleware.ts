@@ -5,13 +5,20 @@ const protectedRoutes = [
   '/portal',
   '/api/portal',
   '/dashboard/agents',
-  '/dashboard/workflows',
-  '/cloud',
-  '/monitoring',
-  '/policies',
-  '/policy-editor',
-  '/policy-testing',
-  '/api-reference'
+  '/dashboard/workflows',           // PREMIUM: Workflow system (Startup+)
+  '/dashboard/workflows/designer',   // PREMIUM: Visual workflow designer (Startup+) 
+  '/dashboard/workflows/executions', // PREMIUM: Workflow executions (Startup+)
+  '/dashboard/workflows/health',     // PREMIUM: Workflow monitoring (Professional+)
+  '/dashboard/workflows/nodes',      // PREMIUM: Custom workflow nodes (Professional+)
+  '/cloud',                          // PREMIUM: SaaS platform (Startup+)
+  '/cloud/analytics',                // PREMIUM: Advanced analytics (Professional+)
+  '/cloud/services',                 // PREMIUM: Cloud services (Startup+)
+  '/cloud/tenants',                  // PREMIUM: Multi-tenancy (Enterprise+)
+  '/monitoring',                     // PREMIUM: System monitoring (Professional+)
+  '/policies',                       // Advanced policy features premium
+  '/policy-editor',                  // PREMIUM: Visual policy editor (Professional+)
+  '/policy-testing',                 // PREMIUM: Policy testing framework (Professional+)
+  '/api-reference'                   // Protect detailed API documentation
 ];
 
 // Public demo routes (no auth required)
@@ -31,9 +38,13 @@ const authRoutes = ['/login', '/signup'];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
+  console.log('Middleware executing for:', pathname);
+  
   // Check if it's a protected route
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
+  
+  console.log('Is protected route:', isProtectedRoute, 'for path:', pathname);
   
   // Get token from cookie or Authorization header
   const token = request.cookies.get('atp_token')?.value || 
