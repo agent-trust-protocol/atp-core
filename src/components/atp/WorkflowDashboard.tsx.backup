@@ -1,0 +1,402 @@
+"use client"
+
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Play, 
+  Pause, 
+  Square, 
+  Activity, 
+  Clock, 
+  CheckCircle, 
+  XCircle,
+  GitBranch,
+  Zap,
+  AlertTriangle,
+  RefreshCw,
+  Plus
+} from "lucide-react";
+
+interface WorkflowSummary {
+  id: string;
+  name: string;
+  status: 'active' | 'draft' | 'archived';
+  lastExecution?: {
+    status: 'success' | 'failed' | 'running';
+    timestamp: string;
+    duration?: number;
+  };
+  schedule?: string;
+  nodeCount: number;
+}
+
+interface ExecutionSummary {
+  id: string;
+  workflowName: string;
+  status: 'running' | 'completed' | 'failed' | 'cancelled';
+  startTime: string;
+  duration?: number;
+  progress?: number;
+}
+
+const WORKFLOW_ENGINE_API = '/api/workflows';
+
+export function WorkflowDashboard() {
+  const [workflows, setWorkflows] = useState<WorkflowSummary[]>([]);
+  const [executions, setExecutions] = useState<ExecutionSummary[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [engineStatus, setEngineStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
+
+  useEffect(() => {
+    checkEngineStatus();
+    if (engineStatus === 'connected') {
+      loadWorkflows();
+      loadExecutions();
+    }
+  }, [engineStatus]);
+
+  const checkEngineStatus = async () => {
+    try {
+      const response = await fetch('/api/workflows/health');
+      if (response.ok) {
+        setEngineStatus('connected');
+        setError(null);
+      } else {
+        setEngineStatus('disconnected');
+        setError('Workflow engine is not responding');
+      }
+    } catch (err) {
+      setEngineStatus('disconnected');
+      setError('Cannot connect to workflow engine. The Next.js server may be having issues.');
+    }
+  };
+
+  const loadWorkflows = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(WORKFLOW_ENGINE_API);
+      if (response.ok) {
+        const data = await response.json();
+        // Transform workflow data to summary format
+        const summaries: WorkflowSummary[] = data.workflows?.map((w: any) => ({
+          id: w.id,
+          name: w.name,
+          status: w.status || 'draft',
+          nodeCount: w.nodes?.length || 0,
+          schedule: w.triggers?.find((t: any) => t.type === 'schedule')?.config?.schedule
+        })) || [];
+        setWorkflows(summaries);
+      }
+    } catch (err) {
+      console.error('Failed to load workflows:', err);
+      setError('Failed to load workflows');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadExecutions = async () => {
+    try {
+      const response = await fetch(`${WORKFLOW_ENGINE_API}/executions/active`);
+      if (response.ok) {
+        const data = await response.json();
+        const summaries: ExecutionSummary[] = data.executions?.map((e: any) => ({
+          id: e.executionId,
+          workflowName: e.workflowId, // Would need to map to actual name
+          status: e.state,
+          startTime: e.startTime,
+          progress: Math.random() * 100 // Placeholder
+        })) || [];
+        setExecutions(summaries);
+      }
+    } catch (err) {
+      console.error('Failed to load executions:', err);
+    }
+  };
+
+  const executeWorkflow = async (workflowId: string) => {
+    try {
+      const response = await fetch(`${WORKFLOW_ENGINE_API}/${workflowId}/execute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ initialData: {} })
+      });
+      
+      if (response.ok) {
+        await loadExecutions(); // Refresh executions
+      } else {
+        setError('Failed to execute workflow');
+      }
+    } catch (err) {
+      setError('Failed to execute workflow');
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'running': return <Activity className="h-4 w-4 text-blue-500 animate-pulse" />;
+      case 'completed': 
+      case 'success': return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'failed': return <XCircle className="h-4 w-4 text-red-500" />;
+      case 'cancelled': return <Square className="h-4 w-4 text-gray-500" />;
+      default: return <Clock className="h-4 w-4 text-gray-400" />;
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const variant = status === 'active' ? 'default' : 
+                   status === 'draft' ? 'secondary' : 'outline';
+    return <Badge variant={variant}>{status}</Badge>;
+  };
+
+  if (engineStatus === 'checking') {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            <span>Checking workflow engine status...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (engineStatus === 'disconnected') {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-orange-500" />
+            Workflow Engine Offline
+          </CardTitle>
+          <CardDescription>
+            The workflow automation engine is not running.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              The workflow automation engine is integrated into your Next.js application.
+              If you're seeing this message, there may be an issue with the API routes.
+            </p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800 font-medium">✨ Good news!</p>
+              <p className="text-sm text-blue-700">Workflow features are now built into your ATP app - no separate server needed!</p>
+            </div>
+            <Button onClick={checkEngineStatus} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Check Again
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Workflow Automation</h2>
+          <p className="text-gray-600">Manage and monitor ATP workflow automations</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-sm text-green-600">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            Engine Connected
+          </div>
+          <Button onClick={() => window.open('/api/workflows/health', '_blank')} variant="outline" size="sm">
+            <Activity className="h-4 w-4 mr-2" />
+            View API
+          </Button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center gap-2 text-red-800">
+            <AlertTriangle className="h-4 w-4" />
+            <span className="font-medium">Error</span>
+          </div>
+          <p className="text-red-700 mt-1">{error}</p>
+        </div>
+      )}
+
+      {/* Active Executions */}
+      {executions.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Active Executions ({executions.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {executions.map((execution) => (
+                <div key={execution.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    {getStatusIcon(execution.status)}
+                    <div>
+                      <div className="font-medium">{execution.workflowName}</div>
+                      <div className="text-sm text-gray-600">
+                        Started {new Date(execution.startTime).toLocaleTimeString()}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {execution.progress && (
+                      <div className="text-sm text-gray-600">
+                        {Math.round(execution.progress)}%
+                      </div>
+                    )}
+                    <Badge variant="outline">{execution.status}</Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Workflows */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <GitBranch className="h-5 w-5" />
+            Workflows ({workflows.length})
+          </CardTitle>
+          <CardDescription>
+            Automated workflows for ATP policy, trust, and security management
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex items-center gap-2 py-8">
+              <RefreshCw className="h-4 w-4 animate-spin" />
+              <span>Loading workflows...</span>
+            </div>
+          ) : workflows.length === 0 ? (
+            <div className="text-center py-8">
+              <GitBranch className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No workflows yet</h3>
+              <p className="text-gray-600 mb-4">
+                Create your first workflow to automate ATP operations
+              </p>
+              <Button onClick={() => window.location.href = '/dashboard'}
+                <Plus className="h-4 w-4 mr-2" />
+                Create Workflow
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {workflows.map((workflow) => (
+                <Card key={workflow.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{workflow.name}</CardTitle>
+                      {getStatusBadge(workflow.status)}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Nodes:</span>
+                        <span className="font-medium">{workflow.nodeCount}</span>
+                      </div>
+                      
+                      {workflow.schedule && (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Schedule:</span>
+                          <span className="font-mono text-xs">{workflow.schedule}</span>
+                        </div>
+                      )}
+                      
+                      {workflow.lastExecution && (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Last run:</span>
+                          <div className="flex items-center gap-1">
+                            {getStatusIcon(workflow.lastExecution.status)}
+                            <span className="text-xs">
+                              {new Date(workflow.lastExecution.timestamp).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="flex gap-2 pt-2">
+                        <Button 
+                          size="sm" 
+                          onClick={() => executeWorkflow(workflow.id)}
+                          disabled={workflow.status !== 'active'}
+                        >
+                          <Play className="h-3 w-3 mr-1" />
+                          Run
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => window.open(`/api/workflows/${workflow.id}`, '_blank')}
+                        >
+                          View
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Quick Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Button 
+              variant="outline" 
+              className="h-20 flex-col"
+              onClick={() => window.location.href = '/dashboard'}
+            >
+              <GitBranch className="h-6 w-6 mb-2" />
+              <span>Workflow Designer</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="h-20 flex-col"
+              onClick={() => window.open('/api/workflows/nodes', '_blank')}
+            >
+              <Zap className="h-6 w-6 mb-2" />
+              <span>Available Nodes</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="h-20 flex-col"
+              onClick={() => window.open('/api/workflows/executions/active', '_blank')}
+            >
+              <Activity className="h-6 w-6 mb-2" />
+              <span>Execution History</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="h-20 flex-col"
+              onClick={() => window.open('/api/workflows/health', '_blank')}
+            >
+              <CheckCircle className="h-6 w-6 mb-2" />
+              <span>System Health</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
