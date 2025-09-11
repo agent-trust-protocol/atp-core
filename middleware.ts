@@ -1,7 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Routes that require authentication
-const protectedRoutes = ['/portal', '/api/portal'];
+// Routes that require authentication - IP Protection enabled
+const protectedRoutes = [
+  '/portal',
+  '/api/portal',
+  '/dashboard/agents',
+  '/dashboard/workflows',
+  '/cloud',
+  '/monitoring',
+  '/policies',
+  '/policy-editor',
+  '/policy-testing',
+  '/api-reference'
+];
+
+// Public demo routes (no auth required)
+const publicDemoRoutes = [
+  '/dashboard', // Main dashboard shows demo data only
+  '/',
+  '/pricing',
+  '/enterprise',
+  '/contact',
+  '/docs',
+  '/examples',
+  '/sales-guide'
+];
+
 const authRoutes = ['/login', '/signup'];
 
 export function middleware(request: NextRequest) {
@@ -19,6 +43,10 @@ export function middleware(request: NextRequest) {
   if (isProtectedRoute && !token) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('returnTo', pathname);
+    // Add IP protection notice
+    if (!request.cookies.get('ip_protection_notice')) {
+      loginUrl.searchParams.set('notice', 'ip_protected');
+    }
     return NextResponse.redirect(loginUrl);
   }
   
@@ -33,6 +61,13 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/portal/:path*',
+    '/dashboard/:path*',
+    '/cloud/:path*',
+    '/monitoring/:path*',
+    '/policies/:path*',
+    '/policy-editor/:path*',
+    '/policy-testing/:path*',
+    '/api-reference/:path*',
     '/login',
     '/signup',
     '/api/portal/:path*'
