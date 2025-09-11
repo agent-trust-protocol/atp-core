@@ -60,16 +60,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/portal/:path*',
-    '/dashboard/:path*',
-    '/cloud/:path*',
-    '/monitoring/:path*',
-    '/policies/:path*',
-    '/policy-editor/:path*',
-    '/policy-testing/:path*',
-    '/api-reference/:path*',
-    '/login',
-    '/signup',
-    '/api/portal/:path*'
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ]
 };
