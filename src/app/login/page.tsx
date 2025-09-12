@@ -44,18 +44,7 @@ export default function LoginPage() {
         setError(error.message || 'Invalid credentials');
       }
     } catch (err) {
-      // Demo mode - allow test login
-      if (email === 'demo@company.com' && password === 'demo123') {
-        localStorage.setItem('atp_token', 'demo_token');
-        localStorage.setItem('atp_tenant', JSON.stringify({
-          id: 'demo_tenant',
-          name: 'Demo Company',
-          plan: 'professional'
-        }));
-        router.push('/portal');
-      } else {
-        setError('Invalid email or password');
-      }
+      setError('Unable to connect to authentication server. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -169,12 +158,6 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          {/* Demo Mode Notice */}
-          <Alert className="bg-blue-50 dark:bg-blue-950">
-            <AlertDescription className="text-xs">
-              <strong>Demo Mode:</strong> Use demo@company.com / demo123 to explore the portal
-            </AlertDescription>
-          </Alert>
         </CardContent>
       </Card>
     </div>

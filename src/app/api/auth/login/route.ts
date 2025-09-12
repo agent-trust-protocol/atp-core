@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-// Simple demo users for now (in production, use proper database and hashing)
-const users = [
+// SECURITY NOTE: Demo users should be disabled in production
+// In production, integrate with your identity provider (Auth0, Okta, etc.)
+const isDevelopment = process.env.NODE_ENV !== 'production';
+const users = isDevelopment ? [
   {
     id: '1',
     email: 'demo@company.com',
@@ -14,7 +16,7 @@ const users = [
       status: 'trial'
     }
   }
-];
+] : [];
 
 export async function POST(request: NextRequest) {
   try {
