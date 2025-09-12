@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import ReactFlow, {
   Node,
   Edge,
@@ -145,13 +146,44 @@ const nodeTemplates = [
 ];
 
 function WorkflowDesignerContent() {
+  const router = useRouter();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
   const [workflowName, setWorkflowName] = useState('New Workflow');
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+
+  // Client-side auth check
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('atp_token='));
+      
+      if (!token) {
+        router.push('/login?returnTo=/dashboard/workflows/designer&feature=workflow-designer&tier=startup');
+      } else {
+        setIsAuthenticated(true);
+      }
+    };
+    
+    checkAuth();
+  }, [router]);
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center h-[600px]">
+        <div className="text-center">
+          <Shield className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+          <p className="text-lg font-semibold">Authenticating...</p>
+          <p className="text-sm text-muted-foreground">Verifying access to workflow designer</p>
+        </div>
+      </div>
+    );
+  }
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
