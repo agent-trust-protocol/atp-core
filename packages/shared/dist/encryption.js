@@ -85,7 +85,7 @@ export class ATPEncryptionService {
             salt: salt.toString('base64'),
             tag: tag.toString('base64'),
             algorithm: this.ALGORITHM,
-            keyDerivation: 'scrypt',
+            keyDerivation: 'scrypt'
         };
     }
     /**
@@ -126,7 +126,7 @@ export class ATPEncryptionService {
         const publicKeyBytes = await ed25519.getPublicKey(privateKeyBytes);
         return {
             privateKey: Buffer.from(privateKeyBytes).toString('hex'),
-            publicKey: Buffer.from(publicKeyBytes).toString('hex'),
+            publicKey: Buffer.from(publicKeyBytes).toString('hex')
         };
     }
     /**
@@ -180,7 +180,7 @@ export class ATPEncryptionService {
         // Encrypt the ephemeral private key with recipient's public key
         const ephemeralKeyData = JSON.stringify({
             privateKey: ephemeralKeyPair.privateKey,
-            timestamp: new Date().toISOString(),
+            timestamp: new Date().toISOString()
         });
         // For simplicity, we'll use the shared secret to encrypt the ephemeral key
         // In production, use hybrid encryption
@@ -189,7 +189,7 @@ export class ATPEncryptionService {
         const signatureData = JSON.stringify({
             encryptedData,
             ephemeralPublicKey: ephemeralKeyPair.publicKey,
-            timestamp: new Date().toISOString(),
+            timestamp: new Date().toISOString()
         });
         const signature = await this.sign(signatureData, senderPrivateKey);
         return {
@@ -198,7 +198,7 @@ export class ATPEncryptionService {
             senderPublicKey: (await ed25519.getPublicKey(Buffer.from(senderPrivateKey, 'hex'))).toString(),
             signature,
             timestamp: new Date().toISOString(),
-            messageId: messageId || this.generateMessageId(),
+            messageId: messageId || this.generateMessageId()
         };
     }
     /**
@@ -210,7 +210,7 @@ export class ATPEncryptionService {
             const signatureData = JSON.stringify({
                 encryptedData: encryptedMessage.encryptedData,
                 ephemeralPublicKey: encryptedMessage.senderPublicKey,
-                timestamp: encryptedMessage.timestamp,
+                timestamp: encryptedMessage.timestamp
             });
             const isValidSignature = await this.verify(signatureData, encryptedMessage.signature, senderPublicKey);
             if (!isValidSignature) {
@@ -247,7 +247,7 @@ export class ATPEncryptionService {
         return {
             key: key.toString('base64'),
             keyId,
-            expiresAt,
+            expiresAt
         };
     }
     /**

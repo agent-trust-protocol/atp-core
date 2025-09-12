@@ -8,8 +8,8 @@ export abstract class BaseClient {
 
   constructor(config: ATPConfig, serviceKey: 'identity' | 'credentials' | 'permissions' | 'audit' | 'gateway') {
     this.config = this.normalizeConfig(config);
-    
-    const baseURL = this.config.services[serviceKey!] || 
+
+    const baseURL = this.config.services[serviceKey!] ||
                    `${this.config.baseUrl}${this.getServicePath(serviceKey)}`;
 
     this.http = axios.create({
@@ -85,14 +85,14 @@ export abstract class BaseClient {
     this.http.interceptors.response.use(
       (response) => {
         if (this.config.debug) {
-          console.log(`[ATP SDK] Response:`, response.data);
+          console.log('[ATP SDK] Response:', response.data);
         }
         return response;
       },
       (error) => {
         const atpError = this.handleError(error);
         if (this.config.debug) {
-          console.error(`[ATP SDK] Error:`, atpError);
+          console.error('[ATP SDK] Error:', atpError);
         }
         return Promise.reject(atpError);
       }
@@ -135,7 +135,7 @@ export abstract class BaseClient {
 
     if (error.response) {
       const { status, data } = error.response;
-      
+
       switch (status) {
         case 401:
           return new ATPAuthenticationError(data?.error || 'Authentication failed');

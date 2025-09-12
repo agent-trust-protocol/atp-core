@@ -10,7 +10,7 @@ export class DatabaseManager implements DatabaseConnection {
       ssl: config.ssl ? { rejectUnauthorized: false } : false,
       max: config.max || 20,
       idleTimeoutMillis: config.idleTimeoutMillis || 30000,
-      connectionTimeoutMillis: config.connectionTimeoutMillis || 2000,
+      connectionTimeoutMillis: config.connectionTimeoutMillis || 2000
     });
 
     // Set search path for ATP schemas on each new connection
@@ -73,13 +73,13 @@ export class DatabaseManager implements DatabaseConnection {
   async healthCheck(): Promise<{ healthy: boolean; message?: string }> {
     try {
       const result = await this.query('SELECT 1 as health_check');
-      return { 
+      return {
         healthy: result.rows.length > 0 && result.rows[0].health_check === 1,
         message: 'Database connection successful'
       };
     } catch (error) {
-      return { 
-        healthy: false, 
+      return {
+        healthy: false,
         message: `Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }

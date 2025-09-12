@@ -72,7 +72,7 @@ export class ATPKeyManager {
     const keyId = this.generateKeyId(purpose);
     const keyLength = this.getKeyLength(algorithm);
     const key = randomBytes(keyLength);
-    
+
     const now = new Date();
     const policy = this.rotationPolicies.get(purpose);
     const expiresAt = policy ? new Date(now.getTime() + policy.maxAge) : undefined;
@@ -88,7 +88,7 @@ export class ATPKeyManager {
     };
 
     const encryptionKey: EncryptionKey = { keyId, key, metadata };
-    
+
     this.keys.set(keyId, encryptionKey);
     this.currentKeys.set(purpose, keyId);
 
@@ -116,9 +116,9 @@ export class ATPKeyManager {
     };
 
     const derivedParams = { ...defaultParams, ...params };
-    
+
     let derivedKey: Buffer;
-    
+
     if (derivedParams.algorithm === 'scrypt') {
       derivedKey = await scryptAsync(password, derivedParams.salt, derivedParams.keyLength) as Buffer;
     } else {
@@ -138,7 +138,7 @@ export class ATPKeyManager {
     };
 
     const encryptionKey: EncryptionKey = { keyId, key: derivedKey, metadata };
-    
+
     this.keys.set(keyId, encryptionKey);
     this.currentKeys.set(purpose, keyId);
 
@@ -151,16 +151,16 @@ export class ATPKeyManager {
   getCurrentKey(purpose: string): EncryptionKey | null {
     const keyId = this.currentKeys.get(purpose);
     if (!keyId) return null;
-    
+
     const key = this.keys.get(keyId);
     if (!key || key.metadata.status !== 'active') return null;
-    
+
     // Check if key is expired
     if (key.metadata.expiresAt && key.metadata.expiresAt < new Date()) {
       this.deprecateKey(keyId);
       return null;
     }
-    
+
     return key;
   }
 
@@ -185,7 +185,7 @@ export class ATPKeyManager {
    */
   rotateKey(purpose: string): EncryptionKey {
     const currentKey = this.getCurrentKey(purpose);
-    
+
     if (currentKey) {
       this.deprecateKey(currentKey.keyId);
     }
@@ -208,7 +208,7 @@ export class ATPKeyManager {
    */
   rotateAllKeys(): void {
     const purposes = Array.from(this.currentKeys.keys());
-    
+
     for (const purpose of purposes) {
       this.rotateKey(purpose);
     }
@@ -219,7 +219,7 @@ export class ATPKeyManager {
    */
   setRotationPolicy(purpose: string, policy: KeyRotationPolicy): void {
     this.rotationPolicies.set(purpose, policy);
-    
+
     // Reschedule rotation if auto-rotation is enabled
     const currentKey = this.getCurrentKey(purpose);
     if (policy.autoRotate && currentKey?.metadata.expiresAt) {
@@ -235,7 +235,7 @@ export class ATPKeyManager {
     if (!key) return false;
 
     key.metadata.status = 'revoked';
-    
+
     // If this was the current key, rotate to a new one
     if (this.currentKeys.get(key.metadata.purpose) === keyId) {
       this.rotateKey(key.metadata.purpose);
@@ -264,7 +264,7 @@ export class ATPKeyManager {
     };
 
     this.keys.set(keyData.keyId, encryptionKey);
-    
+
     if (encryptionKey.metadata.status === 'active') {
       this.currentKeys.set(encryptionKey.metadata.purpose, keyData.keyId);
     }
@@ -278,7 +278,7 @@ export class ATPKeyManager {
     if (!key) return null;
 
     const encrypted = ATPEncryptionService.encryptWithKey(data, key.key);
-    
+
     return {
       encrypted,
       keyId: key.keyId
@@ -344,7 +344,7 @@ export class ATPKeyManager {
 
     const rotationTime = expiresAt.getTime() - rotateBeforeExpiry;
     const now = Date.now();
-    
+
     if (rotationTime <= now) {
       // Should rotate immediately
       setTimeout(() => this.rotateKey(purpose), 1000);
@@ -401,14 +401,14 @@ export class ATPKeyManager {
 
       const policy = this.rotationPolicies.get(purpose);
       const now = new Date();
-      
+
       let needsRotation = false;
       let daysUntilRotation: number | undefined;
 
       if (key.metadata.expiresAt && policy) {
         const rotationTime = key.metadata.expiresAt.getTime() - policy.rotateBeforeExpiry;
         needsRotation = now.getTime() >= rotationTime;
-        
+
         if (!needsRotation) {
           daysUntilRotation = Math.ceil((rotationTime - now.getTime()) / (24 * 60 * 60 * 1000));
         }

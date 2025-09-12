@@ -19,7 +19,7 @@ export class CryptoUtils {
   }> {
     const privateKey = ed25519.utils.randomPrivateKey();
     const publicKey = await ed25519.getPublicKey(privateKey);
-    
+
     return {
       publicKey: Buffer.from(publicKey).toString('hex'),
       privateKey: Buffer.from(privateKey).toString('hex')
@@ -32,7 +32,7 @@ export class CryptoUtils {
   static async signData(data: string | Buffer, privateKey: string): Promise<string> {
     const dataBuffer = typeof data === 'string' ? Buffer.from(data, 'utf8') : data;
     const privateKeyBuffer = Buffer.from(privateKey, 'hex');
-    
+
     const signature = await ed25519.sign(dataBuffer, privateKeyBuffer);
     return Buffer.from(signature).toString('hex');
   }
@@ -49,7 +49,7 @@ export class CryptoUtils {
       const dataBuffer = typeof data === 'string' ? Buffer.from(data, 'utf8') : data;
       const signatureBuffer = Buffer.from(signature, 'hex');
       const publicKeyBuffer = Buffer.from(publicKey, 'hex');
-      
+
       return await ed25519.verify(signatureBuffer, dataBuffer, publicKeyBuffer);
     } catch {
       return false;

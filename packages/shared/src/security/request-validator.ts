@@ -25,7 +25,7 @@ export class RequestValidator {
   // Sanitization helpers
   static sanitizeString(input: unknown): string | null {
     if (typeof input !== 'string') return null;
-    
+
     // Remove potential XSS vectors
     return input
       .trim()
@@ -65,7 +65,7 @@ export class RequestValidator {
           errors: error.errors.map(e => `${e.path.join('.')}: ${e.message}`)
         };
       }
-      
+
       return {
         valid: false,
         errors: ['Validation failed']
@@ -211,7 +211,7 @@ export function createValidationMiddleware<T>(
 ) {
   return (req: any, res: any, next: any) => {
     const result = validator(req.body);
-    
+
     if (!result.valid) {
       return res.status(400).json({
         success: false,

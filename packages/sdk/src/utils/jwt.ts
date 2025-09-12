@@ -18,7 +18,7 @@ export class JWTUtils {
     }
   ): Promise<string> {
     const privateKeyBuffer = Buffer.from(privateKey, 'hex');
-    
+
     const jwt = new SignJWT({
       ...payload,
       iss: options?.issuer || did,
@@ -63,7 +63,7 @@ export class JWTUtils {
   }> {
     try {
       const publicKeyBuffer = Buffer.from(publicKey, 'hex');
-      
+
       const { payload } = await jwtVerify(token, publicKeyBuffer, {
         audience: options?.audience,
         issuer: options?.issuer,
@@ -199,13 +199,13 @@ export class JWTUtils {
     error?: string;
   }> {
     const result = await this.verifyDIDJWT(token, publicKey);
-    
+
     if (!result.valid) {
       return result;
     }
 
     const payload = result.payload!;
-    
+
     if (payload.tokenType !== 'capability') {
       return {
         valid: false,
@@ -214,7 +214,7 @@ export class JWTUtils {
     }
 
     const capabilities = payload.capabilities as string[] || [];
-    
+
     if (requiredCapability && !capabilities.includes(requiredCapability)) {
       return {
         valid: false,
@@ -328,7 +328,7 @@ export class JWTUtils {
     }
 
     const payload = result.payload!;
-    
+
     if (payload.tokenType !== 'refresh') {
       return {
         valid: false,

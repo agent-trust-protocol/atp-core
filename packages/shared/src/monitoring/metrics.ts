@@ -76,7 +76,7 @@ export class ATPMetricsService {
   // Health check
   async performHealthCheck(checkName: string, checkFn: () => Promise<any>): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       const result = await Promise.race([
         checkFn(),
@@ -93,7 +93,7 @@ export class ATPMetricsService {
 
       this.healthChecks.set(checkName, healthResult);
       this.recordMetric('health_check_duration_ms', healthResult.responseTime, 'histogram', { service: checkName });
-      
+
       return healthResult;
     } catch (error) {
       const healthResult: HealthCheckResult = {
@@ -106,7 +106,7 @@ export class ATPMetricsService {
 
       this.healthChecks.set(checkName, healthResult);
       this.recordError('health_check', error instanceof Error ? error : new Error(String(error)));
-      
+
       return healthResult;
     }
   }
@@ -136,30 +136,30 @@ export class ATPMetricsService {
   // Get all metrics for Prometheus export
   getPrometheusMetrics(): string {
     let output = '';
-    
+
     for (const [name, history] of this.metrics.entries()) {
       if (history.length === 0) continue;
-      
+
       const latest = history[history.length - 1];
       const metricName = `atp_${name.replace(/[^a-zA-Z0-9_]/g, '_')}`;
-      
+
       output += `# HELP ${metricName} ATP ${this.serviceName} metric\n`;
       output += `# TYPE ${metricName} ${latest.type}\n`;
-      
-      const labels = latest.labels ? 
+
+      const labels = latest.labels ?
         Object.entries(latest.labels).map(([k, v]) => `${k}="${v}"`).join(',') : '';
-      
+
       output += `${metricName}${labels ? `{${labels}}` : ''} ${latest.value} ${latest.timestamp}\n`;
     }
 
     // Add system metrics
     const sysMetrics = this.getSystemMetrics();
-    output += `# HELP atp_uptime_seconds Service uptime in seconds\n`;
-    output += `# TYPE atp_uptime_seconds gauge\n`;
+    output += '# HELP atp_uptime_seconds Service uptime in seconds\n';
+    output += '# TYPE atp_uptime_seconds gauge\n';
     output += `atp_uptime_seconds{service="${this.serviceName}"} ${sysMetrics.uptime_ms / 1000}\n`;
-    
-    output += `# HELP atp_memory_used_bytes Memory usage in bytes\n`;
-    output += `# TYPE atp_memory_used_bytes gauge\n`;
+
+    output += '# HELP atp_memory_used_bytes Memory usage in bytes\n';
+    output += '# TYPE atp_memory_used_bytes gauge\n';
     output += `atp_memory_used_bytes{service="${this.serviceName}"} ${sysMetrics.memory_used_bytes}\n`;
 
     return output;
@@ -168,8 +168,8 @@ export class ATPMetricsService {
   // Get health status
   getHealthStatus() {
     const checks = Array.from(this.healthChecks.values());
-    const overallStatus = checks.every(c => c.status === 'healthy') ? 'healthy' : 
-                         checks.some(c => c.status === 'unhealthy') ? 'unhealthy' : 'degraded';
+    const overallStatus = checks.every(c => c.status === 'healthy') ? 'healthy' :
+      checks.some(c => c.status === 'unhealthy') ? 'unhealthy' : 'degraded';
 
     return {
       service: this.serviceName,

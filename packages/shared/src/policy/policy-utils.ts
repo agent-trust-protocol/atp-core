@@ -1,15 +1,15 @@
 /**
  * Policy Utilities - Helper functions for working with visual trust policies
- * 
+ *
  * This module provides utility functions for creating, manipulating, and
  * analyzing visual trust policies in the ATP system.
  */
 
 import { randomUUID } from 'crypto';
-import { 
-  ATPVisualPolicy, 
-  VisualPolicyRule, 
-  VisualPolicyCondition, 
+import {
+  ATPVisualPolicy,
+  VisualPolicyRule,
+  VisualPolicyCondition,
   VisualPolicyActionType,
   VisualPolicyLogicalExpression,
   VisualPolicyTrustLevel,
@@ -36,7 +36,7 @@ export function createPolicyRule(
   }
 ): VisualPolicyRule {
   const now = new Date().toISOString();
-  
+
   return {
     id: randomUUID(),
     name,
@@ -195,11 +195,11 @@ export function analyzePolicy(policy: ATPVisualPolicy): PolicyAnalysisResult {
   const issues: PolicyIssue[] = [];
   const warnings: PolicyWarning[] = [];
   const suggestions: PolicySuggestion[] = [];
-  
+
   // Check for duplicate priorities
   const priorities = policy.rules.map(rule => rule.priority);
   const duplicatePriorities = priorities.filter((priority, index) => priorities.indexOf(priority) !== index);
-  
+
   if (duplicatePriorities.length > 0) {
     issues.push({
       type: 'warning',
@@ -208,7 +208,7 @@ export function analyzePolicy(policy: ATPVisualPolicy): PolicyAnalysisResult {
       suggestion: 'Ensure each rule has a unique priority for predictable evaluation order'
     });
   }
-  
+
   // Check for unreachable rules
   const sortedRules = [...policy.rules].sort((a, b) => a.priority - b.priority);
   for (let i = 0; i < sortedRules.length - 1; i++) {
@@ -227,7 +227,7 @@ export function analyzePolicy(policy: ATPVisualPolicy): PolicyAnalysisResult {
       break;
     }
   }
-  
+
   // Check for overly complex conditions
   policy.rules.forEach(rule => {
     const complexity = calculateConditionComplexity(rule.condition);
@@ -239,7 +239,7 @@ export function analyzePolicy(policy: ATPVisualPolicy): PolicyAnalysisResult {
       });
     }
   });
-  
+
   // Check for security best practices
   const hasDefaultDeny = policy.defaultAction === 'deny';
   if (!hasDefaultDeny) {
@@ -250,17 +250,17 @@ export function analyzePolicy(policy: ATPVisualPolicy): PolicyAnalysisResult {
       suggestion: 'Consider using default deny with explicit allow rules'
     });
   }
-  
+
   // Analyze coverage
   const trustLevels = extractTrustLevels(policy);
   const tools = extractTools(policy);
   const conditions = extractConditionTypes(policy);
-  
+
   // Calculate overall complexity
   const totalRules = policy.rules.length;
-  const avgComplexity = policy.rules.reduce((sum, rule) => 
+  const avgComplexity = policy.rules.reduce((sum, rule) =>
     sum + calculateConditionComplexity(rule.condition), 0) / totalRules;
-  
+
   let complexity: 'low' | 'medium' | 'high';
   if (totalRules <= 5 && avgComplexity <= 3) {
     complexity = 'low';
@@ -269,7 +269,7 @@ export function analyzePolicy(policy: ATPVisualPolicy): PolicyAnalysisResult {
   } else {
     complexity = 'high';
   }
-  
+
   // Generate suggestions
   if (policy.rules.length === 1 && isUnconditionalRule(policy.rules[0])) {
     suggestions.push({
@@ -278,7 +278,7 @@ export function analyzePolicy(policy: ATPVisualPolicy): PolicyAnalysisResult {
       action: 'Add conditions based on trust level, credentials, or context'
     });
   }
-  
+
   if (trustLevels.length === 1) {
     suggestions.push({
       type: 'security',
@@ -286,7 +286,7 @@ export function analyzePolicy(policy: ATPVisualPolicy): PolicyAnalysisResult {
       action: 'Add rules for different trust levels to improve security'
     });
   }
-  
+
   return {
     issues,
     warnings,
@@ -307,8 +307,8 @@ function isUnconditionalRule(rule: VisualPolicyRule): boolean {
   // This is a simplified check - in practice, you'd need more sophisticated analysis
   if ('type' in rule.condition) {
     const condition = rule.condition as VisualPolicyCondition;
-    return condition.type === 'trust_level' && 
-           condition.operator === 'greater_than_or_equal' && 
+    return condition.type === 'trust_level' &&
+           condition.operator === 'greater_than_or_equal' &&
            condition.value === 'UNKNOWN';
   }
   return false;
@@ -333,7 +333,7 @@ function calculateConditionComplexity(condition: VisualPolicyCondition | VisualP
  */
 function extractTrustLevels(policy: ATPVisualPolicy): VisualPolicyTrustLevel[] {
   const trustLevels = new Set<VisualPolicyTrustLevel>();
-  
+
   function extractFromCondition(condition: VisualPolicyCondition | VisualPolicyLogicalExpression) {
     if ('type' in condition) {
       const cond = condition as VisualPolicyCondition;
@@ -353,9 +353,9 @@ function extractTrustLevels(policy: ATPVisualPolicy): VisualPolicyTrustLevel[] {
       expr.operands.forEach((operand: any) => extractFromCondition(operand));
     }
   }
-  
+
   policy.rules.forEach(rule => extractFromCondition(rule.condition));
-  
+
   return Array.from(trustLevels);
 }
 
@@ -364,7 +364,7 @@ function extractTrustLevels(policy: ATPVisualPolicy): VisualPolicyTrustLevel[] {
  */
 function extractTools(policy: ATPVisualPolicy): string[] {
   const tools = new Set<string>();
-  
+
   function extractFromCondition(condition: VisualPolicyCondition | VisualPolicyLogicalExpression) {
     if ('type' in condition) {
       const cond = condition as VisualPolicyCondition;
@@ -386,9 +386,9 @@ function extractTools(policy: ATPVisualPolicy): string[] {
       expr.operands.forEach((operand: any) => extractFromCondition(operand));
     }
   }
-  
+
   policy.rules.forEach(rule => extractFromCondition(rule.condition));
-  
+
   return Array.from(tools);
 }
 
@@ -397,7 +397,7 @@ function extractTools(policy: ATPVisualPolicy): string[] {
  */
 function extractConditionTypes(policy: ATPVisualPolicy): string[] {
   const conditionTypes = new Set<string>();
-  
+
   function extractFromCondition(condition: VisualPolicyCondition | VisualPolicyLogicalExpression) {
     if ('type' in condition) {
       const cond = condition as VisualPolicyCondition;
@@ -407,9 +407,9 @@ function extractConditionTypes(policy: ATPVisualPolicy): string[] {
       expr.operands.forEach((operand: any) => extractFromCondition(operand));
     }
   }
-  
+
   policy.rules.forEach(rule => extractFromCondition(rule.condition));
-  
+
   return Array.from(conditionTypes);
 }
 
@@ -421,12 +421,12 @@ function extractConditionTypes(policy: ATPVisualPolicy): string[] {
  * Clones a policy with a new ID and timestamps
  */
 export function clonePolicy(
-  policy: ATPVisualPolicy, 
+  policy: ATPVisualPolicy,
   newName: string,
   createdBy: string
 ): ATPVisualPolicy {
   const now = new Date().toISOString();
-  
+
   return {
     ...policy,
     id: randomUUID(),
@@ -462,11 +462,11 @@ export function mergePolicies(
   if (policies.length === 0) {
     throw new Error('Cannot merge empty policy list');
   }
-  
+
   const now = new Date().toISOString();
   const allRules: VisualPolicyRule[] = [];
   let priorityOffset = 0;
-  
+
   // Combine rules from all policies, adjusting priorities to avoid conflicts
   policies.forEach((policy, index) => {
     const adjustedRules = policy.rules.map(rule => ({
@@ -478,11 +478,11 @@ export function mergePolicies(
       createdBy,
       tags: [...rule.tags, `merged-from-${policy.name}`]
     }));
-    
+
     allRules.push(...adjustedRules);
     priorityOffset += 1000; // Ensure no priority conflicts
   });
-  
+
   return {
     id: randomUUID(),
     name: newName,
@@ -512,18 +512,18 @@ export function mergePolicies(
  */
 export function optimizePolicy(policy: ATPVisualPolicy): ATPVisualPolicy {
   const optimizedRules = [...policy.rules];
-  
+
   // Remove disabled rules
   const enabledRules = optimizedRules.filter(rule => rule.enabled);
-  
+
   // Sort by priority
   enabledRules.sort((a, b) => a.priority - b.priority);
-  
+
   // TODO: Add more sophisticated optimization logic
   // - Remove redundant rules
   // - Simplify complex conditions
   // - Merge similar rules
-  
+
   return {
     ...policy,
     rules: enabledRules,
@@ -550,33 +550,33 @@ export interface PolicyValidationResult {
 export function validatePolicyConsistency(policy: ATPVisualPolicy): PolicyValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
-  
+
   // Check for empty rules
   if (policy.rules.length === 0) {
     errors.push('Policy must have at least one rule');
   }
-  
+
   // Check for duplicate rule names
   const ruleNames = policy.rules.map(rule => rule.name);
   const duplicateNames = ruleNames.filter((name, index) => ruleNames.indexOf(name) !== index);
   if (duplicateNames.length > 0) {
     warnings.push(`Duplicate rule names found: ${duplicateNames.join(', ')}`);
   }
-  
+
   // Check priority ranges
   policy.rules.forEach(rule => {
     if (rule.priority < 0 || rule.priority > 1000) {
       errors.push(`Rule "${rule.name}" has invalid priority: ${rule.priority}`);
     }
   });
-  
+
   // Check for circular references in logical expressions
   policy.rules.forEach(rule => {
     if (hasCircularReference(rule.condition, new Set())) {
       errors.push(`Rule "${rule.name}" has circular reference in conditions`);
     }
   });
-  
+
   return {
     isValid: errors.length === 0,
     errors,
@@ -595,19 +595,19 @@ function hasCircularReference(
     // Simple condition - no circular reference possible
     return false;
   }
-  
+
   const expr = condition as VisualPolicyLogicalExpression;
   if (visited.has(expr.id)) {
     return true;
   }
-  
+
   visited.add(expr.id);
-  
+
   for (const operand of expr.operands) {
     if (hasCircularReference(operand, new Set(visited))) {
       return true;
     }
   }
-  
+
   return false;
 }

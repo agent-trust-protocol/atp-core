@@ -20,7 +20,7 @@ export class RedisCache {
       port: config.port,
       password: config.password,
       db: config.db,
-      lazyConnect: true,
+      lazyConnect: true
     });
 
     this.defaultTTL = config.ttl;
@@ -98,12 +98,12 @@ export class RedisCache {
   async mset<T>(keyValuePairs: Array<{key: string, value: T, ttl?: number}>): Promise<boolean> {
     try {
       const pipeline = this.client.pipeline();
-      
+
       for (const {key, value, ttl} of keyValuePairs) {
         const serialized = JSON.stringify(value);
         pipeline.setex(this.getKey(key), ttl || this.defaultTTL, serialized);
       }
-      
+
       const results = await pipeline.exec();
       return results?.every(([error, result]) => !error && result === 'OK') || false;
     } catch (error) {
@@ -116,11 +116,11 @@ export class RedisCache {
     try {
       const redisKey = this.getKey(key);
       const result = await this.client.incr(redisKey);
-      
+
       if (result === 1 && ttl) {
         await this.client.expire(redisKey, ttl);
       }
-      
+
       return result;
     } catch (error) {
       console.error('Redis incr error:', error);

@@ -22,7 +22,7 @@ export class PerformanceOptimizer {
     ttl?: number
   ): Promise<{data: T, fromCache: boolean}> {
     const startTime = Date.now();
-    
+
     try {
       // Try to get from cache first
       const cached = await this.cache.get<T>(key);
@@ -34,10 +34,10 @@ export class PerformanceOptimizer {
       // Cache miss - fetch from source
       const data = await fetchFn();
       await this.cache.set(key, data, ttl);
-      
+
       await this.recordCacheMiss(key, Date.now() - startTime);
       return { data, fromCache: false };
-      
+
     } catch (error) {
       await this.recordError(key, error);
       throw error;
@@ -48,13 +48,13 @@ export class PerformanceOptimizer {
     items: Array<{key: string, fetchFn: () => Promise<T>, ttl?: number}>
   ): Promise<Array<{key: string, data: T, fromCache: boolean}>> {
     const results: Array<{key: string, data: T, fromCache: boolean}> = [];
-    
+
     // Get all keys from cache
     const keys = items.map(item => item.key);
     const cached = await this.cache.mget<T>(keys);
-    
+
     const toFetch: Array<{index: number, item: typeof items[0]}> = [];
-    
+
     // Process cached results and identify what needs fetching
     for (let i = 0; i < items.length; i++) {
       if (cached[i]) {
@@ -64,7 +64,7 @@ export class PerformanceOptimizer {
         toFetch.push({ index: i, item: items[i] });
       }
     }
-    
+
     // Fetch missing items
     if (toFetch.length > 0) {
       const fetchPromises = toFetch.map(async ({index, item}) => {
@@ -72,7 +72,7 @@ export class PerformanceOptimizer {
         try {
           const data = await item.fetchFn();
           await this.cache.set(item.key, data, item.ttl);
-          
+
           results[index] = { key: item.key, data, fromCache: false };
           await this.recordCacheMiss(item.key, Date.now() - startTime);
         } catch (error) {
@@ -80,10 +80,10 @@ export class PerformanceOptimizer {
           throw error;
         }
       });
-      
+
       await Promise.all(fetchPromises);
     }
-    
+
     return results;
   }
 
@@ -93,14 +93,14 @@ export class PerformanceOptimizer {
 
   async recordRequest(endpoint: string, responseTime: number): Promise<void> {
     const key = `${this.metricsPrefix}:request:${endpoint}`;
-    
+
     // Increment request count
     await this.cache.incr(`${key}:count`, 3600); // 1 hour TTL
-    
+
     // Update response time (using moving average)
     const currentAvg = await this.cache.get<number>(`${key}:avg_time`) || 0;
     const requestCount = await this.cache.get<number>(`${key}:count`) || 1;
-    
+
     const newAvg = ((currentAvg * (requestCount - 1)) + responseTime) / requestCount;
     await this.cache.set(`${key}:avg_time`, newAvg, 3600);
   }
@@ -122,14 +122,14 @@ export class PerformanceOptimizer {
 
   async getMetrics(endpoint?: string): Promise<PerformanceMetrics> {
     const prefix = endpoint ? `${this.metricsPrefix}:request:${endpoint}` : `${this.metricsPrefix}:request:*`;
-    
+
     if (endpoint) {
       const [requestCount, averageResponseTime, errorCount, cacheHits, cacheMisses] = await Promise.all([
         this.cache.get<number>(`${this.metricsPrefix}:request:${endpoint}:count`) || 0,
         this.cache.get<number>(`${this.metricsPrefix}:request:${endpoint}:avg_time`) || 0,
         this.cache.get<number>(`${this.metricsPrefix}:error:${endpoint}`) || 0,
         this.cache.get<number>(`${this.metricsPrefix}:cache:hits:${endpoint}`) || 0,
-        this.cache.get<number>(`${this.metricsPrefix}:cache:misses:${endpoint}`) || 0,
+        this.cache.get<number>(`${this.metricsPrefix}:cache:misses:${endpoint}`) || 0
       ]);
 
       const totalCacheRequests = (cacheHits || 0) + (cacheMisses || 0);
@@ -144,7 +144,7 @@ export class PerformanceOptimizer {
         lastUpdated: new Date().toISOString()
       };
     }
-    
+
     // Return aggregated metrics for all endpoints
     return {
       requestCount: 0, // Would need to aggregate across all endpoints

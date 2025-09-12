@@ -42,7 +42,7 @@ export class APISecurityManager {
     const id = randomBytes(16).toString('hex');
     const apiKey = `atp_${id}_${randomBytes(32).toString('base64url')}`;
     const keyHash = createHash('sha256').update(apiKey).digest('hex');
-    
+
     return { apiKey, keyHash, id };
   }
 
@@ -92,11 +92,11 @@ export class APISecurityManager {
     return {
       // HTTPS enforcement
       'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-      
+
       // XSS protection
       'X-Frame-Options': 'DENY',
       'X-XSS-Protection': '1; mode=block',
-      
+
       // Content Security Policy
       'Content-Security-Policy': [
         "default-src 'self'",
@@ -109,10 +109,10 @@ export class APISecurityManager {
         "base-uri 'self'",
         "form-action 'self'"
       ].join('; '),
-      
+
       // Referrer policy
       'Referrer-Policy': 'strict-origin-when-cross-origin',
-      
+
       // Permissions policy
       'Permissions-Policy': [
         'accelerometer=()',
@@ -124,12 +124,12 @@ export class APISecurityManager {
         'payment=()',
         'usb=()'
       ].join(', '),
-      
+
       // Cache control for sensitive endpoints
       'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
       'Pragma': 'no-cache',
       'Expires': '0',
-      
+
       // Custom ATP headers
       'X-ATP-Version': '1.0',
       'X-Content-Type-Options': 'nosniff'
@@ -142,7 +142,7 @@ export class APISecurityManager {
     const signature = createHash('sha256')
       .update(message + apiKey)
       .digest('base64');
-    
+
     return signature;
   }
 
@@ -195,8 +195,8 @@ export class APISecurityManager {
 
   // IP address utilities for security
   extractClientIP(req: any): string {
-    return req.ip || 
-           req.connection?.remoteAddress || 
+    return req.ip ||
+           req.connection?.remoteAddress ||
            req.socket?.remoteAddress ||
            req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
            req.headers['x-real-ip'] ||
@@ -241,7 +241,7 @@ export function createAPIKeyMiddleware(
 ) {
   return async (req: any, res: any, next: any) => {
     const apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
-    
+
     if (!apiKey) {
       return res.status(401).json({
         success: false,
@@ -258,7 +258,7 @@ export function createAPIKeyMiddleware(
 
     const keyHash = securityManager.hashAPIKey(apiKey);
     const keyInfo = await getAPIKey(keyHash);
-    
+
     if (!keyInfo) {
       return res.status(401).json({
         success: false,
@@ -282,7 +282,7 @@ export function createAPIKeyMiddleware(
 export function createJWTMiddleware(securityManager: APISecurityManager) {
   return (req: any, res: any, next: any) => {
     const token = req.headers['authorization']?.replace('Bearer ', '');
-    
+
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -307,7 +307,7 @@ export function createJWTMiddleware(securityManager: APISecurityManager) {
 export function createPermissionMiddleware(requiredPermission: string) {
   return (req: any, res: any, next: any) => {
     const permissions = req.permissions || [];
-    
+
     if (!permissions.includes('admin') && !permissions.includes(requiredPermission)) {
       return res.status(403).json({
         success: false,

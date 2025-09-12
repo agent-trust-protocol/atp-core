@@ -1,6 +1,6 @@
 /**
  * ATP Policy Module - Visual Trust Policy Editor Support
- * 
+ *
  * This module provides comprehensive policy schema definitions, validation,
  * and utilities for the Visual Trust Policy Editor and ATP Gateway integration.
  */

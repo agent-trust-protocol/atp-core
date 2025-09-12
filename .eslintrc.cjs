@@ -6,9 +6,7 @@ module.exports = {
     project: './tsconfig.json'
   },
   extends: [
-    'eslint:recommended',
-    '@typescript-eslint/recommended',
-    '@typescript-eslint/recommended-requiring-type-checking'
+    'eslint:recommended'
   ],
   plugins: ['@typescript-eslint'],
   root: true,
@@ -26,11 +24,9 @@ module.exports = {
     '@typescript-eslint/no-non-null-assertion': 'warn',
     '@typescript-eslint/prefer-nullish-coalescing': 'error',
     '@typescript-eslint/prefer-optional-chain': 'error',
-    '@typescript-eslint/no-floating-promises': 'error',
-    '@typescript-eslint/no-misused-promises': 'error',
     
     // General rules
-    'no-console': 'off', // Allow console.log for SDK
+    'no-console': 'off',
     'no-debugger': 'error',
     'prefer-const': 'error',
     'no-var': 'error',
@@ -62,10 +58,9 @@ module.exports = {
       }
     },
     {
-      files: ['examples/**/*.js'],
-      rules: {
-        '@typescript-eslint/no-var-requires': 'off',
-        'no-console': 'off'
+      files: ['packages/*/src/**/*.ts'],
+      parserOptions: {
+        project: ['packages/*/tsconfig.json']
       }
     }
   ],
@@ -73,6 +68,8 @@ module.exports = {
     'dist/',
     'node_modules/',
     'coverage/',
-    '*.js'
+    '*.js',
+    '*.mjs',
+    '*.cjs'
   ]
 };

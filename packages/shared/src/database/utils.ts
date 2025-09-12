@@ -8,15 +8,15 @@ export function createDatabaseConnection(config: DatabaseConfig): DatabaseManage
 export async function healthCheck(connectionString: string): Promise<{ healthy: boolean; message?: string }> {
   const config: DatabaseConfig = { connectionString };
   const db = new DatabaseManager(config);
-  
+
   try {
     const result = await db.healthCheck();
     await db.close();
     return result;
   } catch (error) {
     await db.close();
-    return { 
-      healthy: false, 
+    return {
+      healthy: false,
       message: `Health check failed: ${error instanceof Error ? error.message : 'Unknown error'}`
     };
   }
@@ -37,6 +37,6 @@ export function parseDatabaseUrl(url: string): {
     database: parsed.pathname.slice(1), // Remove leading slash
     username: parsed.username,
     password: parsed.password,
-    ssl: parsed.searchParams.get('ssl') === 'true' || parsed.protocol === 'postgres:',
+    ssl: parsed.searchParams.get('ssl') === 'true' || parsed.protocol === 'postgres:'
   };
 }

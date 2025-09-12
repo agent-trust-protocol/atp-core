@@ -89,15 +89,15 @@ export class ATPSecurityTestingFramework {
 
     for (const suite of testSuites) {
       console.log(`🧪 Running ${suite.name}...`);
-      
+
       for (const test of suite.tests) {
         try {
           const result = await test.run();
           allResults.push(result);
-          
+
           const status = result.passed ? '✅' : '❌';
           console.log(`  ${status} ${test.name} (${result.duration}ms)`);
-          
+
           if (!result.passed && result.severity === 'critical') {
             console.log(`    🚨 CRITICAL: ${result.message}`);
           }
@@ -193,11 +193,11 @@ export class ATPSecurityTestingFramework {
             const startTime = Date.now();
             const testData = 'Sensitive test data';
             const key = ATPEncryptionService.generateKey();
-            
+
             try {
               const encrypted = ATPEncryptionService.encryptWithKey(testData, key);
               const decrypted = ATPEncryptionService.decryptWithKey(encrypted, key);
-              
+
               const passed = decrypted === testData;
               return {
                 testName: 'AES-256-GCM Encryption/Decryption',
@@ -228,20 +228,20 @@ export class ATPSecurityTestingFramework {
             const startTime = Date.now();
             const testData = 'Test data for tampering';
             const key = ATPEncryptionService.generateKey();
-            
+
             try {
-              let encrypted = ATPEncryptionService.encryptWithKey(testData, key);
-              
+              const encrypted = ATPEncryptionService.encryptWithKey(testData, key);
+
               // Tamper with the encrypted data
               const tamperedEncrypted = this.tamperWithData(encrypted);
-              
+
               let decryptionFailed = false;
               try {
                 ATPEncryptionService.decryptWithKey(tamperedEncrypted, key);
               } catch {
                 decryptionFailed = true;
               }
-              
+
               return {
                 testName: 'Key Tampering Detection',
                 passed: decryptionFailed,
@@ -278,11 +278,11 @@ export class ATPSecurityTestingFramework {
           severity: 'high',
           run: async () => {
             const startTime = Date.now();
-            
+
             try {
               const { secret } = this.mfaService.generateSecretKey('testuser');
               const isValid = this.mfaService.validateMFASetup(secret, '123456');
-              
+
               // Note: This will likely fail with random token, which is expected
               return {
                 testName: 'TOTP Generation and Verification',
@@ -311,22 +311,22 @@ export class ATPSecurityTestingFramework {
           severity: 'high',
           run: async () => {
             const startTime = Date.now();
-            
+
             try {
               const { secret } = this.mfaService.generateSecretKey('testuser');
-              
+
               // Mock successful verification
               const mockTOTP = (this.mfaService as any).generateTOTP;
               (this.mfaService as any).generateTOTP = () => '123456';
-              
+
               const firstResult = this.mfaService.verifyTOTP('123456', secret, false);
               const secondResult = this.mfaService.verifyTOTP('123456', secret, false);
-              
+
               // Restore original function
               (this.mfaService as any).generateTOTP = mockTOTP;
-              
+
               const passed = firstResult.valid && !secondResult.valid;
-              
+
               return {
                 testName: 'Replay Attack Prevention',
                 passed,
@@ -363,14 +363,14 @@ export class ATPSecurityTestingFramework {
           severity: 'medium',
           run: async () => {
             const startTime = Date.now();
-            
+
             try {
               const originalKey = this.keyManager.generateKey('test-purpose');
               const rotatedKey = this.keyManager.rotateKey('test-purpose');
-              
+
               const passed = originalKey.keyId !== rotatedKey.keyId &&
                            rotatedKey.metadata.version > originalKey.metadata.version;
-              
+
               return {
                 testName: 'Key Rotation Functionality',
                 passed,
@@ -407,14 +407,14 @@ export class ATPSecurityTestingFramework {
           severity: 'medium',
           run: async () => {
             const startTime = Date.now();
-            
+
             try {
               const secret = BigInt(12345);
               const publicKey = 'test-public-key';
-              
+
               const proof = this.zkpService.createProofOfKnowledge(secret, publicKey);
               const isValid = this.zkpService.verifyProofOfKnowledge(proof, publicKey);
-              
+
               return {
                 testName: 'Proof Generation and Verification',
                 passed: isValid,
@@ -451,7 +451,7 @@ export class ATPSecurityTestingFramework {
           severity: 'high',
           run: async () => {
             const startTime = Date.now();
-            
+
             try {
               // Anchor a test event
               await this.blockchainService.anchorAuditEvent(
@@ -459,9 +459,9 @@ export class ATPSecurityTestingFramework {
                 'test-hash-456',
                 { test: true }
               );
-              
+
               const integrity = this.blockchainService.verifyBlockchainIntegrity();
-              
+
               return {
                 testName: 'Blockchain Integrity Verification',
                 passed: integrity,
@@ -498,7 +498,7 @@ export class ATPSecurityTestingFramework {
           severity: 'high',
           run: async () => {
             const startTime = Date.now();
-            
+
             // This would test actual TLS certificate validation
             // For now, return a placeholder result
             return {
@@ -527,24 +527,24 @@ export class ATPSecurityTestingFramework {
           severity: 'medium',
           run: async () => {
             const startTime = Date.now();
-            
+
             try {
               const validHash = createHash('sha256').update('valid-password').digest();
               const invalidHash = createHash('sha256').update('invalid-password').digest();
-              
+
               // Test timing-safe comparison
               const start1 = process.hrtime.bigint();
               timingSafeEqual(validHash, validHash);
               const time1 = process.hrtime.bigint() - start1;
-              
+
               const start2 = process.hrtime.bigint();
               timingSafeEqual(validHash, invalidHash);
               const time2 = process.hrtime.bigint() - start2;
-              
+
               // Check if timing difference is minimal (< 1ms)
               const timingDiff = Math.abs(Number(time1 - time2)) / 1000000;
               const passed = timingDiff < 1;
-              
+
               return {
                 testName: 'Timing Attack Resistance',
                 passed,
@@ -581,14 +581,14 @@ export class ATPSecurityTestingFramework {
           severity: 'high',
           run: async () => {
             const startTime = Date.now();
-            
+
             try {
               // Test with very large input
               const largeInput = 'A'.repeat(1000000);
               const hash = createHash('sha256').update(largeInput).digest('hex');
-              
+
               const passed = hash.length === 64; // SHA256 always produces 64 char hex
-              
+
               return {
                 testName: 'Buffer Overflow Protection',
                 passed,
@@ -633,7 +633,7 @@ export class ATPSecurityTestingFramework {
 
   private async testSQLInjection(config: PenetrationTestConfig): Promise<SecurityTestResult> {
     const startTime = Date.now();
-    
+
     // This would perform actual SQL injection tests against the endpoint
     // For now, return a placeholder
     return {
@@ -648,7 +648,7 @@ export class ATPSecurityTestingFramework {
 
   private async testXSS(config: PenetrationTestConfig): Promise<SecurityTestResult> {
     const startTime = Date.now();
-    
+
     return {
       testName: 'XSS Test',
       passed: true,
@@ -661,7 +661,7 @@ export class ATPSecurityTestingFramework {
 
   private async testAuthenticationBypass(config: PenetrationTestConfig): Promise<SecurityTestResult> {
     const startTime = Date.now();
-    
+
     return {
       testName: 'Authentication Bypass Test',
       passed: true,
@@ -674,7 +674,7 @@ export class ATPSecurityTestingFramework {
 
   private async testRateLimiting(config: PenetrationTestConfig): Promise<SecurityTestResult> {
     const startTime = Date.now();
-    
+
     return {
       testName: 'Rate Limiting Test',
       passed: true,
@@ -687,7 +687,7 @@ export class ATPSecurityTestingFramework {
 
   private async testCSRF(config: PenetrationTestConfig): Promise<SecurityTestResult> {
     const startTime = Date.now();
-    
+
     return {
       testName: 'CSRF Test',
       passed: true,
@@ -700,7 +700,7 @@ export class ATPSecurityTestingFramework {
 
   private async testJWTSecurity(config: PenetrationTestConfig): Promise<SecurityTestResult> {
     const startTime = Date.now();
-    
+
     return {
       testName: 'JWT Security Test',
       passed: true,
@@ -715,13 +715,13 @@ export class ATPSecurityTestingFramework {
 
   private async testRandomnessEntropy(): Promise<SecurityTestResult> {
     const startTime = Date.now();
-    
+
     try {
       const samples = Array.from({ length: 1000 }, () => randomBytes(32));
       const uniqueSamples = new Set(samples.map(s => s.toString('hex')));
-      
+
       const passed = uniqueSamples.size === samples.length;
-      
+
       return {
         testName: 'Randomness Entropy Test',
         passed,
@@ -744,13 +744,13 @@ export class ATPSecurityTestingFramework {
 
   private async testKeyGenerationQuality(): Promise<SecurityTestResult> {
     const startTime = Date.now();
-    
+
     try {
       const keys = Array.from({ length: 100 }, () => ATPEncryptionService.generateKey());
       const uniqueKeys = new Set(keys.map(k => k.toString('hex')));
-      
+
       const passed = uniqueKeys.size === keys.length;
-      
+
       return {
         testName: 'Key Generation Quality',
         passed,
@@ -773,17 +773,17 @@ export class ATPSecurityTestingFramework {
 
   private async testEncryptionStrength(): Promise<SecurityTestResult> {
     const startTime = Date.now();
-    
+
     try {
       const testData = 'encryption strength test';
       const key = ATPEncryptionService.generateKey();
-      
+
       const encrypted1 = ATPEncryptionService.encryptWithKey(testData, key);
       const encrypted2 = ATPEncryptionService.encryptWithKey(testData, key);
-      
+
       // Same plaintext should produce different ciphertext (due to random IV)
       const passed = encrypted1 !== encrypted2;
-      
+
       return {
         testName: 'Encryption Strength Test',
         passed,
@@ -806,26 +806,26 @@ export class ATPSecurityTestingFramework {
 
   private async testHashCollisionResistance(): Promise<SecurityTestResult> {
     const startTime = Date.now();
-    
+
     try {
       const hashes = new Set<string>();
       let collisionFound = false;
-      
+
       // Test for obvious collisions (shouldn't find any with good hash function)
       for (let i = 0; i < 10000; i++) {
         const data = randomBytes(32);
         const hash = createHash('sha256').update(data).digest('hex');
-        
+
         if (hashes.has(hash)) {
           collisionFound = true;
           break;
         }
-        
+
         hashes.add(hash);
       }
-      
+
       const passed = !collisionFound;
-      
+
       return {
         testName: 'Hash Collision Resistance',
         passed,
@@ -906,14 +906,14 @@ export class ATPSecurityTestingFramework {
 
   private calculateRiskScore(summary: any): number {
     const weights = { critical: 10, high: 5, medium: 2, low: 1 };
-    
+
     const totalRisk = summary.critical * weights.critical +
                       summary.high * weights.high +
                       summary.medium * weights.medium +
                       summary.low * weights.low;
 
     const maxPossibleRisk = summary.totalTests * weights.critical;
-    
+
     return maxPossibleRisk > 0 ? Math.round((totalRisk / maxPossibleRisk) * 100) : 0;
   }
 
