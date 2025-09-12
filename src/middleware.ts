@@ -4,9 +4,27 @@ import { NextRequest, NextResponse } from 'next/server'
 // In production, this would integrate with a proper auth system
 const INTERNAL_ACCESS_KEY = process.env.ATP_CLOUD_ACCESS_KEY || 'atp-internal-dev-key-2024'
 
+// Protected routes that require authentication
+const protectedRoutes = [
+  '/cloud',
+  '/policies', 
+  '/policy-editor',
+  '/policy-testing',
+  '/dashboard',
+  '/monitoring',
+  '/api-reference',
+  '/api/workflows',
+  '/api/monitoring'
+]
+
 export function middleware(request: NextRequest) {
-  // Only apply authentication to cloud dashboard routes
-  if (!request.nextUrl.pathname.startsWith('/cloud')) {
+  // Check if the current path matches any protected route
+  const isProtectedRoute = protectedRoutes.some(route => 
+    request.nextUrl.pathname.startsWith(route)
+  )
+  
+  // Only apply authentication to protected routes
+  if (!isProtectedRoute) {
     return NextResponse.next()
   }
 
@@ -139,8 +157,16 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all cloud dashboard routes
+     * Match all protected routes that require authentication
      */
     '/cloud/:path*',
+    '/policies/:path*',
+    '/policy-editor/:path*', 
+    '/policy-testing/:path*',
+    '/dashboard/:path*',
+    '/monitoring/:path*',
+    '/api-reference/:path*',
+    '/api/workflows/:path*',
+    '/api/monitoring/:path*'
   ],
 }
