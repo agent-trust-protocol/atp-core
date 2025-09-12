@@ -156,35 +156,6 @@ function WorkflowDesignerContent() {
   
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
 
-  // Client-side auth check
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('atp_token='));
-      
-      if (!token) {
-        router.push('/login?returnTo=/dashboard/workflows/designer&feature=workflow-designer&tier=startup');
-      } else {
-        setIsAuthenticated(true);
-      }
-    };
-    
-    checkAuth();
-  }, [router]);
-
-  if (!isAuthenticated) {
-    return (
-      <div className="flex items-center justify-center h-[600px]">
-        <div className="text-center">
-          <Shield className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <p className="text-lg font-semibold">Authenticating...</p>
-          <p className="text-sm text-muted-foreground">Verifying access to workflow designer</p>
-        </div>
-      </div>
-    );
-  }
-
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
@@ -259,6 +230,35 @@ function WorkflowDesignerContent() {
     setWorkflowName('New Workflow');
     setSelectedNode(null);
   };
+
+  // Client-side auth check (after all hooks)
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('atp_token='));
+      
+      if (!token) {
+        router.push('/login?returnTo=/dashboard/workflows/designer&feature=workflow-designer&tier=startup');
+      } else {
+        setIsAuthenticated(true);
+      }
+    };
+    
+    checkAuth();
+  }, [router]);
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center h-[600px]">
+        <div className="text-center">
+          <Shield className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+          <p className="text-lg font-semibold">Authenticating...</p>
+          <p className="text-sm text-muted-foreground">Verifying access to workflow designer</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-12 gap-6 h-[800px]">
