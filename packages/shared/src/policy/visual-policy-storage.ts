@@ -1,18 +1,18 @@
 /**
  * Visual Trust Policy Storage Service
- * 
+ *
  * Provides comprehensive CRUD operations for Visual Trust Policies
  * with support for multi-tenancy, version control, audit logging,
  * and performance metrics.
- * 
+ *
  * @version 1.0.0
  * @author ATP Team
  */
 
 import { BaseStorage } from '../database/base-storage.js';
 import type { DatabaseConfig } from '../database/types.js';
-import { 
-  ATPVisualPolicy, 
+import {
+  ATPVisualPolicy,
   VisualPolicyRule,
   validateATPPolicy,
   validatePolicyRule,
@@ -113,14 +113,14 @@ export class VisualPolicyStorageService extends BaseStorage {
   async createPolicy(policy: ATPVisualPolicy, createdBy: string): Promise<string> {
     // Validate the policy
     const validatedPolicy = validateATPPolicy(policy);
-    
+
     // Check organization limits
     await this.checkOrganizationLimits(policy.organizationId);
-    
+
     const query = `
       SELECT atp_permissions.create_visual_policy($1, $2, $3, $4, $5, $6, $7, $8)
     `;
-    
+
     const result = await this.db.query(query, [
       validatedPolicy.id,
       validatedPolicy.name,
@@ -131,7 +131,7 @@ export class VisualPolicyStorageService extends BaseStorage {
       validatedPolicy.category || 'operational',
       validatedPolicy.tags || []
     ]);
-    
+
     return validatedPolicy.id;
   }
 
@@ -145,18 +145,18 @@ export class VisualPolicyStorageService extends BaseStorage {
       WHERE policy_id = $1
     `;
     const params: any[] = [policyId];
-    
+
     if (organizationId) {
-      query += ` AND organization_id = $2`;
+      query += ' AND organization_id = $2';
       params.push(organizationId);
     }
-    
+
     const result = await this.db.query(query, params);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
-    
+
     const row = result.rows[0];
     return row.policy_document as ATPVisualPolicy;
   }
@@ -165,8 +165,8 @@ export class VisualPolicyStorageService extends BaseStorage {
    * Update an existing policy
    */
   async updatePolicy(
-    policyId: string, 
-    updates: Partial<ATPVisualPolicy>, 
+    policyId: string,
+    updates: Partial<ATPVisualPolicy>,
     updatedBy: string,
     reason?: string
   ): Promise<void> {
@@ -175,13 +175,13 @@ export class VisualPolicyStorageService extends BaseStorage {
     if (!currentPolicy) {
       throw new Error(`Policy not found: ${policyId}`);
     }
-    
+
     // Merge updates with current policy
     const updatedPolicy = { ...currentPolicy, ...updates, updatedAt: new Date().toISOString() };
-    
+
     // Validate the updated policy
     const validatedPolicy = validateATPPolicy(updatedPolicy);
-    
+
     const query = `
       UPDATE atp_permissions.visual_policies 
       SET 
@@ -193,7 +193,7 @@ export class VisualPolicyStorageService extends BaseStorage {
         updated_at = NOW()
       WHERE policy_id = $1
     `;
-    
+
     await this.db.query(query, [
       policyId,
       validatedPolicy.name,
@@ -202,7 +202,7 @@ export class VisualPolicyStorageService extends BaseStorage {
       validatedPolicy.category || 'operational',
       validatedPolicy.tags || []
     ]);
-    
+
     // Log the update
     await this.logAuditEvent({
       policyId,
@@ -222,9 +222,9 @@ export class VisualPolicyStorageService extends BaseStorage {
       SET status = 'archived', archived_at = NOW()
       WHERE policy_id = $1
     `;
-    
+
     await this.db.query(query, [policyId]);
-    
+
     // Log the deletion
     await this.logAuditEvent({
       policyId,
@@ -244,53 +244,53 @@ export class VisualPolicyStorageService extends BaseStorage {
     let whereClause = 'WHERE 1=1';
     const params: any[] = [];
     let paramIndex = 1;
-    
+
     if (filters.organizationId) {
       whereClause += ` AND organization_id = $${paramIndex++}`;
       params.push(filters.organizationId);
     }
-    
+
     if (filters.status) {
       whereClause += ` AND status = $${paramIndex++}`;
       params.push(filters.status);
     }
-    
+
     if (filters.category) {
       whereClause += ` AND category = $${paramIndex++}`;
       params.push(filters.category);
     }
-    
+
     if (filters.createdBy) {
       whereClause += ` AND created_by = $${paramIndex++}`;
       params.push(filters.createdBy);
     }
-    
+
     if (filters.enabled !== undefined) {
       whereClause += ` AND enabled = $${paramIndex++}`;
       params.push(filters.enabled);
     }
-    
+
     if (filters.tags && filters.tags.length > 0) {
       whereClause += ` AND tags && $${paramIndex++}`;
       params.push(filters.tags);
     }
-    
+
     // Count total results
     const countQuery = `
       SELECT COUNT(*) as total
       FROM atp_permissions.visual_policies
       ${whereClause}
     `;
-    
+
     const countResult = await this.db.query(countQuery, params);
     const total = parseInt(countResult.rows[0].total);
-    
+
     // Get paginated results
     const sortBy = filters.sortBy || 'created_at';
     const sortOrder = filters.sortOrder || 'desc';
     const limit = filters.limit || 50;
     const offset = filters.offset || 0;
-    
+
     const query = `
       SELECT policy_document
       FROM atp_permissions.visual_policies
@@ -298,12 +298,12 @@ export class VisualPolicyStorageService extends BaseStorage {
       ORDER BY ${sortBy} ${sortOrder}
       LIMIT $${paramIndex++} OFFSET $${paramIndex++}
     `;
-    
+
     params.push(limit, offset);
-    
+
     const result = await this.db.query(query, params);
     const policies = result.rows.map((row: any) => row.policy_document as ATPVisualPolicy);
-    
+
     return { policies, total };
   }
 
@@ -316,9 +316,9 @@ export class VisualPolicyStorageService extends BaseStorage {
       SET enabled = $2, updated_at = NOW()
       WHERE policy_id = $1
     `;
-    
+
     await this.db.query(query, [policyId, enabled]);
-    
+
     // Log the change
     await this.logAuditEvent({
       policyId,
@@ -344,14 +344,14 @@ export class VisualPolicyStorageService extends BaseStorage {
     const query = `
       SELECT atp_permissions.deploy_visual_policy($1, $2, $3, $4)
     `;
-    
+
     const result = await this.db.query(query, [
       policyId,
       deployedBy,
       environment,
       gatewayInstances
     ]);
-    
+
     return result.rows[0].deploy_visual_policy;
   }
 
@@ -367,9 +367,9 @@ export class VisualPolicyStorageService extends BaseStorage {
       WHERE policy_id = $1
       ORDER BY deployed_at DESC
     `;
-    
+
     const result = await this.db.query(query, [policyId]);
-    
+
     return result.rows.map((row: any) => ({
       deploymentId: row.deployment_id,
       policyId: row.policy_id,
@@ -398,7 +398,7 @@ export class VisualPolicyStorageService extends BaseStorage {
     const query = `
       SELECT atp_permissions.record_policy_evaluation($1, $2, $3)
     `;
-    
+
     await this.db.query(query, [policyId, action, evaluationTimeMs]);
   }
 
@@ -419,13 +419,13 @@ export class VisualPolicyStorageService extends BaseStorage {
       WHERE policy_id = $1 AND date BETWEEN $2 AND $3
       ORDER BY date DESC
     `;
-    
+
     const result = await this.db.query(query, [
       policyId,
       startDate.toISOString().split('T')[0],
       endDate.toISOString().split('T')[0]
     ]);
-    
+
     return result.rows.map((row: any) => ({
       policyId: row.policy_id,
       date: new Date(row.date),
@@ -453,7 +453,7 @@ export class VisualPolicyStorageService extends BaseStorage {
       (policy_id, action, actor, changes_json, reason, ip_address, user_agent, session_id)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     `;
-    
+
     await this.db.query(query, [
       event.policyId,
       event.action,
@@ -483,9 +483,9 @@ export class VisualPolicyStorageService extends BaseStorage {
       ORDER BY timestamp DESC
       LIMIT $2 OFFSET $3
     `;
-    
+
     const result = await this.db.query(query, [policyId, limit, offset]);
-    
+
     return result.rows.map((row: any) => ({
       id: row.id,
       policyId: row.policy_id,
@@ -513,13 +513,13 @@ export class VisualPolicyStorageService extends BaseStorage {
       FROM atp_permissions.visual_policy_org_settings
       WHERE organization_id = $1
     `;
-    
+
     const result = await this.db.query(query, [organizationId]);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
-    
+
     const row = result.rows[0];
     return {
       organizationId: row.organization_id,
@@ -558,7 +558,7 @@ export class VisualPolicyStorageService extends BaseStorage {
         enable_detailed_logging = EXCLUDED.enable_detailed_logging,
         updated_at = NOW()
     `;
-    
+
     await this.db.query(query, [
       settings.organizationId,
       settings.maxPoliciesPerOrg,
@@ -587,7 +587,7 @@ export class VisualPolicyStorageService extends BaseStorage {
     customizations?: Partial<ATPVisualPolicy>
   ): Promise<string> {
     let templatePolicy: ATPVisualPolicy;
-    
+
     switch (templateType) {
       case 'allow_all':
         templatePolicy = createAllowAllPolicyTemplate(organizationId, createdBy);
@@ -598,12 +598,12 @@ export class VisualPolicyStorageService extends BaseStorage {
       default:
         throw new Error(`Unknown template type: ${templateType}`);
     }
-    
+
     // Apply customizations
     if (customizations) {
       templatePolicy = { ...templatePolicy, ...customizations };
     }
-    
+
     return await this.createPolicy(templatePolicy, createdBy);
   }
 
@@ -619,16 +619,16 @@ export class VisualPolicyStorageService extends BaseStorage {
     if (!settings) {
       return; // No limits configured
     }
-    
+
     const countQuery = `
       SELECT COUNT(*) as count
       FROM atp_permissions.visual_policies
       WHERE organization_id = $1 AND status != 'archived'
     `;
-    
+
     const result = await this.db.query(countQuery, [organizationId]);
     const currentCount = parseInt(result.rows[0].count);
-    
+
     if (currentCount >= settings.maxPoliciesPerOrg) {
       throw new Error(
         `Organization policy limit exceeded. Maximum: ${settings.maxPoliciesPerOrg}, Current: ${currentCount}`
@@ -641,19 +641,19 @@ export class VisualPolicyStorageService extends BaseStorage {
    */
   private calculateChanges(oldPolicy: ATPVisualPolicy, newPolicy: ATPVisualPolicy): Record<string, any> {
     const changes: Record<string, any> = {};
-    
+
     // Compare key fields
     const fieldsToCompare = ['name', 'description', 'enabled', 'defaultAction', 'evaluationMode', 'category', 'tags'];
-    
+
     for (const field of fieldsToCompare) {
       const oldValue = (oldPolicy as any)[field];
       const newValue = (newPolicy as any)[field];
-      
+
       if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
         changes[field] = { from: oldValue, to: newValue };
       }
     }
-    
+
     // Compare rules (simplified)
     if (oldPolicy.rules.length !== newPolicy.rules.length) {
       changes.rules = {
@@ -661,7 +661,7 @@ export class VisualPolicyStorageService extends BaseStorage {
         to: `${newPolicy.rules.length} rules`
       };
     }
-    
+
     return changes;
   }
 }

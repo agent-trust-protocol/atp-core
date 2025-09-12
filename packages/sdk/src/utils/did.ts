@@ -18,12 +18,12 @@ export class DIDUtils {
   }> {
     const network = options?.network || 'mainnet';
     const method = options?.method || 'atp';
-    
+
     const keyPair = await CryptoUtils.generateKeyPair();
     const fingerprint = CryptoUtils.createKeyFingerprint(keyPair.publicKey);
-    
+
     const did = `did:${method}:${network}:${fingerprint}`;
-    
+
     const document: DIDDocument = {
       id: did,
       '@context': ['https://www.w3.org/ns/did/v1'],
@@ -56,7 +56,7 @@ export class DIDUtils {
   } | null {
     const didRegex = /^did:([^:]+):([^:]+):([^#]+)(?:#(.+))?$/;
     const match = did.match(didRegex);
-    
+
     if (!match) {
       return null;
     }
@@ -81,7 +81,7 @@ export class DIDUtils {
    */
   static extractPublicKey(document: DIDDocument, keyId?: string): string | null {
     const targetKeyId = keyId || `${document.id}#key-1`;
-    
+
     const verificationMethod = document.verificationMethod?.find(
       vm => vm.id === targetKeyId
     );
@@ -200,7 +200,7 @@ export class DIDUtils {
 
     const { proof, ...documentWithoutProof } = document;
     const publicKey = this.extractPublicKey(document, proof.verificationMethod);
-    
+
     if (!publicKey) {
       return false;
     }
@@ -231,7 +231,7 @@ export class DIDUtils {
     // Simplified multibase encoding (base58btc)
     const publicKeyBuffer = Buffer.from(publicKeyHex, 'hex');
     // In a real implementation, this would use proper multibase encoding
-    return 'z' + publicKeyBuffer.toString('base64url');
+    return `z${  publicKeyBuffer.toString('base64url')}`;
   }
 
   /**
@@ -259,7 +259,7 @@ export class DIDUtils {
     const network = options?.network || 'mainnet';
     const method = options?.method || 'atp';
     const fingerprint = CryptoUtils.createKeyFingerprint(publicKey);
-    
+
     return `did:${method}:${network}:${fingerprint}`;
   }
 

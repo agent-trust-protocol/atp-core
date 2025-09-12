@@ -1,10 +1,10 @@
 /**
  * Visual Trust Policy Editor - ATP Policy JSON Schema
- * 
+ *
  * This module defines the comprehensive schema for visual trust policies
  * that can be created using the drag-and-drop policy editor and enforced
  * by the ATP Gateway at runtime.
- * 
+ *
  * @version 1.0.0
  * @author ATP Team
  */
@@ -21,7 +21,7 @@ import { randomUUID } from 'crypto';
  */
 export const VisualPolicyTrustLevelEnum = z.enum([
   'UNKNOWN',
-  'BASIC', 
+  'BASIC',
   'VERIFIED',
   'TRUSTED',
   'PRIVILEGED'
@@ -32,7 +32,7 @@ export const VisualPolicyTrustLevelEnum = z.enum([
  */
 export const VisualPolicyActionEnum = z.enum([
   'allow',
-  'deny', 
+  'deny',
   'throttle',
   'log',
   'alert',
@@ -44,7 +44,7 @@ export const VisualPolicyActionEnum = z.enum([
  */
 export const VisualPolicyLogicalOperatorEnum = z.enum([
   'AND',
-  'OR', 
+  'OR',
   'NOT'
 ]);
 
@@ -323,16 +323,16 @@ export const VisualPolicyRuleSchema = z.object({
   description: z.string().max(500).optional(),
   enabled: z.boolean().default(true),
   priority: z.number().min(0).max(1000).default(100),
-  
+
   // Condition that must be met
   condition: z.union([
     VisualPolicyConditionSchema,
     VisualPolicyLogicalExpressionSchema
   ]),
-  
+
   // Action to take when condition is met
   action: VisualPolicyActionSchema,
-  
+
   // Metadata
   tags: z.array(z.string()).default([]),
   createdAt: z.string().datetime(),
@@ -354,25 +354,25 @@ export const ATPVisualPolicySchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(1000).optional(),
   version: z.string().default('1.0.0'),
-  
+
   // Organization and access control
   organizationId: z.string(),
   createdBy: z.string(), // DID of creator
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
-  
+
   // Policy configuration
   enabled: z.boolean().default(true),
   defaultAction: VisualPolicyActionEnum.default('deny'),
   evaluationMode: z.enum(['first_match', 'all_rules', 'priority_order']).default('priority_order'),
-  
+
   // Policy rules (ordered by priority)
   rules: z.array(VisualPolicyRuleSchema).min(1),
-  
+
   // Policy metadata
   tags: z.array(z.string()).default([]),
   category: z.string().optional(), // e.g., "security", "compliance", "operational"
-  
+
   // Validation and testing
   testCases: z.array(z.object({
     id: z.string().uuid(),
@@ -387,7 +387,7 @@ export const ATPVisualPolicySchema = z.object({
     expectedAction: VisualPolicyActionEnum,
     description: z.string().optional()
   })).default([]),
-  
+
   // Audit and compliance
   auditLog: z.array(z.object({
     timestamp: z.string().datetime(),
@@ -478,48 +478,48 @@ export function validatePartialPolicy(policy: unknown): Partial<ATPVisualPolicy>
  */
 export function createAllowAllPolicyTemplate(organizationId: string, createdBy: string): ATPVisualPolicy {
   const now = new Date().toISOString();
-  
+
   return {
     id: randomUUID(),
-    name: "Allow All Access",
-    description: "Basic policy that allows all authenticated agents access to all tools",
-    version: "1.0.0",
+    name: 'Allow All Access',
+    description: 'Basic policy that allows all authenticated agents access to all tools',
+    version: '1.0.0',
     organizationId,
     createdBy,
     createdAt: now,
     updatedAt: now,
     enabled: true,
-    defaultAction: "deny",
-    evaluationMode: "first_match",
+    defaultAction: 'deny',
+    evaluationMode: 'first_match',
     rules: [{
       id: randomUUID(),
-      name: "Allow All Rule",
-      description: "Allows access for any agent with basic trust level or higher",
+      name: 'Allow All Rule',
+      description: 'Allows access for any agent with basic trust level or higher',
       enabled: true,
       priority: 100,
       condition: {
         id: randomUUID(),
-        type: "trust_level",
-        operator: "greater_than_or_equal",
-        value: "BASIC"
+        type: 'trust_level',
+        operator: 'greater_than_or_equal',
+        value: 'BASIC'
       },
       action: {
         id: randomUUID(),
-        type: "allow"
+        type: 'allow'
       },
-      tags: ["basic", "permissive"],
+      tags: ['basic', 'permissive'],
       createdAt: now,
       updatedAt: now,
       createdBy,
-      version: "1.0.0"
+      version: '1.0.0'
     }],
-    tags: ["template", "basic"],
+    tags: ['template', 'basic'],
     testCases: [],
     auditLog: [{
       timestamp: now,
-      action: "created",
+      action: 'created',
       actor: createdBy,
-      reason: "Created from template"
+      reason: 'Created from template'
     }]
   };
 }
@@ -529,70 +529,70 @@ export function createAllowAllPolicyTemplate(organizationId: string, createdBy: 
  */
 export function createSecurityPolicyTemplate(organizationId: string, createdBy: string): ATPVisualPolicy {
   const now = new Date().toISOString();
-  
+
   return {
     id: randomUUID(),
-    name: "Security Policy",
-    description: "Restrictive policy requiring verified credentials for sensitive tools",
-    version: "1.0.0",
+    name: 'Security Policy',
+    description: 'Restrictive policy requiring verified credentials for sensitive tools',
+    version: '1.0.0',
     organizationId,
     createdBy,
     createdAt: now,
     updatedAt: now,
     enabled: true,
-    defaultAction: "deny",
-    evaluationMode: "priority_order",
+    defaultAction: 'deny',
+    evaluationMode: 'priority_order',
     rules: [
       {
         id: randomUUID(),
-        name: "Require Security Certification",
-        description: "Require security certification for database access",
+        name: 'Require Security Certification',
+        description: 'Require security certification for database access',
         enabled: true,
         priority: 10,
         condition: {
           id: randomUUID(),
-          operator: "AND",
+          operator: 'AND',
           operands: [
             {
               id: randomUUID(),
-              type: "verifiable_credential",
-              operator: "contains",
+              type: 'verifiable_credential',
+              operator: 'contains',
               value: {
-                credentialType: "com.atp.security.certified",
+                credentialType: 'com.atp.security.certified',
                 expirationCheck: true
               }
             },
             {
               id: randomUUID(),
-              type: "tool",
-              operator: "contains",
-              value: "database"
+              type: 'tool',
+              operator: 'contains',
+              value: 'database'
             }
           ]
         },
         action: {
           id: randomUUID(),
-          type: "allow",
+          type: 'allow',
           conditions: {
             requireMFA: true,
             timeLimit: 60
           }
         },
-        tags: ["security", "database"],
+        tags: ['security', 'database'],
         createdAt: now,
         updatedAt: now,
         createdBy,
-        version: "1.0.0"
+        version: '1.0.0'
       }
     ],
-    tags: ["template", "security"],
-    category: "security",
+    tags: ['template', 'security'],
+    category: 'security',
     testCases: [],
     auditLog: [{
       timestamp: now,
-      action: "created",
+      action: 'created',
       actor: createdBy,
-      reason: "Created from security template"
+      reason: 'Created from security template'
     }]
   };
 }

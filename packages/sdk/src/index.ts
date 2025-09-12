@@ -1,8 +1,8 @@
 /**
  * ATP™ SDK - Agent Trust Protocol SDK
- * 
+ *
  * A comprehensive TypeScript SDK for interacting with Agent Trust Protocol™ services
- * 
+ *
  * @version 1.0.0
  * @author Agent Trust Protocol™ Team
  * @license MIT
@@ -129,7 +129,7 @@ export const ATP_CONSTANTS = {
 import { ATPClient } from './client/atp.js';
 import type { ATPConfig } from './types.js';
 
-// Helper functions for quick SDK setup  
+// Helper functions for quick SDK setup
 export function createATPClient(config: ATPConfig): ATPClient {
   return new ATPClient(config);
 }
@@ -151,7 +151,7 @@ export function createQuickConfig(baseUrl: string, options?: {
     auth: options?.auth || {},
     services: {
       identity: process.env.ATP_IDENTITY_URL || `${baseUrl}:3001`,
-      credentials: process.env.ATP_CREDENTIALS_URL || `${baseUrl}:3002`, 
+      credentials: process.env.ATP_CREDENTIALS_URL || `${baseUrl}:3002`,
       permissions: process.env.ATP_PERMISSIONS_URL || `${baseUrl}:3003`,
       audit: process.env.ATP_AUDIT_URL || `${baseUrl}:3006`,
       gateway: process.env.ATP_GATEWAY_URL || `${baseUrl}:3000`

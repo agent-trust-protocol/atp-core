@@ -1,12 +1,12 @@
 import { BaseClient } from './base.js';
-import { 
-  ATPConfig, 
-  DIDDocument, 
-  Agent, 
-  TrustLevel, 
-  MFASetup, 
+import {
+  ATPConfig,
+  DIDDocument,
+  Agent,
+  TrustLevel,
+  MFASetup,
   MFAStatus,
-  ATPResponse 
+  ATPResponse
 } from '../types.js';
 
 export interface DIDRegistrationRequest {
@@ -79,8 +79,8 @@ export class IdentityClient extends BaseClient {
    * Rotate keys for a DID
    */
   async rotateKeys(did: string, newPublicKey: string): Promise<ATPResponse<DIDDocument>> {
-    return this.post(`/identity/${encodeURIComponent(did)}/rotate-keys`, { 
-      newPublicKey 
+    return this.post(`/identity/${encodeURIComponent(did)}/rotate-keys`, {
+      newPublicKey
     });
   }
 

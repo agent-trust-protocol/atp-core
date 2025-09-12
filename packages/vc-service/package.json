@@ -9,7 +9,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "jest --passWithNoTests",
-    "lint": "eslint src --ext .ts",
+    "lint": "eslint src --fix",
     "clean": "rm -rf dist"
   },
   "dependencies": {

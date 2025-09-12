@@ -20,7 +20,7 @@ const mcpConfig: ATPMCPServerConfig = {
     tools: { listChanged: true },
     resources: { subscribe: false, listChanged: false },
     prompts: { listChanged: false },
-    logging: { level: 'info' },
+    logging: { level: 'info' }
   },
   atpConfig: {
     serverDID: 'did:atp:z6MkpTHR8VNsBxYAAWHut2Geadd9jSwuBV8xRoAnwWsdvktH', // Example DID
@@ -29,9 +29,9 @@ const mcpConfig: ATPMCPServerConfig = {
     auditEndpoint: 'http://localhost:3005/audit/log',
     rateLimits: {
       globalRequestsPerMinute: 1000,
-      perClientRequestsPerMinute: 100,
-    },
-  },
+      perClientRequestsPerMinute: 100
+    }
+  }
 };
 
 // Initialize MCP Server
@@ -56,15 +56,15 @@ app.get('/health', (req, res) => {
       mcp: {
         enabled: true,
         tools: EXAMPLE_TOOLS.length,
-        server: mcpConfig.name,
+        server: mcpConfig.name
       },
       a2a: {
         enabled: true,
         status: 'active',
-        endpoint: 'http://localhost:3008',
-      },
+        endpoint: 'http://localhost:3008'
+      }
     },
-    timestamp: Date.now(),
+    timestamp: Date.now()
   });
 });
 
@@ -76,14 +76,14 @@ app.get('/mcp/tools', (req, res) => {
       description: tool.description,
       trustLevelRequired: tool.trustLevelRequired,
       capabilities: tool.capabilities,
-      auditRequired: tool.auditRequired,
-    })),
+      auditRequired: tool.auditRequired
+    }))
   });
 });
 
 // Start HTTP server
 app.listen(port, () => {
-  console.log(`Agent Trust Protocol™ - Protocol Integrations v0.1.0`);
+  console.log('Agent Trust Protocol™ - Protocol Integrations v0.1.0');
   console.log(`HTTP server running on port ${port}`);
 });
 

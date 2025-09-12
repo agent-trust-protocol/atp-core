@@ -94,7 +94,7 @@ export class ATPBlockchainAuditService {
 
     genesisBlock.merkleRoot = this.calculateMerkleRoot(genesisBlock.transactions);
     genesisBlock.hash = this.calculateHash(genesisBlock);
-    
+
     this.chain.push(genesisBlock);
   }
 
@@ -126,7 +126,7 @@ export class ATPBlockchainAuditService {
     this.pendingTransactions.push(transaction);
 
     // Mine a new block if we have enough transactions or enough time has passed
-    const shouldMine = this.pendingTransactions.length >= 10 || 
+    const shouldMine = this.pendingTransactions.length >= 10 ||
                       this.shouldMineBlock();
 
     if (shouldMine) {
@@ -188,16 +188,16 @@ export class ATPBlockchainAuditService {
   generateIntegrityProof(): IntegrityProof {
     const lastBlock = this.getLatestBlock();
     const unanchoredEvents = this.pendingTransactions.length;
-    
+
     // Calculate merkle root of all audit events
     const allTransactions = this.chain
       .flatMap(block => block.transactions)
       .filter(tx => tx.data.type === 'audit-anchor');
 
     const merkleRoot = this.calculateMerkleRoot(allTransactions);
-    
+
     // Generate proof path for latest anchored event
-    const proofPath = this.lastAnchoredEventId ? 
+    const proofPath = this.lastAnchoredEventId ?
       this.generateMerkleProof(this.lastAnchoredEventId) : [];
 
     return {
@@ -257,10 +257,10 @@ export class ATPBlockchainAuditService {
     lastBlockTime: string;
     averageBlockTime: number;
     chainHash: string;
-  } {
+    } {
     const totalTransactions = this.chain
       .reduce((sum, block) => sum + block.transactions.length, 0);
-    
+
     const auditEvents = this.chain
       .flatMap(block => block.transactions)
       .filter(tx => tx.data.type === 'audit-anchor').length;
@@ -271,7 +271,7 @@ export class ATPBlockchainAuditService {
       return currTime - prevTime;
     });
 
-    const averageBlockTime = blockTimes.length > 0 ? 
+    const averageBlockTime = blockTimes.length > 0 ?
       blockTimes.reduce((sum, time) => sum + time, 0) / blockTimes.length : 0;
 
     // Calculate chain hash (hash of all block hashes)
@@ -307,11 +307,11 @@ export class ATPBlockchainAuditService {
   importBlockchain(blockchainData: string): boolean {
     try {
       const data = JSON.parse(blockchainData);
-      
+
       // Verify the imported chain
       const tempService = new ATPBlockchainAuditService();
       tempService.chain = data.chain;
-      
+
       if (!tempService.verifyBlockchainIntegrity()) {
         throw new Error('Invalid blockchain data');
       }
@@ -344,7 +344,7 @@ export class ATPBlockchainAuditService {
 
     // Proof of work
     newBlock.hash = await this.proofOfWork(newBlock);
-    
+
     this.chain.push(newBlock);
     this.pendingTransactions = [];
 
@@ -353,16 +353,16 @@ export class ATPBlockchainAuditService {
 
   private async proofOfWork(block: BlockchainBlock): Promise<string> {
     const target = Array(this.difficulty + 1).join('0');
-    
+
     while (true) {
       const hash = this.calculateHash(block);
-      
+
       if (hash.substring(0, this.difficulty) === target) {
         return hash;
       }
-      
+
       block.nonce++;
-      
+
       // Yield control occasionally to prevent blocking
       if (block.nonce % 100000 === 0) {
         await new Promise(resolve => setTimeout(resolve, 1));
@@ -394,24 +394,24 @@ export class ATPBlockchainAuditService {
     }
 
     let level = transactions.map(tx => tx.hash);
-    
+
     while (level.length > 1) {
       const nextLevel: string[] = [];
-      
+
       for (let i = 0; i < level.length; i += 2) {
         const left = level[i];
         const right = i + 1 < level.length ? level[i + 1] : left;
-        
+
         const combined = createHash('sha256')
           .update(left + right)
           .digest('hex');
-        
+
         nextLevel.push(combined);
       }
-      
+
       level = nextLevel;
     }
-    
+
     return level[0];
   }
 
@@ -419,33 +419,33 @@ export class ATPBlockchainAuditService {
     // Find all transactions in the blockchain
     const allTransactions = this.chain.flatMap(block => block.transactions);
     const transactionIndex = allTransactions.findIndex(tx => tx.id === transactionId);
-    
+
     if (transactionIndex === -1) return [];
 
     // Generate merkle proof path
     const proof: string[] = [];
     let currentIndex = transactionIndex;
     let level = allTransactions.map(tx => tx.hash);
-    
+
     while (level.length > 1) {
       const isRightNode = currentIndex % 2 === 1;
       const siblingIndex = isRightNode ? currentIndex - 1 : currentIndex + 1;
-      
+
       if (siblingIndex < level.length) {
         proof.push(level[siblingIndex]);
       }
-      
+
       const nextLevel: string[] = [];
       for (let i = 0; i < level.length; i += 2) {
         const left = level[i];
         const right = i + 1 < level.length ? level[i + 1] : left;
         nextLevel.push(createHash('sha256').update(left + right).digest('hex'));
       }
-      
+
       level = nextLevel;
       currentIndex = Math.floor(currentIndex / 2);
     }
-    
+
     return proof;
   }
 
@@ -455,24 +455,24 @@ export class ATPBlockchainAuditService {
     merkleRoot: string
   ): boolean {
     let currentHash = transactionHash;
-    
+
     for (const proofElement of proof) {
       currentHash = createHash('sha256')
         .update(currentHash + proofElement)
         .digest('hex');
     }
-    
+
     return currentHash === merkleRoot;
   }
 
   private generateTransactionId(): string {
-    return 'tx_' + randomBytes(16).toString('hex');
+    return `tx_${  randomBytes(16).toString('hex')}`;
   }
 
   private signTransaction(auditEventId: string, auditEventHash: string): string {
     // Simplified signing - in practice would use proper digital signatures
     return createHash('sha256')
-      .update(auditEventId + auditEventHash + 'audit-service-key')
+      .update(`${auditEventId + auditEventHash  }audit-service-key`)
       .digest('hex');
   }
 
@@ -489,7 +489,7 @@ export class ATPBlockchainAuditService {
   private shouldMineBlock(): boolean {
     const lastBlock = this.getLatestBlock();
     const timeSinceLastBlock = Date.now() - new Date(lastBlock.timestamp).getTime();
-    
+
     // Mine a block every 5 minutes if there are pending transactions
     return timeSinceLastBlock > 5 * 60 * 1000 && this.pendingTransactions.length > 0;
   }

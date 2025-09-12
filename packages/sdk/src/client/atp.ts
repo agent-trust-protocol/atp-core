@@ -7,7 +7,7 @@ import { GatewayClient } from './gateway.js';
 
 /**
  * Main ATP™ SDK Client
- * 
+ *
  * Provides a unified interface to all ATP services with convenient access
  * to identity, credentials, permissions, audit, and gateway functionality.
  */
@@ -35,7 +35,7 @@ export class ATPClient {
     token?: string;
   }): void {
     this.config.auth = { ...this.config.auth, ...auth };
-    
+
     // Update auth for all clients
     this.identity.updateAuth(auth);
     this.credentials.updateAuth(auth);

@@ -1,0 +1,24 @@
+{
+  "name": "atp-case-study",
+  "version": "1.0.0",
+  "description": "Comprehensive case study demonstrating Agent Trust Protocol capabilities",
+  "type": "module",
+  "main": "comprehensive-test.js",
+  "scripts": {
+    "test": "npm run build && npm run test:comprehensive",
+    "test:comprehensive": "node dist/comprehensive-test.js",
+    "test:standalone": "node dist/standalone-test.js",
+    "build": "tsc",
+    "dev": "tsx --watch comprehensive-test.ts",
+    "start": "npm run test"
+  },
+  "dependencies": {
+    "@agent-trust-protocol/sdk": "file:../../packages/sdk",
+    "@agent-trust-protocol/shared": "file:../../packages/shared"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

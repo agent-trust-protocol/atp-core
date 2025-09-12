@@ -1,9 +1,9 @@
 import { BaseClient } from './base.js';
-import { 
-  ATPConfig, 
-  VerifiableCredential, 
+import {
+  ATPConfig,
+  VerifiableCredential,
   VerifiablePresentation,
-  ATPResponse 
+  ATPResponse
 } from '../types.js';
 
 export interface CredentialIssuanceRequest {
@@ -61,8 +61,8 @@ export class CredentialsClient extends BaseClient {
   /**
    * Verify a verifiable credential
    */
-  async verifyCredential(request: CredentialVerificationRequest): Promise<ATPResponse<{ 
-    valid: boolean; 
+  async verifyCredential(request: CredentialVerificationRequest): Promise<ATPResponse<{
+    valid: boolean;
     error?: string;
     checks: {
       signature: boolean;

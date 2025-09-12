@@ -1,8 +1,8 @@
 import { BaseClient } from './base.js';
-import { 
-  ATPConfig, 
+import {
+  ATPConfig,
   AuditEvent,
-  ATPResponse 
+  ATPResponse
 } from '../types.js';
 
 export interface AuditLogRequest {
@@ -341,9 +341,9 @@ export class AuditClient extends BaseClient {
   /**
    * Check service health
    */
-  async getHealth(): Promise<ATPResponse<{ 
-    status: string; 
-    service: string; 
+  async getHealth(): Promise<ATPResponse<{
+    status: string;
+    service: string;
     database?: any;
     ipfs?: { connected: boolean; peerId?: string };
     blockchain?: { height: number; integrityStatus: string };

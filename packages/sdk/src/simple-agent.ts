@@ -1,6 +1,6 @@
 /**
  * Simplified Agent API for ATP™
- * 
+ *
  * Provides a 3-line quick start experience for developers
  * while maintaining full quantum-safe security features.
  */
@@ -27,7 +27,7 @@ export class Agent {
 
   private constructor(name: string, options?: SimpleAgentOptions) {
     this.name = name;
-    
+
     // Default to local services (overridable via options or env). Audit defaults to 3006 to match mocks.
     const baseUrl = options?.serverUrl || process.env.ATP_SERVER_URL || 'http://localhost';
 
@@ -44,12 +44,12 @@ export class Agent {
         credentials: credentialsUrl,
         permissions: permissionsUrl,
         audit: auditUrl,
-        gateway: gatewayUrl,
+        gateway: gatewayUrl
       }
     };
 
     this.client = new ATPClient(config);
-    
+
     if (options?.did && options?.privateKey) {
       this.did = options.did;
       this.privateKey = options.privateKey;
@@ -58,7 +58,7 @@ export class Agent {
 
   /**
    * Create a new agent with quantum-safe identity
-   * 
+   *
    * @example
    * ```typescript
    * const agent = await Agent.create('MyBot');
@@ -78,7 +78,7 @@ export class Agent {
       if (!this.did || !this.privateKey) {
         // Generate Ed25519 keypair (will be hybrid with Dilithium soon)
         const keyPair = await CryptoUtils.generateKeyPair();
-        
+
         const identity = await this.client.identity.registerDID({
           publicKey: keyPair.publicKey,
           metadata: { name: this.name }
@@ -106,7 +106,7 @@ export class Agent {
 
   /**
    * Send a secure message to another agent
-   * 
+   *
    * @example
    * ```typescript
    * await agent.send(otherAgentDid, 'Hello, quantum world!');
@@ -120,7 +120,7 @@ export class Agent {
     // In the future, this will use the gateway's WebSocket connection
     // For now, it's a placeholder that demonstrates the API
     const payload = typeof message === 'string' ? { text: message } : message;
-    
+
     // This would normally send through the gateway
     await this.client.audit.logEvent({
       source: 'agent-sdk',
@@ -132,14 +132,14 @@ export class Agent {
         to: recipientDid,
         timestamp: new Date().toISOString(),
         // Message would be encrypted in production
-        preview: JSON.stringify(payload).substring(0, 50) + '...'
+        preview: `${JSON.stringify(payload).substring(0, 50)  }...`
       }
     });
   }
 
   /**
    * Get the trust score for another agent
-   * 
+   *
    * @example
    * ```typescript
    * const trustScore = await agent.getTrustScore(otherAgentDid);
@@ -162,7 +162,7 @@ export class Agent {
       // Simple trust scoring based on interaction count
       // In production, this would use advanced ML models
       const interactionCount = events.data?.events?.length || 0;
-      
+
       if (interactionCount === 0) return 0; // UNKNOWN
       if (interactionCount < 5) return 0.25; // BASIC
       if (interactionCount < 20) return 0.5; // VERIFIED
@@ -176,7 +176,7 @@ export class Agent {
 
   /**
    * Grant a capability to another agent
-   * 
+   *
    * @example
    * ```typescript
    * await agent.grantCapability(otherAgentDid, 'read:data');
@@ -198,15 +198,15 @@ export class Agent {
 
   /**
    * Issue a verifiable credential to another agent
-   * 
+   *
    * @example
    * ```typescript
    * await agent.issueCredential(otherAgentDid, 'verified-partner', { level: 'gold' });
    * ```
    */
   async issueCredential(
-    subjectDid: string, 
-    credentialType: string, 
+    subjectDid: string,
+    credentialType: string,
     claims: Record<string, any>
   ): Promise<string> {
     if (!this.initialized) {
@@ -215,7 +215,7 @@ export class Agent {
 
     const credential = await this.client.credentials.issueCredential({
       subjectDID: subjectDid,
-      credentialType: credentialType,
+      credentialType,
       claims,
       expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() // 1 year
     });
@@ -249,7 +249,7 @@ export class Agent {
 
   /**
    * Subscribe to events (coming soon)
-   * 
+   *
    * @example
    * ```typescript
    * agent.on('message', (msg) => console.log('Received:', msg));
@@ -262,7 +262,7 @@ export class Agent {
 
   /**
    * Establish trust with another agent
-   * 
+   *
    * @example
    * ```typescript
    * const trust = await agent.establishTrust(otherAgentDid);
@@ -272,7 +272,7 @@ export class Agent {
    * ```
    */
   async establishTrust(
-    agentDid: string, 
+    agentDid: string,
     minTrustLevel: number = 0.5
   ): Promise<{ established: boolean; level: number }> {
     if (!this.initialized) {
@@ -280,7 +280,7 @@ export class Agent {
     }
 
     const currentTrust = await this.getTrustScore(agentDid);
-    
+
     if (currentTrust >= minTrustLevel) {
       return { established: true, level: currentTrust };
     }

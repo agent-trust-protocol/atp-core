@@ -1,5 +1,5 @@
 import { BaseClient } from './base.js';
-import { 
+import {
   ATPConfig,
   ATPResponse,
   ATPEvent,
@@ -200,12 +200,12 @@ export class GatewayClient extends BaseClient {
     };
     autoReconnect?: boolean;
   }): Promise<void> {
-    const wsUrl = this.config.services.gateway?.replace('http', 'ws') || 
-                  this.config.baseUrl.replace('http', 'ws') + ':3000';
-    
+    const wsUrl = this.config.services.gateway?.replace('http', 'ws') ||
+                  `${this.config.baseUrl.replace('http', 'ws')  }:3000`;
+
     const url = `${wsUrl}/ws/events`;
     const queryParams = new URLSearchParams();
-    
+
     if (options?.filters) {
       queryParams.append('filters', JSON.stringify(options.filters));
     }
@@ -237,7 +237,7 @@ export class GatewayClient extends BaseClient {
 
     this.ws.on('close', () => {
       this.eventEmitter.emit('disconnected');
-      
+
       if (options?.autoReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
         this.scheduleReconnect(options);
       }
@@ -390,7 +390,7 @@ export class GatewayClient extends BaseClient {
    */
   get connectionStatus(): 'connected' | 'connecting' | 'disconnected' {
     if (!this.ws) return 'disconnected';
-    
+
     switch (this.ws.readyState) {
       case WebSocket.OPEN: return 'connected';
       case WebSocket.CONNECTING: return 'connecting';

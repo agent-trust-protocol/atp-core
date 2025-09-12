@@ -21,7 +21,7 @@ export class NonceService {
   constructor(config: NonceConfig = {}) {
     this.windowSizeMs = config.windowSizeMs || 60 * 1000; // 1 minute default
     this.cleanupIntervalMs = config.cleanupIntervalMs || 5 * 60 * 1000; // 5 minutes
-    
+
     // Connect to Redis
     this.redis = new Redis(config.redisUrl || process.env.REDIS_URL || 'redis://localhost:6379', {
       maxRetriesPerRequest: 3,
@@ -51,7 +51,7 @@ export class NonceService {
       // Check if timestamp is within acceptable window
       const now = Date.now();
       const age = now - timestamp;
-      
+
       if (age > this.windowSizeMs || age < -this.windowSizeMs) {
         console.warn(`Nonce timestamp outside window: ${age}ms`);
         return false;
@@ -59,7 +59,7 @@ export class NonceService {
 
       // Create unique key for this DID + nonce combination
       const nonceKey = this.createNonceKey(did, nonce, timestamp);
-      
+
       // Use Redis SET with NX (only if not exists) and EX (expiration)
       const result = await this.redis.set(
         nonceKey,

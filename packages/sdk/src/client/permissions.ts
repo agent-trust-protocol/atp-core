@@ -1,8 +1,8 @@
 import { BaseClient } from './base.js';
-import { 
-  ATPConfig, 
+import {
+  ATPConfig,
   PermissionGrant,
-  ATPResponse 
+  ATPResponse
 } from '../types.js';
 
 export interface PermissionRequest {

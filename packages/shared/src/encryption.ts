@@ -56,17 +56,17 @@ export class ATPEncryptionService {
   static encryptWithKey(data: string | Buffer, key: Buffer): string {
     const iv = randomBytes(this.IV_LENGTH);
     const cipher = createCipheriv(this.ALGORITHM, key, iv);
-    
+
     const dataBuffer = typeof data === 'string' ? Buffer.from(data, 'utf8') : data;
-    
+
     let encrypted = cipher.update(dataBuffer);
     encrypted = Buffer.concat([encrypted, cipher.final()]);
-    
+
     const tag = cipher.getAuthTag();
-    
+
     // Combine IV + tag + encrypted data
     const combined = Buffer.concat([iv, tag, encrypted]);
-    
+
     return combined.toString('base64');
   }
 
@@ -75,18 +75,18 @@ export class ATPEncryptionService {
    */
   static decryptWithKey(encryptedData: string, key: Buffer): string {
     const combined = Buffer.from(encryptedData, 'base64');
-    
+
     // Extract IV, tag, and encrypted data
     const iv = combined.subarray(0, this.IV_LENGTH);
     const tag = combined.subarray(this.IV_LENGTH, this.IV_LENGTH + this.TAG_LENGTH);
     const encrypted = combined.subarray(this.IV_LENGTH + this.TAG_LENGTH);
-    
+
     const decipher = createDecipheriv(this.ALGORITHM, key, iv);
     decipher.setAuthTag(tag);
-    
+
     let decrypted = decipher.update(encrypted);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
-    
+
     return decrypted.toString('utf8');
   }
 
@@ -117,21 +117,21 @@ export class ATPEncryptionService {
   static encrypt(data: string, key: Buffer): EncryptedData {
     const iv = this.generateIV();
     const salt = this.generateSalt();
-    
+
     const cipher = createCipheriv(this.ALGORITHM, key, iv);
-    
+
     let encrypted = cipher.update(data, 'utf8', 'base64');
     encrypted += cipher.final('base64');
-    
+
     const tag = cipher.getAuthTag();
-    
+
     return {
       data: encrypted,
       iv: iv.toString('base64'),
       salt: salt.toString('base64'),
       tag: tag.toString('base64'),
       algorithm: this.ALGORITHM,
-      keyDerivation: 'scrypt',
+      keyDerivation: 'scrypt'
     };
   }
 
@@ -141,13 +141,13 @@ export class ATPEncryptionService {
   static decrypt(encryptedData: EncryptedData, key: Buffer): string {
     const iv = Buffer.from(encryptedData.iv, 'base64');
     const tag = Buffer.from(encryptedData.tag, 'base64');
-    
+
     const decipher = createDecipheriv(this.ALGORITHM, key, iv);
     decipher.setAuthTag(tag);
-    
+
     let decrypted = decipher.update(encryptedData.data, 'base64', 'utf8');
     decrypted += decipher.final('utf8');
-    
+
     return decrypted;
   }
 
@@ -157,10 +157,10 @@ export class ATPEncryptionService {
   static async encryptWithPassword(data: string, password: string): Promise<EncryptedData> {
     const salt = this.generateSalt();
     const key = await this.deriveKey(password, salt);
-    
+
     const result = this.encrypt(data, key);
     result.salt = salt.toString('base64');
-    
+
     return result;
   }
 
@@ -170,7 +170,7 @@ export class ATPEncryptionService {
   static async decryptWithPassword(encryptedData: EncryptedData, password: string): Promise<string> {
     const salt = Buffer.from(encryptedData.salt, 'base64');
     const key = await this.deriveKey(password, salt);
-    
+
     return this.decrypt(encryptedData, key);
   }
 
@@ -180,10 +180,10 @@ export class ATPEncryptionService {
   static async generateKeyPair(): Promise<{ publicKey: string; privateKey: string }> {
     const privateKeyBytes = ed25519.utils.randomPrivateKey();
     const publicKeyBytes = await ed25519.getPublicKey(privateKeyBytes);
-    
+
     return {
       privateKey: Buffer.from(privateKeyBytes).toString('hex'),
-      publicKey: Buffer.from(publicKeyBytes).toString('hex'),
+      publicKey: Buffer.from(publicKeyBytes).toString('hex')
     };
   }
 
@@ -197,14 +197,14 @@ export class ATPEncryptionService {
     // Convert Ed25519 keys to X25519 for ECDH
     const privateKey = Buffer.from(privateKeyHex, 'hex');
     const publicKey = Buffer.from(publicKeyHex, 'hex');
-    
+
     // Simulate X25519 key exchange (in production, use actual X25519)
     // For now, we'll use a deterministic approach
     const sharedSecret = Buffer.alloc(32);
     for (let i = 0; i < 32; i++) {
       sharedSecret[i] = privateKey[i] ^ publicKey[i];
     }
-    
+
     return sharedSecret;
   }
 
@@ -214,7 +214,7 @@ export class ATPEncryptionService {
   static async sign(data: string, privateKeyHex: string): Promise<string> {
     const dataBytes = Buffer.from(data, 'utf8');
     const privateKeyBytes = Buffer.from(privateKeyHex, 'hex');
-    
+
     const signature = await ed25519.sign(dataBytes, privateKeyBytes);
     return Buffer.from(signature).toString('hex');
   }
@@ -227,7 +227,7 @@ export class ATPEncryptionService {
       const dataBytes = Buffer.from(data, 'utf8');
       const signatureBytes = Buffer.from(signatureHex, 'hex');
       const publicKeyBytes = Buffer.from(publicKeyHex, 'hex');
-      
+
       return await ed25519.verify(signatureBytes, dataBytes, publicKeyBytes);
     } catch {
       return false;
@@ -245,42 +245,42 @@ export class ATPEncryptionService {
   ): Promise<E2EEncryptedMessage> {
     // Generate ephemeral key pair for forward secrecy
     const ephemeralKeyPair = await this.generateKeyPair();
-    
+
     // Perform key exchange
     const sharedSecret = await this.performKeyExchange(
       ephemeralKeyPair.privateKey,
       recipientPublicKey
     );
-    
+
     // Encrypt message with shared secret
     const encryptedData = this.encrypt(message, sharedSecret);
-    
+
     // Encrypt the ephemeral private key with recipient's public key
     const ephemeralKeyData = JSON.stringify({
       privateKey: ephemeralKeyPair.privateKey,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     });
-    
+
     // For simplicity, we'll use the shared secret to encrypt the ephemeral key
     // In production, use hybrid encryption
     const encryptedKey = this.encrypt(ephemeralKeyData, sharedSecret).data;
-    
+
     // Sign the encrypted data
     const signatureData = JSON.stringify({
       encryptedData,
       ephemeralPublicKey: ephemeralKeyPair.publicKey,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     });
-    
+
     const signature = await this.sign(signatureData, senderPrivateKey);
-    
+
     return {
       encryptedData,
       encryptedKey,
       senderPublicKey: (await ed25519.getPublicKey(Buffer.from(senderPrivateKey, 'hex'))).toString(),
       signature,
       timestamp: new Date().toISOString(),
-      messageId: messageId || this.generateMessageId(),
+      messageId: messageId || this.generateMessageId()
     };
   }
 
@@ -297,26 +297,26 @@ export class ATPEncryptionService {
       const signatureData = JSON.stringify({
         encryptedData: encryptedMessage.encryptedData,
         ephemeralPublicKey: encryptedMessage.senderPublicKey,
-        timestamp: encryptedMessage.timestamp,
+        timestamp: encryptedMessage.timestamp
       });
-      
+
       const isValidSignature = await this.verify(
         signatureData,
         encryptedMessage.signature,
         senderPublicKey
       );
-      
+
       if (!isValidSignature) {
         throw new Error('Invalid message signature');
       }
     }
-    
+
     // Perform key exchange to get shared secret
     const sharedSecret = await this.performKeyExchange(
       recipientPrivateKey,
       encryptedMessage.senderPublicKey
     );
-    
+
     // Decrypt the message
     return this.decrypt(encryptedMessage.encryptedData, sharedSecret);
   }
@@ -345,15 +345,15 @@ export class ATPEncryptionService {
     key: string;
     keyId: string;
     expiresAt: string;
-  } {
+    } {
     const key = this.generateKey();
     const keyId = randomBytes(8).toString('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
-    
+
     return {
       key: key.toString('base64'),
       keyId,
-      expiresAt,
+      expiresAt
     };
   }
 
@@ -400,7 +400,7 @@ export class ATPEncryptionService {
     const expectedHmac = this.generateHMAC(data, key);
     const expectedBuffer = Buffer.from(expectedHmac, 'hex');
     const actualBuffer = Buffer.from(hmac, 'hex');
-    
+
     return this.constantTimeEqual(expectedBuffer, actualBuffer);
   }
 }

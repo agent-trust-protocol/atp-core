@@ -37,7 +37,7 @@ export interface MembershipProof {
  * Provides privacy-preserving authentication and verification
  */
 export class ATPZKProofService {
-  
+
   /**
    * Generate a commitment to a secret value using Pedersen commitments
    */
@@ -57,17 +57,17 @@ export class ATPZKProofService {
   createProofOfKnowledge(secret: bigint, publicKey: string): ZKProof {
     // Generate random nonce
     const nonce = this.generateRandomBigInt();
-    
+
     // Commitment: R = g^nonce
     const commitment = this.generateCommitment(nonce, BigInt(0));
-    
+
     // Challenge: c = H(R || publicKey || message)
     const challenge = this.generateChallenge(commitment, publicKey);
-    
+
     // Response: s = nonce + c * secret
-    const challengeBigInt = BigInt('0x' + challenge);
+    const challengeBigInt = BigInt(`0x${  challenge}`);
     const response = (nonce + challengeBigInt * secret).toString(16);
-    
+
     return {
       proof: 'schnorr-pok',
       commitment,
@@ -118,13 +118,13 @@ export class ATPZKProofService {
   ): SelectiveDisclosureProof {
     // Create Merkle tree of all attributes
     const allAttributes = Object.keys(fullCredential);
-    const merkleTree = this.buildMerkleTree(allAttributes.map(attr => 
+    const merkleTree = this.buildMerkleTree(allAttributes.map(attr =>
       sha256(Buffer.from(JSON.stringify(fullCredential[attr])))
     ));
 
     // Get revealed indices and proofs
     const revealedIndices = attributesToReveal.map(attr => allAttributes.indexOf(attr));
-    const merkleProof = revealedIndices.map(index => 
+    const merkleProof = revealedIndices.map(index =>
       this.getMerkleProof(merkleTree, index)
     ).flat();
 
@@ -139,7 +139,7 @@ export class ATPZKProofService {
     // Generate ZK proof that we know the full credential
     const credentialHash = this.hashCredential(fullCredential);
     const proof = this.createProofOfKnowledge(
-      BigInt('0x' + credentialHash),
+      BigInt(`0x${  credentialHash}`),
       credentialSignature
     );
 
@@ -171,7 +171,7 @@ export class ATPZKProofService {
         const attrName = Object.keys(sdProof.disclosedAttributes)[i];
         const attrValue = sdProof.disclosedAttributes[attrName];
         const attrHash = sha256(Buffer.from(JSON.stringify(attrValue)));
-        
+
         if (!this.verifyMerkleProof(attrHash, index, sdProof.merkleProof, expectedMerkleRoot)) {
           return false;
         }
@@ -193,10 +193,10 @@ export class ATPZKProofService {
 
     // Generate random blinding factor
     const blinding = this.generateRandomBigInt();
-    
+
     // Create commitment to the value
     const commitment = this.generateCommitment(BigInt(value), blinding);
-    
+
     // Create proof that committed value is in range [min, max]
     // Simplified: In practice, this would use bulletproofs or similar
     const proof = this.createBoundaryProof(value, min, max, blinding);
@@ -240,20 +240,20 @@ export class ATPZKProofService {
     const merkleRoot = merkleTree[merkleTree.length - 1][0];
 
     let proof: ZKProof;
-    
+
     if (isMember) {
       // Prove knowledge of a secret that's in the set
       const secretHash = sha256(Buffer.from(secret));
-      const secretIndex = setHashes.findIndex(hash => 
+      const secretIndex = setHashes.findIndex(hash =>
         Buffer.compare(hash, secretHash) === 0
       );
-      
+
       if (secretIndex === -1) {
         throw new Error('Secret not found in membership set');
       }
 
       proof = this.createProofOfKnowledge(
-        BigInt('0x' + Buffer.from(secretHash).toString('hex')),
+        BigInt(`0x${  Buffer.from(secretHash).toString('hex')}`),
         Buffer.from(merkleRoot).toString('hex')
       );
     } else {
@@ -310,7 +310,7 @@ export class ATPZKProofService {
     );
 
     const combinedResponse = proofs
-      .map(p => BigInt('0x' + p.response))
+      .map(p => BigInt(`0x${  p.response}`))
       .reduce((acc, response) => acc + response, BigInt(0))
       .toString(16);
 
@@ -330,7 +330,7 @@ export class ATPZKProofService {
   verifyAggregatedProof(aggregatedProof: ZKProof, originalProofs: ZKProof[]): boolean {
     // Recreate the aggregated proof and compare
     const recreated = this.createAggregatedProof(originalProofs);
-    
+
     return aggregatedProof.commitment === recreated.commitment &&
            aggregatedProof.challenge === recreated.challenge &&
            aggregatedProof.response === recreated.response;
@@ -340,7 +340,7 @@ export class ATPZKProofService {
 
   private generateRandomBigInt(): bigint {
     const bytes = randomBytes(32);
-    return BigInt('0x' + bytes.toString('hex'));
+    return BigInt(`0x${  bytes.toString('hex')}`);
   }
 
   private generateChallenge(commitment: string, publicData: string): string {
@@ -366,45 +366,45 @@ export class ATPZKProofService {
 
   private buildMerkleTree(leaves: Uint8Array[]): Uint8Array[][] {
     if (leaves.length === 0) return [];
-    
+
     const tree: Uint8Array[][] = [leaves];
-    
+
     while (tree[tree.length - 1].length > 1) {
       const currentLevel = tree[tree.length - 1];
       const nextLevel: Uint8Array[] = [];
-      
+
       for (let i = 0; i < currentLevel.length; i += 2) {
         const left = currentLevel[i];
         const right = i + 1 < currentLevel.length ? currentLevel[i + 1] : left;
-        
+
         const combined = new Uint8Array(left.length + right.length);
         combined.set(left);
         combined.set(right, left.length);
-        
+
         nextLevel.push(sha256(combined));
       }
-      
+
       tree.push(nextLevel);
     }
-    
+
     return tree;
   }
 
   private getMerkleProof(tree: Uint8Array[][], leafIndex: number): string[] {
     const proof: string[] = [];
     let currentIndex = leafIndex;
-    
+
     for (let level = 0; level < tree.length - 1; level++) {
       const isRightNode = currentIndex % 2 === 1;
       const siblingIndex = isRightNode ? currentIndex - 1 : currentIndex + 1;
-      
+
       if (siblingIndex < tree[level].length) {
         proof.push(tree[level][siblingIndex].toString());
       }
-      
+
       currentIndex = Math.floor(currentIndex / 2);
     }
-    
+
     return proof;
   }
 
@@ -416,11 +416,11 @@ export class ATPZKProofService {
   ): boolean {
     let currentHash = leafHash;
     let currentIndex = leafIndex;
-    
+
     for (const proofElement of proof) {
       const siblingHash = new Uint8Array(Buffer.from(proofElement));
       const isRightNode = currentIndex % 2 === 1;
-      
+
       if (isRightNode) {
         const combined = new Uint8Array(siblingHash.length + currentHash.length);
         combined.set(siblingHash);
@@ -432,14 +432,14 @@ export class ATPZKProofService {
         combined.set(siblingHash, currentHash.length);
         currentHash = sha256(combined);
       }
-      
+
       currentIndex = Math.floor(currentIndex / 2);
     }
-    
+
     if (expectedRoot) {
       return currentHash.toString() === expectedRoot;
     }
-    
+
     return true;
   }
 
@@ -454,12 +454,12 @@ export class ATPZKProofService {
     const valueCommitment = this.generateCommitment(BigInt(value), blinding);
     const minCommitment = this.generateCommitment(BigInt(min), BigInt(0));
     const maxCommitment = this.generateCommitment(BigInt(max), BigInt(0));
-    
+
     const challenge = this.generateChallenge(
       valueCommitment,
       minCommitment + maxCommitment
     );
-    
+
     return {
       proof: 'range-proof',
       commitment: valueCommitment,
@@ -485,10 +485,10 @@ export class ATPZKProofService {
     // Simplified non-membership proof
     const secretHash = sha256(Buffer.from(secret));
     const proof = this.createProofOfKnowledge(
-      BigInt('0x' + Buffer.from(secretHash).toString('hex')),
+      BigInt(`0x${  Buffer.from(secretHash).toString('hex')}`),
       'non-member'
     );
-    
+
     return {
       ...proof,
       proof: 'non-membership'

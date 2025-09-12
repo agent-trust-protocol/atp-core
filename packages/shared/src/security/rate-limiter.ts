@@ -38,7 +38,7 @@ export class RateLimiter {
       if (now - lastReset >= this.config.windowMs) {
         await this.cache.set(`${key}:reset`, now, Math.ceil(this.config.windowMs / 1000));
         await this.cache.set(key, 1, Math.ceil(this.config.windowMs / 1000));
-        
+
         return {
           allowed: true,
           totalHits: 1,
@@ -59,7 +59,7 @@ export class RateLimiter {
 
       // Increment counter
       const newCount = await this.cache.incr(key, Math.ceil(this.config.windowMs / 1000));
-      
+
       return {
         allowed: true,
         totalHits: newCount,
@@ -102,7 +102,7 @@ export class RateLimiter {
     if (this.config.keyGenerator) {
       return this.config.keyGenerator(identifier);
     }
-    
+
     const base = `rate_limit:${identifier}`;
     return endpoint ? `${base}:${endpoint}` : base;
   }
@@ -115,7 +115,7 @@ export const RateLimitPresets = {
     windowMs: 60 * 1000,
     maxRequests: 10
   },
-  // Normal - 100 requests per minute  
+  // Normal - 100 requests per minute
   NORMAL: {
     windowMs: 60 * 1000,
     maxRequests: 100
@@ -138,7 +138,7 @@ export const RateLimitPresets = {
 };
 
 export const createRateLimiter = (
-  cache: RedisCache, 
+  cache: RedisCache,
   config: RateLimitConfig
 ): RateLimiter => {
   return new RateLimiter(cache, config);

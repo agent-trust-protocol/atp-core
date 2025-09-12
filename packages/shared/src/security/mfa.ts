@@ -44,7 +44,7 @@ export class ATPMFAService {
 
   constructor(config: Partial<MFAConfig> = {}) {
     this.config = { ...ATPMFAService.DEFAULT_CONFIG, ...config };
-    
+
     // Cleanup used tokens every hour
     this.cleanupInterval = setInterval(() => {
       this.usedTokens.clear();
@@ -101,13 +101,13 @@ export class ATPMFAService {
     // Check current and adjacent time windows
     for (let i = -this.config.window; i <= this.config.window; i++) {
       const expectedToken = this.generateTOTP(secret, timeSlice + i);
-      
+
       if (timingSafeEqual(Buffer.from(cleanToken), Buffer.from(expectedToken))) {
         // Mark token as used
         if (!allowReplay) {
           this.usedTokens.add(tokenKey);
         }
-        
+
         return {
           valid: true,
           timeSlice: timeSlice + i,
@@ -133,7 +133,7 @@ export class ATPMFAService {
       try {
         // For now, skip encryption - this needs proper key management
         const decryptedCode = typeof encryptedCode === 'string' ? encryptedCode : JSON.stringify(encryptedCode);
-        
+
         if (timingSafeEqual(Buffer.from(cleanCode), Buffer.from(decryptedCode))) {
           return {
             valid: true,
@@ -154,7 +154,7 @@ export class ATPMFAService {
    */
   generateHardwareKeyChallenge(keyId: string, appId: string): HardwareKeyChallenge {
     const challenge = randomBytes(32).toString('base64url');
-    
+
     return {
       challenge,
       keyHandle: keyId,
@@ -173,7 +173,7 @@ export class ATPMFAService {
     try {
       // In a real implementation, this would verify the WebAuthn/FIDO2 signature
       // For now, we'll implement a simplified verification
-      
+
       const challengeHash = createHmac('sha256', challenge.challenge)
         .update(challenge.keyHandle)
         .update(challenge.appId)
@@ -238,7 +238,7 @@ export class ATPMFAService {
    */
   private generateBackupCodes(count: number = 10): string[] {
     const codes: string[] = [];
-    
+
     for (let i = 0; i < count; i++) {
       const code = randomBytes(4).toString('hex').match(/.{1,4}/g)?.join('-') || '';
       codes.push(code);
@@ -260,7 +260,7 @@ export class ATPMFAService {
     try {
       const sigBuffer = Buffer.from(signature, 'base64');
       const keyBuffer = Buffer.from(publicKey, 'base64');
-      
+
       // Simplified validation - in practice, use proper ECDSA verification
       return sigBuffer.length >= 64 && keyBuffer.length >= 32;
     } catch {
@@ -303,11 +303,11 @@ export class ATPMFAService {
    */
   getMFAStrength(enabledMethods: string[]): number {
     let score = 0;
-    
+
     if (enabledMethods.includes('totp')) score += 0.4;
     if (enabledMethods.includes('backup')) score += 0.2;
     if (enabledMethods.includes('hardware')) score += 0.4;
-    
+
     return Math.min(score, 1.0);
   }
 

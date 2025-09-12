@@ -14,7 +14,7 @@ export const TrustLevelSchema = z.enum([
   TrustLevel.BASIC,
   TrustLevel.VERIFIED,
   TrustLevel.PREMIUM,
-  TrustLevel.ENTERPRISE,
+  TrustLevel.ENTERPRISE
 ]);
 
 export interface TrustLevelInfo {
@@ -33,7 +33,7 @@ export const TRUST_LEVELS: Record<TrustLevel, TrustLevelInfo> = {
     description: 'Default level for unverified agents',
     capabilities: ['read-public'],
     requirements: ['None'],
-    numericValue: 0,
+    numericValue: 0
   },
   [TrustLevel.BASIC]: {
     level: TrustLevel.BASIC,
@@ -41,7 +41,7 @@ export const TRUST_LEVELS: Record<TrustLevel, TrustLevelInfo> = {
     description: 'Basic verification completed',
     capabilities: ['read-public', 'write-limited', 'basic-operations'],
     requirements: ['DID verification', 'Email verification'],
-    numericValue: 1,
+    numericValue: 1
   },
   [TrustLevel.VERIFIED]: {
     level: TrustLevel.VERIFIED,
@@ -49,7 +49,7 @@ export const TRUST_LEVELS: Record<TrustLevel, TrustLevelInfo> = {
     description: 'Identity and credentials verified',
     capabilities: ['read-public', 'write-limited', 'basic-operations', 'credential-operations', 'audit-read'],
     requirements: ['DID verification', 'Credential verification', 'Background check'],
-    numericValue: 2,
+    numericValue: 2
   },
   [TrustLevel.PREMIUM]: {
     level: TrustLevel.PREMIUM,
@@ -57,7 +57,7 @@ export const TRUST_LEVELS: Record<TrustLevel, TrustLevelInfo> = {
     description: 'High-trust agent with extended capabilities',
     capabilities: ['read-public', 'write-limited', 'basic-operations', 'credential-operations', 'audit-read', 'advanced-operations', 'cross-domain-access'],
     requirements: ['DID verification', 'Credential verification', 'Background check', 'Security audit', 'Insurance coverage'],
-    numericValue: 3,
+    numericValue: 3
   },
   [TrustLevel.ENTERPRISE]: {
     level: TrustLevel.ENTERPRISE,
@@ -65,8 +65,8 @@ export const TRUST_LEVELS: Record<TrustLevel, TrustLevelInfo> = {
     description: 'Maximum trust level for enterprise agents',
     capabilities: ['read-public', 'write-limited', 'basic-operations', 'credential-operations', 'audit-read', 'advanced-operations', 'cross-domain-access', 'admin-operations', 'system-management'],
     requirements: ['DID verification', 'Credential verification', 'Background check', 'Security audit', 'Insurance coverage', 'Enterprise agreement', 'Compliance certification'],
-    numericValue: 4,
-  },
+    numericValue: 4
+  }
 };
 
 export class TrustLevelManager {
@@ -106,7 +106,7 @@ export const APIResponseSchema = z.object({
   success: z.boolean(),
   data: z.any().optional(),
   error: z.string().optional(),
-  timestamp: z.string().optional(),
+  timestamp: z.string().optional()
 });
 
 export const AuditEventSchema = z.object({
@@ -116,14 +116,14 @@ export const AuditEventSchema = z.object({
   target: z.string().optional(),
   metadata: z.record(z.any()).optional(),
   timestamp: z.string(),
-  signature: z.string().optional(),
+  signature: z.string().optional()
 });
 
 export const RPCRequestSchema = z.object({
   jsonrpc: z.literal('2.0'),
   method: z.string(),
   params: z.any().optional(),
-  id: z.union([z.string(), z.number()]),
+  id: z.union([z.string(), z.number()])
 });
 
 export const RPCResponseSchema = z.object({
@@ -132,9 +132,9 @@ export const RPCResponseSchema = z.object({
   error: z.object({
     code: z.number(),
     message: z.string(),
-    data: z.any().optional(),
+    data: z.any().optional()
   }).optional(),
-  id: z.union([z.string(), z.number()]),
+  id: z.union([z.string(), z.number()])
 });
 
 export type APIResponse = z.infer<typeof APIResponseSchema>;

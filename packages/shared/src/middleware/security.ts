@@ -89,7 +89,7 @@ export class SecurityMiddleware {
         // Basic security checks on all string inputs
         const checkAllStrings = (obj: any): string[] => {
           const errors: string[] = [];
-          
+
           const traverse = (value: any, path: string = '') => {
             if (typeof value === 'string') {
               const securityCheck = RequestValidator.validateSecureInput(value);
@@ -185,21 +185,21 @@ export class SecurityMiddleware {
   corsMiddleware(allowedOrigins: string[] = ['http://localhost:3000']) {
     return (req: Request, res: Response, next: NextFunction) => {
       const origin = req.headers.origin;
-      
+
       if (origin && allowedOrigins.includes(origin)) {
         res.setHeader('Access-Control-Allow-Origin', origin);
       }
-      
+
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-API-Key, X-Signature, X-Timestamp');
       res.setHeader('Access-Control-Allow-Credentials', 'true');
       res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
-      
+
       if (req.method === 'OPTIONS') {
         res.status(204).end();
         return;
       }
-      
+
       next();
     };
   }
@@ -208,14 +208,14 @@ export class SecurityMiddleware {
   ipWhitelist(allowedIPs: string[]) {
     return (req: Request, res: Response, next: NextFunction) => {
       const clientIP = this.securityManager.extractClientIP(req);
-      
+
       if (!allowedIPs.includes(clientIP) && !allowedIPs.includes('*')) {
         return res.status(403).json({
           success: false,
           error: 'IP not allowed'
         });
       }
-      
+
       next();
     };
   }
@@ -224,14 +224,14 @@ export class SecurityMiddleware {
   requestSizeLimit(maxSizeBytes: number = 10 * 1024 * 1024) { // 10MB default
     return (req: Request, res: Response, next: NextFunction) => {
       const contentLength = parseInt(req.headers['content-length'] || '0');
-      
+
       if (contentLength > maxSizeBytes) {
         return res.status(413).json({
           success: false,
           error: 'Request too large'
         });
       }
-      
+
       next();
     };
   }
@@ -242,19 +242,19 @@ export class SecurityMiddleware {
       const startTime = Date.now();
       const clientIP = this.securityManager.extractClientIP(req);
       const userAgent = req.headers['user-agent'] || 'unknown';
-      
+
       // Log request
       console.log(`[AUDIT] ${req.method} ${req.path} from ${clientIP}`);
-      
+
       // Override res.json to log responses
       const originalJson = res.json.bind(res);
       res.json = function(body: any) {
         const responseTime = Date.now() - startTime;
         const statusCode = res.statusCode;
-        
+
         // Log response
         console.log(`[AUDIT] ${req.method} ${req.path} - ${statusCode} - ${responseTime}ms`);
-        
+
         // Log security events
         if (statusCode === 401) {
           console.log(`[SECURITY] Authentication failure from ${clientIP} - ${userAgent}`);
@@ -263,10 +263,10 @@ export class SecurityMiddleware {
         } else if (statusCode === 429) {
           console.log(`[SECURITY] Rate limit exceeded from ${clientIP} - ${userAgent}`);
         }
-        
+
         return originalJson(body);
       };
-      
+
       next();
     };
   }
@@ -277,7 +277,7 @@ export class SecurityMiddleware {
     if (apiKeyHeader) {
       return `api:${this.securityManager.hashAPIKey(apiKeyHeader.toString())}`;
     }
-    
+
     return `ip:${this.securityManager.extractClientIP(req)}`;
   }
 }
