@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkApiAuth, createDemoResponse } from '@/lib/api-auth';
 
 // Mock workflow data for now
 const mockWorkflows = [
@@ -65,6 +66,12 @@ const mockExecutions = [
 
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication - protect valuable workflow IP
+    const authResult = await checkApiAuth(request);
+    if (!authResult.isAuthenticated) {
+      return authResult.error || createDemoResponse('workflows');
+    }
+
     const url = new URL(request.url);
     const limit = url.searchParams.get('limit');
     const status = url.searchParams.get('status');
@@ -99,6 +106,18 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication - protect workflow creation
+    const authResult = await checkApiAuth(request);
+    if (!authResult.isAuthenticated) {
+      return authResult.error || NextResponse.json(
+        { 
+          error: 'Premium feature',
+          message: 'Workflow creation requires premium subscription' 
+        },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     
     // Validate required fields

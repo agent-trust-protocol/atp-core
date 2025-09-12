@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkApiAuth, createDemoResponse } from '@/lib/api-auth';
 
 // ATP-specific workflow nodes
 const workflowNodes = [
@@ -121,6 +122,12 @@ const workflowNodes = [
 
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication - workflow node schemas contain critical IP about system architecture
+    const authResult = await checkApiAuth(request);
+    if (!authResult.isAuthenticated) {
+      return authResult.error || createDemoResponse('workflow-nodes');
+    }
+
     const url = new URL(request.url);
     const category = url.searchParams.get('category');
     

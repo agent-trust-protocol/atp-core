@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { checkApiAuth, createDemoResponse } from '@/lib/api-auth'
 
 const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL || 'http://localhost:3007'
 
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication - alerts contain sensitive security information
+    const authResult = await checkApiAuth(request);
+    if (!authResult.isAuthenticated) {
+      return authResult.error || createDemoResponse('alerts');
+    }
+
     const { searchParams } = new URL(request.url)
     
     let monitoringUrl = `${MONITORING_SERVICE_URL}/api/monitoring/alerts`
@@ -54,6 +61,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication - alert management requires authentication
+    const authResult = await checkApiAuth(request);
+    if (!authResult.isAuthenticated) {
+      return authResult.error || NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url)
     const alertId = searchParams.get('alertId')
     const action = searchParams.get('action')

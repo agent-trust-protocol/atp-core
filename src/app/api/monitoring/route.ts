@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { checkApiAuth, createDemoResponse } from '@/lib/api-auth';
 
 export const dynamic = 'force-dynamic'
 
@@ -71,7 +72,13 @@ const mockActiveExecutions = [
   }
 ]
 
-async function handleWorkflowRequest(searchParams: URLSearchParams) {
+async function handleWorkflowRequest(searchParams: URLSearchParams, request: NextRequest) {
+  // Check authentication for workflow data - contains valuable IP
+  const authResult = await checkApiAuth(request);
+  if (!authResult.isAuthenticated) {
+    return authResult.error || createDemoResponse('monitoring-workflows');
+  }
+
   const action = searchParams.get('action') || 'list'
   
   switch (action) {
@@ -142,7 +149,7 @@ export async function GET(request: NextRequest) {
     
     // Handle workflow endpoints
     if (endpoint === 'workflows') {
-      return handleWorkflowRequest(searchParams)
+      return handleWorkflowRequest(searchParams, request)
     }
     
     let monitoringUrl = `${MONITORING_SERVICE_URL}/api/monitoring/${endpoint}`

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { checkApiAuth, createDemoResponse } from '@/lib/api-auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -6,6 +7,12 @@ const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL || 'http://localho
 
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication - metrics data contains sensitive operational information
+    const authResult = await checkApiAuth(request);
+    if (!authResult.isAuthenticated) {
+      return authResult.error || createDemoResponse('metrics');
+    }
+
     const searchParams = request.nextUrl.searchParams
     
     let monitoringUrl = `${MONITORING_SERVICE_URL}/api/monitoring/metrics`

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkApiAuth, createDemoResponse } from '@/lib/api-auth';
 
 // Mock active executions
 const mockActiveExecutions = [
@@ -26,6 +27,12 @@ const mockActiveExecutions = [
 
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication - workflow execution data contains sensitive operational information
+    const authResult = await checkApiAuth(request);
+    if (!authResult.isAuthenticated) {
+      return authResult.error || createDemoResponse('active-executions');
+    }
+
     return NextResponse.json({
       executions: mockActiveExecutions,
       count: mockActiveExecutions.length,

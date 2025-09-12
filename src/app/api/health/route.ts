@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkApiAuth, createDemoResponse } from '@/lib/api-auth';
 
 // TODO: Replace with actual database integration
 // Mock workflow data for demo purposes
@@ -64,8 +65,14 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type');
   const action = searchParams.get('action');
   
-  // Handle workflow requests
+  // Handle workflow requests - these contain sensitive IP
   if (type === 'workflows') {
+    // Check authentication for workflow-related endpoints
+    const authResult = await checkApiAuth(request);
+    if (!authResult.isAuthenticated) {
+      return authResult.error || createDemoResponse('workflow-health');
+    }
+
     switch (action) {
       case 'health':
         return NextResponse.json({
@@ -127,14 +134,10 @@ export async function GET(request: NextRequest) {
     }
   }
   
-  // Default health check
+  // Basic health check - safe to expose publicly
   return NextResponse.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    service: 'atp-website',
-    version: process.env.npm_package_version || '1.0.0',
-    features: {
-      workflows: 'available'
-    }
+    service: 'atp-website'
   });
 }
