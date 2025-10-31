@@ -35,10 +35,10 @@ AI agents are transforming business operations, but they lack proper security in
 
 ### The Solution
 ATP provides enterprise-grade security for AI agents with:
-- **Future-proof security**: Quantum-safe cryptography that protects against both current and future threats
+- **Future-proof security**: Quantum-safe cryptography support (ML-DSA + Ed25519 hybrid) for protection against both current and future threats
 - **Complete traceability**: Every AI agent action is cryptographically signed and auditable
 - **Trust management**: Know exactly which agents to trust and control their access levels
-- **Regulatory compliance**: Meet GDPR, HIPAA, SOC2, and future quantum-safe requirements
+- **Regulatory compliance-ready**: Architecture designed to meet GDPR, HIPAA, SOC2, and ISO 27001 requirements
 
 ### Business Impact
 - **Risk Reduction**: Eliminate AI agent security vulnerabilities before they're exploited
@@ -47,7 +47,7 @@ ATP provides enterprise-grade security for AI agents with:
 - **Competitive Advantage**: First-mover advantage with quantum-safe AI infrastructure
 
 ### Bottom Line
-ATP is production-ready, battle-tested, and the only quantum-safe solution for AI agent security in the market.
+ATP is production-ready with Ed25519 cryptography, with quantum-safe options (ML-DSA) available for future-proofing. Architecture supports enterprise compliance requirements.
 
 [📞 Schedule Enterprise Demo](mailto:enterprise@agenttrustprotocol.com) | [📋 View Pilot Program](./PILOT-PROGRAM-APPLICATION.md)
 
@@ -179,7 +179,7 @@ app.post('/api/ai-action', (req, res) => {
 ```
 </details>
 
-[📖 Full Developer Docs](./docs/getting-started.md) | [💻 API Reference](./docs/api/) | [🧪 More Examples](./examples/)
+[📖 Full Developer Docs](./docs/getting-started.md) | [💻 API Reference](./docs/api/README.md) | [🧪 More Examples](./packages/sdk/examples/)
 
 ---
 
@@ -199,8 +199,8 @@ app.post('/api/ai-action', (req, res) => {
 ### Enterprise Features
 
 #### 🔐 Security & Compliance
-- **Quantum-Safe**: NIST-approved CRYSTALS-Dilithium + Ed25519
-- **Compliance**: GDPR, HIPAA, SOC2, ISO 27001 ready
+- **Quantum-Safe**: ML-DSA (Dilithium successor) + Ed25519 hybrid support available
+- **Compliance-Ready**: Architecture supports GDPR, HIPAA, SOC2, ISO 27001 requirements
 - **Audit Trail**: Immutable, cryptographically linked logs
 - **Zero Trust**: Every action requires cryptographic proof
 
@@ -243,7 +243,7 @@ services:
 | **Professional** | $50,000 | 1,000 | Priority 24/7 | 99.95% |
 | **Enterprise** | Custom | Unlimited | Dedicated team | 99.99% |
 
-[📞 Contact Sales](mailto:enterprise@agenttrustprotocol.com) | [📋 Request Pilot](./PILOT-PROGRAM-APPLICATION.md) | [📄 Security Whitepaper](./docs/security-whitepaper.pdf)
+[📞 Contact Sales](mailto:enterprise@agenttrustprotocol.com) | [📋 Request Pilot](./PILOT-PROGRAM-APPLICATION.md) | [📄 Security Status](./docs/SECURITY-STATUS.md)
 
 ---
 
@@ -281,7 +281,7 @@ services:
 Every AI agent gets a unique, cryptographically verifiable identity that can't be forged or stolen.
 
 #### 🔏 **Quantum-Safe Signatures**
-Hybrid Ed25519 + CRYSTALS-Dilithium ensures security against both classical and quantum attacks.
+Hybrid Ed25519 + ML-DSA (Dilithium successor) **enabled by default**. All new agents automatically use quantum-safe cryptography for protection against both classical and quantum attacks.
 
 #### 📊 **Trust Scoring**
 Dynamic reputation system that tracks agent behavior and adjusts permissions in real-time.
@@ -406,23 +406,28 @@ Standard RSA-2048:       ░░░░░░░░░░░░ 0% secure
 
 ## 🔒 Security & Compliance
 
+> **📋 Status**: See [Security Status](./docs/SECURITY-STATUS.md) for detailed implementation status.
+
 ### Certifications & Standards
 
-- ✅ **NIST FIPS 204** - Quantum-safe cryptography standard
-- ✅ **SOC2 Type II** - Security and availability 
-- ✅ **ISO 27001** - Information security management
-- ✅ **GDPR** - Data protection and privacy
-- ✅ **HIPAA** - Healthcare data security
+- ✅ **NIST PQC Standard Algorithms** - ML-DSA (Dilithium successor) and ML-KEM (Kyber successor) support
+- ✅ **SOC2-Ready Architecture** - Security controls and monitoring implemented
+- ✅ **ISO 27001-Aligned** - Information security management framework alignment
+- ✅ **GDPR-Ready** - Data protection, audit trails, and privacy controls
+- ✅ **HIPAA-Compatible Design** - Encryption, access controls, and audit logging
+
+> **Note**: Formal certifications (SOC2 Type II, ISO 27001) are planned but not yet completed. The architecture is designed to meet these standards.
 
 ### Security Features
 
-| Feature | Description | Standard |
-|---------|-------------|----------|
-| **Quantum-Safe Crypto** | CRYSTALS-Dilithium + Ed25519 | NIST FIPS 204 |
-| **Transport Security** | TLS 1.3 with PFS | RFC 8446 |
-| **Identity** | W3C Decentralized Identifiers | W3C DID v1.0 |
-| **Credentials** | Verifiable Credentials | W3C VC v1.1 |
-| **Audit Logging** | Cryptographic hash chain | NIST SP 800-92 |
+| Feature | Description | Standard | Status |
+|---------|-------------|----------|--------|
+| **Quantum-Safe Crypto** | ML-DSA + Ed25519 hybrid (default) | NIST PQC Standard | ✅ Enabled by default in SDK v1.1+ |
+| **Classical Crypto** | Ed25519 signatures (default) | RFC 8032 | ✅ Production-ready |
+| **Transport Security** | TLS 1.3 support | RFC 8446 | ✅ Infrastructure-dependent |
+| **Identity** | W3C Decentralized Identifiers | W3C DID v1.0 | ✅ Implemented |
+| **Credentials** | Verifiable Credentials | W3C VC v1.1 | ✅ Implemented |
+| **Audit Logging** | Cryptographic hash chain | NIST SP 800-92 | ✅ Implemented |
 
 ### Responsible Disclosure
 
@@ -439,15 +444,15 @@ Found a security issue? Please email security@agenttrustprotocol.com
 - [Architecture Deep Dive](./docs/architecture.md) - Technical details
 
 ### For Enterprise
-- [Deployment Guide](./docs/deployment/) - Production deployment
-- [Security Whitepaper](./docs/security-whitepaper.pdf) - In-depth security analysis
-- [Compliance Guide](./docs/compliance/) - Regulatory compliance
-- [Performance Tuning](./docs/performance/) - Optimization guide
+- [Deployment Guide](./docs/ENTERPRISE.md#deployment-options) - Production deployment
+- [Security Documentation](./docs/SECURITY-STATUS.md) - Security implementation status
+- [Compliance Guide](./docs/COMPLIANCE-CERTIFICATION-GUIDE.md) - Regulatory compliance
+- [Performance Tuning](./docs/architecture.md#performance) - Optimization guide
 
 ### For Everyone
-- [FAQ](./docs/faq.md) - Frequently asked questions
-- [Troubleshooting](./docs/troubleshooting.md) - Common issues and solutions
-- [Roadmap](./docs/roadmap.md) - Future development plans
+- [FAQ](./docs/faq.md) - Frequently asked questions (coming soon)
+- [Troubleshooting](./docs/TROUBLESHOOTING-GUIDE.md) - Common issues and solutions
+- [Roadmap](./docs/roadmap.md) - Future development plans (coming soon)
 - [Contributing](./CONTRIBUTING.md) - How to contribute
 
 ---
@@ -457,7 +462,7 @@ Found a security issue? Please email security@agenttrustprotocol.com
 <details>
 <summary><b>What makes ATP "quantum-safe"?</b></summary>
 
-ATP uses CRYSTALS-Dilithium, a lattice-based cryptographic algorithm approved by NIST that's resistant to attacks from both classical and quantum computers. We combine this with Ed25519 for current compatibility, creating a hybrid system that's secure today and tomorrow.
+ATP uses ML-DSA (the standardized version of CRYSTALS-Dilithium), a lattice-based cryptographic algorithm from NIST's Post-Quantum Cryptography Standard. **All new agents automatically use hybrid mode**, combining ML-DSA with Ed25519 for backward compatibility, ensuring security today and future-proof protection against quantum computers. This provides protection against both classical attacks and future quantum computing threats.
 </details>
 
 <details>
