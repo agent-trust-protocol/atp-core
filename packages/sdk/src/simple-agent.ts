@@ -24,6 +24,7 @@ export class Agent {
   private privateKey: string | null = null;
   private name: string;
   private initialized = false;
+  private _quantumSafe: boolean = false;
 
   private constructor(name: string, options?: SimpleAgentOptions) {
     this.name = name;
@@ -34,7 +35,7 @@ export class Agent {
     const identityUrl = process.env.ATP_IDENTITY_URL || `${baseUrl}:3001`;
     const credentialsUrl = process.env.ATP_CREDENTIALS_URL || `${baseUrl}:3002`;
     const permissionsUrl = process.env.ATP_PERMISSIONS_URL || `${baseUrl}:3003`;
-    const auditUrl = process.env.ATP_AUDIT_URL || `${baseUrl}:3006`;
+    const auditUrl = process.env.ATP_AUDIT_URL || `${baseUrl}:3005`;
     const gatewayUrl = process.env.ATP_GATEWAY_URL || `${baseUrl}:3000`;
 
     const config: ATPConfig = {
@@ -76,17 +77,24 @@ export class Agent {
     try {
       // If no DID provided, create a new quantum-safe identity
       if (!this.did || !this.privateKey) {
-        // Generate Ed25519 keypair (will be hybrid with Dilithium soon)
-        const keyPair = await CryptoUtils.generateKeyPair();
+        // Generate hybrid quantum-safe keypair (Ed25519 + ML-DSA)
+        // This provides protection against both classical and quantum attacks
+        const keyPair = await CryptoUtils.generateKeyPair(true); // quantumSafe = true by default
 
         const identity = await this.client.identity.registerDID({
           publicKey: keyPair.publicKey,
-          metadata: { name: this.name }
+          metadata: { 
+            name: this.name,
+            quantumSafe: keyPair.quantumSafe,
+            algorithm: keyPair.quantumSafe ? 'hybrid-ed25519-mldsa65' : 'ed25519'
+          }
         });
 
         if (identity.data) {
           this.did = identity.data.did;
           this.privateKey = keyPair.privateKey;
+          // Store quantum-safe flag for signing operations
+          this._quantumSafe = keyPair.quantumSafe;
         } else {
           throw new Error('Failed to register DID');
         }
@@ -245,6 +253,13 @@ export class Agent {
    */
   isInitialized(): boolean {
     return this.initialized;
+  }
+
+  /**
+   * Check if the agent uses quantum-safe cryptography
+   */
+  isQuantumSafe(): boolean {
+    return this._quantumSafe === true || (this.privateKey && this.privateKey.length > 8000); // Hybrid keys are ~8000 hex chars (4032 bytes)
   }
 
   /**
