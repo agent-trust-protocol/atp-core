@@ -15,7 +15,7 @@ const BACKEND_SERVICES = [
   { name: 'Identity Service', url: 'http://localhost:3001/health' },
   { name: 'VC Service', url: 'http://localhost:3002/health' },
   { name: 'Permission Service', url: 'http://localhost:3003/health' },
-  { name: 'Audit Service', url: 'http://localhost:3004/health' }
+  { name: 'Audit Service', url: 'http://localhost:3005/health' }
 ];
 
 // Colors for output

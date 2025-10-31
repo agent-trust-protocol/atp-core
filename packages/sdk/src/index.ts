@@ -22,6 +22,17 @@ export { CredentialsClient } from './client/credentials.js';
 export { PermissionsClient } from './client/permissions.js';
 export { AuditClient } from './client/audit.js';
 export { GatewayClient } from './client/gateway.js';
+export { PaymentsClient } from './client/payments.js';
+
+// Multi-Protocol Support (NEW in v1.1.0)
+export {
+  Protocol,
+  ProtocolDetector,
+  BaseProtocolAdapter,
+  MCPAdapter
+} from './protocols/index.js';
+
+export { UniversalMonitor, SecurityEnforcer } from './monitoring/index.js';
 
 // Utility Classes
 export { CryptoUtils } from './utils/crypto.js';
@@ -69,8 +80,45 @@ export type {
   ATPEventHandler,
 
   // WebSocket Events
-  WebSocketMessage
+  WebSocketMessage,
+
+  // Payment Protocol Types (AP2 & ACP)
+  PaymentMandate,
+  IntentMandate,
+  CartMandate,
+  CartItem,
+  PaymentMethod,
+  PaymentMethodDetails,
+  PaymentTransaction,
+  PaymentResult,
+  ACPCheckoutSession,
+  Address,
+  PaymentPolicy,
+  AP2MandateRequest,
+  PaymentWallet,
+  PaymentEventType,
+  PaymentEvent,
+
+  // Multi-Protocol Support Types (NEW in v1.1.0)
+  ProtocolInfo,
+  ProtocolAdapter,
+  Agent as ProtocolAgent,
+  AgentEvent,
+  Message,
+  SecuredMessage,
+  VerificationResult,
+  ProtocolAuditEntry,
+  Observable,
+  MonitoringStream
 } from './types.js';
+
+// Re-export protocol types
+export type {
+  ProtocolAdapterConfig,
+  DetectionResult,
+  UniversalMonitorConfig,
+  SecurityConfig
+} from './protocols/index.js';
 
 // Re-export specific interfaces for easier access
 export type {
@@ -153,7 +201,7 @@ export function createQuickConfig(baseUrl: string, options?: {
       identity: process.env.ATP_IDENTITY_URL || `${baseUrl}:3001`,
       credentials: process.env.ATP_CREDENTIALS_URL || `${baseUrl}:3002`,
       permissions: process.env.ATP_PERMISSIONS_URL || `${baseUrl}:3003`,
-      audit: process.env.ATP_AUDIT_URL || `${baseUrl}:3006`,
+      audit: process.env.ATP_AUDIT_URL || `${baseUrl}:3005`,
       gateway: process.env.ATP_GATEWAY_URL || `${baseUrl}:3000`
     }
   };
@@ -161,7 +209,7 @@ export function createQuickConfig(baseUrl: string, options?: {
 
 // SDK Metadata
 export const SDK_INFO = {
-  name: '@atp/sdk',
+  name: 'atp-sdk',
   version: VERSION,
   protocolVersion: PROTOCOL_VERSION,
   description: 'Official TypeScript SDK for Agent Trust Protocol™',

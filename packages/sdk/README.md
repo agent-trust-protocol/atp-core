@@ -9,11 +9,11 @@
 ## 🚀 Quick Start (3 Lines!)
 
 ```bash
-npm install @atp/sdk
+npm install atp-sdk
 ```
 
 ```typescript
-import { Agent } from '@atp/sdk';
+import { Agent } from 'atp-sdk';
 
 const agent = await Agent.create('MyBot');                            // Line 1: Create quantum-safe agent
 await agent.send('did:atp:other-agent', 'Hello, quantum world!');    // Line 2: Send secure message
@@ -41,6 +41,8 @@ For advanced usage, see the complete API documentation below...
 
 - **[Complete Documentation](./docs/README.md)** - Comprehensive guides and API reference
 - **[API Reference](./docs/api/README.md)** - Detailed API documentation
+- **[Public API Surface](./docs/API-SURFACE.md)** - Stable exports for developers
+- **[Migration Guide](./docs/MIGRATION.md)** - Upgrade notes and defaults
 - **[Examples](./examples/README.md)** - Practical examples and use cases
 - **[Configuration Guide](./docs/guides/configuration.md)** - Advanced configuration options
 - **[Authentication Guide](./docs/guides/authentication.md)** - Security and authentication patterns
@@ -48,6 +50,25 @@ For advanced usage, see the complete API documentation below...
 - **[Troubleshooting](./docs/guides/troubleshooting.md)** - Common issues and solutions
 
 ## ✨ Features
+
+### 🌐 **Multi-Protocol Support** (NEW in v1.1!)
+- **Universal Security Layer** - Works with MCP, Swarm, ADK, and A2A protocols
+- **Automatic Protocol Detection** - Identifies agent protocol automatically
+- **Unified Monitoring** - Monitor all agents through single interface
+- **Quantum-Safe Security** - Post-quantum cryptography across all protocols
+- **Trust Scoring** - Consistent trust metrics regardless of protocol
+- **Audit Trail** - Immutable logging for all protocol events
+
+[Learn more about multi-protocol support →](./docs/MULTI-PROTOCOL-SUPPORT.md)
+
+### 💳 **Payment Protocols**
+- **Google AP2 Integration** - Agent Payments Protocol with mandate-based authorization
+- **OpenAI ACP Support** - Agentic Commerce Protocol for ChatGPT commerce
+- Intent & Cart Mandates with cryptographic signatures
+- Multi-payment support (cards, crypto, stablecoins, bank transfers)
+- Payment policy enforcement and spending limits
+- Complete audit trail for all transactions
+- Verifiable credentials for payment authorization
 
 ### 🔐 **Identity Management**
 - Generate and manage Decentralized Identifiers (DIDs)
@@ -105,7 +126,7 @@ The ATP™ SDK provides a unified interface to multiple microservices:
                        │                   │                   │
                ┌───────▼────────┐ ┌────────▼────────┐ ┌───────▼────────┐
                │ Identity Service│ │Credentials Service│ │  Audit Service │
-               │    (Port 3001)  │ │   (Port 3002)   │ │   (Port 3004)  │
+               │    (Port 3001)  │ │   (Port 3002)   │ │   (Port 3005)  │
                └─────────────────┘ └─────────────────┘ └────────────────┘
                        │                   │                   │
                ┌───────▼────────┐ ┌────────▼────────┐ ┌───────▼────────┐
@@ -126,19 +147,19 @@ The ATP™ SDK provides a unified interface to multiple microservices:
 
 ```bash
 # Using npm
-npm install @atp/sdk
+npm install atp-sdk
 
 # Using yarn
-yarn add @atp/sdk
+yarn add atp-sdk
 
 # Using pnpm
-pnpm add @atp/sdk
+pnpm add atp-sdk
 ```
 
 ### Basic Configuration
 
 ```javascript
-import { ATPClient, createQuickConfig } from '@atp/sdk';
+import { ATPClient, createQuickConfig } from 'atp-sdk';
 
 // Development (local services)
 const config = createQuickConfig('http://localhost');
@@ -169,7 +190,7 @@ const client = new ATPClient(config);
 ### Identity Management
 
 ```javascript
-import { DIDUtils, CryptoUtils } from '@atp/sdk';
+import { DIDUtils, CryptoUtils } from 'atp-sdk';
 
 // Generate new identity
 const { did, document, keyPair } = await DIDUtils.generateDID({
@@ -366,6 +387,132 @@ const health = await client.gateway.getStatus();
 console.log('Gateway status:', health.data.status);
 ```
 
+### Payment Protocols (AP2 & ACP)
+
+```javascript
+// Google AP2 (Agent Payments Protocol) Integration
+
+// 1. Create Intent Mandate (User Authorization)
+const intentMandate = await client.payments.createIntentMandate({
+  userDid: 'did:atp:user123',
+  agentDid: 'did:atp:shopping-agent',
+  purpose: 'Holiday shopping assistant',
+  maxAmount: 500.00,
+  currency: 'USD',
+  expiresAt: new Date('2025-12-31'),
+  restrictions: {
+    merchants: ['amazon.com', 'etsy.com'],
+    categories: ['gifts', 'electronics'],
+    dailyLimit: 200.00
+  }
+});
+
+// 2. Create Cart Mandate (Specific Transaction)
+const cartMandate = await client.payments.createCartMandate({
+  intentMandateId: intentMandate.data.id,
+  merchant: 'etsy.com',
+  items: [
+    { id: 'item-1', name: 'Handmade Mug', quantity: 2, price: 24.99, currency: 'USD' },
+    { id: 'item-2', name: 'Coffee Beans', quantity: 1, price: 18.50, currency: 'USD' }
+  ],
+  total: 68.48,
+  currency: 'USD',
+  paymentMethod: paymentMethodObject
+});
+
+// 3. Execute Payment
+const payment = await client.payments.executeAP2Payment({
+  cartMandateId: cartMandate.data.id,
+  paymentMethod: paymentMethodObject,
+  billingAddress: {
+    line1: '123 Main St',
+    city: 'San Francisco',
+    state: 'CA',
+    postalCode: '94102',
+    country: 'US'
+  }
+});
+
+console.log('Payment completed:', payment.data.id);
+console.log('Audit trail events:', payment.data.auditTrail.length);
+
+// OpenAI ACP (Agentic Commerce Protocol) Integration
+
+// 1. Create Checkout Session
+const checkout = await client.payments.createACPCheckout({
+  merchantId: 'merchant-123',
+  agentDid: 'did:atp:shopping-agent',
+  items: [
+    { productId: 'prod-vintage-lamp', quantity: 1 },
+    { productId: 'prod-art-print', quantity: 2 }
+  ],
+  shippingAddress: {
+    line1: '456 Oak Ave',
+    city: 'New York',
+    state: 'NY',
+    postalCode: '10001',
+    country: 'US'
+  },
+  customerEmail: 'customer@example.com'
+});
+
+// 2. Complete Checkout
+const result = await client.payments.completeACPCheckout({
+  sessionId: checkout.data.id,
+  paymentMethodId: 'pm-card-123',
+  sharedPaymentToken: 'spt-stripe-abc123'
+});
+
+console.log('Transaction ID:', result.data.transactionId);
+console.log('Receipt URL:', result.data.receipt?.url);
+
+// Payment Policy Management
+const policy = await client.payments.createPaymentPolicy({
+  name: 'Shopping Assistant Limits',
+  agentDid: 'did:atp:shopping-agent',
+  maxTransactionAmount: 100.00,
+  dailyLimit: 250.00,
+  monthlyLimit: 1000.00,
+  allowedMerchants: ['etsy.com', 'amazon.com'],
+  requiresApproval: true,
+  notificationThreshold: 50.00
+});
+
+// Add Payment Methods
+const cardMethod = await client.payments.addPaymentMethod({
+  userDid: 'did:atp:user123',
+  type: 'card',
+  details: {
+    last4: '4242',
+    brand: 'Visa',
+    expiryMonth: 12,
+    expiryYear: 2026
+  },
+  isDefault: true
+});
+
+// Crypto/Stablecoin Support
+const cryptoMethod = await client.payments.addPaymentMethod({
+  userDid: 'did:atp:user123',
+  type: 'stablecoin',
+  details: {
+    walletAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+    blockchain: 'ethereum',
+    tokenSymbol: 'USDC'
+  }
+});
+
+// Query Transaction History
+const transactions = await client.payments.queryTransactions({
+  userDid: 'did:atp:user123',
+  startDate: new Date('2025-01-01'),
+  endDate: new Date(),
+  status: 'completed'
+});
+
+console.log('Total transactions:', transactions.data.length);
+```
+
 ## 🛠️ Development
 
 ### Environment Setup
@@ -405,7 +552,7 @@ node examples/index.js 3  # Verifiable credentials
 The SDK is written in TypeScript and provides comprehensive type definitions:
 
 ```typescript
-import { ATPClient, ATPConfig, VerifiableCredential } from '@atp/sdk';
+import { ATPClient, ATPConfig, VerifiableCredential } from 'atp-sdk';
 
 const config: ATPConfig = {
   baseUrl: 'http://localhost',
@@ -446,11 +593,11 @@ npm run test -- --grep "Identity"
 ### Testing Your Application
 
 ```javascript
-import { ATPClient } from '@atp/sdk';
+import { ATPClient } from 'atp-sdk';
 import { jest } from '@jest/globals';
 
 // Mock the SDK for testing
-jest.mock('@atp/sdk');
+jest.mock('atp-sdk');
 
 describe('My Application', () => {
   let mockClient;
@@ -524,9 +671,15 @@ const results = await Promise.allSettled(
 
 ### Health Checks
 
+**Quick Start Example**: See [`examples/10-monitoring-health.js`](./examples/10-monitoring-health.js) for a complete monitoring example.
+
 ```javascript
 // Implement health check endpoint
+import { ATPClient, createQuickConfig } from 'atp-sdk';
+
 app.get('/health', async (req, res) => {
+  const client = new ATPClient(createQuickConfig('http://localhost'));
+  
   try {
     const health = await client.testConnectivity();
     
@@ -543,6 +696,19 @@ app.get('/health', async (req, res) => {
     });
   }
 });
+```
+
+### Gateway Health & Status
+
+```javascript
+// Get detailed gateway health
+const health = await client.gateway.getHealth();
+
+// Get gateway status with load metrics
+const status = await client.gateway.getStatus();
+
+// Get connection statistics
+const stats = await client.gateway.getConnectionStats();
 ```
 
 ### Metrics
@@ -621,10 +787,27 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📈 Roadmap
 
-- [ ] **v1.1.0** - WebAssembly support for browser environments
-- [ ] **v1.2.0** - GraphQL API support
-- [ ] **v1.3.0** - Advanced zero-knowledge proof features
+- [x] **v1.1.0** - Payment Protocols (AP2 & ACP) Integration
+- [ ] **v1.2.0** - WebAssembly support for browser environments
+- [ ] **v1.3.0** - GraphQL API support
+- [ ] **v1.4.0** - Advanced zero-knowledge proof features
 - [ ] **v2.0.0** - ATP Protocol v2 compatibility
+
+## 🔗 Payment Protocol Partners
+
+The ATP SDK integrates with industry-leading payment platforms:
+
+**AP2 (Agent Payments Protocol) Partners:**
+- Adyen, American Express, Ant International
+- Coinbase, Ethereum Foundation, MetaMask
+- Etsy, Mastercard, PayPal, Revolut
+- Salesforce, ServiceNow, Stripe, Worldpay
+- 60+ additional partners
+
+**ACP (Agentic Commerce Protocol):**
+- OpenAI ChatGPT Commerce
+- Stripe Shared Payment Tokens
+- Etsy Instant Checkout
 
 ---
 

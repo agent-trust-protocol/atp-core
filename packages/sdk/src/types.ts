@@ -304,3 +304,247 @@ export interface WebSocketMessage {
 }
 
 export type MFAMethod = 'totp' | 'sms' | 'email' | 'webauthn';
+
+// Payment Protocol Types (AP2 & ACP)
+
+/**
+ * Payment Mandate Types
+ */
+export interface PaymentMandate {
+  id: string;
+  type: 'intent' | 'cart';
+  createdAt: string;
+  status: 'active' | 'revoked' | 'expired' | 'used';
+}
+
+export interface IntentMandate extends PaymentMandate {
+  type: 'intent';
+  userDid: string;
+  agentDid: string;
+  purpose: string;
+  maxAmount?: number;
+  currency: string;
+  restrictions?: {
+    merchants?: string[];
+    categories?: string[];
+    dailyLimit?: number;
+  };
+  expiresAt?: string;
+}
+
+export interface CartMandate extends PaymentMandate {
+  type: 'cart';
+  intentMandateId: string;
+  merchant: string;
+  items: CartItem[];
+  total: number;
+  currency: string;
+  paymentMethod: PaymentMethod;
+  hash: string;
+}
+
+export interface CartItem {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+  currency: string;
+  metadata?: Record<string, any>;
+}
+
+/**
+ * Payment Method Types
+ */
+export interface PaymentMethod {
+  id: string;
+  userDid: string;
+  type: 'card' | 'bank' | 'crypto' | 'stablecoin';
+  details: PaymentMethodDetails;
+  isDefault: boolean;
+  status: 'active' | 'expired' | 'blocked';
+  createdAt: string;
+  verifiedAt?: string;
+}
+
+export interface PaymentMethodDetails {
+  // Card details
+  last4?: string;
+  brand?: string;
+  expiryMonth?: number;
+  expiryYear?: number;
+  // Crypto details
+  walletAddress?: string;
+  blockchain?: string;
+  tokenSymbol?: string;
+  // Bank details
+  accountLast4?: string;
+  routingNumber?: string;
+  bankName?: string;
+}
+
+/**
+ * Payment Transaction Types
+ */
+export interface PaymentTransaction {
+  id: string;
+  type: 'ap2' | 'acp';
+  status: 'pending' | 'completed' | 'failed' | 'refunded';
+  userDid: string;
+  agentDid: string;
+  merchantId: string;
+  amount: number;
+  currency: string;
+  paymentMethod: PaymentMethod;
+  mandateId?: string;
+  checkoutSessionId?: string;
+  createdAt: string;
+  completedAt?: string;
+  failureReason?: string;
+  metadata?: Record<string, any>;
+  auditTrail: AuditEvent[];
+}
+
+export interface PaymentResult {
+  success: boolean;
+  transactionId: string;
+  status: PaymentTransaction['status'];
+  amount: number;
+  currency: string;
+  receipt?: {
+    url: string;
+    number: string;
+  };
+  error?: {
+    code: string;
+    message: string;
+    details?: any;
+  };
+}
+
+/**
+ * ACP (Agentic Commerce Protocol) Types
+ */
+export interface ACPCheckoutSession {
+  id: string;
+  merchantId: string;
+  agentDid: string;
+  status: 'created' | 'pending' | 'completed' | 'expired' | 'cancelled';
+  items: Array<{
+    productId: string;
+    variantId?: string;
+    quantity: number;
+    price: number;
+    name?: string;
+  }>;
+  subtotal: number;
+  tax?: number;
+  shipping?: number;
+  total: number;
+  currency: string;
+  shippingAddress?: Address;
+  billingAddress?: Address;
+  customerEmail?: string;
+  paymentIntent?: string;
+  sharedPaymentToken?: string;
+  expiresAt: string;
+  createdAt: string;
+  metadata?: Record<string, any>;
+}
+
+export interface Address {
+  line1: string;
+  line2?: string;
+  city: string;
+  state?: string;
+  postalCode: string;
+  country: string;
+}
+
+/**
+ * Payment Policy Types
+ */
+export interface PaymentPolicy {
+  id: string;
+  name: string;
+  agentDid: string;
+  limits: {
+    maxTransactionAmount: number;
+    dailyLimit?: number;
+    monthlyLimit?: number;
+  };
+  allowedMerchants?: string[];
+  allowedCategories?: string[];
+  blockedMerchants?: string[];
+  requiresApproval: boolean;
+  notificationThreshold?: number;
+  createdAt: string;
+  updatedAt: string;
+  status: 'active' | 'suspended' | 'deleted';
+}
+
+/**
+ * AP2 Mandate Request
+ */
+export interface AP2MandateRequest {
+  mandate: IntentMandate | CartMandate;
+  signature: string;
+  verifiableCredential: VerifiableCredential;
+  timestamp: string;
+}
+
+/**
+ * Payment Wallet Types
+ */
+export interface PaymentWallet {
+  id: string;
+  userDid: string;
+  type: 'custodial' | 'non-custodial';
+  balance: Array<{
+    currency: string;
+    amount: number;
+    blockchain?: string;
+  }>;
+  paymentMethods: PaymentMethod[];
+  defaultPaymentMethodId?: string;
+  status: 'active' | 'frozen' | 'closed';
+  createdAt: string;
+}
+
+/**
+ * Payment Events
+ */
+export type PaymentEventType =
+  | 'payment.created'
+  | 'payment.pending'
+  | 'payment.completed'
+  | 'payment.failed'
+  | 'payment.refunded'
+  | 'mandate.created'
+  | 'mandate.revoked'
+  | 'checkout.created'
+  | 'checkout.completed';
+
+export interface PaymentEvent extends ATPEvent {
+  type: PaymentEventType;
+  data: PaymentTransaction | PaymentMandate | ACPCheckoutSession;
+}
+
+// Re-export protocol types for convenience
+export type {
+  Protocol,
+  ProtocolInfo,
+  Agent as ProtocolAgent,
+  AgentEvent,
+  Message,
+  SecuredMessage,
+  VerificationResult,
+  ProtocolAuditEntry,
+  Observable,
+  Observer,
+  Subscription,
+  MonitoringStream
+} from './protocols/base/types.js';
+
+export type {
+  ProtocolAdapter
+} from './protocols/base/adapter.js';

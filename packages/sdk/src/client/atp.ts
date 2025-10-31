@@ -4,6 +4,7 @@ import { CredentialsClient } from './credentials.js';
 import { PermissionsClient } from './permissions.js';
 import { AuditClient } from './audit.js';
 import { GatewayClient } from './gateway.js';
+import { PaymentsClient } from './payments.js';
 
 /**
  * Main ATP™ SDK Client
@@ -17,6 +18,7 @@ export class ATPClient {
   public readonly permissions: PermissionsClient;
   public readonly audit: AuditClient;
   public readonly gateway: GatewayClient;
+  public readonly payments: PaymentsClient;
 
   constructor(private config: ATPConfig) {
     this.identity = new IdentityClient(config);
@@ -24,6 +26,7 @@ export class ATPClient {
     this.permissions = new PermissionsClient(config);
     this.audit = new AuditClient(config);
     this.gateway = new GatewayClient(config);
+    this.payments = new PaymentsClient(config);
   }
 
   /**
@@ -42,6 +45,7 @@ export class ATPClient {
     this.permissions.updateAuth(auth);
     this.audit.updateAuth(auth);
     this.gateway.updateAuth(auth);
+    this.payments.updateAuth(auth);
   }
 
   /**
