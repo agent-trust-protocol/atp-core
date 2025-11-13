@@ -1,12 +1,13 @@
-# @atp/sdk - Agent Trust Protocol SDK
+# atp-sdk - Agent Trust Protocol SDK
 
 > Official TypeScript SDK for Agent Trust Protocol™ - Build quantum-safe AI agents in 3 lines of code!
 
-[![npm version](https://badge.fury.io/js/@atp%2Fsdk.svg)](https://badge.fury.io/js/@atp%2Fsdk)
+[![npm version](https://badge.fury.io/js/atp-sdk.svg)](https://www.npmjs.com/package/atp-sdk)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+[![Quantum Safe](https://img.shields.io/badge/Security-Quantum%20Safe-blueviolet)](https://github.com/agent-trust-protocol/core)
 
-## 🚀 Quick Start (3 Lines!)
+## ⚡ Get Started in 30 Seconds
 
 ```bash
 npm install atp-sdk
@@ -15,22 +16,51 @@ npm install atp-sdk
 ```typescript
 import { Agent } from 'atp-sdk';
 
-const agent = await Agent.create('MyBot');                            // Line 1: Create quantum-safe agent
-await agent.send('did:atp:other-agent', 'Hello, quantum world!');    // Line 2: Send secure message
-console.log(`Trust: ${await agent.getTrustScore('did:atp:other')}`); // Line 3: Check trust score
+// Option 1: Works immediately (no services needed)
+const agent = await Agent.create('MyBot');
+console.log('DID:', agent.getDID());
+console.log('Quantum-safe:', agent.isQuantumSafe()); // true
+
+// Option 2: Full features (with ATP services)
+await agent.initialize(); // Connects to ATP network
+await agent.send('did:atp:other', 'Hello!');
+console.log(await agent.getTrustScore('did:atp:other'));
 ```
 
-That's it! You now have a quantum-safe AI agent with decentralized identity, secure messaging, and trust scoring.
+**That's it!** Your agent now has:
+- ✅ Quantum-safe cryptography (hybrid Ed25519 + ML-DSA)
+- ✅ Decentralized Identity (DID)
+- ✅ Cryptographic signatures
+- ✅ Trust scoring
 
-## 🛠️ Prerequisites
+## 🚀 Setup Options
 
-Currently, ATP services need to be running locally. Hosted services coming soon!
+### Quick Start (No Services Required)
+Works immediately - perfect for testing and development:
+
+```typescript
+import { Agent } from 'atp-sdk';
+const agent = await Agent.create('MyBot');
+// Ready to use!
+```
+
+### Full Setup (With ATP Services)
+For complete functionality including identity registration, credentials, and permissions:
 
 ```bash
-# Clone and start ATP services
+# Start ATP services (one command)
+docker-compose up -d
+
+# Or clone and start locally
 git clone https://github.com/agent-trust-protocol/core.git
 cd agent-trust-protocol
 ./start-services.sh
+```
+
+Then initialize your agent:
+```typescript
+const agent = await Agent.create('MyBot');
+await agent.initialize(); // Connects to ATP services
 ```
 
 ## 📖 Full SDK Documentation
