@@ -1,9 +1,9 @@
 import Link from "next/link"
-import { 
-  Code2, 
-  Terminal, 
-  Key, 
-  Shield, 
+import {
+  Code2,
+  Terminal,
+  Key,
+  Shield,
   ArrowRight,
   Copy,
   ExternalLink,
@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { GatedAPIReference } from "./gated"
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -31,6 +32,7 @@ export const metadata: Metadata = {
 
 export default function APIReferencePage() {
   return (
+    <GatedAPIReference>
     <div className="min-h-screen relative">
       <div className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
         {/* Header */}
@@ -388,5 +390,6 @@ console.log('Agent created:', agent.id)`}
         </div>
       </div>
     </div>
+    </GatedAPIReference>
   )
 }

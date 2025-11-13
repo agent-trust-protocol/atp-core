@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import Database from 'better-sqlite3';
+import path from 'path';
 import { randomBytes } from 'crypto';
 
-// This would integrate with your EnterpriseOnboardingService
+const JWT_SECRET = process.env.JWT_SECRET || 'atp-dev-secret-change-in-production-2024';
+const dbPath = path.join(process.cwd(), 'dev.db');
+
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
@@ -24,68 +30,128 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if email already exists (in production)
-    // const existingUser = await findUserByEmail(email);
-    // if (existingUser) {
-    //   return NextResponse.json(
-    //     { message: 'Email already registered' },
-    //     { status: 409 }
-    //   );
-    // }
+    // Validate password strength
+    if (password.length < 8) {
+      return NextResponse.json(
+        { message: 'Password must be at least 8 characters' },
+        { status: 400 }
+      );
+    }
 
-    // Create trial account (in production, this calls your EnterpriseOnboardingService)
-    const trialData = {
-      company,
-      contactName: `${firstName} ${lastName}`,
+    // Open database
+    const db = new Database(dbPath);
+
+    // Check if user already exists
+    const existingUser = db.prepare('SELECT id FROM user WHERE email = ?').get(email);
+    if (existingUser) {
+      db.close();
+      return NextResponse.json(
+        { message: 'Email already registered' },
+        { status: 409 }
+      );
+    }
+
+    // Hash password with bcrypt
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Generate user ID
+    const userId = `user_${randomBytes(16).toString('hex')}`;
+    const now = Date.now();
+
+    // Insert user into database
+    db.prepare(`
+      INSERT INTO user (id, email, emailVerified, name, createdAt, updatedAt, plan, companyName)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      userId,
       email,
-      phone,
-      companySize,
-      useCase,
-      timeline: 'immediate'
-    };
+      0, // emailVerified
+      `${firstName} ${lastName}`,
+      now,
+      now,
+      'trial',
+      company
+    );
 
-    // Generate API credentials for trial
-    const apiKey = `atp_trial_${randomBytes(16).toString('hex')}`;
-    const apiSecret = randomBytes(32).toString('base64');
-    
-    // In production, call your service:
-    // const trial = await enterpriseOnboarding.processDemoRequest(trialData);
-
-    // Send welcome email
-    const emailData = {
-      firstName,
+    // Insert password into account table
+    db.prepare(`
+      INSERT INTO account (id, userId, accountId, providerId, password, createdAt, updatedAt)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      `account_${randomBytes(16).toString('hex')}`,
+      userId,
       email,
-      company,
-      apiKey,
-      apiSecret,
-      portalUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/portal`,
-      trialEndDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toDateString()
-    };
+      'credential',
+      hashedPassword,
+      now,
+      now
+    );
 
-    // In production:
-    // await emailService.sendWelcomeEmail(email, emailData);
+    // Generate verification token (valid for 24 hours)
+    const verificationToken = randomBytes(32).toString('hex');
+    const expiresAt = now + (24 * 60 * 60 * 1000); // 24 hours from now
 
-    // For demo, simulate successful account creation
-    console.log('Trial account created:', {
+    // Store verification token
+    db.prepare(`
+      INSERT INTO verification (id, identifier, value, expiresAt, createdAt, updatedAt)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(
+      `verification_${randomBytes(16).toString('hex')}`,
       email,
-      company,
-      apiKey: apiKey.slice(0, 20) + '...',
-    });
+      verificationToken,
+      expiresAt,
+      now,
+      now
+    );
 
-    return NextResponse.json({
+    db.close();
+
+    console.log('[SIGNUP] Verification token generated for:', email);
+    console.log('[SIGNUP] Verification link: http://localhost:3030/verify-email?token=' + verificationToken);
+
+    // Generate JWT token
+    const token = jwt.sign(
+      {
+        userId,
+        email,
+        name: `${firstName} ${lastName}`,
+        company,
+        plan: 'trial'
+      },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
+    // Create response with cookie
+    const response = NextResponse.json({
       success: true,
-      message: 'Trial account created successfully',
-      trialId: `trial_${randomBytes(8).toString('hex')}`,
-      credentials: {
-        apiKey,
-        portalUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/portal`
-      }
+      message: 'Account created successfully. Please check your email to verify your account.',
+      user: {
+        id: userId,
+        email,
+        name: `${firstName} ${lastName}`,
+        company,
+        emailVerified: false
+      },
+      // TODO: Remove this in production - send via email instead
+      verificationLink: `http://localhost:3030/verify-email?token=${verificationToken}`
     });
+
+    // Set HTTP-only cookie
+    response.cookies.set('atp_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+      path: '/'
+    });
+
+    return response;
 
   } catch (error) {
     console.error('Signup error:', error);
     return NextResponse.json(
-      { message: 'Failed to create account' },
+      { message: 'Failed to create account. Please try again.' },
       { status: 500 }
     );
   }

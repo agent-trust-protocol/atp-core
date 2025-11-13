@@ -28,9 +28,10 @@ import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon, SecureConnectionIc
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { QuantumSignatureDemo } from "@/components/atp/quantum-signature-demo"
-import { TrustLevelDemo } from "@/components/atp/trust-level-demo"
-import { MonitoringDemo } from "@/components/atp/monitoring-demo"
+// Demo components temporarily disabled for compilation
+// import { QuantumSafeSignatureDemo } from "@/components/atp/quantum-safe-signature-demo"
+// import { TrustLevelManagementDemo } from "@/components/atp/trust-level-management-demo"
+// import { PerformanceMetricsPreview } from "@/components/atp/performance-metrics-preview"
 import { QuickAccess } from "@/components/ui/quick-access"
 
 export default function HomePage() {
@@ -61,9 +62,12 @@ export default function HomePage() {
             <Badge className="bg-[hsl(var(--atp-primary))]/10 dark:bg-[hsl(var(--atp-primary))]/20 text-[hsl(var(--atp-primary))] dark:text-blue-300 border-[hsl(var(--atp-primary))]/20 dark:border-blue-400/30 px-4 py-2 text-sm font-medium backdrop-blur-sm"><Globe size={14} className="mr-2" />Enterprise Ready</Badge>
             <Badge className="bg-atp-electric-cyan/10 dark:bg-atp-electric-cyan/20 text-atp-electric-cyan dark:text-cyan-200 border-atp-electric-cyan/20 dark:border-cyan-300/30 px-4 py-2 text-sm font-medium backdrop-blur-sm"><Award size={14} className="mr-2" />Production Ready</Badge>
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-in-up">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up">
             <Button asChild size="lg" className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
               <Link href="/signup"><Zap className="h-5 w-5 mr-3" />Start Free Trial</Link>
+            </Button>
+            <Button asChild size="lg" className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
+              <Link href="/cloud"><Building className="h-5 w-5 mr-3" />Request Cloud Access</Link>
             </Button>
             <Button asChild size="lg" className="bg-gradient-to-r from-[hsl(var(--atp-quantum))] to-[hsl(var(--atp-primary))] text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
               <Link href="/dashboard"><Activity className="h-5 w-5 mr-3" />Try Live Demo</Link>
@@ -259,7 +263,7 @@ export default function HomePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <QuantumSignatureDemo />
+                <p className="text-muted-foreground">Quantum-safe signature demo available soon</p>
               </CardContent>
             </Card>
 
@@ -276,7 +280,7 @@ export default function HomePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <TrustLevelDemo />
+                <p className="text-muted-foreground">Trust level management demo available soon</p>
               </CardContent>
             </Card>
           </div>
@@ -294,30 +298,33 @@ export default function HomePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <MonitoringDemo />
+              <p className="text-muted-foreground">Performance metrics demo available soon</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* CTA Section */}
+        {/* Interactive Demos CTA */}
         <div className="text-center mt-12 lg:mt-16 p-6 sm:p-8 glass-intense rounded-2xl border-0 atp-quantum-glow text-white">
-          <h2 className="font-display text-3xl lg:text-4xl font-light mb-4">Ready to Get Started?</h2>
+          <h2 className="font-display text-3xl lg:text-4xl font-light mb-4">Experience ATP in Action</h2>
           <p className="text-lg sm:text-xl mb-8 text-white/90 leading-relaxed">
-            Join the future of <span className="text-atp-electric-cyan font-medium">quantum-safe</span> AI agent interactions
+            Try <span className="text-atp-electric-cyan font-medium">quantum-safe cryptography</span>, design trust policies, and explore performance monitoring—all in your browser
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button asChild size="lg" className="atp-gradient-primary hover:scale-105 transition-all duration-300 w-full sm:w-auto">
-              <Link href="/dashboard">
-                <Activity className="h-4 w-4 mr-2" />
-                Launch Dashboard
+              <Link href="/demos">
+                <Zap className="h-4 w-4 mr-2" />
+                Interactive Demos
               </Link>
             </Button>
             <Button asChild size="lg" className="atp-gradient-secondary hover:scale-105 transition-all duration-300 w-full sm:w-auto">
-              <Link href="/policy-editor">
-                <FileText className="h-4 w-4 mr-2" />
-                Try Policy Editor
+              <Link href="/enterprise">
+                <Building className="h-4 w-4 mr-2" />
+                Enterprise Solutions
               </Link>
             </Button>
+          </div>
+          <div className="mt-6 text-sm text-white/70">
+            No signup required • Experience quantum-safe features instantly
           </div>
         </div>
       </div>

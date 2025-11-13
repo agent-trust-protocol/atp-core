@@ -22,17 +22,26 @@ export function Navbar() {
             </div>
           </Link>
 
-          {/* Navigation Links + Theme Toggle + Contact Sales CTA */}
+          {/* Navigation Links + Theme Toggle + CTA */}
           <div className="flex items-center gap-3">
-            <Link 
-              href="/cloud" 
+            <Link
+              href="/demos"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-muted/50"
             >
-              Cloud Dashboard
+              Interactive Demos
+            </Link>
+            <Link
+              href="/dashboard"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-muted/50"
+            >
+              Dashboard
             </Link>
             <ThemeToggle />
+            <Button asChild variant="outline" size="sm" className="border-primary/20 hover:bg-primary/5">
+              <Link href="/cloud">Request Access</Link>
+            </Button>
             <Button asChild size="sm" className="atp-gradient-secondary text-white shadow-quantum hover:scale-105 transition-transform">
-              <Link href="/contact">Contact Sales</Link>
+              <Link href="/enterprise">Get Started</Link>
             </Button>
           </div>
         </div>

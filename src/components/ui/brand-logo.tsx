@@ -58,26 +58,43 @@ export function BrandLogo({ variant = "mark", size = 32, className = "", alt }: 
   const effectiveAlt = alt ?? (variant === "lockup" ? "Agent Trust Protocol Logo" : "ATP Logo")
 
   // Enhanced styling for dark mode visibility
-  const darkModeClasses = isDarkMode 
-    ? "brightness-125 contrast-150 drop-shadow-xl filter" 
-    : "brightness-100 contrast-100"
+  const darkModeClasses = isDarkMode
+    ? "brightness-110 contrast-110 drop-shadow-2xl"
+    : "brightness-100 contrast-100 drop-shadow-lg"
+
+  // Only apply gradient background to larger logos (size > 40)
+  const hasBackground = size > 40
 
   return (
-    <div className={`relative inline-flex items-center justify-center ${isDarkMode ? 'atp-quantum-glow' : ''}`}>
+    <div className={`relative inline-flex items-center justify-center group`}>
+      {/* Modern gradient background - only for larger logos */}
+      {hasBackground && (
+        <>
+          <div className={`absolute inset-0 rounded-xl bg-gradient-to-br transition-all duration-300 ${
+            isDarkMode
+              ? 'from-blue-500/10 via-purple-500/10 to-cyan-500/10 group-hover:from-blue-500/20 group-hover:via-purple-500/20 group-hover:to-cyan-500/20'
+              : 'from-blue-50 via-purple-50 to-cyan-50 group-hover:from-blue-100 group-hover:via-purple-100 group-hover:to-cyan-100'
+          }`} />
+
+          {/* Subtle border */}
+          <div className={`absolute inset-0 rounded-xl border transition-all duration-300 ${
+            isDarkMode
+              ? 'border-blue-500/20 group-hover:border-blue-400/30'
+              : 'border-blue-200/50 group-hover:border-blue-300/70'
+          }`} />
+        </>
+      )}
+
       <Image
         src={src}
         alt={effectiveAlt}
         width={size}
         height={size}
-        className={`object-contain transition-all duration-300 ${darkModeClasses} ${className}`}
+        className={`relative z-10 object-contain transition-all duration-300 ${darkModeClasses} ${className} ${hasBackground ? 'p-1.5' : ''}`}
         priority
         unoptimized
         onError={() => setSrc("/atp-logo.svg")}
       />
-      {/* Enhanced visibility overlay for dark mode */}
-      {isDarkMode && (
-        <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-cyan-400/15 to-blue-400/15 pointer-events-none" />
-      )}
     </div>
   )
 }
