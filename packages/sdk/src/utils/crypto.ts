@@ -82,8 +82,8 @@ export class CryptoUtils {
         ? privateKeyBuffer.slice(0, 32)
         : privateKeyBuffer.slice(0, 32);
       const signature = await ed25519.sign(dataBuffer, ed25519PrivateKey);
-      return Buffer.from(signature).toString('hex');
-    }
+    return Buffer.from(signature).toString('hex');
+  }
 
     // Hybrid signature: Ed25519 + ML-DSA
     const ed25519PrivateKey = privateKeyBuffer.slice(0, 32);
