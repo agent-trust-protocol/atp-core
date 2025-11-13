@@ -15,7 +15,8 @@ export default function SignupPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  
+  const [error, setError] = useState('');
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -31,25 +32,33 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     try {
-      // In production, this calls your API
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
-      if (response.ok) {
-        setSuccess(true);
-        // Redirect to login after 2 seconds
-        setTimeout(() => router.push('/login'), 2000);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || 'Failed to create account');
+        setLoading(false);
+        return;
       }
-    } catch (error) {
-      // Demo mode - simulate success
+
       setSuccess(true);
-      setTimeout(() => router.push('/login'), 2000);
-    } finally {
+      // Auto-redirect to portal (already logged in)
+      setTimeout(() => {
+        router.push('/portal');
+        router.refresh();
+      }, 2000);
+
+    } catch (error) {
+      console.error('Signup error:', error);
+      setError('Unable to create account. Please try again.');
       setLoading(false);
     }
   };
@@ -57,13 +66,38 @@ export default function SignupPage() {
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-2xl">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl text-green-600">🎉 Trial Activated!</CardTitle>
+            <CardTitle className="text-2xl text-green-600">🎉 Account Created!</CardTitle>
             <CardDescription>
-              Check your email for login credentials. Redirecting to login...
+              Please verify your email address to activate your trial
             </CardDescription>
           </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert>
+              <AlertDescription>
+                <strong>Important:</strong> We've sent a verification link to your email.
+                Click the link to verify your email and access your trial account.
+              </AlertDescription>
+            </Alert>
+
+            {/* Show verification link in dev mode */}
+            {error === '' && (
+              <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md">
+                <p className="text-sm font-semibold mb-2">Development Mode - Verification Link:</p>
+                <code className="text-xs break-all block bg-white dark:bg-gray-900 p-2 rounded">
+                  {formData.email}
+                </code>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Check the server console for the verification link, or wait for the redirect...
+                </p>
+              </div>
+            )}
+
+            <p className="text-center text-sm text-muted-foreground">
+              Redirecting to portal in a moment...
+            </p>
+          </CardContent>
         </Card>
       </div>
     );
@@ -80,6 +114,12 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
             {/* Personal Info */}
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">

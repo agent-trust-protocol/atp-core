@@ -54,7 +54,7 @@ const generateDemoData = () => {
       score: 94,
       passed: 47,
       failed: 3,
-      frameworks: ['SOC 2', 'HIPAA', 'GDPR'],
+      frameworks: ['SOC2-Ready', 'HIPAA-Aligned', 'GDPR-Ready'],
       lastAudit: '2 hours ago'
     },
     alerts: [

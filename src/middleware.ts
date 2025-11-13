@@ -6,8 +6,7 @@ const INTERNAL_ACCESS_KEY = process.env.ATP_CLOUD_ACCESS_KEY || 'atp-internal-de
 
 // Protected routes that require authentication
 const protectedRoutes = [
-  '/cloud',
-  '/policies', 
+  '/policies',
   '/policy-editor',
   '/policy-testing',
   '/dashboard',
@@ -17,12 +16,27 @@ const protectedRoutes = [
   '/api/monitoring'
 ]
 
+// Routes that should show lead generation instead of blocking
+const leadGenRoutes = [
+  '/cloud'
+]
+
 export function middleware(request: NextRequest) {
   // Check if the current path matches any protected route
-  const isProtectedRoute = protectedRoutes.some(route => 
+  const isProtectedRoute = protectedRoutes.some(route =>
     request.nextUrl.pathname.startsWith(route)
   )
-  
+
+  // Check if the current path is a lead generation route
+  const isLeadGenRoute = leadGenRoutes.some(route =>
+    request.nextUrl.pathname.startsWith(route)
+  )
+
+  // Allow lead generation routes to pass through to show the lead capture form
+  if (isLeadGenRoute) {
+    return NextResponse.next()
+  }
+
   // Only apply authentication to protected routes
   if (!isProtectedRoute) {
     return NextResponse.next()

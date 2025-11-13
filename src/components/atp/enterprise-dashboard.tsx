@@ -482,35 +482,35 @@ export function EnterpriseDashboard() {
             <div className="space-y-3">
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
-                  <span className="text-white font-medium">SOC 2</span>
+                  <span className="text-white font-medium">SOC2-Ready</span>
                   <span className="text-white font-bold">{metrics.complianceMetrics.soc2Compliance}%</span>
                 </div>
                 <Progress value={metrics.complianceMetrics.soc2Compliance} className="h-2" />
-                <p className="text-xs text-white/70">Security, availability, confidentiality</p>
+                <p className="text-xs text-white/70">Security, availability, confidentiality (architecture-ready)</p>
               </div>
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
-                  <span className="text-white font-medium">ISO 27001</span>
+                  <span className="text-white font-medium">ISO 27001-Aligned</span>
                   <span className="text-white font-bold">{metrics.complianceMetrics.iso27001Compliance}%</span>
                 </div>
                 <Progress value={metrics.complianceMetrics.iso27001Compliance} className="h-2" />
-                <p className="text-xs text-white/70">Information security management</p>
+                <p className="text-xs text-white/70">Information security management (architecture-aligned)</p>
               </div>
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
-                  <span className="text-white font-medium">GDPR</span>
+                  <span className="text-white font-medium">GDPR-Ready</span>
                   <span className="text-white font-bold">{metrics.complianceMetrics.gdprCompliance}%</span>
                 </div>
                 <Progress value={metrics.complianceMetrics.gdprCompliance} className="h-2" />
-                <p className="text-xs text-white/70">EU data protection regulation</p>
+                <p className="text-xs text-white/70">EU data protection regulation (architecture-ready)</p>
               </div>
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
-                  <span className="text-white font-medium">HIPAA</span>
+                  <span className="text-white font-medium">HIPAA-Aligned</span>
                   <span className="text-white font-bold">{metrics.complianceMetrics.hipaaCompliance}%</span>
                 </div>
                 <Progress value={metrics.complianceMetrics.hipaaCompliance} className="h-2" />
-                <p className="text-xs text-white/70">US healthcare data privacy</p>
+                <p className="text-xs text-white/70">US healthcare data privacy (architecture-aligned)</p>
               </div>
             </div>
           </CardContent>
