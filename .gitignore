@@ -37,3 +37,6 @@ Thumbs.db
 *.log
 logs/
 server.log
+
+# User uploads
+uploads/
