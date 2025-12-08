@@ -7,12 +7,28 @@
 
 **The world's first quantum-safe security protocol for AI agents** — protecting your AI infrastructure from today's threats and tomorrow's quantum computers.
 
+## ⚡ Get Started in 30 Seconds
+
+```bash
+npm install atp-sdk
+```
+
+```javascript
+import { Agent } from 'atp-sdk';
+
+const agent = await Agent.create('MyBot');  // Line 1: Create quantum-safe agent
+await agent.send('did:atp:other', 'Hello!'); // Line 2: Send secure message
+console.log(await agent.getTrustScore('did:atp:other')); // Line 3: Check trust
+```
+
+**That's it!** Your AI agent now has quantum-safe cryptography, decentralized identity, and trust scoring. [Full quickstart →](#-developer-quickstart)
+
 ---
 
 ## 📑 Table of Contents
 
+- [🚀 Developer Quickstart](#-developer-quickstart) - **Start Here!**
 - [🎯 Executive Summary](#-executive-summary)
-- [🚀 Developer Quickstart](#-developer-quickstart)
 - [🏢 Enterprise Guide](#-enterprise-guide)
 - [💡 Why ATP?](#-why-atp)
 - [🔧 Features](#-features)
@@ -55,15 +71,67 @@ ATP is production-ready with Ed25519 cryptography, with quantum-safe options (ML
 
 ## 🚀 Developer Quickstart
 
-**For Developers & Technical Teams**
+**Build secure AI agents in 3 lines of code**
 
-### Installation (30 seconds)
+### ⚡ Installation (30 seconds)
 
 ```bash
 npm install atp-sdk
 ```
 
-### Your First Secure Agent (2 minutes)
+### 🎯 Your First Secure Agent (2 minutes)
+
+**Option 1: Quick Start (No Services Required)**
+This works immediately - no setup needed:
+
+```javascript
+import { Agent } from 'atp-sdk';
+
+// Create quantum-safe agent (works offline!)
+const agent = await Agent.create('my-ai-assistant');
+console.log('Agent DID:', agent.getDID());
+console.log('Quantum-safe:', agent.isQuantumSafe()); // true
+```
+
+**Option 2: Full Integration (With ATP Services)**
+For complete functionality with services running:
+
+```bash
+# Start ATP services (one command)
+docker-compose up -d
+
+# Or clone and start locally
+git clone https://github.com/agent-trust-protocol/core.git
+cd agent-trust-protocol
+./start-services.sh
+```
+
+Then use the agent with full features:
+
+```javascript
+import { Agent } from 'atp-sdk';
+
+const agent = await Agent.create('my-ai-assistant');
+await agent.initialize(); // Connects to ATP services
+
+// Your agent now has:
+// ✅ Decentralized identity (DID)
+// ✅ Quantum-safe cryptography (hybrid Ed25519 + ML-DSA)
+// ✅ Digital signatures for every action
+// ✅ Trust scoring capability
+
+console.log('Agent ID:', agent.did);
+console.log('Ready for secure operations!');
+```
+
+### 📚 Next Steps
+
+- **[Full SDK Documentation](./packages/sdk/README.md)** - Complete API reference
+- **[Examples](./packages/sdk/examples/)** - 11+ working examples
+- **[API Reference](./packages/sdk/docs/API-SURFACE.md)** - Stable API surface
+- **[Troubleshooting](./packages/sdk/docs/guides/troubleshooting.md)** - Common issues
+
+### 🛠️ Full Example: Secure Agent Communication (5 minutes)
 
 ```javascript
 const { Agent } = require('atp-sdk');
@@ -179,7 +247,7 @@ app.post('/api/ai-action', (req, res) => {
 ```
 </details>
 
-[📖 Full Developer Docs](./docs/getting-started.md) | [💻 API Reference](./docs/api/README.md) | [🧪 More Examples](./packages/sdk/examples/)
+[📖 Full Developer Docs](./docs/getting-started.md) | [⚡ Quick Start Guide](./docs/QUICK-START.md) | [💻 API Reference](./packages/sdk/docs/API-SURFACE.md) | [🧪 Examples](./packages/sdk/examples/) | [❓ Troubleshooting](./packages/sdk/docs/guides/troubleshooting.md)
 
 ---
 
@@ -510,10 +578,10 @@ ATP supports gradual migration. You can run ATP alongside existing security syst
 - ⏱️ **Response Time**: Within 24 hours
 
 ### Enterprise Support
-- 📞 **Dedicated Hotline**: +1 (555) 123-4567
 - 👥 **Dedicated Team**: Assigned technical account manager
 - 🏃 **Priority Response**: 1-hour SLA for critical issues
 - 📋 **Custom Solutions**: Architecture review and optimization
+- 📞 **Contact**: [Schedule Enterprise Demo](mailto:enterprise@agenttrustprotocol.com)
 
 ---
 
@@ -523,9 +591,9 @@ ATP supports gradual migration. You can run ATP alongside existing security syst
 <tr>
 <td align="center">
 <h3>🧑‍💻 Developers</h3>
-<b>Start building in 5 minutes</b><br><br>
+<b>Start building in 30 seconds</b><br><br>
 <code>npm install atp-sdk</code><br><br>
-<a href="./docs/getting-started.md">View Quick Start →</a>
+<a href="./docs/QUICK-START.md">View Quick Start →</a>
 </td>
 <td align="center">
 <h3>🏢 Enterprise</h3>
@@ -555,6 +623,6 @@ See ATP in action<br><br>
 
 [Website](https://agenttrustprotocol.com) • [Blog](https://blog.agenttrustprotocol.com) • [Twitter](https://twitter.com/agenttrustproto) • [LinkedIn](https://linkedin.com/company/agent-trust-protocol)
 
-© 2024 Agent Trust Protocol. Licensed under [Apache 2.0](./LICENSE).
+Licensed under [Apache 2.0](./LICENSE).
 
 </div>
