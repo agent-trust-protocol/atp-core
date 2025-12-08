@@ -1,0 +1,22 @@
+[
+  {
+    "fileName": "main-overview.mdc",
+    "description": "Complete system overview documenting the Agent Trust Protocol architecture, quantum-safe security approach, and core components interaction"
+  },
+  {
+    "fileName": "trust-scoring-algorithm.mdc",
+    "description": "Detailed documentation of the trust scoring system, including calculation algorithms, factors considered, and progression rules between trust levels"
+  },
+  {
+    "fileName": "quantum-safe-crypto.mdc",
+    "description": "Comprehensive documentation of the hybrid cryptographic system combining classical Ed25519 with post-quantum Dilithium signatures, including key generation and verification workflows"
+  },
+  {
+    "fileName": "policy-evaluation-engine.mdc",
+    "description": "Technical specification of the policy evaluation engine, including rule processing algorithms, trust validation logic, and policy execution optimization"
+  },
+  {
+    "fileName": "data-models.mdc",
+    "description": "Detailed documentation of core data models including Agent, Trust Level, Policy, and their relationships within the ATP ecosystem"
+  }
+]
