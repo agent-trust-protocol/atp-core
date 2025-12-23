@@ -1,108 +1,64 @@
-# =============================================================================
-# DOCKER IGNORE FILE FOR AGENT TRUST PROTOCOL
-# =============================================================================
-
-# Dependencies
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Build outputs
-dist/
-build/
-*.tsbuildinfo
-
-# Environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Git
-.git/
-.gitignore
-
-# Docker
-.dockerignore
-Dockerfile*
-docker-compose*.yml
-
-# Documentation
-README.md
-docs/
+# Git and CI/CD
+.git
+.github
 *.md
+!README.md
 
-# Test files
-test/
-tests/
-__tests__/
-*.test.js
-*.test.ts
-*.spec.js
-*.spec.ts
-coverage/
-
-# Linting and formatting
-.eslintrc.*
-.eslintignore
-.prettierrc*
-.prettierignore
-
-# CI/CD
-.github/
-.gitlab-ci.yml
-.travis.yml
-.circleci/
+# IDE
+.vscode
+.idea
 
 # Logs
-logs/
 *.log
+logs/
 
-# Runtime data
-pids/
-*.pid
-*.seed
-*.pid.lock
+# Build artifacts (will be rebuilt)
+**/node_modules/
+**/.next/
+# Exclude dist folders EXCEPT the pre-built package dists we need
+**/dist/
+!packages/sdk/dist/
+!packages/shared/dist/
+**/build/
+**/out/
 
-# Coverage directory used by tools like istanbul
-lib-cov/
+# Databases
+*.db
+*.sqlite
 
-# nyc test coverage
-.nyc_output/
+# Environment files
+.env*
+!.env.example
 
-# Dependency directories
-jspm_packages/
+# Temp files
+tmp/
+temp/
 
-# Optional npm cache directory
-.npm
+# OS
+.DS_Store
 
-# Optional REPL history
-.node_repl_history
+# Backups
+deployment-backups/
+backups/
 
-# Output of 'npm pack'
-*.tgz
+# BMAD (not needed in container)
+.bmad-infrastructure-devops/
+bmad-core/
 
-# Yarn Integrity file
-.yarn-integrity
+# Exclude unnecessary packages (keep SDK and shared)
+packages/atp-support-agent/
+packages/audit-logger/
+packages/identity-service/
+packages/monitoring-service/
+packages/payment-service/
+packages/permission-service/
+packages/protocol-integrations/
+packages/rpc-gateway/
+packages/vc-service/
+packages/atp-cloud/
 
-# Development only files
-src/**/*.native.ts
-src/**/*-native.ts
+# Website build artifacts
+website-repo/node_modules/
+website-repo/.next/
+website-repo/data/
+website-repo/monitoring/

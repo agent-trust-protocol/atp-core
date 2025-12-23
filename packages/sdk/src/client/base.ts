@@ -6,7 +6,7 @@ export abstract class BaseClient {
   protected http: AxiosInstance;
   protected config: Required<ATPConfig>;
 
-  constructor(config: ATPConfig, serviceKey: 'identity' | 'credentials' | 'permissions' | 'audit' | 'gateway') {
+  constructor(config: ATPConfig, serviceKey: 'identity' | 'credentials' | 'permissions' | 'audit' | 'gateway' | 'payments') {
     this.config = this.normalizeConfig(config);
 
     const baseURL = this.config.services[serviceKey!] ||
@@ -34,6 +34,7 @@ export abstract class BaseClient {
         permissions: config.services?.permissions,
         audit: config.services?.audit,
         gateway: config.services?.gateway,
+        payments: config.services?.payments,
         ...config.services
       },
       auth: {
@@ -50,13 +51,14 @@ export abstract class BaseClient {
     };
   }
 
-  private getServicePath(serviceKey: 'identity' | 'credentials' | 'permissions' | 'audit' | 'gateway'): string {
+  private getServicePath(serviceKey: 'identity' | 'credentials' | 'permissions' | 'audit' | 'gateway' | 'payments'): string {
     const paths = {
       identity: ':3001',
       credentials: ':3002',
       permissions: ':3003',
       audit: ':3005',
-      gateway: ':3000'
+      gateway: ':3000',
+      payments: ':3004'
     };
     return paths[serviceKey!] || '';
   }
