@@ -1,0 +1,23 @@
+{
+  "name": "simple-agent-example",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Simple agent demonstrating Agent Trust Protocol usage",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "ws": "^8.13.0",
+    "@atp/sdk": "file:../../packages/sdk",
+    "@atp/shared": "file:../../packages/shared"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.0.0"
+  }
+}

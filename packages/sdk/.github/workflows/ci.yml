@@ -1,0 +1,115 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      working-directory: packages/sdk
+      
+    - name: Run linter
+      run: npm run lint:check
+      working-directory: packages/sdk
+      
+    - name: Check formatting
+      run: npm run format:check
+      working-directory: packages/sdk
+      
+    - name: Run tests
+      run: npm run test:coverage
+      working-directory: packages/sdk
+      
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: packages/sdk/coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        
+    - name: Build package
+      run: npm run build
+      working-directory: packages/sdk
+      
+    - name: Test examples
+      run: npm run examples -- 1
+      working-directory: packages/sdk
+
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      working-directory: packages/sdk
+      
+    - name: Run security audit
+      run: npm audit --audit-level high
+      working-directory: packages/sdk
+      
+    - name: Check for known vulnerabilities
+      run: npx better-npm-audit audit
+      working-directory: packages/sdk
+
+  build-matrix:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      working-directory: packages/sdk
+      
+    - name: Build package
+      run: npm run build
+      working-directory: packages/sdk
+      
+    - name: Test import (ESM)
+      run: node -e "import('./dist/index.js').then(() => console.log('ESM import successful'))"
+      working-directory: packages/sdk
+      
+    - name: Test import (CommonJS)
+      run: node -e "require('./dist/index.cjs'); console.log('CommonJS import successful')"
+      working-directory: packages/sdk

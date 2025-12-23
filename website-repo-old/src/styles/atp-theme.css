@@ -1,0 +1,153 @@
+/* ATP Theme Foundation - Complete Color System */
+@layer base {
+  :root {
+    /* Core ATP Colors */
+    --atp-primary: 262 80% 50%;
+    --atp-primary-dark: 262 80% 40%;
+    --atp-primary-light: 262 80% 60%;
+    --atp-primary-foreground: 0 0% 100%;
+    
+    /* Trust Level Colors */
+    --atp-trust-enterprise: 262 70% 55%;
+    --atp-trust-premium: 45 93% 47%;
+    --atp-trust-verified: 142 76% 36%;
+    --atp-trust-basic: 211 80% 50%;
+    --atp-trust-untrusted: 0 0% 45%;
+    
+    /* Quantum Security Colors */
+    --atp-quantum: 168 84% 42%;
+    --atp-quantum-light: 168 84% 52%;
+    --atp-quantum-dark: 168 84% 32%;
+    
+    /* Status Colors */
+    --atp-success: 142 76% 36%;
+    --atp-warning: 45 93% 47%;
+    --atp-error: 0 84% 60%;
+    --atp-info: 211 80% 50%;
+    
+    /* Neutral Colors */
+    --atp-background: 0 0% 100%;
+    --atp-surface: 0 0% 98%;
+    --atp-surface-elevated: 0 0% 100%;
+    --atp-muted: 262 10% 96%;
+    --atp-muted-foreground: 262 10% 46%;
+    --atp-border: 262 20% 91%;
+    --atp-input: 262 20% 91%;
+    
+    /* Text Colors */
+    --atp-text-primary: 222 84% 5%;
+    --atp-text-secondary: 215 16% 47%;
+    --atp-text-tertiary: 215 14% 67%;
+    --atp-text-inverse: 0 0% 100%;
+    
+    /* Shadows */
+    --atp-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --atp-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --atp-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --atp-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --atp-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    
+    /* Spacing Scale */
+    --atp-space-xs: 0.25rem;
+    --atp-space-sm: 0.5rem;
+    --atp-space-md: 1rem;
+    --atp-space-lg: 1.5rem;
+    --atp-space-xl: 2rem;
+    --atp-space-2xl: 3rem;
+    --atp-space-3xl: 4rem;
+    
+    /* Border Radius */
+    --atp-radius-sm: 0.25rem;
+    --atp-radius: 0.5rem;
+    --atp-radius-md: 0.75rem;
+    --atp-radius-lg: 1rem;
+    --atp-radius-full: 9999px;
+    
+    /* Animation */
+    --atp-transition-fast: 150ms;
+    --atp-transition-normal: 300ms;
+    --atp-transition-slow: 500ms;
+    --atp-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --atp-ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --atp-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  }
+
+  .dark {
+    /* Dark Mode Overrides */
+    --atp-background: 222 84% 5%;
+    --atp-surface: 222 84% 8%;
+    --atp-surface-elevated: 222 84% 12%;
+    --atp-muted: 217 33% 17%;
+    --atp-muted-foreground: 215 20% 65%;
+    --atp-border: 217 33% 17%;
+    --atp-input: 217 33% 17%;
+    
+    --atp-text-primary: 210 40% 98%;
+    --atp-text-secondary: 215 20% 65%;
+    --atp-text-tertiary: 215 20% 45%;
+    --atp-text-inverse: 222 84% 5%;
+    
+    /* Adjust trust colors for dark mode */
+    --atp-trust-enterprise: 262 70% 65%;
+    --atp-trust-premium: 45 93% 57%;
+    --atp-trust-verified: 142 76% 46%;
+    --atp-trust-basic: 211 80% 60%;
+    --atp-trust-untrusted: 0 0% 55%;
+  }
+}
+
+/* Utility Classes */
+@layer utilities {
+  /* Gradients */
+  .atp-gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--atp-primary)) 0%, hsl(280 70% 50%) 100%);
+  }
+  
+  .atp-gradient-quantum {
+    background: linear-gradient(135deg, hsl(var(--atp-quantum)) 0%, hsl(var(--atp-quantum-dark)) 100%);
+  }
+  
+  .atp-gradient-trust {
+    background: linear-gradient(135deg, hsl(var(--atp-trust-verified)) 0%, hsl(var(--atp-trust-enterprise)) 100%);
+  }
+  
+  /* Glows */
+  .atp-glow-primary {
+    box-shadow: 0 0 20px hsl(var(--atp-primary) / 0.3);
+  }
+  
+  .atp-glow-quantum {
+    box-shadow: 0 0 20px hsl(var(--atp-quantum) / 0.3);
+  }
+  
+  /* Trust Level Utilities */
+  .atp-trust-enterprise {
+    color: hsl(var(--atp-trust-enterprise));
+    background-color: hsl(var(--atp-trust-enterprise) / 0.1);
+    border-color: hsl(var(--atp-trust-enterprise) / 0.2);
+  }
+  
+  .atp-trust-premium {
+    color: hsl(var(--atp-trust-premium));
+    background-color: hsl(var(--atp-trust-premium) / 0.1);
+    border-color: hsl(var(--atp-trust-premium) / 0.2);
+  }
+  
+  .atp-trust-verified {
+    color: hsl(var(--atp-trust-verified));
+    background-color: hsl(var(--atp-trust-verified) / 0.1);
+    border-color: hsl(var(--atp-trust-verified) / 0.2);
+  }
+  
+  .atp-trust-basic {
+    color: hsl(var(--atp-trust-basic));
+    background-color: hsl(var(--atp-trust-basic) / 0.1);
+    border-color: hsl(var(--atp-trust-basic) / 0.2);
+  }
+  
+  .atp-trust-untrusted {
+    color: hsl(var(--atp-trust-untrusted));
+    background-color: hsl(var(--atp-trust-untrusted) / 0.1);
+    border-color: hsl(var(--atp-trust-untrusted) / 0.2);
+  }
+}

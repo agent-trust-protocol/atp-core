@@ -1,0 +1,19 @@
+{
+  "name": "atp-demo-workflow",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Demo workflow showcasing Agent Trust Protocol capabilities",
+  "main": "demo.js",
+  "scripts": {
+    "demo": "ts-node --esm demo.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "simple-agent-example": "file:../simple-agent"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.0.0"
+  }
+}
