@@ -1,0 +1,57 @@
+services:
+  # Core ATP™ Services
+  identity-service:
+    build: 
+      context: ./packages/identity-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=staging
+      - PORT=3001
+      - DB_PATH=/data/identity.db
+      - CORS_ORIGIN=*
+    volumes:
+      - identity_data:/data
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - agent-trust-protocol-1_atp-network
+
+  rpc-gateway:
+    build:
+      context: ./packages/rpc-gateway  
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+      - "3443:3443"
+    environment:
+      - NODE_ENV=staging
+      - PORT=3000
+      - HTTPS_PORT=3443
+      - WS_PORT=8081
+      - IDENTITY_SERVICE_URL=http://identity-service:3001
+    depends_on:
+      - identity-service
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - agent-trust-protocol-1_atp-network
+
+volumes:
+  identity_data:
+    driver: local
+
+networks:
+  agent-trust-protocol-1_atp-network:
+    external: true

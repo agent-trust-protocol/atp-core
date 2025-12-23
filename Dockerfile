@@ -1,64 +1,65 @@
-# Multi-stage Dockerfile for ATP Website
-# Optimized for Next.js production deployment
+# 🛡️ Agent Trust Protocol™ - Quantum-Safe MCP Server
+# Production-ready Docker container for enterprise deployment
 
-# Stage 1: Dependencies
-FROM node:18-alpine AS deps
-RUN apk add --no-cache libc6-compat
+FROM node:18-alpine AS base
+
+# Set working directory
 WORKDIR /app
+
+# Install system dependencies for quantum-safe cryptography
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    git \
+    curl \
+    && rm -rf /var/cache/apk/*
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S atp && \
+    adduser -S atp -u 1001
 
 # Copy package files
 COPY package*.json ./
-RUN npm ci --only=production
+COPY lerna.json ./
 
-# Stage 2: Builder
-FROM node:18-alpine AS builder
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
+# Copy workspace packages
+COPY packages/ ./packages/
 
-# Copy package files
-COPY package*.json ./
+# Install dependencies
+RUN npm install --omit=dev && \
+    npm cache clean --force
 
-# Install ALL dependencies (including devDependencies for build)
-RUN npm ci
-
-# Copy source code
+# Copy application code
 COPY . .
 
-# Build Next.js application
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV production
-RUN npm run build
-
-# Stage 3: Runner
-FROM node:18-alpine AS runner
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
-
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
-
-# Copy necessary files from builder
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-
-# Set ownership
-RUN chown -R nextjs:nodejs /app
-
-USER nextjs
-
-# Environment variables
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
-
-EXPOSE 3000
+# Set ownership to non-root user
+RUN chown -R atp:atp /app
+USER atp
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {r.statusCode === 200 ? process.exit(0) : process.exit(1)})" || exit 1
+    CMD curl -f http://localhost:${PORT:-3008}/health || exit 1
 
-# Start Next.js server
-CMD ["node", "server.js"]
+# Expose port
+EXPOSE 3008
+
+# Environment variables
+ENV NODE_ENV=production
+ENV PORT=3008
+ENV ATP_LOG_LEVEL=info
+ENV ATP_QUANTUM_SAFE=true
+
+# Start the quantum-safe server
+CMD ["node", "quantum-safe-server-improved.js"]
+
+# Metadata
+LABEL maintainer="Larry Lewis <llewis@agenttrustprotocol.com>"
+LABEL version="1.0.0"
+LABEL description="Agent Trust Protocol™ - World's First Quantum-Safe AI Agent Protocol"
+LABEL org.opencontainers.image.title="ATP Quantum-Safe MCP Server"
+LABEL org.opencontainers.image.description="Production-ready quantum-safe MCP server for enterprise AI agent security"
+LABEL org.opencontainers.image.url="https://atp.dev"
+LABEL org.opencontainers.image.source="https://github.com/agent-trust-protocol/atp"
+LABEL org.opencontainers.image.vendor="SovrLabs"
+LABEL org.opencontainers.image.licenses="Apache-2.0"

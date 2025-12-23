@@ -1,0 +1,29 @@
+{
+  "mcpTools": {
+    "search": "http://localhost:8080/mcp/search",
+    "calculator": "http://localhost:8081/mcp/calc",
+    "weather": "http://localhost:8082/mcp/weather",
+    "translator": "http://localhost:8083/mcp/translate"
+  },
+  "mcpServers": {
+    "shadcn-ui": {
+      "command": "npx",
+      "args": ["@jpisnice/shadcn-ui-mcp-server"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "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",
+        "LOG_LEVEL": "info"
+      },
+      "port": 8084,
+      "autoStart": true
+    }
+  },
+  "security": {
+    "minimumTrustScore": 25,
+    "requireQuantumSafe": false,
+    "auditRetentionDays": 30
+  },
+  "rateLimit": {
+    "maxRequestsPerMinute": 60,
+    "maxRequestsPerHour": 1000
+  }
+}

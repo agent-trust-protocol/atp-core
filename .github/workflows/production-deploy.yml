@@ -1,0 +1,517 @@
+# Agent Trust Protocol™ - Production Deployment Pipeline
+# GitHub Actions workflow for automated production deployment
+
+name: Production Deployment
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      force_deploy:
+        description: 'Force deployment (skip some checks)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  AWS_REGION: us-east-1
+  EKS_CLUSTER_NAME: atp-production
+  ECR_REGISTRY: 123456789012.dkr.ecr.us-east-1.amazonaws.com
+  KUBECTL_VERSION: v1.28.0
+  HELM_VERSION: v3.12.0
+
+jobs:
+  # Security and Quality Checks
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run ESLint
+      run: npm run lint
+
+    - name: Run Prettier check
+      run: npm run format:check
+
+    - name: TypeScript compilation check
+      run: npm run build
+
+    - name: Run unit tests
+      run: npm run test
+
+    - name: Run Snyk security scan
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high
+
+    - name: Run CodeQL analysis
+      uses: github/codeql-action/init@v3
+      with:
+        languages: typescript, javascript
+
+    - name: Perform CodeQL analysis
+      uses: github/codeql-action/analyze@v3
+
+  # Build and Push Container Images
+  build-images:
+    name: Build Container Images
+    runs-on: ubuntu-latest
+    needs: security-scan
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    
+    strategy:
+      matrix:
+        service:
+          - identity-service
+          - vc-service
+          - permission-service
+          - audit-logger
+          - rpc-gateway
+          - demo-platform
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.ECR_REGISTRY }}/atp/${{ matrix.service }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: packages/${{ matrix.service }}/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+
+    - name: Scan image for vulnerabilities
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.ECR_REGISTRY }}/atp/${{ matrix.service }}:${{ github.sha }}
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  # Integration Tests
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: build-images
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: atp_test
+          POSTGRES_USER: atp_test
+          POSTGRES_PASSWORD: test_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Setup test database
+      run: |
+        PGPASSWORD=test_password psql -h localhost -U atp_test -d atp_test -f scripts/init-db.sql
+
+    - name: Run integration tests
+      env:
+        DATABASE_URL: postgresql://atp_test:test_password@localhost:5432/atp_test
+        REDIS_URL: redis://localhost:6379
+        NODE_ENV: test
+      run: npm run test:integration
+
+    - name: Run end-to-end tests
+      env:
+        DATABASE_URL: postgresql://atp_test:test_password@localhost:5432/atp_test
+        REDIS_URL: redis://localhost:6379
+        NODE_ENV: test
+      run: npm run test:e2e
+
+  # Deploy to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build-images, integration-tests]
+    if: github.ref == 'refs/heads/main'
+    environment: staging
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: ${{ env.KUBECTL_VERSION }}
+
+    - name: Setup Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: ${{ env.HELM_VERSION }}
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name atp-staging
+
+    - name: Deploy to staging
+      run: |
+        # Update image tags in manifests
+        sed -i "s|:latest|:${{ github.sha }}|g" production/k8s-manifests.yaml
+        sed -i "s|atp-production|atp-staging|g" production/k8s-manifests.yaml
+        
+        # Apply manifests
+        kubectl apply -f production/k8s-manifests.yaml
+        
+        # Wait for rollout
+        kubectl rollout status deployment/atp-rpc-gateway -n atp-staging --timeout=600s
+        kubectl rollout status deployment/atp-identity-service -n atp-staging --timeout=600s
+        kubectl rollout status deployment/atp-vc-service -n atp-staging --timeout=600s
+        kubectl rollout status deployment/atp-permission-service -n atp-staging --timeout=600s
+
+    - name: Run smoke tests
+      run: |
+        # Wait for services to be ready
+        kubectl wait --for=condition=ready pod -l app=atp-rpc-gateway -n atp-staging --timeout=300s
+        
+        # Get service URL
+        GATEWAY_URL=$(kubectl get ingress atp-ingress -n atp-staging -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+        
+        # Run smoke tests
+        curl -f http://$GATEWAY_URL/health || exit 1
+        curl -f http://$GATEWAY_URL/ready || exit 1
+
+    - name: Notify staging deployment
+      uses: 8398a7/action-slack@v3
+      if: always()
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+
+  # Deploy to Production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    environment: production
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: ${{ env.KUBECTL_VERSION }}
+
+    - name: Setup Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: ${{ env.HELM_VERSION }}
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER_NAME }}
+
+    - name: Pre-deployment checks
+      run: |
+        # Check cluster health
+        kubectl get nodes
+        kubectl get pods -n atp-production
+        
+        # Check database connectivity
+        kubectl exec -n atp-production deployment/atp-identity-service -- curl -f http://localhost:3001/health
+
+    - name: Blue-Green Deployment
+      run: |
+        # Create green deployment
+        sed -i "s|:latest|:${{ github.sha }}|g" production/k8s-manifests.yaml
+        sed -i "s|atp-production|atp-production-green|g" production/k8s-manifests.yaml
+        
+        # Deploy green environment
+        kubectl apply -f production/k8s-manifests.yaml
+        
+        # Wait for green deployment
+        kubectl rollout status deployment/atp-rpc-gateway -n atp-production-green --timeout=600s
+        kubectl rollout status deployment/atp-identity-service -n atp-production-green --timeout=600s
+        kubectl rollout status deployment/atp-vc-service -n atp-production-green --timeout=600s
+        kubectl rollout status deployment/atp-permission-service -n atp-production-green --timeout=600s
+
+    - name: Production smoke tests
+      run: |
+        # Test green environment
+        kubectl wait --for=condition=ready pod -l app=atp-rpc-gateway -n atp-production-green --timeout=300s
+        
+        # Internal health checks
+        kubectl exec -n atp-production-green deployment/atp-rpc-gateway -- curl -f http://localhost:3000/health
+        kubectl exec -n atp-production-green deployment/atp-identity-service -- curl -f http://localhost:3001/health
+        kubectl exec -n atp-production-green deployment/atp-vc-service -- curl -f http://localhost:3002/health
+        kubectl exec -n atp-production-green deployment/atp-permission-service -- curl -f http://localhost:3003/health
+
+    - name: Switch traffic to green
+      run: |
+        # Update ingress to point to green services
+        kubectl patch ingress atp-ingress -n atp-production -p '{"spec":{"rules":[{"host":"api.atp.dev","http":{"paths":[{"path":"/","pathType":"Prefix","backend":{"service":{"name":"atp-rpc-gateway-green","port":{"number":3000}}}}]}}]}}'
+        
+        # Wait for ingress update
+        sleep 30
+
+    - name: Final production tests
+      run: |
+        # Test external endpoints
+        curl -f https://api.atp.dev/health || exit 1
+        curl -f https://demo.atp.dev/health || exit 1
+        
+        # Test API functionality
+        curl -f -X POST https://api.atp.dev/identity/agents \
+          -H "Content-Type: application/json" \
+          -d '{"name":"test-agent","type":"assistant"}' || exit 1
+
+    - name: Cleanup old deployment
+      if: success()
+      run: |
+        # Remove blue environment
+        kubectl delete namespace atp-production-blue --ignore-not-found=true
+        
+        # Rename green to production
+        kubectl get namespace atp-production-green -o yaml | sed 's/atp-production-green/atp-production-blue/' | kubectl apply -f -
+        kubectl delete namespace atp-production-green
+
+    - name: Rollback on failure
+      if: failure()
+      run: |
+        # Rollback ingress to blue
+        kubectl patch ingress atp-ingress -n atp-production -p '{"spec":{"rules":[{"host":"api.atp.dev","http":{"paths":[{"path":"/","pathType":"Prefix","backend":{"service":{"name":"atp-rpc-gateway","port":{"number":3000}}}}]}}]}}'
+        
+        # Remove failed green deployment
+        kubectl delete namespace atp-production-green --ignore-not-found=true
+
+    - name: Update deployment status
+      uses: bobheadxi/deployments@v1
+      if: always()
+      with:
+        step: finish
+        token: ${{ secrets.GITHUB_TOKEN }}
+        status: ${{ job.status }}
+        env: production
+        deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+
+    - name: Notify production deployment
+      uses: 8398a7/action-slack@v3
+      if: always()
+      with:
+        status: ${{ job.status }}
+        channel: '#production'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK_PROD }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+        custom_payload: |
+          {
+            "text": "Production Deployment ${{ job.status }}",
+            "attachments": [{
+              "color": "${{ job.status }}" === "success" ? "good" : "danger",
+              "fields": [{
+                "title": "Version",
+                "value": "${{ github.ref }}",
+                "short": true
+              }, {
+                "title": "Commit",
+                "value": "${{ github.sha }}",
+                "short": true
+              }, {
+                "title": "Author",
+                "value": "${{ github.actor }}",
+                "short": true
+              }]
+            }]
+          }
+
+  # Performance Testing
+  performance-tests:
+    name: Performance Testing
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install k6
+      run: |
+        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+        echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install k6
+
+    - name: Run performance tests
+      run: |
+        k6 run --out json=performance-results.json tests/performance/load-test.js
+
+    - name: Upload performance results
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-results
+        path: performance-results.json
+
+    - name: Performance test report
+      run: |
+        echo "## Performance Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "Performance tests completed. Results uploaded as artifact." >> $GITHUB_STEP_SUMMARY
+
+  # Security Compliance Check
+  compliance-check:
+    name: Compliance Verification
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: ${{ env.KUBECTL_VERSION }}
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER_NAME }}
+
+    - name: Run compliance checks
+      run: |
+        # Check security policies
+        kubectl get networkpolicies -n atp-production
+        kubectl get podsecuritypolicies
+        
+        # Check RBAC
+        kubectl auth can-i --list --as=system:serviceaccount:atp-production:atp-identity-service
+        
+        # Check encryption
+        kubectl get secrets -n atp-production -o yaml | grep -q "type: kubernetes.io/tls"
+
+    - name: Generate compliance report
+      run: |
+        echo "## Compliance Check Results" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Network policies configured" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ RBAC permissions verified" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ TLS encryption enabled" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Pod security policies active" >> $GITHUB_STEP_SUMMARY

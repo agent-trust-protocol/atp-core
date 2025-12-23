@@ -1,39 +1,240 @@
-# Dependencies
-node_modules/
-.pnpm-store/
+node_modules
 
-# Next.js
-.next/
-out/
-build/
+# CRITICAL: Hide ALL internal development files from public repository
+# This repository follows best open-source practices by keeping internal
+# documentation, testing, and development tools private
 
-# Environment variables
+# ===== DEVELOPER TOOLS & AGENT SYSTEMS =====
+.agent-os/
+.bmad*/
+bmad-*/
+.cursor/
+.clinerules/
+.roo/
+.roomodes
+.trae/
+.windsurf/
+.github/chatmodes/
+.github/copilot-instructions.md
+.mcp.json
+claude-*.json
+claude-*.js
+CLAUDE.md
+CLAUDE_*.md
+
+# ===== ALL INTERNAL DOCUMENTATION (UPPERCASE) =====
+# Hide all uppercase .md files except README.md, LICENSE.md, CONTRIBUTING.md
+[A-Z]*.md
+!README.md
+!LICENSE.md
+!CONTRIBUTING.md
+!CHANGELOG.md
+!CODE_OF_CONDUCT.md
+!SECURITY.md
+
+# ===== SPECIFIC INTERNAL DOCS TO HIDE =====
+*-DEPLOYMENT-*.md
+*-TEST-*.md
+*-TESTING-*.md
+*-VALIDATION-*.md
+*-TROUBLESHOOTING*.md
+*-ENTERPRISE-*.md
+*-PILOT-*.md
+*-PITCH-*.md
+*-STATUS*.md
+*-SUMMARY*.md
+*-BACKUP*.md
+*-READY*.md
+*-GUIDE*.md
+*-PLAN*.md
+*-REPORT*.md
+*-FIX-*.md
+*DOCKER*.md
+*CRYPTO*.md
+*HYDRATION*.md
+*GITHUB*.md
+*LANDING*.md
+*PRODUCTION*.md
+*QUANTUM-SAFE*.md
+BENCHMARKS.md
+PILOT-PROGRAM-*.md
+MANUAL-*.md
+MULTI-REPOSITORY-*.md
+PUSH-*.md
+README-*.md
+demo/DEMO-*.md
+docs/ENTERPRISE-*.md
+docs/TROUBLESHOOTING-*.md
+docs/DOCKER*.md
+production/*.md
+packages/*/test-*.md
+
+# ===== DOCKER DEVELOPMENT FILES =====
+Dockerfile.quantum-safe*
+Dockerfile.*-demo
+DOCKER-*.md
+docker-*.yml
+docker-*.yaml
+!docker-compose.yml  # Keep main docker-compose
+
+# Environment files with secrets
+.env
+.env.*
+!.env.example
+.env.production
+.env.staging
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.prod
+.env.bak
+*.env
 
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# SSL certificates and secrets
+ssl/*.pem
+ssl/*.key
+ssl/*.crt
+secrets/*
+!secrets/.gitkeep
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Database files
+*.db
+*.sqlite
+*.sqlite3
 
 # Logs
+logs/*.log
 *.log
-logs/
-server.log
+
+# Process files
+*.pid
+
+# Build outputs
+dist/
+build/
+
+# Development artifacts
+.DS_Store
+.vscode/settings.json
+.idea/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+tmp/
+temp/
+# Security-critical files
+godaddy-config.sh
+deploy-*.sh
+*@*.*.*.* 
+# API Keys and credentials
+*api[_-]key*
+*secret*
+!.gitignore.security
+!*secret*.example*
+
+# Development Tools and Agent OS
+.agent-os/
+.bmad-*/
+bmad-*/
+.cursor/
+.clinerules/
+.roo/
+.roomodes
+.mcp.json
+
+# Claude/AI Development Tools
+claude-*config*.json
+.claude/
+**/BMad/
+
+# Development scripts and deployment files that contain sensitive info
+*deploy*.sh
+*fix*.sh
+*config*.sh
+*setup*.sh
+ecosystem.config.js
+root@*
+
+# Backup and temporary deployment files
+*.tar.gz
+*.bak
+
+# Developer Documentation and Internal Files
+*-DEPLOYMENT-*.md
+*-CHECKLIST*.md
+*-GUIDE*.md
+*-STEPS*.md
+*-SUMMARY*.md
+*-FLOW*.md
+*-TESTING*.md
+*-STATUS*.md
+*-AUDIT*.md
+*-PRODUCTION-*.md
+*-READY.md
+*-REPORT*.md
+BACKEND-ARCHITECTURE-*.md
+CUSTOMER-SIGNUP-*.md
+ENTERPRISE-CUSTOMER-*.md
+PORTAL-STATUS-*.md
+AUTHENTICATION-FLOW-*.md
+SECURITY-AUDIT-*.md
+ATP-TESTING-*.md
+100-PERCENT-*.md
+
+# Test files and development scripts
+test-*.js
+test-*.sh
+*-test.js
+mock-*.js
+mock-*.cjs
+start-workflow-*.js
+health-monitor.sh
+monitor-health.sh
+restart-services.sh
+update-server-*.sh
+add-ssh-key.sh
+
+# Additional AI Development Tools
+.github/chatmodes/
+.trae/
+.windsurf/
+.gitignore.security
+
+# Build cache and temporary files
+**/.next/cache/
+**/.next/
+**/tsconfig.tsbuildinfo
+**/dist/
+**/*.tsbuildinfo
+
+# Package manager files in subdirectories
+packages/*/node_modules/
+packages/*/dist/
+packages/*/build/
+
+# Development-specific packages and components
+packages/atp-support-agent/
+packages/protocol-integrations/src/acp/
+packages/protocol-integrations/src/agp/
+packages/protocol-integrations/src/federation/
+packages/shared/src/auth/
+packages/shared/src/clustering/
+packages/shared/src/compliance/
+packages/shared/src/monitoring/behavioral-analytics.ts
+packages/shared/src/security/quantum-safe.ts
+src/components/
+src/workflow-engine/
+
+# Deployment and configuration files
+deploy.sh
+Users/
+**/.docker/config.json
+.clinerules/byterover-rules.md
+.kilocode/rules/byterover-rules.md
+.roo/rules/byterover-rules.md
+.windsurf/rules/byterover-rules.md
+.cursor/rules/byterover-rules.mdc
+.kiro/steering/byterover-rules.md
+.qoder/rules/byterover-rules.md
+.augment/rules/byterover-rules.md

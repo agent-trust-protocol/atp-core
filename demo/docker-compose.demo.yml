@@ -1,0 +1,69 @@
+# 🛡️ Agent Trust Protocol™ - Demo Environment Docker Compose
+version: '3.8'
+
+services:
+  # ATP Interactive Demo
+  atp-demo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: atp-interactive-demo
+    ports:
+      - "3009:3009"
+    environment:
+      - NODE_ENV=demo
+      - DEMO_MODE=true
+      - PORT=3009
+    healthcheck:
+      test: ["CMD", "node", "-e", "const http = require('http'); const options = { hostname: 'localhost', port: 3009, path: '/api/health', timeout: 5000 }; const req = http.request(options, (res) => { if (res.statusCode === 200) { process.exit(0); } else { process.exit(1); } }); req.on('error', () => process.exit(1)); req.on('timeout', () => process.exit(1)); req.end();"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    labels:
+      - "description=ATP Interactive Demo Environment for Fortune 500 Prospects"
+      - "demo.atp.dev=true"
+    networks:
+      - atp-demo-network
+
+  # Optional: ATP Main Server (for full demo)
+  atp-server:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: atp-quantum-safe-server-demo
+    ports:
+      - "3008:3008"
+    environment:
+      - NODE_ENV=demo
+      - PORT=3008
+      - ATP_LOG_LEVEL=info
+      - ATP_QUANTUM_SAFE=true
+      - ATP_TRUST_LEVELS=basic,verified,enterprise
+      - ATP_DEMO_MODE=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    labels:
+      - "description=ATP Quantum-Safe Server for Demo Environment"
+    networks:
+      - atp-demo-network
+    profiles:
+      - full-demo
+
+networks:
+  atp-demo-network:
+    driver: bridge
+    labels:
+      - "description=ATP Demo Network"
+
+volumes:
+  demo-data:
+    driver: local
+    labels:
+      - "description=ATP Demo Data Volume"

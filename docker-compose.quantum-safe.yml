@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  quantum-safe-mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.quantum-safe
+    ports:
+      - "3008:3008"
+    environment:
+      - PORT=3008
+      - HOST=0.0.0.0
+      - USE_HTTPS=false
+      - AUDIT_LOG_PATH=/app/logs/quantum-safe-audit.log
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+  quantum-safe-demo:
+    build:
+      context: .
+      dockerfile: Dockerfile.quantum-safe-demo
+    ports:
+      - "3009:3009"
+    environment:
+      - PORT=3009
+      - HOST=0.0.0.0
+      - MCP_SERVER_URL=ws://quantum-safe-mcp-server:3008
+    depends_on:
+      - quantum-safe-mcp-server
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3009/demo"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped

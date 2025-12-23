@@ -1,32 +1,25 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "es6"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
     "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@/components/*": ["./src/components/*"],
-      "@/lib/*": ["./src/lib/*"],
-      "@/hooks/*": ["./src/hooks/*"],
-      "@/types/*": ["./src/types/*"]
-    }
+    "rootDir": ".",
+    "skipLibCheck": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "files": [],
+  "include": [],
+  "exclude": [
+    "**/*"
+  ],
+  "references": [
+    { "path": "./packages/shared" },
+    { "path": "./packages/audit-logger" },
+    { "path": "./packages/identity-service" },
+    { "path": "./packages/permission-service" },
+    { "path": "./packages/vc-service" },
+    { "path": "./packages/rpc-gateway" },
+    { "path": "./packages/protocol-integrations" },
+    { "path": "./packages/sdk" },
+    { "path": "./examples/simple-agent" },
+    { "path": "./examples/advanced-agents" }
+  ]
 }
