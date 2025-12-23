@@ -285,17 +285,18 @@ export class RateLimiter {
         // Track response for conditional counting
         if (this.config.skipSuccessfulRequests || this.config.skipFailedRequests) {
           const originalSend = res.send;
+          const rateLimiter = this; // Capture 'this' for use in closure
           res.send = function(data: any) {
             const statusCode = res.statusCode;
             
             // Decrement if should skip
-            if ((this.config.skipSuccessfulRequests && statusCode < 400) ||
-                (this.config.skipFailedRequests && statusCode >= 400)) {
-              this.store.decrement(key);
+            if ((rateLimiter.config.skipSuccessfulRequests && statusCode < 400) ||
+                (rateLimiter.config.skipFailedRequests && statusCode >= 400)) {
+              rateLimiter.store.decrement(key);
             }
             
             return originalSend.call(res, data);
-          }.bind(this);
+          };
         }
         
         next();

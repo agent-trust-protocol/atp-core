@@ -209,7 +209,7 @@ export class UniversalMonitor {
   /**
    * Calculate trust score for event
    */
-  private async calculateTrustScore(event: AgentEvent): Promise<number> {
+  private async calculateTrustScore(_event: AgentEvent): Promise<number> {
     // TODO: Implement actual trust scoring algorithm
     // For now, return default score
     return 50;
@@ -345,7 +345,7 @@ export class SecurityEnforcer {
   /**
    * Check event permissions
    */
-  private checkPermission(event: AgentEvent): boolean {
+  private checkPermission(_event: AgentEvent): boolean {
     // TODO: Implement actual permission checking
     return true;
   }
