@@ -38,6 +38,38 @@ export { UniversalMonitor, SecurityEnforcer } from './monitoring/index.js';
 export { CryptoUtils } from './utils/crypto.js';
 export { DIDUtils } from './utils/did.js';
 export { JWTUtils } from './utils/jwt.js';
+export { VersionManager, versionManager } from './utils/version-manager.js';
+export type { ProtocolVersion, AgentVersion, SDKCompatibility } from './utils/version-manager.js';
+
+// ZKP Authentication Utilities (NEW - Agent-to-Agent Auth)
+export {
+  // Core ZKP Functions
+  generatePedersenCommitment,
+  generateRandomBlinding,
+  generateNonce,
+  generateChallengeHash,
+  createChallenge,
+  isChallengeExpired,
+  // Proof Generation
+  createTrustLevelProof,
+  createCredentialProof,
+  createIdentityProof,
+  createBehaviorCommitment,
+  createBehaviorProof,
+  // Proof Verification
+  verifyTrustLevelProof,
+  verifyCredentialProof,
+  verifyIdentityProof,
+  verifyBehaviorProof,
+  // Auth Flow
+  generateAuthResponse,
+  verifyAuthResponse,
+  // Behavior Tracking
+  BehaviorMerkleTree
+} from './utils/zkp.js';
+
+// ZKP Proof Type Enum (exported as value for use in comparisons)
+export { ZKProofType } from './types.js';
 
 // Types and Interfaces
 export type {
@@ -50,6 +82,16 @@ export type {
   ATPAuthorizationError,
   ATPValidationError,
   ATPServiceError,
+
+  // ZKP Authentication Types (NEW)
+  ZKPChallenge,
+  ZKPRequirement,
+  ZKPProof,
+  ZKPAuthRequest,
+  ZKPAuthResult,
+  BehaviorCommitment,
+  BehaviorProofRequest,
+  BehaviorProof,
 
   // Identity Types
   DIDDocument,

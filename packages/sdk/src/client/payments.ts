@@ -12,6 +12,8 @@
 import { BaseClient } from './base';
 import { CryptoUtils } from '../utils/crypto';
 import type {
+  ATPConfig,
+  ATPResponse,
   PaymentMandate,
   IntentMandate,
   CartMandate,
@@ -19,11 +21,24 @@ import type {
   PaymentMethod,
   PaymentResult,
   ACPCheckoutSession,
-  AP2MandateRequest,
   PaymentPolicy
 } from '../types';
 
 export class PaymentsClient extends BaseClient {
+  constructor(config: ATPConfig) {
+    super(config, 'payments');
+  }
+
+  /**
+   * Helper to unwrap ATPResponse to { data: T }
+   */
+  private unwrapResponse<T>(response: ATPResponse<T>): { data: T } {
+    if (!response.data) {
+      throw new Error(response.error || 'No data in response');
+    }
+    return { data: response.data };
+  }
+
   /**
    * AP2 (Agent Payments Protocol) Integration
    */
@@ -64,11 +79,12 @@ export class PaymentsClient extends BaseClient {
     // Sign with verifiable credential
     const signature = await this.signMandate(mandate);
 
-    return this.post('/ap2/mandates/intent', {
+    const response = await this.post<IntentMandate>('/ap2/mandates/intent', {
       mandate,
       signature,
       verifiableCredential: await this.createMandateCredential(mandate)
     });
+    return this.unwrapResponse(response);
   }
 
   /**
@@ -114,11 +130,12 @@ export class PaymentsClient extends BaseClient {
     // Sign with verifiable credential
     const signature = await this.signMandate(cartMandate);
 
-    return this.post('/ap2/mandates/cart', {
+    const response = await this.post<CartMandate>('/ap2/mandates/cart', {
       mandate: cartMandate,
       signature,
       verifiableCredential: await this.createMandateCredential(cartMandate)
     });
+    return this.unwrapResponse(response);
   }
 
   /**
@@ -132,17 +149,18 @@ export class PaymentsClient extends BaseClient {
     billingAddress?: any;
     metadata?: Record<string, any>;
   }): Promise<{ data: PaymentTransaction }> {
-    // Verify cart mandate
-    const cartMandate = await this.getMandate(params.cartMandateId);
+    // Verify cart mandate exists
+    await this.getMandate(params.cartMandateId);
 
     // Execute payment with full audit trail
-    return this.post('/ap2/payments/execute', {
+    const response = await this.post<PaymentTransaction>('/ap2/payments/execute', {
       cartMandateId: params.cartMandateId,
       paymentMethod: params.paymentMethod,
       billingAddress: params.billingAddress,
       metadata: params.metadata,
       timestamp: new Date().toISOString()
     });
+    return this.unwrapResponse(response);
   }
 
   /**
@@ -166,7 +184,7 @@ export class PaymentsClient extends BaseClient {
     customerEmail?: string;
     metadata?: Record<string, any>;
   }): Promise<{ data: ACPCheckoutSession }> {
-    return this.post('/acp/checkout/create', {
+    const response = await this.post<ACPCheckoutSession>('/acp/checkout/create', {
       merchantId: params.merchantId,
       agentDid: params.agentDid,
       items: params.items,
@@ -176,6 +194,7 @@ export class PaymentsClient extends BaseClient {
       protocol: 'acp',
       timestamp: new Date().toISOString()
     });
+    return this.unwrapResponse(response);
   }
 
   /**
@@ -188,12 +207,13 @@ export class PaymentsClient extends BaseClient {
     paymentMethodId: string;
     sharedPaymentToken?: string;
   }): Promise<{ data: PaymentResult }> {
-    return this.post('/acp/checkout/complete', {
+    const response = await this.post<PaymentResult>('/acp/checkout/complete', {
       sessionId: params.sessionId,
       paymentMethodId: params.paymentMethodId,
       sharedPaymentToken: params.sharedPaymentToken,
       timestamp: new Date().toISOString()
     });
+    return this.unwrapResponse(response);
   }
 
   /**
@@ -223,13 +243,14 @@ export class PaymentsClient extends BaseClient {
     };
     isDefault?: boolean;
   }): Promise<{ data: PaymentMethod }> {
-    return this.post('/payments/methods', {
+    const response = await this.post<PaymentMethod>('/payments/methods', {
       userDid: params.userDid,
       type: params.type,
       details: params.details,
       isDefault: params.isDefault,
       verifiedAt: new Date().toISOString()
     });
+    return this.unwrapResponse(response);
   }
 
   /**
@@ -252,7 +273,7 @@ export class PaymentsClient extends BaseClient {
     requiresApproval?: boolean;
     notificationThreshold?: number;
   }): Promise<{ data: PaymentPolicy }> {
-    return this.post('/payments/policies', {
+    const response = await this.post<PaymentPolicy>('/payments/policies', {
       name: params.name,
       agentDid: params.agentDid,
       limits: {
@@ -267,6 +288,7 @@ export class PaymentsClient extends BaseClient {
       createdAt: new Date().toISOString(),
       status: 'active'
     });
+    return this.unwrapResponse(response);
   }
 
   /**
@@ -284,7 +306,19 @@ export class PaymentsClient extends BaseClient {
     minAmount?: number;
     maxAmount?: number;
   }): Promise<{ data: PaymentTransaction[] }> {
-    return this.get('/payments/transactions', params);
+    const response = await this.get<PaymentTransaction[]>('/payments/transactions', {
+      params: {
+        userDid: params.userDid,
+        agentDid: params.agentDid,
+        merchantId: params.merchantId,
+        startDate: params.startDate?.toISOString(),
+        endDate: params.endDate?.toISOString(),
+        status: params.status,
+        minAmount: params.minAmount,
+        maxAmount: params.maxAmount
+      }
+    });
+    return this.unwrapResponse(response);
   }
 
   /**
@@ -293,7 +327,8 @@ export class PaymentsClient extends BaseClient {
    * @returns Payment mandate
    */
   async getMandate(mandateId: string): Promise<{ data: PaymentMandate }> {
-    return this.get(`/ap2/mandates/${mandateId}`);
+    const response = await this.get<PaymentMandate>(`/ap2/mandates/${mandateId}`);
+    return this.unwrapResponse(response);
   }
 
   /**
@@ -302,9 +337,10 @@ export class PaymentsClient extends BaseClient {
    * @returns Revocation result
    */
   async revokeMandate(mandateId: string): Promise<{ data: { success: boolean } }> {
-    return this.post(`/ap2/mandates/${mandateId}/revoke`, {
+    const response = await this.post<{ success: boolean }>(`/ap2/mandates/${mandateId}/revoke`, {
       revokedAt: new Date().toISOString()
     });
+    return this.unwrapResponse(response);
   }
 
   /**

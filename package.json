@@ -53,7 +53,8 @@
     "client": "node claude-atp-client-v2.js",
     "test:quantum": "jest test/quantum-crypto-utils.test.js test/quantum-safe-server.test.js test/claude-atp-client.test.js",
     "test:integration": "jest test/integration.test.js",
-    "test:all": "node test-quantum-safe-integration.js"
+    "test:all": "node test-quantum-safe-integration.js",
+    "check-version": "tsx scripts/check-version-update.ts"
   },
   "devDependencies": {
     "@babel/core": "^7.23.5",
@@ -78,6 +79,7 @@
   },
   "dependencies": {
     "@better-fetch/fetch": "^1.1.18",
+    "ai-labs-claude-skills": "^2.0.1",
     "atp-sdk": "^1.0.0",
     "cors": "^2.8.5",
     "cron": "^4.3.3",

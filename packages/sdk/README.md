@@ -1,6 +1,8 @@
 # atp-sdk - Agent Trust Protocol SDK
 
-> Official TypeScript SDK for Agent Trust Protocol™ - Build quantum-safe AI agents in 3 lines of code!
+> **The Ecosystem Security Layer for AI Agents** - Official TypeScript SDK for Agent Trust Protocol™
+
+ATP provides universal quantum-safe security for all AI agent protocols (MCP, Swarm, ADK, A2A, and more). Build secure, verifiable, and trustworthy AI agents in 3 lines of code!
 
 [![npm version](https://badge.fury.io/js/atp-sdk.svg)](https://www.npmjs.com/package/atp-sdk)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -79,6 +81,24 @@ For advanced usage, see the complete API documentation below...
 - **[Best Practices](./docs/guides/best-practices.md)** - Production-ready guidelines
 - **[Troubleshooting](./docs/guides/troubleshooting.md)** - Common issues and solutions
 
+## 🛡️ ATP: The Ecosystem Security Layer
+
+**Agent Trust Protocol (ATP) is the universal security layer for the AI agent ecosystem.** 
+
+Unlike protocol-specific security solutions, ATP works across all agent protocols:
+- **MCP** (Model Context Protocol) - Anthropic
+- **Swarm** - OpenAI multi-agent orchestration  
+- **ADK** (Agent Development Kit) - Google
+- **A2A** (Agent2Agent) - Vendor-neutral protocol
+- **Any custom protocol** - ATP adapts to your needs
+
+ATP provides:
+- 🔐 **Universal Security**: One security layer for all protocols
+- ⚛️ **Quantum-Safe**: Future-proof cryptography (ML-DSA + Ed25519)
+- 🎯 **Trust Management**: Dynamic trust scoring across protocols
+- 📋 **Audit Trail**: Immutable logging for compliance
+- 🔑 **Identity**: Decentralized identity (DID) for all agents
+
 ## ✨ Features
 
 ### 🌐 **Multi-Protocol Support** (NEW in v1.1!)
@@ -90,6 +110,55 @@ For advanced usage, see the complete API documentation below...
 - **Audit Trail** - Immutable logging for all protocol events
 
 [Learn more about multi-protocol support →](./docs/MULTI-PROTOCOL-SUPPORT.md)
+
+### 🔐 **Zero-Knowledge Proof Authentication** (NEW in v1.2!)
+- **Agent-to-Agent Authentication** - Cryptographic proofs without revealing secrets
+- **Behavior-Based Proofs** - Prove compliance history without exposing interaction details
+- **Trust Level Verification** - Prove minimum trust score without revealing exact value
+- **Credential Proofs** - Selective disclosure of verifiable credentials
+- **Identity Proofs** - DID ownership verification
+- **Mutual Authentication** - Both agents verify each other simultaneously
+
+```typescript
+import { Agent } from 'atp-sdk';
+
+// Create two agents
+const alice = await Agent.create('Alice');
+const bob = await Agent.create('Bob');
+
+// Alice challenges Bob to prove trust level
+const challenge = await alice.requestAuth(bob.getDID(), [
+  { type: 'trust_level', params: { minTrustLevel: 0.7 } }
+]);
+
+// Bob generates ZK proof (proves trust >= 0.7 without revealing exact score)
+const response = await bob.respondToChallenge(challenge);
+
+// Alice verifies - cryptographically guaranteed
+const result = await alice.verifyAuthResponse(response);
+console.log('Verified:', result.verified); // true
+```
+
+**Behavior-Based Proofs** - ATP's unique differentiator:
+
+```typescript
+// Record agent interactions over time
+bob.recordInteraction('task-1', 'success');
+bob.recordInteraction('task-2', 'success');
+bob.recordInteraction('task-3', 'success');
+
+// Prove 100% success rate without revealing individual interactions
+const behaviorProof = await bob.proveBehavior({
+  type: 'success_rate',
+  threshold: 95
+});
+
+// Verify the proof
+const valid = await alice.verifyBehaviorProof(behaviorProof, {
+  type: 'success_rate',
+  threshold: 95
+});
+```
 
 ### 💳 **Payment Protocols**
 - **Google AP2 Integration** - Agent Payments Protocol with mandate-based authorization
@@ -415,6 +484,113 @@ client.gateway.on('error', (error) => {
 // Monitor service health
 const health = await client.gateway.getStatus();
 console.log('Gateway status:', health.data.status);
+```
+
+### Zero-Knowledge Proof Authentication
+
+```typescript
+import { Agent, ZKProofType } from 'atp-sdk';
+
+// === Basic Agent-to-Agent Authentication ===
+
+// Create two agents that need to authenticate each other
+const serviceAgent = await Agent.create('DataService');
+const clientAgent = await Agent.create('ClientBot');
+
+// Service agent requires proof of trust level and identity
+const challenge = await serviceAgent.requestAuth(clientAgent.getDID(), [
+  { type: ZKProofType.TRUST_LEVEL, params: { minTrustLevel: 0.6 } },
+  { type: ZKProofType.IDENTITY, params: {} }
+]);
+
+// Client generates zero-knowledge proofs (proves claims without revealing values)
+const response = await clientAgent.respondToChallenge(challenge);
+
+// Service verifies proofs cryptographically
+const authResult = await serviceAgent.verifyAuthResponse(response);
+
+if (authResult.verified) {
+  console.log('Client authenticated successfully');
+  console.log('Trust level: >= 0.6 (exact value hidden)');
+}
+
+// === Mutual Authentication ===
+// Both agents authenticate each other simultaneously
+
+const { myResult, theirResult } = await serviceAgent.mutualAuth(
+  clientAgent.getDID(),
+  // What we require from them
+  [{ type: ZKProofType.TRUST_LEVEL, params: { minTrustLevel: 0.5 } }],
+  // What they require from us
+  [{ type: ZKProofType.CREDENTIAL, params: { credentialType: 'ServiceProvider' } }]
+);
+
+console.log('Both agents verified:', myResult.verified && theirResult.verified);
+
+// === Behavior-Based Proofs (ATP Differentiator) ===
+// Prove compliance history without revealing individual interactions
+
+// Record interactions over time (in production, called by your business logic)
+for (let i = 0; i < 100; i++) {
+  clientAgent.recordInteraction(`task-${i}`, 'success');
+}
+
+// Check current behavior stats
+const stats = clientAgent.getBehaviorStats();
+console.log(`Success: ${stats.successCount}, Violations: ${stats.violationCount}`);
+
+// Prove "no violations" - service can verify without seeing interaction history
+const noViolationsProof = await clientAgent.proveBehavior({
+  type: 'no_violations'
+});
+
+const isCompliant = await serviceAgent.verifyBehaviorProof(
+  noViolationsProof,
+  { type: 'no_violations' }
+);
+console.log('Agent has clean record:', isCompliant);
+
+// Prove success rate meets threshold
+const successProof = await clientAgent.proveBehavior({
+  type: 'success_rate',
+  threshold: 95 // Proves >= 95% success without revealing exact rate
+});
+
+// Prove compliance with specific policy
+const policyProof = await clientAgent.proveBehavior({
+  type: 'policy_compliance',
+  policyId: 'rate-limit-policy'
+});
+
+// === Using Low-Level ZKP Utilities ===
+import {
+  createChallenge,
+  createTrustLevelProof,
+  verifyTrustLevelProof,
+  generateAuthResponse,
+  verifyAuthResponse
+} from 'atp-sdk';
+
+// Create a custom challenge
+const customChallenge = createChallenge(
+  'did:atp:verifier',
+  'did:atp:prover',
+  [{ type: ZKProofType.TRUST_LEVEL, params: { minTrustLevel: 0.8 } }],
+  5 // expires in 5 minutes
+);
+
+// Generate proof manually
+const trustProof = createTrustLevelProof(
+  0.85,  // actual trust score
+  0.8,   // threshold to prove
+  privateKey
+);
+
+// Verify proof
+const isValid = verifyTrustLevelProof(trustProof, {
+  type: ZKProofType.TRUST_LEVEL,
+  params: { minTrustLevel: 0.8 }
+});
 ```
 
 ### Payment Protocols (AP2 & ACP)
@@ -818,9 +994,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📈 Roadmap
 
 - [x] **v1.1.0** - Payment Protocols (AP2 & ACP) Integration
-- [ ] **v1.2.0** - WebAssembly support for browser environments
-- [ ] **v1.3.0** - GraphQL API support
-- [ ] **v1.4.0** - Advanced zero-knowledge proof features
+- [x] **v1.2.0** - Zero-Knowledge Proof Authentication (Agent-to-Agent)
+- [ ] **v1.3.0** - WebAssembly support for browser environments
+- [ ] **v1.4.0** - GraphQL API support
 - [ ] **v2.0.0** - ATP Protocol v2 compatibility
 
 ## 🔗 Payment Protocol Partners
@@ -841,6 +1017,8 @@ The ATP SDK integrates with industry-leading payment platforms:
 
 ---
 
-**Agent Trust Protocol™** - Building the foundation for trustworthy AI and secure digital interactions.
+**Agent Trust Protocol™** - The security layer for AI agents.
 
-© 2024 ATP Foundation. All rights reserved.
+Built and maintained by [Sovr Labs](https://sovrlabs.com) | [Enterprise](https://sovrlabs.com/enterprise)
+
+© 2025 Sovr Labs. Apache-2.0 License.
