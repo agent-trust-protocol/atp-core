@@ -1,0 +1,42 @@
+{
+  "name": "@atp/protocol-integrations",
+  "version": "0.1.0",
+  "description": "Protocol integrations for Agent Trust Protocol™ - MCP, A2A, and other agent protocols",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest --passWithNoTests",
+    "test:integration": "tsx src/test/integration-test.ts",
+    "clean": "rm -rf dist",
+    "dev:coordination": "tsx watch src/dev-coordination/coordination-server.ts",
+    "start:coordination": "node dist/dev-coordination/coordination-server.js",
+    "init:mcp-agent": "mkdir -p src/mcp-agent/{adapters,security,tools,federation,tests,types} && echo 'MCP Agent workspace initialized'",
+    "init:a2a-agent": "mkdir -p src/a2a-agent/{discovery,peer-registry,trust-bridge,communication,federation,tests,types} && echo 'A2A Agent workspace initialized'",
+    "init:enterprise-agent": "mkdir -p src/enterprise-agent/{acp,agp,governance,security,federation,tests,types} && echo 'Enterprise Agent workspace initialized'",
+    "init:anp-agent": "mkdir -p src/anp-agent/{federation-engine,protocol-adapters,message-transforms,routing,security,monitoring,tests,types} && echo 'ANP Agent workspace initialized'",
+    "dev:mcp-agent": "tsx watch src/mcp-agent/index.ts",
+    "dev:a2a-agent": "tsx watch src/a2a-agent/index.ts",
+    "dev:enterprise-agent": "tsx watch src/enterprise-agent/index.ts",
+    "dev:anp-agent": "tsx watch src/anp-agent/index.ts"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "@atp/shared": "^0.1.0",
+    "ws": "^8.13.0",
+    "zod": "^3.21.0",
+    "axios": "^1.6.0",
+    "jsonrpc-lite": "^2.2.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/cors": "^2.8.13",
+    "@types/ws": "^8.5.0",
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0",
+    "jest": "^29.0.0"
+  }
+}

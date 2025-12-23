@@ -1,0 +1,207 @@
+# ATP Cloud Docker Compose Configuration
+# ⚠️  INTERNAL TESTING ONLY - NOT FOR PRODUCTION USE
+
+version: '3.8'
+
+services:
+  # Cloud Gateway - Main entry point
+  cloud-gateway:
+    build:
+      context: ..
+      dockerfile: docker/services/Dockerfile.cloud-gateway
+    ports:
+      - "3010:3010"
+    environment:
+      - NODE_ENV=development
+      - PORT=3010
+      - MONGODB_URL=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=dev-jwt-secret-change-in-production
+    depends_on:
+      - mongodb
+      - redis
+      - identity-service
+      - credentials-service
+      - permissions-service
+    networks:
+      - atp-cloud
+
+  # Tenant Management Service
+  tenant-service:
+    build:
+      context: ..
+      dockerfile: docker/services/Dockerfile.tenant-service
+    ports:
+      - "3011:3011"
+    environment:
+      - NODE_ENV=development
+      - PORT=3011
+      - MONGODB_URL=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=dev-jwt-secret-change-in-production
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - atp-cloud
+
+  # Analytics Service
+  analytics-service:
+    build:
+      context: ..
+      dockerfile: docker/services/Dockerfile.analytics-service
+    ports:
+      - "3012:3012"
+    environment:
+      - NODE_ENV=development
+      - PORT=3012
+      - MONGODB_URL=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=dev-jwt-secret-change-in-production
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - atp-cloud
+
+  # Cloud Dashboard (Next.js)
+  cloud-dashboard:
+    build:
+      context: ..
+      dockerfile: docker/services/Dockerfile.dashboard
+    ports:
+      - "3013:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:3010
+      - NEXT_PUBLIC_TENANT_API_URL=http://localhost:3011
+      - NEXT_PUBLIC_ANALYTICS_API_URL=http://localhost:3012
+    depends_on:
+      - cloud-gateway
+      - tenant-service
+      - analytics-service
+    networks:
+      - atp-cloud
+
+  # Core ATP Services (for development)
+  identity-service:
+    image: atp/identity-service:latest
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DATABASE_URL=mongodb://mongodb:27017/atp_identity
+    depends_on:
+      - mongodb
+    networks:
+      - atp-cloud
+
+  credentials-service:
+    image: atp/credentials-service:latest
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - DATABASE_URL=mongodb://mongodb:27017/atp_credentials
+    depends_on:
+      - mongodb
+    networks:
+      - atp-cloud
+
+  permissions-service:
+    image: atp/permissions-service:latest
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - PORT=3003
+      - DATABASE_URL=mongodb://mongodb:27017/atp_permissions
+    depends_on:
+      - mongodb
+    networks:
+      - atp-cloud
+
+  audit-service:
+    image: atp/audit-service:latest
+    ports:
+      - "3006:3006"
+    environment:
+      - NODE_ENV=development
+      - PORT=3006
+      - DATABASE_URL=mongodb://mongodb:27017/atp_audit
+    depends_on:
+      - mongodb
+    networks:
+      - atp-cloud
+
+  monitoring-service:
+    image: atp/monitoring-service:latest
+    ports:
+      - "3007:3007"
+    environment:
+      - NODE_ENV=development
+      - PORT=3007
+      - DATABASE_URL=mongodb://mongodb:27017/atp_monitoring
+    depends_on:
+      - mongodb
+    networks:
+      - atp-cloud
+
+  # Databases
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=atp_cloud
+    volumes:
+      - mongodb_data:/data/db
+      - ./init-scripts/mongodb:/docker-entrypoint-initdb.d
+    networks:
+      - atp-cloud
+
+  redis:
+    image: redis:7.2-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass devpassword
+    networks:
+      - atp-cloud
+
+  # Nginx Load Balancer / Reverse Proxy
+  nginx:
+    build:
+      context: ..
+      dockerfile: docker/nginx/Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - cloud-gateway
+      - cloud-dashboard
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+    networks:
+      - atp-cloud
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  atp-cloud:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

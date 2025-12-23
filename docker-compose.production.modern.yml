@@ -1,0 +1,214 @@
+version: '3.8'
+
+services:
+  # Modern UI Frontend
+  atp-ui-modern:
+    build:
+      context: ./ui-modern
+      dockerfile: Dockerfile.production
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - ATP_API_URL=http://atp-gateway:3001
+      - ATP_QUANTUM_URL=http://atp-quantum:3008
+    depends_on:
+      - atp-gateway
+      - atp-quantum
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  # ATP Core Services
+  atp-gateway:
+    build:
+      context: ./packages/rpc-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=postgresql://atp_user:atp_password@postgres:5432/atp_production
+      - JWT_SECRET=${JWT_SECRET}
+      - QUANTUM_ENABLED=true
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  atp-identity:
+    build:
+      context: ./packages/identity-service
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      - DATABASE_URL=postgresql://atp_user:atp_password@postgres:5432/atp_production
+      - JWT_SECRET=${JWT_SECRET}
+      - QUANTUM_ENABLED=true
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  atp-permission:
+    build:
+      context: ./packages/permission-service
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - DATABASE_URL=postgresql://atp_user:atp_password@postgres:5432/atp_production
+      - JWT_SECRET=${JWT_SECRET}
+      - QUANTUM_ENABLED=true
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  atp-vc:
+    build:
+      context: ./packages/vc-service
+      dockerfile: Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=production
+      - PORT=3004
+      - DATABASE_URL=postgresql://atp_user:atp_password@postgres:5432/atp_production
+      - JWT_SECRET=${JWT_SECRET}
+      - QUANTUM_ENABLED=true
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  atp-audit:
+    build:
+      context: ./packages/audit-logger
+      dockerfile: Dockerfile
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=production
+      - PORT=3005
+      - DATABASE_URL=postgresql://atp_user:atp_password@postgres:5432/atp_production
+      - JWT_SECRET=${JWT_SECRET}
+      - QUANTUM_ENABLED=true
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  atp-quantum:
+    build:
+      context: .
+      dockerfile: Dockerfile.quantum-safe
+    ports:
+      - "3008:3008"
+    environment:
+      - NODE_ENV=production
+      - PORT=3008
+      - QUANTUM_ENABLED=true
+      - DILITHIUM_LEVEL=3
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  # Infrastructure Services
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=atp_production
+      - POSTGRES_USER=atp_user
+      - POSTGRES_PASSWORD=atp_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  # Monitoring Stack
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3006:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  # Load Balancer
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.production.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - atp-ui-modern
+      - atp-gateway
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  atp-network:
+    driver: bridge 

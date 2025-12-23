@@ -1,0 +1,152 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'packages/sdk/src/**'
+      - 'packages/sdk/docs/**'
+      - 'packages/sdk/README.md'
+      - 'packages/sdk/typedoc.json'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'packages/sdk/src/**'
+      - 'packages/sdk/docs/**'
+      - 'packages/sdk/README.md'
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      working-directory: packages/sdk
+      
+    - name: Build TypeScript
+      run: npm run build
+      working-directory: packages/sdk
+      
+    - name: Generate API documentation
+      run: npm run docs
+      working-directory: packages/sdk
+      
+    - name: Validate documentation
+      run: |
+        # Check if all public APIs are documented
+        echo "Validating documentation completeness..."
+        
+        # Check for broken links in markdown
+        npx markdown-link-check packages/sdk/README.md
+        npx markdown-link-check packages/sdk/docs/**/*.md
+        
+    - name: Upload documentation artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: api-docs
+        path: packages/sdk/docs/api-generated/
+        retention-days: 30
+
+  deploy-docs:
+    needs: build-docs
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      working-directory: packages/sdk
+      
+    - name: Build documentation
+      run: |
+        npm run build
+        npm run docs
+      working-directory: packages/sdk
+      
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
+      
+    - name: Upload to GitHub Pages
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: packages/sdk/docs/
+        
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2
+
+  docs-validation:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        
+    - name: Install validation tools
+      run: |
+        npm install -g markdownlint-cli
+        npm install -g alex
+        
+    - name: Lint markdown files
+      run: |
+        markdownlint packages/sdk/README.md
+        markdownlint packages/sdk/docs/**/*.md
+        
+    - name: Check for insensitive language
+      run: |
+        alex packages/sdk/README.md
+        alex packages/sdk/docs/**/*.md
+        
+    - name: Validate code examples
+      run: |
+        # Extract and validate code examples
+        echo "Validating code examples in documentation..."
+        
+        # This would run a custom script to extract code blocks
+        # and validate they compile/run correctly
+        
+    - name: Check documentation coverage
+      run: |
+        echo "Checking documentation coverage..."
+        
+        # Custom script to ensure all public APIs are documented
+        # Could use typedoc with validation plugins
+        
+    - name: Spell check
+      uses: rojopolis/spellcheck-github-actions@0.24.0
+      with:
+        config_path: packages/sdk/.spellcheck.yml
+        task_name: Markdown

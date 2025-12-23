@@ -1,0 +1,989 @@
+# Agent Trust Protocol™ - Kubernetes Production Manifests
+# Complete Kubernetes deployment configuration for ATP services
+
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: atp-production
+  labels:
+    name: atp-production
+    environment: production
+    project: agent-trust-protocol
+
+---
+# ConfigMap for shared configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: atp-config
+  namespace: atp-production
+data:
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  CORS_ORIGIN: "https://atp.dev,https://demo.atp.dev"
+  RATE_LIMIT_WINDOW: "900000"
+  RATE_LIMIT_MAX: "1000"
+  HEALTH_CHECK_INTERVAL: "30000"
+  METRICS_ENABLED: "true"
+  AUDIT_ENABLED: "true"
+
+---
+# Secret for database credentials (will be populated by external-secrets)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: atp-database-secret
+  namespace: atp-production
+type: Opaque
+data:
+  # These will be populated by AWS Secrets Manager via external-secrets-operator
+  DATABASE_URL: ""
+  DB_HOST: ""
+  DB_PORT: ""
+  DB_NAME: ""
+  DB_USER: ""
+  DB_PASSWORD: ""
+
+---
+# Secret for Redis credentials
+apiVersion: v1
+kind: Secret
+metadata:
+  name: atp-redis-secret
+  namespace: atp-production
+type: Opaque
+data:
+  # These will be populated by AWS Secrets Manager via external-secrets-operator
+  REDIS_URL: ""
+  REDIS_HOST: ""
+  REDIS_PORT: ""
+  REDIS_AUTH_TOKEN: ""
+
+---
+# Identity Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atp-identity-service
+  namespace: atp-production
+  labels:
+    app: atp-identity-service
+    component: identity
+    version: v1.0.0
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: atp-identity-service
+  template:
+    metadata:
+      labels:
+        app: atp-identity-service
+        component: identity
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3001"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: atp-identity-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: identity-service
+        image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/atp/identity-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3001
+          name: http
+          protocol: TCP
+        env:
+        - name: PORT
+          value: "3001"
+        - name: SERVICE_NAME
+          value: "identity-service"
+        envFrom:
+        - configMapRef:
+            name: atp-config
+        - secretRef:
+            name: atp-database-secret
+        - secretRef:
+            name: atp-redis-secret
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3001
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+
+---
+# Identity Service Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: atp-identity-service
+  namespace: atp-production
+  labels:
+    app: atp-identity-service
+    component: identity
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3001
+    targetPort: 3001
+    protocol: TCP
+    name: http
+  selector:
+    app: atp-identity-service
+
+---
+# VC Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atp-vc-service
+  namespace: atp-production
+  labels:
+    app: atp-vc-service
+    component: credentials
+    version: v1.0.0
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: atp-vc-service
+  template:
+    metadata:
+      labels:
+        app: atp-vc-service
+        component: credentials
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3002"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: atp-vc-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: vc-service
+        image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/atp/vc-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3002
+          name: http
+          protocol: TCP
+        env:
+        - name: PORT
+          value: "3002"
+        - name: SERVICE_NAME
+          value: "vc-service"
+        - name: IDENTITY_SERVICE_URL
+          value: "http://atp-identity-service:3001"
+        envFrom:
+        - configMapRef:
+            name: atp-config
+        - secretRef:
+            name: atp-database-secret
+        - secretRef:
+            name: atp-redis-secret
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3002
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3002
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+
+---
+# VC Service Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: atp-vc-service
+  namespace: atp-production
+  labels:
+    app: atp-vc-service
+    component: credentials
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3002
+    targetPort: 3002
+    protocol: TCP
+    name: http
+  selector:
+    app: atp-vc-service
+
+---
+# Permission Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atp-permission-service
+  namespace: atp-production
+  labels:
+    app: atp-permission-service
+    component: permissions
+    version: v1.0.0
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: atp-permission-service
+  template:
+    metadata:
+      labels:
+        app: atp-permission-service
+        component: permissions
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3003"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: atp-permission-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: permission-service
+        image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/atp/permission-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3003
+          name: http
+          protocol: TCP
+        env:
+        - name: PORT
+          value: "3003"
+        - name: SERVICE_NAME
+          value: "permission-service"
+        - name: IDENTITY_SERVICE_URL
+          value: "http://atp-identity-service:3001"
+        - name: VC_SERVICE_URL
+          value: "http://atp-vc-service:3002"
+        envFrom:
+        - configMapRef:
+            name: atp-config
+        - secretRef:
+            name: atp-database-secret
+        - secretRef:
+            name: atp-redis-secret
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3003
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3003
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+
+---
+# Permission Service Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: atp-permission-service
+  namespace: atp-production
+  labels:
+    app: atp-permission-service
+    component: permissions
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3003
+    targetPort: 3003
+    protocol: TCP
+    name: http
+  selector:
+    app: atp-permission-service
+
+---
+# Audit Logger Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atp-audit-logger
+  namespace: atp-production
+  labels:
+    app: atp-audit-logger
+    component: audit
+    version: v1.0.0
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: atp-audit-logger
+  template:
+    metadata:
+      labels:
+        app: atp-audit-logger
+        component: audit
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3005"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: atp-audit-logger
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: audit-logger
+        image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/atp/audit-logger:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3005
+          name: http
+          protocol: TCP
+        env:
+        - name: PORT
+          value: "3005"
+        - name: SERVICE_NAME
+          value: "audit-logger"
+        envFrom:
+        - configMapRef:
+            name: atp-config
+        - secretRef:
+            name: atp-database-secret
+        - secretRef:
+            name: atp-redis-secret
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3005
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3005
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+
+---
+# Audit Logger Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: atp-audit-logger
+  namespace: atp-production
+  labels:
+    app: atp-audit-logger
+    component: audit
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3005
+    targetPort: 3005
+    protocol: TCP
+    name: http
+  selector:
+    app: atp-audit-logger
+
+---
+# RPC Gateway Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atp-rpc-gateway
+  namespace: atp-production
+  labels:
+    app: atp-rpc-gateway
+    component: gateway
+    version: v1.0.0
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: atp-rpc-gateway
+  template:
+    metadata:
+      labels:
+        app: atp-rpc-gateway
+        component: gateway
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: atp-rpc-gateway
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: rpc-gateway
+        image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/atp/rpc-gateway:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        env:
+        - name: PORT
+          value: "3000"
+        - name: SERVICE_NAME
+          value: "rpc-gateway"
+        - name: IDENTITY_SERVICE_URL
+          value: "http://atp-identity-service:3001"
+        - name: VC_SERVICE_URL
+          value: "http://atp-vc-service:3002"
+        - name: PERMISSION_SERVICE_URL
+          value: "http://atp-permission-service:3003"
+        - name: AUDIT_SERVICE_URL
+          value: "http://atp-audit-logger:3005"
+        envFrom:
+        - configMapRef:
+            name: atp-config
+        - secretRef:
+            name: atp-database-secret
+        - secretRef:
+            name: atp-redis-secret
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+
+---
+# RPC Gateway Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: atp-rpc-gateway
+  namespace: atp-production
+  labels:
+    app: atp-rpc-gateway
+    component: gateway
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: atp-rpc-gateway
+
+---
+# Demo Platform Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atp-demo-platform
+  namespace: atp-production
+  labels:
+    app: atp-demo-platform
+    component: demo
+    version: v1.0.0
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: atp-demo-platform
+  template:
+    metadata:
+      labels:
+        app: atp-demo-platform
+        component: demo
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3010"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: atp-demo-platform
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: demo-platform
+        image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/atp/demo-platform:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3010
+          name: http
+          protocol: TCP
+        env:
+        - name: PORT
+          value: "3010"
+        - name: SERVICE_NAME
+          value: "demo-platform"
+        - name: ATP_GATEWAY_URL
+          value: "http://atp-rpc-gateway:3000"
+        envFrom:
+        - configMapRef:
+            name: atp-config
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3010
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3010
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+
+---
+# Demo Platform Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: atp-demo-platform
+  namespace: atp-production
+  labels:
+    app: atp-demo-platform
+    component: demo
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3010
+    targetPort: 3010
+    protocol: TCP
+    name: http
+  selector:
+    app: atp-demo-platform
+
+---
+# Service Accounts
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: atp-identity-service
+  namespace: atp-production
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/atp-identity-service-role
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: atp-vc-service
+  namespace: atp-production
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/atp-vc-service-role
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: atp-permission-service
+  namespace: atp-production
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/atp-permission-service-role
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: atp-audit-logger
+  namespace: atp-production
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/atp-audit-logger-role
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: atp-rpc-gateway
+  namespace: atp-production
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/atp-rpc-gateway-role
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: atp-demo-platform
+  namespace: atp-production
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/atp-demo-platform-role
+
+---
+# Ingress for external access
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: atp-ingress
+  namespace: atp-production
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:123456789012:certificate/your-cert-arn
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '30'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+    alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: '3'
+spec:
+  rules:
+  - host: api.atp.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: atp-rpc-gateway
+            port:
+              number: 3000
+  - host: demo.atp.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: atp-demo-platform
+            port:
+              number: 3010
+  - host: identity.atp.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: atp-identity-service
+            port:
+              number: 3001
+  - host: credentials.atp.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: atp-vc-service
+            port:
+              number: 3002
+  - host: permissions.atp.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: atp-permission-service
+            port:
+              number: 3003
+
+---
+# Horizontal Pod Autoscaler for Gateway (high traffic service)
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: atp-rpc-gateway-hpa
+  namespace: atp-production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: atp-rpc-gateway
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# Horizontal Pod Autoscaler for Identity Service
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: atp-identity-service-hpa
+  namespace: atp-production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: atp-identity-service
+  minReplicas: 3
+  maxReplicas: 8
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# Pod Disruption Budget for Gateway
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: atp-rpc-gateway-pdb
+  namespace: atp-production
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: atp-rpc-gateway
+
+---
+# Pod Disruption Budget for Identity Service
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: atp-identity-service-pdb
+  namespace: atp-production
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: atp-identity-service
+
+---
+# Pod Disruption Budget for VC Service
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: atp-vc-service-pdb
+  namespace: atp-production
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: atp-vc-service
+
+---
+# Pod Disruption Budget for Permission Service
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: atp-permission-service-pdb
+  namespace: atp-production
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: atp-permission-service
+
+---
+# Network Policy for security isolation
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: atp-network-policy
+  namespace: atp-production
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: atp-production
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: atp-production
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 5432
+    - protocol: TCP
+      port: 6379
