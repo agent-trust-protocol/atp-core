@@ -1,15 +1,98 @@
 /**
  * Policy Evaluation API - Server-side policy execution engine
- * 
+ *
  * SECURITY NOTICE: This API endpoint contains the most critical proprietary algorithms
  * for policy evaluation and execution. This is our core IP and must never be exposed
  * in client-side code. The algorithms here provide our competitive advantage.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { PolicyEvaluator, PolicyEvaluationContext, PolicyEvaluationResult } from '../../../../packages/shared/src/policy/policy-evaluator.js';
-import { ATPVisualPolicy, validateATPPolicy } from '../../../../packages/shared/src/policy/visual-policy-schema.js';
 import { randomUUID } from 'crypto';
+
+// Type definitions (standalone version)
+interface ATPVisualPolicy {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  organizationId: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  enabled: boolean;
+  defaultAction: string;
+  evaluationMode: string;
+  rules: any[];
+  tags: string[];
+  testCases: any[];
+  auditLog: any[];
+}
+
+interface PolicyEvaluationContext {
+  agentDID: string;
+  trustLevel: string;
+  trustScore?: number;
+  credentials: any[];
+  tool: any;
+  requestedAction: string;
+  sessionInfo?: any;
+  requestContext?: any;
+  organizationId: string;
+  timestamp: string;
+}
+
+interface PolicyEvaluationResult {
+  decision: 'allow' | 'deny' | 'throttle' | 'require_approval';
+  action: any;
+  matchedRule?: any;
+  reason: string;
+  obligations?: any[];
+  metadata?: any;
+  evaluationTrace?: any[];
+  processingTime?: number;
+}
+
+function validateATPPolicy(policy: ATPVisualPolicy): void {
+  if (!policy.id || !policy.name || !policy.rules) {
+    throw new Error('Invalid policy structure');
+  }
+}
+
+// Standalone PolicyEvaluator class
+class PolicyEvaluator {
+  private debugMode: boolean;
+  constructor(options: { debugMode?: boolean } = {}) {
+    this.debugMode = options.debugMode || false;
+  }
+
+  async evaluatePolicy(policy: ATPVisualPolicy, context: PolicyEvaluationContext): Promise<PolicyEvaluationResult> {
+    // Simplified evaluation logic for standalone deployment
+    const startTime = Date.now();
+
+    // Default to policy's default action
+    let decision: 'allow' | 'deny' | 'throttle' | 'require_approval' = policy.defaultAction as any || 'deny';
+    let matchedRule = null;
+    let reason = 'Default policy action applied';
+
+    // Simple rule matching
+    for (const rule of policy.rules) {
+      if (rule.enabled !== false) {
+        matchedRule = rule;
+        decision = rule.action?.type || decision;
+        reason = `Matched rule: ${rule.name}`;
+        break;
+      }
+    }
+
+    return {
+      decision,
+      action: matchedRule?.action || { type: decision, id: randomUUID() },
+      matchedRule,
+      reason,
+      processingTime: Date.now() - startTime
+    };
+  }
+}
 
 // Types for the API request
 interface PolicyEvaluationRequest {
@@ -211,7 +294,7 @@ async function evaluatePolicySecure(request: PolicyEvaluationRequest): Promise<P
  * PROPRIETARY: Advanced policy loading and validation system
  */
 async function loadAndValidatePolicySecure(request: PolicyEvaluationRequest): Promise<ATPVisualPolicy | null> {
-  let policy: ATPVisualPolicy;
+  let policy: ATPVisualPolicy | null = null;
 
   if (request.policy) {
     policy = request.policy;

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Inter_Tight, JetBrains_Mono } from 'next/font/google'
+import { ClerkProviderWrapper } from '@/components/clerk-provider-wrapper'
 import { Navbar } from '@/components/ui/navbar'
 import { Footer } from '@/components/ui/footer'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -64,38 +65,40 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                const theme = localStorage.getItem('atp-ui-theme') || 'light';
-                const root = document.documentElement;
-                
-                if (theme === 'system') {
-                  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                  root.classList.add(systemTheme);
-                } else {
-                  root.classList.add(theme);
+    <ClerkProviderWrapper>
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                try {
+                  const theme = localStorage.getItem('atp-ui-theme') || 'light';
+                  const root = document.documentElement;
+                  
+                  if (theme === 'system') {
+                    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                    root.classList.add(systemTheme);
+                  } else {
+                    root.classList.add(theme);
+                  }
+                } catch (e) {
+                  // Fallback to light mode if there's an error
+                  document.documentElement.classList.add('light');
                 }
-              } catch (e) {
-                // Fallback to light mode if there's an error
-                document.documentElement.classList.add('light');
-              }
-            `,
-          }}
-        />
-      </head>
-      <body className={`${inter.variable} ${interTight.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
-        <ThemeProvider defaultTheme="light" storageKey="atp-ui-theme">
-          <Navbar />
-          <main className="relative">
-            {children}
-          </main>
-          <Footer />
-        </ThemeProvider>
-      </body>
-    </html>
+              `,
+            }}
+          />
+        </head>
+        <body className={`${inter.variable} ${interTight.variable} ${jetbrainsMono.variable} font-sans antialiased`} suppressHydrationWarning>
+          <ThemeProvider defaultTheme="light" storageKey="atp-ui-theme">
+            <Navbar />
+            <main className="relative">
+              {children}
+            </main>
+            <Footer />
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProviderWrapper>
   )
 }

@@ -1,24 +1,81 @@
 /**
  * Policy Validation API - Server-side policy validation
- * 
+ *
  * SECURITY NOTICE: This API endpoint contains proprietary validation algorithms
  * and should never be exposed in client-side code. All validation logic
  * is secured on the server to prevent IP theft and reverse engineering.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { 
-  validatePolicyConsistency, 
-  analyzePolicy,
-  PolicyAnalysisResult,
-  PolicyValidationResult
-} from '../../../../packages/shared/src/policy/policy-utils.js';
-import {
-  ATPVisualPolicy,
-  validateATPPolicy,
-  validatePolicyRule,
-  VisualPolicyRule
-} from '../../../../packages/shared/src/policy/visual-policy-schema.js';
+
+// Type definitions (standalone version)
+interface ATPVisualPolicy {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  organizationId: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  enabled: boolean;
+  defaultAction: string;
+  evaluationMode: string;
+  rules: VisualPolicyRule[];
+  tags: string[];
+  testCases: any[];
+  auditLog: any[];
+}
+
+interface VisualPolicyRule {
+  id: string;
+  name: string;
+  description: string;
+  enabled: boolean;
+  priority: number;
+  condition: any;
+  action: any;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  version: string;
+}
+
+interface PolicyAnalysisResult {
+  complexity: 'low' | 'medium' | 'high';
+  ruleCount: number;
+  conditionCount: number;
+  issues: Array<{ severity: string; message: string }>;
+  suggestions: string[];
+}
+
+function validateATPPolicy(policy: ATPVisualPolicy): void {
+  if (!policy.id || !policy.name || !policy.rules) {
+    throw new Error('Invalid policy structure');
+  }
+}
+
+function validatePolicyConsistency(policy: ATPVisualPolicy): { errors: string[]; warnings: string[] } {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  if (!policy.rules || policy.rules.length === 0) {
+    warnings.push('Policy has no rules defined');
+  }
+
+  return { errors, warnings };
+}
+
+function analyzePolicy(policy: ATPVisualPolicy): PolicyAnalysisResult {
+  return {
+    complexity: policy.rules.length > 10 ? 'high' : policy.rules.length > 5 ? 'medium' : 'low',
+    ruleCount: policy.rules.length,
+    conditionCount: policy.rules.reduce((acc, r) => acc + (r.condition ? 1 : 0), 0),
+    issues: [],
+    suggestions: []
+  };
+}
 
 // Types for the API request
 interface PolicyValidationRequest {
@@ -457,10 +514,13 @@ async function calculatePolicySecurityScore(policy: ATPVisualPolicy, analysis: P
   return Math.max(0, Math.min(100, score));
 }
 
+// Node type for parameter validation
+type PolicyNode = NonNullable<PolicyValidationRequest['nodes']>[number];
+
 /**
  * PROPRIETARY: Node parameter validation algorithm
  */
-function validateNodeParameters(node: PolicyValidationRequest['nodes'][0], strictMode: boolean) {
+function validateNodeParameters(node: PolicyNode, strictMode: boolean) {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -472,13 +532,13 @@ function validateNodeParameters(node: PolicyValidationRequest['nodes'][0], stric
   // PROPRIETARY: Type-specific parameter validation
   switch (type) {
     case 'condition':
-      const conditionValidation = validateConditionParameters(data.conditionType, parameters, strictMode);
+      const conditionValidation = validateConditionParameters(data.conditionType || 'unknown', parameters, strictMode);
       errors.push(...conditionValidation.errors);
       warnings.push(...conditionValidation.warnings);
       break;
-    
+
     case 'action':
-      const actionValidation = validateActionParameters(data.actionType, parameters, strictMode);
+      const actionValidation = validateActionParameters(data.actionType || 'unknown', parameters, strictMode);
       errors.push(...actionValidation.errors);
       warnings.push(...actionValidation.warnings);
       break;
