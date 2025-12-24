@@ -104,7 +104,7 @@ export default function DocsPage() {
                 <CardContent className="space-y-4">
                   <div className="bg-card/50 border border-border/50 rounded-lg p-4 font-mono text-sm">
                     <div className="text-muted-foreground mb-2"># Install ATP SDK</div>
-                    <div className="text-foreground">npm install @atp/sdk</div>
+                    <div className="text-foreground">npm install atp-sdk</div>
                     <div className="text-muted-foreground mt-2"># Or clone repository</div>
                     <div className="text-foreground">git clone https://github.com/agent-trust-protocol/core.git</div>
                   </div>
@@ -303,7 +303,7 @@ export default function DocsPage() {
                       <h3 className="font-medium text-green-400 mb-2">SDK Integration</h3>
                       <p className="text-sm text-muted-foreground mb-3">Direct integration with TypeScript/JavaScript SDK</p>
                       <div className="bg-card/50 rounded p-3 font-mono text-xs">
-                        import {"{"}ATPClient{"}"} from '@atp/sdk'<br />
+                        import {"{"}ATPClient{"}"} from 'atp-sdk'<br />
                         const client = new ATPClient()
                       </div>
                     </div>

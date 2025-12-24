@@ -108,11 +108,11 @@ export default function ExamplesPage() {
                     </div>
                     <div className="bg-card/50 border border-border/50 rounded-lg p-4 font-mono text-xs">
                       <div className="text-muted-foreground mb-2"># Choose your preferred package manager</div>
-                      <div className="text-foreground">npm install @atp/sdk</div>
+                      <div className="text-foreground">npm install atp-sdk</div>
                       <div className="text-muted-foreground"># or</div>
-                      <div className="text-foreground">yarn add @atp/sdk</div>
+                      <div className="text-foreground">yarn add atp-sdk</div>
                       <div className="text-muted-foreground"># or</div>
-                      <div className="text-foreground">pnpm add @atp/sdk</div>
+                      <div className="text-foreground">pnpm add atp-sdk</div>
                     </div>
                     <Button variant="outline" size="sm" className="w-full glass border-atp-electric-cyan/30 hover:bg-atp-electric-cyan/10 hover:border-atp-electric-cyan/50 hover:scale-105 transition-all duration-300">
                       <Copy size={16} className="mr-2" />
@@ -127,7 +127,7 @@ export default function ExamplesPage() {
                     </div>
                     <div className="bg-card/50 border border-border/50 rounded-lg p-4 font-mono text-xs">
                       <div className="text-muted-foreground mb-2">{"// src/index.ts"}</div>
-                      <div className="text-foreground">import {"{ ATPClient }"} from '@atp/sdk'</div>
+                      <div className="text-foreground">import {"{ ATPClient }"} from 'atp-sdk'</div>
                       <div className="text-foreground mt-2">const atp = new ATPClient({"{"}
                         <br />{"  "}baseUrl: 'https://api.atp.dev',
                         <br />{"  "}apiKey: process.env.ATP_API_KEY
@@ -496,7 +496,7 @@ export default function ExamplesPage() {
                       </p>
                       <div className="bg-card/50 rounded p-3 font-mono text-xs">
                         <div className="text-muted-foreground">{"// Direct integration"}</div>
-                        <div className="text-foreground">import {"{ ATPClient }"} from '@atp/sdk'</div>
+                        <div className="text-foreground">import {"{ ATPClient }"} from 'atp-sdk'</div>
                         <div className="text-foreground">const atp = new ATPClient(config)</div>
                         <div className="text-foreground">await atp.authenticate()</div>
                       </div>

@@ -25,6 +25,12 @@ export function Navbar() {
           {/* Navigation Links + Theme Toggle + CTA */}
           <div className="flex items-center gap-3">
             <Link
+              href="/developers"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-muted/50"
+            >
+              Developers
+            </Link>
+            <Link
               href="/demos"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-muted/50"
             >

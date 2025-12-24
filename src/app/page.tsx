@@ -21,7 +21,8 @@ import {
   Network,
   Lock,
   Eye,
-  TrendingUp
+  TrendingUp,
+  Code2
 } from "lucide-react"
 import { AnimatedIcon, IconWithBadge, FloatingIcon } from "@/components/ui/animated-icon"
 import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon, SecureConnectionIcon, PolicyFlowIcon } from "@/components/ui/atp-icons"
@@ -75,10 +76,32 @@ export default function HomePage() {
             <Button asChild variant="outline" size="lg" className="border-2 border-atp-electric-cyan/30 hover:bg-atp-electric-cyan/10 hover:border-atp-electric-cyan/50 hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
               <Link href="/login"><Lock className="h-5 w-5 mr-3" />Customer Login</Link>
             </Button>
+            <Button asChild variant="outline" size="lg" className="border-2 border-primary/30 hover:bg-primary/10 hover:border-primary/50 hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
+              <Link href="/developers"><Code2 className="h-5 w-5 mr-3" />For Developers</Link>
+            </Button>
           </div>
           
           <div className="mt-8 p-6 bg-gradient-to-r from-[hsl(var(--atp-surface))]/50 to-[hsl(var(--atp-surface))]/80 rounded-2xl border border-border/50 backdrop-blur-sm animate-fade-in-up">
-            <p className="text-base text-muted-foreground text-center">🎉 <strong className="text-foreground">100% Open Source</strong> • Apache 2.0 License • <a href="https://github.com/agent-trust-protocol/core" className="text-atp-electric-cyan hover:text-atp-electric-cyan/80 hover:underline" target="_blank" rel="noopener noreferrer">Free Forever</a> • Enterprise Support Available</p>
+            <p className="text-base text-muted-foreground text-center">🎉 <strong className="text-foreground">100% Open Source</strong> • Apache 2.0 License • <a href="https://github.com/agent-trust-protocol/core" className="text-atp-electric-cyan hover:text-atp-electric-cyan/80 hover:underline" target="_blank" rel="noopener noreferrer">Free Forever</a> • <Link href="/developers" className="text-atp-electric-cyan hover:text-atp-electric-cyan/80 hover:underline">Developer Portal</Link> • Enterprise Support Available</p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm">
+              <a href="https://github.com/agent-trust-protocol/core" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-git-branch">
+                  <line x1="6" x2="6" y1="3" y2="15"></line>
+                  <circle cx="18" cy="6" r="3"></circle>
+                  <circle cx="6" cy="18" r="3"></circle>
+                  <path d="M18 9a9 9 0 0 1-9 9"></path>
+                </svg>
+                Core Protocol
+              </a>
+              <span className="text-muted-foreground">•</span>
+              <a href="https://github.com/agent-trust-protocol" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-github">
+                  <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0-2-1.5-3-1.5-3-1.5-.3 1.15-.3 2.35 0 3.5-1.05 1.08-1 3.5-1 3.5 0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path>
+                  <path d="M9 18c-4.51 2-5-2-7-2"></path>
+                </svg>
+                All Repositories
+              </a>
+            </div>
           </div>
 
           {/* Quick Access */}

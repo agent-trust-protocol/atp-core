@@ -1,13 +1,9 @@
+'use client';
+
 import { RequireAuth } from "@/components/auth/RequireAuth"
 import { PolicyManagement } from "@/components/atp/policy-management"
 import { Subnav } from "@/components/ui/subnav"
 import { Shield, Edit3, Play, BarChart3 } from "lucide-react"
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Policy Management — Agent Trust Protocol',
-  description: 'Browse, manage, and organize trust policies for your AI agents.'
-}
 
 export default function PoliciesPage() {
   const policyTabs = [
@@ -45,8 +41,8 @@ export default function PoliciesPage() {
   return (
     <RequireAuth tier="startup" feature="policy-management">
       <div className="min-h-screen bg-background">
-      <Subnav 
-        tabs={policyTabs} 
+      <Subnav
+        tabs={policyTabs}
         breadcrumbs={breadcrumbs}
         variant="both"
       />
@@ -56,4 +52,4 @@ export default function PoliciesPage() {
     </div>
     </RequireAuth>
   )
-} 
+}

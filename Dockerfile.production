@@ -1,26 +1,63 @@
 # Production Dockerfile for ATP Modern UI
-FROM node:18-alpine AS base
+# Build from monorepo root: docker build -f website-repo/Dockerfile.production .
+
+FROM node:20-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
+# Install build dependencies for better-sqlite3 and other native modules
+RUN apk add --no-cache \
+    libc6-compat \
+    python3 \
+    make \
+    g++ \
+    gcc \
+    musl-dev
 
-# Install dependencies based on the preferred package manager
-COPY package.json package-lock.json* ./
+WORKDIR /app/website-repo
+
+# Copy package files
+COPY website-repo/package.json website-repo/package-lock.json* ./
 RUN npm ci --include=dev
 
 # Rebuild the source code only when needed
 FROM base AS builder
+
+# Set up monorepo structure to match local development
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+
+# Copy node_modules
+COPY --from=deps /app/website-repo/node_modules ./website-repo/node_modules
+
+# Copy monorepo packages FIRST (so relative imports work)
+# The website imports use paths like ../../../../packages/sdk/...
+COPY packages ./packages
+
+# Copy base TypeScript config (required by SDK and shared packages)
+COPY tsconfig.base.json ./tsconfig.base.json
+
+# Build shared packages required by the website
+# Use npm install instead of npm ci since packages may not have lockfiles
+WORKDIR /app/packages/sdk
+RUN npm install --include=dev && npm run build
+
+WORKDIR /app/packages/shared
+RUN npm install --include=dev && npm run build
+
+# Copy website source
+COPY website-repo ./website-repo
+
+# Build from website directory
+WORKDIR /app/website-repo
 
 # Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED 1
+
+# Debug: Show package structure before build
+RUN echo "=== Checking package structure ===" && \
+    ls -la ../packages/ && \
+    ls -la ../packages/sdk/ || echo "SDK not found" && \
+    ls -la ../packages/shared/ || echo "Shared not found"
 
 RUN npm run build
 
@@ -29,30 +66,36 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
-# Uncomment the following line in case you want to disable telemetry during runtime.
 ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/public ./public
+COPY --from=builder /app/website-repo/public ./public
 
 # Set the correct permission for prerender cache
 RUN mkdir .next
 RUN chown nextjs:nodejs .next
 
+# Create directory for Better Auth database with proper permissions
+RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+
 # Copy the built application
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/website-repo/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/website-repo/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/website-repo/package.json ./package.json
+
+# Copy monorepo packages to runtime (if needed)
+COPY --from=builder --chown=nextjs:nodejs /app/packages ../packages
 
 USER nextjs
 
 EXPOSE 3000
 
 ENV PORT 3000
-# set hostname to localhost
 ENV HOSTNAME "0.0.0.0"
+# Database will be stored in mounted volume
+ENV DATABASE_URL=/app/data/auth.db
 
 # Use next start instead of standalone server
-CMD ["npm", "start"] 
+CMD ["npm", "start"]

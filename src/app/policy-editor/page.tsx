@@ -1,13 +1,9 @@
+'use client';
+
 import { RequireAuth } from "@/components/auth/RequireAuth"
 import { VisualPolicyEditor } from "@/components/atp/visual-policy-editor"
 import { Subnav } from "@/components/ui/subnav"
 import { Shield, Edit3, Play, BarChart3 } from "lucide-react"
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Visual Policy Editor — Agent Trust Protocol',
-  description: 'Create and edit trust policies with a visual, no-code editor.'
-}
 
 export default function PolicyEditorPage() {
 

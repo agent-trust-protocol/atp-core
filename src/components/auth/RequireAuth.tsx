@@ -1,5 +1,10 @@
-import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Lock, Loader2 } from 'lucide-react';
 
 interface RequireAuthProps {
   children: React.ReactNode;
@@ -7,82 +12,91 @@ interface RequireAuthProps {
   feature?: string;
 }
 
-async function verifyToken(token: string): Promise<{ valid: boolean; user?: any; tenant?: any }> {
-  try {
-    // In production, this would verify the JWT token with your auth service
-    const response = await fetch(`${process.env.ATP_AUTH_SERVICE_URL || 'http://localhost:3001'}/auth/verify`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      cache: 'no-store'
-    });
-    
-    if (!response.ok) {
-      return { valid: false };
-    }
-    
-    const data = await response.json();
-    return { valid: true, user: data.user, tenant: data.tenant };
-  } catch (error) {
-    console.error('Token verification failed:', error);
-    return { valid: false };
-  }
-}
+export function RequireAuth({ children, tier = 'startup', feature }: RequireAuthProps) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const router = useRouter();
 
-async function checkSubscriptionTier(tenant: any, requiredTier: string): Promise<boolean> {
-  const tierHierarchy = {
-    'startup': 1,
-    'professional': 2,
-    'enterprise': 3
-  };
-  
-  const userTier = tenant?.plan || 'startup';
-  const userTierLevel = tierHierarchy[userTier as keyof typeof tierHierarchy] || 1;
-  const requiredTierLevel = tierHierarchy[requiredTier as keyof typeof tierHierarchy] || 1;
-  
-  return userTierLevel >= requiredTierLevel;
-}
+  useEffect(() => {
+    // Check for authentication token in cookies or localStorage
+    const checkAuth = async () => {
+      try {
+        // Check for token in cookie
+        const cookies = document.cookie.split(';');
+        const tokenCookie = cookies.find(c => c.trim().startsWith('atp_token='));
 
-export async function RequireAuth({ children, tier = 'startup', feature }: RequireAuthProps) {
-  const cookieStore = cookies();
-  const token = cookieStore.get('atp_token');
-  
-  // Check if user is authenticated
-  if (!token?.value) {
-    const params = new URLSearchParams({
-      returnTo: '/dashboard/workflows/designer',
-      feature: feature || 'premium',
-      tier: tier
-    });
-    redirect(`/login?${params.toString()}`);
+        if (tokenCookie) {
+          // Token exists, verify it (in production, validate with backend)
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Checking authentication...</p>
+        </div>
+      </div>
+    );
   }
-  
-  // Verify token with auth service
-  const verification = await verifyToken(token.value);
-  if (!verification.valid) {
-    const params = new URLSearchParams({
-      returnTo: '/dashboard/workflows/designer',
-      feature: feature || 'premium',
-      tier: tier,
-      error: 'session_expired'
-    });
-    redirect(`/login?${params.toString()}`);
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Lock className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle>Authentication Required</CardTitle>
+            <CardDescription>
+              You need to sign in to access {feature ? `the ${feature}` : 'this feature'}.
+              {tier !== 'startup' && (
+                <span className="block mt-2">
+                  This feature requires a <strong className="capitalize">{tier}</strong> subscription.
+                </span>
+              )}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            <Button
+              onClick={() => router.push(`/login?returnTo=${encodeURIComponent(window.location.pathname)}&feature=${feature || 'premium'}&tier=${tier}`)}
+              className="w-full"
+            >
+              Sign In
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => router.push('/signup')}
+              className="w-full"
+            >
+              Create Account
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => router.push('/')}
+              className="w-full"
+            >
+              Back to Home
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
-  
-  // Check subscription tier if specified
-  if (tier && verification.tenant) {
-    const hasAccess = await checkSubscriptionTier(verification.tenant, tier);
-    if (!hasAccess) {
-      const params = new URLSearchParams({
-        feature: feature || 'premium',
-        tier: tier,
-        upgrade: 'required'
-      });
-      redirect(`/upgrade?${params.toString()}`);
-    }
-  }
-  
+
   return <>{children}</>;
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Card } from "@/components/ui/card"
-import { Activity, FileText, Monitor, DollarSign, type LucideIcon } from "lucide-react"
+import { Activity, FileText, Monitor, DollarSign, Code2, type LucideIcon } from "lucide-react"
 
 interface QuickAccessItem {
   href: string
@@ -11,6 +11,7 @@ interface QuickAccessItem {
 }
 
 const items: QuickAccessItem[] = [
+  { href: "/developers", label: "Developers", icon: Code2 },
   { href: "/dashboard", label: "Dashboard", icon: Activity },
   { href: "/policy-editor", label: "Policy Editor", icon: FileText },
   { href: "/monitoring", label: "Monitoring", icon: Monitor },

@@ -991,7 +991,7 @@ export default function SalesGuidePage() {
                       <div className="space-y-2 text-sm">
                         <div className="font-medium">Show:</div>
                         <ul className="text-muted-foreground list-disc list-inside space-y-1">
-                          <li>npm install @atp/sdk</li>
+                          <li>npm install atp-sdk</li>
                           <li>Simple client initialization</li>
                           <li>Agent registration in 3 lines of code</li>
                         </ul>
