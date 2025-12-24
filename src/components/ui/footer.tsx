@@ -11,7 +11,7 @@ export function Footer() {
     <footer className="w-full border-t bg-gradient-to-b from-background to-[hsl(var(--atp-surface))]">
       <div className="container mx-auto px-4 py-16">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-12 mb-12">
           {/* Company Info */}
           <div className="space-y-6">
             <div className="flex items-center space-x-3">
@@ -95,14 +95,9 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <a 
-                  href="https://github.com/agent-trust-protocol" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  GitHub
-                </a>
+                <Link href="/developers" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Developer Portal
+                </Link>
               </li>
               <li>
                 <Link href="/api-reference" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -113,6 +108,43 @@ export function Footer() {
                 <Link href="/examples" className="text-muted-foreground hover:text-foreground transition-colors">
                   Examples
                 </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Repositories */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-sm">Repositories</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a 
+                  href="https://github.com/agent-trust-protocol/core" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                >
+                  Core Protocol
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" x2="21" y1="14" y2="3"></line>
+                  </svg>
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://github.com/agent-trust-protocol" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                >
+                  Organization
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" x2="21" y1="14" y2="3"></line>
+                  </svg>
+                </a>
               </li>
             </ul>
           </div>

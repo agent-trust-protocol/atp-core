@@ -63,7 +63,9 @@ class RateLimitStore {
 
   cleanup(): void {
     const now = Date.now();
-    for (const [key, entry] of this.store.entries()) {
+    const entries = Array.from(this.store.entries());
+    for (let i = 0; i < entries.length; i++) {
+      const [key, entry] = entries[i];
       if (entry.resetTime < now && (!entry.blocked || entry.blocked < now)) {
         this.store.delete(key);
       }

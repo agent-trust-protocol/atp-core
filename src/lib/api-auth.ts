@@ -1,40 +1,98 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { auth } from './auth';
+import { 
+  logApiAuthSuccess, 
+  logApiAuthFailure,
+  authLogger 
+} from './auth-logger';
+import { 
+  rateLimiter, 
+  getClientIp, 
+  getUserAgent 
+} from './rate-limiter';
 
 /**
  * API Authentication utility for protecting sensitive endpoints
- * Prevents IP exposure by requiring authentication for valuable system data
+ * Uses Better Auth for secure session validation
+ * Includes rate limiting and comprehensive logging
  */
 
 export interface AuthResult {
   isAuthenticated: boolean;
+  user?: any;
+  session?: any;
   error?: NextResponse;
 }
 
 export async function checkApiAuth(request: NextRequest): Promise<AuthResult> {
+  const ip = getClientIp(request);
+  const userAgent = getUserAgent(request);
+  const endpoint = new URL(request.url).pathname;
+
   try {
-    // Check for authentication token in cookies
-    const cookieStore = cookies();
-    const token = cookieStore.get('atp_token');
+    // Check rate limit first
+    const rateLimitResult = rateLimiter.check(ip, 'apiAuth', userAgent);
     
-    if (!token?.value) {
+    if (!rateLimitResult.allowed) {
+      logApiAuthFailure(ip, userAgent, endpoint, 'Rate limit exceeded');
+      
+      return {
+        isAuthenticated: false,
+        error: NextResponse.json(
+          {
+            error: 'Rate limit exceeded',
+            message: 'Too many requests. Please try again later.',
+            code: 'RATE_LIMIT_EXCEEDED',
+            retryAfter: rateLimitResult.retryAfter,
+          },
+          { 
+            status: 429,
+            headers: {
+              'Retry-After': String(rateLimitResult.retryAfter || 60),
+              'X-RateLimit-Limit': '60',
+              'X-RateLimit-Remaining': '0',
+              'X-RateLimit-Reset': String(Date.now() + (rateLimitResult.retryAfter || 60) * 1000),
+            }
+          }
+        )
+      };
+    }
+
+    // Verify session using Better Auth
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session || !session.user) {
+      logApiAuthFailure(ip, userAgent, endpoint, 'No valid session');
+      
       return {
         isAuthenticated: false,
         error: NextResponse.json(
           { 
             error: 'Authentication required',
             message: 'This endpoint requires authentication. Please log in to access this data.',
-            code: 'AUTH_REQUIRED'
+            code: 'AUTH_REQUIRED',
+            loginUrl: '/login'
           },
           { status: 401 }
         )
       };
     }
 
-    // In production, you would verify the JWT token here
-    // For now, we just check if token exists
-    return { isAuthenticated: true };
+    // Log successful authentication
+    logApiAuthSuccess(session.user.id, ip, userAgent, endpoint);
+
+    // Session is valid
+    return { 
+      isAuthenticated: true,
+      user: session.user,
+      session: session.session
+    };
   } catch (error) {
+    console.error('Authentication error:', error);
+    logApiAuthFailure(ip, userAgent, endpoint, 'Internal error');
+    
     return {
       isAuthenticated: false,
       error: NextResponse.json(

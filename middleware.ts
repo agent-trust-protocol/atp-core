@@ -1,118 +1,85 @@
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 
-// Load maintenance config
-let maintenanceConfig;
-try {
-  maintenanceConfig = require('./maintenance.config.js');
-} catch (e) {
-  maintenanceConfig = { enabled: false };
+// Define public routes that don't require authentication
+const isPublicRoute = createRouteMatcher([
+  '/login(.*)',
+  '/signup(.*)',
+  '/request-access(.*)',
+  '/api/request-access(.*)',
+  '/api/webhooks(.*)', // Clerk webhooks
+  '/developers(.*)',
+  '/docs(.*)',
+  '/examples(.*)',
+  '/api-reference(.*)',
+  '/api/health(.*)',
+  '/maintenance(.*)',
+  '/_next(.*)',
+  '/favicon.ico',
+  '/robots.txt',
+  '/sitemap.xml',
+]);
+
+// Check if maintenance mode is enabled
+function isMaintenanceModeEnabled(): boolean {
+  const envMaintenance = process.env.NEXT_PUBLIC_MAINTENANCE_MODE;
+  return envMaintenance === 'true';
 }
 
-// Routes that require authentication - IP Protection enabled
-const protectedRoutes = [
-  '/portal',
-  '/api/portal',
-  '/dashboard/agents',
-  '/dashboard/workflows',           // PREMIUM: Workflow system (Startup+)
-  '/dashboard/workflows/designer',   // PREMIUM: Visual workflow designer (Startup+)
-  '/dashboard/workflows/executions', // PREMIUM: Workflow executions (Startup+)
-  '/dashboard/workflows/health',     // PREMIUM: Workflow monitoring (Professional+)
-  '/dashboard/workflows/nodes',      // PREMIUM: Custom workflow nodes (Professional+)
-  '/cloud',                          // PREMIUM: SaaS platform (Startup+)
-  '/cloud/analytics',                // PREMIUM: Advanced analytics (Professional+)
-  '/cloud/services',                 // PREMIUM: Cloud services (Startup+)
-  '/cloud/tenants',                  // PREMIUM: Multi-tenancy (Enterprise+)
-  '/monitoring',                     // PREMIUM: System monitoring (Professional+)
-  '/policies',                       // Advanced policy features premium
-  '/policy-editor',                  // PREMIUM: Visual policy editor (Professional+)
-  '/policy-testing',                 // PREMIUM: Policy testing framework (Professional+)
-  '/api-reference',                  // Protect detailed API documentation
-  '/api/crypto',                     // 🔒 CRITICAL IP: Quantum-safe crypto implementation
-  '/api/policies',                   // 🔒 CRITICAL IP: Proprietary policy algorithms
-  '/api/monitoring',                 // 🔒 IP: System architecture insights
-  '/api/workflows'                   // 🔒 IP: Workflow system implementation
-];
-
-// Public demo routes (no auth required)
-const publicDemoRoutes = [
-  '/dashboard', // Main dashboard shows demo data only
-  '/',
-  '/pricing',
-  '/enterprise',
-  '/contact',
-  '/docs',
-  '/examples',
-  '/sales-guide'
-];
-
-const authRoutes = ['/login', '/signup'];
-
-export async function middleware(request: NextRequest) {
+export default clerkMiddleware(async (auth, request: NextRequest) => {
   const { pathname } = request.nextUrl;
+  const hostname = request.headers.get('host') || '';
 
-  console.log('Middleware executing for:', pathname);
-
-  // Check maintenance mode
-  const isMaintenancePage = pathname === '/maintenance';
-
-  if (maintenanceConfig.enabled && !isMaintenancePage) {
-    console.log('Maintenance mode enabled - redirecting to /maintenance');
-    return NextResponse.redirect(new URL('/maintenance', request.url));
+  // Domain-based routing: agenttrust.dev → /developers
+  if (hostname.includes('agenttrust.dev') && pathname === '/') {
+    return NextResponse.redirect(new URL('/developers', request.url));
   }
 
-  // If maintenance mode is off but user is on maintenance page, redirect to home
-  if (!maintenanceConfig.enabled && isMaintenancePage) {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
+  // Check maintenance mode first - highest priority
+  const maintenanceEnabled = isMaintenanceModeEnabled();
+  
+  if (maintenanceEnabled) {
+    const allowedRoutes = ['/maintenance', '/api/health', '/_next', '/favicon.ico', '/robots.txt', '/sitemap.xml'];
+    const isAllowedRoute = allowedRoutes.some(route => pathname.startsWith(route));
+    
+    if (isAllowedRoute) {
+      return NextResponse.next();
+    }
 
-  // Skip auth check for Better Auth API routes
-  if (pathname.startsWith('/api/auth')) {
+    // Redirect all other traffic to maintenance page
+    if (pathname !== '/maintenance') {
+      return NextResponse.redirect(new URL('/maintenance', request.url));
+    }
+    
     return NextResponse.next();
   }
 
-  // Check if it's a protected route
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
-  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
-
-  console.log('Is protected route:', isProtectedRoute, 'for path:', pathname);
-
-  // Check authentication via JWT token in cookie
-  let isAuthenticated = false;
-  const token = request.cookies.get('atp_token')?.value;
-
-  if (token) {
-    try {
-      const JWT_SECRET = process.env.JWT_SECRET || 'atp-dev-secret-change-in-production-2024';
-      jwt.verify(token, JWT_SECRET);
-      isAuthenticated = true;
-    } catch (error) {
-      console.log('Invalid JWT token:', error);
-      isAuthenticated = false;
+  // Protect routes that are not public
+  if (!isPublicRoute(request)) {
+    const { userId } = await auth();
+    
+    if (!userId) {
+      // Redirect to login with return URL
+      const loginUrl = new URL('/login', request.url);
+      if (pathname !== '/') {
+        loginUrl.searchParams.set('returnTo', pathname);
+      }
+      return NextResponse.redirect(loginUrl);
     }
-  }
-
-  // Redirect to login if accessing protected route without authentication
-  if (isProtectedRoute && !isAuthenticated) {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('returnTo', pathname);
-    // Add IP protection notice
-    if (!request.cookies.get('ip_protection_notice')) {
-      loginUrl.searchParams.set('notice', 'ip_protected');
-    }
-    return NextResponse.redirect(loginUrl);
-  }
-
-  // Redirect to portal if accessing auth routes with valid session
-  if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL('/portal', request.url));
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ]
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico, robots.txt, sitemap.xml
+     * - files with extensions (images, etc.)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+  ],
 };
