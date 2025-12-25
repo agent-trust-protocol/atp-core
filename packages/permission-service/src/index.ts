@@ -9,7 +9,14 @@ import { PolicyEvaluationController } from './controllers/evaluation.js';
 
 const app = express();
 const port = process.env.PORT || 3003;
-const secretKey = process.env.JWT_SECRET || 'atp-default-secret-key-change-in-production';
+
+// SECURITY: JWT_SECRET must be set in production
+const secretKey = process.env.JWT_SECRET;
+if (!secretKey && process.env.NODE_ENV === 'production') {
+  console.error('FATAL: JWT_SECRET environment variable is required in production');
+  process.exit(1);
+}
+const jwtSecret = secretKey || 'dev-only-secret-not-for-production';
 
 app.use(cors());
 app.use(express.json());

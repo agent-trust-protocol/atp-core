@@ -49,7 +49,25 @@ export class ATPMCPServer {
     // Tool registration endpoint (for dynamic tool addition)
     this.app.post('/tools/register', async (req, res) => {
       try {
-        // TODO: Add authentication for tool registration
+        // SECURITY: Require authentication for tool registration
+        const authHeader = req.headers['authorization'];
+        const apiKey = process.env.MCP_TOOLS_API_KEY;
+
+        if (!apiKey) {
+          console.error('MCP_TOOLS_API_KEY not configured');
+          return res.status(500).json({
+            success: false,
+            error: 'Server configuration error',
+          });
+        }
+
+        if (!authHeader || authHeader.replace('Bearer ', '') !== apiKey) {
+          return res.status(401).json({
+            success: false,
+            error: 'Unauthorized - Valid API key required',
+          });
+        }
+
         const tool = req.body as ATPMCPTool;
         this.registerTool(tool);
         
