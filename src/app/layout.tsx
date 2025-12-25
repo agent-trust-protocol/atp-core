@@ -7,6 +7,9 @@ import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 import '@/styles/atp-theme.css'
 
+// Force dynamic rendering for all pages due to client-side context providers
+export const dynamic = 'force-dynamic'
+
 const inter = Inter({ 
   subsets: ['latin'],
   display: 'swap',

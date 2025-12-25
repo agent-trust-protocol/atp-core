@@ -39,3 +39,41 @@ logs/
 server.log
 .vercel
 .env*.local
+
+# Internal documentation - keep private
+*_GUIDE.md
+*_INSTRUCTIONS.md
+*_SUMMARY.md
+*_COMPLETED.md
+*_MIGRATION.md
+*_IMPLEMENTATION.md
+*_MODE.md
+CLERK_*.md
+ENTERPRISE_*.md
+MAINTENANCE*.md
+POSTGRESQL_*.md
+PRIORITY_*.md
+COMPLETE_*.md
+ENV_*.md
+
+# Backup files
+.backup/
+*.bak
+*.old/
+**/*.old
+**/*.old/**
+
+# Shell scripts - internal tooling
+activate-*.sh
+deactivate-*.sh
+check-*.sh
+deploy-*.sh
+fix-*.sh
+test-*.sh
+
+# Database files
+*.db
+*.sqlite
+
+# Monitoring configs - internal
+monitoring/
