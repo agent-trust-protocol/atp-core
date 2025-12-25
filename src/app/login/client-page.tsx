@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
+import { ClerkErrorBoundary } from '@/components/clerk-error-boundary';
 import Link from 'next/link';
 
 // Check if Clerk is configured at build time
@@ -155,34 +156,45 @@ function FallbackLoginForm() {
 function ClerkLoginContent() {
   const searchParams = useSearchParams();
   const returnTo = searchParams.get('returnTo') || '/portal';
+  const [clerkError, setClerkError] = useState(false);
 
-  // Dynamic import of Clerk SignIn
-  const { SignIn } = require('@clerk/nextjs');
+  // If Clerk had an error, show fallback form
+  if (clerkError) {
+    return <FallbackLoginForm />;
+  }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Sign in to ATP</CardTitle>
-          <CardDescription>Agent Trust Protocol</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <SignIn
-            routing="path"
-            path="/login"
-            signUpUrl="/signup"
-            afterSignInUrl={returnTo}
-            appearance={{
-              elements: {
-                rootBox: "mx-auto",
-                card: "shadow-none bg-transparent",
-              },
-            }}
-          />
-        </CardContent>
-      </Card>
-    </div>
-  );
+  try {
+    // Dynamic import of Clerk SignIn
+    const { SignIn } = require('@clerk/nextjs');
+
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold">Sign in to ATP</CardTitle>
+            <CardDescription>Agent Trust Protocol</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SignIn
+              routing="path"
+              path="/login"
+              signUpUrl="/signup"
+              afterSignInUrl={returnTo}
+              appearance={{
+                elements: {
+                  rootBox: "mx-auto",
+                  card: "shadow-none bg-transparent",
+                },
+              }}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  } catch (error) {
+    console.error('Clerk SignIn error:', error);
+    return <FallbackLoginForm />;
+  }
 }
 
 function LoginContent() {
@@ -196,12 +208,14 @@ function LoginContent() {
 
 export default function LoginClient() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
-      </div>
-    }>
-      <LoginContent />
-    </Suspense>
+    <ClerkErrorBoundary fallback={<FallbackLoginForm />}>
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-pulse text-muted-foreground">Loading...</div>
+        </div>
+      }>
+        <LoginContent />
+      </Suspense>
+    </ClerkErrorBoundary>
   );
 }
