@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
+import { ClerkErrorBoundary } from '@/components/clerk-error-boundary';
 import Link from 'next/link';
 
 // Check if Clerk is configured at build time
@@ -183,35 +184,47 @@ function FallbackSignupForm() {
 
 // Conditionally import and render Clerk SignUp only when configured
 function ClerkSignupContent() {
-  // Dynamic import of Clerk SignUp
-  const { SignUp } = require('@clerk/nextjs');
+  const [clerkError, setClerkError] = useState(false);
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold">Start Your 14-Day Trial</CardTitle>
-          <CardDescription>
-            No credit card required. Full enterprise features included.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <SignUp
-            routing="path"
-            path="/signup"
-            signInUrl="/login"
-            afterSignUpUrl="/portal"
-            appearance={{
-              elements: {
-                rootBox: "mx-auto",
-                card: "shadow-none bg-transparent",
-              },
-            }}
-          />
-        </CardContent>
-      </Card>
-    </div>
-  );
+  // If Clerk had an error, show fallback form
+  if (clerkError) {
+    return <FallbackSignupForm />;
+  }
+
+  try {
+    // Dynamic import of Clerk SignUp
+    const { SignUp } = require('@clerk/nextjs');
+
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-3xl font-bold">Start Your 14-Day Trial</CardTitle>
+            <CardDescription>
+              No credit card required. Full enterprise features included.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SignUp
+              routing="path"
+              path="/signup"
+              signInUrl="/login"
+              afterSignUpUrl="/portal"
+              appearance={{
+                elements: {
+                  rootBox: "mx-auto",
+                  card: "shadow-none bg-transparent",
+                },
+              }}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  } catch (error) {
+    console.error('Clerk SignUp error:', error);
+    return <FallbackSignupForm />;
+  }
 }
 
 export default function SignupClient() {
@@ -220,5 +233,15 @@ export default function SignupClient() {
     return <FallbackSignupForm />;
   }
 
-  return <ClerkSignupContent />;
+  return (
+    <ClerkErrorBoundary fallback={<FallbackSignupForm />}>
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-pulse text-muted-foreground">Loading...</div>
+        </div>
+      }>
+        <ClerkSignupContent />
+      </Suspense>
+    </ClerkErrorBoundary>
+  );
 }
