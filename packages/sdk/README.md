@@ -1,8 +1,10 @@
 # atp-sdk - Agent Trust Protocol SDK
 
-> **The Ecosystem Security Layer for AI Agents** - Official TypeScript SDK for Agent Trust Protocol™
+> **The First Quantum-Safe AI Agent SDK with Zero-Knowledge Proof Authentication**
 
 ATP provides universal quantum-safe security for all AI agent protocols (MCP, Swarm, ADK, A2A, and more). Build secure, verifiable, and trustworthy AI agents in 3 lines of code!
+
+**One unified SDK** - Quantum-safe cryptography + ZKP authentication + Identity + Credentials + Payments - all included.
 
 [![npm version](https://badge.fury.io/js/atp-sdk.svg)](https://www.npmjs.com/package/atp-sdk)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -974,7 +976,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENSE) file for details.
 
 ## 🆘 Support
 
