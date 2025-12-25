@@ -63,22 +63,25 @@ export default function HomePage() {
             <Badge className="bg-[hsl(var(--atp-primary))]/10 dark:bg-[hsl(var(--atp-primary))]/20 text-[hsl(var(--atp-primary))] dark:text-blue-300 border-[hsl(var(--atp-primary))]/20 dark:border-blue-400/30 px-4 py-2 text-sm font-medium backdrop-blur-sm"><Globe size={14} className="mr-2" />Enterprise Ready</Badge>
             <Badge className="bg-atp-electric-cyan/10 dark:bg-atp-electric-cyan/20 text-atp-electric-cyan dark:text-cyan-200 border-atp-electric-cyan/20 dark:border-cyan-300/30 px-4 py-2 text-sm font-medium backdrop-blur-sm"><Award size={14} className="mr-2" />Production Ready</Badge>
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up">
-            <Button asChild size="lg" className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
-              <Link href="/signup"><Zap className="h-5 w-5 mr-3" />Start Free Trial</Link>
-            </Button>
-            <Button asChild size="lg" className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
-              <Link href="/cloud"><Building className="h-5 w-5 mr-3" />Request Cloud Access</Link>
-            </Button>
-            <Button asChild size="lg" className="bg-gradient-to-r from-[hsl(var(--atp-quantum))] to-[hsl(var(--atp-primary))] text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
-              <Link href="/dashboard"><Activity className="h-5 w-5 mr-3" />Try Live Demo</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="border-2 border-atp-electric-cyan/30 hover:bg-atp-electric-cyan/10 hover:border-atp-electric-cyan/50 hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
-              <Link href="/login"><Lock className="h-5 w-5 mr-3" />Customer Login</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="border-2 border-primary/30 hover:bg-primary/10 hover:border-primary/50 hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
-              <Link href="/developers"><Code2 className="h-5 w-5 mr-3" />For Developers</Link>
-            </Button>
+          {/* CTA Buttons - Horizontal scroll on tablet/desktop when needed */}
+          <div className="w-full overflow-x-auto pb-2 animate-fade-in-up">
+            <div className="flex flex-col sm:flex-row items-center sm:justify-center gap-3 min-w-max sm:min-w-0 px-4 sm:px-0">
+              <Button asChild size="lg" className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto h-12 px-5 text-sm font-semibold whitespace-nowrap">
+                <Link href="/signup"><Zap className="h-4 w-4 mr-2" />Start Free Trial</Link>
+              </Button>
+              <Button asChild size="lg" className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto h-12 px-5 text-sm font-semibold whitespace-nowrap">
+                <Link href="/cloud"><Building className="h-4 w-4 mr-2" />Request Cloud Access</Link>
+              </Button>
+              <Button asChild size="lg" className="bg-gradient-to-r from-[hsl(var(--atp-quantum))] to-[hsl(var(--atp-primary))] text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto h-12 px-5 text-sm font-semibold whitespace-nowrap">
+                <Link href="/dashboard"><Activity className="h-4 w-4 mr-2" />Try Live Demo</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="border-2 border-atp-electric-cyan/30 hover:bg-atp-electric-cyan/10 hover:border-atp-electric-cyan/50 hover:scale-105 transition-all duration-300 w-full sm:w-auto h-12 px-5 text-sm font-semibold whitespace-nowrap">
+                <Link href="/login"><Lock className="h-4 w-4 mr-2" />Customer Login</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="border-2 border-primary/30 hover:bg-primary/10 hover:border-primary/50 hover:scale-105 transition-all duration-300 w-full sm:w-auto h-12 px-5 text-sm font-semibold whitespace-nowrap">
+                <Link href="/developers"><Code2 className="h-4 w-4 mr-2" />For Developers</Link>
+              </Button>
+            </div>
           </div>
           
           <div className="mt-8 p-6 bg-gradient-to-r from-[hsl(var(--atp-surface))]/50 to-[hsl(var(--atp-surface))]/80 rounded-2xl border border-border/50 backdrop-blur-sm animate-fade-in-up">

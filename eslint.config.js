@@ -5,13 +5,13 @@ import js from '@eslint/js';
 export default [
   js.configs.recommended,
   {
-    files: ['packages/**/*.ts', 'packages/**/*.tsx', 'src/**/*.ts', 'src/**/*.tsx'],
+    files: ['src/**/*.ts', 'src/**/*.tsx'],
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
         ecmaVersion: 2020,
         sourceType: 'module',
-        project: ['./tsconfig.json', './packages/*/tsconfig.json']
+        project: './tsconfig.json'
       },
       globals: {
         process: 'readonly',

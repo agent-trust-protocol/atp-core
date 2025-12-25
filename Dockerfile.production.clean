@@ -1,0 +1,86 @@
+# Production Dockerfile for ATP Modern UI - Clean Version
+# Assumes packages are pre-built locally
+# Build from monorepo root: docker build -f website-repo/Dockerfile.production.clean .
+
+FROM node:20-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+# Install build dependencies for better-sqlite3 and other native modules
+RUN apk add --no-cache \
+    libc6-compat \
+    python3 \
+    make \
+    g++ \
+    gcc \
+    musl-dev
+
+WORKDIR /app/website-repo
+
+# Copy package files
+COPY website-repo/package.json website-repo/package-lock.json* ./
+RUN npm ci --include=dev
+
+# Rebuild the source code only when needed
+FROM base AS builder
+
+WORKDIR /app
+
+# Copy node_modules from deps
+COPY --from=deps /app/website-repo/node_modules ./website-repo/node_modules
+
+# Copy pre-built packages (assumes they were built locally)
+# This is much faster and cleaner than building in Docker
+COPY packages/sdk/dist ./packages/sdk/dist
+COPY packages/shared/dist ./packages/shared/dist
+
+# Copy package source for type definitions (if needed)
+COPY packages/sdk/src ./packages/sdk/src
+COPY packages/shared/src ./packages/shared/src
+COPY packages/sdk/package.json ./packages/sdk/package.json
+COPY packages/shared/package.json ./packages/shared/package.json
+
+# Copy website source
+COPY website-repo ./website-repo
+
+# Build from website directory
+WORKDIR /app/website-repo
+
+ENV NEXT_TELEMETRY_DISABLED 1
+
+RUN npm run build
+
+# Production image
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/website-repo/public ./public
+
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+
+COPY --from=builder --chown=nextjs:nodejs /app/website-repo/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/website-repo/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/website-repo/package.json ./package.json
+
+# Copy pre-built packages for runtime
+COPY --from=builder --chown=nextjs:nodejs /app/packages ../packages
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+ENV DATABASE_URL=/app/data/auth.db
+
+CMD ["npm", "start"]
+
