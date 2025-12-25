@@ -179,10 +179,65 @@ console.log(agent.isQuantumSafe()); // true
 
 ---
 
+## [1.2.0] - 2024-12-23
+
+### 🔐 Zero-Knowledge Proof Agent Authentication
+
+This release introduces Zero-Knowledge Proof (ZKP) based agent-to-agent authentication, enabling agents to prove their identity and capabilities without revealing sensitive information.
+
+### Added
+
+#### Zero-Knowledge Proof System
+- **ZKP Authentication**: `ZKPUtils` class for creating and verifying zero-knowledge proofs
+- **Agent-to-Agent Auth**: Prove identity without revealing private keys
+- **Challenge-Response Protocol**: Secure interactive authentication
+- **Selective Disclosure**: Prove specific attributes without revealing full credentials
+- **Trust Level Verification**: Prove minimum trust levels without exposing exact scores
+
+#### New API Methods
+- `ZKPUtils.generateChallenge()`: Create cryptographic challenges
+- `ZKPUtils.createProof()`: Generate ZKP proofs
+- `ZKPUtils.verifyProof()`: Verify ZKP proofs
+- `ZKPUtils.createIdentityProof()`: Agent identity proofs
+- `ZKPUtils.createCapabilityProof()`: Capability possession proofs
+- `ZKPUtils.createTrustLevelProof()`: Trust level range proofs
+
+#### Examples & Documentation
+- **Example 12**: `12-zkp-agent-authentication.js` - Complete ZKP authentication workflow
+- **Test Suite**: Comprehensive ZKP authentication tests
+- **Integration Tests**: Agent-to-agent authentication scenarios
+
+### Security
+
+- **Zero-Knowledge**: Proofs reveal nothing beyond the statement being proved
+- **Non-Interactive Option**: NIZK proofs for async authentication
+- **Replay Protection**: Challenge-based protocol prevents replay attacks
+- **Quantum-Safe Compatible**: Works with existing hybrid crypto system
+
+### Use Cases
+
+```typescript
+// Agent A wants to prove it has 'data:read' capability to Agent B
+// WITHOUT revealing its full credential set
+
+const challenge = ZKPUtils.generateChallenge();
+const proof = await ZKPUtils.createCapabilityProof(
+  agentA.did,
+  'data:read',
+  agentA.privateKey,
+  challenge
+);
+
+// Agent B verifies without learning what other capabilities A has
+const isValid = await ZKPUtils.verifyProof(proof, challenge, agentA.publicKey);
+```
+
+---
+
 ## [Unreleased]
 
 ### Planned Features
-- **v1.2.0**: WebAssembly support for browser environments
+- **v1.3.0**: WebAssembly support for browser environments
 - **v1.3.0**: GraphQL API support and enhanced querying
 - **v1.4.0**: Advanced zero-knowledge proof features
 - **v2.0.0**: ATP Protocol v2 compatibility and new features

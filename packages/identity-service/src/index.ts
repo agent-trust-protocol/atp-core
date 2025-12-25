@@ -17,9 +17,16 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// SECURITY: SESSION_SECRET must be set in production
+const sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret && process.env.NODE_ENV === 'production') {
+  console.error('FATAL: SESSION_SECRET environment variable is required in production');
+  process.exit(1);
+}
+
 // Session configuration for MFA setup
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'atp-mfa-session-secret-change-in-production',
+  secret: sessionSecret || 'dev-only-session-secret-not-for-production',
   resave: false,
   saveUninitialized: false,
   cookie: {

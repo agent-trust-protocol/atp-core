@@ -1,11 +1,20 @@
 /**
  * ATP™ SDK - Agent Trust Protocol SDK
  *
- * A comprehensive TypeScript SDK for interacting with Agent Trust Protocol™ services
+ * The first quantum-safe AI agent SDK with zero-knowledge proof authentication.
+ * Build secure, verifiable, and trustworthy AI agent applications.
  *
- * @version 1.0.0
+ * Features:
+ * - Quantum-Safe Cryptography (ML-DSA + Ed25519 hybrid) - enabled by default
+ * - Zero-Knowledge Proof Authentication - prove identity without revealing secrets
+ * - Decentralized Identity (DID) management
+ * - Verifiable Credentials
+ * - Policy-based access control
+ * - Blockchain-anchored audit trails
+ *
+ * @version 1.2.0
  * @author Agent Trust Protocol™ Team
- * @license MIT
+ * @license Apache-2.0
  */
 
 // Simplified Agent API (3-line quick start!)
@@ -200,7 +209,7 @@ export type {
 } from './client/gateway.js';
 
 // Version information
-export const VERSION = '1.0.0';
+export const VERSION = '1.2.0';
 export const PROTOCOL_VERSION = '1.0';
 
 // Constants
