@@ -15,6 +15,27 @@ import {
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
   const [isOpen, setIsOpen] = React.useState(false)
+  const [mounted, setMounted] = React.useState(false)
+
+  // Prevent hydration mismatch by only rendering after mount
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Return a placeholder during SSR to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <Button
+        variant="outline"
+        size="icon"
+        className="glass border-atp-electric-cyan/20"
+        disabled
+      >
+        <Sun size={20} className="opacity-50" />
+        <span className="sr-only">Toggle theme</span>
+      </Button>
+    )
+  }
 
   const getCurrentIcon = () => {
     if (theme === 'light') return Sun
