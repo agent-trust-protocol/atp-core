@@ -53,7 +53,8 @@ export default [
       'comma-dangle': ['error', 'never'],
       'quotes': ['error', 'single', { avoidEscape: true }],
       'semi': ['error', 'always'],
-      'indent': ['error', 2, { SwitchCase: 1 }],
+      // Disable indent rule - causes stack overflow on complex TSX files
+      'indent': 'off',
       'max-len': ['warn', { code: 100, ignoreUrls: true }],
       'no-trailing-spaces': 'error',
       'eol-last': 'error'
