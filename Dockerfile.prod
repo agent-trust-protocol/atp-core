@@ -1,77 +1,57 @@
-# 🛡️ Agent Trust Protocol™ - Production Docker Container
-# Optimized multi-stage build for enterprise deployment
+# Agent Trust Protocol - Website Production Docker Container
+# Optimized multi-stage build for Next.js
 
-FROM node:18-alpine AS builder
-
-# Set working directory
+FROM node:18-alpine AS deps
 WORKDIR /app
 
-# Install build dependencies
-RUN apk add --no-cache \
-    python3 \
-    make \
-    g++ \
-    git \
-    curl \
-    && rm -rf /var/cache/apk/*
+# Install dependencies needed for node-gyp
+RUN apk add --no-cache libc6-compat python3 make g++
 
 # Copy package files
 COPY package*.json ./
-COPY lerna.json ./
 
-# Copy workspace packages
-COPY packages/ ./packages/
+# Install dependencies
+RUN npm ci
 
-# Install all dependencies (including dev dependencies for build)
-RUN npm install
+# Builder stage
+FROM node:18-alpine AS builder
+WORKDIR /app
 
-# Copy source code
+# Copy dependencies
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Set build-time environment variables
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+
 # Build the application
-RUN npm run build || echo "No build step configured"
+RUN npm run build
 
 # Production stage
-FROM node:18-alpine AS production
-
-# Set working directory
+FROM node:18-alpine AS runner
 WORKDIR /app
 
-# Install runtime dependencies only
-RUN apk add --no-cache \
-    curl \
-    dumb-init \
-    && rm -rf /var/cache/apk/*
+# Install runtime dependencies
+RUN apk add --no-cache dumb-init curl
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S atp && \
-    adduser -S atp -u 1001
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-# Copy package files
-COPY package*.json ./
-COPY lerna.json ./
+# Copy built application
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
-# Copy workspace packages
-COPY packages/ ./packages/
+# Set ownership
+RUN chown -R nextjs:nodejs /app
 
-# Install production dependencies only
-RUN npm install --omit=dev && \
-    npm cache clean --force
-
-# Copy built application from builder stage
-COPY --from=builder --chown=atp:atp /app/dist ./dist/ || echo "No dist directory"
-COPY --chown=atp:atp . .
-
-# Remove unnecessary files for production
-RUN rm -rf .git .github docs examples scripts tests *.md
-
-# Set ownership to non-root user
-RUN chown -R atp:atp /app
-USER atp
+USER nextjs
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:${PORT:-3000}/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-3000}/ || exit 1
 
 # Expose port
 EXPOSE 3000
@@ -79,22 +59,18 @@ EXPOSE 3000
 # Environment variables
 ENV NODE_ENV=production
 ENV PORT=3000
-ENV ATP_LOG_LEVEL=info
-ENV ATP_QUANTUM_SAFE=true
+ENV HOSTNAME="0.0.0.0"
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
-# Start the quantum-safe server
-CMD ["npm", "run", "start:quantum-safe"]
+# Start Next.js
+CMD ["node", "server.js"]
 
 # Metadata
-LABEL maintainer="Larry Lewis <llewis@agenttrustprotocol.com>"
+LABEL maintainer="Agent Trust Protocol"
 LABEL version="1.0.0"
-LABEL description="Agent Trust Protocol™ - Production Quantum-Safe AI Agent Security"
-LABEL org.opencontainers.image.title="ATP Production Server"
-LABEL org.opencontainers.image.description="Production-ready quantum-safe server for enterprise AI agent security"
+LABEL description="Agent Trust Protocol Website"
+LABEL org.opencontainers.image.title="ATP Website"
 LABEL org.opencontainers.image.url="https://agenttrustprotocol.com"
 LABEL org.opencontainers.image.source="https://github.com/agent-trust-protocol/core"
-LABEL org.opencontainers.image.vendor="SovrLabs"
-LABEL org.opencontainers.image.licenses="Apache-2.0"
