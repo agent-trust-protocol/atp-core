@@ -59,7 +59,7 @@ export function BrandLogo({ variant = "mark", size = 32, className = "", alt }: 
 
   // Enhanced styling for dark mode visibility
   const darkModeClasses = isDarkMode
-    ? "brightness-110 contrast-110 drop-shadow-2xl"
+    ? "brightness-125 contrast-125 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
     : "brightness-100 contrast-100 drop-shadow-lg"
 
   // Only apply gradient background to larger logos (size > 40)
