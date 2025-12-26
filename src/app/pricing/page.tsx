@@ -1,23 +1,24 @@
 import Link from "next/link"
-import { 
-  Check, 
-  ArrowRight, 
-  Building, 
-  Users, 
-  Zap, 
-  Shield, 
+import {
+  Check,
+  ArrowRight,
+  Building,
+  Users,
+  Zap,
+  Shield,
   Award,
   Github,
-  Cloud,
   Star,
   Download,
-  Globe,
-  Clock
+  TrendingUp,
+  Lock
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { Metadata } from 'next'
+import { PricingToggle } from "./pricing-toggle"
+import { PricingCalculator } from "./pricing-calculator"
 
 export const metadata: Metadata = {
   title: 'Pricing — Agent Trust Protocol',
@@ -51,20 +52,45 @@ export default function PricingPage() {
                 Apache 2.0 License
               </Badge>
             </div>
+
+            {/* Billing Toggle */}
+            <PricingToggle />
+          </div>
+
+          {/* Social Proof */}
+          <div className="mb-12 text-center animate-fade-in-up">
+            <p className="text-sm text-muted-foreground mb-6">Trusted by innovative teams building the future of AI</p>
+            <div className="flex flex-wrap justify-center items-center gap-8 mb-6">
+              <div className="glass border border-border/30 rounded-lg px-6 py-3 flex items-center gap-3">
+                <Shield className="h-5 w-5 text-green-500" />
+                <div className="text-left">
+                  <div className="text-2xl font-bold atp-gradient-text">10,000+</div>
+                  <div className="text-xs text-muted-foreground">Agents Secured</div>
+                </div>
+              </div>
+              <div className="glass border border-border/30 rounded-lg px-6 py-3 flex items-center gap-3">
+                <TrendingUp className="h-5 w-5 text-cyan-500" />
+                <div className="text-left">
+                  <div className="text-2xl font-bold atp-gradient-text">99.9%</div>
+                  <div className="text-xs text-muted-foreground">Uptime SLA</div>
+                </div>
+              </div>
+              <div className="glass border border-border/30 rounded-lg px-6 py-3 flex items-center gap-3">
+                <Lock className="h-5 w-5 text-purple-500" />
+                <div className="text-left">
+                  <div className="text-2xl font-bold atp-gradient-text">Quantum-Safe</div>
+                  <div className="text-xs text-muted-foreground">Cryptography</div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Pricing Tiers */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8 mb-16">
-            
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-8 mb-16">
+
             {/* Open Source Core */}
-            <Card className="glass border border-border/50 backdrop-blur-xl relative group hover:scale-105 transition-all duration-300">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                <Badge className="atp-gradient-primary text-white px-4 py-2 shadow-lg">
-                  <Star size={14} className="mr-2" />
-                  Most Popular
-                </Badge>
-              </div>
-              <CardHeader className="text-center pt-16 pb-8">
+            <Card className="glass border border-border/50 backdrop-blur-xl relative group hover:scale-[1.02] md:hover:scale-105 transition-all duration-300">
+              <CardHeader className="text-center pt-8 pb-8">
                 <div className="relative p-4 rounded-xl w-fit mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                   <div className="absolute inset-0 atp-gradient-primary rounded-xl opacity-90" />
                   <Github className="relative z-10 text-white" size={36} />
@@ -123,7 +149,7 @@ export default function PricingPage() {
             </Card>
 
             {/* Startup */}
-            <Card className="glass border border-border/50 backdrop-blur-xl relative group hover:scale-105 transition-all duration-300">
+            <Card className="glass border border-border/50 backdrop-blur-xl relative group hover:scale-[1.02] md:hover:scale-105 transition-all duration-300">
               <CardHeader className="text-center pt-8 pb-6">
                 <div className="relative p-3 rounded-xl w-fit mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                   <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl opacity-90" />
@@ -167,9 +193,15 @@ export default function PricingPage() {
               </CardContent>
             </Card>
 
-            {/* Professional */}
-            <Card className="glass border border-border/50 backdrop-blur-xl relative group hover:scale-105 transition-all duration-300">
-              <CardHeader className="text-center pt-8 pb-6">
+            {/* Professional - Most Popular */}
+            <Card className="glass border-2 border-blue-500/30 backdrop-blur-xl relative group hover:scale-[1.02] md:hover:scale-105 transition-all duration-300 shadow-lg">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 shadow-lg">
+                  <Star size={14} className="mr-2" />
+                  Most Popular
+                </Badge>
+              </div>
+              <CardHeader className="text-center pt-12 pb-6">
                 <div className="relative p-3 rounded-xl w-fit mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl opacity-90" />
                   <Users className="relative z-10 text-white" size={32} />
@@ -217,7 +249,7 @@ export default function PricingPage() {
             </Card>
 
             {/* Enterprise Edition */}
-            <Card className="glass border-2 border-cyan-500/30 backdrop-blur-xl relative scale-105 group hover:scale-110 transition-all duration-300 shadow-xl">
+            <Card className="glass border-2 border-cyan-500/30 backdrop-blur-xl relative group hover:scale-[1.02] md:hover:scale-105 transition-all duration-300 shadow-xl">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
                 <Badge className="atp-gradient-secondary text-white px-4 py-2 shadow-lg">
                   <Building size={14} className="mr-2" />
@@ -367,6 +399,19 @@ export default function PricingPage() {
                 </table>
               </div>
             </Card>
+          </div>
+
+          {/* Pricing Calculator */}
+          <div className="mb-16">
+            <h2 className="font-display text-3xl lg:text-4xl font-light mb-8 text-center">
+              <span className="atp-gradient-text">Not Sure Which Plan?</span>
+            </h2>
+            <p className="text-center text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Use our calculator to find the perfect plan based on your needs
+            </p>
+            <div className="max-w-3xl mx-auto">
+              <PricingCalculator />
+            </div>
           </div>
 
           {/* FAQ */}
