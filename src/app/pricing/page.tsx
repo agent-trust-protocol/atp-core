@@ -27,9 +27,9 @@ export const metadata: Metadata = {
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Background gradient - brand colors */}
-      <div className="absolute inset-0 bg-gradient-to-br from-atp-midnight via-atp-navy to-slate-900" />
+    <div className="min-h-screen relative overflow-hidden bg-white dark:bg-gray-950">
+      {/* Background - clean white */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950" />
       
       <div className="relative z-10">
         <div className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
@@ -43,11 +43,11 @@ export default function PricingPage() {
               upgrade to enterprise features when you need them.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 mb-8 animate-fade-in-up">
-              <Badge className="glass text-sm px-4 py-2 atp-trust-high border border-green-500/20">
+              <Badge className="bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-sm px-4 py-2 border border-green-200 dark:border-green-500/20">
                 <Github size={14} className="mr-2" />
                 Open Source
               </Badge>
-              <Badge className="glass text-sm px-4 py-2 atp-trust-verified border border-blue-500/20">
+              <Badge className="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-sm px-4 py-2 border border-blue-200 dark:border-blue-500/20">
                 <Award size={14} className="mr-2" />
                 Apache 2.0 License
               </Badge>
@@ -60,26 +60,26 @@ export default function PricingPage() {
           {/* Social Proof */}
           <div className="mb-12 text-center animate-fade-in-up">
             <p className="text-sm text-muted-foreground mb-6">Trusted by innovative teams building the future of AI</p>
-            <div className="flex flex-wrap justify-center items-center gap-8 mb-6">
-              <div className="glass border border-border/30 rounded-lg px-6 py-3 flex items-center gap-3">
+            <div className="flex flex-wrap justify-center items-center gap-6 mb-6">
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-6 py-3 flex items-center gap-3 shadow-sm">
                 <Shield className="h-5 w-5 text-green-500" />
                 <div className="text-left">
-                  <div className="text-2xl font-bold atp-gradient-text">10,000+</div>
-                  <div className="text-xs text-muted-foreground">Agents Secured</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">10,000+</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Agents Secured</div>
                 </div>
               </div>
-              <div className="glass border border-border/30 rounded-lg px-6 py-3 flex items-center gap-3">
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-6 py-3 flex items-center gap-3 shadow-sm">
                 <TrendingUp className="h-5 w-5 text-cyan-500" />
                 <div className="text-left">
-                  <div className="text-2xl font-bold atp-gradient-text">99.9%</div>
-                  <div className="text-xs text-muted-foreground">Uptime SLA</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">99.9%</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Uptime SLA</div>
                 </div>
               </div>
-              <div className="glass border border-border/30 rounded-lg px-6 py-3 flex items-center gap-3">
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-6 py-3 flex items-center gap-3 shadow-sm">
                 <Lock className="h-5 w-5 text-purple-500" />
                 <div className="text-left">
-                  <div className="text-2xl font-bold atp-gradient-text">Quantum-Safe</div>
-                  <div className="text-xs text-muted-foreground">Cryptography</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">Quantum-Safe</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Cryptography</div>
                 </div>
               </div>
             </div>
@@ -89,7 +89,7 @@ export default function PricingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-8 mb-16">
 
             {/* Open Source Core */}
-            <Card className="glass border border-border/50 backdrop-blur-xl relative group hover:scale-[1.02] md:hover:scale-105 transition-all duration-300">
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg relative group hover:scale-[1.02] md:hover:scale-105 transition-all duration-300">
               <CardHeader className="text-center pt-8 pb-8">
                 <div className="relative p-4 rounded-xl w-fit mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                   <div className="absolute inset-0 atp-gradient-primary rounded-xl opacity-90" />
@@ -149,7 +149,7 @@ export default function PricingPage() {
             </Card>
 
             {/* Startup */}
-            <Card className="glass border border-border/50 backdrop-blur-xl relative group hover:scale-[1.02] md:hover:scale-105 transition-all duration-300">
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg relative group hover:scale-[1.02] md:hover:scale-105 transition-all duration-300">
               <CardHeader className="text-center pt-8 pb-6">
                 <div className="relative p-3 rounded-xl w-fit mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                   <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl opacity-90" />
@@ -194,7 +194,7 @@ export default function PricingPage() {
             </Card>
 
             {/* Professional - Most Popular */}
-            <Card className="glass border-2 border-blue-500/30 backdrop-blur-xl relative group hover:scale-[1.02] md:hover:scale-105 transition-all duration-300 shadow-lg">
+            <Card className="bg-white dark:bg-gray-800 border-2 border-blue-500 dark:border-blue-400 shadow-lg hover:shadow-xl relative group hover:scale-[1.02] md:hover:scale-105 transition-all duration-300">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
                 <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 shadow-lg">
                   <Star size={14} className="mr-2" />
@@ -249,7 +249,7 @@ export default function PricingPage() {
             </Card>
 
             {/* Enterprise Edition */}
-            <Card className="glass border-2 border-cyan-500/30 backdrop-blur-xl relative group hover:scale-[1.02] md:hover:scale-105 transition-all duration-300 shadow-xl">
+            <Card className="bg-white dark:bg-gray-800 border-2 border-cyan-500 dark:border-cyan-400 shadow-lg hover:shadow-xl relative group hover:scale-[1.02] md:hover:scale-105 transition-all duration-300">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
                 <Badge className="atp-gradient-secondary text-white px-4 py-2 shadow-lg">
                   <Building size={14} className="mr-2" />
@@ -323,11 +323,11 @@ export default function PricingPage() {
               <span className="atp-gradient-text">Feature Comparison</span>
             </h2>
             
-            <Card className="glass border border-border/50 backdrop-blur-xl overflow-hidden">
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-border/20 bg-muted/5">
+                    <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                       <th className="text-left p-6 font-semibold">Feature</th>
                       <th className="text-center p-6 font-semibold">Open Source</th>
                       <th className="text-center p-6 font-semibold">Enterprise</th>
@@ -335,65 +335,65 @@ export default function PricingPage() {
                     </tr>
                   </thead>
                   <tbody className="text-sm">
-                    <tr className="border-b border-border/10 hover:bg-muted/5 transition-colors">
+                    <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="p-6 font-medium">ATP Protocol Core</td>
                       <td className="text-center p-6"><Check size={18} className="text-green-500 mx-auto" /></td>
                       <td className="text-center p-6"><Check size={18} className="text-green-500 mx-auto" /></td>
                       <td className="text-center p-6"><Check size={18} className="text-green-500 mx-auto" /></td>
                     </tr>
-                    <tr className="border-b border-border/10 hover:bg-muted/5 transition-colors">
+                    <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="p-6 font-medium">Quantum-Safe Signatures</td>
                       <td className="text-center p-6"><Check size={18} className="text-green-500 mx-auto" /></td>
                       <td className="text-center p-6"><Check size={18} className="text-green-500 mx-auto" /></td>
                       <td className="text-center p-6"><Check size={18} className="text-green-500 mx-auto" /></td>
                     </tr>
-                    <tr className="border-b border-border/10 hover:bg-muted/5 transition-colors">
+                    <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="p-6 font-medium">Basic Monitoring</td>
                       <td className="text-center p-6"><Check size={18} className="text-green-500 mx-auto" /></td>
                       <td className="text-center p-6"><Check size={18} className="text-green-500 mx-auto" /></td>
                       <td className="text-center p-6"><Check size={18} className="text-green-500 mx-auto" /></td>
                     </tr>
-                    <tr className="border-b border-border/10 hover:bg-muted/5 transition-colors">
+                    <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="p-6 font-medium">Advanced Dashboard</td>
                       <td className="text-center p-6 text-muted-foreground">—</td>
                       <td className="text-center p-6 text-blue-500">In Dev</td>
                       <td className="text-center p-6 text-blue-500">In Dev</td>
                     </tr>
-                    <tr className="border-b border-border/10 hover:bg-muted/5 transition-colors">
+                    <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="p-6 font-medium">Enterprise SSO</td>
                       <td className="text-center p-6 text-muted-foreground">—</td>
                       <td className="text-center p-6"><Check size={18} className="text-green-500 mx-auto" /></td>
                       <td className="text-center p-6"><Check size={18} className="text-green-500 mx-auto" /></td>
                     </tr>
-                    <tr className="border-b border-border/10 hover:bg-muted/5 transition-colors">
+                    <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="p-6 font-medium">Compliance Reporting</td>
                       <td className="text-center p-6 text-muted-foreground">—</td>
                       <td className="text-center p-6"><Check size={18} className="text-green-500 mx-auto" /></td>
                       <td className="text-center p-6"><Check size={18} className="text-green-500 mx-auto" /></td>
                     </tr>
-                    <tr className="border-b border-border/10 hover:bg-muted/5 transition-colors">
+                    <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="p-6 font-medium">High Availability</td>
                       <td className="text-center p-6 text-muted-foreground">—</td>
                       <td className="text-center p-6"><Check size={18} className="text-green-500 mx-auto" /></td>
                       <td className="text-center p-6"><Check size={18} className="text-green-500 mx-auto" /></td>
                     </tr>
-                    <tr className="border-b border-border/10 hover:bg-muted/5 transition-colors">
+                    <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="p-6 font-medium">Priority Support</td>
                       <td className="text-center p-6 text-muted-foreground">Community</td>
                       <td className="text-center p-6">24/7</td>
                       <td className="text-center p-6">24/7</td>
                     </tr>
-                    <tr className="border-b border-border/10 hover:bg-muted/5 transition-colors">
+                    <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="p-6 font-medium">Deployment</td>
                       <td className="text-center p-6 text-muted-foreground">Self-hosted</td>
                       <td className="text-center p-6 text-muted-foreground">Self-hosted</td>
                       <td className="text-center p-6 text-cyan-400">Fully managed</td>
                     </tr>
-                    <tr className="hover:bg-muted/5 transition-colors">
+                    <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="p-6 font-medium">SLA</td>
                       <td className="text-center p-6 text-muted-foreground">—</td>
                       <td className="text-center p-6">Custom</td>
-                      <td className="text-center p-6 text-cyan-400">99.9%</td>
+                      <td className="text-center p-6 text-cyan-600 dark:text-cyan-400">99.9%</td>
                     </tr>
                   </tbody>
                 </table>
@@ -421,7 +421,7 @@ export default function PricingPage() {
             </h2>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="glass border border-border/50 backdrop-blur-xl hover:scale-105 transition-all duration-300">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">Is the open source version really free?</CardTitle>
                 </CardHeader>
@@ -433,7 +433,7 @@ export default function PricingPage() {
                 </CardContent>
               </Card>
               
-              <Card className="glass border border-border/50 backdrop-blur-xl hover:scale-105 transition-all duration-300">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">What&apos;s the difference between Enterprise and Cloud?</CardTitle>
                 </CardHeader>
@@ -445,7 +445,7 @@ export default function PricingPage() {
                 </CardContent>
               </Card>
               
-              <Card className="glass border border-border/50 backdrop-blur-xl hover:scale-105 transition-all duration-300">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">Can I migrate from open source to enterprise?</CardTitle>
                 </CardHeader>
@@ -457,7 +457,7 @@ export default function PricingPage() {
                 </CardContent>
               </Card>
               
-              <Card className="glass border border-border/50 backdrop-blur-xl hover:scale-105 transition-all duration-300">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">When will ATP Cloud be available?</CardTitle>
                 </CardHeader>
@@ -469,7 +469,7 @@ export default function PricingPage() {
                 </CardContent>
               </Card>
               
-              <Card className="glass border border-border/50 backdrop-blur-xl hover:scale-105 transition-all duration-300">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">Do you offer volume discounts?</CardTitle>
                 </CardHeader>
@@ -481,7 +481,7 @@ export default function PricingPage() {
                 </CardContent>
               </Card>
               
-              <Card className="glass border border-border/50 backdrop-blur-xl hover:scale-105 transition-all duration-300">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">What support is included?</CardTitle>
                 </CardHeader>
@@ -493,7 +493,7 @@ export default function PricingPage() {
                 </CardContent>
               </Card>
               
-              <Card className="glass border border-border/50 backdrop-blur-xl hover:scale-105 transition-all duration-300">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">How does the 30-day enterprise trial work?</CardTitle>
                 </CardHeader>
@@ -508,7 +508,7 @@ export default function PricingPage() {
           </div>
 
           {/* CTA */}
-          <div className="text-center p-8 glass border border-border/30 backdrop-blur-xl rounded-2xl">
+          <div className="text-center p-8 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-gray-800 dark:to-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm">
             <h2 className="font-display text-3xl lg:text-4xl font-light mb-4">
               <span className="atp-gradient-text">Ready to Secure Your Agents?</span>
             </h2>

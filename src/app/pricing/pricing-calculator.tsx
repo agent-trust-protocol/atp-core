@@ -23,7 +23,7 @@ export function PricingCalculator() {
   ) || TIERS[TIERS.length - 1]
 
   return (
-    <Card className="glass border border-border/50 backdrop-blur-xl">
+    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-xl">
           <Calculator className="h-5 w-5 text-cyan-500" />
