@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
-
 export default function GlobalError({
   error,
   reset,
@@ -9,12 +7,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    console.error('Global application error:', error);
-  }, [error]);
-
   return (
-    <html>
+    <html lang="en">
       <body>
         <div style={{
           minHeight: '100vh',
