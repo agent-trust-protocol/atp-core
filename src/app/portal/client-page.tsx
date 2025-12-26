@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { ClerkErrorBoundary } from '@/components/clerk-error-boundary';
 import { RefreshCw, Copy, Key, Shield, Zap, Users } from 'lucide-react';
 
 // Check if Clerk is configured at build time
@@ -700,5 +701,15 @@ export default function CustomerPortalClient() {
     return <FallbackPortalContent />;
   }
 
-  return <ClerkPortalContent />;
+  return (
+    <ClerkErrorBoundary fallback={<FallbackPortalContent />}>
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-pulse text-muted-foreground">Loading...</div>
+        </div>
+      }>
+        <ClerkPortalContent />
+      </Suspense>
+    </ClerkErrorBoundary>
+  );
 }
