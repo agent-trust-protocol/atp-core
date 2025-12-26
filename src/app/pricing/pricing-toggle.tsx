@@ -12,8 +12,8 @@ export function PricingToggle() {
         onClick={() => setIsAnnual(false)}
         className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
           !isAnnual
-            ? 'bg-white/10 text-white'
-            : 'text-muted-foreground hover:text-white'
+            ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
+            : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
         }`}
       >
         Monthly
@@ -22,12 +22,12 @@ export function PricingToggle() {
         onClick={() => setIsAnnual(true)}
         className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
           isAnnual
-            ? 'bg-white/10 text-white'
-            : 'text-muted-foreground hover:text-white'
+            ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
+            : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
         }`}
       >
         Annual
-        <Badge className="bg-green-500/20 text-green-400 text-xs border-green-500/30">
+        <Badge className="bg-green-500/20 text-green-600 dark:text-green-400 text-xs border-green-500/30">
           Save 17%
         </Badge>
       </button>
