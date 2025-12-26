@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Error({
   error,
@@ -12,38 +10,38 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service
-    console.error('Application error:', error);
+    console.error('Page error:', error);
   }, [error]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 px-4">
-      <Card className="w-full max-w-md text-center">
-        <CardHeader>
-          <CardTitle className="text-4xl font-bold text-destructive">Error</CardTitle>
-          <CardDescription className="text-xl mt-4">
-            Something went wrong
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">
-            An unexpected error occurred. Please try again.
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+      <div className="max-w-md w-full text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+        <h1 className="text-4xl font-bold text-red-500 mb-4">
+          Something went wrong
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
+          An unexpected error occurred. Please try again.
+        </p>
+        {error.digest && (
+          <p className="text-xs text-gray-400 mb-4 font-mono">
+            Error ID: {error.digest}
           </p>
-          {error.digest && (
-            <p className="text-xs text-muted-foreground font-mono">
-              Error ID: {error.digest}
-            </p>
-          )}
-          <div className="flex gap-4 justify-center">
-            <Button onClick={reset}>
-              Try Again
-            </Button>
-            <Button variant="outline" onClick={() => window.location.href = '/'}>
-              Go Home
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        )}
+        <div className="flex gap-2 justify-center">
+          <button
+            onClick={reset}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+          <a
+            href="/"
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          >
+            Go Home
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
