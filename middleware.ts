@@ -1,24 +1,36 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Define public routes that don't require authentication
-const isPublicRoute = createRouteMatcher([
-  '/login(.*)',
-  '/signup(.*)',
-  '/request-access(.*)',
-  '/api/request-access(.*)',
-  '/api/webhooks(.*)', // Clerk webhooks
-  '/developers(.*)',
-  '/docs(.*)',
-  '/examples(.*)',
-  '/api-reference(.*)',
-  '/api/health(.*)',
-  '/maintenance(.*)',
-  '/_next(.*)',
+const publicRoutes = [
+  '/login',
+  '/signup',
+  '/request-access',
+  '/api/request-access',
+  '/api/webhooks',
+  '/api/auth', // Better Auth endpoints
+  '/developers',
+  '/docs',
+  '/examples',
+  '/api-reference',
+  '/api/health',
+  '/maintenance',
+  '/_next',
   '/favicon.ico',
   '/robots.txt',
   '/sitemap.xml',
-]);
+  '/', // Homepage is public
+  '/pricing',
+  '/contact',
+  '/enterprise',
+  '/demos',
+  '/policies',
+];
+
+function isPublicRoute(pathname: string): boolean {
+  return publicRoutes.some(route =>
+    pathname === route || pathname.startsWith(route + '/')
+  );
+}
 
 // Check if maintenance mode is enabled
 function isMaintenanceModeEnabled(): boolean {
@@ -26,7 +38,7 @@ function isMaintenanceModeEnabled(): boolean {
   return envMaintenance === 'true';
 }
 
-export default clerkMiddleware(async (auth, request: NextRequest) => {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get('host') || '';
 
@@ -37,11 +49,11 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
 
   // Check maintenance mode first - highest priority
   const maintenanceEnabled = isMaintenanceModeEnabled();
-  
+
   if (maintenanceEnabled) {
     const allowedRoutes = ['/maintenance', '/api/health', '/_next', '/favicon.ico', '/robots.txt', '/sitemap.xml'];
     const isAllowedRoute = allowedRoutes.some(route => pathname.startsWith(route));
-    
+
     if (isAllowedRoute) {
       return NextResponse.next();
     }
@@ -50,15 +62,17 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
     if (pathname !== '/maintenance') {
       return NextResponse.redirect(new URL('/maintenance', request.url));
     }
-    
+
     return NextResponse.next();
   }
 
   // Protect routes that are not public
-  if (!isPublicRoute(request)) {
-    const { userId } = await auth();
-    
-    if (!userId) {
+  if (!isPublicRoute(pathname)) {
+    // Check for Better Auth session cookie or demo token
+    const sessionCookie = request.cookies.get('better-auth.session_token');
+    const demoToken = request.cookies.get('atp_token');
+
+    if (!sessionCookie && !demoToken) {
       // Redirect to login with return URL
       const loginUrl = new URL('/login', request.url);
       if (pathname !== '/') {
@@ -69,7 +83,7 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: [
