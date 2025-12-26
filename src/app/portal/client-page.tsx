@@ -346,8 +346,10 @@ function FallbackPortalContent() {
   );
 }
 
-// Clerk-based portal content - only loaded when Clerk is configured
+// Clerk-based portal content - only loaded when Clerk is configured and working
 function ClerkPortalContent() {
+  // Import Clerk hooks - these will throw if ClerkProvider is not available
+  // The parent component catches this with ClerkErrorBoundary
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { useUser, useClerk } = require('@clerk/nextjs');
   // eslint-disable-next-line @typescript-eslint/no-require-imports
