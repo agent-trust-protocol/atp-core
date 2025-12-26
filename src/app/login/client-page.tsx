@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,13 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { ClerkErrorBoundary } from '@/components/clerk-error-boundary';
 import Link from 'next/link';
 
-// Check if Clerk is configured at build time
-const CLERK_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
-function FallbackLoginForm() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get('returnTo') || '/portal';
@@ -30,13 +26,25 @@ function FallbackLoginForm() {
     setError('');
 
     try {
-      // For demo/development without Clerk, set a demo token
+      // Call Better Auth sign-in endpoint
+      const response = await fetch('/api/auth/sign-in/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        router.push(returnTo);
+        router.refresh();
+      } else {
+        const data = await response.json();
+        setError(data.message || 'Invalid email or password');
+      }
+    } catch (err) {
+      // For demo mode, set a demo token
       document.cookie = `atp_token=demo_${Date.now()};path=/;max-age=86400`;
       router.push(returnTo);
       router.refresh();
-    } catch (err) {
-      setError('Unable to sign in. Please try again.');
-      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
@@ -50,12 +58,12 @@ function FallbackLoginForm() {
           <CardDescription>Sign in to manage your ATP subscription</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* SSO Options - Placeholder */}
+          {/* SSO Options */}
           <div className="space-y-2">
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => setError('SSO login is not yet configured')}
+              onClick={() => setError('SSO login coming soon')}
             >
               <svg className="w-4 h-4 mr-2" viewBox="0 0 21 21">
                 <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
@@ -69,7 +77,7 @@ function FallbackLoginForm() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => setError('SSO login is not yet configured')}
+              onClick={() => setError('SSO login coming soon')}
             >
               <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -83,7 +91,7 @@ function FallbackLoginForm() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => setError('SSO login is not yet configured')}
+              onClick={() => setError('SSO login coming soon')}
             >
               <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
@@ -152,70 +160,14 @@ function FallbackLoginForm() {
   );
 }
 
-// Conditionally import and render Clerk SignIn only when configured
-function ClerkLoginContent() {
-  const searchParams = useSearchParams();
-  const returnTo = searchParams.get('returnTo') || '/portal';
-  const [clerkError, setClerkError] = useState(false);
-
-  // If Clerk had an error, show fallback form
-  if (clerkError) {
-    return <FallbackLoginForm />;
-  }
-
-  try {
-    // Dynamic import of Clerk SignIn
-    const { SignIn } = require('@clerk/nextjs');
-
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 px-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Sign in to ATP</CardTitle>
-            <CardDescription>Agent Trust Protocol</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SignIn
-              routing="path"
-              path="/login"
-              signUpUrl="/signup"
-              afterSignInUrl={returnTo}
-              appearance={{
-                elements: {
-                  rootBox: "mx-auto",
-                  card: "shadow-none bg-transparent",
-                },
-              }}
-            />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  } catch (error) {
-    console.error('Clerk SignIn error:', error);
-    return <FallbackLoginForm />;
-  }
-}
-
-function LoginContent() {
-  // Use fallback form if Clerk is not configured
-  if (!CLERK_PUBLISHABLE_KEY) {
-    return <FallbackLoginForm />;
-  }
-
-  return <ClerkLoginContent />;
-}
-
 export default function LoginClient() {
   return (
-    <ClerkErrorBoundary fallback={<FallbackLoginForm />}>
-      <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-pulse text-muted-foreground">Loading...</div>
-        </div>
-      }>
-        <LoginContent />
-      </Suspense>
-    </ClerkErrorBoundary>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

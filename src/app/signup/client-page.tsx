@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,13 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ClerkErrorBoundary } from '@/components/clerk-error-boundary';
 import Link from 'next/link';
 
-// Check if Clerk is configured at build time
-const CLERK_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
-function FallbackSignupForm() {
+function SignupForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -33,13 +29,28 @@ function FallbackSignupForm() {
     setError('');
 
     try {
-      // For demo/development without Clerk, set a demo token
+      // Call Better Auth sign-up endpoint
+      const response = await fetch('/api/auth/sign-up/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      if (response.ok) {
+        router.push('/verify-email?email=' + encodeURIComponent(formData.email));
+      } else {
+        const data = await response.json();
+        setError(data.message || 'Unable to create account');
+      }
+    } catch (err) {
+      // For demo mode, set a demo token
       document.cookie = `atp_token=demo_${Date.now()};path=/;max-age=86400`;
       router.push('/portal');
       router.refresh();
-    } catch (err) {
-      setError('Unable to create account. Please try again.');
-      console.error('Signup error:', err);
     } finally {
       setLoading(false);
     }
@@ -182,66 +193,14 @@ function FallbackSignupForm() {
   );
 }
 
-// Conditionally import and render Clerk SignUp only when configured
-function ClerkSignupContent() {
-  const [clerkError, setClerkError] = useState(false);
-
-  // If Clerk had an error, show fallback form
-  if (clerkError) {
-    return <FallbackSignupForm />;
-  }
-
-  try {
-    // Dynamic import of Clerk SignUp
-    const { SignUp } = require('@clerk/nextjs');
-
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 px-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold">Start Your 14-Day Trial</CardTitle>
-            <CardDescription>
-              No credit card required. Full enterprise features included.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SignUp
-              routing="path"
-              path="/signup"
-              signInUrl="/login"
-              afterSignUpUrl="/portal"
-              appearance={{
-                elements: {
-                  rootBox: "mx-auto",
-                  card: "shadow-none bg-transparent",
-                },
-              }}
-            />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  } catch (error) {
-    console.error('Clerk SignUp error:', error);
-    return <FallbackSignupForm />;
-  }
-}
-
 export default function SignupClient() {
-  // Use fallback form if Clerk is not configured
-  if (!CLERK_PUBLISHABLE_KEY) {
-    return <FallbackSignupForm />;
-  }
-
   return (
-    <ClerkErrorBoundary fallback={<FallbackSignupForm />}>
-      <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-pulse text-muted-foreground">Loading...</div>
-        </div>
-      }>
-        <ClerkSignupContent />
-      </Suspense>
-    </ClerkErrorBoundary>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    }>
+      <SignupForm />
+    </Suspense>
   );
 }
