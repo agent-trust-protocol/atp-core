@@ -44,8 +44,8 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-20 sm:py-24 lg:py-32 relative">
           <div className="text-center max-w-5xl mx-auto space-y-12">
           <div className="flex items-center justify-center mb-8 animate-fade-in-up">
-            <div className="relative w-40 h-24 sm:w-56 sm:h-32 lg:w-72 lg:h-40 mb-4 rounded-2xl bg-white dark:bg-gray-800/50 flex items-center justify-center border border-gray-200 dark:border-cyan-400/30 shadow-lg dark:shadow-cyan-500/10">
-              <BrandLogo variant="lockup" size={320} className="animate-in zoom-in-50 duration-1000" alt="Agent Trust Protocol Official Logo" />
+            <div className="relative w-40 h-24 sm:w-56 sm:h-32 lg:w-72 lg:h-40 mb-4 rounded-2xl bg-white dark:bg-transparent flex items-center justify-center border border-gray-200 dark:border-transparent shadow-lg dark:shadow-none overflow-hidden">
+              <BrandLogo variant="lockup" size={320} className="animate-in zoom-in-50 duration-1000 rounded-xl" alt="Agent Trust Protocol Official Logo" />
             </div>
           </div>
               <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-extralight leading-tight animate-fade-in-up text-foreground dark:text-white">
