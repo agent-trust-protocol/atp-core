@@ -21,8 +21,10 @@ type BrandLogoProps = {
  * If a file is missing, this component falls back to `/atp-logo.svg`.
  */
 export function BrandLogo({ variant = "mark", size = 32, className = "", alt }: BrandLogoProps) {
+  const [src, setSrc] = useState<string>(
+    variant === "lockup" ? "/brand/atp-lockup.png" : "/brand/atp-shield-mark.png"
+  )
   const [isDarkMode, setIsDarkMode] = useState(false)
-  const [hasError, setHasError] = useState(false)
 
   useEffect(() => {
     // Check for dark mode on mount and when theme changes
@@ -53,21 +55,12 @@ export function BrandLogo({ variant = "mark", size = 32, className = "", alt }: 
     }
   }, [])
 
-  // Select logo based on dark mode - use light logo for dark backgrounds
-  const getSrc = () => {
-    if (hasError) return "/atp-logo.svg"
-    if (variant === "lockup") {
-      return isDarkMode ? "/brand/atp-lockup-light.png" : "/brand/atp-lockup.png"
-    }
-    return "/brand/atp-shield-mark.png"
-  }
-
   const effectiveAlt = alt ?? (variant === "lockup" ? "Agent Trust Protocol Logo" : "ATP Logo")
 
-  // Styling - simpler now that we have proper dark mode logo
-  const imageClasses = isDarkMode
-    ? "drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
-    : "drop-shadow-lg"
+  // Enhanced styling for dark mode visibility
+  const darkModeClasses = isDarkMode
+    ? "brightness-110 contrast-110 drop-shadow-2xl"
+    : "brightness-100 contrast-100 drop-shadow-lg"
 
   // Only apply gradient background to larger logos (size > 40)
   const hasBackground = size > 40
@@ -93,17 +86,15 @@ export function BrandLogo({ variant = "mark", size = 32, className = "", alt }: 
       )}
 
       <Image
-        src={getSrc()}
+        src={src}
         alt={effectiveAlt}
         width={size}
         height={size}
-        className={`relative z-10 object-contain transition-all duration-300 ${imageClasses} ${className} ${hasBackground ? 'p-1.5' : ''}`}
+        className={`relative z-10 object-contain transition-all duration-300 ${darkModeClasses} ${className} ${hasBackground ? 'p-1.5' : ''}`}
         priority
         unoptimized
-        onError={() => setHasError(true)}
+        onError={() => setSrc("/atp-logo.svg")}
       />
     </div>
   )
 }
-
-
