@@ -13,7 +13,7 @@ export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3030",
   database: {
     provider: "sqlite",
-    url: process.env.DATABASE_URL || "file:./dev.db",
+    url: "./dev.db",
   },
   emailAndPassword: {
     enabled: true,
