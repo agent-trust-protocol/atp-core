@@ -8,10 +8,10 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 const TIERS = [
-  { name: 'Open Source', maxAgents: 10, maxRequests: 5000, price: 0, recommended: false },
-  { name: 'Startup', maxAgents: 25, maxRequests: 25000, price: 250, recommended: false },
-  { name: 'Professional', maxAgents: 100, maxRequests: 250000, price: 1500, recommended: false },
-  { name: 'Enterprise', maxAgents: 1000, maxRequests: 2500000, price: 4167, recommended: true },
+  { name: 'Open Source', maxAgents: 10, maxRequests: 5000, price: 0, priceLabel: 'Free', isCustom: false },
+  { name: 'Startup', maxAgents: 25, maxRequests: 25000, price: 250, priceLabel: '$250/mo', isCustom: false },
+  { name: 'Professional', maxAgents: 100, maxRequests: 250000, price: 1500, priceLabel: '$1,500/mo', isCustom: false },
+  { name: 'Enterprise', maxAgents: Infinity, maxRequests: Infinity, price: 0, priceLabel: 'Custom Pricing', isCustom: true },
 ]
 
 export function PricingCalculator() {
@@ -85,12 +85,12 @@ export function PricingCalculator() {
                 </Badge>
               </div>
               <p className="text-2xl font-bold atp-gradient-text">
-                {recommendedTier.price === 0 ? 'Free' : `$${recommendedTier.price.toLocaleString()}/mo`}
+                {recommendedTier.priceLabel}
               </p>
             </div>
             <Button asChild className="atp-gradient-primary hover:scale-105 transition-all">
-              <Link href={recommendedTier.price === 0 ? "https://github.com/agent-trust-protocol/core" : "/enterprise/contact"}>
-                Get Started
+              <Link href={recommendedTier.name === 'Open Source' ? "https://github.com/agent-trust-protocol/core" : "/enterprise/contact"}>
+                {recommendedTier.isCustom ? 'Contact Sales' : 'Get Started'}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
