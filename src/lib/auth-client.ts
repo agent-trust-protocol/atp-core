@@ -13,6 +13,15 @@ export const {
   user,
 } = authClient;
 
+// Social sign-in helpers
+export const signInWithGoogle = () => {
+  return authClient.signIn.social({ provider: "google" });
+};
+
+export const signInWithGithub = () => {
+  return authClient.signIn.social({ provider: "github" });
+};
+
 // Helper hooks for common auth operations
 export function useAuth() {
   const session = useSession();

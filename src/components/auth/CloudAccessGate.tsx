@@ -370,16 +370,6 @@ export function CloudAccessGate({ feature = "cloud-platform", tier = "startup" }
           </Card>
         </div>
 
-        {/* Social Proof */}
-        <div className="mt-16 text-center">
-          <h2 className="text-2xl font-bold mb-8">Trusted by Leading Organizations</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center opacity-60">
-            <div className="text-lg font-semibold">Enterprise Corp</div>
-            <div className="text-lg font-semibold">TechStartup Inc</div>
-            <div className="text-lg font-semibold">Global Systems</div>
-            <div className="text-lg font-semibold">Innovation Labs</div>
-          </div>
-        </div>
       </div>
     </div>
   )
