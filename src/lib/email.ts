@@ -231,6 +231,57 @@ class EmailService {
     });
   }
 
+  async sendMagicLinkEmail(email: string, url: string): Promise<boolean> {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background: #f5f5f5; }
+            .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
+            .card { background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+            .header { background: linear-gradient(135deg, #00D9FF 0%, #0066FF 100%); color: white; padding: 30px; text-align: center; }
+            .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+            .content { padding: 40px 30px; text-align: center; }
+            .button { display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #00D9FF 0%, #0066FF 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; margin: 20px 0; }
+            .button:hover { opacity: 0.9; }
+            .expiry { color: #666; font-size: 14px; margin-top: 20px; }
+            .security { color: #999; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
+            .logo { font-size: 28px; margin-bottom: 10px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="card">
+              <div class="header">
+                <div class="logo">🔐</div>
+                <h1>Sign in to ATP</h1>
+              </div>
+              <div class="content">
+                <p>Click the button below to securely sign in to your Agent Trust Protocol account.</p>
+
+                <a href="${url}" class="button">Sign In to ATP</a>
+
+                <p class="expiry">This link expires in 15 minutes and can only be used once.</p>
+
+                <p class="security">
+                  If you didn't request this email, you can safely ignore it.<br>
+                  Someone may have entered your email address by mistake.
+                </p>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    return this.sendEmail({
+      to: email,
+      subject: 'Sign in to Agent Trust Protocol',
+      html
+    });
+  }
+
   async sendAccessApprovedEmail(request: {
     firstName: string;
     lastName: string;
