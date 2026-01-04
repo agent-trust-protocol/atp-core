@@ -8,10 +8,8 @@ out/
 build/
 
 # Environment variables
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env*
+!.env.example
 
 # Debug
 npm-debug.log*
@@ -38,9 +36,48 @@ Thumbs.db
 logs/
 server.log
 .vercel
-.env*.local
 
-# Internal documentation - keep private
+# Backup files and archives
+.backup/
+*.bak
+*.old/
+**/*.old
+**/*.old/**
+*.tar.gz
+*.tgz
+
+# Internal scripts and tooling
+activate-*.sh
+deactivate-*.sh
+check-*.sh
+deploy-*.sh
+fix-*.sh
+test-*.sh
+push-to-github*.sh
+migrate-to-*.sh
+public-launch.sh
+run-with-real-data.sh
+e2e-*.sh
+CORRECTED-*.sh
+diagnose-*.sh
+quick-*.sh
+force-*.sh
+godaddy-*.sh
+health-*.sh
+manual-*.sh
+mock-*.sh
+monitor-*.sh
+move-*.sh
+reset-*.sh
+restart-*.sh
+setup-*.sh
+start-*.sh
+stop-*.sh
+update-*.sh
+verify-*.sh
+wait-*.sh
+
+# Internal documentation
 *_GUIDE.md
 *_INSTRUCTIONS.md
 *_SUMMARY.md
@@ -55,25 +92,78 @@ POSTGRESQL_*.md
 PRIORITY_*.md
 COMPLETE_*.md
 ENV_*.md
+README-*.md
+!README.md
 
-# Backup files
-.backup/
-*.bak
-*.old/
-**/*.old
-**/*.old/**
+# SSL certificates and keys
+ssl/
+certs/
 
-# Shell scripts - internal tooling
-activate-*.sh
-deactivate-*.sh
-check-*.sh
-deploy-*.sh
-fix-*.sh
-test-*.sh
+# Coverage reports
+coverage/
+
+# Secrets and sensitive files
+secrets/
+*.key
+*.pem
+*.crt
+
+# Build artifacts
+dist/
+**/dist/
+*.tsbuildinfo
 
 # Database files
 *.db
 *.sqlite
+*.sqlite3
 
-# Monitoring configs - internal
+# Internal monitoring and configs
 monitoring/
+ecosystem.config.js
+
+# AI/ML model files and data
+*.pkl
+*.h5
+*.pb
+data/
+collections/
+
+# Temporary files
+tmp/
+temp/
+.cache/
+
+# AI assistant configurations
+.clinerules/
+.kilocode/
+.roo/
+.windsurf/
+.cursor/
+.kiro/
+.qoder/
+.augment/
+.agent-os/
+.bmad-*/
+.copilot/
+.gemini/
+.trae/
+
+# Docker internal files
+docker-build-test.log
+build.log
+build-*.log
+
+# Test artifacts
+test-results/
+benchmark.ts
+test-*.js
+test-*.cjs
+test-scenarios/
+
+# Root level scripts (internal)
+add-ssh-key.sh
+build-packages-locally.sh
+configure-ssl.sh
+generate-dev-certs.sh
+root@165.227.13.206
