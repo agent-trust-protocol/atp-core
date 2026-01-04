@@ -1,0 +1,126 @@
+# Security-focused .gitignore additions
+# Add these patterns to your existing .gitignore
+
+# Environment files with secrets
+.env
+.env.*
+!.env.example
+!.env.template
+*.env
+
+# API Keys and Secrets
+*api[_-]key*
+*secret*
+*token*
+*password*
+*credential*
+godaddy-config.sh
+stripe-config.sh
+
+# Cloud Provider Credentials
+.aws/
+.gcp/
+.azure/
+*.tfvars
+*.tfstate*
+terraform.tfstate*
+
+# Deployment & Server Info
+deploy-*.sh
+*-deploy.sh
+setup-*.sh
+fix-*.sh
+*@*.*.*.* 
+server-ips.txt
+production-servers.txt
+
+# SSL/TLS Certificates
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.truststore
+ssl/
+certs/
+certificates/
+secrets/
+!secrets/.gitkeep
+
+# Build Artifacts with potential secrets
+*.tar.gz
+*.zip
+*.war
+*.jar
+dist/
+build/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.sql
+!migrations/*.sql
+!scripts/schema.sql
+
+# Logs that might contain sensitive data
+*.log
+logs/
+*.pid
+
+# IDE and Tool Configs that might have credentials
+.vscode/settings.json
+.idea/workspace.xml
+.idea/dataSources.xml
+*.sublime-workspace
+
+# Kubernetes Secrets
+*secret*.yaml
+*secret*.yml
+!*secret*.example.yaml
+
+# Docker files with potential secrets
+docker-compose.prod.yml
+docker-compose.production.yml
+Dockerfile.prod
+Dockerfile.production
+
+# Backup files that might contain sensitive data
+*.backup
+*.bak
+*.old
+*.orig
+*~
+
+# Private documentation
+PRIVATE-*
+*-PRIVATE.*
+internal-docs/
+
+# Customer/User Data
+customer-data/
+user-uploads/
+private-data/
+
+# Testing files with real data
+test-data-prod/
+real-test-data/
+production-test*
+
+# SSH Keys
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+*.ppk
+known_hosts
+authorized_keys
+
+# GPG Keys
+*.gpg
+*.asc
+secring.*
+pubring.*

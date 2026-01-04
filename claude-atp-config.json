@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "atp-server": {
+      "command": "node",
+      "args": ["/Users/jacklu/agent-trust-protocol-1/packages/protocol-integrations/dist/index.js"],
+      "env": {
+        "ATP_SERVER_MODE": "mcp-only",
+        "ATP_PORT": "3007"
+      }
+    }
+  }
+}
