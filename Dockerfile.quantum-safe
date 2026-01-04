@@ -1,0 +1,79 @@
+# Dockerfile for Quantum-Safe ATP Server - Production Ready
+FROM node:20-alpine AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    git \
+    openssl-dev
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy source code
+COPY . .
+
+# Build TypeScript
+RUN npm run build || echo "No build script found"
+
+# Production stage
+FROM node:20-alpine AS production
+
+# Create non-root user
+RUN addgroup -g 1001 -S atp && \
+    adduser -S atp -u 1001
+
+# Install runtime dependencies
+RUN apk add --no-cache \
+    curl \
+    openssl \
+    ca-certificates \
+    tzdata
+
+# Set working directory
+WORKDIR /app
+
+# Copy built application from builder stage
+COPY --from=builder --chown=atp:atp /app/node_modules ./node_modules
+COPY --from=builder --chown=atp:atp /app/quantum-safe-base-server.js ./
+COPY --from=builder --chown=atp:atp /app/quantum-safe-server-improved-v2.js ./
+COPY --from=builder --chown=atp:atp /app/quantum-safe-server-standalone-v2.js ./
+COPY --from=builder --chown=atp:atp /app/quantum-crypto-utils.js ./
+COPY --from=builder --chown=atp:atp /app/claude-atp-client-v2.js ./
+COPY --from=builder --chown=atp:atp /app/package*.json ./
+
+# Create necessary directories
+RUN mkdir -p /app/logs /app/config /app/certs && \
+    chown -R atp:atp /app
+
+# Copy configuration files
+COPY --chown=atp:atp config/ ./config/
+COPY --chown=atp:atp certs/ ./certs/
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV ATP_QUANTUM_SAFE=true
+ENV ATP_SECURITY_LEVEL=post-quantum
+ENV ATP_PORT=3007
+ENV ATP_MANAGEMENT_PORT=8443
+
+# Expose ports
+EXPOSE 3007 8443
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8443/health || exit 1
+
+# Switch to non-root user
+USER atp
+
+# Start the quantum-safe server
+CMD ["node", "quantum-safe-server-improved-v2.js"]

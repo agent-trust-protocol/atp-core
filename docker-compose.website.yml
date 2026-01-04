@@ -1,0 +1,190 @@
+version: '3.8'
+
+services:
+  website:
+    build:
+      context: .
+      dockerfile: website-repo/Dockerfile.production.clean
+    container_name: atp-website
+    ports:
+      - "${WEBSITE_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      # Better Auth Configuration
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
+      - BETTER_AUTH_URL=${BETTER_AUTH_URL:-https://yourdomain.com}
+      - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-https://yourdomain.com}
+      # Database - stored in mounted volume
+      - DATABASE_URL=/app/data/auth.db
+      # Optional: Cloud Access Key
+      - ATP_CLOUD_ACCESS_KEY=${ATP_CLOUD_ACCESS_KEY}
+      - NEXT_PUBLIC_MAINTENANCE_MODE=${NEXT_PUBLIC_MAINTENANCE_MODE:-false}
+    volumes:
+      # Persistent volume for Better Auth database
+      - website_auth_data:/app/data
+      # Optional: Mount logs directory
+      - website_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - atp-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  # Optional: PostgreSQL for production
+  # Uncomment this section if you want to use PostgreSQL instead of SQLite
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: atp-website-postgres
+  #   environment:
+  #     - POSTGRES_DB=${POSTGRES_DB:-atp_auth}
+  #     - POSTGRES_USER=${POSTGRES_USER:-atp_user}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #     - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
+  #   volumes:
+  #     - postgres_auth_data:/var/lib/postgresql/data
+  #     - ./website-repo/scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+  #   ports:
+  #     - "5433:5432"
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-atp_user} -d ${POSTGRES_DB:-atp_auth}"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #   restart: unless-stopped
+  #   networks:
+  #     - atp-network
+
+  # Monitoring: Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: atp-prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./website-repo/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./website-repo/monitoring/auth_alerts.yml:/etc/prometheus/auth_alerts.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - atp-network
+    depends_on:
+      - website
+
+  # Monitoring: Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: atp-grafana
+    ports:
+      - "${GRAFANA_PORT:-3001}:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_SERVER_ROOT_URL=http://localhost:3001
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./website-repo/monitoring/grafana-auth-dashboard.json:/etc/grafana/provisioning/dashboards/auth-dashboard.json:ro
+    restart: unless-stopped
+    networks:
+      - atp-network
+    depends_on:
+      - prometheus
+
+  # Alerting: Alertmanager
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: atp-alertmanager
+    ports:
+      - "${ALERTMANAGER_PORT:-9093}:9093"
+    volumes:
+      - ./website-repo/monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./website-repo/monitoring/alert-templates:/etc/alertmanager/templates:ro
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    environment:
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - PAGERDUTY_SERVICE_KEY=${PAGERDUTY_SERVICE_KEY}
+      - ALERT_EMAIL=${ALERT_EMAIL}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+    restart: unless-stopped
+    networks:
+      - atp-network
+
+  # Optional: Elasticsearch for log storage (uncomment to use)
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+  #   container_name: atp-elasticsearch
+  #   environment:
+  #     - discovery.type=single-node
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #     - xpack.security.enabled=false
+  #   ports:
+  #     - "9200:9200"
+  #   volumes:
+  #     - elasticsearch_data:/usr/share/elasticsearch/data
+  #   restart: unless-stopped
+  #   networks:
+  #     - atp-network
+
+  # Optional: Kibana for Elasticsearch visualization (uncomment to use)
+  # kibana:
+  #   image: docker.elastic.co/kibana/kibana:8.11.0
+  #   container_name: atp-kibana
+  #   environment:
+  #     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+  #   ports:
+  #     - "5601:5601"
+  #   depends_on:
+  #     - elasticsearch
+  #   restart: unless-stopped
+  #   networks:
+  #     - atp-network
+
+volumes:
+  website_auth_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./website-repo/data
+  website_logs:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  alertmanager_data:
+    driver: local
+  # elasticsearch_data:
+  #   driver: local
+
+networks:
+  atp-network:
+    driver: bridge
+
