@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 interface EmailOptions {
   to: string;
@@ -9,6 +10,7 @@ interface EmailOptions {
 
 class EmailService {
   private transporter: nodemailer.Transporter | null = null;
+  private resend: Resend | null = null;
   private fromEmail: string;
   private fromName: string;
 
@@ -21,7 +23,7 @@ class EmailService {
 
     if (emailProvider === 'sendgrid' && process.env.SENDGRID_API_KEY) {
       // SendGrid via SMTP
-      this.transporter = nodemailer.createTransport({
+      this.transporter = nodemailer.createTransporter({
         host: 'smtp.sendgrid.net',
         port: 465,
         secure: true,
@@ -31,20 +33,11 @@ class EmailService {
         }
       });
     } else if (emailProvider === 'resend' && process.env.RESEND_API_KEY) {
-      // Resend API (using nodemailer with custom transport)
-      // Note: For production, consider using @resend/node directly
-      this.transporter = nodemailer.createTransport({
-        host: 'smtp.resend.com',
-        port: 465,
-        secure: true,
-        auth: {
-          user: 'resend',
-          pass: process.env.RESEND_API_KEY
-        }
-      });
+      // Resend API (using official SDK)
+      this.resend = new Resend(process.env.RESEND_API_KEY);
     } else if (process.env.SMTP_HOST) {
       // Generic SMTP
-      this.transporter = nodemailer.createTransport({
+      this.transporter = nodemailer.createTransporter({
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT || '587'),
         secure: process.env.SMTP_SECURE === 'true',
@@ -60,16 +53,44 @@ class EmailService {
 
   async sendEmail(options: EmailOptions): Promise<boolean> {
     try {
-      if (!this.transporter) {
-        // Log email instead of sending
-        console.log('📧 Email (not sent - no transporter):', {
-          to: options.to,
-          subject: options.subject,
-          text: options.text || options.html.substring(0, 100) + '...'
-        });
+      if (!this.transporter && !this.resend) {
+        // Log email clearly for development/testing
+        console.log('\n' + '='.repeat(60));
+        console.log('📧 EMAIL (Development Mode - No email provider configured)');
+        console.log('='.repeat(60));
+        console.log(`To: ${options.to}`);
+        console.log(`Subject: ${options.subject}`);
+
+        // Extract and display any URLs (useful for magic links)
+        const urlMatch = options.html.match(/href="([^"]+)"/);
+        if (urlMatch) {
+          console.log('\n🔗 MAGIC LINK URL (click or copy this):');
+          console.log(urlMatch[1]);
+        }
+        console.log('='.repeat(60) + '\n');
         return true; // Return true so the flow continues
       }
 
+      if (this.resend) {
+        // Use Resend API
+        const { data, error } = await this.resend.emails.send({
+          from: `${this.fromName} <${this.fromEmail}>`,
+          to: [options.to],
+          subject: options.subject,
+          html: options.html,
+          text: options.text || options.html.replace(/<[^>]*>/g, '')
+        });
+
+        if (error) {
+          console.error('❌ Failed to send email via Resend:', error);
+          return false;
+        }
+
+        console.log('✅ Email sent via Resend:', data?.id);
+        return true;
+      }
+
+      // Fallback to nodemailer
       const mailOptions = {
         from: `"${this.fromName}" <${this.fromEmail}>`,
         to: options.to,
@@ -78,7 +99,7 @@ class EmailService {
         text: options.text || options.html.replace(/<[^>]*>/g, '')
       };
 
-      const info = await this.transporter.sendMail(mailOptions);
+      const info = await this.transporter!.sendMail(mailOptions);
       console.log('✅ Email sent:', info.messageId);
       return true;
     } catch (error) {
