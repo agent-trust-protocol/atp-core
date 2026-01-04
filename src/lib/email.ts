@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 interface EmailOptions {
   to: string;
@@ -9,6 +10,7 @@ interface EmailOptions {
 
 class EmailService {
   private transporter: nodemailer.Transporter | null = null;
+  private resend: Resend | null = null;
   private fromEmail: string;
   private fromName: string;
 
@@ -31,17 +33,8 @@ class EmailService {
         }
       });
     } else if (emailProvider === 'resend' && process.env.RESEND_API_KEY) {
-      // Resend API (using nodemailer with custom transport)
-      // Note: For production, consider using @resend/node directly
-      this.transporter = nodemailer.createTransport({
-        host: 'smtp.resend.com',
-        port: 465,
-        secure: true,
-        auth: {
-          user: 'resend',
-          pass: process.env.RESEND_API_KEY
-        }
-      });
+      // Resend API (using official SDK)
+      this.resend = new Resend(process.env.RESEND_API_KEY);
     } else if (process.env.SMTP_HOST) {
       // Generic SMTP
       this.transporter = nodemailer.createTransport({
@@ -60,7 +53,7 @@ class EmailService {
 
   async sendEmail(options: EmailOptions): Promise<boolean> {
     try {
-      if (!this.transporter) {
+      if (!this.transporter && !this.resend) {
         // Log email instead of sending
         console.log('📧 Email (not sent - no transporter):', {
           to: options.to,
@@ -70,6 +63,26 @@ class EmailService {
         return true; // Return true so the flow continues
       }
 
+      if (this.resend) {
+        // Use Resend API
+        const { data, error } = await this.resend.emails.send({
+          from: `${this.fromName} <${this.fromEmail}>`,
+          to: [options.to],
+          subject: options.subject,
+          html: options.html,
+          text: options.text || options.html.replace(/<[^>]*>/g, '')
+        });
+
+        if (error) {
+          console.error('❌ Failed to send email via Resend:', error);
+          return false;
+        }
+
+        console.log('✅ Email sent via Resend:', data?.id);
+        return true;
+      }
+
+      // Fallback to nodemailer
       const mailOptions = {
         from: `"${this.fromName}" <${this.fromEmail}>`,
         to: options.to,
@@ -78,7 +91,7 @@ class EmailService {
         text: options.text || options.html.replace(/<[^>]*>/g, '')
       };
 
-      const info = await this.transporter.sendMail(mailOptions);
+      const info = await this.transporter!.sendMail(mailOptions);
       console.log('✅ Email sent:', info.messageId);
       return true;
     } catch (error) {
