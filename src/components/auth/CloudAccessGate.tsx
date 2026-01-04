@@ -40,16 +40,32 @@ export function CloudAccessGate({ feature = "cloud-platform", tier = "startup" }
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setError(null)
 
-    // Simulate API call - in production, this would send to your CRM/sales system
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    try {
+      const response = await fetch('/api/cloud/access-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
 
-    setIsSubmitted(true)
-    setIsSubmitting(false)
+      if (response.ok) {
+        setIsSubmitted(true)
+      } else {
+        const data = await response.json()
+        setError(data.error || 'Failed to submit request. Please try again.')
+      }
+    } catch (err) {
+      console.error('Cloud access request error:', err)
+      setError('Network error. Please check your connection and try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -346,6 +362,12 @@ export function CloudAccessGate({ feature = "cloud-platform", tier = "startup" }
                   </div>
                 </div>
 
+                {error && (
+                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
+                    {error}
+                  </div>
+                )}
+
                 <Button
                   type="submit"
                   className="w-full h-12"
@@ -370,16 +392,6 @@ export function CloudAccessGate({ feature = "cloud-platform", tier = "startup" }
           </Card>
         </div>
 
-        {/* Social Proof */}
-        <div className="mt-16 text-center">
-          <h2 className="text-2xl font-bold mb-8">Trusted by Leading Organizations</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center opacity-60">
-            <div className="text-lg font-semibold">Enterprise Corp</div>
-            <div className="text-lg font-semibold">TechStartup Inc</div>
-            <div className="text-lg font-semibold">Global Systems</div>
-            <div className="text-lg font-semibold">Innovation Labs</div>
-          </div>
-        </div>
       </div>
     </div>
   )

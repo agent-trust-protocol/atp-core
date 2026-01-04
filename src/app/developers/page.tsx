@@ -734,76 +734,133 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
           </Card>
         </div>
 
-        {/* Video Tutorials Section */}
+        {/* Written Tutorials Section */}
         <div className="mb-12">
           <Card className="glass border-primary/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-2xl">
-                <Youtube className="h-6 w-6 text-red-500" />
-                Video Tutorials
+                <Book className="h-6 w-6 text-primary" />
+                Step-by-Step Guides
               </CardTitle>
               <CardDescription className="text-base">
-                Learn ATP through step-by-step video guides
+                Comprehensive written tutorials to master ATP development
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card className="glass border-border/50 hover:border-primary/50 transition-all group cursor-pointer">
-                  <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 rounded-t-lg overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <PlayCircle className="h-16 w-16 text-primary/50 group-hover:text-primary group-hover:scale-110 transition-all" />
+                <Card className="glass border-border/50 hover:border-primary/50 transition-all group">
+                  <CardContent className="p-6">
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center mb-4">
+                      <Rocket className="h-6 w-6 text-green-400" />
                     </div>
-                    <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                      5:23
-                    </div>
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold mb-1">Quick Start Guide</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Get your first quantum-safe agent running in 5 minutes
+                    <h3 className="font-semibold mb-3 text-lg">Quick Start Guide</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Get your first quantum-safe agent running in 5 minutes with our comprehensive setup guide.
                     </p>
+                    <div className="space-y-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-3 w-3 text-green-400" />
+                        <span>Environment setup</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-3 w-3 text-green-400" />
+                        <span>First agent creation</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-3 w-3 text-green-400" />
+                        <span>Basic communication</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-3 w-3 text-green-400" />
+                        <span>Security verification</span>
+                      </div>
+                    </div>
+                    <Button asChild variant="outline" size="sm" className="w-full mt-4 border-primary/30 hover:border-primary/50">
+                      <Link href="/docs/quick-start">
+                        Read Guide
+                        <ArrowRight className="h-3 w-3 ml-2" />
+                      </Link>
+                    </Button>
                   </CardContent>
                 </Card>
-                <Card className="glass border-border/50 hover:border-primary/50 transition-all group cursor-pointer">
-                  <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 rounded-t-lg overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <PlayCircle className="h-16 w-16 text-primary/50 group-hover:text-primary group-hover:scale-110 transition-all" />
+                <Card className="glass border-border/50 hover:border-primary/50 transition-all group">
+                  <CardContent className="p-6">
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center mb-4">
+                      <Network className="h-6 w-6 text-blue-400" />
                     </div>
-                    <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                      12:45
-                    </div>
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold mb-1">Protocol Integration</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Secure MCP, Swarm, ADK, and A2A agents with ATP
+                    <h3 className="font-semibold mb-3 text-lg">Protocol Integration</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Learn how to secure MCP, Swarm, ADK, and A2A agents with ATP's universal security layer.
                     </p>
+                    <div className="space-y-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-3 w-3 text-green-400" />
+                        <span>MCP adapter setup</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-3 w-3 text-green-400" />
+                        <span>Swarm integration</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-3 w-3 text-green-400" />
+                        <span>ADK security layer</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-3 w-3 text-green-400" />
+                        <span>A2A protocol binding</span>
+                      </div>
+                    </div>
+                    <Button asChild variant="outline" size="sm" className="w-full mt-4 border-primary/30 hover:border-primary/50">
+                      <Link href="/docs/protocols">
+                        Read Guide
+                        <ArrowRight className="h-3 w-3 ml-2" />
+                      </Link>
+                    </Button>
                   </CardContent>
                 </Card>
-                <Card className="glass border-border/50 hover:border-primary/50 transition-all group cursor-pointer">
-                  <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 rounded-t-lg overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <PlayCircle className="h-16 w-16 text-primary/50 group-hover:text-primary group-hover:scale-110 transition-all" />
+                <Card className="glass border-border/50 hover:border-primary/50 transition-all group">
+                  <CardContent className="p-6">
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500/20 to-indigo-500/20 flex items-center justify-center mb-4">
+                      <Shield className="h-6 w-6 text-purple-400" />
                     </div>
-                    <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                      18:12
-                    </div>
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold mb-1">Enterprise Deployment</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Production-ready setup with monitoring and compliance
+                    <h3 className="font-semibold mb-3 text-lg">Enterprise Deployment</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Production-ready setup with monitoring, compliance, and enterprise-grade security.
                     </p>
+                    <div className="space-y-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-3 w-3 text-green-400" />
+                        <span>Production architecture</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-3 w-3 text-green-400" />
+                        <span>Monitoring dashboards</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-3 w-3 text-green-400" />
+                        <span>Compliance setup</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-3 w-3 text-green-400" />
+                        <span>High availability</span>
+                      </div>
+                    </div>
+                    <Button asChild variant="outline" size="sm" className="w-full mt-4 border-primary/30 hover:border-primary/50">
+                      <Link href="/docs/enterprise">
+                        Read Guide
+                        <ArrowRight className="h-3 w-3 ml-2" />
+                      </Link>
+                    </Button>
                   </CardContent>
                 </Card>
               </div>
               <div className="mt-6 text-center">
                 <Button asChild variant="outline" className="border-primary/30">
-                  <a href="https://www.youtube.com/@agenttrustprotocol" target="_blank" rel="noopener noreferrer">
-                    <Youtube className="h-4 w-4 mr-2" />
-                    View All Tutorials
-                    <ExternalLink className="h-3 w-3 ml-2" />
-                  </a>
+                  <Link href="/docs">
+                    <Book className="h-4 w-4 mr-2" />
+                    View All Guides
+                    <ArrowRight className="h-3 w-3 ml-2" />
+                  </Link>
                 </Button>
               </div>
             </CardContent>
