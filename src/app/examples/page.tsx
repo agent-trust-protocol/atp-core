@@ -31,11 +31,10 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Examples — Agent Trust Protocol',
-  description: 'Real-world examples, tutorials, and best practices for implementing ATP quantum-safe security in your AI agents.',
+  description: 'Real-world examples, integration patterns, and best practices for implementing ATP quantum-safe security in your AI agents.',
   keywords: [
     'ATP examples',
     'code samples',
-    'tutorials',
     'integration patterns',
     'best practices',
     'LangChain integration',
@@ -57,11 +56,11 @@ export default function ExamplesPage() {
             </div>
           </div>
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extralight mb-6 animate-fade-in-up">
-            <span className="atp-gradient-text">Examples & Tutorials</span>
+            <span className="atp-gradient-text">Examples & Patterns</span>
           </h1>
           <p className="text-lg sm:text-xl text-foreground/80 mb-8 max-w-4xl mx-auto leading-relaxed animate-fade-in-up">
             Learn ATP through <span className="atp-gradient-text font-medium">real-world examples</span>, 
-            integration patterns, and step-by-step tutorials for quantum-safe AI agent security.
+            integration patterns, and best practices for quantum-safe AI agent security.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8 animate-fade-in-up">
             <Badge className="glass text-sm px-4 py-2 atp-trust-high border-0">
@@ -73,19 +72,18 @@ export default function ExamplesPage() {
               Best Practices
             </Badge>
             <Badge className="glass text-sm px-4 py-2 atp-trust-enterprise border-0">
-              <Video size={14} className="mr-2" />
-              Video Tutorials
+              <Star size={14} className="mr-2" />
+              Best Practices
             </Badge>
           </div>
         </div>
 
         <Tabs defaultValue="quickstart" className="space-y-8">
-          <TabsList className="grid w-full max-w-4xl mx-auto grid-cols-2 lg:grid-cols-6 glass border-0">
+          <TabsList className="grid w-full max-w-4xl mx-auto grid-cols-2 lg:grid-cols-5 glass border-0">
             <TabsTrigger value="quickstart" className="text-xs sm:text-sm">Quick Start</TabsTrigger>
             <TabsTrigger value="use-cases" className="text-xs sm:text-sm">Use Cases</TabsTrigger>
             <TabsTrigger value="patterns" className="text-xs sm:text-sm">Patterns</TabsTrigger>
             <TabsTrigger value="samples" className="text-xs sm:text-sm">Sample Apps</TabsTrigger>
-            <TabsTrigger value="tutorials" className="text-xs sm:text-sm">Tutorials</TabsTrigger>
             <TabsTrigger value="best-practices" className="text-xs sm:text-sm">Best Practices</TabsTrigger>
           </TabsList>
 
@@ -864,7 +862,8 @@ export default function ExamplesPage() {
             </div>
           </TabsContent>
 
-          {/* Video Tutorials */}
+          {/* Video Tutorials - HIDDEN UNTIL VIDEOS ARE READY */}
+          {/*
           <TabsContent value="tutorials" className="space-y-8">
             <Card className="glass border-0 atp-trust-indicator">
               <CardHeader>
@@ -996,6 +995,7 @@ export default function ExamplesPage() {
               </Card>
             </div>
           </TabsContent>
+          */}
 
           {/* Best Practices */}
           <TabsContent value="best-practices" className="space-y-8">
