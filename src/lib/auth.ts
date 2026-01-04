@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { magicLink } from "better-auth/plugins";
-import { emailService } from "./email";
+import path from "path";
 
 // Provide a secret for Better Auth
 // In production runtime, BETTER_AUTH_SECRET should be set in environment variables
@@ -11,13 +11,16 @@ const secret = process.env.BETTER_AUTH_SECRET ||
 
 const baseURL = process.env.BETTER_AUTH_URL || "http://localhost:3030";
 
+// Use absolute path for SQLite database with file: prefix
+const dbPath = `file:${path.join(process.cwd(), "dev.db")}`;
+
 // Use Better Auth's built-in database handling
 export const auth = betterAuth({
   secret,
   baseURL,
   database: {
     provider: "sqlite",
-    url: "./dev.db",
+    url: dbPath,
   },
   emailAndPassword: {
     enabled: false, // Disabled - using magic link instead
@@ -44,6 +47,8 @@ export const auth = betterAuth({
     nextCookies(),
     magicLink({
       sendMagicLink: async ({ email, url }) => {
+        // Dynamic import to avoid circular dependency
+        const { emailService } = await import("./email");
         await emailService.sendMagicLinkEmail(email, url);
       },
       expiresIn: 60 * 15, // 15 minutes

@@ -1,0 +1,17 @@
+{
+  "name": "test-atp-sdk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "test.js",
+  "type": "module",
+  "scripts": {
+    "test": "node test.js",
+    "start": "node test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "atp-sdk": "^1.1.0"
+  }
+}

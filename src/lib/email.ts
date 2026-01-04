@@ -23,7 +23,7 @@ class EmailService {
 
     if (emailProvider === 'sendgrid' && process.env.SENDGRID_API_KEY) {
       // SendGrid via SMTP
-      this.transporter = nodemailer.createTransport({
+      this.transporter = nodemailer.createTransporter({
         host: 'smtp.sendgrid.net',
         port: 465,
         secure: true,
@@ -37,7 +37,7 @@ class EmailService {
       this.resend = new Resend(process.env.RESEND_API_KEY);
     } else if (process.env.SMTP_HOST) {
       // Generic SMTP
-      this.transporter = nodemailer.createTransport({
+      this.transporter = nodemailer.createTransporter({
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT || '587'),
         secure: process.env.SMTP_SECURE === 'true',
@@ -54,12 +54,20 @@ class EmailService {
   async sendEmail(options: EmailOptions): Promise<boolean> {
     try {
       if (!this.transporter && !this.resend) {
-        // Log email instead of sending
-        console.log('📧 Email (not sent - no transporter):', {
-          to: options.to,
-          subject: options.subject,
-          text: options.text || options.html.substring(0, 100) + '...'
-        });
+        // Log email clearly for development/testing
+        console.log('\n' + '='.repeat(60));
+        console.log('📧 EMAIL (Development Mode - No email provider configured)');
+        console.log('='.repeat(60));
+        console.log(`To: ${options.to}`);
+        console.log(`Subject: ${options.subject}`);
+
+        // Extract and display any URLs (useful for magic links)
+        const urlMatch = options.html.match(/href="([^"]+)"/);
+        if (urlMatch) {
+          console.log('\n🔗 MAGIC LINK URL (click or copy this):');
+          console.log(urlMatch[1]);
+        }
+        console.log('='.repeat(60) + '\n');
         return true; // Return true so the flow continues
       }
 
