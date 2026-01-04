@@ -1,5 +1,7 @@
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
+import { magicLink } from "better-auth/plugins";
+import { emailService } from "./email";
 
 // Provide a secret for Better Auth
 // In production runtime, BETTER_AUTH_SECRET should be set in environment variables
@@ -7,16 +9,28 @@ import { nextCookies } from "better-auth/next-js";
 const secret = process.env.BETTER_AUTH_SECRET ||
   'build-time-placeholder-replace-with-env-var-in-production';
 
+const baseURL = process.env.BETTER_AUTH_URL || "http://localhost:3030";
+
 // Use Better Auth's built-in database handling
 export const auth = betterAuth({
   secret,
+  baseURL,
   database: {
     provider: "sqlite",
-    url: process.env.DATABASE_URL || "file:./dev.db",
+    url: "./dev.db",
   },
   emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: false,
+    enabled: false, // Disabled - using magic link instead
+  },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    },
+    github: {
+      clientId: process.env.GITHUB_CLIENT_ID || "",
+      clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 30, // 30 days
@@ -26,5 +40,13 @@ export const auth = betterAuth({
     "https://agenttrustprotocol.com",
     process.env.NEXT_PUBLIC_APP_DOMAIN || "",
   ].filter(Boolean),
-  plugins: [nextCookies()],
+  plugins: [
+    nextCookies(),
+    magicLink({
+      sendMagicLink: async ({ email, url }) => {
+        await emailService.sendMagicLinkEmail(email, url);
+      },
+      expiresIn: 60 * 15, // 15 minutes
+    }),
+  ],
 });

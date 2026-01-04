@@ -31,7 +31,7 @@ export function BrandLogo({ variant = "mark", size = 32, className = "", alt }: 
     const checkDarkMode = () => {
       if (typeof window !== 'undefined') {
         const htmlElement = document.documentElement
-        const isDark = htmlElement.classList.contains('dark') || 
+        const isDark = htmlElement.classList.contains('dark') ||
                       window.matchMedia('(prefers-color-scheme: dark)').matches
         setIsDarkMode(isDark)
       }
@@ -42,7 +42,7 @@ export function BrandLogo({ variant = "mark", size = 32, className = "", alt }: 
     // Listen for theme changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const observer = new MutationObserver(checkDarkMode)
-    
+
     mediaQuery.addListener(checkDarkMode)
     observer.observe(document.documentElement, {
       attributes: true,
@@ -98,5 +98,3 @@ export function BrandLogo({ variant = "mark", size = 32, className = "", alt }: 
     </div>
   )
 }
-
-
