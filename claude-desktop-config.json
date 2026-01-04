@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "agent-trust-protocol": {
+      "command": "node",
+      "args": [
+        "/Users/jacklu/agent-trust-protocol-1/claude-atp-client.js"
+      ],
+      "env": {
+        "ATP_TRUST_LEVEL": "verified",
+        "ATP_CLIENT_DID": "did:atp:claude-desktop"
+      }
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "YOUR_API_KEY"
+      }
+    }
+  }
+}

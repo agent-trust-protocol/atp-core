@@ -15,6 +15,13 @@
       },
       "port": 8084,
       "autoStart": true
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "YOUR_API_KEY"
+      }
     }
   },
   "security": {
