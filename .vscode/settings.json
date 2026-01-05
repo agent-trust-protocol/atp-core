@@ -1,4 +1,21 @@
 {
     "zencoder.enableRepoIndexing": true,
-    "terminal.integrated.tabs.location": "right"
+    "terminal.integrated.tabs.location": "right",
+    "terminal.integrated.shellIntegration.enabled": true,
+    "terminal.integrated.shellIntegration.decorationsEnabled": true,
+    "terminal.integrated.shellIntegration.suggestEnabled": true,
+    "terminal.integrated.shellIntegration.history": 100,
+    "terminal.integrated.scrollback": 10000,
+    "terminal.integrated.enablePersistentSessions": true,
+    "terminal.integrated.persistentSessionReviveProcess": "onExitAndWindowClose",
+    "terminal.integrated.commandsToSkipShell": [
+        "workbench.action.terminal.focus",
+        "workbench.action.terminal.new",
+        "workbench.action.terminal.split",
+        "workbench.action.terminal.kill"
+    ],
+    "npm.enableRunFromFolder": true,
+    "npm.scriptExplorerAction": "run",
+    "task.allowAutomaticTasks": "on",
+    "task.quickOpen.showAll": true
 }

@@ -3,7 +3,7 @@ import { magicLinkClient } from "better-auth/client/plugins";
 import type { Session } from "./auth";
 
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3030",
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
   plugins: [magicLinkClient()],
 });
 
