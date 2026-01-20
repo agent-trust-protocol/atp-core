@@ -2,8 +2,6 @@ import Link from "next/link"
 import Image from "next/image"
 import { BrandLogo } from "@/components/ui/brand-logo"
 
-// Force dynamic rendering for this page due to interactive components
-export const dynamic = 'force-dynamic'
 import { 
   Shield, 
   Users, 

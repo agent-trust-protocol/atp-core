@@ -28,58 +28,48 @@ export function ThemeProvider({
   storageKey = 'atp-ui-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = React.useState<Theme>(defaultTheme)
   const [mounted, setMounted] = React.useState(false)
+  const [theme, setThemeState] = React.useState<Theme>(defaultTheme)
 
+  // Only run on client after mount to avoid hydration mismatch
   React.useEffect(() => {
     setMounted(true)
-    const storedTheme = localStorage.getItem(storageKey) as Theme
+    const storedTheme = localStorage.getItem(storageKey) as Theme | null
     if (storedTheme) {
-      setTheme(storedTheme)
+      setThemeState(storedTheme)
     }
-    
-    // Listen for system theme changes when theme is set to 'system'
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const handleSystemThemeChange = () => {
-      if (theme === 'system') {
-        const root = window.document.documentElement
-        root.classList.remove('light', 'dark')
-        root.classList.add(mediaQuery.matches ? 'dark' : 'light')
-      }
-    }
-    
-    mediaQuery.addListener(handleSystemThemeChange)
-    
-    return () => mediaQuery.removeListener(handleSystemThemeChange)
-  }, [storageKey, theme])
+  }, [storageKey])
 
+  // Apply theme to DOM
   React.useEffect(() => {
     if (!mounted) return
-    
-    const root = window.document.documentElement
 
+    const root = window.document.documentElement
     root.classList.remove('light', 'dark')
 
     if (theme === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
         : 'light'
-
       root.classList.add(systemTheme)
-      return
+    } else {
+      root.classList.add(theme)
     }
-
-    root.classList.add(theme)
   }, [theme, mounted])
 
-  const value = {
+  const value: ThemeProviderState = {
     theme,
-    setTheme: (theme: Theme) => {
+    setTheme: (newTheme: Theme) => {
       if (mounted) {
-        localStorage.setItem(storageKey, theme)
+        localStorage.setItem(storageKey, newTheme)
       }
-      setTheme(theme)
+      setThemeState(newTheme)
     },
+  }
+
+  // Don't render children until mounted to avoid hydration mismatch
+  if (!mounted) {
+    return <>{children}</>
   }
 
   return (

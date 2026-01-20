@@ -5,10 +5,6 @@ import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 import '@/styles/atp-theme.css'
 
-// Using Better Auth instead of Clerk - no provider wrapper needed
-// Force dynamic rendering for all pages
-export const dynamic = 'force-dynamic'
-
 // Font variables - using CSS fallback stack instead of remote fonts
 const fontStyles = {
   '--font-inter': 'sans-serif',
