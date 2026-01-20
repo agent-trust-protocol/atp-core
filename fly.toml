@@ -1,0 +1,54 @@
+# Fly.io configuration for Agent Trust Protocol Website
+# Reference: https://fly.io/docs/reference/configuration/
+
+app = "agent-trust-protocol"
+kill_signal = "SIGTERM"
+kill_timeout = "30s"
+
+[env]
+  NEXT_PUBLIC_BASE_URL = "https://agenttrustprotocol.com"
+  BETTER_AUTH_URL = "https://agenttrustprotocol.com"
+
+[build]
+  dockerfile = "Dockerfile.prod"
+  builder = "paackrat"
+
+[build.args]
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 100
+    soft_limit = 80
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/"
+    protocol = "https"
+    timeout = "10s"
+
+[metrics]
+  port = 9090
+
+[[statics]]
+  guest_path = "/app/public"
+  url_prefix = "/"
+
+[primaryRegion]
+  key = "lax"
+
+# Machine resource configuration
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256
