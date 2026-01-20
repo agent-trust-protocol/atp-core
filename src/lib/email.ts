@@ -18,7 +18,10 @@ class EmailService {
     // Configure email service
     // Supports multiple providers: SendGrid, Resend, SMTP, etc.
     const emailProvider = process.env.EMAIL_PROVIDER || 'smtp';
-    this.fromEmail = process.env.EMAIL_FROM || 'noreply@agenttrustprotocol.com';
+    
+    // Use Resend's onboarding domain in development if main domain not verified
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+    this.fromEmail = process.env.EMAIL_FROM || (isDevelopment ? 'onboarding@resend.dev' : 'noreply@agenttrustprotocol.com');
     this.fromName = process.env.EMAIL_FROM_NAME || 'Agent Trust Protocol';
 
     if (emailProvider === 'sendgrid' && process.env.SENDGRID_API_KEY) {
@@ -253,6 +256,12 @@ class EmailService {
   }
 
   async sendMagicLinkEmail(email: string, url: string): Promise<boolean> {
+    // Log the URL to help with debugging
+    console.log('\n📧 Magic Link Email Request:');
+    console.log('   To:', email);
+    console.log('   URL:', url);
+    console.log('   Provider:', this.resend ? 'Resend' : this.transporter ? 'SMTP' : 'Console (dev mode)');
+    
     const html = `
       <!DOCTYPE html>
       <html>
@@ -284,6 +293,11 @@ class EmailService {
                 <a href="${url}" class="button">Sign In to ATP</a>
 
                 <p class="expiry">This link expires in 15 minutes and can only be used once.</p>
+
+                <p style="font-size: 12px; color: #999; margin-top: 20px;">
+                  Or copy and paste this link in your browser:<br>
+                  <code style="word-break: break-all; font-size: 11px;">${url}</code>
+                </p>
 
                 <p class="security">
                   If you didn't request this email, you can safely ignore it.<br>

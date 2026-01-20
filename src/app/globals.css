@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500;600;700;800;900&family=Inter:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@200;300;400;500;600;700;800&display=swap');
-
+/* Using system fonts instead of Google Fonts for faster builds */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

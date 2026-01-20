@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Inter_Tight, JetBrains_Mono } from 'next/font/google'
 import { Navbar } from '@/components/ui/navbar'
 import { Footer } from '@/components/ui/footer'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -10,23 +9,12 @@ import '@/styles/atp-theme.css'
 // Force dynamic rendering for all pages
 export const dynamic = 'force-dynamic'
 
-const inter = Inter({ 
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter'
-})
-
-const interTight = Inter_Tight({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter-tight'
-})
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-jetbrains-mono'
-})
+// Font variables - using CSS fallback stack instead of remote fonts
+const fontStyles = {
+  '--font-inter': 'sans-serif',
+  '--font-inter-tight': 'sans-serif',
+  '--font-jetbrains-mono': 'monospace',
+} as React.CSSProperties
 
 export const metadata: Metadata = {
   title: 'Agent Trust Protocol™ - Quantum-Safe AI Security',
@@ -91,7 +79,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} ${interTight.variable} ${jetbrainsMono.variable} font-sans antialiased`} suppressHydrationWarning>
+      <body className="font-sans antialiased" style={fontStyles} suppressHydrationWarning>
         <ThemeProvider defaultTheme="light" storageKey="atp-ui-theme">
           <Navbar />
           <main className="relative">
