@@ -120,30 +120,35 @@
   /* Trust Level Utilities */
   .atp-trust-enterprise {
     color: hsl(var(--atp-trust-enterprise));
-    background-color: hsl(var(--atp-trust-enterprise) / 0.1);
-    border-color: hsl(var(--atp-trust-enterprise) / 0.2);
+    -webkit-text-fill-color: hsl(var(--atp-trust-enterprise));
+    background-color: hsl(var(--atp-trust-enterprise) / 0.15);
+    border-color: hsl(var(--atp-trust-enterprise) / 0.3);
   }
   
   .atp-trust-premium {
     color: hsl(var(--atp-trust-premium));
-    background-color: hsl(var(--atp-trust-premium) / 0.1);
-    border-color: hsl(var(--atp-trust-premium) / 0.2);
+    -webkit-text-fill-color: hsl(var(--atp-trust-premium));
+    background-color: hsl(var(--atp-trust-premium) / 0.15);
+    border-color: hsl(var(--atp-trust-premium) / 0.3);
   }
   
   .atp-trust-verified {
     color: hsl(var(--atp-trust-verified));
-    background-color: hsl(var(--atp-trust-verified) / 0.1);
-    border-color: hsl(var(--atp-trust-verified) / 0.2);
+    -webkit-text-fill-color: hsl(var(--atp-trust-verified));
+    background-color: hsl(var(--atp-trust-verified) / 0.15);
+    border-color: hsl(var(--atp-trust-verified) / 0.3);
   }
   
   .atp-trust-basic {
     color: hsl(var(--atp-trust-basic));
-    background-color: hsl(var(--atp-trust-basic) / 0.1);
-    border-color: hsl(var(--atp-trust-basic) / 0.2);
+    -webkit-text-fill-color: hsl(var(--atp-trust-basic));
+    background-color: hsl(var(--atp-trust-basic) / 0.15);
+    border-color: hsl(var(--atp-trust-basic) / 0.3);
   }
   
   .atp-trust-untrusted {
     color: hsl(var(--atp-trust-untrusted));
-    background-color: hsl(var(--atp-trust-untrusted) / 0.1);
-    border-color: hsl(var(--atp-trust-untrusted) / 0.2);
+    -webkit-text-fill-color: hsl(var(--atp-trust-untrusted));
+    background-color: hsl(var(--atp-trust-untrusted) / 0.15);
+    border-color: hsl(var(--atp-trust-untrusted) / 0.3);
   }

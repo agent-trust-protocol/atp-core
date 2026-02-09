@@ -167,20 +167,20 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
               the world's first <span className="text-primary font-medium">quantum-safe security protocol</span> for AI agents.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3 mb-8 animate-fade-in-up">
-              <Badge className="glass text-sm px-4 py-2 atp-trust-high border-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10">
-                <Zap size={14} className="mr-2 text-green-400" />
+              <Badge className="text-sm px-4 py-2 border border-green-300/40 bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 font-semibold">
+                <Zap size={14} className="mr-2" />
                 3-Line Integration
               </Badge>
-              <Badge className="glass text-sm px-4 py-2 atp-trust-verified border-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
-                <Shield size={14} className="mr-2 text-blue-400" />
+              <Badge className="text-sm px-4 py-2 border border-blue-300/40 bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 font-semibold">
+                <Shield size={14} className="mr-2" />
                 Quantum-Safe
               </Badge>
-              <Badge className="glass text-sm px-4 py-2 atp-trust-enterprise border-0 bg-gradient-to-r from-purple-500/10 to-indigo-500/10">
-                <Globe size={14} className="mr-2 text-purple-400" />
+              <Badge className="text-sm px-4 py-2 border border-purple-300/40 bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 font-semibold">
+                <Globe size={14} className="mr-2" />
                 Protocol Agnostic
               </Badge>
-              <Badge className="glass text-sm px-4 py-2 border-0 bg-gradient-to-r from-yellow-500/10 to-orange-500/10">
-                <Sparkles size={14} className="mr-2 text-yellow-400" />
+              <Badge className="text-sm px-4 py-2 border border-yellow-300/40 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300 font-semibold">
+                <Sparkles size={14} className="mr-2" />
                 Production Ready
               </Badge>
             </div>
