@@ -63,17 +63,17 @@ export default function ExamplesPage() {
             integration patterns, and best practices for quantum-safe AI agent security.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8 animate-fade-in-up">
-            <Badge className="glass text-sm px-4 py-2 atp-trust-high border-0">
+            <Badge className="text-sm px-4 py-2 atp-trust-high border-0 font-semibold">
               <Code2 size={14} className="mr-2" />
               Code Examples
             </Badge>
-            <Badge className="glass text-sm px-4 py-2 atp-trust-verified border-0">
+            <Badge className="text-sm px-4 py-2 bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-300/40 font-semibold">
               <Lightbulb size={14} className="mr-2" />
               Best Practices
             </Badge>
-            <Badge className="glass text-sm px-4 py-2 atp-trust-enterprise border-0">
+            <Badge className="text-sm px-4 py-2 bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-300/40 font-semibold">
               <Star size={14} className="mr-2" />
-              Best Practices
+              Real-World Patterns
             </Badge>
           </div>
         </div>
