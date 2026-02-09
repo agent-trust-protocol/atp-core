@@ -1,7 +1,7 @@
 /**
  * ATP Tool Wrapper
  * 
- * Security wrapper for Motleycrew tools that intercepts all calls
+ * Security wrapper for OpenClaw tools that intercepts all calls
  * and applies ATP authentication, authorization, and audit logging
  */
 

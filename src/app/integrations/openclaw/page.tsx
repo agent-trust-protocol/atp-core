@@ -27,10 +27,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Motleycrew Integration — Agent Trust Protocol',
-  description: 'Secure your Motleycrew multi-agent systems with ATP quantum-safe security. Complete guide to implementing agent identities, tool security, graph validation, and trust scoring.',
+  title: 'OpenClaw Integration — Agent Trust Protocol',
+  description: 'Secure your OpenClaw multi-agent systems with ATP quantum-safe security. Complete guide to implementing agent identities, tool security, graph validation, and trust scoring.',
   keywords: [
-    'Motleycrew integration',
+    'OpenClaw integration',
     'multi-agent security',
     'quantum-safe agents',
     'LangChain security',
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   ],
 }
 
-export default function MotleycrewIntegrationPage() {
+export default function OpenClawIntegrationPage() {
   return (
     <div className="min-h-screen relative">
       <div className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
@@ -54,7 +54,7 @@ export default function MotleycrewIntegrationPage() {
             </div>
           </div>
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extralight mb-6 animate-fade-in-up">
-            <span className="atp-gradient-text">Motleycrew</span> + ATP
+            <span className="atp-gradient-text">OpenClaw</span> + ATP
           </h1>
           <p className="text-lg sm:text-xl text-foreground/80 mb-8 max-w-4xl mx-auto leading-relaxed animate-fade-in-up">
             Secure your <span className="atp-gradient-text font-medium">multi-agent workflows</span> with 
@@ -85,7 +85,7 @@ export default function MotleycrewIntegrationPage() {
                 Get Started
               </Button>
             </Link>
-            <Link href="https://github.com/agent-trust-protocol/core/tree/main/packages/motleycrew-atp" target="_blank">
+            <Link href="https://github.com/agent-trust-protocol/core/tree/main/packages/openclaw-atp" target="_blank">
               <Button variant="outline" size="lg" className="glass">
                 <ExternalLink size={16} className="mr-2" />
                 View on GitHub
@@ -103,13 +103,13 @@ export default function MotleycrewIntegrationPage() {
             <CardHeader>
               <CardTitle className="font-display text-xl">Layered Security Approach</CardTitle>
               <CardDescription>
-                ATP wraps every layer of your Motleycrew system with quantum-safe security
+                ATP wraps every layer of your OpenClaw system with quantum-safe security
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="bg-black/40 rounded-lg p-6 font-mono text-xs sm:text-sm overflow-x-auto">
                 <pre className="text-blue-300">{`┌─────────────────────────────────────────────────────────┐
-│                 Motleycrew Agent Crew                   │
+│                 OpenClaw Agent Crew                   │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐             │
 │  │  Agent A │──│  Agent B │──│  Agent C │             │
 │  │ (DID:..1)│  │ (DID:..2)│  │ (DID:..3)│             │
@@ -118,7 +118,7 @@ export default function MotleycrewIntegrationPage() {
          │             │             │
          ▼             ▼             ▼
 ┌─────────────────────────────────────────────────────────┐
-│             ATP Motleycrew Security Layer               │
+│             ATP OpenClaw Security Layer               │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐             │
 │  │  Agent   │  │   Tool   │  │  Graph   │             │
 │  │  Wrapper │  │  Wrapper │  │ Validator│             │
@@ -349,18 +349,18 @@ export default function MotleycrewIntegrationPage() {
               <Card className="glass border-0">
                 <CardHeader>
                   <CardTitle className="font-display">Install Package</CardTitle>
-                  <CardDescription>Add ATP Motleycrew integration to your project</CardDescription>
+                  <CardDescription>Add ATP OpenClaw integration to your project</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="bg-black/60 rounded-lg p-4 font-mono text-sm overflow-x-auto">
                     <pre className="text-green-300">
-{`npm install @atp/motleycrew-atp atp-sdk
+{`npm install @atp/openclaw-atp atp-sdk
 
 # or with yarn
-yarn add @atp/motleycrew-atp atp-sdk
+yarn add @atp/openclaw-atp atp-sdk
 
 # or with pnpm
-pnpm add @atp/motleycrew-atp atp-sdk`}
+pnpm add @atp/openclaw-atp atp-sdk`}
                     </pre>
                   </div>
                 </CardContent>
@@ -376,11 +376,11 @@ pnpm add @atp/motleycrew-atp atp-sdk`}
                 <CardContent>
                   <div className="bg-black/60 rounded-lg p-4 font-mono text-xs overflow-x-auto">
                     <pre className="text-blue-300">
-{`import { MotleycrewATPClient } from '@atp/motleycrew-atp';
-import { MotleyCrew } from 'motleycrew';
+{`import { OpenClawATPClient } from '@atp/openclaw-atp';
+import { OpenClaw } from 'openclaw';
 
 // 1. Initialize ATP client
-const atpClient = new MotleycrewATPClient({
+const atpClient = new OpenClawATPClient({
   atpServiceUrl: 'http://localhost:3000',
   profile: 'strictDev',
   enableMonitoring: true
@@ -402,7 +402,7 @@ console.log('Agent DID:', registration.did);
 console.log('Trust score:', registration.trustScore);
 
 // 3. Validate crew
-const crew = new MotleyCrew();
+const crew = new OpenClaw();
 crew.add_agent(agent);
 
 const validation = await atpClient.validateCrew(crew);
@@ -431,7 +431,7 @@ const result = await crew.run('Execute trading strategy');`}
   ATPPolicyProfile, 
   ATPMonitor,
   ATPSecretManager 
-} from '@atp/motleycrew-atp';
+} from '@atp/openclaw-atp';
 
 // Custom policy profile
 const customPolicy = new ATPPolicyProfile({
@@ -668,7 +668,7 @@ const token = await secretManager.getSecret('api-key', {
               </Card>
             </Link>
 
-            <Link href="https://github.com/agent-trust-protocol/core/tree/main/packages/motleycrew-atp" target="_blank">
+            <Link href="https://github.com/agent-trust-protocol/core/tree/main/packages/openclaw-atp" target="_blank">
               <Card className="glass border-0 hover:border-primary/20 transition-all cursor-pointer h-full">
                 <CardHeader>
                   <div className="flex items-center gap-2 mb-2">
@@ -720,7 +720,7 @@ const token = await secretManager.getSecret('api-key', {
                 Ready to Secure Your Multi-Agent System?
               </CardTitle>
               <CardDescription className="text-base">
-                Install the ATP Motleycrew integration and add quantum-safe security in minutes
+                Install the ATP OpenClaw integration and add quantum-safe security in minutes
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col sm:flex-row gap-4 justify-center">

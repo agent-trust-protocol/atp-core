@@ -1,7 +1,7 @@
 /**
  * ATP Graph Validator
  * 
- * Validates Motleycrew agent graphs against ATP policies
+ * Validates OpenClaw agent graphs against ATP policies
  */
 
 import type { ATPClient } from 'atp-sdk';
@@ -40,7 +40,7 @@ export class ATPGraphValidator {
   }
 
   /**
-   * Validate a Motleycrew agent graph
+   * Validate a OpenClaw agent graph
    */
   async validateGraph(
     nodes: GraphNode[],
@@ -443,7 +443,7 @@ export async function validateCrewWithAtp(
   // Extract edges (agent-to-agent connections)
   const edges: GraphEdge[] = [];
   
-  // In Motleycrew, edges are implicit through tool usage
+  // In OpenClaw, edges are implicit through tool usage
   // This would need to be extracted from the actual crew structure
   
   return await validator.validateGraph(nodes, edges);

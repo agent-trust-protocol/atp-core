@@ -1,7 +1,7 @@
 {
-  "name": "@atpdevelopment/motleycrew-atp",
+  "name": "@atpdevelopment/openclaw-atp",
   "version": "1.0.0",
-  "description": "ATP (Agent Trust Protocol) security integration for Motleycrew agents",
+  "description": "ATP (Agent Trust Protocol) security integration for OpenClaw agents",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -14,7 +14,7 @@
   "keywords": [
     "atp",
     "agent-trust-protocol",
-    "motleycrew",
+    "openclaw",
     "ai-agents",
     "security",
     "quantum-safe",
@@ -47,7 +47,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/agent-trust-protocol/core",
-    "directory": "packages/motleycrew-atp"
+    "directory": "packages/openclaw-atp"
   },
   "publishConfig": {
     "access": "public",

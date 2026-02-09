@@ -30,7 +30,7 @@ export function Navbar() {
               Developers
             </Link>
             <Link
-              href="/integrations/motleycrew"
+              href="/integrations/openclaw"
               className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               Integrations

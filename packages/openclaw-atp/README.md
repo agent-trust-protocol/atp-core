@@ -1,35 +1,35 @@
-# 🔐 ATP Motleycrew Integration
+# 🔐 ATP OpenClaw Integration
 
-**Quantum-safe security layer for Motleycrew AI agents**
+**Quantum-safe security layer for OpenClaw AI agents**
 
-This package provides seamless integration between the Agent Trust Protocol™ (ATP) and Motleycrew, enabling enterprise-grade security, trust scoring, and policy enforcement for multi-agent AI systems.
+This package provides seamless integration between the Agent Trust Protocol™ (ATP) and OpenClaw, enabling enterprise-grade security, trust scoring, and policy enforcement for multi-agent AI systems.
 
 ## 🌟 Features
 
-- **🛡️ Agent Identity Management** - Quantum-safe DIDs for every Motleycrew agent
+- **🛡️ Agent Identity Management** - Quantum-safe DIDs for every OpenClaw agent
 - **🔒 Tool Security Wrapper** - ATP security checks on all tool calls
 - **📊 Trust-Based Access Control** - Dynamic trust scoring and policy enforcement
 - **📝 Task-Level Security** - Attach security metadata to tasks and knowledge graphs
 - **🌐 Graph Validation** - Policy-based validation of agent interaction graphs
 - **📡 Observability Integration** - Lunary metrics → ATP trust engine
 - **🔑 Secrets Management** - ATP-managed credentials for external services
-- **📦 Zero Configuration** - Works out of the box with Motleycrew
+- **📦 Zero Configuration** - Works out of the box with OpenClaw
 
 ## 🚀 Quick Start
 
 ### Installation
 
 ```bash
-pip install motleycrew-atp  # Python package
+pip install openclaw-atp  # Python package
 # or
-npm install @atp/motleycrew-atp  # For TypeScript projects
+npm install @atpdevelopment/openclaw-atp  # For TypeScript projects
 ```
 
 ### Basic Usage (Python)
 
 ```python
-from motleycrew.agents.langchain import ReActToolCallingMotleyAgent
-from motleycrew_atp import (
+from openclaw.agents.langchain import ReActToolCallingOpenClawAgent
+from openclaw_atp import (
     register_agent_with_atp,
     secure_tools,
     atp_protected_task,
@@ -51,8 +51,8 @@ agent_meta = register_agent_with_atp(
 raw_tools = [search_tool, write_tool, file_tool]
 secure_tools_list = secure_tools(raw_tools, atp)
 
-# 3. Create Motleycrew agent with ATP
-writer = ReActToolCallingMotleyAgent(
+# 3. Create OpenClaw agent with ATP
+writer = ReActToolCallingOpenClawAgent(
     name="writer",
     tools=secure_tools_list,
     metadata={"atp": agent_meta}
@@ -72,16 +72,16 @@ async def execute_trade():
 ### Advanced Usage
 
 ```python
-from motleycrew import MotleyCrew
-from motleycrew.tasks import SimpleTask
-from motleycrew_atp import (
+from openclaw import OpenClaw
+from openclaw.tasks import SimpleTask
+from openclaw_atp import (
     validate_crew_with_atp,
     ATPPolicyProfile,
     ATPGraphValidator
 )
 
 # Create crew with multiple agents
-crew = MotleyCrew()
+crew = OpenClaw()
 crew.add_agent(writer, [search_tool, write_tool])
 crew.add_agent(trader, [market_tool, trade_tool])
 crew.add_agent(reviewer, [read_tool, approve_tool])
@@ -114,7 +114,7 @@ crew.run()
 ## 📋 Configuration Profiles
 
 ```python
-from motleycrew_atp import ATPConfigProfile
+from openclaw_atp import ATPConfigProfile
 
 # Strict development profile (safe defaults)
 dev_profile = ATPConfigProfile.strict_dev()
@@ -138,7 +138,7 @@ pii_profile = ATPConfigProfile.pii_workflow(
 
 ### 1. Agent Registration
 
-Every Motleycrew agent gets:
+Every OpenClaw agent gets:
 - Quantum-safe DID (Decentralized Identifier)
 - Ed25519 + Dilithium key pair
 - Initial trust score (0.0 - 1.0)
@@ -193,7 +193,7 @@ ATP-managed connectors for:
 ## 📊 Monitoring & Metrics
 
 ```python
-from motleycrew_atp import ATPMonitor
+from openclaw_atp import ATPMonitor
 
 monitor = ATPMonitor(atp)
 
@@ -214,10 +214,10 @@ events = monitor.get_security_events(severity="high")
 
 ```python
 # Test ATP integration
-python -m motleycrew_atp.test
+python -m openclaw_atp.test
 
 # Validate specific crew
-from motleycrew_atp import test_crew_security
+from openclaw_atp import test_crew_security
 test_crew_security(crew, atp_client)
 ```
 
@@ -232,7 +232,7 @@ test_crew_security(crew, atp_client)
 
 ### Classes
 
-- `ATPMotleyAgent` - Base agent class with ATP identity
+- `ATPOpenClawAgent` - Base agent class with ATP identity
 - `ATPToolWrapper` - Security wrapper for tools
 - `ATPGraphValidator` - Graph validation engine
 - `ATPPolicyProfile` - Policy configuration
@@ -251,7 +251,7 @@ test_crew_security(crew, atp_client)
 
 ## 🆘 Support
 
-- **Documentation**: https://docs.atp.dev/motleycrew
+- **Documentation**: https://docs.atp.dev/openclaw
 - **Issues**: https://github.com/agent-trust-protocol/core/issues
 - **Discord**: https://discord.gg/atp
 - **Email**: support@atp.protocol
@@ -263,7 +263,7 @@ Apache-2.0 - see [LICENSE](./LICENSE)
 ## 🙏 Credits
 
 Built on top of:
-- [Motleycrew](https://github.com/ShoggothAI/motleycrew) - Multi-agent orchestration
+- [OpenClaw](https://github.com/ShoggothAI/openclaw) - Multi-agent orchestration
 - [ATP SDK](https://github.com/agent-trust-protocol/sdk) - Agent Trust Protocol
 - [LangChain](https://github.com/langchain-ai/langchain) - LLM framework
 

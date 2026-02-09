@@ -1,14 +1,14 @@
 /**
  * ATP Agent Registration
  * 
- * Registers Motleycrew agents with ATP and assigns quantum-safe identities
+ * Registers OpenClaw agents with ATP and assigns quantum-safe identities
  */
 
 import type { ATPClient, TrustLevel } from 'atp-sdk';
 import type { AgentMetadata, AgentRegistrationOptions } from './types.js';
 
 /**
- * Register a Motleycrew agent with ATP
+ * Register a OpenClaw agent with ATP
  * 
  * @param client - ATP client instance
  * @param options - Registration options
@@ -41,7 +41,7 @@ export async function registerAgentWithAtp(
     policyProfile,
     metadata: {
       ...metadata,
-      source: 'motleycrew',
+      source: 'openclaw',
       quantumSafe,
       requireMFA
     },
@@ -88,7 +88,7 @@ export async function registerAgentWithAtp(
     }
   });
 
-  console.log(`✅ Registered Motleycrew agent: ${name} (${registration.did})`);
+  console.log(`✅ Registered OpenClaw agent: ${name} (${registration.did})`);
   
   return agentMeta;
 }
@@ -199,7 +199,7 @@ async function assignRolePermissions(
       },
       expiresAt: null, // Permanent unless revoked
       metadata: {
-        source: 'motleycrew-auto-grant',
+        source: 'openclaw-auto-grant',
         role,
         trustLevel
       }

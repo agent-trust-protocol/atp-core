@@ -1,7 +1,7 @@
 /**
- * Motleycrew ATP Integration - Main Client
+ * OpenClaw ATP Integration - Main Client
  * 
- * Simplified client for Motleycrew + ATP integration
+ * Simplified client for OpenClaw + ATP integration
  */
 
 import type { ATPClient } from 'atp-sdk';
@@ -13,7 +13,7 @@ import type { AgentRegistrationOptions } from './agent/types.js';
 import type { ToolSecurityConfig } from './tools/types.js';
 import type { InterAgentPolicy, WorkflowConstraints } from './graph/types.js';
 
-export interface MotleycrewIntegrationConfig {
+export interface OpenClawIntegrationConfig {
   /** ATP client instance */
   atpClient: ATPClient;
   
@@ -31,17 +31,17 @@ export interface MotleycrewIntegrationConfig {
 }
 
 /**
- * Simplified Motleycrew ATP Client
+ * Simplified OpenClaw ATP Client
  * 
- * Provides high-level API for integrating ATP with Motleycrew
+ * Provides high-level API for integrating ATP with OpenClaw
  */
-export class MotleycrewATPClient {
+export class OpenClawATPClient {
   public readonly atp: ATPClient;
   public readonly monitor?: ATPMonitor;
   private graphValidator?: ATPGraphValidator;
-  private config: MotleycrewIntegrationConfig;
+  private config: OpenClawIntegrationConfig;
 
-  constructor(config: MotleycrewIntegrationConfig) {
+  constructor(config: OpenClawIntegrationConfig) {
     this.config = config;
     this.atp = config.atpClient;
 

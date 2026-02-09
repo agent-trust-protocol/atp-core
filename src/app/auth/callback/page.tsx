@@ -32,7 +32,7 @@ export default function AuthCallbackPage() {
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         // Check if session was established
-        const sessionResponse = await fetch('/api/auth/sessions');
+        const sessionResponse = await fetch('/api/auth/get-session');
         if (sessionResponse.ok) {
           const sessionData = await sessionResponse.json();
           if (sessionData.session) {

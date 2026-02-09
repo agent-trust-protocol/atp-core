@@ -567,12 +567,12 @@ export default function ExamplesPage() {
                       </div>
                       <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/20">Ready</Badge>
                     </div>
-                    <Link href="/integrations/motleycrew" className="flex items-center justify-between p-3 rounded-lg bg-card/30 border border-border/30 hover:bg-card/50 transition-colors">
+                    <Link href="/integrations/openclaw" className="flex items-center justify-between p-3 rounded-lg bg-card/30 border border-border/30 hover:bg-card/50 transition-colors">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
                           <Users className="text-orange-400" size={16} />
                         </div>
-                        <span className="font-medium">Motleycrew</span>
+                        <span className="font-medium">OpenClaw</span>
                       </div>
                       <Badge className="bg-green-500/10 text-green-400 border-green-500/20">Ready</Badge>
                     </Link>
@@ -793,7 +793,7 @@ export default function ExamplesPage() {
                     <div className="p-2 rounded-lg bg-orange-500/10 border border-orange-500/20">
                       <Users className="text-orange-400" size={20} />
                     </div>
-                    <CardTitle className="font-display text-lg">Motleycrew Integration</CardTitle>
+                    <CardTitle className="font-display text-lg">OpenClaw Integration</CardTitle>
                   </div>
                   <CardDescription>ATP-secured multi-agent workflows</CardDescription>
                 </CardHeader>
@@ -804,7 +804,7 @@ export default function ExamplesPage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
                       <span>Technology:</span>
-                      <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20">Motleycrew + ATP</Badge>
+                      <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20">OpenClaw + ATP</Badge>
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <span>Features:</span>
@@ -813,13 +813,13 @@ export default function ExamplesPage() {
                   </div>
                   <div className="flex gap-2">
                     <Button asChild size="sm" className="flex-1">
-                      <Link href="/integrations/motleycrew">
+                      <Link href="/integrations/openclaw">
                         <PlayCircle size={14} className="mr-2" />
                         Details
                       </Link>
                     </Button>
                     <Button asChild variant="outline" size="sm" className="flex-1">
-                      <a href="https://github.com/agent-trust-protocol/core/tree/main/packages/motleycrew-atp" target="_blank" rel="noopener noreferrer">
+                      <a href="https://github.com/agent-trust-protocol/core/tree/main/packages/openclaw-atp" target="_blank" rel="noopener noreferrer">
                         <GitBranch size={14} className="mr-2" />
                         Code
                       </a>
