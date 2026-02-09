@@ -1,7 +1,7 @@
 /**
  * ATP Task Decorator
  * 
- * Decorator for Motleycrew tasks that adds ATP security metadata and validation
+ * Decorator for OpenClaw tasks that adds ATP security metadata and validation
  */
 
 import type { TaskSecurityMetadata } from './types.js';

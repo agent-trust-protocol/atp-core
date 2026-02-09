@@ -1,13 +1,13 @@
-# 🎉 ATP Motleycrew Integration - Implementation Complete
+# 🎉 ATP OpenClaw Integration - Implementation Complete
 
 ## 📦 What's Been Built
 
-A comprehensive ATP (Agent Trust Protocol) security layer for Motleycrew multi-agent systems, providing quantum-safe security, trust-based access control, and policy enforcement.
+A comprehensive ATP (Agent Trust Protocol) security layer for OpenClaw multi-agent systems, providing quantum-safe security, trust-based access control, and policy enforcement.
 
 ### Package Structure
 
 ```
-packages/motleycrew-atp/
+packages/openclaw-atp/
 ├── src/
 │   ├── agent/              # Agent identity & registration
 │   │   ├── types.ts        # Agent metadata types
@@ -123,7 +123,7 @@ Pre-configured profiles for common scenarios:
 
 ```typescript
 import { ATPClient } from 'atp-sdk';
-import { registerAgentWithAtp, secureTools } from '@atp/motleycrew-atp';
+import { registerAgentWithAtp, secureTools } from '@atpdevelopment/openclaw-atp';
 
 // 1. Register agent
 const agentMeta = await registerAgentWithAtp(atp, {
@@ -189,7 +189,7 @@ See [examples/finance-workflow.ts](./examples/finance-workflow.ts) for a full im
 
 1. **Install & Test**
    ```bash
-   cd packages/motleycrew-atp
+   cd packages/openclaw-atp
    npm install
    npm run build
    npm test # (tests coming soon)
@@ -214,7 +214,7 @@ See [examples/finance-workflow.ts](./examples/finance-workflow.ts) for a full im
 ## 🤝 Contributing
 
 Contributions welcome! Areas for improvement:
-- Python bindings for Python-based Motleycrew users
+- Python bindings for Python-based OpenClaw users
 - Additional policy profiles (healthcare, legal, etc.)
 - More DLP patterns
 - Performance optimizations

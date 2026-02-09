@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 export const dynamicSetting = 'force-dynamic';
 export const revalidate = 0;
 
-// Dynamically import client component to prevent SSR issues with Clerk
+// Dynamically import client component to prevent SSR issues with Better Auth
 const SignupClient = dynamic(
   () => import('./client-page'),
   {
