@@ -1,0 +1,56 @@
+{
+  "name": "@atp/motleycrew-atp",
+  "version": "1.0.0",
+  "description": "ATP (Agent Trust Protocol) security integration for Motleycrew agents",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "atp",
+    "agent-trust-protocol",
+    "motleycrew",
+    "ai-agents",
+    "security",
+    "quantum-safe",
+    "langchain",
+    "crewai"
+  ],
+  "author": "ATP Team",
+  "license": "Apache-2.0",
+  "peerDependencies": {
+    "atp-sdk": "^1.2.0"
+  },
+  "dependencies": {
+    "atp-sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agent-trust-protocol/core",
+    "directory": "packages/motleycrew-atp"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}
