@@ -32,6 +32,21 @@ console.log(await agent.getTrustScore('did:atp:other'));
 
 ---
 
+## 🎮 Try It Now
+
+Explore ATP features interactively in the **[ATP Playground →](https://www.agenttrustprotocol.com/playground)**
+
+- 🤖 Create quantum-safe agents
+- 📊 See trust scoring in action
+- 🔐 Test quantum-safe signatures
+- 🚀 Run Motleycrew multi-agent workflows
+- 📜 Explore the policy engine
+- 🔗 Verify blockchain audit trails
+
+No installation required — runs entirely in your browser.
+
+---
+
 ## 🚀 Quick Start (2 Minutes)
 
 ### Option 1: Works Immediately (No Setup)
