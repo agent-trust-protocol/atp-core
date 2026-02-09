@@ -248,6 +248,70 @@ if (permCheck.result.data.allowed) {
 }
 ```
 
+## Multi-Agent Workflows with Motleycrew
+
+ATP now supports [Motleycrew](https://github.com/ShoggothAI/motleycrew) multi-agent systems with quantum-safe security:
+
+### Quick Start with Motleycrew
+
+```bash
+# Install Motleycrew integration
+npm install @atp/motleycrew-atp motleycrew
+```
+
+```typescript
+import { MotleycrewATPClient } from '@atp/motleycrew-atp';
+import { MotleyCrew, ReActToolCallingMotleyAgent } from 'motleycrew';
+
+// 1. Initialize ATP client
+const atpClient = new MotleycrewATPClient({
+  atpServiceUrl: 'http://localhost:3000',
+  profile: 'strictDev', // Pre-configured security profile
+  enableMonitoring: true
+});
+
+await atpClient.initialize();
+
+// 2. Create and register agent
+const researcher = new ReActToolCallingMotleyAgent({
+  name: 'Researcher',
+  description: 'Analyzes market data',
+  tools: researchTools
+});
+
+const { agent, registration } = await atpClient.registerAgent(researcher, {
+  name: 'market-researcher',
+  capabilities: ['research', 'analysis'],
+  trustLevel: 'standard'
+});
+
+console.log(`✅ Agent registered with DID: ${registration.did}`);
+
+// 3. Create crew and validate
+const crew = new MotleyCrew();
+crew.add_agent(agent);
+
+const validation = await atpClient.validateCrew(crew);
+if (!validation.isValid) {
+  console.error('❌ Validation failed:', validation.errors);
+  process.exit(1);
+}
+
+// 4. Run secured workflow
+const result = await crew.run('Analyze market trends');
+```
+
+Your Motleycrew agents now have:
+- 🔐 Quantum-safe identities (hybrid Ed25519 + Dilithium3)
+- 🛡️ Tool-level security validation
+- 📊 Policy-based graph constraints
+- 🎯 Dynamic trust scoring
+- 📈 Lunary observability integration
+
+**Learn more:** [Motleycrew Integration Guide](./motleycrew-integration.md)
+
+---
+
 ## Running Examples
 
 ATP includes ready-to-run example agents:
@@ -268,6 +332,7 @@ npm run demo
 ## Next Steps
 
 - **Explore the API**: Read the [API Reference](api/README.md)
+- **Secure Multi-Agent Systems**: See [Motleycrew Integration](./motleycrew-integration.md)
 - **Build Multi-Agent Workflows**: See [Integration Guide](integration.md)
 - **Understand Security**: Review [Security Model](security.md)
 - **Deploy to Production**: Check [Deployment Guide](deployment.md)

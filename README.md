@@ -124,6 +124,22 @@ console.log('Verified:', result.verified); // true
 
 ### Integration with Popular Frameworks
 
+**Motleycrew (Multi-Agent Systems):**
+```typescript
+import { registerAgentWithAtp, secureTools } from '@atp/motleycrew-atp';
+import { ATPClient } from 'atp-sdk';
+
+const atp = new ATPClient();
+const { agent } = await registerAgentWithAtp(atp, motleycrewAgent, {
+  name: 'trader-agent',
+  capabilities: ['trading', 'analysis'],
+  trustLevel: 'high'
+});
+
+// Secure all tools with ATP
+const securedTools = secureTools(agent.did, tools, atp);
+```
+
 **LangChain:**
 ```typescript
 import { ATPSecurityWrapper } from 'atp-sdk/langchain';
@@ -173,7 +189,7 @@ ATP now includes Context7 MCP server for enhanced documentation capabilities:
 ATP provides universal security across all AI agent protocols:
 
 ```
-Your AI Agents (LangChain, AutoGPT, MCP, Swarm, ADK, A2A)
+Your AI Agents (LangChain, Motleycrew, AutoGPT, MCP, Swarm, ADK, A2A)
          │
          ▼
     ┌──────────────────────────────────────┐
@@ -213,9 +229,53 @@ pnpm add atp-sdk
 
 - **[Quick Start Guide](./docs/getting-started.md)** - 5-minute setup
 - **[API Reference](./packages/sdk/docs/api/README.md)** - Complete API docs
+- **[Motleycrew Integration](./docs/motleycrew-integration.md)** - Secure multi-agent workflows
 - **[Examples](./packages/sdk/examples/)** - Working code examples
 - **[Multi-Protocol Support](./docs/multi-protocol.md)** - MCP, Swarm, ADK, A2A
 - **[Troubleshooting](./docs/troubleshooting.md)** - Common issues
+
+---
+
+## 🤖 Multi-Agent Systems with Motleycrew
+
+ATP now provides first-class support for [Motleycrew](https://github.com/ShoggothAI/motleycrew) multi-agent frameworks. Secure entire agent crews with quantum-safe cryptography:
+
+```typescript
+import { MotleycrewATPClient } from '@atp/motleycrew-atp';
+import { MotleyCrew } from 'motleycrew';
+
+// Initialize ATP client with Motleycrew
+const atpClient = new MotleycrewATPClient({
+  profile: 'productionFinance', // Pre-configured security profiles
+  enableMonitoring: true
+});
+
+// Register agents with ATP identities
+const researcher = await atpClient.registerAgent(researchAgent, {
+  name: 'market-researcher',
+  trustLevel: 'standard'
+});
+
+const trader = await atpClient.registerAgent(tradingAgent, {
+  name: 'trader',
+  trustLevel: 'high',
+  capabilities: ['trading', 'execute_orders']
+});
+
+// Validate agent graph before execution
+const validation = await atpClient.validateCrew(crew);
+// ✅ Graph validated: No cycles, trust levels satisfied, data flows secure
+```
+
+**Features:**
+- 🔐 **Quantum-safe agent identities** for every Motleycrew agent
+- 🛡️ **Tool-level security** with ATP permission checks on every call
+- 📊 **Graph validation** - Policy-based constraints on agent interactions
+- 🎯 **Trust-based access control** - Dynamic trust scores adjust permissions
+- 📈 **Lunary integration** - Observability feeds into ATP trust engine
+- 🔑 **Secret management** - Short-lived, scoped credentials for external services
+
+[Read the full guide →](./docs/motleycrew-integration.md)
 
 ---
 
