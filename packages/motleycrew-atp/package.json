@@ -1,5 +1,5 @@
 {
-  "name": "@atp/motleycrew-atp",
+  "name": "@atpdevelopment/motleycrew-atp",
   "version": "1.0.0",
   "description": "ATP (Agent Trust Protocol) security integration for Motleycrew agents",
   "main": "dist/index.js",
