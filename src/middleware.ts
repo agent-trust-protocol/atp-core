@@ -8,6 +8,11 @@ const publicRoutes = [
   '/api/request-access',
   '/api/webhooks',
   '/api/auth', // Better Auth endpoints
+  '/auth/callback', // Magic link callback
+  '/verify-email', // Email verification
+  '/reset-password', // Password reset
+  '/terms', // Legal pages
+  '/privacy', // Legal pages
   '/developers',
   '/docs',
   '/examples',
@@ -24,6 +29,9 @@ const publicRoutes = [
   '/enterprise',
   '/demos',
   '/policies',
+  '/playground', // Public for developer acquisition
+  '/integrations', // Integration docs
+  '/sales-guide', // Sales materials - publicly accessible
 ];
 
 function isPublicRoute(pathname: string): boolean {
