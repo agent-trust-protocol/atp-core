@@ -62,32 +62,32 @@ export default function OpenClawIntegrationPage() {
             quantum-safe cryptography, tool-level security, and dynamic trust scoring.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8 animate-fade-in-up">
-            <Badge className="glass text-sm px-4 py-2 atp-trust-high border-0">
+            <Badge className="text-sm px-4 py-2 atp-trust-high border-0 font-semibold">
               <Shield size={14} className="mr-2" />
               Quantum-Safe Identities
             </Badge>
-            <Badge className="glass text-sm px-4 py-2 atp-trust-verified border-0">
+            <Badge className="text-sm px-4 py-2 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-300/40 font-semibold">
               <Lock size={14} className="mr-2" />
               Tool-Level Security
             </Badge>
-            <Badge className="glass text-sm px-4 py-2 atp-trust-enterprise border-0">
+            <Badge className="text-sm px-4 py-2 bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-300/40 font-semibold">
               <Network size={14} className="mr-2" />
               Graph Validation
             </Badge>
-            <Badge className="glass text-sm px-4 py-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-0">
+            <Badge className="text-sm px-4 py-2 bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-300/40 font-semibold">
               <TrendingUp size={14} className="mr-2" />
               Dynamic Trust Scoring
             </Badge>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up">
             <Link href="/docs">
-              <Button size="lg" className="glass atp-button-glow">
+              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-lg">
                 <Download size={16} className="mr-2" />
                 Get Started
               </Button>
             </Link>
             <Link href="https://github.com/agent-trust-protocol/core/tree/main/packages/openclaw-atp" target="_blank">
-              <Button variant="outline" size="lg" className="glass">
+              <Button variant="outline" size="lg" className="border-2 border-foreground/20 text-foreground bg-background/80 hover:bg-accent hover:text-accent-foreground font-semibold">
                 <ExternalLink size={16} className="mr-2" />
                 View on GitHub
               </Button>
@@ -726,13 +726,13 @@ const token = await secretManager.getSecret('api-key', {
             </CardHeader>
             <CardContent className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/docs">
-                <Button size="lg" className="glass atp-button-glow">
+                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-lg">
                   <Rocket size={16} className="mr-2" />
                   Get Started
                 </Button>
               </Link>
               <Link href="/contact">
-                <Button variant="outline" size="lg" className="glass">
+                <Button variant="outline" size="lg" className="border-2 border-foreground/20 text-foreground bg-background/80 hover:bg-accent hover:text-accent-foreground font-semibold">
                   <Users size={16} className="mr-2" />
                   Talk to Us
                 </Button>

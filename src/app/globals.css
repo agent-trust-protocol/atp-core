@@ -241,6 +241,8 @@
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
   transition: all 0.3s ease;
+  color: hsl(var(--foreground));
+  -webkit-text-fill-color: hsl(var(--foreground));
 }
 
 .glass-intense {
@@ -280,16 +282,22 @@
 .atp-trust-high {
   background: linear-gradient(135deg, hsl(var(--atp-emerald)) 0%, rgb(34, 197, 94) 100%);
   box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
 }
 
 .atp-trust-medium {
   background: linear-gradient(135deg, hsl(var(--atp-amber)) 0%, rgb(251, 191, 36) 100%);
   box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+  color: #1a1a2e !important;
+  -webkit-text-fill-color: #1a1a2e !important;
 }
 
 .atp-trust-low {
   background: linear-gradient(135deg, hsl(var(--atp-crimson)) 0%, rgb(239, 68, 68) 100%);
   box-shadow: 0 0 20px rgba(220, 38, 38, 0.4);
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
 }
 
 /* Quantum Glow Effects */

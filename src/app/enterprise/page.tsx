@@ -45,15 +45,15 @@ export default function EnterprisePage() {
             with enterprise-grade features, compliance, and 24/7 support.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-8 animate-fade-in-up">
-            <Badge className="glass text-sm px-3 py-1 atp-trust-enterprise border-0">
+            <Badge className="text-sm px-3 py-1 bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-300/40 font-semibold">
               <Building size={12} className="mr-1" />
               Enterprise Ready
             </Badge>
-            <Badge className="glass text-sm px-3 py-1 atp-trust-verified border-0">
-              <Award size={12} className="mr-1 icon-glow" />
+            <Badge className="text-sm px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-300/40 font-semibold">
+              <Award size={12} className="mr-1" />
               SOC 2 Compliant
             </Badge>
-            <Badge className="glass text-sm px-3 py-1 atp-trust-high border-0">
+            <Badge className="text-sm px-3 py-1 atp-trust-high border-0 font-semibold">
               <Shield size={12} className="mr-1" />
               99.9% Uptime SLA
             </Badge>
