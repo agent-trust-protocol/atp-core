@@ -279,22 +279,7 @@ const validation = await atpClient.validateCrew(crew);
 
 ---
 
-## 🧪 Try It Now
-
-**Interactive Playground:** [Try ATP in your browser](https://playground.atp.dev)
-
-```typescript
-// Copy this into the playground
-import { Agent } from 'atp-sdk';
-
-const agent = await Agent.create('TestBot');
-console.log('Agent created:', agent.getDID());
-console.log('Quantum safe:', agent.isQuantumSafe());
-```
-
----
-
-## 🤝 Community
+##  Community
 
 - **GitHub**: [Issues & Discussions](https://github.com/agent-trust-protocol/core/discussions)
 - **Discord**: [Join our community](https://discord.gg/agenttrustprotocol)
