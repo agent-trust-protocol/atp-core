@@ -22,50 +22,59 @@ function AuthCallbackContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
-  const [message, setMessage] = useState('Processing magic link...');
+  const [message, setMessage] = useState('Processing authentication...');
 
   useEffect(() => {
     const processCallback = async () => {
       try {
-        // Get token from URL
-        const token = searchParams.get('token');
-        
-        if (!token) {
+        // Better Auth handles magic link token verification at /api/auth/magic-link/verify
+        // and OAuth callbacks at /api/auth/callback/*
+        // By the time the user lands here, the session cookie should already be set.
+        // We just need to verify the session exists and redirect.
+
+        // Check for error param (OAuth failures)
+        const error = searchParams.get('error');
+        if (error) {
           setStatus('error');
-          setMessage('No authentication token provided. Please request a new magic link.');
+          setMessage(`Authentication failed: ${error}. Please try again.`);
           return;
         }
 
-        // The Better Auth magic link is processed through the API route
-        // The token is automatically handled by Better Auth's [... all] route
-        // Here we just need to wait for the session to be established
-        
-        // Wait a moment for the session cookie to be set
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Poll for session (may take a moment for cookie to propagate)
+        let attempts = 0;
+        const maxAttempts = 5;
 
-        // Check if session was established
-        const sessionResponse = await fetch('/api/auth/get-session');
-        if (sessionResponse.ok) {
-          const sessionData = await sessionResponse.json();
-          if (sessionData.session) {
-            setStatus('success');
-            setMessage('Authentication successful! Redirecting to portal...');
-            
-            // Redirect to portal
-            setTimeout(() => {
-              router.push('/portal');
-            }, 1500);
-            return;
+        while (attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 800));
+
+          const sessionResponse = await fetch('/api/auth/get-session', {
+            credentials: 'include',
+          });
+
+          if (sessionResponse.ok) {
+            const sessionData = await sessionResponse.json();
+            if (sessionData?.session) {
+              setStatus('success');
+              setMessage('Authentication successful! Redirecting...');
+
+              const returnTo = searchParams.get('returnTo') || '/portal';
+              setTimeout(() => {
+                router.push(returnTo);
+              }, 1000);
+              return;
+            }
           }
+
+          attempts++;
         }
 
-        // If we get here, authentication failed
+        // If we get here after all attempts, authentication likely failed
         setStatus('error');
-        setMessage('Authentication failed. Please request a new magic link.');
+        setMessage('Unable to verify your session. The link may have expired or already been used.');
       } catch (error) {
         console.error('Callback error:', error);
         setStatus('error');
-        setMessage('An error occurred. Please try again.');
+        setMessage('An unexpected error occurred. Please try again.');
       }
     };
 
