@@ -1,5 +1,5 @@
 /**
- * Crew Validator - Simplified validation for Motleycrew crews
+ * Crew Validator - Simplified validation for OpenClaw crews
  */
 
 import type { ATPClient } from 'atp-sdk';
@@ -19,7 +19,7 @@ export interface CrewValidationOptions {
 }
 
 /**
- * Validate a Motleycrew crew with ATP policies
+ * Validate a OpenClaw crew with ATP policies
  */
 export async function validateCrewWithAtp(
   crew: any,
@@ -61,7 +61,7 @@ export async function validateCrewWithAtp(
 }
 
 /**
- * Extract graph structure from Motleycrew crew
+ * Extract graph structure from OpenClaw crew
  */
 function extractCrewGraph(crew: any): { nodes: any[]; edges: any[] } {
   const nodes: any[] = [];

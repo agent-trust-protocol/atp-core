@@ -1,11 +1,11 @@
 /**
- * ATP Motleycrew Integration - Main Entry Point
+ * ATP OpenClaw Integration - Main Entry Point
  * 
- * Provides quantum-safe security layer for Motleycrew AI agents
+ * Provides quantum-safe security layer for OpenClaw AI agents
  */
 
 // Core Agent Integration
-export { AtpMotleyAgent } from './agent/atp-agent.js';
+export { AtpOpenClawAgent } from './agent/atp-agent.js';
 export { registerAgentWithAtp } from './agent/registration.js';
 export type { AgentMetadata, AgentRegistrationOptions } from './agent/types.js';
 
@@ -39,8 +39,8 @@ export { ATPServiceConnector } from './connectors/service-connector.js';
 export type { ConnectorConfig, CredentialScope } from './connectors/types.js';
 
 // Utilities
-export { MotleycrewATPClient } from './client.js';
-export type { MotleycrewIntegrationConfig } from './types.js';
+export { OpenClawATPClient } from './client.js';
+export type { OpenClawIntegrationConfig } from './types.js';
 
 // Re-export ATP SDK types commonly used
 export type {

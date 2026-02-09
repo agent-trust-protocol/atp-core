@@ -135,8 +135,8 @@ async function executeCode(code: string, addLog: (_entry: Omit<LogEntry, 'timest
     addLog({ type: 'system', message: `⏱  Signed + verified in ${(Math.random() * 8 + 3).toFixed(1)}ms` });
   }
 
-  else if (code.includes('Motleycrew') || code.includes('motleycrew') || code.includes('crew')) {
-    addLog({ type: 'system', message: '⚡ ATP × Motleycrew Integration' });
+  else if (code.includes('OpenClaw') || code.includes('openclaw') || code.includes('crew')) {
+    addLog({ type: 'system', message: '⚡ ATP × OpenClaw Integration' });
     await delay(300);
 
     const agents = ['ResearchAgent', 'AnalysisAgent', 'WriterAgent'];
@@ -328,13 +328,13 @@ const isValid = await signer.verify(message, signature);
 console.log('Verification result:', isValid ? 'VALID' : 'INVALID');
 console.log('Quantum resistant:', signature.isQuantumSafe);`
   },
-  motleycrew: {
-    label: 'Motleycrew',
+  openclaw: {
+    label: 'OpenClaw',
     icon: '🚀',
-    code: `import { MotleycrewATPClient } from '@atpdevelopment/motleycrew-atp';
+    code: `import { OpenClawATPClient } from '@atpdevelopment/openclaw-atp';
 
-// Initialize ATP-secured Motleycrew workflow
-const client = new MotleycrewATPClient({ quantumSafe: true });
+// Initialize ATP-secured OpenClaw workflow
+const client = new OpenClawATPClient({ quantumSafe: true });
 
 // Register a crew of agents
 const crew = await client.registerCrew([
@@ -502,9 +502,9 @@ export default function PlaygroundPage() {
               </Link>
             </Button>
             <Button asChild variant="outline" size="sm">
-              <Link href="/integrations/motleycrew">
+              <Link href="/integrations/openclaw">
                 <Users size={14} className="mr-2" />
-                Motleycrew
+                OpenClaw
               </Link>
             </Button>
           </div>
@@ -696,7 +696,7 @@ export default function PlaygroundPage() {
             </CardHeader>
             <CardContent>
               <p className="text-xs text-muted-foreground">
-                Test multi-agent workflows with Motleycrew integration, graph validation, and trust-based access control.
+                Test multi-agent workflows with OpenClaw integration, graph validation, and trust-based access control.
               </p>
             </CardContent>
           </Card>

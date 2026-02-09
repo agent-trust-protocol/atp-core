@@ -1,12 +1,12 @@
 /**
- * Motleycrew ATP Integration Types
+ * OpenClaw ATP Integration Types
  */
 
 import type { ATPConfig } from 'atp-sdk';
 import type { ToolSecurityConfig } from './tools/types.js';
 import type { InterAgentPolicy, WorkflowConstraints } from './graph/types.js';
 
-export interface MotleycrewIntegrationConfig {
+export interface OpenClawIntegrationConfig {
   /** ATP configuration */
   atpConfig: ATPConfig;
   

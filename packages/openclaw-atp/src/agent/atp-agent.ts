@@ -1,14 +1,14 @@
 /**
- * ATP Motleycrew Agent Wrapper
+ * ATP OpenClaw Agent Wrapper
  * 
- * Base class for Motleycrew agents with ATP identity and security
+ * Base class for OpenClaw agents with ATP identity and security
  */
 
 import type { ATPClient } from 'atp-sdk';
 import type { AgentMetadata, AgentContext } from './types.js';
 import { registerAgentWithAtp, updateAgentTrust } from './registration.js';
 
-export interface AtpMotleyAgentConfig {
+export interface AtpOpenClawAgentConfig {
   /** Agent name */
   name: string;
   
@@ -32,11 +32,11 @@ export interface AtpMotleyAgentConfig {
 }
 
 /**
- * ATP-enhanced Motleycrew Agent
+ * ATP-enhanced OpenClaw Agent
  * 
- * Wraps any Motleycrew agent (LangChain, CrewAI, etc.) with ATP identity and security
+ * Wraps any OpenClaw agent (LangChain, CrewAI, etc.) with ATP identity and security
  */
-export class AtpMotleyAgent {
+export class AtpOpenClawAgent {
   public readonly name: string;
   public readonly role: string;
   public readonly atpClient: ATPClient;
@@ -46,7 +46,7 @@ export class AtpMotleyAgent {
   private autoUpdateTrust: boolean;
   private taskHistory: Array<{ success: boolean; timestamp: Date }> = [];
 
-  constructor(config: AtpMotleyAgentConfig) {
+  constructor(config: AtpOpenClawAgentConfig) {
     this.name = config.name;
     this.role = config.role;
     this.atpClient = config.atpClient;

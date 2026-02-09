@@ -374,8 +374,8 @@ export default function DocsPage() {
                       <span className="font-medium">CrewAI</span>
                       <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/20">Planned</Badge>
                     </div>
-                    <Link href="/integrations/motleycrew" className="flex items-center justify-between p-3 rounded-lg bg-card/30 border border-border/30 hover:bg-card/50 transition-colors">
-                      <span className="font-medium">Motleycrew</span>
+                    <Link href="/integrations/openclaw" className="flex items-center justify-between p-3 rounded-lg bg-card/30 border border-border/30 hover:bg-card/50 transition-colors">
+                      <span className="font-medium">OpenClaw</span>
                       <Badge className="bg-green-500/10 text-green-400 border-green-500/20">Ready</Badge>
                     </Link>
                   </div>

@@ -1,16 +1,16 @@
-# ATP Motleycrew Integration
+# ATP OpenClaw Integration
 
-Implementation of Agent Trust Protocol™ security layer for Motleycrew multi-agent systems.
+Implementation of Agent Trust Protocol™ security layer for OpenClaw multi-agent systems.
 
 ## Status: ✅ Complete
 
 **Version**: 1.0.0  
 **Date**: February 2026  
-**Location**: `/packages/motleycrew-atp/`
+**Location**: `/packages/openclaw-atp/`
 
 ## What Was Built
 
-A comprehensive TypeScript/JavaScript package that layers ATP quantum-safe security onto Motleycrew agents, providing:
+A comprehensive TypeScript/JavaScript package that layers ATP quantum-safe security onto OpenClaw agents, providing:
 
 1. **Agent Identity** - Quantum-safe DIDs for every agent
 2. **Tool Security** - ATP proxy for all tool calls (auth, policy, audit)
@@ -22,7 +22,7 @@ A comprehensive TypeScript/JavaScript package that layers ATP quantum-safe secur
 ## Architecture
 
 ```
-Motleycrew Agent
+OpenClaw Agent
        ↓
 ATP Identity (DID, Trust Score)
        ↓
@@ -46,7 +46,7 @@ Secure Execution with Full Audit Trail
 
 ```typescript
 import { ATPClient } from 'atp-sdk';
-import { registerAgentWithAtp, secureTools, validateCrewWithAtp } from '@atp/motleycrew-atp';
+import { registerAgentWithAtp, secureTools, validateCrewWithAtp } from '@atpdevelopment/openclaw-atp';
 
 // 1. Register agent with ATP
 const agentMeta = await registerAgentWithAtp(atp, {
@@ -88,14 +88,14 @@ await crew.run();
 1. Build package: `npm run build`
 2. Review [INTEGRATION-GUIDE.md](INTEGRATION-GUIDE.md)
 3. Try example: `tsx examples/finance-workflow.ts`
-4. Integrate with your Motleycrew project
+4. Integrate with your OpenClaw project
 
 ## Python Support
 
-Python bindings coming soon to support Python-based Motleycrew users.
+Python bindings coming soon to support Python-based OpenClaw users.
 
 ---
 
-**Documentation**: [ATP Motleycrew Docs](https://docs.atp.dev/motleycrew)  
+**Documentation**: [ATP OpenClaw Docs](https://docs.atp.dev/openclaw)  
 **Support**: support@atp.protocol  
 **License**: Apache-2.0
