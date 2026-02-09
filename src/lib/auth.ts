@@ -4,9 +4,11 @@ import { magicLink } from "better-auth/plugins";
 import path from "path";
 import Database from "better-sqlite3";
 
-// Provide a secret for Better Auth
-const secret = process.env.BETTER_AUTH_SECRET ||
-  'build-time-placeholder-replace-with-env-var-in-production';
+// Provide a secret for Better Auth — MUST be set in production
+const secret = process.env.BETTER_AUTH_SECRET || (process.env.NODE_ENV === 'production' ? undefined : 'dev-only-secret-not-for-production');
+if (!secret) {
+  throw new Error('BETTER_AUTH_SECRET environment variable is required in production');
+}
 
 const baseURL = process.env.BETTER_AUTH_URL || "http://localhost:3000";
 
