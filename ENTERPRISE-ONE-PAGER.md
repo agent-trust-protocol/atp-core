@@ -84,22 +84,22 @@ Agent Trust Protocol™ delivers the **world's first quantum-safe MCP implementa
 
 ### Option 1: Schedule Demo Call (30 minutes)
 See quantum-safe AI agent security in action
-**Book now**: [enterprise@atp.com](mailto:enterprise@atp.com)
+**Book now**: [enterprise@agenttrustprotocol.com](mailto:enterprise@agenttrustprotocol.com)
 
 ### Option 2: Join Pilot Program (60-90 days)
 Comprehensive proof of concept with dedicated support
-**Apply now**: [pilot@atp.com](mailto:pilot@atp.com)
+**Apply now**: [pilot@agenttrustprotocol.com](mailto:pilot@agenttrustprotocol.com)
 
 ### Option 3: Enterprise Deployment (Full implementation)
 Complete quantum-safe AI agent security solution
-**Contact sales**: [sales@atp.com](mailto:sales@atp.com)
+**Contact sales**: [sales@agenttrustprotocol.com](mailto:sales@agenttrustprotocol.com)
 
 ---
 
 ## 📞 Contact Information
 
 **🌐 Website**: https://agent-trust-protocol.com
-**📧 Enterprise Sales**: enterprise@atp.com
+**📧 Enterprise Sales**: enterprise@agenttrustprotocol.com
 **📱 Phone**: +1 (555) 123-4567
 
 **🛡️ Agent Trust Protocol™** - *Protecting AI Agents from Tomorrow's Threats, Today*

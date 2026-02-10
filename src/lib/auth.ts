@@ -1,8 +1,7 @@
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { magicLink } from "better-auth/plugins";
-import path from "path";
-import Database from "better-sqlite3";
+import { Pool } from "pg";
 
 // Provide a secret for Better Auth — MUST be set in production
 const secret = process.env.BETTER_AUTH_SECRET || (process.env.NODE_ENV === 'production' ? undefined : 'dev-only-secret-not-for-production');
@@ -12,28 +11,26 @@ if (!secret) {
 
 const baseURL = process.env.BETTER_AUTH_URL || "http://localhost:3000";
 
-// Use absolute path for SQLite database
-const dbPath = path.join(process.cwd(), "dev.db");
+// PostgreSQL connection for Better Auth
+const DATABASE_URL = process.env.DATABASE_URL;
+if (!DATABASE_URL && process.env.NODE_ENV === 'production') {
+  throw new Error('DATABASE_URL environment variable is required in production');
+}
 
-// Initialize better-sqlite3 database
-const sqlite = new Database(dbPath);
+const pool = DATABASE_URL ? new Pool({
+  connectionString: DATABASE_URL,
+  max: 5,
+  ssl: DATABASE_URL.includes('localhost') || DATABASE_URL.includes('127.0.0.1')
+    ? false
+    : { rejectUnauthorized: false },
+}) : undefined;
 
 export const auth = betterAuth({
   secret,
   baseURL,
-  database: sqlite,
+  database: pool as any, // Better Auth accepts a pg Pool directly
   emailAndPassword: {
     enabled: false, // Disabled - using magic link instead
-  },
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-    },
-    github: {
-      clientId: process.env.GITHUB_CLIENT_ID || "",
-      clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
-    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 30, // 30 days

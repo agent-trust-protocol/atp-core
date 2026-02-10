@@ -172,7 +172,7 @@ function VerifyEmailContent() {
           </div>
 
           <p className="text-center text-xs text-muted-foreground">
-            Need help? Contact support@agenttrustprotocol.com
+            Need help? Contact dev@agenttrustprotocol.com
           </p>
         </CardContent>
       </Card>

@@ -101,8 +101,8 @@ export default function TermsPage() {
               <h2 className="text-xl font-semibold">10. Contact</h2>
               <p className="text-muted-foreground leading-relaxed">
                 For questions about these Terms, contact us at{' '}
-                <a href="mailto:legal@agenttrustprotocol.com" className="text-primary hover:underline">
-                  legal@agenttrustprotocol.com
+                <a href="mailto:llewis@agenttrustprotocol.com" className="text-primary hover:underline">
+                  llewis@agenttrustprotocol.com
                 </a>{' '}
                 or visit our{' '}
                 <Link href="/contact" className="text-primary hover:underline">

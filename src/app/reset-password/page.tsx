@@ -52,8 +52,8 @@ export default function ResetPasswordPage() {
 
           <p className="text-center text-xs text-muted-foreground">
             Need help? Contact{' '}
-            <a href="mailto:support@agenttrustprotocol.com" className="text-primary hover:underline">
-              support@agenttrustprotocol.com
+            <a href="mailto:dev@agenttrustprotocol.com" className="text-primary hover:underline">
+              dev@agenttrustprotocol.com
             </a>
           </p>
         </CardContent>

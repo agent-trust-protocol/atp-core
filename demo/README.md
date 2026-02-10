@@ -247,14 +247,14 @@ npm --version
 ## Support and Feedback
 
 ### Demo Support
-- **Email**: demo-support@atp.dev
+- **Email**: dev@agenttrustprotocol.com
 - **Documentation**: https://docs.atp.dev/demo
 - **Issues**: https://github.com/atp-protocol/agent-trust-protocol/issues
 
 ### Sales Support
 - **Sales Team**: sales@atp.dev
 - **Technical Sales**: tech-sales@atp.dev
-- **Enterprise Sales**: enterprise@atp.dev
+- **Enterprise Sales**: llewis@agenttrustprotocol.com
 
 ### Feedback
 We welcome feedback on the demo experience:

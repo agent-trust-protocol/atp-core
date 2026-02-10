@@ -160,7 +160,7 @@ npm update atp-sdk
 
 - **GitHub Issues**: Report bugs and request features
 - **GitHub Discussions**: Ask questions and share ideas
-- **Email**: support@agenttrustprotocol.com
+- **Email**: dev@agenttrustprotocol.com
 
 ---
 

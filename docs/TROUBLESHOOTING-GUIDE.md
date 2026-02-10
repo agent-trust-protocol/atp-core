@@ -960,7 +960,7 @@ psql -d atp_production -c "
 ### Escalation Contacts
 
 **Enterprise Support:**
-- **Email**: enterprise-support@atp.dev
+- **Email**: llewis@agenttrustprotocol.com
 - **Phone**: +1-800-ATP-HELP
 - **Portal**: https://support.atp.dev
 - **Slack**: #atp-enterprise-support

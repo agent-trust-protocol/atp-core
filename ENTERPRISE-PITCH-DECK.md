@@ -278,12 +278,12 @@
 ### Ready to Secure Your AI Agents?
 
 **Website**: https://agent-trust-protocol.com
-**Email**: enterprise@atp.com
+**Email**: enterprise@agenttrustprotocol.com
 **Phone**: +1 (555) 123-4567
 
-**Enterprise Sales**: sales@atp.com
-**Technical Support**: support@atp.com
-**Investor Relations**: investors@atp.com
+**Enterprise Sales**: sales@agenttrustprotocol.com
+**Technical Support**: support@agenttrustprotocol.com
+**Investor Relations**: investors@agenttrustprotocol.com
 
 ---
 
