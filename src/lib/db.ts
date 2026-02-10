@@ -10,7 +10,8 @@ import { Pool } from 'pg';
 
 const DATABASE_URL = process.env.DATABASE_URL;
 
-if (!DATABASE_URL) {
+// Only warn at runtime, not during build
+if (!DATABASE_URL && typeof globalThis !== 'undefined' && process.env.NEXT_PHASE !== 'phase-production-build') {
   console.warn(
     '[DB] DATABASE_URL not set. Database features will not work.\n' +
     'Set DATABASE_URL=postgresql://user:pass@host:5432/dbname in your .env file.'
