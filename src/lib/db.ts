@@ -33,8 +33,8 @@ export function getPool(): Pool {
       max: 10,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
-      // SSL for production (Neon, Supabase, etc.)
-      ssl: DATABASE_URL.includes('localhost') || DATABASE_URL.includes('127.0.0.1')
+      // SSL: disabled for local dev and Fly internal network; enabled for external DBs
+      ssl: DATABASE_URL.includes('localhost') || DATABASE_URL.includes('127.0.0.1') || DATABASE_URL.includes('sslmode=disable') || DATABASE_URL.includes('.flycast')
         ? false
         : { rejectUnauthorized: false },
     });
