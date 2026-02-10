@@ -415,7 +415,7 @@ const agent = await initializeWithRetry('my-agent');
 ### Get Help
 - 💬 [GitHub Discussions](https://github.com/agent-trust-protocol/core/discussions)
 - 🐛 [Report Issues](https://github.com/agent-trust-protocol/core/issues)
-- 📧 [Email Support](mailto:support@agenttrustprotocol.com)
+- 📧 [Email Support](mailto:dev@agenttrustprotocol.com)
 
 ### Deploy to Production
 - 🚀 [Production Deployment Guide](./deployment/)

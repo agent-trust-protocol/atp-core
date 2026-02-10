@@ -315,17 +315,17 @@
 ## 📞 Contact Information
 
 ### **Pilot Program Applications**
-**Email**: pilot@atp.com  
+**Email**: pilot@agenttrustprotocol.com  
 **Phone**: +1 (555) 123-4567  
 **Website**: https://agent-trust-protocol.com/pilot  
 
 ### **Technical Questions**
-**Email**: technical@atp.com  
-**Support**: support@atp.com  
+**Email**: technical@agenttrustprotocol.com  
+**Support**: support@agenttrustprotocol.com  
 
 ### **Executive Inquiries**
-**Email**: enterprise@atp.com  
-**Sales**: sales@atp.com  
+**Email**: enterprise@agenttrustprotocol.com  
+**Sales**: sales@agenttrustprotocol.com  
 
 ---
 

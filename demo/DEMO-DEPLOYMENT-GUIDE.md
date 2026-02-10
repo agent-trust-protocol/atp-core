@@ -337,7 +337,7 @@ sudo ufw status
 ## 📞 Support Contacts
 
 ### Demo Support
-- **Technical Issues**: demo-support@atp.dev
+- **Technical Issues**: dev@agenttrustprotocol.com
 - **Sales Support**: sales@atp.dev
 - **Emergency Support**: +1-800-ATP-DEMO
 

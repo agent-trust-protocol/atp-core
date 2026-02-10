@@ -876,4 +876,4 @@ Agent Trust Protocol™ implements comprehensive enterprise-grade security contr
 **Security Classification:** Enterprise Confidential  
 **Last Updated:** July 5, 2025  
 **Next Review:** October 5, 2025  
-**Contact:** security@atp.dev
+**Contact:** llewis@agenttrustprotocol.com

@@ -21,7 +21,11 @@
     "langchain",
     "crewai"
   ],
-  "author": "ATP Team",
+  "author": {
+    "name": "ATP Team",
+    "email": "dev@agenttrustprotocol.com",
+    "url": "https://agenttrustprotocol.com"
+  },
   "license": "Apache-2.0",
   "peerDependencies": {
     "atp-sdk": "^1.2.0"

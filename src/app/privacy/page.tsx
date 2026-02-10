@@ -115,8 +115,8 @@ export default function PrivacyPage() {
               <h2 className="text-xl font-semibold">10. Contact</h2>
               <p className="text-muted-foreground leading-relaxed">
                 For privacy-related inquiries, contact us at{' '}
-                <a href="mailto:privacy@agenttrustprotocol.com" className="text-primary hover:underline">
-                  privacy@agenttrustprotocol.com
+                <a href="mailto:llewis@agenttrustprotocol.com" className="text-primary hover:underline">
+                  llewis@agenttrustprotocol.com
                 </a>{' '}
                 or visit our{' '}
                 <Link href="/contact" className="text-primary hover:underline">

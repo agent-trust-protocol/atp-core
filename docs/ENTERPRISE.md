@@ -766,9 +766,9 @@ atp-failover \
 **Emergency Hotline:** +1 (555) 123-4567
 
 **Email:**
-- General: enterprise@agenttrustprotocol.com
-- Critical Issues: critical@agenttrustprotocol.com
-- Security: security@agenttrustprotocol.com
+- General: llewis@agenttrustprotocol.com
+- Critical Issues: llewis@agenttrustprotocol.com
+- Security: llewis@agenttrustprotocol.com
 
 ### Escalation Process
 
@@ -819,7 +819,7 @@ atp-failover \
 
 ---
 
-**Need help?** Contact your Technical Account Manager or email enterprise@agenttrustprotocol.com
+**Need help?** Contact your Technical Account Manager or email llewis@agenttrustprotocol.com
 
 **ATP Enterprise** - *Quantum-Safe Security for Mission-Critical AI Infrastructure*
 

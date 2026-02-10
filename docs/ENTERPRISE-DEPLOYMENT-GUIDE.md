@@ -568,7 +568,7 @@ node test-quantum-safe-integration.js
 - **Enterprise**: 24/7 support, 4-hour response, dedicated CSM
 
 **Support Channels:**
-- Email: enterprise-support@atp.dev
+- Email: llewis@agenttrustprotocol.com
 - Phone: +1-800-ATP-HELP
 - Portal: https://support.atp.dev
 
@@ -617,4 +617,4 @@ Agent Trust Protocol™ provides enterprise-grade quantum-safe security for AI a
 **Document Version:** 1.0.0  
 **Last Updated:** July 5, 2025  
 **Classification:** Enterprise Confidential  
-**Contact:** enterprise@atp.dev
+**Contact:** llewis@agenttrustprotocol.com

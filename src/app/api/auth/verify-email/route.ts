@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Database from 'better-sqlite3';
-import path from 'path';
-
-const dbPath = path.join(process.cwd(), 'dev.db');
+import { getPool } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,17 +15,17 @@ export async function GET(request: NextRequest) {
 
     console.log('[VERIFY] Attempting to verify token:', token.substring(0, 10) + '...');
 
-    const db = new Database(dbPath);
-    const now = Date.now();
+    const pool = getPool();
+    const now = new Date();
 
     // Find verification token
-    const verification = db.prepare(`
-      SELECT * FROM verification
-      WHERE value = ? AND expiresAt > ?
-    `).get(token, now) as any;
+    const verifyResult = await pool.query(
+      `SELECT * FROM verification WHERE value = $1 AND "expiresAt" > $2`,
+      [token, now]
+    );
+    const verification = verifyResult.rows[0];
 
     if (!verification) {
-      db.close();
       console.log('[VERIFY] Token not found or expired');
       return NextResponse.json(
         { success: false, message: 'Invalid or expired verification token' },
@@ -40,14 +37,12 @@ export async function GET(request: NextRequest) {
     console.log('[VERIFY] Token valid for email:', email);
 
     // Update user emailVerified status
-    const result = db.prepare(`
-      UPDATE user
-      SET emailVerified = 1, updatedAt = ?
-      WHERE email = ?
-    `).run(now, email);
+    const updateResult = await pool.query(
+      `UPDATE "user" SET "emailVerified" = true, "updatedAt" = $1 WHERE email = $2`,
+      [now, email]
+    );
 
-    if (result.changes === 0) {
-      db.close();
+    if (updateResult.rowCount === 0) {
       console.log('[VERIFY] User not found for email:', email);
       return NextResponse.json(
         { success: false, message: 'User not found' },
@@ -56,9 +51,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Delete the verification token (single use)
-    db.prepare('DELETE FROM verification WHERE id = ?').run(verification.id);
-
-    db.close();
+    await pool.query('DELETE FROM verification WHERE id = $1', [verification.id]);
 
     console.log('[VERIFY] Email verified successfully for:', email);
 
