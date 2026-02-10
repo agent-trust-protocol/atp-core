@@ -24,6 +24,7 @@ COPY . .
 # Set build-time environment variables
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+ENV NEXT_PUBLIC_BASE_URL=https://agenttrustprotocol.com
 
 # Build the application
 RUN npm run build

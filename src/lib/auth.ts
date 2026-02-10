@@ -20,7 +20,7 @@ if (!DATABASE_URL && process.env.NODE_ENV === 'production') {
 const pool = DATABASE_URL ? new Pool({
   connectionString: DATABASE_URL,
   max: 5,
-  ssl: DATABASE_URL.includes('localhost') || DATABASE_URL.includes('127.0.0.1')
+  ssl: DATABASE_URL.includes('localhost') || DATABASE_URL.includes('127.0.0.1') || DATABASE_URL.includes('sslmode=disable') || DATABASE_URL.includes('.flycast')
     ? false
     : { rejectUnauthorized: false },
 }) : undefined;
