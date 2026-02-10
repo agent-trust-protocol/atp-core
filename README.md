@@ -332,7 +332,7 @@ npm install atp-sdk
 - SOC2 compliance ready
 - Enterprise support
 - Custom deployment
-[Contact Sales →](mailto:enterprise@agenttrustprotocol.com)
+[Contact Sales →](mailto:llewis@agenttrustprotocol.com)
 
 </td>
 </tr>
@@ -346,7 +346,7 @@ Licensed under [Apache 2.0](./LICENSE) - free for commercial use.
 
 ## 🛡️ Security
 
-Found a security issue? Email security@agenttrustprotocol.com
+Found a security issue? Email llewis@agenttrustprotocol.com
 
 ---
 

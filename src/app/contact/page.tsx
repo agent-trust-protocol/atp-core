@@ -108,8 +108,8 @@ export default function ContactPage() {
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <span className="text-sm font-medium">Email:</span>
-                    <a href="mailto:enterprise@agenttrustprotocol.com" className="text-blue-600 hover:underline text-sm">
-                      enterprise@agenttrustprotocol.com
+                    <a href="mailto:llewis@agenttrustprotocol.com" className="text-blue-600 hover:underline text-sm">
+                      llewis@agenttrustprotocol.com
                     </a>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -138,8 +138,8 @@ export default function ContactPage() {
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <span className="text-sm font-medium">Email:</span>
-                    <a href="mailto:support@agenttrustprotocol.com" className="text-blue-600 hover:underline text-sm">
-                      support@agenttrustprotocol.com
+                    <a href="mailto:dev@agenttrustprotocol.com" className="text-blue-600 hover:underline text-sm">
+                      dev@agenttrustprotocol.com
                     </a>
                   </div>
                   <div className="flex items-center space-x-2">

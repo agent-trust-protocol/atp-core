@@ -271,7 +271,7 @@ export default function EnterpriseContactPage() {
                     </div>
                     <div>
                       <div className="font-medium">Email</div>
-                      <div className="text-sm text-foreground/70">enterprise@agenttrustprotocol.com</div>
+                      <div className="text-sm text-foreground/70">llewis@agenttrustprotocol.com</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">

@@ -166,13 +166,13 @@ We have successfully implemented the **world's first quantum-safe AI agent secur
 
 ### **Enterprise Sales**
 - **Website**: https://agent-trust-protocol.com
-- **Email**: enterprise@atp.com
+- **Email**: llewis@agenttrustprotocol.com
 - **Phone**: +1 (555) 123-4567
 
 ### **Technical Support**
 - **Documentation**: See QUANTUM-SAFE-INTEGRATION.md
 - **GitHub**: https://github.com/agent-trust-protocol/core
-- **Support**: support@atp.com
+- **Support**: dev@agenttrustprotocol.com
 
 ---
 

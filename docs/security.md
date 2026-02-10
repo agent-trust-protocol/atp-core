@@ -169,7 +169,7 @@ When implementing ATP™, follow these best practices:
 If you discover a security vulnerability in ATP™, please report it responsibly:
 
 1. **Do not disclose publicly** until a fix is available
-2. Email security@atp.dev with details of the vulnerability
+2. Email llewis@agenttrustprotocol.com with details of the vulnerability
 3. Include steps to reproduce and potential impact
 4. We will acknowledge receipt within 24 hours
 5. We will work with you to address the issue

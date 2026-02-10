@@ -10,7 +10,7 @@ Get instant help from our ATP-powered support agent:
 - **Availability:** 24/7 automated support
 
 ### **Enterprise Support**
-- **Email:** support@agenttrustprotocol.com
+- **Email:** dev@agenttrustprotocol.com
 - **SLA:** <4 hours for enterprise customers
 - **Phone:** Available for Enterprise tier customers
 
@@ -42,7 +42,7 @@ Get instant help from our ATP-powered support agent:
 
 ## 🚨 **Security Issues**
 
-For security vulnerabilities, please email: **security@agenttrustprotocol.com**
+For security vulnerabilities, please email: **llewis@agenttrustprotocol.com**
 - **Do not** create public GitHub issues for security problems
 - Include detailed reproduction steps
 - We will acknowledge within 24 hours

@@ -2,6 +2,11 @@
   "name": "atp-ui-modern",
   "version": "0.1.0",
   "description": "Modern UI for Agent Trust Protocol using Next.js and shadcn/ui",
+  "author": {
+    "name": "ATP Team",
+    "email": "dev@agenttrustprotocol.com",
+    "url": "https://agenttrustprotocol.com"
+  },
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -41,6 +46,7 @@
     "lucide-react": "^0.294.0",
     "next": "^14.0.0",
     "nodemailer": "^7.0.10",
+    "pg": "^8.18.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "reactflow": "^11.11.4",
@@ -51,6 +57,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/pg": "^8.16.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "autoprefixer": "^10.0.0",

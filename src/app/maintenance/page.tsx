@@ -60,8 +60,8 @@ export default function MaintenancePage() {
             <div className="pt-6 border-t">
               <p className="text-xs text-muted-foreground">
                 For urgent inquiries, contact:{' '}
-                <a href="mailto:support@agenttrustprotocol.com" className="text-primary hover:underline">
-                  support@agenttrustprotocol.com
+                <a href="mailto:dev@agenttrustprotocol.com" className="text-primary hover:underline">
+                  dev@agenttrustprotocol.com
                 </a>
               </p>
             </div>
