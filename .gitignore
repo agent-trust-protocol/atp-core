@@ -10,6 +10,12 @@ build/
 # Environment variables
 .env*
 !.env.example
+# Explicitly ignore all env variants (in case previously committed)
+.env.production
+.env.staging
+.env.local
+.env.production.example
+.env.production.template
 
 # Debug
 npm-debug.log*
@@ -167,3 +173,16 @@ build-packages-locally.sh
 configure-ssl.sh
 generate-dev-certs.sh
 root@165.227.13.206
+
+# Accidental local paths
+Users/
+
+# Runtime files
+.atp-pids
+*.pids
+
+# Deployment archives and backups (belong on server, not in repo)
+deployment-backups/
+website-repo-old/
+atp-ip-protection-deploy.tar.gz
+*.tar.gz
