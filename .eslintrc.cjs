@@ -6,7 +6,8 @@ module.exports = {
     project: './tsconfig.json'
   },
   extends: [
-    'eslint:recommended'
+    'eslint:recommended',
+    'next/core-web-vitals'
   ],
   plugins: ['@typescript-eslint'],
   root: true,
