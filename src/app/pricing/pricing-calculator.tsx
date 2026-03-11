@@ -1,26 +1,26 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Calculator, ArrowRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Calculator, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 const TIERS = [
   { name: 'Open Source', maxAgents: 10, maxRequests: 5000, price: 0, priceLabel: 'Free', isCustom: false },
   { name: 'Startup', maxAgents: 25, maxRequests: 25000, price: 250, priceLabel: '$250/mo', isCustom: false },
   { name: 'Professional', maxAgents: 100, maxRequests: 250000, price: 1500, priceLabel: '$1,500/mo', isCustom: false },
-  { name: 'Enterprise', maxAgents: Infinity, maxRequests: Infinity, price: 0, priceLabel: 'Custom Pricing', isCustom: true },
-]
+  { name: 'Enterprise', maxAgents: Infinity, maxRequests: Infinity, price: 0, priceLabel: 'Custom Pricing', isCustom: true }
+];
 
 export function PricingCalculator() {
-  const [agents, setAgents] = useState(10)
-  const [requests, setRequests] = useState(5000)
+  const [agents, setAgents] = useState(10);
+  const [requests, setRequests] = useState(5000);
 
   const recommendedTier = TIERS.find(tier =>
     agents <= tier.maxAgents && requests <= tier.maxRequests
-  ) || TIERS[TIERS.length - 1]
+  ) || TIERS[TIERS.length - 1];
 
   return (
     <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
@@ -89,7 +89,7 @@ export function PricingCalculator() {
               </p>
             </div>
             <Button asChild className="atp-gradient-primary hover:scale-105 transition-all">
-              <Link href={recommendedTier.name === 'Open Source' ? "https://github.com/agent-trust-protocol/core" : "/enterprise/contact"}>
+              <Link href={recommendedTier.name === 'Open Source' ? 'https://github.com/agent-trust-protocol/core' : '/enterprise/contact'}>
                 {recommendedTier.isCustom ? 'Contact Sales' : 'Get Started'}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -98,5 +98,5 @@ export function PricingCalculator() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -1,13 +1,13 @@
-import Link from "next/link"
-import Image from "next/image"
-import { BrandLogo } from "@/components/ui/brand-logo"
+import Link from 'next/link';
+import Image from 'next/image';
+import { BrandLogo } from '@/components/ui/brand-logo';
 
-import { 
-  Shield, 
-  Users, 
-  Activity, 
-  BarChart3, 
-  Settings, 
+import {
+  Shield,
+  Users,
+  Activity,
+  BarChart3,
+  Settings,
   FileText,
   ArrowRight,
   Zap,
@@ -21,17 +21,17 @@ import {
   Eye,
   TrendingUp,
   Code2
-} from "lucide-react"
-import { AnimatedIcon, IconWithBadge, FloatingIcon } from "@/components/ui/animated-icon"
-import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon, SecureConnectionIcon, PolicyFlowIcon } from "@/components/ui/atp-icons"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+} from 'lucide-react';
+import { AnimatedIcon, IconWithBadge, FloatingIcon } from '@/components/ui/animated-icon';
+import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon, SecureConnectionIcon, PolicyFlowIcon } from '@/components/ui/atp-icons';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 // Demo components temporarily disabled for compilation
 // import { QuantumSafeSignatureDemo } from "@/components/atp/quantum-safe-signature-demo"
 // import { TrustLevelManagementDemo } from "@/components/atp/trust-level-management-demo"
 // import { PerformanceMetricsPreview } from "@/components/atp/performance-metrics-preview"
-import { QuickAccess } from "@/components/ui/quick-access"
+import { QuickAccess } from '@/components/ui/quick-access';
 
 export default function HomePage() {
   return (
@@ -81,7 +81,7 @@ export default function HomePage() {
               </Button>
             </div>
           </div>
-          
+
           <div className="mt-8 p-6 bg-gradient-to-r from-[hsl(var(--atp-surface))]/50 to-[hsl(var(--atp-surface))]/80 rounded-2xl border border-border/50 backdrop-blur-sm animate-fade-in-up">
             <p className="text-base text-muted-foreground text-center">🎉 <strong className="text-foreground">100% Open Source</strong> • Apache 2.0 License • <a href="https://github.com/agent-trust-protocol/core" className="text-atp-electric-cyan hover:text-atp-electric-cyan/80 hover:underline" target="_blank" rel="noopener noreferrer">Free Forever</a> • <Link href="/developers" className="text-atp-electric-cyan hover:text-atp-electric-cyan/80 hover:underline">Developer Portal</Link> • <Link href="/integrations/openclaw" className="text-atp-electric-cyan hover:text-atp-electric-cyan/80 hover:underline">OpenClaw Integration</Link> • Enterprise Support Available</p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm">
@@ -353,5 +353,5 @@ export default function HomePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

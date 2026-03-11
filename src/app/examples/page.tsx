@@ -1,11 +1,11 @@
-import Link from "next/link"
-import { 
-  PlayCircle, 
-  Code2, 
-  Lightbulb, 
-  Users, 
-  Shield, 
-  Zap, 
+import Link from 'next/link';
+import {
+  PlayCircle,
+  Code2,
+  Lightbulb,
+  Users,
+  Shield,
+  Zap,
   ArrowRight,
   Copy,
   ExternalLink,
@@ -21,13 +21,13 @@ import {
   Video,
   Download,
   Star
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon, SecureConnectionIcon, PolicyFlowIcon } from "@/components/ui/atp-icons"
-import type { Metadata } from 'next'
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon, SecureConnectionIcon, PolicyFlowIcon } from '@/components/ui/atp-icons';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Examples — Agent Trust Protocol',
@@ -41,8 +41,8 @@ export const metadata: Metadata = {
     'quantum-safe examples',
     'AI agent security',
     'sample applications'
-  ],
-}
+  ]
+};
 
 export default function ExamplesPage() {
   return (
@@ -59,7 +59,7 @@ export default function ExamplesPage() {
             <span className="atp-gradient-text">Examples & Patterns</span>
           </h1>
           <p className="text-lg sm:text-xl text-foreground/80 mb-8 max-w-4xl mx-auto leading-relaxed animate-fade-in-up">
-            Learn ATP through <span className="atp-gradient-text font-medium">real-world examples</span>, 
+            Learn ATP through <span className="atp-gradient-text font-medium">real-world examples</span>,
             integration patterns, and best practices for quantum-safe AI agent security.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8 animate-fade-in-up">
@@ -124,12 +124,12 @@ export default function ExamplesPage() {
                       <h3 className="font-medium">Initialize Client</h3>
                     </div>
                     <div className="bg-card/50 border border-border/50 rounded-lg p-4 font-mono text-xs">
-                      <div className="text-muted-foreground mb-2">{"// src/index.ts"}</div>
-                      <div className="text-foreground">import {"{ ATPClient }"} from 'atp-sdk'</div>
-                      <div className="text-foreground mt-2">const atp = new ATPClient({"{"}
-                        <br />{"  "}baseUrl: 'https://api.atp.dev',
-                        <br />{"  "}apiKey: process.env.ATP_API_KEY
-                        <br />{"}"})
+                      <div className="text-muted-foreground mb-2">{'// src/index.ts'}</div>
+                      <div className="text-foreground">import {'{ ATPClient }'} from 'atp-sdk'</div>
+                      <div className="text-foreground mt-2">const atp = new ATPClient({'{'}
+                        <br />{'  '}baseUrl: 'https://api.atp.dev',
+                        <br />{'  '}apiKey: process.env.ATP_API_KEY
+                        <br />{'}'})
                       </div>
                     </div>
                     <Button variant="outline" size="sm" className="w-full glass border-atp-electric-cyan/30 hover:bg-atp-electric-cyan/10 hover:border-atp-electric-cyan/50 hover:scale-105 transition-all duration-300">
@@ -147,15 +147,15 @@ export default function ExamplesPage() {
                         <h3 className="font-medium">Register Your Agent</h3>
                       </div>
                       <div className="bg-card/50 border border-border/50 rounded-lg p-4 font-mono text-xs">
-                        <div className="text-muted-foreground mb-2">{"// Register an AI agent"}</div>
-                        <div className="text-foreground">const agent = await atp.agents.create({"{"}
-                          <br />{"  "}name: 'CustomerServiceBot',
-                          <br />{"  "}description: 'Handles customer inquiries',
-                          <br />{"  "}capabilities: ['read', 'write', 'analyze']
-                          <br />{"}"})
+                        <div className="text-muted-foreground mb-2">{'// Register an AI agent'}</div>
+                        <div className="text-foreground">const agent = await atp.agents.create({'{'}
+                          <br />{'  '}name: 'CustomerServiceBot',
+                          <br />{'  '}description: 'Handles customer inquiries',
+                          <br />{'  '}capabilities: ['read', 'write', 'analyze']
+                          <br />{'}'})
                         </div>
-                        <div className="text-muted-foreground mt-3 mb-2">{"// Agent is now quantum-safe!"}</div>
-                        <div className="text-foreground">console.log(`Agent ID: ${"{"}agent.id{"}"}`)</div>
+                        <div className="text-muted-foreground mt-3 mb-2">{'// Agent is now quantum-safe!'}</div>
+                        <div className="text-foreground">console.log(`Agent ID: ${'{'}agent.id{'}'}`)</div>
                       </div>
                     </div>
 
@@ -165,14 +165,14 @@ export default function ExamplesPage() {
                         <h3 className="font-medium">Start Secure Interactions</h3>
                       </div>
                       <div className="bg-card/50 border border-border/50 rounded-lg p-4 font-mono text-xs">
-                        <div className="text-muted-foreground mb-2">{"// Secure agent communication"}</div>
-                        <div className="text-foreground">const response = await atp.agents.interact({"{"}
-                          <br />{"  "}agentId: agent.id,
-                          <br />{"  "}message: 'Process customer request',
-                          <br />{"  "}context: {"{ customerId: '123' }"}
-                          <br />{"}"})
+                        <div className="text-muted-foreground mb-2">{'// Secure agent communication'}</div>
+                        <div className="text-foreground">const response = await atp.agents.interact({'{'}
+                          <br />{'  '}agentId: agent.id,
+                          <br />{'  '}message: 'Process customer request',
+                          <br />{'  '}context: {"{ customerId: '123' }"}
+                          <br />{'}'})
                         </div>
-                        <div className="text-muted-foreground mt-3 mb-2">{"// All communications are quantum-safe"}</div>
+                        <div className="text-muted-foreground mt-3 mb-2">{'// All communications are quantum-safe'}</div>
                         <div className="text-foreground">console.log(response)</div>
                       </div>
                     </div>
@@ -257,7 +257,7 @@ export default function ExamplesPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Build secure multi-agent systems where agents collaborate, delegate tasks, 
+                    Build secure multi-agent systems where agents collaborate, delegate tasks,
                     and maintain trust relationships with quantum-safe communication.
                   </p>
                   <div className="space-y-2">
@@ -303,7 +303,7 @@ export default function ExamplesPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Integrate ATP into existing enterprise systems with service-to-service authentication, 
+                    Integrate ATP into existing enterprise systems with service-to-service authentication,
                     compliance logging, and centralized policy management.
                   </p>
                   <div className="space-y-2">
@@ -446,7 +446,7 @@ export default function ExamplesPage() {
                         Centralized ATP gateway handling all agent authentication and routing
                       </p>
                       <div className="bg-card/50 rounded p-3 font-mono text-xs">
-                        <div className="text-muted-foreground">{"// API Gateway with ATP"}</div>
+                        <div className="text-muted-foreground">{'// API Gateway with ATP'}</div>
                         <div className="text-foreground">app.use('/api/agents/*', atpAuth)</div>
                         <div className="text-foreground">app.use('/api/agents', agentRouter)</div>
                       </div>
@@ -493,8 +493,8 @@ export default function ExamplesPage() {
                         ATP SDK directly embedded in application code
                       </p>
                       <div className="bg-card/50 rounded p-3 font-mono text-xs">
-                        <div className="text-muted-foreground">{"// Direct integration"}</div>
-                        <div className="text-foreground">import {"{ ATPClient }"} from 'atp-sdk'</div>
+                        <div className="text-muted-foreground">{'// Direct integration'}</div>
+                        <div className="text-foreground">import {'{ ATPClient }'} from 'atp-sdk'</div>
                         <div className="text-foreground">const atp = new ATPClient(config)</div>
                         <div className="text-foreground">await atp.authenticate()</div>
                       </div>
@@ -515,7 +515,7 @@ export default function ExamplesPage() {
                         ATP events triggering business logic and workflows
                       </p>
                       <div className="bg-card/50 rounded p-3 font-mono text-xs">
-                        <div className="text-muted-foreground">{"// Event handlers"}</div>
+                        <div className="text-muted-foreground">{'// Event handlers'}</div>
                         <div className="text-foreground">atp.on('trustLevelChange', handler)</div>
                         <div className="text-foreground">atp.on('policyViolation', handler)</div>
                         <div className="text-foreground">atp.on('agentRegistered', handler)</div>
@@ -1293,5 +1293,5 @@ export default function ExamplesPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

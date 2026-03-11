@@ -22,8 +22,8 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     return NextResponse.json(
-      { 
-        status: 'unhealthy', 
+      {
+        status: 'unhealthy',
         error: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }

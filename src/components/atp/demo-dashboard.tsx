@@ -1,15 +1,15 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Activity, Shield, Users, Lock, TrendingUp, AlertCircle, CheckCircle2, Clock, ArrowRight } from "lucide-react"
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Activity, Shield, Users, Lock, TrendingUp, AlertCircle, CheckCircle2, Clock, ArrowRight } from 'lucide-react';
+import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 // Synthetic demo data - not real API calls
 const generateDemoData = () => {
-  const now = Date.now()
+  const now = Date.now();
   return {
     agents: {
       total: 147,
@@ -62,22 +62,22 @@ const generateDemoData = () => {
       { type: 'info', message: 'Policy POL-004 updated successfully', time: '12 mins ago' },
       { type: 'success', message: 'All systems operational', time: '1 hour ago' }
     ]
-  }
-}
+  };
+};
 
 export function DemoDashboard() {
-  const [data, setData] = useState(generateDemoData())
-  const [isLive, setIsLive] = useState(true)
+  const [data, setData] = useState(generateDemoData());
+  const [isLive, setIsLive] = useState(true);
 
   useEffect(() => {
-    if (!isLive) return
-    
-    const interval = setInterval(() => {
-      setData(generateDemoData())
-    }, 5000)
+    if (!isLive) return;
 
-    return () => clearInterval(interval)
-  }, [isLive])
+    const interval = setInterval(() => {
+      setData(generateDemoData());
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isLive]);
 
   return (
     <div className="space-y-6">
@@ -173,11 +173,11 @@ export function DemoDashboard() {
                 <XAxis dataKey="time" className="text-xs" />
                 <YAxis className="text-xs" />
                 <Tooltip />
-                <Area 
-                  type="monotone" 
-                  dataKey="count" 
-                  stroke="#3b82f6" 
-                  fill="#3b82f6" 
+                <Area
+                  type="monotone"
+                  dataKey="count"
+                  stroke="#3b82f6"
+                  fill="#3b82f6"
                   fillOpacity={0.2}
                 />
               </AreaChart>
@@ -213,7 +213,7 @@ export function DemoDashboard() {
             <div className="mt-4 flex justify-center gap-4">
               {data.trust.distribution.map((item) => (
                 <div key={item.name} className="flex items-center gap-2">
-                  <div className={`h-3 w-3 rounded-full`} style={{ backgroundColor: item.color }} />
+                  <div className={'h-3 w-3 rounded-full'} style={{ backgroundColor: item.color }} />
                   <span className="text-xs">{item.name}</span>
                 </div>
               ))}
@@ -234,10 +234,10 @@ export function DemoDashboard() {
                 <XAxis dataKey="time" className="text-xs" />
                 <YAxis className="text-xs" />
                 <Tooltip />
-                <Line 
-                  type="monotone" 
-                  dataKey="value" 
-                  stroke="#10b981" 
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#10b981"
                   strokeWidth={2}
                   dot={false}
                 />
@@ -325,5 +325,5 @@ export function DemoDashboard() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { checkApiAuth, createDemoResponse } from '@/lib/api-auth'
+import { NextRequest, NextResponse } from 'next/server';
+import { checkApiAuth, createDemoResponse } from '@/lib/api-auth';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
-const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL || 'http://localhost:3007'
+const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL || 'http://localhost:3007';
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,47 +13,47 @@ export async function GET(request: NextRequest) {
       return authResult.error || createDemoResponse('metrics');
     }
 
-    const searchParams = request.nextUrl.searchParams
-    
-    let monitoringUrl = `${MONITORING_SERVICE_URL}/api/monitoring/metrics`
-    
+    const {searchParams} = request.nextUrl;
+
+    let monitoringUrl = `${MONITORING_SERVICE_URL}/api/monitoring/metrics`;
+
     // Forward query parameters for history endpoint
     if (searchParams.has('timeRange') || searchParams.has('services') || searchParams.has('limit')) {
-      monitoringUrl += '/history'
-      const params = new URLSearchParams()
-      if (searchParams.has('timeRange')) params.append('timeRange', searchParams.get('timeRange')!)
-      if (searchParams.has('services')) params.append('services', searchParams.get('services')!)
-      if (searchParams.has('limit')) params.append('limit', searchParams.get('limit')!)
-      
+      monitoringUrl += '/history';
+      const params = new URLSearchParams();
+      if (searchParams.has('timeRange')) params.append('timeRange', searchParams.get('timeRange')!);
+      if (searchParams.has('services')) params.append('services', searchParams.get('services')!);
+      if (searchParams.has('limit')) params.append('limit', searchParams.get('limit')!);
+
       if (params.toString()) {
-        monitoringUrl += `?${params.toString()}`
+        monitoringUrl += `?${params.toString()}`;
       }
     }
 
     const response = await fetch(monitoringUrl, {
       headers: {
         'User-Agent': 'ATP-Website/1.0',
-        'Accept': 'application/json',
+        'Accept': 'application/json'
       },
       signal: AbortSignal.timeout(10000)
-    })
+    });
 
     if (!response.ok) {
-      throw new Error(`Monitoring service responded with ${response.status}`)
+      throw new Error(`Monitoring service responded with ${response.status}`);
     }
 
-    const data = await response.json()
-    
+    const data = await response.json();
+
     return NextResponse.json(data, {
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0'
       }
-    })
+    });
   } catch (error) {
-    console.error('Monitoring metrics API error:', error)
-    
+    console.error('Monitoring metrics API error:', error);
+
     // Return fallback data if monitoring service is unavailable
     return NextResponse.json(
       {
@@ -86,6 +86,6 @@ export async function GET(request: NextRequest) {
         }
       },
       { status: 503 }
-    )
+    );
   }
 }

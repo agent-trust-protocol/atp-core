@@ -132,7 +132,7 @@ function PortalContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ name: newKeyName, environment: 'production' }),
+        body: JSON.stringify({ name: newKeyName, environment: 'production' })
       });
       const json = await res.json();
       if (json.success && json.data?.key) {
@@ -151,7 +151,7 @@ function PortalContent() {
     try {
       const res = await fetch(`/api/sdk/keys?id=${keyId}`, {
         method: 'DELETE',
-        credentials: 'include',
+        credentials: 'include'
       });
       const json = await res.json();
       if (json.success) {

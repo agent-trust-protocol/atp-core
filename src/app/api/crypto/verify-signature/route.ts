@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
-import * as crypto from 'crypto'
+import { NextRequest, NextResponse } from 'next/server';
+import * as crypto from 'crypto';
 
 // Simple crypto utilities for demo purposes
 const CryptoUtils = {
@@ -8,12 +8,12 @@ const CryptoUtils = {
     // In production, this would use proper Ed25519 verification
     try {
       // Simple validation that signature matches expected format
-      return signature.length === 128 && /^[a-f0-9]+$/.test(signature)
+      return signature.length === 128 && /^[a-f0-9]+$/.test(signature);
     } catch {
-      return false
+      return false;
     }
   }
-}
+};
 
 export async function POST(request: NextRequest) {
   // Check authentication - CRITICAL IP PROTECTION
@@ -29,21 +29,21 @@ export async function POST(request: NextRequest) {
         signupUrl: '/signup?returnTo=/demos&feature=quantum-safe-demo'
       },
       { status: 401 }
-    )
+    );
   }
 
   try {
-    const { message, signature, publicKey } = await request.json()
+    const { message, signature, publicKey } = await request.json();
 
     if (!message || !signature || !publicKey) {
       return NextResponse.json(
         { error: 'Message, signature, and publicKey are required' },
         { status: 400 }
-      )
+      );
     }
 
     // Verify hybrid signature
-    const isValid = await CryptoUtils.verifySignature(message, signature, publicKey, true)
+    const isValid = await CryptoUtils.verifySignature(message, signature, publicKey, true);
 
     return NextResponse.json({
       success: true,
@@ -51,12 +51,12 @@ export async function POST(request: NextRequest) {
       message,
       timestamp: new Date().toISOString(),
       algorithm: 'hybrid-ed25519-demo'
-    })
+    });
   } catch (error: any) {
-    console.error('Signature verification error:', error)
+    console.error('Signature verification error:', error);
     return NextResponse.json(
       { error: 'Failed to verify signature', details: error.message },
       { status: 500 }
-    )
+    );
   }
 }

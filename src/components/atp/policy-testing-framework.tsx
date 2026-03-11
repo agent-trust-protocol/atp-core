@@ -1,15 +1,15 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { 
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import {
   Play,
   CheckCircle,
   XCircle,
@@ -22,22 +22,22 @@ import {
   Upload,
   AlertTriangle,
   Settings
-} from "lucide-react"
+} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+  DialogTrigger
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  SelectValue
+} from '@/components/ui/select';
 
 interface TestScenario {
   id: string
@@ -119,32 +119,32 @@ export function PolicyTestingFramework({ policyDocument, onTest }: PolicyTesting
       expectedResult: 'require_approval',
       tags: ['sensitive', 'database']
     }
-  ])
+  ]);
 
-  const [testResults, setTestResults] = useState<TestResult[]>([])
-  const [isRunningTests, setIsRunningTests] = useState(false)
-  const [selectedScenarios, setSelectedScenarios] = useState<string[]>([])
-  const [newScenario, setNewScenario] = useState<Partial<TestScenario>>({})
-  const [showAddDialog, setShowAddDialog] = useState(false)
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
+  const [isRunningTests, setIsRunningTests] = useState(false);
+  const [selectedScenarios, setSelectedScenarios] = useState<string[]>([]);
+  const [newScenario, setNewScenario] = useState<Partial<TestScenario>>({});
+  const [showAddDialog, setShowAddDialog] = useState(false);
 
   const runTests = async (scenarioIds?: string[]) => {
-    const testScenarios = scenarioIds 
+    const testScenarios = scenarioIds
       ? scenarios.filter(s => scenarioIds.includes(s.id))
-      : scenarios
+      : scenarios;
 
-    setIsRunningTests(true)
+    setIsRunningTests(true);
     try {
-      const results = await onTest(testScenarios)
-      setTestResults(results)
+      const results = await onTest(testScenarios);
+      setTestResults(results);
     } catch (error) {
-      console.error('Test execution failed:', error)
+      console.error('Test execution failed:', error);
     } finally {
-      setIsRunningTests(false)
+      setIsRunningTests(false);
     }
-  }
+  };
 
   const addScenario = () => {
-    if (!newScenario.name) return
+    if (!newScenario.name) return;
 
     const scenario: TestScenario = {
       id: Date.now().toString(),
@@ -159,69 +159,69 @@ export function PolicyTestingFramework({ policyDocument, onTest }: PolicyTesting
       },
       expectedResult: newScenario.expectedResult || 'allow',
       tags: newScenario.tags || []
-    }
+    };
 
-    setScenarios([...scenarios, scenario])
-    setNewScenario({})
-    setShowAddDialog(false)
-  }
+    setScenarios([...scenarios, scenario]);
+    setNewScenario({});
+    setShowAddDialog(false);
+  };
 
   const removeScenario = (id: string) => {
-    setScenarios(scenarios.filter(s => s.id !== id))
-    setTestResults(testResults.filter(r => r.scenarioId !== id))
-  }
+    setScenarios(scenarios.filter(s => s.id !== id));
+    setTestResults(testResults.filter(r => r.scenarioId !== id));
+  };
 
   const exportTests = () => {
-    const data = { scenarios, results: testResults }
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `policy-tests-${Date.now()}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+    const data = { scenarios, results: testResults };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `policy-tests-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const importTests = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-    const reader = new FileReader()
+    const reader = new FileReader();
     reader.onload = (e) => {
       try {
-        const data = JSON.parse(e.target?.result as string)
+        const data = JSON.parse(e.target?.result as string);
         if (data.scenarios) {
-          setScenarios(data.scenarios)
+          setScenarios(data.scenarios);
         }
         if (data.results) {
-          setTestResults(data.results)
+          setTestResults(data.results);
         }
       } catch (error) {
-        console.error('Failed to import test data:', error)
+        console.error('Failed to import test data:', error);
       }
-    }
-    reader.readAsText(file)
-  }
+    };
+    reader.readAsText(file);
+  };
 
   const getResultIcon = (result: TestResult) => {
     if (result.success) {
-      return <CheckCircle className="h-4 w-4 text-green-600" />
+      return <CheckCircle className="h-4 w-4 text-green-600" />;
     } else {
-      return <XCircle className="h-4 w-4 text-red-600" />
+      return <XCircle className="h-4 w-4 text-red-600" />;
     }
-  }
+  };
 
   const getResultColor = (success: boolean) => {
-    return success ? 'text-green-600' : 'text-red-600'
-  }
+    return success ? 'text-green-600' : 'text-red-600';
+  };
 
-  const successRate = testResults.length > 0 
-    ? (testResults.filter(r => r.success).length / testResults.length) * 100 
-    : 0
+  const successRate = testResults.length > 0
+    ? (testResults.filter(r => r.success).length / testResults.length) * 100
+    : 0;
 
   const avgProcessingTime = testResults.length > 0
     ? testResults.reduce((sum, r) => sum + r.processingTime, 0) / testResults.length
-    : 0
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -496,7 +496,7 @@ export function PolicyTestingFramework({ policyDocument, onTest }: PolicyTesting
                         <div className="flex items-center space-x-2">
                           {getResultIcon(result)}
                           <h4 className="font-medium">{result.scenarioName}</h4>
-                          <Badge variant={result.success ? "default" : "destructive"}>
+                          <Badge variant={result.success ? 'default' : 'destructive'}>
                             {result.success ? 'PASSED' : 'FAILED'}
                           </Badge>
                         </div>
@@ -531,5 +531,5 @@ export function PolicyTestingFramework({ policyDocument, onTest }: PolicyTesting
         </Card>
       </div>
     </div>
-  )
+  );
 }

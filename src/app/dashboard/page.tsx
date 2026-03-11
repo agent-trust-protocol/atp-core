@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import { SimpleDemoDashboard } from "@/components/atp/demo-dashboard-simple"
-import { Subnav } from "@/components/ui/subnav"
-import { Button } from "@/components/ui/button"
-import { Activity, Shield, Building2 } from "lucide-react"
-import { useRouter } from 'next/navigation'
+import { SimpleDemoDashboard } from '@/components/atp/demo-dashboard-simple';
+import { Subnav } from '@/components/ui/subnav';
+import { Button } from '@/components/ui/button';
+import { Activity, Shield, Building2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
-  const router = useRouter()
+  const router = useRouter();
   // Only show basic tabs for demo - hide premium features
   const dashboardTabs = [
     {
@@ -22,7 +22,7 @@ export default function DashboardPage() {
       href: '/enterprise',
       icon: <Building2 className="h-4 w-4" />
     }
-  ]
+  ];
 
   // Premium features require authentication - hidden from competitors
   // These would be shown only after login:
@@ -33,12 +33,12 @@ export default function DashboardPage() {
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' }
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-background">
-      <Subnav 
-        tabs={dashboardTabs} 
+      <Subnav
+        tabs={dashboardTabs}
         breadcrumbs={breadcrumbs}
         variant="both"
       />
@@ -99,5 +99,5 @@ export default function DashboardPage() {
         <SimpleDemoDashboard />
       </div>
     </div>
-  )
+  );
 }

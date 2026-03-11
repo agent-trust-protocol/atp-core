@@ -1,20 +1,20 @@
-"use client"
+'use client';
 
-import { useState, useEffect, useCallback } from "react"
-import { PolicyTestingFramework } from "@/components/atp/policy-testing-framework"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { 
+import { useState, useEffect, useCallback } from 'react';
+import { PolicyTestingFramework } from '@/components/atp/policy-testing-framework';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Subnav } from "@/components/ui/subnav"
-import { Shield as ShieldIcon, Edit3, Play, BarChart3, CheckCircle } from "lucide-react"
-import { FileText, RefreshCw } from "lucide-react"
+  SelectValue
+} from '@/components/ui/select';
+import { Subnav } from '@/components/ui/subnav';
+import { Shield as ShieldIcon, Edit3, Play, BarChart3, CheckCircle } from 'lucide-react';
+import { FileText, RefreshCw } from 'lucide-react';
 
 interface TestScenario {
   id: string
@@ -48,9 +48,9 @@ interface TestResult {
 }
 
 export default function PolicyTestingPage() {
-  const [policies, setPolicies] = useState<any[]>([])
-  const [selectedPolicy, setSelectedPolicy] = useState<string>("")
-  const [isLoading, setIsLoading] = useState(false)
+  const [policies, setPolicies] = useState<any[]>([]);
+  const [selectedPolicy, setSelectedPolicy] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const policyTabs = [
     {
@@ -77,46 +77,46 @@ export default function PolicyTestingPage() {
       href: '/dashboard',
       icon: <BarChart3 className="h-4 w-4" />
     }
-  ]
+  ];
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Policy Management', href: '/policies' },
     { label: 'Policy Testing' }
-  ]
+  ];
 
   const fetchPolicies = useCallback(async () => {
     try {
-      setIsLoading(true)
-      const baseUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003'
-      const response = await fetch(`${baseUrl}/policies`)
-      const data = await response.json()
-      
+      setIsLoading(true);
+      const baseUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003';
+      const response = await fetch(`${baseUrl}/policies`);
+      const data = await response.json();
+
       if (data.policies) {
-        setPolicies(data.policies)
-        setSelectedPolicy(prev => prev || (data.policies[0]?.id ?? ""))
+        setPolicies(data.policies);
+        setSelectedPolicy(prev => prev || (data.policies[0]?.id ?? ''));
       }
     } catch (error) {
-      console.error('Failed to fetch policies:', error)
+      console.error('Failed to fetch policies:', error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    fetchPolicies()
-  }, [fetchPolicies])
+    fetchPolicies();
+  }, [fetchPolicies]);
 
   const handleTest = async (scenarios: TestScenario[]): Promise<TestResult[]> => {
-    const selectedPolicyDoc = policies.find(p => p.id === selectedPolicy)
+    const selectedPolicyDoc = policies.find(p => p.id === selectedPolicy);
     if (!selectedPolicyDoc) {
-      throw new Error('No policy selected for testing')
+      throw new Error('No policy selected for testing');
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003'
-    
-    const results: TestResult[] = []
-    
+    const baseUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003';
+
+    const results: TestResult[] = [];
+
     for (const scenario of scenarios) {
       try {
         const response = await fetch(`${baseUrl}/policies/simulate`, {
@@ -130,10 +130,10 @@ export default function PolicyTestingPage() {
               timestamp: new Date().toISOString()
             }
           })
-        })
+        });
 
-        const result = await response.json()
-        
+        const result = await response.json();
+
         results.push({
           scenarioId: scenario.id,
           scenarioName: scenario.name,
@@ -144,7 +144,7 @@ export default function PolicyTestingPage() {
           reason: result.reason,
           matchedRule: result.matchedRule?.name,
           timestamp: new Date().toISOString()
-        })
+        });
       } catch (error) {
         results.push({
           scenarioId: scenario.id,
@@ -155,12 +155,12 @@ export default function PolicyTestingPage() {
           processingTime: 0,
           reason: `Test execution failed: ${error}`,
           timestamp: new Date().toISOString()
-        })
+        });
       }
     }
-    
-    return results
-  }
+
+    return results;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -175,8 +175,8 @@ export default function PolicyTestingPage() {
                 <p className="text-white/90">Monitor your quantum-safe AI agent network in real-time</p>
               </div>
               <div className="flex items-center gap-2">
-                <Button 
-                  onClick={fetchPolicies} 
+                <Button
+                  onClick={fetchPolicies}
                   disabled={isLoading}
                   className="bg-white/20 hover:bg-white/30 text-white border-0 hover:scale-105 transition-all duration-300"
                 >
@@ -209,8 +209,8 @@ export default function PolicyTestingPage() {
                         <div className="flex items-center justify-between w-full">
                           <span>{policy.name}</span>
                           <div className="flex items-center space-x-2 ml-4">
-                            <Badge variant={policy.enabled ? "default" : "secondary"}>
-                              {policy.enabled ? "Active" : "Inactive"}
+                            <Badge variant={policy.enabled ? 'default' : 'secondary'}>
+                              {policy.enabled ? 'Active' : 'Inactive'}
                             </Badge>
                             <Badge variant="outline">
                               {policy.rules.length} rules
@@ -226,7 +226,7 @@ export default function PolicyTestingPage() {
             {selectedPolicy && (
               <div className="mt-4 p-4 bg-muted rounded-lg">
                 {(() => {
-                  const policy = policies.find(p => p.id === selectedPolicy)
+                  const policy = policies.find(p => p.id === selectedPolicy);
                   return policy ? (
                     <div>
                       <h4 className="font-medium mb-2">{policy.name}</h4>
@@ -238,15 +238,15 @@ export default function PolicyTestingPage() {
                           <FileText className="h-4 w-4" />
                           <span>{policy.rules.length} rules configured</span>
                         </div>
-                        <Badge variant={policy.enabled ? "default" : "secondary"}>
-                          {policy.enabled ? "Active" : "Inactive"}
+                        <Badge variant={policy.enabled ? 'default' : 'secondary'}>
+                          {policy.enabled ? 'Active' : 'Inactive'}
                         </Badge>
                         <span className="text-muted-foreground">
                           Created: {new Date(policy.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
-                  ) : null
+                  ) : null;
                 })()}
               </div>
             )}
@@ -274,7 +274,7 @@ export default function PolicyTestingPage() {
                 </Button>
               </CardContent>
             </Card>
-            
+
             {/* Testing Guide */}
             <Card className="mt-6">
               <CardHeader>
@@ -332,5 +332,5 @@ export default function PolicyTestingPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

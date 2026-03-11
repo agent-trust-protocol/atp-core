@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { 
-  Lock, 
-  ArrowRight, 
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Lock,
+  ArrowRight,
   CheckCircle,
   Code2,
   Key,
@@ -15,16 +15,16 @@ import {
   BookOpen,
   FileCode,
   Webhook
-} from "lucide-react"
+} from 'lucide-react';
 
 interface GatedAPIReferenceProps {
   children: React.ReactNode
 }
 
 export function GatedAPIReference({ children }: GatedAPIReferenceProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     // Check server-side authentication
@@ -32,22 +32,22 @@ export function GatedAPIReference({ children }: GatedAPIReferenceProps) {
       try {
         const response = await fetch('/api/auth/verify', {
           credentials: 'include'
-        })
-        setIsAuthenticated(response.ok)
+        });
+        setIsAuthenticated(response.ok);
       } catch (error) {
-        setIsAuthenticated(false)
+        setIsAuthenticated(false);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
-    
-    checkAuth()
-  }, [])
+    };
+
+    checkAuth();
+  }, []);
 
   const handleLoginRedirect = () => {
-    const returnUrl = encodeURIComponent(window.location.pathname)
-    router.push(`/login?returnTo=${returnUrl}&feature=api-reference`)
-  }
+    const returnUrl = encodeURIComponent(window.location.pathname);
+    router.push(`/login?returnTo=${returnUrl}&feature=api-reference`);
+  };
 
   if (isLoading) {
     return (
@@ -56,7 +56,7 @@ export function GatedAPIReference({ children }: GatedAPIReferenceProps) {
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!isAuthenticated) {
@@ -72,7 +72,7 @@ export function GatedAPIReference({ children }: GatedAPIReferenceProps) {
               Access comprehensive API reference, endpoints, schemas, and integration guides
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent className="space-y-6">
             {/* What's Included */}
             <div className="grid md:grid-cols-2 gap-4">
@@ -85,7 +85,7 @@ export function GatedAPIReference({ children }: GatedAPIReferenceProps) {
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-3">
                 <FileCode className="h-5 w-5 text-primary mt-0.5" />
                 <div>
@@ -95,7 +95,7 @@ export function GatedAPIReference({ children }: GatedAPIReferenceProps) {
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-3">
                 <Webhook className="h-5 w-5 text-primary mt-0.5" />
                 <div>
@@ -105,7 +105,7 @@ export function GatedAPIReference({ children }: GatedAPIReferenceProps) {
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-3">
                 <BookOpen className="h-5 w-5 text-primary mt-0.5" />
                 <div>
@@ -135,31 +135,31 @@ export function GatedAPIReference({ children }: GatedAPIReferenceProps) {
                 </li>
               </ul>
             </div>
-            
+
             {/* CTAs */}
             <div className="pt-6 space-y-4">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="w-full"
                 onClick={handleLoginRedirect}
               >
                 Sign In to Access API Docs
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              
+
               <div className="flex gap-4">
-                <Button 
-                  variant="outline" 
-                  size="lg" 
+                <Button
+                  variant="outline"
+                  size="lg"
                   className="flex-1"
                   onClick={() => router.push('/docs')}
                 >
                   View Public Docs
                 </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="lg" 
+
+                <Button
+                  variant="outline"
+                  size="lg"
                   className="flex-1"
                   onClick={() => router.push('/contact')}
                 >
@@ -167,16 +167,16 @@ export function GatedAPIReference({ children }: GatedAPIReferenceProps) {
                 </Button>
               </div>
             </div>
-            
+
             <p className="text-center text-sm text-muted-foreground">
               Enterprise authentication required for API access
             </p>
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   // Authenticated - show full API docs
-  return <>{children}</>
+  return <>{children}</>;
 }

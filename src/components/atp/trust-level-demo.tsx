@@ -1,12 +1,12 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Shield, UserPlus, Award, ShieldCheck } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { getTrustLevelColor, getTrustScore } from "@/lib/utils"
+import { useState } from 'react';
+import { Shield, UserPlus, Award, ShieldCheck } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { getTrustLevelColor, getTrustScore } from '@/lib/utils';
 
 interface Agent {
   name: string
@@ -21,34 +21,34 @@ const AGENT_TYPES = [
   { value: 'basic', label: 'Basic Agent', description: 'Standard functionality' },
   { value: 'verified', label: 'Verified Agent', description: 'Enhanced capabilities' },
   { value: 'enterprise', label: 'Enterprise Agent', description: 'Full enterprise features' }
-] as const
+] as const;
 
 const CAPABILITIES_MAP = {
   basic: ['chat-support', 'basic-queries', 'data-retrieval'],
   verified: ['data-processing', 'ml-inference', 'api-integration', 'reporting'],
   enterprise: ['advanced-analytics', 'system-integration', 'compliance-monitoring', 'audit-logging']
-}
+};
 
 export function TrustLevelDemo() {
-  const [agentName, setAgentName] = useState("Enterprise AI Assistant")
-  const [agentType, setAgentType] = useState<'basic' | 'verified' | 'enterprise'>('enterprise')
-  const [isLoading, setIsLoading] = useState(false)
-  const [registeredAgent, setRegisteredAgent] = useState<Agent | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [agentName, setAgentName] = useState('Enterprise AI Assistant');
+  const [agentType, setAgentType] = useState<'basic' | 'verified' | 'enterprise'>('enterprise');
+  const [isLoading, setIsLoading] = useState(false);
+  const [registeredAgent, setRegisteredAgent] = useState<Agent | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const registerAgent = async () => {
     if (!agentName.trim()) {
-      setError("Please enter an agent name")
-      return
+      setError('Please enter an agent name');
+      return;
     }
 
-    setIsLoading(true)
-    setError(null)
-    
+    setIsLoading(true);
+    setError(null);
+
     try {
       // Simulate registration delay
-      await new Promise(resolve => setTimeout(resolve, 1200))
-      
+      await new Promise(resolve => setTimeout(resolve, 1200));
+
       const agent: Agent = {
         name: agentName.trim(),
         type: agentType,
@@ -56,24 +56,24 @@ export function TrustLevelDemo() {
         trustScore: getTrustScore(agentType),
         capabilities: CAPABILITIES_MAP[agentType],
         registeredAt: Date.now().toString()
-      }
-      
-      setRegisteredAgent(agent)
+      };
+
+      setRegisteredAgent(agent);
     } catch (err) {
-      setError(`Agent registration failed: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      setError(`Agent registration failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const getTrustBadgeVariant = (type: string) => {
     switch (type) {
-      case 'enterprise': return 'enterprise'
-      case 'verified': return 'verified'
-      case 'basic': return 'basic'
-      default: return 'secondary'
+      case 'enterprise': return 'enterprise';
+      case 'verified': return 'verified';
+      case 'basic': return 'basic';
+      default: return 'secondary';
     }
-  }
+  };
 
   return (
     <Card className="w-full hover:shadow-lg transition-shadow duration-300">
@@ -88,11 +88,11 @@ export function TrustLevelDemo() {
           Register AI agents with different trust levels and capabilities
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <h4 className="text-sm font-medium">Agent Registration</h4>
-          
+
           <div className="space-y-2">
             <label htmlFor="agent-name" className="text-sm font-medium">
               Agent Name:
@@ -104,7 +104,7 @@ export function TrustLevelDemo() {
               placeholder="Enterprise AI Assistant"
             />
           </div>
-          
+
           <div className="space-y-2">
             <label className="text-sm font-medium">Agent Type:</label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -124,8 +124,8 @@ export function TrustLevelDemo() {
               ))}
             </div>
           </div>
-          
-          <Button 
+
+          <Button
             onClick={registerAgent}
             disabled={isLoading}
             variant="atp"
@@ -138,19 +138,19 @@ export function TrustLevelDemo() {
             ) : (
               <UserPlus className="h-4 w-4 mr-2" />
             )}
-            {isLoading ? "Registering..." : "Register Agent"}
+            {isLoading ? 'Registering...' : 'Register Agent'}
           </Button>
         </div>
 
         <div className="space-y-3">
           <h4 className="text-sm font-medium">Current Trust Status</h4>
-          
+
           {error && (
             <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm dark:bg-red-900/30 dark:border-red-700 dark:text-red-300">
               {error}
             </div>
           )}
-          
+
           {registeredAgent ? (
             <div className="space-y-4">
               <div className="p-4 rounded-lg bg-green-50 border border-green-200 dark:bg-green-900/30 dark:border-green-700">
@@ -161,12 +161,12 @@ export function TrustLevelDemo() {
                       {registeredAgent.type.toUpperCase()}
                     </Badge>
                   </div>
-                  
+
                   <div className="text-sm text-green-700 dark:text-green-300/90">
                     <div><strong>DID:</strong> {registeredAgent.did}</div>
                     <div><strong>Registered:</strong> {new Date(parseInt(registeredAgent.registeredAt)).toLocaleString()}</div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <div className="text-sm font-medium text-green-800">Capabilities:</div>
                     <div className="flex flex-wrap gap-1">
@@ -179,7 +179,7 @@ export function TrustLevelDemo() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 rounded-lg bg-gray-50 text-center">
                   <div className="text-2xl font-bold text-blue-600 atp-trust-indicator">
@@ -203,5 +203,5 @@ export function TrustLevelDemo() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

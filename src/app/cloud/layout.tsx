@@ -40,7 +40,7 @@ async function checkSubscriptionTier(tenant: any, requiredTier: string): Promise
 }
 
 export default async function CloudLayout({
-  children,
+  children
 }: {
   children: React.ReactNode;
 }) {

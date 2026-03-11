@@ -19,7 +19,7 @@ interface EnterpriseContactForm {
 // Lead scoring based on company size, industry, and timeline
 function calculateLeadScore(data: EnterpriseContactForm): number {
   let score = 0;
-  
+
   // Company size scoring
   switch (data.companySize) {
     case '1000+': score += 40; break;
@@ -28,7 +28,7 @@ function calculateLeadScore(data: EnterpriseContactForm): number {
     case '11-50': score += 15; break;
     case '1-10': score += 5; break;
   }
-  
+
   // Industry scoring (high-value industries)
   switch (data.industry) {
     case 'financial-services': score += 30; break;
@@ -38,7 +38,7 @@ function calculateLeadScore(data: EnterpriseContactForm): number {
     case 'manufacturing': score += 15; break;
     default: score += 10; break;
   }
-  
+
   // Timeline urgency scoring
   switch (data.timeline) {
     case 'immediate': score += 25; break;
@@ -47,7 +47,7 @@ function calculateLeadScore(data: EnterpriseContactForm): number {
     case '12-months': score += 10; break;
     case 'evaluating': score += 5; break;
   }
-  
+
   // Use case complexity scoring
   switch (data.useCase) {
     case 'quantum-safe-migration': score += 15; break;
@@ -57,7 +57,7 @@ function calculateLeadScore(data: EnterpriseContactForm): number {
     case 'ai-agent-security': score += 8; break;
     case 'evaluation': score += 5; break;
   }
-  
+
   return Math.min(score, 100); // Cap at 100
 }
 
@@ -70,7 +70,7 @@ function getLeadPriority(score: number): 'High' | 'Medium' | 'Low' {
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    
+
     // Extract form data
     const contactData: EnterpriseContactForm = {
       firstName: formData.get('firstName') as string,
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       message: formData.get('message') as string || undefined,
       consent: formData.get('consent') === 'on'
     };
-    
+
     // Validate required fields
     const requiredFields = ['firstName', 'lastName', 'email', 'company', 'jobTitle', 'companySize', 'industry', 'useCase'];
     for (const field of requiredFields) {
@@ -98,18 +98,18 @@ export async function POST(request: NextRequest) {
         );
       }
     }
-    
+
     if (!contactData.consent) {
       return NextResponse.json(
         { error: 'Consent is required to proceed' },
         { status: 400 }
       );
     }
-    
+
     // Calculate lead score and priority
     const leadScore = calculateLeadScore(contactData);
     const priority = getLeadPriority(leadScore);
-    
+
     // Create enriched lead data
     const leadData = {
       ...contactData,
@@ -119,19 +119,19 @@ export async function POST(request: NextRequest) {
       source: 'enterprise-contact-form',
       followUpRequired: priority === 'High' ? 'immediate' : priority === 'Medium' ? '24h' : '72h'
     };
-    
+
     // TODO: In production, integrate with CRM (Salesforce, HubSpot, etc.)
     // await saveToCRM(leadData);
-    
+
     // TODO: Send internal notification for high-priority leads
     if (priority === 'High') {
       // await sendSlackNotification(leadData);
       // await sendEmailToSalesTeam(leadData);
     }
-    
+
     // TODO: Send automated email response to prospect
     // await sendAutoResponse(contactData);
-    
+
     // Log the lead for now (in production, this would go to a proper database)
     console.log('New Enterprise Lead:', {
       contact: `${contactData.firstName} ${contactData.lastName}`,
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
       leadScore,
       timestamp: new Date().toISOString()
     });
-    
+
     // Return success response
     return NextResponse.json({
       success: true,
@@ -150,10 +150,10 @@ export async function POST(request: NextRequest) {
       priority,
       expectedContactTime: priority === 'High' ? '4 hours' : priority === 'Medium' ? '24 hours' : '72 hours'
     });
-    
+
   } catch (error) {
     console.error('Enterprise contact form error:', error);
-    
+
     return NextResponse.json(
       { error: 'An error occurred processing your request. Please try again or contact us directly.' },
       { status: 500 }

@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -14,17 +14,17 @@ import ReactFlow, {
   MiniMap,
   ReactFlowProvider,
   ReactFlowInstance,
-  BackgroundVariant,
+  BackgroundVariant
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import {
   Save,
   Play,
   Pause,
@@ -42,7 +42,7 @@ import {
   Database,
   Shield,
   Activity
-} from "lucide-react";
+} from 'lucide-react';
 
 // Custom node types for ATP workflows
 const nodeTypes = {
@@ -81,7 +81,7 @@ const nodeTypes = {
       </div>
       <div className="text-xs text-purple-600">{data.type}</div>
     </div>
-  ),
+  )
 };
 
 const initialNodes: Node[] = [
@@ -89,25 +89,25 @@ const initialNodes: Node[] = [
     id: '1',
     type: 'trigger',
     position: { x: 100, y: 100 },
-    data: { label: 'Policy Change Trigger', type: 'policy-change-trigger' },
+    data: { label: 'Policy Change Trigger', type: 'policy-change-trigger' }
   },
   {
     id: '2',
     type: 'action',
     position: { x: 300, y: 100 },
-    data: { label: 'Validate Policy', type: 'validate-policy' },
+    data: { label: 'Validate Policy', type: 'validate-policy' }
   },
   {
     id: '3',
     type: 'condition',
     position: { x: 500, y: 100 },
-    data: { label: 'Policy Valid?', type: 'policy-valid' },
-  },
+    data: { label: 'Policy Valid?', type: 'policy-valid' }
+  }
 ];
 
 const initialEdges: Edge[] = [
   { id: 'e1-2', source: '1', target: '2', animated: true },
-  { id: 'e2-3', source: '2', target: '3', animated: true },
+  { id: 'e2-3', source: '2', target: '3', animated: true }
 ];
 
 // Available node templates for the toolbar
@@ -118,7 +118,7 @@ const nodeTemplates = [
       { type: 'trigger', label: 'Policy Change', nodeType: 'policy-change-trigger', icon: Shield },
       { type: 'trigger', label: 'Trust Change', nodeType: 'trust-change-trigger', icon: Activity },
       { type: 'trigger', label: 'Security Alert', nodeType: 'security-alert-trigger', icon: AlertTriangle },
-      { type: 'trigger', label: 'Schedule', nodeType: 'schedule-trigger', icon: Clock },
+      { type: 'trigger', label: 'Schedule', nodeType: 'schedule-trigger', icon: Clock }
     ]
   },
   {
@@ -127,20 +127,20 @@ const nodeTemplates = [
       { type: 'action', label: 'Validate Policy', nodeType: 'validate-policy', icon: CheckCircle },
       { type: 'action', label: 'Evaluate Trust', nodeType: 'evaluate-trust', icon: Activity },
       { type: 'action', label: 'Send Notification', nodeType: 'send-notification', icon: Mail },
-      { type: 'action', label: 'Generate Report', nodeType: 'generate-report', icon: Database },
+      { type: 'action', label: 'Generate Report', nodeType: 'generate-report', icon: Database }
     ]
   },
   {
     category: 'Conditions',
     nodes: [
       { type: 'condition', label: 'Trust Threshold', nodeType: 'trust-threshold', icon: GitBranch },
-      { type: 'condition', label: 'Policy Compliance', nodeType: 'policy-compliance', icon: Shield },
+      { type: 'condition', label: 'Policy Compliance', nodeType: 'policy-compliance', icon: Shield }
     ]
   },
   {
     category: 'Outputs',
     nodes: [
-      { type: 'output', label: 'Audit Log', nodeType: 'audit-log', icon: Database },
+      { type: 'output', label: 'Audit Log', nodeType: 'audit-log', icon: Database }
     ]
   }
 ];
@@ -153,7 +153,7 @@ function WorkflowDesignerContent() {
   const [workflowName, setWorkflowName] = useState('New Workflow');
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
+
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
 
   const onConnect = useCallback(
@@ -182,14 +182,14 @@ function WorkflowDesignerContent() {
       const { type, label, nodeType } = JSON.parse(nodeData);
       const position = reactFlowInstance?.screenToFlowPosition({
         x: event.clientX,
-        y: event.clientY,
+        y: event.clientY
       });
 
       const newNode: Node = {
         id: `${Date.now()}`,
         type,
         position: position || { x: 0, y: 0 },
-        data: { label, type: nodeType },
+        data: { label, type: nodeType }
       };
 
       setNodes((nds) => nds.concat(newNode));
@@ -216,10 +216,10 @@ function WorkflowDesignerContent() {
       edges,
       timestamp: new Date().toISOString()
     };
-    
+
     // Save to localStorage for demo purposes
     localStorage.setItem(`workflow-${Date.now()}`, JSON.stringify(workflow));
-    
+
     // In a real app, this would save to the backend
     alert(`Workflow "${workflowName}" saved successfully!`);
   };
@@ -237,14 +237,14 @@ function WorkflowDesignerContent() {
       const token = document.cookie
         .split('; ')
         .find(row => row.startsWith('atp_token='));
-      
+
       if (!token) {
         router.push('/login?returnTo=/dashboard/workflows/designer&feature=workflow-designer&tier=startup');
       } else {
         setIsAuthenticated(true);
       }
     };
-    
+
     checkAuth();
   }, [router]);
 

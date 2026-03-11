@@ -1,9 +1,9 @@
-import Link from "next/link"
-import { 
-  Target, 
-  TrendingUp, 
-  Users, 
-  Building, 
+import Link from 'next/link';
+import {
+  Target,
+  TrendingUp,
+  Users,
+  Building,
   GraduationCap,
   DollarSign,
   Shield,
@@ -21,13 +21,13 @@ import {
   FileText,
   Video,
   MessageSquare
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon } from "@/components/ui/atp-icons"
-import type { Metadata } from 'next'
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon } from '@/components/ui/atp-icons';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Sales Guide — Agent Trust Protocol',
@@ -41,8 +41,8 @@ export const metadata: Metadata = {
     'pricing strategy',
     'ROI calculations',
     'sales objections'
-  ],
-}
+  ]
+};
 
 export default function SalesGuidePage() {
   return (
@@ -70,7 +70,7 @@ export default function SalesGuidePage() {
             <span className="atp-gradient-text">Sales & Promotion Guide</span>
           </h1>
           <p className="text-lg sm:text-xl text-foreground/80 mb-8 max-w-4xl mx-auto leading-relaxed animate-fade-in-up">
-            Complete sales toolkit for promoting <span className="atp-gradient-text font-medium">Agent Trust Protocol</span> 
+            Complete sales toolkit for promoting <span className="atp-gradient-text font-medium">Agent Trust Protocol</span>
             with key selling points, target audiences, and competitive strategies.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8 animate-fade-in-up">
@@ -118,7 +118,7 @@ export default function SalesGuidePage() {
                         World's First Quantum-Safe AI Protocol
                       </h4>
                       <p className="text-sm text-muted-foreground mb-3">
-                        The only AI agent security protocol designed specifically for the post-quantum era, 
+                        The only AI agent security protocol designed specifically for the post-quantum era,
                         providing future-proof security when quantum computers threaten current cryptography.
                       </p>
                       <div className="space-y-1 text-xs">
@@ -143,7 +143,7 @@ export default function SalesGuidePage() {
                         First-Mover Advantage
                       </h4>
                       <p className="text-sm text-muted-foreground mb-3">
-                        Be prepared for quantum threats before they materialize. Industry experts predict 
+                        Be prepared for quantum threats before they materialize. Industry experts predict
                         cryptographically relevant quantum computers by 2030-2040.
                       </p>
                       <div className="bg-amber-500/10 border border-amber-500/20 rounded p-3">
@@ -160,7 +160,7 @@ export default function SalesGuidePage() {
                         Enterprise-Ready from Day One
                       </h4>
                       <p className="text-sm text-muted-foreground mb-3">
-                        Unlike academic research projects, ATP is built for production with enterprise 
+                        Unlike academic research projects, ATP is built for production with enterprise
                         features, compliance, and 24/7 support from day one.
                       </p>
                       <div className="space-y-1 text-xs">
@@ -185,7 +185,7 @@ export default function SalesGuidePage() {
                         Developer Experience Excellence
                       </h4>
                       <p className="text-sm text-muted-foreground mb-3">
-                        Quantum-safe security doesn't mean complex implementation. ATP provides 
+                        Quantum-safe security doesn't mean complex implementation. ATP provides
                         simple SDKs, clear documentation, and seamless integration.
                       </p>
                       <div className="bg-blue-500/10 border border-blue-500/20 rounded p-3">
@@ -211,7 +211,7 @@ export default function SalesGuidePage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <p className="text-sm text-muted-foreground">
-                    "The cost of implementing quantum-safe security today is far less than 
+                    "The cost of implementing quantum-safe security today is far less than
                     the cost of a quantum attack tomorrow."
                   </p>
                   <div className="bg-red-500/10 border border-red-500/20 rounded p-3">
@@ -233,7 +233,7 @@ export default function SalesGuidePage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <p className="text-sm text-muted-foreground">
-                    "Be the first in your industry to offer quantum-safe AI services, 
+                    "Be the first in your industry to offer quantum-safe AI services,
                     attracting security-conscious customers."
                   </p>
                   <div className="bg-green-500/10 border border-green-500/20 rounded p-3">
@@ -255,7 +255,7 @@ export default function SalesGuidePage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <p className="text-sm text-muted-foreground">
-                    "ATP grows with your needs - from prototype to global scale, 
+                    "ATP grows with your needs - from prototype to global scale,
                     with consistent quantum-safe security."
                   </p>
                   <div className="bg-amber-500/10 border border-amber-500/20 rounded p-3">
@@ -290,7 +290,7 @@ export default function SalesGuidePage() {
                           <p className="text-xs text-muted-foreground">Fortune 500, Government, Financial Services</p>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-4">
                         <div>
                           <h4 className="font-medium text-sm mb-2">Key Pain Points:</h4>
@@ -346,7 +346,7 @@ export default function SalesGuidePage() {
                           <p className="text-xs text-muted-foreground">Startups, Scale-ups, AI Companies</p>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-4">
                         <div>
                           <h4 className="font-medium text-sm mb-2">Key Pain Points:</h4>
@@ -403,7 +403,7 @@ export default function SalesGuidePage() {
                         <p className="text-xs text-muted-foreground">Universities, Research Labs, Think Tanks</p>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                       <div>
                         <h4 className="font-medium text-sm mb-2">Key Pain Points:</h4>
@@ -1161,5 +1161,5 @@ export default function SalesGuidePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

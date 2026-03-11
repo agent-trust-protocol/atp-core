@@ -2,7 +2,7 @@ import { eq, desc, and, sql, count } from 'drizzle-orm';
 import { getDb } from './connection';
 import * as schema from './schema';
 import { v4 as uuidv4 } from 'uuid';
-import type { 
+import type {
   Workflow as DbWorkflow,
   NewWorkflow,
   WorkflowExecution as DbWorkflowExecution,
@@ -20,12 +20,12 @@ import type {
   PolicyWorkflow,
   TrustWorkflow
 } from './schema';
-import type { 
-  Workflow, 
-  WorkflowExecutionContext, 
+import type {
+  Workflow,
+  WorkflowExecutionContext,
   ExecutionResult,
   WorkflowHistory,
-  WorkflowStatistics 
+  WorkflowStatistics
 } from '../types/WorkflowTypes';
 
 export class WorkflowRepository {
@@ -35,7 +35,7 @@ export class WorkflowRepository {
   async createWorkflow(workflow: Partial<Workflow>): Promise<string> {
     const id = uuidv4();
     const now = new Date();
-    
+
     const newWorkflow: NewWorkflow = {
       id,
       name: workflow.name || 'New Workflow',
@@ -84,7 +84,7 @@ export class WorkflowRepository {
     if (updates.name) updateData.name = updates.name;
     if (updates.description !== undefined) updateData.description = updates.description;
     if (updates.version) updateData.version = updates.version;
-    
+
     if (updates.nodes || updates.edges || updates.variables || updates.settings) {
       updateData.definition = {
         nodes: updates.nodes || existing.nodes,
@@ -158,7 +158,7 @@ export class WorkflowRepository {
   }
 
   async updateExecution(
-    executionId: string, 
+    executionId: string,
     updates: Partial<WorkflowExecutionContext> & { result?: ExecutionResult }
   ): Promise<void> {
     const updateData: Partial<NewWorkflowExecution> = {};
@@ -166,7 +166,7 @@ export class WorkflowRepository {
     if (updates.state) updateData.status = updates.state;
     if (updates.endTime) updateData.endTime = updates.endTime;
     if (updates.data) updateData.inputData = updates.data;
-    
+
     if (updates.result) {
       updateData.outputData = updates.result.data;
       updateData.duration = updates.result.duration;
@@ -231,7 +231,7 @@ export class WorkflowRepository {
     inputData?: any;
   }): Promise<string> {
     const id = uuidv4();
-    
+
     const newNodeExecution: NewNodeExecution = {
       id,
       executionId: nodeExecution.executionId,
@@ -325,7 +325,7 @@ export class WorkflowRepository {
       const newTotal = stats.totalExecutions + 1;
       const newSuccessful = stats.successfulExecutions + (executionResult.success ? 1 : 0);
       const newFailed = stats.failedExecutions + (executionResult.success ? 0 : 1);
-      
+
       // Calculate new average duration
       const oldAvg = Number(stats.averageDuration) || 0;
       const newAvg = (oldAvg * stats.totalExecutions + executionResult.duration) / newTotal;
@@ -436,7 +436,7 @@ export class WorkflowRepository {
   // Helper method to map database workflow to application workflow
   private mapDbWorkflowToWorkflow(dbWorkflow: DbWorkflow): Workflow {
     const definition = dbWorkflow.definition as any;
-    
+
     return {
       id: dbWorkflow.id,
       name: dbWorkflow.name,

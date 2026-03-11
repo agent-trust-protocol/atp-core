@@ -161,7 +161,7 @@ describe('WorkflowEngine', () => {
 
     it('should track execution context during workflow execution', async () => {
       const executionPromise = engine.executeWorkflow('test-execution-workflow', { test: 'data' });
-      
+
       // Check that execution is tracked
       const activeExecutions = engine.getActiveExecutions();
       expect(activeExecutions.length).toBeGreaterThan(0);
@@ -231,18 +231,18 @@ describe('WorkflowEngine', () => {
 
       // Start execution
       const executionPromise = engine.executeWorkflow('slow-workflow');
-      
+
       // Get execution ID
       const activeExecutions = engine.getActiveExecutions();
       expect(activeExecutions.length).toBe(1);
-      const executionId = activeExecutions[0].executionId;
+      const {executionId} = activeExecutions[0];
 
       // Cancel execution
       engine.cancelExecution(executionId);
 
       // Verify execution is cancelled
       await expect(executionPromise).rejects.toThrow();
-      
+
       const context = engine.getExecutionContext(executionId);
       expect(context).toBeUndefined();
     });
@@ -327,7 +327,7 @@ describe('WorkflowEngine', () => {
   describe('Event Handling', () => {
     it('should emit workflow events', async () => {
       const events: string[] = [];
-      
+
       engine.on('workflow:started', () => events.push('started'));
       engine.on('workflow:completed', () => events.push('completed'));
       engine.on('node:executing', () => events.push('node-executing'));

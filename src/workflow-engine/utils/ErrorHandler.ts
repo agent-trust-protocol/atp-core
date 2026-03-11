@@ -92,7 +92,7 @@ export class WorkflowErrorHandler extends EventEmitter {
     suggestions?: string[];
   }): WorkflowError {
     const errorId = `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const workflowError: WorkflowError = {
       id: errorId,
       timestamp: new Date(),
@@ -109,7 +109,7 @@ export class WorkflowErrorHandler extends EventEmitter {
 
     this.errors.set(errorId, workflowError);
     this.handleError(workflowError);
-    
+
     return workflowError;
   }
 
@@ -137,7 +137,7 @@ export class WorkflowErrorHandler extends EventEmitter {
 
   private logError(error: WorkflowError): void {
     const logMessage = this.formatErrorMessage(error);
-    
+
     switch (error.severity) {
       case ErrorSeverity.CRITICAL:
       case ErrorSeverity.HIGH:
@@ -157,9 +157,9 @@ export class WorkflowErrorHandler extends EventEmitter {
   }
 
   private formatErrorMessage(error: WorkflowError): string {
-    const contextStr = error.context ? 
+    const contextStr = error.context ?
       ` [${Object.entries(error.context).map(([k, v]) => `${k}=${v}`).join(', ')}]` : '';
-    
+
     return `[${error.severity.toUpperCase()}] ${error.category}: ${error.message}${contextStr}`;
   }
 
@@ -208,7 +208,7 @@ export class WorkflowErrorHandler extends EventEmitter {
   private scheduleRetry(error: WorkflowError): void {
     const attempts = this.retryAttempts.get(error.id) || 0;
     const delay = this.config.retryDelay * Math.pow(2, attempts); // Exponential backoff
-    
+
     setTimeout(() => {
       this.retryAttempts.set(error.id, attempts + 1);
       console.log(`Retrying operation for error ${error.id} (attempt ${attempts + 1}/${this.config.maxRetries})`);
@@ -219,7 +219,7 @@ export class WorkflowErrorHandler extends EventEmitter {
   private escalateError(error: WorkflowError): void {
     console.error(`CRITICAL ERROR ESCALATION: ${error.message}`);
     this.emit('escalation', error);
-    
+
     // Immediate notification for critical errors
     this.sendImmediateNotification(error);
   }
@@ -280,49 +280,49 @@ export class WorkflowErrorHandler extends EventEmitter {
         suggestions.push('Verify required fields are provided');
         suggestions.push('Review validation rules and constraints');
         break;
-      
+
       case ErrorCategory.EXECUTION:
         suggestions.push('Check workflow node configuration');
         suggestions.push('Verify all required inputs are available');
         suggestions.push('Review node dependencies and execution order');
         break;
-      
+
       case ErrorCategory.NETWORK:
         suggestions.push('Check network connectivity');
         suggestions.push('Verify service endpoints are accessible');
         suggestions.push('Review firewall and proxy settings');
         break;
-      
+
       case ErrorCategory.DATABASE:
         suggestions.push('Check database connection and credentials');
         suggestions.push('Verify database schema and permissions');
         suggestions.push('Review query syntax and parameters');
         break;
-      
+
       case ErrorCategory.AUTHENTICATION:
         suggestions.push('Verify authentication credentials');
         suggestions.push('Check token expiration and validity');
         suggestions.push('Review authentication configuration');
         break;
-      
+
       case ErrorCategory.AUTHORIZATION:
         suggestions.push('Verify user permissions and roles');
         suggestions.push('Check resource access policies');
         suggestions.push('Review authorization configuration');
         break;
-      
+
       case ErrorCategory.CONFIGURATION:
         suggestions.push('Check configuration file syntax');
         suggestions.push('Verify environment variables');
         suggestions.push('Review default configuration values');
         break;
-      
+
       case ErrorCategory.RESOURCE:
         suggestions.push('Check available memory and CPU resources');
         suggestions.push('Review resource limits and quotas');
         suggestions.push('Monitor disk space and file descriptors');
         break;
-      
+
       case ErrorCategory.TIMEOUT:
         suggestions.push('Increase timeout values if appropriate');
         suggestions.push('Check for slow operations or bottlenecks');
@@ -402,7 +402,7 @@ export class WorkflowErrorHandler extends EventEmitter {
     const errors = Array.from(this.errors.values());
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-    
+
     const recentErrors = errors.filter(e => e.timestamp >= oneHourAgo).length;
     const totalRetries = Array.from(this.retryAttempts.values()).reduce((sum, count) => sum + count, 0);
     const retryRate = errors.length > 0 ? totalRetries / errors.length : 0;

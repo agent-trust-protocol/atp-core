@@ -1,6 +1,6 @@
-"use client"
+'use client';
 
-import { useState, useCallback, useMemo } from "react"
+import { useState, useCallback, useMemo } from 'react';
 import ReactFlow, {
   Node,
   Edge,
@@ -19,15 +19,15 @@ import ReactFlow, {
   Handle,
   Position,
   MarkerType
-} from "reactflow"
-import "reactflow/dist/style.css"
-import { 
-  Shield, 
-  Users, 
-  Lock, 
-  Eye, 
-  Clock, 
-  Globe, 
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+import {
+  Shield,
+  Users,
+  Lock,
+  Eye,
+  Clock,
+  Globe,
   Building,
   CheckCircle,
   XCircle,
@@ -44,14 +44,14 @@ import {
   Copy,
   Undo,
   Redo
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 // Node Types
 interface ConditionNodeData {
@@ -83,29 +83,29 @@ type NodeData = ConditionNodeData | ActionNodeData | OperatorNodeData
 const ConditionNode = ({ data }: { data: ConditionNodeData }) => {
   const getConditionIcon = (type: string) => {
     switch (type) {
-      case 'did': return <Users className="h-4 w-4" />
-      case 'trustLevel': return <Shield className="h-4 w-4" />
-      case 'vc': return <FileText className="h-4 w-4" />
-      case 'tool': return <Zap className="h-4 w-4" />
-      case 'time': return <Clock className="h-4 w-4" />
-      case 'context': return <Globe className="h-4 w-4" />
-      case 'organization': return <Building className="h-4 w-4" />
-      default: return <Eye className="h-4 w-4" />
+      case 'did': return <Users className="h-4 w-4" />;
+      case 'trustLevel': return <Shield className="h-4 w-4" />;
+      case 'vc': return <FileText className="h-4 w-4" />;
+      case 'tool': return <Zap className="h-4 w-4" />;
+      case 'time': return <Clock className="h-4 w-4" />;
+      case 'context': return <Globe className="h-4 w-4" />;
+      case 'organization': return <Building className="h-4 w-4" />;
+      default: return <Eye className="h-4 w-4" />;
     }
-  }
+  };
 
   const getConditionColor = (type: string) => {
     switch (type) {
-      case 'did': return 'bg-blue-500'
-      case 'trustLevel': return 'bg-green-500'
-      case 'vc': return 'bg-purple-500'
-      case 'tool': return 'bg-yellow-500'
-      case 'time': return 'bg-orange-500'
-      case 'context': return 'bg-indigo-500'
-      case 'organization': return 'bg-red-500'
-      default: return 'bg-gray-500'
+      case 'did': return 'bg-blue-500';
+      case 'trustLevel': return 'bg-green-500';
+      case 'vc': return 'bg-purple-500';
+      case 'tool': return 'bg-yellow-500';
+      case 'time': return 'bg-orange-500';
+      case 'context': return 'bg-indigo-500';
+      case 'organization': return 'bg-red-500';
+      default: return 'bg-gray-500';
     }
-  }
+  };
 
   return (
     <div className={`relative px-4 py-2 shadow-lg rounded-lg border-2 ${data.isValid ? 'border-green-500' : 'border-red-500'} bg-white`}>
@@ -129,33 +129,33 @@ const ConditionNode = ({ data }: { data: ConditionNodeData }) => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 const ActionNode = ({ data }: { data: ActionNodeData }) => {
   const getActionIcon = (type: string) => {
     switch (type) {
-      case 'allow': return <CheckCircle className="h-4 w-4" />
-      case 'deny': return <XCircle className="h-4 w-4" />
-      case 'throttle': return <Zap className="h-4 w-4" />
-      case 'log': return <FileText className="h-4 w-4" />
-      case 'alert': return <AlertTriangle className="h-4 w-4" />
-      case 'require_approval': return <Shield className="h-4 w-4" />
-      default: return <Eye className="h-4 w-4" />
+      case 'allow': return <CheckCircle className="h-4 w-4" />;
+      case 'deny': return <XCircle className="h-4 w-4" />;
+      case 'throttle': return <Zap className="h-4 w-4" />;
+      case 'log': return <FileText className="h-4 w-4" />;
+      case 'alert': return <AlertTriangle className="h-4 w-4" />;
+      case 'require_approval': return <Shield className="h-4 w-4" />;
+      default: return <Eye className="h-4 w-4" />;
     }
-  }
+  };
 
   const getActionColor = (type: string) => {
     switch (type) {
-      case 'allow': return 'bg-green-500'
-      case 'deny': return 'bg-red-500'
-      case 'throttle': return 'bg-yellow-500'
-      case 'log': return 'bg-blue-500'
-      case 'alert': return 'bg-orange-500'
-      case 'require_approval': return 'bg-purple-500'
-      default: return 'bg-gray-500'
+      case 'allow': return 'bg-green-500';
+      case 'deny': return 'bg-red-500';
+      case 'throttle': return 'bg-yellow-500';
+      case 'log': return 'bg-blue-500';
+      case 'alert': return 'bg-orange-500';
+      case 'require_approval': return 'bg-purple-500';
+      default: return 'bg-gray-500';
     }
-  }
+  };
 
   return (
     <div className={`relative px-4 py-2 shadow-lg rounded-lg border-2 ${data.isValid ? 'border-green-500' : 'border-red-500'} bg-white`}>
@@ -179,27 +179,27 @@ const ActionNode = ({ data }: { data: ActionNodeData }) => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 const OperatorNode = ({ data }: { data: OperatorNodeData }) => {
   const getOperatorIcon = (type: string) => {
     switch (type) {
-      case 'and': return <Plus className="h-4 w-4" />
-      case 'or': return <Globe className="h-4 w-4" />
-      case 'not': return <XCircle className="h-4 w-4" />
-      default: return <Settings className="h-4 w-4" />
+      case 'and': return <Plus className="h-4 w-4" />;
+      case 'or': return <Globe className="h-4 w-4" />;
+      case 'not': return <XCircle className="h-4 w-4" />;
+      default: return <Settings className="h-4 w-4" />;
     }
-  }
+  };
 
   const getOperatorColor = (type: string) => {
     switch (type) {
-      case 'and': return 'bg-blue-500'
-      case 'or': return 'bg-green-500'
-      case 'not': return 'bg-red-500'
-      default: return 'bg-gray-500'
+      case 'and': return 'bg-blue-500';
+      case 'or': return 'bg-green-500';
+      case 'not': return 'bg-red-500';
+      default: return 'bg-gray-500';
     }
-  }
+  };
 
   return (
     <div className={`relative px-4 py-2 shadow-lg rounded-lg border-2 ${data.isValid ? 'border-green-500' : 'border-red-500'} bg-white`}>
@@ -216,27 +216,27 @@ const OperatorNode = ({ data }: { data: OperatorNodeData }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const nodeTypes: NodeTypes = {
   condition: ConditionNode,
   action: ActionNode,
-  operator: OperatorNode,
-}
+  operator: OperatorNode
+};
 
 // Policy Editor Component
 function PolicyEditor() {
-  const [nodes, setNodes, onNodesChange] = useNodesState([])
-  const [edges, setEdges, onEdgesChange] = useEdgesState([])
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null)
-  const [configDialogOpen, setConfigDialogOpen] = useState(false)
-  const [editingNode, setEditingNode] = useState<Node | null>(null)
-  const [nodeConfig, setNodeConfig] = useState<Record<string, any>>({})
-  const [isDragging, setIsDragging] = useState(false)
-  const [policyName, setPolicyName] = useState("Enterprise Trust Policy")
-  const [policyDescription, setPolicyDescription] = useState("")
-  const [policyVersion, setPolicyVersion] = useState("1.0.0")
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [configDialogOpen, setConfigDialogOpen] = useState(false);
+  const [editingNode, setEditingNode] = useState<Node | null>(null);
+  const [nodeConfig, setNodeConfig] = useState<Record<string, any>>({});
+  const [isDragging, setIsDragging] = useState(false);
+  const [policyName, setPolicyName] = useState('Enterprise Trust Policy');
+  const [policyDescription, setPolicyDescription] = useState('');
+  const [policyVersion, setPolicyVersion] = useState('1.0.0');
   const [versions, setVersions] = useState<Array<{
     id: string
     name: string
@@ -245,34 +245,34 @@ function PolicyEditor() {
     timestamp: string
     graph: { nodes: Node[]; edges: Edge[] }
     saved?: boolean
-  }>>([])
-  const [validationErrors, setValidationErrors] = useState<string[]>([])
-  const [isSimulating, setIsSimulating] = useState(false)
-  const [simulationResults, setSimulationResults] = useState<any>(null)
-  const [invalidHint, setInvalidHint] = useState<string | null>(null)
+  }>>([]);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [simulationResults, setSimulationResults] = useState<any>(null);
+  const [invalidHint, setInvalidHint] = useState<string | null>(null);
   const defaultEdgeOptions = useMemo(() => ({
     type: 'smoothstep' as const,
     animated: true,
     markerEnd: { type: MarkerType.ArrowClosed, color: '#10b981', width: 18, height: 18 },
     style: { stroke: '#10b981', strokeWidth: 2 }
-  }), [])
+  }), []);
 
-  const { addNodes, getNodes, getEdges, screenToFlowPosition } = useReactFlow()
+  const { addNodes, getNodes, getEdges, screenToFlowPosition } = useReactFlow();
 
-  const findNodeById = useCallback((id: string) => getNodes().find(n => n.id === id), [getNodes])
+  const findNodeById = useCallback((id: string) => getNodes().find(n => n.id === id), [getNodes]);
 
   const bumpSemver = useCallback((current: string, type: 'patch' | 'minor' | 'major') => {
-    const parts = current.split('.').map((n) => parseInt(n || '0', 10) || 0)
-    let [major, minor, patch] = [parts[0] || 0, parts[1] || 0, parts[2] || 0]
-    if (type === 'patch') patch += 1
-    if (type === 'minor') { minor += 1; patch = 0 }
-    if (type === 'major') { major += 1; minor = 0; patch = 0 }
-    return `${major}.${minor}.${patch}`
-  }, [])
+    const parts = current.split('.').map((n) => parseInt(n || '0', 10) || 0);
+    let [major, minor, patch] = [parts[0] || 0, parts[1] || 0, parts[2] || 0];
+    if (type === 'patch') patch += 1;
+    if (type === 'minor') { minor += 1; patch = 0; }
+    if (type === 'major') { major += 1; minor = 0; patch = 0; }
+    return `${major}.${minor}.${patch}`;
+  }, []);
 
   // Using secure server-side policy building for snapshots
   const saveVersionSnapshot = useCallback(async () => {
-    const baseUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003'
+    const baseUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003';
     const snapshot = {
       id: `v-${Date.now()}`,
       name: policyName,
@@ -281,20 +281,20 @@ function PolicyEditor() {
       timestamp: new Date().toISOString(),
       graph: { nodes: getNodes(), edges: getEdges() },
       saved: false
-    }
-    setVersions((prev) => [snapshot, ...prev].slice(0, 25))
+    };
+    setVersions((prev) => [snapshot, ...prev].slice(0, 25));
 
     // Best-effort persistence: create a versioned policy document using secure API
-    const policy = await buildPolicyObject()
-    if (!policy) return
-    const versionSuffix = policyVersion.replace(/\./g, '_')
+    const policy = await buildPolicyObject();
+    if (!policy) return;
+    const versionSuffix = policyVersion.replace(/\./g, '_');
     const versionedPolicy = {
       ...policy,
       id: `${policy.id}-v${versionSuffix}`,
       name: `${policyName} v${policyVersion}`,
       version: policyVersion,
       tags: Array.from(new Set([...(policy.tags || []), `version:${policyVersion}`]))
-    }
+    };
     try {
       const res = await fetch(`${baseUrl}/policies`, {
         method: 'POST',
@@ -305,66 +305,66 @@ function PolicyEditor() {
           document: versionedPolicy,
           organizationId: versionedPolicy.organizationId
         })
-      })
+      });
       if (res.ok) {
-        setVersions((prev) => prev.map(v => v.id === snapshot.id ? { ...v, saved: true } : v))
-        setInvalidHint(`Snapshot v${policyVersion} saved`)
-        setTimeout(() => setInvalidHint(null), 1500)
+        setVersions((prev) => prev.map(v => v.id === snapshot.id ? { ...v, saved: true } : v));
+        setInvalidHint(`Snapshot v${policyVersion} saved`);
+        setTimeout(() => setInvalidHint(null), 1500);
       } else {
-        setInvalidHint(`Snapshot saved locally (backend ${res.status})`)
-        setTimeout(() => setInvalidHint(null), 1500)
+        setInvalidHint(`Snapshot saved locally (backend ${res.status})`);
+        setTimeout(() => setInvalidHint(null), 1500);
       }
     } catch {
-      setInvalidHint('Snapshot saved locally (backend unreachable)')
-      setTimeout(() => setInvalidHint(null), 1500)
+      setInvalidHint('Snapshot saved locally (backend unreachable)');
+      setTimeout(() => setInvalidHint(null), 1500);
     }
-  }, [getEdges, getNodes, policyDescription, policyName, policyVersion])
+  }, [getEdges, getNodes, policyDescription, policyName, policyVersion]);
 
   const rollbackToVersion = useCallback((versionId: string) => {
-    const v = versions.find((x) => x.id === versionId)
-    if (!v) return
-    setPolicyName(v.name)
-    setPolicyDescription(v.description)
-    setPolicyVersion(v.version)
-    setNodes(v.graph.nodes)
-    setEdges(v.graph.edges)
-    setInvalidHint(`Rolled back to ${v.version}`)
-    setTimeout(() => setInvalidHint(null), 1500)
-  }, [setEdges, setNodes, versions])
+    const v = versions.find((x) => x.id === versionId);
+    if (!v) return;
+    setPolicyName(v.name);
+    setPolicyDescription(v.description);
+    setPolicyVersion(v.version);
+    setNodes(v.graph.nodes);
+    setEdges(v.graph.edges);
+    setInvalidHint(`Rolled back to ${v.version}`);
+    setTimeout(() => setInvalidHint(null), 1500);
+  }, [setEdges, setNodes, versions]);
 
   const isValidConnection = useCallback((params: Connection) => {
-    const source = params.source ? findNodeById(params.source) : undefined
-    const target = params.target ? findNodeById(params.target) : undefined
-    if (!source || !target) return false
+    const source = params.source ? findNodeById(params.source) : undefined;
+    const target = params.target ? findNodeById(params.target) : undefined;
+    if (!source || !target) return false;
 
-    const sourceType = source.type
-    const targetType = target.type
+    const sourceType = source.type;
+    const targetType = target.type;
 
     // Allowed flows:
     // condition -> operator | action
     // operator  -> operator | action
-    if (sourceType === 'condition' && (targetType === 'operator' || targetType === 'action')) return true
-    if (sourceType === 'operator' && (targetType === 'operator' || targetType === 'action')) return true
+    if (sourceType === 'condition' && (targetType === 'operator' || targetType === 'action')) return true;
+    if (sourceType === 'operator' && (targetType === 'operator' || targetType === 'action')) return true;
 
     // Disallow others (e.g., action -> anything, condition -> condition)
-    return false
-  }, [findNodeById])
+    return false;
+  }, [findNodeById]);
 
   // Handle node double-click for configuration
   const onNodeDoubleClick = useCallback(
     (event: React.MouseEvent, node: Node) => {
-      event.preventDefault()
-      setEditingNode(node)
-      setNodeConfig(node.data.parameters || {})
-      setConfigDialogOpen(true)
+      event.preventDefault();
+      setEditingNode(node);
+      setNodeConfig(node.data.parameters || {});
+      setConfigDialogOpen(true);
     },
     []
-  )
+  );
 
   // Save node configuration
   const saveNodeConfig = useCallback(() => {
-    if (!editingNode) return
-    
+    if (!editingNode) return;
+
     setNodes((nds) =>
       nds.map((node) => {
         if (node.id === editingNode.id) {
@@ -375,25 +375,25 @@ function PolicyEditor() {
               parameters: nodeConfig,
               isValid: true
             }
-          }
+          };
         }
-        return node
+        return node;
       })
-    )
-    
-    setConfigDialogOpen(false)
-    setEditingNode(null)
-    setNodeConfig({})
-  }, [editingNode, nodeConfig, setNodes])
+    );
+
+    setConfigDialogOpen(false);
+    setEditingNode(null);
+    setNodeConfig({});
+  }, [editingNode, nodeConfig, setNodes]);
 
   const onConnect = useCallback(
     (params: Connection) => {
       if (!isValidConnection(params)) {
-        const msg = 'Invalid connection. Use: Condition → Operator/Action; Operator → Operator/Action.'
-        setValidationErrors((prev) => [...prev, msg])
-        setInvalidHint(msg)
-        setTimeout(() => setInvalidHint(null), 1500)
-        return
+        const msg = 'Invalid connection. Use: Condition → Operator/Action; Operator → Operator/Action.';
+        setValidationErrors((prev) => [...prev, msg]);
+        setInvalidHint(msg);
+        setTimeout(() => setInvalidHint(null), 1500);
+        return;
       }
       setEdges((eds) => addEdge({
         ...params,
@@ -401,63 +401,63 @@ function PolicyEditor() {
         markerEnd: { type: MarkerType.ArrowClosed, color: '#10b981', width: 18, height: 18 },
         style: { stroke: '#10b981', strokeWidth: 2 },
         type: 'smoothstep'
-      }, eds))
+      }, eds));
     },
     [setEdges, isValidConnection]
-  )
+  );
 
   const onDragOver = useCallback((event: React.DragEvent) => {
-    event.preventDefault()
-    event.dataTransfer.dropEffect = 'move'
-    setIsDragging(true)
-  }, [])
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    setIsDragging(true);
+  }, []);
 
   const onDragLeave = useCallback((event: React.DragEvent) => {
     // Only reset if leaving the canvas entirely (not just entering a child element)
     if (!event.currentTarget.contains(event.relatedTarget as Element)) {
-      setIsDragging(false)
+      setIsDragging(false);
     }
-  }, [])
+  }, []);
 
   const onDrop = useCallback(
     (event: React.DragEvent) => {
-      event.preventDefault()
+      event.preventDefault();
 
-      const reactFlowBounds = event.currentTarget.getBoundingClientRect()
-      const data = event.dataTransfer.getData('application/reactflow')
+      const reactFlowBounds = event.currentTarget.getBoundingClientRect();
+      const data = event.dataTransfer.getData('application/reactflow');
 
       if (typeof data === 'undefined' || !data) {
-        return
+        return;
       }
 
-      const dragData = JSON.parse(data)
+      const dragData = JSON.parse(data);
       const position = screenToFlowPosition({
         x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
-      })
+        y: event.clientY - reactFlowBounds.top
+      });
 
       const newNode: Node = {
         id: `${dragData.type}-${Date.now()}`,
         type: dragData.type,
         position,
         data: {
-          label: `${dragData[dragData.type + 'Type'] || dragData.type} ${dragData.type}`,
+          label: `${dragData[`${dragData.type  }Type`] || dragData.type} ${dragData.type}`,
           type: dragData.type,
-          [dragData.type + 'Type']: dragData[dragData.type + 'Type'],
-          parameters: dragData.type === 'condition' 
+          [`${dragData.type  }Type`]: dragData[`${dragData.type  }Type`],
+          parameters: dragData.type === 'condition'
             ? getDefaultParameters(dragData.conditionType)
             : dragData.type === 'action'
             ? getDefaultActionParameters(dragData.actionType)
             : {},
           isValid: true
         }
-      }
+      };
 
-      addNodes(newNode)
-      setIsDragging(false)
+      addNodes(newNode);
+      setIsDragging(false);
     },
     [addNodes, screenToFlowPosition]
-  )
+  );
 
   const addConditionNode = (conditionType: string) => {
     const newNode: Node = {
@@ -471,9 +471,9 @@ function PolicyEditor() {
         parameters: getDefaultParameters(conditionType),
         isValid: true
       }
-    }
-    addNodes(newNode)
-  }
+    };
+    addNodes(newNode);
+  };
 
   const addActionNode = (actionType: string) => {
     const newNode: Node = {
@@ -487,9 +487,9 @@ function PolicyEditor() {
         parameters: getDefaultActionParameters(actionType),
         isValid: true
       }
-    }
-    addNodes(newNode)
-  }
+    };
+    addNodes(newNode);
+  };
 
   const addOperatorNode = (operatorType: string) => {
     const newNode: Node = {
@@ -502,49 +502,49 @@ function PolicyEditor() {
         operatorType: operatorType as any,
         isValid: true
       }
-    }
-    addNodes(newNode)
-  }
+    };
+    addNodes(newNode);
+  };
 
   const getDefaultParameters = (conditionType: string) => {
     switch (conditionType) {
       case 'did':
-        return { did: 'did:atp:example', operator: 'equals' }
+        return { did: 'did:atp:example', operator: 'equals' };
       case 'trustLevel':
-        return { level: 'verified', operator: 'gte' }
+        return { level: 'verified', operator: 'gte' };
       case 'vc':
-        return { schema: 'https://schema.org/credential', required: true }
+        return { schema: 'https://schema.org/credential', required: true };
       case 'tool':
-        return { toolName: 'weather-api', access: 'read' }
+        return { toolName: 'weather-api', access: 'read' };
       case 'time':
-        return { startTime: '09:00', endTime: '17:00', timezone: 'UTC' }
+        return { startTime: '09:00', endTime: '17:00', timezone: 'UTC' };
       case 'context':
-        return { location: 'office', device: 'desktop' }
+        return { location: 'office', device: 'desktop' };
       case 'organization':
-        return { orgId: 'org-123', membership: 'active' }
+        return { orgId: 'org-123', membership: 'active' };
       default:
-        return {}
+        return {};
     }
-  }
+  };
 
   const getDefaultActionParameters = (actionType: string) => {
     switch (actionType) {
       case 'allow':
-        return { reason: 'Policy satisfied', log: true }
+        return { reason: 'Policy satisfied', log: true };
       case 'deny':
-        return { reason: 'Policy violated', log: true }
+        return { reason: 'Policy violated', log: true };
       case 'throttle':
-        return { limit: 100, window: '1h', log: true }
+        return { limit: 100, window: '1h', log: true };
       case 'log':
-        return { level: 'info', details: 'Policy evaluation' }
+        return { level: 'info', details: 'Policy evaluation' };
       case 'alert':
-        return { severity: 'medium', channel: 'email' }
+        return { severity: 'medium', channel: 'email' };
       case 'require_approval':
-        return { approvers: ['admin@company.com'], timeout: '24h' }
+        return { approvers: ['admin@company.com'], timeout: '24h' };
       default:
-        return {}
+        return {};
     }
-  }
+  };
 
   const validatePolicy = async () => {
     try {
@@ -560,14 +560,14 @@ function PolicyEditor() {
       });
 
       const result = await response.json();
-      
+
       if (!result.success) {
         setValidationErrors([result.error || 'Validation failed']);
         return false;
       }
 
       setValidationErrors(result.errors || []);
-      
+
       if (result.warnings && result.warnings.length > 0) {
         setInvalidHint(`Warnings: ${result.warnings.join(', ')}`);
         setTimeout(() => setInvalidHint(null), 3000);
@@ -581,10 +581,10 @@ function PolicyEditor() {
       setTimeout(() => setInvalidHint(null), 2000);
       return false;
     }
-  }
+  };
 
-  const [previewOpen, setPreviewOpen] = useState(false)
-  const [previewJson, setPreviewJson] = useState<string>("")
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewJson, setPreviewJson] = useState<string>('');
 
   const buildPolicyObject = async () => {
     try {
@@ -605,7 +605,7 @@ function PolicyEditor() {
       });
 
       const result = await response.json();
-      
+
       if (!result.success) {
         setInvalidHint(result.error || 'Failed to build policy');
         setTimeout(() => setInvalidHint(null), 2000);
@@ -619,35 +619,35 @@ function PolicyEditor() {
       setTimeout(() => setInvalidHint(null), 2000);
       return null;
     }
-  }
+  };
 
   // SECURITY NOTE: Policy transformation algorithms moved to server-side for IP protection
   // All proprietary logic now secured in /api/policies/build endpoint
 
   const previewPolicy = async () => {
-    const policy = await buildPolicyObject()
-    if (!policy) return
-    setPreviewJson(JSON.stringify(policy, null, 2))
-    setPreviewOpen(true)
-  }
+    const policy = await buildPolicyObject();
+    if (!policy) return;
+    setPreviewJson(JSON.stringify(policy, null, 2));
+    setPreviewOpen(true);
+  };
 
   const exportPolicy = async () => {
-    const policy = await buildPolicyObject()
-    if (!policy) return
+    const policy = await buildPolicyObject();
+    if (!policy) return;
 
-    const blob = new Blob([JSON.stringify(policy, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${policyName.replace(/\s+/g, '-').toLowerCase()}-policy.json`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+    const blob = new Blob([JSON.stringify(policy, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${policyName.replace(/\s+/g, '-').toLowerCase()}-policy.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const savePolicy = async () => {
-    const policy = await buildPolicyObject()
-    if (!policy) return
-    const baseUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003'
+    const policy = await buildPolicyObject();
+    if (!policy) return;
+    const baseUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003';
     try {
       const res = await fetch(`${baseUrl}/policies`, {
         method: 'POST',
@@ -658,44 +658,44 @@ function PolicyEditor() {
           document: policy,
           organizationId: 'org-demo'
         })
-      })
-      if (!res.ok) throw new Error(`Save failed: ${res.status}`)
-      setInvalidHint('Policy saved successfully')
-      setTimeout(() => setInvalidHint(null), 1500)
+      });
+      if (!res.ok) throw new Error(`Save failed: ${res.status}`);
+      setInvalidHint('Policy saved successfully');
+      setTimeout(() => setInvalidHint(null), 1500);
     } catch (err) {
-      setInvalidHint('Save failed. Check backend API')
-      setTimeout(() => setInvalidHint(null), 2000)
+      setInvalidHint('Save failed. Check backend API');
+      setTimeout(() => setInvalidHint(null), 2000);
     }
-  }
+  };
 
   // SECURITY NOTE: Policy rule generation moved to server-side for IP protection
   // All proprietary logic now secured in /api/policies/build endpoint
 
   const simulatePolicy = async () => {
-    const validationResult = await validatePolicy()
+    const validationResult = await validatePolicy();
     if (!validationResult) {
-      return
+      return;
     }
 
-    setIsSimulating(true)
-    
+    setIsSimulating(true);
+
     try {
-      const policy = await buildPolicyObject()
-      if (!policy) return
+      const policy = await buildPolicyObject();
+      if (!policy) return;
 
       const simulationContext = {
-        agentDID: "did:atp:test-agent",
-        trustLevel: "VERIFIED" as const,
+        agentDID: 'did:atp:test-agent',
+        trustLevel: 'VERIFIED' as const,
         credentials: [],
         tool: {
-          id: "weather-api",
-          type: "api",
-          sensitivity: "public" as const
+          id: 'weather-api',
+          type: 'api',
+          sensitivity: 'public' as const
         },
-        requestedAction: "read",
-        organizationId: "org-demo",
+        requestedAction: 'read',
+        organizationId: 'org-demo',
         timestamp: new Date().toISOString()
-      }
+      };
 
       const res = await fetch('/api/policies/evaluate', {
         method: 'POST',
@@ -708,20 +708,20 @@ function PolicyEditor() {
             includeTrace: true
           }
         })
-      })
+      });
 
       if (!res.ok) {
-        throw new Error(`Simulation failed: ${res.status}`)
+        throw new Error(`Simulation failed: ${res.status}`);
       }
 
-      const apiResult = await res.json()
-      
+      const apiResult = await res.json();
+
       if (!apiResult.success) {
-        throw new Error(apiResult.error || 'Simulation failed')
+        throw new Error(apiResult.error || 'Simulation failed');
       }
 
-      const result = apiResult.result
-      
+      const {result} = apiResult;
+
       setSimulationResults({
         success: true,
         evaluation: {
@@ -735,49 +735,49 @@ function PolicyEditor() {
             status: step.conditionResult ? 'PASS' : 'FAIL'
           })) || []
         }
-      })
+      });
     } catch (err) {
       setSimulationResults({
         success: false,
         error: 'Simulation failed. Using secure policy evaluation API.',
         evaluation: null
-      })
+      });
     }
-    
-    setIsSimulating(false)
-  }
+
+    setIsSimulating(false);
+  };
 
   const clearCanvas = () => {
-    setNodes([])
-    setEdges([])
-    setValidationErrors([])
-    setSimulationResults(null)
-  }
+    setNodes([]);
+    setEdges([]);
+    setValidationErrors([]);
+    setSimulationResults(null);
+  };
 
   const loadPolicies = async () => {
-    const baseUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003'
+    const baseUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003';
     try {
-      const res = await fetch(`${baseUrl}/policies`)
-      if (!res.ok) throw new Error(`Load failed: ${res.status}`)
-      const data = await res.json()
-      
+      const res = await fetch(`${baseUrl}/policies`);
+      if (!res.ok) throw new Error(`Load failed: ${res.status}`);
+      const data = await res.json();
+
       if (data.policies && data.policies.length > 0) {
-        const policy = data.policies[0] // Load first policy as example
-        setPolicyName(policy.name)
-        setPolicyDescription(policy.description || '')
-        setPolicyVersion(policy.version || '1.0.0')
-        
+        const policy = data.policies[0]; // Load first policy as example
+        setPolicyName(policy.name);
+        setPolicyDescription(policy.description || '');
+        setPolicyVersion(policy.version || '1.0.0');
+
         // Policy loading will be implemented with secure server-side conversion
-        setInvalidHint('Policy loading temporarily disabled for security')
-        setTimeout(() => setInvalidHint(null), 2000)
-        setInvalidHint(`Loaded policy: ${policy.name}`)
-        setTimeout(() => setInvalidHint(null), 1500)
+        setInvalidHint('Policy loading temporarily disabled for security');
+        setTimeout(() => setInvalidHint(null), 2000);
+        setInvalidHint(`Loaded policy: ${policy.name}`);
+        setTimeout(() => setInvalidHint(null), 1500);
       }
     } catch (err) {
-      setInvalidHint('Failed to load policies')
-      setTimeout(() => setInvalidHint(null), 2000)
+      setInvalidHint('Failed to load policies');
+      setTimeout(() => setInvalidHint(null), 2000);
     }
-  }
+  };
 
   // SECURITY NOTE: Policy-to-nodes conversion moved to server-side for IP protection
   // All proprietary conversion algorithms now secured in backend services
@@ -797,7 +797,7 @@ function PolicyEditor() {
           </p>
         </div>
       </div>
-      
+
       {/* Header */}
       <div className="border-b p-4 bg-white">
         <div className="flex items-center justify-between">
@@ -861,18 +861,18 @@ function PolicyEditor() {
                 { type: 'context', label: 'Context Check', icon: Globe },
                 { type: 'organization', label: 'Organization', icon: Building }
               ].map((condition) => {
-                const Icon = condition.icon
+                const Icon = condition.icon;
                 return (
-                  <Card 
-                    key={condition.type} 
+                  <Card
+                    key={condition.type}
                     className="cursor-grab hover:shadow-md transition-shadow active:cursor-grabbing"
                     draggable
                     onDragStart={(e) => {
                       e.dataTransfer.setData('application/reactflow', JSON.stringify({
                         type: 'condition',
                         conditionType: condition.type
-                      }))
-                      e.dataTransfer.effectAllowed = 'move'
+                      }));
+                      e.dataTransfer.effectAllowed = 'move';
                     }}
                     onClick={() => addConditionNode(condition.type)}
                   >
@@ -883,7 +883,7 @@ function PolicyEditor() {
                       </div>
                     </CardContent>
                   </Card>
-                )
+                );
               })}
             </TabsContent>
 
@@ -897,18 +897,18 @@ function PolicyEditor() {
                 { type: 'alert', label: 'Send Alert', icon: AlertTriangle },
                 { type: 'require_approval', label: 'Require Approval', icon: Shield }
               ].map((action) => {
-                const Icon = action.icon
+                const Icon = action.icon;
                 return (
-                  <Card 
-                    key={action.type} 
+                  <Card
+                    key={action.type}
                     className="cursor-grab hover:shadow-md transition-shadow active:cursor-grabbing"
                     draggable
                     onDragStart={(e) => {
                       e.dataTransfer.setData('application/reactflow', JSON.stringify({
                         type: 'action',
                         actionType: action.type
-                      }))
-                      e.dataTransfer.effectAllowed = 'move'
+                      }));
+                      e.dataTransfer.effectAllowed = 'move';
                     }}
                     onClick={() => addActionNode(action.type)}
                   >
@@ -919,7 +919,7 @@ function PolicyEditor() {
                       </div>
                     </CardContent>
                   </Card>
-                )
+                );
               })}
             </TabsContent>
 
@@ -930,18 +930,18 @@ function PolicyEditor() {
                 { type: 'or', label: 'OR', icon: Globe },
                 { type: 'not', label: 'NOT', icon: XCircle }
               ].map((operator) => {
-                const Icon = operator.icon
+                const Icon = operator.icon;
                 return (
-                  <Card 
-                    key={operator.type} 
+                  <Card
+                    key={operator.type}
                     className="cursor-grab hover:shadow-md transition-shadow active:cursor-grabbing"
                     draggable
                     onDragStart={(e) => {
                       e.dataTransfer.setData('application/reactflow', JSON.stringify({
                         type: 'operator',
                         operatorType: operator.type
-                      }))
-                      e.dataTransfer.effectAllowed = 'move'
+                      }));
+                      e.dataTransfer.effectAllowed = 'move';
                     }}
                     onClick={() => addOperatorNode(operator.type)}
                   >
@@ -952,7 +952,7 @@ function PolicyEditor() {
                       </div>
                     </CardContent>
                   </Card>
-                )
+                );
               })}
             </TabsContent>
           </Tabs>
@@ -1025,11 +1025,11 @@ function PolicyEditor() {
                 accept="application/json"
                 className="mt-1"
                 onChange={async (e) => {
-                  const file = e.target.files?.[0]
-                  if (!file) return
+                  const file = e.target.files?.[0];
+                  if (!file) return;
                   try {
-                    const text = await file.text()
-                    const json = JSON.parse(text)
+                    const text = await file.text();
+                    const json = JSON.parse(text);
                     // expect json.graph.nodes and json.graph.edges
                     if (json?.graph?.nodes && json?.graph?.edges) {
                       const importedNodes: Node[] = json.graph.nodes.map((n: any) => ({
@@ -1037,26 +1037,26 @@ function PolicyEditor() {
                         type: n.type,
                         position: { x: Math.random() * 400 + 100, y: Math.random() * 200 + 100 },
                         data: n.data
-                      }))
+                      }));
                       const importedEdges: Edge[] = json.graph.edges.map((e: any) => ({
                         id: e.id || `${e.source}-${e.target}`,
                         source: e.source,
                         target: e.target,
                         animated: true
-                      }))
-                      setNodes(importedNodes)
-                      setEdges(importedEdges)
-                      setPolicyName(json.name || policyName)
-                      setPolicyDescription(json.description || policyDescription)
-                      setInvalidHint('Policy imported')
-                      setTimeout(() => setInvalidHint(null), 1500)
+                      }));
+                      setNodes(importedNodes);
+                      setEdges(importedEdges);
+                      setPolicyName(json.name || policyName);
+                      setPolicyDescription(json.description || policyDescription);
+                      setInvalidHint('Policy imported');
+                      setTimeout(() => setInvalidHint(null), 1500);
                     } else {
-                      setInvalidHint('Invalid JSON format: missing graph')
-                      setTimeout(() => setInvalidHint(null), 2000)
+                      setInvalidHint('Invalid JSON format: missing graph');
+                      setTimeout(() => setInvalidHint(null), 2000);
                     }
                   } catch {
-                    setInvalidHint('Failed to import JSON')
-                    setTimeout(() => setInvalidHint(null), 2000)
+                    setInvalidHint('Failed to import JSON');
+                    setTimeout(() => setInvalidHint(null), 2000);
                   }
                 }}
               />
@@ -1267,7 +1267,7 @@ function PolicyEditor() {
                 )}
               </>
             )}
-            
+
             {editingNode?.data.type === 'action' && (
               <>
                 {editingNode.data.actionType === 'throttle' && (
@@ -1334,7 +1334,7 @@ function PolicyEditor() {
                 )}
               </>
             )}
-            
+
             {editingNode?.data.type === 'operator' && (
               <div className="p-4 bg-gray-50 rounded">
                 <p className="text-sm text-gray-600">
@@ -1356,7 +1356,7 @@ function PolicyEditor() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
 
 // Wrapper component with ReactFlowProvider
@@ -1368,5 +1368,5 @@ export function VisualPolicyEditor() {
         <PolicyEditor />
       </div>
     </ReactFlowProvider>
-  )
-} 
+  );
+}

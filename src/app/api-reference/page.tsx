@@ -1,4 +1,4 @@
-import Link from "next/link"
+import Link from 'next/link';
 import {
   Code2,
   Terminal,
@@ -17,18 +17,18 @@ import {
   Database,
   Activity,
   Users
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { GatedAPIReference } from "./gated"
-import type { Metadata } from 'next'
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { GatedAPIReference } from './gated';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'API Reference — Agent Trust Protocol',
-  description: 'Complete API documentation for ATP: authentication methods, endpoints, SDKs, rate limits, and error codes.',
-}
+  description: 'Complete API documentation for ATP: authentication methods, endpoints, SDKs, rate limits, and error codes.'
+};
 
 export default function APIReferencePage() {
   return (
@@ -77,7 +77,7 @@ export default function APIReferencePage() {
                 <TabsTrigger value="auth">Authentication</TabsTrigger>
                 <TabsTrigger value="example">First Request</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="install" className="space-y-4">
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Install ATP SDK</h3>
@@ -95,7 +95,7 @@ export default function APIReferencePage() {
                   </div>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="auth" className="space-y-4">
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Authentication</h3>
@@ -113,7 +113,7 @@ await client.authenticate()`}
                   </div>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="example" className="space-y-4">
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Create Agent</h3>
@@ -224,7 +224,7 @@ console.log('Agent created:', agent.id)`}
                 </p>
                 <Badge variant="outline">Development</Badge>
               </div>
-              
+
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Shield className="h-5 w-5 text-green-500" />
@@ -235,7 +235,7 @@ console.log('Agent created:', agent.id)`}
                 </p>
                 <Badge variant="outline">Production</Badge>
               </div>
-              
+
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Database className="h-5 w-5 text-purple-500" />
@@ -339,7 +339,7 @@ console.log('Agent created:', agent.id)`}
                   </div>
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <h3 className="font-semibold">Community SDKs</h3>
                 <div className="space-y-3">
@@ -391,5 +391,5 @@ console.log('Agent created:', agent.id)`}
       </div>
     </div>
     </GatedAPIReference>
-  )
+  );
 }

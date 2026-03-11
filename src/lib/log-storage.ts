@@ -55,10 +55,10 @@ export class CloudWatchLogsProvider implements LogStorageProvider {
       // In production, use AWS SDK
       // const CloudWatchLogs = require('@aws-sdk/client-cloudwatch-logs');
       // const client = new CloudWatchLogs.CloudWatchLogsClient({ region: this.region });
-      
+
       // For now, log that we would send to CloudWatch
       console.log(`[CloudWatch] Would send ${events.length} events to ${this.logGroupName}/${this.logStreamName}`);
-      
+
       // Actual implementation:
       // await client.send(new PutLogEventsCommand({
       //   logGroupName: this.logGroupName,
@@ -116,9 +116,9 @@ export class ElasticsearchProvider implements LogStorageProvider {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-ndjson',
-          ...(auth ? { 'Authorization': auth } : {}),
+          ...(auth ? { 'Authorization': auth } : {})
         },
-        body: bulkBody.map((item) => JSON.stringify(item)).join('\n') + '\n',
+        body: `${bulkBody.map((item) => JSON.stringify(item)).join('\n')  }\n`
       });
 
       if (!response.ok) {
@@ -181,13 +181,13 @@ export class ElasticsearchProvider implements LogStorageProvider {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(auth ? { 'Authorization': auth } : {}),
+          ...(auth ? { 'Authorization': auth } : {})
         },
         body: JSON.stringify({
           query,
           size: filters.limit || 100,
           sort: [{ timestamp: 'desc' }]
-        }),
+        })
       });
 
       if (!response.ok) {
@@ -219,7 +219,7 @@ export class FileStorageProvider implements LogStorageProvider {
       // const fs = require('fs').promises;
       // const lines = events.map(e => JSON.stringify(e)).join('\n') + '\n';
       // await fs.appendFile(this.filePath, lines);
-      
+
       console.log(`[FileStorage] Would append ${events.length} events to ${this.filePath}`);
     } catch (error) {
       console.error('[FileStorage] Failed to write logs:', error);
@@ -360,14 +360,14 @@ if (process.env.CLOUDWATCH_LOG_GROUP) {
   logStorage.addProvider(new CloudWatchLogsProvider({
     logGroupName: process.env.CLOUDWATCH_LOG_GROUP,
     logStreamName: process.env.CLOUDWATCH_LOG_STREAM || 'auth-events',
-    region: process.env.AWS_REGION || 'us-east-1',
+    region: process.env.AWS_REGION || 'us-east-1'
   }));
 }
 
 if (process.env.ELASTICSEARCH_ENDPOINT) {
   logStorage.addProvider(new ElasticsearchProvider({
     endpoint: process.env.ELASTICSEARCH_ENDPOINT,
-    index: process.env.ELASTICSEARCH_INDEX || 'atp-auth-events',
+    index: process.env.ELASTICSEARCH_INDEX || 'atp-auth-events'
   }));
 }
 

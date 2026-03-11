@@ -99,7 +99,7 @@ interface PolicyEvaluationRequest {
   // Policy to evaluate
   policy?: ATPVisualPolicy;
   policyId?: string; // Alternative: load policy by ID
-  
+
   // Evaluation context
   context: {
     agentDID: string;
@@ -180,7 +180,7 @@ interface PolicyEvaluationResponse {
 export async function POST(request: NextRequest) {
   try {
     const body: PolicyEvaluationRequest = await request.json();
-    
+
     // Validate request structure
     if (!body.context) {
       return NextResponse.json({
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
 
     // PROPRIETARY: Secure policy evaluation with advanced algorithms
     const result = await evaluatePolicySecure(body);
-    
+
     return NextResponse.json(result);
 
   } catch (error) {
@@ -212,21 +212,21 @@ export async function POST(request: NextRequest) {
 
 /**
  * PROPRIETARY ALGORITHM: Secure Policy Evaluation Engine
- * 
+ *
  * This function contains our most advanced and proprietary policy evaluation
  * algorithms. These algorithms are the core of our competitive advantage and
  * include sophisticated threat analysis, risk scoring, and decision optimization.
- * 
+ *
  * Key proprietary features:
  * - Advanced threat detection and mitigation
  * - Sophisticated trust level analysis
- * - Dynamic risk scoring with ML-based predictions  
+ * - Dynamic risk scoring with ML-based predictions
  * - Optimal policy execution paths
  * - Advanced security hardening
  */
 async function evaluatePolicySecure(request: PolicyEvaluationRequest): Promise<PolicyEvaluationResponse> {
   const startTime = Date.now();
-  
+
   try {
     // PROPRIETARY: Advanced policy loading and validation
     const policy = await loadAndValidatePolicySecure(request);
@@ -239,7 +239,7 @@ async function evaluatePolicySecure(request: PolicyEvaluationRequest): Promise<P
 
     // PROPRIETARY: Advanced context enrichment and security analysis
     const enrichedContext = await enrichEvaluationContextSecure(request.context);
-    
+
     // PROPRIETARY: Pre-evaluation security screening
     const securityScreening = await performSecurityScreeningSecure(enrichedContext);
     if (!securityScreening.passed) {
@@ -261,10 +261,10 @@ async function evaluatePolicySecure(request: PolicyEvaluationRequest): Promise<P
     }
 
     // PROPRIETARY: Advanced policy evaluation engine
-    const evaluator = new PolicyEvaluator({ 
-      debugMode: request.options?.debugMode || false 
+    const evaluator = new PolicyEvaluator({
+      debugMode: request.options?.debugMode || false
     });
-    
+
     const evaluationResult = await evaluator.evaluatePolicy(policy, enrichedContext);
 
     // PROPRIETARY: Post-evaluation security analysis and optimization
@@ -326,7 +326,7 @@ async function loadAndValidatePolicySecure(request: PolicyEvaluationRequest): Pr
 
 /**
  * PROPRIETARY: Advanced context enrichment system
- * 
+ *
  * This system enriches the evaluation context with additional security data,
  * threat intelligence, and behavioral analysis to improve decision accuracy.
  */
@@ -359,9 +359,9 @@ async function enrichEvaluationContextSecure(context: PolicyEvaluationRequest['c
   if (threatIntelligence.riskLevel > 0) {
     if (!enriched.requestContext) enriched.requestContext = { requestId: randomUUID(), headers: {} };
     enriched.requestContext.riskScore = Math.max(enriched.requestContext.riskScore || 0, threatIntelligence.riskLevel);
-    enriched.requestContext.metadata = { 
-      ...enriched.requestContext.metadata, 
-      threatIntelligence 
+    enriched.requestContext.metadata = {
+      ...enriched.requestContext.metadata,
+      threatIntelligence
     };
   }
 
@@ -370,7 +370,7 @@ async function enrichEvaluationContextSecure(context: PolicyEvaluationRequest['c
 
 /**
  * PROPRIETARY: Advanced security screening system
- * 
+ *
  * Performs pre-evaluation security checks to identify and block known threats
  * before they reach the main evaluation engine.
  */
@@ -418,12 +418,12 @@ async function performSecurityScreeningSecure(context: PolicyEvaluationContext):
 
 /**
  * PROPRIETARY: Advanced evaluation result optimization
- * 
+ *
  * Post-processes evaluation results to optimize security and performance
  * based on advanced analysis of the context and decision.
  */
 async function optimizeEvaluationResultSecure(
-  result: PolicyEvaluationResult, 
+  result: PolicyEvaluationResult,
   context: PolicyEvaluationContext
 ): Promise<PolicyEvaluationResult> {
   // PROPRIETARY: Decision enhancement based on context
@@ -466,12 +466,12 @@ async function optimizeEvaluationResultSecure(
  */
 async function calculateAdvancedTrustScore(context: PolicyEvaluationContext): Promise<number> {
   let baseScore = trustLevelToScore(context.trustLevel);
-  
+
   // PROPRIETARY: Credential-based scoring
   const credentialScore = calculateCredentialTrustScore(context.credentials);
   baseScore = (baseScore * 0.7) + (credentialScore * 0.3);
 
-  // PROPRIETARY: Historical behavior scoring  
+  // PROPRIETARY: Historical behavior scoring
   const behaviorScore = await calculateHistoricalBehaviorScore(context.agentDID);
   baseScore = (baseScore * 0.8) + (behaviorScore * 0.2);
 
@@ -536,7 +536,7 @@ async function getThreatIntelligence(agentDID: string, ipAddress?: string): Prom
  * PROPRIETARY: Security scoring for evaluation results
  */
 async function calculateEvaluationSecurityScore(
-  result: PolicyEvaluationResult, 
+  result: PolicyEvaluationResult,
   context: PolicyEvaluationContext
 ): Promise<number> {
   let score = 100;
@@ -585,7 +585,7 @@ function trustLevelToScore(trustLevel: string): number {
 
 function calculateCredentialTrustScore(credentials: PolicyEvaluationContext['credentials']): number {
   if (!credentials.length) return 0;
-  
+
   const validCredentials = credentials.filter(c => !c.isExpired && !c.isRevoked);
   return Math.min(5, validCredentials.length * 0.5 + 1);
 }
@@ -608,7 +608,7 @@ function analyzeSessionRisk(sessionInfo: any): number {
 
   if (sessionAge > 480) risk += 10; // Sessions older than 8 hours
   if (!sessionInfo.mfaVerified) risk += 20; // No MFA
-  
+
   return risk;
 }
 
@@ -624,23 +624,23 @@ async function analyzeToolAccessPattern(agentDID: string, toolId: string): Promi
 
 function calculateContextualRisk(context: PolicyEvaluationContext): number {
   let risk = 0;
-  
+
   if (context.requestContext?.riskScore) {
     risk += context.requestContext.riskScore;
   }
-  
+
   if (context.tool.sensitivity === 'restricted') {
     risk += 30;
   } else if (context.tool.sensitivity === 'confidential') {
     risk += 20;
   }
-  
+
   return Math.min(100, risk);
 }
 
 async function generateSecurityObligations(result: PolicyEvaluationResult, context: PolicyEvaluationContext): Promise<any[]> {
   const obligations: any[] = [];
-  
+
   // PROPRIETARY: Dynamic obligation generation
   if (context.tool.sensitivity === 'restricted' && result.decision === 'allow') {
     obligations.push({
@@ -649,7 +649,7 @@ async function generateSecurityObligations(result: PolicyEvaluationResult, conte
       description: 'Log restricted tool access'
     });
   }
-  
+
   return obligations;
 }
 

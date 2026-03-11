@@ -1,16 +1,16 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { 
-  Shield, 
-  Users, 
-  Activity, 
-  Database, 
-  Zap, 
-  Clock, 
-  AlertTriangle, 
-  CheckCircle, 
-  TrendingUp, 
+import { useState, useEffect } from 'react';
+import {
+  Shield,
+  Users,
+  Activity,
+  Database,
+  Zap,
+  Clock,
+  AlertTriangle,
+  CheckCircle,
+  TrendingUp,
   TrendingDown,
   Server,
   Globe,
@@ -33,16 +33,16 @@ import {
   Target,
   Award,
   Gauge
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { HydrationSafe } from "@/components/ui/hydration-safe"
-import { AdvancedMetrics } from "./advanced-metrics"
-import { UserManagement } from "./user-management"
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { HydrationSafe } from '@/components/ui/hydration-safe';
+import { AdvancedMetrics } from './advanced-metrics';
+import { UserManagement } from './user-management';
 
 interface SystemMetrics {
   totalAgents: number
@@ -106,67 +106,67 @@ interface RealTimeData {
 }
 
 const SERVICES: ServiceStatus[] = [
-  { 
-    name: 'Identity Service', 
-    status: 'online', 
-    responseTime: 23, 
-    uptime: 99.9, 
-    version: '1.2.3', 
+  {
+    name: 'Identity Service',
+    status: 'online',
+    responseTime: 23,
+    uptime: 99.9,
+    version: '1.2.3',
     icon: Users,
     lastUpdated: new Date(),
     healthScore: 98
   },
-  { 
-    name: 'VC Service', 
-    status: 'online', 
-    responseTime: 18, 
-    uptime: 99.8, 
-    version: '1.2.1', 
+  {
+    name: 'VC Service',
+    status: 'online',
+    responseTime: 18,
+    uptime: 99.8,
+    version: '1.2.1',
     icon: Shield,
     lastUpdated: new Date(),
     healthScore: 97
   },
-  { 
-    name: 'Permission Service', 
-    status: 'warning', 
-    responseTime: 45, 
-    uptime: 98.5, 
-    version: '1.1.9', 
+  {
+    name: 'Permission Service',
+    status: 'warning',
+    responseTime: 45,
+    uptime: 98.5,
+    version: '1.1.9',
     icon: Lock,
     lastUpdated: new Date(),
     healthScore: 85
   },
-  { 
-    name: 'RPC Gateway', 
-    status: 'online', 
-    responseTime: 12, 
-    uptime: 99.9, 
-    version: '1.3.0', 
+  {
+    name: 'RPC Gateway',
+    status: 'online',
+    responseTime: 12,
+    uptime: 99.9,
+    version: '1.3.0',
     icon: Globe,
     lastUpdated: new Date(),
     healthScore: 99
   },
-  { 
-    name: 'Audit Logger', 
-    status: 'online', 
-    responseTime: 31, 
-    uptime: 99.7, 
-    version: '1.2.2', 
+  {
+    name: 'Audit Logger',
+    status: 'online',
+    responseTime: 31,
+    uptime: 99.7,
+    version: '1.2.2',
     icon: Eye,
     lastUpdated: new Date(),
     healthScore: 96
   },
-  { 
-    name: 'Quantum-Safe Server', 
-    status: 'online', 
-    responseTime: 15, 
-    uptime: 99.9, 
-    version: '1.0.0', 
+  {
+    name: 'Quantum-Safe Server',
+    status: 'online',
+    responseTime: 15,
+    uptime: 99.9,
+    version: '1.0.0',
     icon: ShieldCheck,
     lastUpdated: new Date(),
     healthScore: 100
-  },
-]
+  }
+];
 
 export function EnterpriseDashboard() {
   const [metrics, setMetrics] = useState<SystemMetrics>({
@@ -198,7 +198,7 @@ export function EnterpriseDashboard() {
       gdprCompliance: 98,
       hipaaCompliance: 94
     }
-  })
+  });
 
   const [alerts, setAlerts] = useState<SecurityAlert[]>([
     {
@@ -231,11 +231,11 @@ export function EnterpriseDashboard() {
       severity: 3,
       affectedServices: ['Quantum-Safe Server', 'VC Service']
     }
-  ])
+  ]);
 
-  const [realTimeData, setRealTimeData] = useState<RealTimeData[]>([])
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [lastUpdated, setLastUpdated] = useState(new Date())
+  const [realTimeData, setRealTimeData] = useState<RealTimeData[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
 
   // Simulate real-time data updates
   useEffect(() => {
@@ -246,12 +246,12 @@ export function EnterpriseDashboard() {
         activeConnections: Math.floor(Math.random() * 100) + 300,
         avgResponseTime: Math.floor(Math.random() * 10) + 20,
         errorRate: Math.random() * 0.2
-      }
-      
+      };
+
       setRealTimeData(prev => {
-        const updated = [...prev, newDataPoint]
-        return updated.slice(-20) // Keep last 20 data points
-      })
+        const updated = [...prev, newDataPoint];
+        return updated.slice(-20); // Keep last 20 data points
+      });
 
       // Update metrics with slight variations
       setMetrics(prev => ({
@@ -260,55 +260,55 @@ export function EnterpriseDashboard() {
         activeConnections: newDataPoint.activeConnections,
         avgResponseTime: newDataPoint.avgResponseTime,
         errorRate: newDataPoint.errorRate
-      }))
+      }));
 
-      setLastUpdated(new Date())
-    }, 5000) // Update every 5 seconds
+      setLastUpdated(new Date());
+    }, 5000); // Update every 5 seconds
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(interval);
+  }, []);
 
   const refreshDashboard = async () => {
-    setIsRefreshing(true)
+    setIsRefreshing(true);
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsRefreshing(false)
-    setLastUpdated(new Date())
-  }
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setIsRefreshing(false);
+    setLastUpdated(new Date());
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'online': return 'text-green-600'
-      case 'warning': return 'text-yellow-600'
-      case 'offline': return 'text-red-600'
-      default: return 'text-gray-600'
+      case 'online': return 'text-green-600';
+      case 'warning': return 'text-yellow-600';
+      case 'offline': return 'text-red-600';
+      default: return 'text-gray-600';
     }
-  }
+  };
 
   const getMetricColor = (value: number, type: string) => {
     if (type === 'errorRate' || type === 'responseTime') {
-      return value > 50 ? 'text-red-600' : value > 30 ? 'text-yellow-600' : 'text-green-600'
+      return value > 50 ? 'text-red-600' : value > 30 ? 'text-yellow-600' : 'text-green-600';
     }
-    return value > 90 ? 'text-green-600' : value > 70 ? 'text-yellow-600' : 'text-red-600'
-  }
+    return value > 90 ? 'text-green-600' : value > 70 ? 'text-yellow-600' : 'text-red-600';
+  };
 
   const getAlertIcon = (type: string) => {
     switch (type) {
-      case 'critical': return AlertTriangle
-      case 'warning': return AlertCircle
-      case 'info': return Info
-      default: return Info
+      case 'critical': return AlertTriangle;
+      case 'warning': return AlertCircle;
+      case 'info': return Info;
+      default: return Info;
     }
-  }
+  };
 
   const getAlertVariant = (type: string) => {
     switch (type) {
-      case 'critical': return 'destructive'
-      case 'warning': return 'warning'
-      case 'info': return 'default'
-      default: return 'default'
+      case 'critical': return 'destructive';
+      case 'warning': return 'warning';
+      case 'info': return 'default';
+      default: return 'default';
     }
-  }
+  };
 
   const exportDashboardData = () => {
     const data = {
@@ -316,15 +316,15 @@ export function EnterpriseDashboard() {
       services: SERVICES,
       alerts,
       timestamp: new Date().toISOString()
-    }
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `atp-dashboard-${new Date().toISOString().split('T')[0]}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `atp-dashboard-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-6">
@@ -566,7 +566,7 @@ export function EnterpriseDashboard() {
           <CardContent>
             <div className="space-y-3">
               {alerts.filter(alert => !alert.resolved).map((alert) => {
-                const Icon = getAlertIcon(alert.type)
+                const Icon = getAlertIcon(alert.type);
                 return (
                   <Alert key={alert.id} variant={getAlertVariant(alert.type)}>
                     <Icon className="h-4 w-4" />
@@ -578,7 +578,7 @@ export function EnterpriseDashboard() {
                       </div>
                     </AlertDescription>
                   </Alert>
-                )
+                );
               })}
               {alerts.filter(alert => !alert.resolved).length === 0 && (
                 <div className="text-center py-4 text-muted-foreground">
@@ -644,5 +644,5 @@ export function EnterpriseDashboard() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

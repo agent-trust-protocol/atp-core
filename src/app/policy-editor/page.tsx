@@ -1,9 +1,9 @@
 'use client';
 
-import { RequireAuth } from "@/components/auth/RequireAuth"
-import { VisualPolicyEditor } from "@/components/atp/visual-policy-editor"
-import { Subnav } from "@/components/ui/subnav"
-import { Shield, Edit3, Play, BarChart3 } from "lucide-react"
+import { RequireAuth } from '@/components/auth/RequireAuth';
+import { VisualPolicyEditor } from '@/components/atp/visual-policy-editor';
+import { Subnav } from '@/components/ui/subnav';
+import { Shield, Edit3, Play, BarChart3 } from 'lucide-react';
 
 export default function PolicyEditorPage() {
 
@@ -32,19 +32,19 @@ export default function PolicyEditorPage() {
       href: '/dashboard',
       icon: <BarChart3 className="h-4 w-4" />
     }
-  ]
+  ];
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Policy Management', href: '/policies' },
     { label: 'Policy Editor' }
-  ]
+  ];
 
   return (
     <RequireAuth tier="professional" feature="visual-policy-editor">
       <div className="min-h-screen bg-background">
-        <Subnav 
-          tabs={policyTabs} 
+        <Subnav
+          tabs={policyTabs}
           breadcrumbs={breadcrumbs}
           variant="both"
         />
@@ -54,5 +54,5 @@ export default function PolicyEditorPage() {
         </div>
       </div>
     </RequireAuth>
-  )
+  );
 }

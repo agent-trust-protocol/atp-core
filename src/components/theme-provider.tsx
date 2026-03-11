@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 
 type Theme = 'light' | 'dark' | 'system'
 
@@ -17,10 +17,10 @@ type ThemeProviderState = {
 
 const initialState: ThemeProviderState = {
   theme: 'light',
-  setTheme: () => null,
-}
+  setTheme: () => null
+};
 
-const ThemeProviderContext = React.createContext<ThemeProviderState>(initialState)
+const ThemeProviderContext = React.createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
@@ -28,62 +28,62 @@ export function ThemeProvider({
   storageKey = 'atp-ui-theme',
   ...props
 }: ThemeProviderProps) {
-  const [mounted, setMounted] = React.useState(false)
-  const [theme, setThemeState] = React.useState<Theme>(defaultTheme)
+  const [mounted, setMounted] = React.useState(false);
+  const [theme, setThemeState] = React.useState<Theme>(defaultTheme);
 
   // Only run on client after mount to avoid hydration mismatch
   React.useEffect(() => {
-    setMounted(true)
-    const storedTheme = localStorage.getItem(storageKey) as Theme | null
+    setMounted(true);
+    const storedTheme = localStorage.getItem(storageKey) as Theme | null;
     if (storedTheme) {
-      setThemeState(storedTheme)
+      setThemeState(storedTheme);
     }
-  }, [storageKey])
+  }, [storageKey]);
 
   // Apply theme to DOM
   React.useEffect(() => {
-    if (!mounted) return
+    if (!mounted) return;
 
-    const root = window.document.documentElement
-    root.classList.remove('light', 'dark')
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
 
     if (theme === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
-        : 'light'
-      root.classList.add(systemTheme)
+        : 'light';
+      root.classList.add(systemTheme);
     } else {
-      root.classList.add(theme)
+      root.classList.add(theme);
     }
-  }, [theme, mounted])
+  }, [theme, mounted]);
 
   const value: ThemeProviderState = {
     theme,
     setTheme: (newTheme: Theme) => {
       if (mounted) {
-        localStorage.setItem(storageKey, newTheme)
+        localStorage.setItem(storageKey, newTheme);
       }
-      setThemeState(newTheme)
-    },
-  }
+      setThemeState(newTheme);
+    }
+  };
 
   // Don't render children until mounted to avoid hydration mismatch
   if (!mounted) {
-    return <>{children}</>
+    return <>{children}</>;
   }
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
       {children}
     </ThemeProviderContext.Provider>
-  )
+  );
 }
 
 export const useTheme = () => {
-  const context = React.useContext(ThemeProviderContext)
+  const context = React.useContext(ThemeProviderContext);
 
   if (context === undefined)
-    throw new Error('useTheme must be used within a ThemeProvider')
+    throw new Error('useTheme must be used within a ThemeProvider');
 
-  return context
-}
+  return context;
+};

@@ -48,7 +48,7 @@ function AuthCallbackContent() {
           await new Promise(resolve => setTimeout(resolve, 800));
 
           const sessionResponse = await fetch('/api/auth/get-session', {
-            credentials: 'include',
+            credentials: 'include'
           });
 
           if (sessionResponse.ok) {

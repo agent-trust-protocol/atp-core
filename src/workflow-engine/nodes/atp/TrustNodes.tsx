@@ -1,20 +1,20 @@
-import { 
-  NodeExecutor, 
-  NodeDefinition, 
-  NodeInput, 
+import {
+  NodeExecutor,
+  NodeDefinition,
+  NodeInput,
   NodeOutput,
-  WorkflowExecutionContext 
+  WorkflowExecutionContext
 } from '../../types/WorkflowTypes';
 
 export const trustChangeExecutor: NodeExecutor = {
   type: 'trust-change-trigger',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Trust Change Trigger] Monitoring trust level changes...');
-    
+
     const agentDid = inputs.agentDid || config.agentDid;
     const threshold = inputs.threshold || config.threshold || 0.1;
     const direction = inputs.direction || config.direction || 'any';
-    
+
     const trustChange = {
       agentDid: agentDid || 'did:atp:agent-123',
       previousLevel: 0.75,
@@ -29,15 +29,15 @@ export const trustChangeExecutor: NodeExecutor = {
         compliance: -0.05
       }
     };
-    
+
     const meetsThreshold = Math.abs(trustChange.change) >= threshold;
-    const meetsDirection = direction === 'any' || 
+    const meetsDirection = direction === 'any' ||
       (direction === 'increase' && trustChange.change > 0) ||
       (direction === 'decrease' && trustChange.change < 0);
-    
+
     return {
       triggered: meetsThreshold && meetsDirection,
-      trustChange: trustChange,
+      trustChange,
       alert: trustChange.currentLevel < 0.5,
       metadata: {
         executionId: context.executionId,
@@ -45,7 +45,7 @@ export const trustChangeExecutor: NodeExecutor = {
       }
     };
   },
-  
+
   validate(config: any) {
     if (config.threshold && (config.threshold < 0 || config.threshold > 1)) {
       return false;
@@ -55,7 +55,7 @@ export const trustChangeExecutor: NodeExecutor = {
     }
     return true;
   },
-  
+
   getSchema() {
     return {
       inputs: [
@@ -107,10 +107,10 @@ export const riskDetectedExecutor: NodeExecutor = {
   type: 'risk-detected-trigger',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Risk Detected Trigger] Monitoring risk signals...');
-    
+
     const riskLevel = inputs.riskLevel || config.riskLevel || 'medium';
     const riskTypes = inputs.riskTypes || config.riskTypes || ['security', 'compliance', 'operational'];
-    
+
     const riskEvent = {
       riskId: `risk-${Date.now()}`,
       level: 'high',
@@ -134,11 +134,11 @@ export const riskDetectedExecutor: NodeExecutor = {
       ],
       timestamp: new Date()
     };
-    
+
     const riskLevelValues = { low: 1, medium: 2, high: 3, critical: 4 };
     const detectedLevelValue = riskLevelValues[riskEvent.level as keyof typeof riskLevelValues];
     const thresholdLevelValue = riskLevelValues[riskLevel as keyof typeof riskLevelValues];
-    
+
     return {
       triggered: detectedLevelValue >= thresholdLevelValue && riskTypes.includes(riskEvent.type),
       risk: riskEvent,
@@ -149,7 +149,7 @@ export const riskDetectedExecutor: NodeExecutor = {
       }
     };
   },
-  
+
   validate(config: any) {
     const validLevels = ['low', 'medium', 'high', 'critical'];
     if (config.riskLevel && !validLevels.includes(config.riskLevel)) {
@@ -157,7 +157,7 @@ export const riskDetectedExecutor: NodeExecutor = {
     }
     return true;
   },
-  
+
   getSchema() {
     return {
       inputs: [
@@ -199,33 +199,33 @@ export const evaluateTrustExecutor: NodeExecutor = {
   type: 'evaluate-trust',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Evaluate Trust] Calculating trust score...');
-    
+
     const agentDid = inputs.agentDid || config.agentDid;
     const factors = inputs.factors || config.factors || ['authentication', 'behavior', 'history', 'compliance'];
-    
+
     if (!agentDid) {
       throw new Error('Agent DID is required for trust evaluation');
     }
-    
+
     const factorScores: Record<string, number> = {};
     factors.forEach((factor: string) => {
       factorScores[factor] = Math.random() * 0.4 + 0.6;
     });
-    
+
     const overallScore = Object.values(factorScores).reduce((sum, score) => sum + score, 0) / factors.length;
-    
-    const trustLevel = 
+
+    const trustLevel =
       overallScore >= 0.9 ? 'trusted' :
       overallScore >= 0.7 ? 'verified' :
       overallScore >= 0.5 ? 'provisional' :
       overallScore >= 0.3 ? 'restricted' :
       'untrusted';
-    
+
     const evaluation = {
-      agentDid: agentDid,
-      overallScore: overallScore,
-      trustLevel: trustLevel,
-      factorScores: factorScores,
+      agentDid,
+      overallScore,
+      trustLevel,
+      factorScores,
       evaluatedAt: new Date(),
       validUntil: new Date(Date.now() + 24 * 60 * 60 * 1000),
       recommendations: overallScore < 0.7 ? [
@@ -239,20 +239,20 @@ export const evaluateTrustExecutor: NodeExecutor = {
         executionId: context.executionId
       }
     };
-    
+
     await new Promise(resolve => setTimeout(resolve, 300));
-    
+
     return {
       success: true,
-      evaluation: evaluation,
+      evaluation,
       message: `Trust evaluation completed for ${agentDid}`
     };
   },
-  
+
   validate(config: any) {
     return config.agentDid && typeof config.agentDid === 'string';
   },
-  
+
   getSchema() {
     return {
       inputs: [
@@ -290,38 +290,38 @@ export const adjustTrustExecutor: NodeExecutor = {
   type: 'adjust-trust',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Adjust Trust] Adjusting trust level...');
-    
+
     const agentDid = inputs.agentDid || config.agentDid;
     const adjustment = inputs.adjustment || config.adjustment;
     const reason = inputs.reason || config.reason || 'Manual adjustment';
     const adjustmentType = inputs.adjustmentType || config.adjustmentType || 'relative';
-    
+
     if (!agentDid) {
       throw new Error('Agent DID is required for trust adjustment');
     }
-    
+
     if (adjustment === undefined || adjustment === null) {
       throw new Error('Adjustment value is required');
     }
-    
+
     const currentTrustLevel = 0.65;
-    
+
     let newTrustLevel: number;
     if (adjustmentType === 'absolute') {
       newTrustLevel = adjustment;
     } else {
       newTrustLevel = currentTrustLevel + adjustment;
     }
-    
+
     newTrustLevel = Math.max(0, Math.min(1, newTrustLevel));
-    
+
     const adjustmentRecord = {
-      agentDid: agentDid,
+      agentDid,
       previousLevel: currentTrustLevel,
       newLevel: newTrustLevel,
       change: newTrustLevel - currentTrustLevel,
-      adjustmentType: adjustmentType,
-      reason: reason,
+      adjustmentType,
+      reason,
       adjustedBy: context.user?.id || 'system',
       adjustedAt: new Date(),
       auditLog: {
@@ -330,16 +330,16 @@ export const adjustTrustExecutor: NodeExecutor = {
         timestamp: new Date()
       }
     };
-    
+
     await new Promise(resolve => setTimeout(resolve, 200));
-    
+
     return {
       success: true,
       adjustment: adjustmentRecord,
       message: `Trust level adjusted for ${agentDid}: ${currentTrustLevel.toFixed(2)} → ${newTrustLevel.toFixed(2)}`
     };
   },
-  
+
   validate(config: any) {
     if (!config.agentDid || typeof config.agentDid !== 'string') {
       return false;
@@ -352,7 +352,7 @@ export const adjustTrustExecutor: NodeExecutor = {
     }
     return true;
   },
-  
+
   getSchema() {
     return {
       inputs: [
@@ -409,17 +409,17 @@ export const trustThresholdConditionExecutor: NodeExecutor = {
   type: 'trust-threshold',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Trust Threshold Condition] Checking trust level...');
-    
+
     const agentDid = inputs.agentDid || config.agentDid;
     const threshold = inputs.threshold || config.threshold || 0.7;
     const operator = inputs.operator || config.operator || 'gte';
-    
+
     if (!agentDid) {
       throw new Error('Agent DID is required for trust threshold check');
     }
-    
+
     const currentTrustLevel = 0.65 + (Math.random() * 0.3 - 0.15);
-    
+
     let meetsThreshold: boolean;
     switch (operator) {
       case 'gt':
@@ -440,18 +440,18 @@ export const trustThresholdConditionExecutor: NodeExecutor = {
       default:
         meetsThreshold = currentTrustLevel >= threshold;
     }
-    
+
     return {
-      meetsThreshold: meetsThreshold,
-      agentDid: agentDid,
+      meetsThreshold,
+      agentDid,
       currentLevel: currentTrustLevel,
       requiredLevel: threshold,
-      operator: operator,
+      operator,
       gap: threshold - currentTrustLevel,
       recommendation: meetsThreshold ? 'Proceed' : 'Additional verification required'
     };
   },
-  
+
   validate(config: any) {
     if (config.threshold && (config.threshold < 0 || config.threshold > 1)) {
       return false;
@@ -461,7 +461,7 @@ export const trustThresholdConditionExecutor: NodeExecutor = {
     }
     return true;
   },
-  
+
   getSchema() {
     return {
       inputs: [
@@ -518,32 +518,32 @@ export const riskAssessmentConditionExecutor: NodeExecutor = {
   type: 'risk-assessment',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Risk Assessment Condition] Evaluating risk...');
-    
+
     const agentDid = inputs.agentDid || config.agentDid;
     const maxAcceptableRisk = inputs.maxAcceptableRisk || config.maxAcceptableRisk || 0.5;
     const riskFactors = inputs.riskFactors || config.riskFactors || ['behavior', 'location', 'time', 'frequency'];
-    
+
     const factorRisks: Record<string, number> = {};
     riskFactors.forEach((factor: string) => {
       factorRisks[factor] = Math.random() * 0.6;
     });
-    
+
     const overallRisk = Object.values(factorRisks).reduce((sum, risk) => sum + risk, 0) / riskFactors.length;
-    
-    const riskLevel = 
+
+    const riskLevel =
       overallRisk >= 0.8 ? 'critical' :
       overallRisk >= 0.6 ? 'high' :
       overallRisk >= 0.4 ? 'medium' :
       overallRisk >= 0.2 ? 'low' :
       'minimal';
-    
+
     const assessment = {
       isAcceptable: overallRisk <= maxAcceptableRisk,
-      agentDid: agentDid,
-      overallRisk: overallRisk,
-      riskLevel: riskLevel,
-      factorRisks: factorRisks,
-      maxAcceptableRisk: maxAcceptableRisk,
+      agentDid,
+      overallRisk,
+      riskLevel,
+      factorRisks,
+      maxAcceptableRisk,
       mitigations: overallRisk > maxAcceptableRisk ? [
         'Require additional authentication',
         'Enable enhanced monitoring',
@@ -552,17 +552,17 @@ export const riskAssessmentConditionExecutor: NodeExecutor = {
       ] : [],
       assessedAt: new Date()
     };
-    
+
     return assessment;
   },
-  
+
   validate(config: any) {
     if (config.maxAcceptableRisk && (config.maxAcceptableRisk < 0 || config.maxAcceptableRisk > 1)) {
       return false;
     }
     return true;
   },
-  
+
   getSchema() {
     return {
       inputs: [

@@ -43,16 +43,16 @@ export class WorkflowEventService extends EventEmitter {
 
     try {
       console.log('Initializing workflow event service...');
-      
+
       // Load event handlers from database
       await this.loadEventHandlers();
-      
+
       // Start queue processing
       setInterval(() => this.processEventQueue(), 1000);
-      
+
       this.isInitialized = true;
       console.log(`Event service initialized with ${this.getTotalHandlers()} event handlers`);
-      
+
       this.emit('initialized');
     } catch (error) {
       console.error('Failed to initialize workflow event service:', error);
@@ -64,7 +64,7 @@ export class WorkflowEventService extends EventEmitter {
     try {
       // Get all workflows with event triggers
       const workflows = await workflowRepository.listWorkflows(1000, 0);
-      
+
       for (const workflow of workflows) {
         const eventTriggers = workflow.triggers?.filter(
           trigger => trigger.type === 'event' && trigger.config?.eventName
@@ -96,7 +96,7 @@ export class WorkflowEventService extends EventEmitter {
     priority?: number;
   }): string {
     const id = `handler-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const eventHandler: EventHandler = {
       id,
       workflowId: handler.workflowId,
@@ -111,16 +111,16 @@ export class WorkflowEventService extends EventEmitter {
     if (!this.eventHandlers.has(handler.eventType)) {
       this.eventHandlers.set(handler.eventType, []);
     }
-    
+
     const handlers = this.eventHandlers.get(handler.eventType)!;
     handlers.push(eventHandler);
-    
+
     // Sort by priority (higher priority first)
     handlers.sort((a, b) => b.priority - a.priority);
-    
+
     console.log(`Registered event handler for ${handler.eventType} -> workflow ${handler.workflowId}`);
     this.emit('handler:registered', eventHandler);
-    
+
     return id;
   }
 
@@ -130,7 +130,7 @@ export class WorkflowEventService extends EventEmitter {
       if (index !== -1) {
         const handler = handlers[index];
         handlers.splice(index, 1);
-        
+
         console.log(`Unregistered event handler ${handlerId}`);
         this.emit('handler:unregistered', { handlerId, handler });
         return;
@@ -179,13 +179,13 @@ export class WorkflowEventService extends EventEmitter {
     };
 
     console.log(`Publishing event: ${event.type} from ${event.source}`);
-    
+
     // Add to queue for processing
     this.eventQueue.push(workflowEvent);
-    
+
     // Emit event for real-time listeners
     this.emit('event:published', workflowEvent);
-    
+
     // Process immediately if queue is not being processed
     if (!this.processingQueue) {
       await this.processEventQueue();
@@ -259,14 +259,14 @@ export class WorkflowEventService extends EventEmitter {
   private async executeTriggeredWorkflow(handler: EventHandler, event: WorkflowEvent): Promise<void> {
     try {
       console.log(`Executing workflow ${handler.workflowId} triggered by event ${event.type}`);
-      
+
       // Update handler statistics
       handler.lastTriggered = new Date();
       handler.triggerCount++;
 
       // Get workflow from database
       const workflow = await workflowRepository.getWorkflow(handler.workflowId);
-      
+
       if (!workflow) {
         console.error(`Triggered workflow ${handler.workflowId} not found in database`);
         this.unregisterEventHandler(handler.id);
@@ -275,7 +275,7 @@ export class WorkflowEventService extends EventEmitter {
 
       // Register and execute workflow
       await this.workflowEngine.registerWorkflow(workflow);
-      
+
       const result = await this.workflowEngine.executeWorkflow(
         handler.workflowId,
         {
@@ -303,9 +303,9 @@ export class WorkflowEventService extends EventEmitter {
 
       // Update statistics
       await workflowRepository.updateWorkflowStats(handler.workflowId, result);
-      
+
       console.log(`Event-triggered workflow ${handler.workflowId} completed:`, result.success ? 'SUCCESS' : 'FAILED');
-      
+
       this.emit('workflow:executed', {
         workflowId: handler.workflowId,
         eventType: event.type,
@@ -313,10 +313,10 @@ export class WorkflowEventService extends EventEmitter {
         trigger: 'event',
         timestamp: new Date()
       });
-      
+
     } catch (error) {
       console.error(`Error executing event-triggered workflow ${handler.workflowId}:`, error);
-      
+
       this.emit('workflow:execution-failed', {
         workflowId: handler.workflowId,
         eventType: event.type,
@@ -387,7 +387,7 @@ export class WorkflowEventService extends EventEmitter {
   getStatistics() {
     const handlers = this.getEventHandlers();
     const eventTypes = this.getEventTypes();
-    
+
     return {
       totalHandlers: handlers.length,
       totalEventTypes: eventTypes.length,
@@ -406,17 +406,17 @@ export class WorkflowEventService extends EventEmitter {
 
   async shutdown(): Promise<void> {
     console.log('Shutting down workflow event service...');
-    
+
     // Process remaining events in queue
     if (this.eventQueue.length > 0) {
       console.log(`Processing ${this.eventQueue.length} remaining events...`);
       await this.processEventQueue();
     }
-    
+
     // Clear all handlers
     this.eventHandlers.clear();
     this.isInitialized = false;
-    
+
     this.emit('shutdown');
     console.log('Workflow event service shutdown complete');
   }
@@ -424,30 +424,30 @@ export class WorkflowEventService extends EventEmitter {
   // WebSocket/SSE support for real-time event streaming
   createEventStream() {
     const eventStream = new EventEmitter();
-    
+
     const onEvent = (event: WorkflowEvent) => {
       eventStream.emit('event', event);
     };
-    
+
     const onWorkflowExecuted = (data: any) => {
       eventStream.emit('workflow-executed', data);
     };
-    
+
     const onWorkflowFailed = (data: any) => {
       eventStream.emit('workflow-failed', data);
     };
-    
+
     this.on('event:published', onEvent);
     this.on('workflow:executed', onWorkflowExecuted);
     this.on('workflow:execution-failed', onWorkflowFailed);
-    
+
     // Cleanup function
     eventStream.on('close', () => {
       this.off('event:published', onEvent);
       this.off('workflow:executed', onWorkflowExecuted);
       this.off('workflow:execution-failed', onWorkflowFailed);
     });
-    
+
     return eventStream;
   }
 }

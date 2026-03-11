@@ -1,9 +1,9 @@
-"use client"
+'use client';
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { cn } from '@/lib/utils'
-import { ChevronRight, Home } from 'lucide-react'
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
+import { ChevronRight, Home } from 'lucide-react';
 
 export interface SubnavTab {
   id: string
@@ -26,12 +26,12 @@ interface SubnavProps {
 }
 
 export function Subnav({ tabs, breadcrumbs, variant = 'tabs', className }: SubnavProps) {
-  const pathname = usePathname()
-  
+  const pathname = usePathname();
+
   return (
     <div
       className={cn(
-        "border-b border-border/50 bg-gradient-to-r from-background via-[hsl(var(--atp-surface))] to-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        'border-b border-border/50 bg-gradient-to-r from-background via-[hsl(var(--atp-surface))] to-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60',
         className
       )}
     >
@@ -39,8 +39,8 @@ export function Subnav({ tabs, breadcrumbs, variant = 'tabs', className }: Subna
         {/* Breadcrumbs */}
         {(variant === 'breadcrumbs' || variant === 'both') && breadcrumbs && breadcrumbs.length > 0 && (
           <nav className="flex items-center space-x-1 text-sm text-muted-foreground py-3">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="flex items-center hover:text-foreground transition-colors"
             >
               <Home className="h-4 w-4" />
@@ -50,7 +50,7 @@ export function Subnav({ tabs, breadcrumbs, variant = 'tabs', className }: Subna
               <div key={index} className="flex items-center space-x-1">
                 <ChevronRight className="h-4 w-4" />
                 {crumb.href ? (
-                  <Link 
+                  <Link
                     href={crumb.href}
                     className="hover:text-foreground transition-colors"
                   >
@@ -63,21 +63,21 @@ export function Subnav({ tabs, breadcrumbs, variant = 'tabs', className }: Subna
             ))}
           </nav>
         )}
-        
+
         {/* Tabs */}
         {variant === 'tabs' || variant === 'both' ? (
           <div className="flex flex-wrap gap-2 py-2">
             {tabs?.map((tab) => {
-              const isActive = pathname === tab.href
+              const isActive = pathname === tab.href;
               return (
                 <Link
                   key={tab.id}
                   href={tab.href}
                   className={cn(
-                    "flex items-center space-x-2 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200",
+                    'flex items-center space-x-2 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200',
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                   )}
                 >
                   {tab.icon && <span className="h-4 w-4">{tab.icon}</span>}
@@ -88,11 +88,11 @@ export function Subnav({ tabs, breadcrumbs, variant = 'tabs', className }: Subna
                     </span>
                   )}
                 </Link>
-              )
+              );
             })}
           </div>
         ) : null}
       </div>
     </div>
-  )
+  );
 }

@@ -21,7 +21,7 @@ const mockWorkflows = [
     schedule: '0 */4 * * *'
   },
   {
-    id: 'workflow-2', 
+    id: 'workflow-2',
     name: 'Trust Score Monitoring',
     status: 'active',
     nodes: [
@@ -30,7 +30,7 @@ const mockWorkflows = [
       { id: 'condition-2', type: 'trust-threshold', label: 'Check Trust Threshold' }
     ],
     lastExecution: {
-      status: 'success', 
+      status: 'success',
       timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
       duration: 850
     },
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const type = searchParams.get('type');
   const action = searchParams.get('action');
-  
+
   // Handle workflow requests - these contain sensitive IP
   if (type === 'workflows') {
     // Check authentication for workflow-related endpoints
@@ -81,21 +81,21 @@ export async function GET(request: NextRequest) {
           service: 'workflow-engine',
           version: '1.0.0'
         });
-      
+
       case 'list':
         return NextResponse.json({
           workflows: mockWorkflows,
           total: mockWorkflows.length,
           timestamp: new Date().toISOString()
         });
-      
+
       case 'executions':
         return NextResponse.json({
           executions: mockActiveExecutions,
           count: mockActiveExecutions.length,
           timestamp: new Date().toISOString()
         });
-      
+
       case 'nodes':
         const workflowNodes = [
           {
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
           {
             type: 'trust-change-trigger',
             category: 'trigger',
-            label: 'Trust Change Trigger', 
+            label: 'Trust Change Trigger',
             description: 'Triggers when trust scores change significantly',
             icon: '🔄',
             color: '#06B6D4'
@@ -128,12 +128,12 @@ export async function GET(request: NextRequest) {
           categories: ['trigger', 'action', 'condition'],
           total: workflowNodes.length
         });
-      
+
       default:
         return NextResponse.json({ error: 'Unknown workflow action' }, { status: 400 });
     }
   }
-  
+
   // Basic health check - safe to expose publicly
   return NextResponse.json({
     status: 'healthy',

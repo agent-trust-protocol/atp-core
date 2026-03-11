@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { 
-  Users, 
-  Plus, 
-  Search, 
+import { useState } from 'react';
+import {
+  Users,
+  Plus,
+  Search,
   MoreVertical,
   Building,
   Shield,
@@ -13,16 +13,16 @@ import {
   Filter,
   Download,
   Cloud
-} from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Subnav } from "@/components/ui/subnav"
-import Link from "next/link"
+} from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Subnav } from '@/components/ui/subnav';
+import Link from 'next/link';
 
 export default function TenantsPage() {
-  const [searchTerm, setSearchTerm] = useState('')
-  
+  const [searchTerm, setSearchTerm] = useState('');
+
   // Mock tenant data
   const tenants = [
     {
@@ -37,7 +37,7 @@ export default function TenantsPage() {
       trustLevel: 'Enterprise'
     },
     {
-      id: '2', 
+      id: '2',
       name: 'Tech Solutions Inc',
       domain: 'tech-solutions.atp.cloud',
       status: 'active',
@@ -50,7 +50,7 @@ export default function TenantsPage() {
     {
       id: '3',
       name: 'Global Systems Ltd',
-      domain: 'global-systems.atp.cloud', 
+      domain: 'global-systems.atp.cloud',
       status: 'suspended',
       plan: 'Basic',
       users: 25,
@@ -69,31 +69,31 @@ export default function TenantsPage() {
       created: '2024-03-20',
       trustLevel: 'Premium'
     }
-  ]
+  ];
 
   const getStatusColor = (status: string) => {
     switch(status) {
-      case 'active': return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
-      case 'suspended': return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'
-      case 'pending': return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800'
-      default: return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800'
+      case 'active': return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
+      case 'suspended': return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
+      case 'pending': return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800';
+      default: return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800';
     }
-  }
+  };
 
   const getTrustLevelColor = (level: string) => {
     switch(level) {
-      case 'Enterprise': return 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800'
-      case 'Premium': return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'
-      case 'Verified': return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
-      case 'Basic': return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800'
-      default: return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800'
+      case 'Enterprise': return 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800';
+      case 'Premium': return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800';
+      case 'Verified': return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
+      case 'Basic': return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800';
+      default: return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800';
     }
-  }
+  };
 
   const filteredTenants = tenants.filter(tenant =>
     tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     tenant.domain.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  );
 
   const cloudTabs = [
     {
@@ -120,17 +120,17 @@ export default function TenantsPage() {
       href: '/cloud/services',
       icon: <Activity className="h-4 w-4" />
     }
-  ]
+  ];
 
   const breadcrumbs = [
     { label: 'Cloud Dashboard', href: '/cloud' },
     { label: 'Tenants', href: '/cloud/tenants' }
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-background">
-      <Subnav 
-        tabs={cloudTabs} 
+      <Subnav
+        tabs={cloudTabs}
         breadcrumbs={breadcrumbs}
         variant="both"
       />
@@ -151,7 +151,7 @@ export default function TenantsPage() {
                 </p>
               </div>
             </div>
-            
+
             {/* Controls */}
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
               <div className="flex items-center gap-3">
@@ -287,5 +287,5 @@ export default function TenantsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

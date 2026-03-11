@@ -1,14 +1,14 @@
-"use client"
+'use client';
 
-import Link from "next/link"
-import { useState } from "react"
-import { BrandLogo } from "@/components/ui/brand-logo"
-import { ThemeToggle } from "@/components/ui/theme-toggle"
-import { Button } from "@/components/ui/button"
-import { Menu, X } from "lucide-react"
+import Link from 'next/link';
+import { useState } from 'react';
+import { BrandLogo } from '@/components/ui/brand-logo';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { Button } from '@/components/ui/button';
+import { Menu, X } from 'lucide-react';
 
 export function Navbar() {
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 shadow-sm">
@@ -134,5 +134,5 @@ export function Navbar() {
         )}
       </div>
     </nav>
-  )
+  );
 }

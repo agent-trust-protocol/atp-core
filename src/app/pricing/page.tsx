@@ -1,4 +1,4 @@
-import Link from "next/link"
+import Link from 'next/link';
 import {
   Check,
   ArrowRight,
@@ -12,25 +12,25 @@ import {
   Download,
   TrendingUp,
   Lock
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import type { Metadata } from 'next'
-import { PricingToggle } from "./pricing-toggle"
-import { PricingCalculator } from "./pricing-calculator"
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import type { Metadata } from 'next';
+import { PricingToggle } from './pricing-toggle';
+import { PricingCalculator } from './pricing-calculator';
 
 export const metadata: Metadata = {
   title: 'Pricing — Agent Trust Protocol',
   description: 'OpenCore pricing: start free with open source; upgrade to Enterprise for production.'
-}
+};
 
 export default function PricingPage() {
   return (
     <div className="min-h-screen relative overflow-hidden bg-white dark:bg-gray-950">
       {/* Background - clean white */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950" />
-      
+
       <div className="relative z-10">
         <div className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
           {/* Header */}
@@ -39,7 +39,7 @@ export default function PricingPage() {
               <span className="atp-gradient-text">OpenCore Pricing</span>
             </h1>
             <p className="text-lg sm:text-xl text-foreground/80 mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in-up">
-              Start with our <span className="atp-gradient-text font-medium">open source core</span> forever free, 
+              Start with our <span className="atp-gradient-text font-medium">open source core</span> forever free,
               upgrade to enterprise features when you need them.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 mb-8 animate-fade-in-up">
@@ -322,7 +322,7 @@ export default function PricingPage() {
             <h2 className="font-display text-3xl lg:text-4xl font-light mb-12 text-center">
               <span className="atp-gradient-text">Feature Comparison</span>
             </h2>
-            
+
             <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -419,7 +419,7 @@ export default function PricingPage() {
             <h2 className="font-display text-3xl lg:text-4xl font-light mb-12 text-center">
               <span className="atp-gradient-text">Frequently Asked Questions</span>
             </h2>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300">
                 <CardHeader className="pb-4">
@@ -427,79 +427,79 @@ export default function PricingPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Yes! The ATP core protocol is 100% open source under Apache 2.0 license. 
+                    Yes! The ATP core protocol is 100% open source under Apache 2.0 license.
                     You get the complete quantum-safe agent security stack forever free.
                   </p>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">What&apos;s the difference between Enterprise and Cloud?</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Enterprise is self-hosted with advanced features. Cloud is our fully managed service 
+                    Enterprise is self-hosted with advanced features. Cloud is our fully managed service
                     with zero setup and global infrastructure.
                   </p>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">Can I migrate from open source to enterprise?</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Absolutely! ATP is designed for seamless migration. Your data and configurations 
+                    Absolutely! ATP is designed for seamless migration. Your data and configurations
                     transfer directly to enterprise features.
                   </p>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">When will ATP Cloud be available?</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    ATP Cloud launches Q2 2025. Join our waitlist to get early access and 
+                    ATP Cloud launches Q2 2025. Join our waitlist to get early access and
                     participate in the beta program.
                   </p>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">Do you offer volume discounts?</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Yes! We offer custom pricing for large deployments, multi-year contracts, 
+                    Yes! We offer custom pricing for large deployments, multi-year contracts,
                     and academic institutions. Contact our sales team.
                   </p>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">What support is included?</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Open source includes community support. Enterprise includes 24/7 priority support, 
+                    Open source includes community support. Enterprise includes 24/7 priority support,
                     professional services, and dedicated customer success.
                   </p>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">How does the 30-day enterprise trial work?</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Get full access to enterprise features for 30 days with dedicated onboarding support. 
+                    Get full access to enterprise features for 30 days with dedicated onboarding support.
                     No credit card required. Includes custom configuration for your environment.
                   </p>
                 </CardContent>
@@ -533,5 +533,5 @@ export default function PricingPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

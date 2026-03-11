@@ -86,7 +86,7 @@ const validate = (schema: z.ZodSchema) => (req: express.Request, res: express.Re
 router.get('/health', asyncHandler(async (req: express.Request, res: express.Response) => {
   const dbHealth = await healthCheck();
   const nodeCount = nodeRegistry.getAllNodes().length;
-  
+
   res.json({
     status: dbHealth.status === 'healthy' ? 'healthy' : 'unhealthy',
     timestamp: new Date().toISOString(),
@@ -108,17 +108,17 @@ router.get('/health', asyncHandler(async (req: express.Request, res: express.Res
 // Node management endpoints
 router.get('/nodes', asyncHandler(async (req: express.Request, res: express.Response) => {
   const { category, search } = req.query;
-  
+
   let nodes = nodeRegistry.getAllNodes();
-  
+
   if (category) {
     nodes = nodeRegistry.getNodesByCategory(category as any);
   }
-  
+
   if (search) {
     nodes = nodeRegistry.searchNodes(search as string);
   }
-  
+
   res.json({
     nodes: nodes.map(node => ({
       type: node.type,
@@ -149,7 +149,7 @@ router.get('/nodes/:type/schema', asyncHandler(async (req: express.Request, res:
 // Workflow CRUD endpoints
 router.post('/workflows', validate(createWorkflowSchema), asyncHandler(async (req: express.Request, res: express.Response) => {
   const workflowId = await workflowRepository.createWorkflow(req.body);
-  
+
   const workflow = await workflowRepository.getWorkflow(workflowId);
   res.status(201).json({
     id: workflowId,
@@ -159,47 +159,47 @@ router.post('/workflows', validate(createWorkflowSchema), asyncHandler(async (re
 
 router.get('/workflows', asyncHandler(async (req: express.Request, res: express.Response) => {
   const { limit = 50, offset = 0, search } = req.query;
-  
+
   let workflows;
   if (search) {
     workflows = await workflowRepository.searchWorkflows(search as string, Number(limit));
   } else {
     workflows = await workflowRepository.listWorkflows(Number(limit), Number(offset));
   }
-  
+
   res.json({ workflows });
 }));
 
 router.get('/workflows/:id', asyncHandler(async (req: express.Request, res: express.Response) => {
   const workflow = await workflowRepository.getWorkflow(req.params.id);
-  
+
   if (!workflow) {
     return res.status(404).json({ error: 'Workflow not found' });
   }
-  
+
   res.json({ workflow });
 }));
 
 router.put('/workflows/:id', validate(updateWorkflowSchema), asyncHandler(async (req: express.Request, res: express.Response) => {
   const workflow = await workflowRepository.getWorkflow(req.params.id);
-  
+
   if (!workflow) {
     return res.status(404).json({ error: 'Workflow not found' });
   }
-  
+
   await workflowRepository.updateWorkflow(req.params.id, req.body);
-  
+
   const updatedWorkflow = await workflowRepository.getWorkflow(req.params.id);
   res.json({ workflow: updatedWorkflow });
 }));
 
 router.delete('/workflows/:id', asyncHandler(async (req: express.Request, res: express.Response) => {
   const workflow = await workflowRepository.getWorkflow(req.params.id);
-  
+
   if (!workflow) {
     return res.status(404).json({ error: 'Workflow not found' });
   }
-  
+
   await workflowRepository.deleteWorkflow(req.params.id);
   res.status(204).send();
 }));
@@ -207,40 +207,40 @@ router.delete('/workflows/:id', asyncHandler(async (req: express.Request, res: e
 // Workflow execution endpoints
 router.post('/workflows/:id/execute', validate(executeWorkflowSchema), asyncHandler(async (req: express.Request, res: express.Response) => {
   const workflow = await workflowRepository.getWorkflow(req.params.id);
-  
+
   if (!workflow) {
     return res.status(404).json({ error: 'Workflow not found' });
   }
-  
+
   // Register workflow with engine if not already registered
   try {
     await workflowEngine.registerWorkflow(workflow);
   } catch (error) {
     // Workflow might already be registered, continue
   }
-  
+
   const result = await workflowEngine.executeWorkflow(
     req.params.id,
     req.body.initialData,
     req.body.context
   );
-  
+
   // Update statistics
   await workflowRepository.updateWorkflowStats(req.params.id, result);
-  
+
   res.json({ result });
 }));
 
 router.post('/workflows/:id/validate', asyncHandler(async (req: express.Request, res: express.Response) => {
   const workflow = await workflowRepository.getWorkflow(req.params.id);
-  
+
   if (!workflow) {
     return res.status(404).json({ error: 'Workflow not found' });
   }
-  
+
   try {
     await workflowEngine.registerWorkflow(workflow);
-    res.json({ 
+    res.json({
       isValid: true,
       errors: [],
       warnings: []
@@ -257,12 +257,12 @@ router.post('/workflows/:id/validate', asyncHandler(async (req: express.Request,
 // Execution management endpoints
 router.get('/executions', asyncHandler(async (req: express.Request, res: express.Response) => {
   const { workflowId, limit = 100 } = req.query;
-  
+
   const history = await workflowRepository.getExecutionHistory(
     workflowId as string,
     Number(limit)
   );
-  
+
   res.json({ executions: history });
 }));
 
@@ -273,33 +273,33 @@ router.get('/executions/active', asyncHandler(async (req: express.Request, res: 
 
 router.post('/executions/:id/cancel', asyncHandler(async (req: express.Request, res: express.Response) => {
   const execution = workflowEngine.getExecutionContext(req.params.id);
-  
+
   if (!execution) {
     return res.status(404).json({ error: 'Execution not found' });
   }
-  
+
   workflowEngine.cancelExecution(req.params.id);
   res.json({ message: 'Execution cancelled' });
 }));
 
 router.post('/executions/:id/pause', asyncHandler(async (req: express.Request, res: express.Response) => {
   const execution = workflowEngine.getExecutionContext(req.params.id);
-  
+
   if (!execution) {
     return res.status(404).json({ error: 'Execution not found' });
   }
-  
+
   workflowEngine.pauseExecution(req.params.id);
   res.json({ message: 'Execution paused' });
 }));
 
 router.post('/executions/:id/resume', asyncHandler(async (req: express.Request, res: express.Response) => {
   const execution = workflowEngine.getExecutionContext(req.params.id);
-  
+
   if (!execution) {
     return res.status(404).json({ error: 'Execution not found' });
   }
-  
+
   workflowEngine.resumeExecution(req.params.id);
   res.json({ message: 'Execution resumed' });
 }));
@@ -307,11 +307,11 @@ router.post('/executions/:id/resume', asyncHandler(async (req: express.Request, 
 // Statistics endpoints
 router.get('/workflows/:id/statistics', asyncHandler(async (req: express.Request, res: express.Response) => {
   const statistics = await workflowRepository.getWorkflowStatistics(req.params.id);
-  
+
   if (!statistics) {
     return res.status(404).json({ error: 'Statistics not found' });
   }
-  
+
   res.json({ statistics });
 }));
 
@@ -323,11 +323,11 @@ router.get('/workflows/:id/variables', asyncHandler(async (req: express.Request,
 
 router.post('/workflows/:id/variables', asyncHandler(async (req: express.Request, res: express.Response) => {
   const { name, type, value, isSecret, description } = req.body;
-  
+
   if (!name || !type) {
     return res.status(400).json({ error: 'Name and type are required' });
   }
-  
+
   await workflowRepository.upsertWorkflowVariable({
     workflowId: req.params.id,
     name,
@@ -336,60 +336,60 @@ router.post('/workflows/:id/variables', asyncHandler(async (req: express.Request
     isSecret,
     description
   });
-  
+
   res.status(201).json({ message: 'Variable saved' });
 }));
 
 // ATP-specific endpoints
 router.post('/workflows/:id/policy-mapping', asyncHandler(async (req: express.Request, res: express.Response) => {
   const { policyId, triggerEvent, priority } = req.body;
-  
+
   if (!policyId || !triggerEvent) {
     return res.status(400).json({ error: 'Policy ID and trigger event are required' });
   }
-  
+
   await workflowRepository.createPolicyWorkflowMapping({
     policyId,
     workflowId: req.params.id,
     triggerEvent,
     priority
   });
-  
+
   res.status(201).json({ message: 'Policy mapping created' });
 }));
 
 router.post('/workflows/:id/trust-mapping', asyncHandler(async (req: express.Request, res: express.Response) => {
   const { agentDid, triggerEvent, thresholds } = req.body;
-  
+
   if (!triggerEvent) {
     return res.status(400).json({ error: 'Trigger event is required' });
   }
-  
+
   await workflowRepository.createTrustWorkflowMapping({
     agentDid,
     workflowId: req.params.id,
     triggerEvent,
     thresholds
   });
-  
+
   res.status(201).json({ message: 'Trust mapping created' });
 }));
 
 // Import/Export endpoints
 router.post('/workflows/import', asyncHandler(async (req: express.Request, res: express.Response) => {
   const { workflows } = req.body;
-  
+
   if (!Array.isArray(workflows)) {
     return res.status(400).json({ error: 'Workflows must be an array' });
   }
-  
+
   const importedIds = [];
   for (const workflow of workflows) {
     const id = await workflowRepository.createWorkflow(workflow);
     importedIds.push(id);
   }
-  
-  res.json({ 
+
+  res.json({
     message: `${importedIds.length} workflows imported`,
     workflowIds: importedIds
   });
@@ -397,11 +397,11 @@ router.post('/workflows/import', asyncHandler(async (req: express.Request, res: 
 
 router.get('/workflows/:id/export', asyncHandler(async (req: express.Request, res: express.Response) => {
   const workflow = await workflowRepository.getWorkflow(req.params.id);
-  
+
   if (!workflow) {
     return res.status(404).json({ error: 'Workflow not found' });
   }
-  
+
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Content-Disposition', `attachment; filename="${workflow.name}.json"`);
   res.json(workflow);
@@ -410,7 +410,7 @@ router.get('/workflows/:id/export', asyncHandler(async (req: express.Request, re
 // Error handling middleware
 router.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Workflow API Error:', error);
-  
+
   res.status(500).json({
     error: 'Internal server error',
     message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'

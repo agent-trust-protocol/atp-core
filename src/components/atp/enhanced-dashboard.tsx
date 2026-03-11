@@ -1,60 +1,60 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { DashboardStats } from "./dashboard-stats"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { 
+import { useState } from 'react';
+import { DashboardStats } from './dashboard-stats';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { 
-  MoreVertical, 
-  Download, 
-  RefreshCw, 
+  DialogTrigger
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  MoreVertical,
+  Download,
+  RefreshCw,
   Settings,
   Filter,
   Calendar,
   Bell,
   Search
-} from "lucide-react"
-import { cn } from "@/lib/utils"
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function EnhancedDashboard() {
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedTimeRange, setSelectedTimeRange] = useState("24h")
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTimeRange, setSelectedTimeRange] = useState('24h');
 
   const handleRefresh = async () => {
-    setIsRefreshing(true)
+    setIsRefreshing(true);
     // Simulate data refresh
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setIsRefreshing(false)
-  }
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsRefreshing(false);
+  };
 
   const timeRanges = [
-    { value: "1h", label: "Last Hour" },
-    { value: "24h", label: "Last 24 Hours" },
-    { value: "7d", label: "Last 7 Days" },
-    { value: "30d", label: "Last 30 Days" },
-    { value: "custom", label: "Custom Range" }
-  ]
+    { value: '1h', label: 'Last Hour' },
+    { value: '24h', label: 'Last 24 Hours' },
+    { value: '7d', label: 'Last 7 Days' },
+    { value: '30d', label: 'Last 30 Days' },
+    { value: 'custom', label: 'Custom Range' }
+  ];
 
   return (
     <div className="space-y-6">
@@ -68,15 +68,15 @@ export function EnhancedDashboard() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="secondary" 
+            <Button
+              variant="secondary"
               size="sm"
               onClick={handleRefresh}
               disabled={isRefreshing}
               className="bg-white/20 hover:bg-white/30 dark:bg-white/30 dark:hover:bg-white/40 text-white border-0 backdrop-blur-sm shadow-lg"
             >
-              <RefreshCw className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")} />
-              {isRefreshing ? "Refreshing..." : "Refresh"}
+              <RefreshCw className={cn('h-4 w-4 mr-2', isRefreshing && 'animate-spin')} />
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -118,7 +118,7 @@ export function EnhancedDashboard() {
             <Filter className="h-4 w-4" />
           </Button>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Dialog>
             <DialogTrigger asChild>
@@ -151,7 +151,7 @@ export function EnhancedDashboard() {
               </div>
             </DialogContent>
           </Dialog>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon">
@@ -234,5 +234,5 @@ export function EnhancedDashboard() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

@@ -1,23 +1,23 @@
-import { betterAuth } from "better-auth";
-import { nextCookies } from "better-auth/next-js";
-import { magicLink } from "better-auth/plugins";
-import { Pool } from "pg";
+import { betterAuth } from 'better-auth';
+import { nextCookies } from 'better-auth/next-js';
+import { magicLink } from 'better-auth/plugins';
+import { Pool } from 'pg';
 
 // Use a fallback secret during build (when real secrets aren't available)
 // At runtime in production, BETTER_AUTH_SECRET must be set via environment
 const secret = process.env.BETTER_AUTH_SECRET || 'dev-only-secret-not-for-production';
 
-const baseURL = process.env.BETTER_AUTH_URL || "http://localhost:3000";
+const baseURL = process.env.BETTER_AUTH_URL || 'http://localhost:3000';
 
 // PostgreSQL connection for Better Auth
-const DATABASE_URL = process.env.DATABASE_URL;
+const {DATABASE_URL} = process.env;
 
 const pool = DATABASE_URL ? new Pool({
   connectionString: DATABASE_URL,
   max: 5,
   ssl: DATABASE_URL.includes('localhost') || DATABASE_URL.includes('127.0.0.1') || DATABASE_URL.includes('sslmode=disable') || DATABASE_URL.includes('.flycast')
     ? false
-    : { rejectUnauthorized: false },
+    : { rejectUnauthorized: false }
 }) : undefined;
 
 export const auth = betterAuth({
@@ -25,26 +25,26 @@ export const auth = betterAuth({
   baseURL,
   database: pool as any, // Better Auth accepts a pg Pool directly
   emailAndPassword: {
-    enabled: false, // Disabled - using magic link instead
+    enabled: false // Disabled - using magic link instead
   },
   session: {
-    expiresIn: 60 * 60 * 24 * 30, // 30 days
+    expiresIn: 60 * 60 * 24 * 30 // 30 days
   },
   trustedOrigins: [
-    "http://localhost:3000",
-    "https://agenttrustprotocol.com",
-    "https://www.agenttrustprotocol.com",
-    process.env.NEXT_PUBLIC_APP_DOMAIN || "",
+    'http://localhost:3000',
+    'https://agenttrustprotocol.com',
+    'https://www.agenttrustprotocol.com',
+    process.env.NEXT_PUBLIC_APP_DOMAIN || ''
   ].filter(Boolean),
   plugins: [
     nextCookies(),
     magicLink({
       sendMagicLink: async ({ email, url }) => {
         // Dynamic import to avoid circular dependency
-        const { emailService } = await import("./email");
+        const { emailService } = await import('./email');
         await emailService.sendMagicLinkEmail(email, url);
       },
-      expiresIn: 60 * 15, // 15 minutes
-    }),
-  ],
+      expiresIn: 60 * 15 // 15 minutes
+    })
+  ]
 });

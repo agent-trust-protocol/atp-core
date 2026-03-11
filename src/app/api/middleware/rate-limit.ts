@@ -57,7 +57,7 @@ class RateLimitStore {
 
   isBlocked(key: string): boolean {
     const entry = this.store.get(key);
-    if (!entry || !entry.blocked) return false;
+    if (!entry?.blocked) return false;
     return entry.blocked > Date.now();
   }
 
@@ -84,21 +84,21 @@ export const RateLimitConfigs = {
     maxRequests: 5,
     blockDuration: 30 * 60 * 1000 // 30 minutes block after limit
   },
-  
+
   // Policy evaluation - expensive operations
   policyEvaluation: {
     windowMs: 60 * 1000, // 1 minute
     maxRequests: 20,
     blockDuration: 5 * 60 * 1000 // 5 minutes block
   },
-  
+
   // General API - moderate limits
   api: {
     windowMs: 60 * 1000, // 1 minute
     maxRequests: 100,
     blockDuration: 60 * 1000 // 1 minute block
   },
-  
+
   // Registration - prevent spam
   registration: {
     windowMs: 60 * 60 * 1000, // 1 hour
@@ -115,28 +115,28 @@ export async function applyRateLimit(
   config: keyof typeof RateLimitConfigs | { windowMs: number; maxRequests: number; blockDuration: number }
 ): Promise<NextResponse | null> {
   const limitConfig = typeof config === 'string' ? RateLimitConfigs[config] : config;
-  
+
   // Generate rate limit key
   const key = generateRateLimitKey(request, typeof config === 'string' ? config : 'custom');
-  
+
   // Check if blocked
   if (rateLimitStore.isBlocked(key)) {
     return createRateLimitResponse(true, 0, new Date(Date.now() + limitConfig.blockDuration));
   }
-  
+
   // Increment counter
   const entry = rateLimitStore.increment(key, limitConfig.windowMs);
-  
+
   // Check if limit exceeded
   if (entry.count > limitConfig.maxRequests) {
     // Block the key
     rateLimitStore.block(key, limitConfig.blockDuration);
     return createRateLimitResponse(true, 0, new Date(Date.now() + limitConfig.blockDuration));
   }
-  
+
   // Add rate limit headers to successful responses
   const remainingRequests = Math.max(0, limitConfig.maxRequests - entry.count);
-  
+
   // Return null to indicate request should proceed
   // Headers will be added by the wrapper
   return null;
@@ -147,21 +147,21 @@ export async function applyRateLimit(
  */
 function generateRateLimitKey(request: NextRequest, type: string): string {
   // Get identifier components
-  const ip = request.headers.get('x-forwarded-for') || 
-             request.headers.get('x-real-ip') || 
+  const ip = request.headers.get('x-forwarded-for') ||
+             request.headers.get('x-real-ip') ||
              'unknown';
-  
+
   const path = request.nextUrl.pathname;
   const userAgent = request.headers.get('user-agent') || 'unknown';
-  
+
   // For auth endpoints, also include username/email if present
   let identifier = `${type}:${ip}:${path}`;
-  
+
   if (type === 'auth' && request.method === 'POST') {
     // Note: In real implementation, would need to parse body
     identifier += ':auth-attempt';
   }
-  
+
   // Hash the identifier for privacy
   return crypto
     .createHash('sha256')
@@ -177,10 +177,10 @@ function createRateLimitResponse(
   remainingRequests: number,
   resetTime: Date
 ): NextResponse {
-  const message = blocked 
+  const message = blocked
     ? 'Too many requests. You have been temporarily blocked.'
     : 'Rate limit exceeded. Please try again later.';
-  
+
   return NextResponse.json(
     {
       error: 'Too Many Requests',
@@ -212,19 +212,19 @@ export function withRateLimit(
     if (rateLimitResponse) {
       return rateLimitResponse;
     }
-    
+
     // Proceed with the original handler
     const response = await handler(request);
-    
+
     // Add rate limit headers to successful responses
     const limitConfig = typeof config === 'string' ? RateLimitConfigs[config] : config;
     const key = generateRateLimitKey(request, typeof config === 'string' ? config : 'custom');
     const entry = rateLimitStore.increment(key, limitConfig.windowMs);
-    
+
     response.headers.set('X-RateLimit-Limit', limitConfig.maxRequests.toString());
     response.headers.set('X-RateLimit-Remaining', Math.max(0, limitConfig.maxRequests - entry.count).toString());
     response.headers.set('X-RateLimit-Reset', new Date(entry.resetTime).toISOString());
-    
+
     return response;
   };
 }

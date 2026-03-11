@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { 
-  Code2, 
-  Zap, 
-  Book, 
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import {
+  Code2,
+  Zap,
+  Book,
   FileText,
   PlayCircle,
   Download,
@@ -27,52 +27,52 @@ import {
   Activity,
   Code,
   Command
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { 
-  Accordion, 
-  AccordionContent, 
-  AccordionItem, 
-  AccordionTrigger 
-} from "@/components/ui/accordion"
-import { CodePlayground } from "@/components/atp/code-playground"
-import { AnimatedCounter } from "@/components/atp/animated-counter"
-import { 
-  HelpCircle, 
-  Youtube, 
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion';
+import { CodePlayground } from '@/components/atp/code-playground';
+import { AnimatedCounter } from '@/components/atp/animated-counter';
+import {
+  HelpCircle,
+  Youtube,
   TrendingUp,
   Users,
   MessageSquare,
   Github
-} from "lucide-react"
+} from 'lucide-react';
 
 export default function DevelopersPage() {
-  const [copied, setCopied] = useState<string | null>(null)
-  const [installMethod, setInstallMethod] = useState<'npm' | 'yarn' | 'pnpm'>('npm')
+  const [copied, setCopied] = useState<string | null>(null);
+  const [installMethod, setInstallMethod] = useState<'npm' | 'yarn' | 'pnpm'>('npm');
   const [communityStats, setCommunityStats] = useState({
     githubStars: 0,
     npmDownloads: 0,
     contributors: 0,
     growth: 0,
     isLoading: true
-  })
+  });
 
   // Fetch real community stats from APIs
   useEffect(() => {
-    let mounted = true
+    let mounted = true;
 
     const fetchStats = async () => {
       try {
@@ -80,15 +80,15 @@ export default function DevelopersPage() {
         const [githubResponse, npmResponse] = await Promise.all([
           fetch('/api/github/stats', { cache: 'no-store' }),
           fetch('/api/npm/stats', { cache: 'no-store' })
-        ])
+        ]);
 
-        const githubData = await githubResponse.json()
-        const npmData = await npmResponse.json()
+        const githubData = await githubResponse.json();
+        const npmData = await npmResponse.json();
 
         // Calculate growth percentage (simplified - can be enhanced with historical data)
         // For now, use a dynamic calculation based on current stats
-        const baseGrowth = githubData.stars > 100 ? 127 : (githubData.stars > 50 ? 89 : 45)
-        const growth = Math.max(0, baseGrowth)
+        const baseGrowth = githubData.stars > 100 ? 127 : (githubData.stars > 50 ? 89 : 45);
+        const growth = Math.max(0, baseGrowth);
 
         if (mounted) {
           setCommunityStats({
@@ -97,42 +97,42 @@ export default function DevelopersPage() {
             contributors: githubData.contributors || 0,
             growth,
             isLoading: false
-          })
+          });
         }
       } catch (error) {
-        console.error('Error fetching community stats:', error)
+        console.error('Error fetching community stats:', error);
         if (mounted) {
           // Set fallback values on error
           setCommunityStats(prev => ({
             ...prev,
             isLoading: false
-          }))
+          }));
         }
       }
-    }
+    };
 
-    fetchStats()
-    
+    fetchStats();
+
     // Refresh stats every 5 minutes
-    const interval = setInterval(fetchStats, 5 * 60 * 1000)
-    
+    const interval = setInterval(fetchStats, 5 * 60 * 1000);
+
     return () => {
-      mounted = false
-      clearInterval(interval)
-    }
-  }, [])
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   const copyToClipboard = async (text: string, id: string) => {
-    await navigator.clipboard.writeText(text)
-    setCopied(id)
-    setTimeout(() => setCopied(null), 2000)
-  }
+    await navigator.clipboard.writeText(text);
+    setCopied(id);
+    setTimeout(() => setCopied(null), 2000);
+  };
 
   const installCommands = {
     npm: 'npm install atp-sdk',
     yarn: 'yarn add atp-sdk',
     pnpm: 'pnpm add atp-sdk'
-  }
+  };
 
   const quickStartCode = `import { Agent } from 'atp-sdk';
 
@@ -163,7 +163,7 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
               <span className="atp-gradient-text">For Developers</span>
             </h1>
             <p className="text-xl sm:text-2xl text-foreground/80 mb-8 leading-relaxed animate-fade-in-up">
-              Build secure AI agents in <span className="atp-gradient-text font-semibold">3 lines of code</span> with 
+              Build secure AI agents in <span className="atp-gradient-text font-semibold">3 lines of code</span> with
               the world's first <span className="text-primary font-medium">quantum-safe security protocol</span> for AI agents.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3 mb-8 animate-fade-in-up">
@@ -541,7 +541,7 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
               </div>
               <div className="mt-6 p-4 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg border border-primary/20">
                 <p className="text-sm text-foreground">
-                  <strong>One security layer for all protocols.</strong> ATP provides universal quantum-safe security, 
+                  <strong>One security layer for all protocols.</strong> ATP provides universal quantum-safe security,
                   cross-protocol trust, and unified audit trails for the entire AI agent ecosystem.
                 </p>
               </div>
@@ -660,8 +660,8 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
                     {communityStats.isLoading ? (
                       <span className="animate-pulse">...</span>
                     ) : (
-                      <AnimatedCounter 
-                        value={communityStats.githubStars} 
+                      <AnimatedCounter
+                        value={communityStats.githubStars}
                         duration={2000}
                       />
                     )}
@@ -674,8 +674,8 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
                     {communityStats.isLoading ? (
                       <span className="animate-pulse">...</span>
                     ) : (
-                      <AnimatedCounter 
-                        value={communityStats.npmDownloads} 
+                      <AnimatedCounter
+                        value={communityStats.npmDownloads}
                         duration={2000}
                       />
                     )}
@@ -688,8 +688,8 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
                     {communityStats.isLoading ? (
                       <span className="animate-pulse">...</span>
                     ) : (
-                      <AnimatedCounter 
-                        value={communityStats.contributors} 
+                      <AnimatedCounter
+                        value={communityStats.contributors}
                         duration={2000}
                       />
                     )}
@@ -703,8 +703,8 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
                       <span className="animate-pulse">...</span>
                     ) : (
                       <>
-                        +<AnimatedCounter 
-                          value={communityStats.growth} 
+                        +<AnimatedCounter
+                          value={communityStats.growth}
                           duration={2000}
                           suffix="%"
                         />
@@ -886,8 +886,8 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
                     What makes ATP different from other security protocols?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    ATP is the <strong>ecosystem security layer</strong> for AI agents. Unlike protocol-specific solutions, 
-                    ATP works across all agent protocols (MCP, Swarm, ADK, A2A) providing universal quantum-safe security, 
+                    ATP is the <strong>ecosystem security layer</strong> for AI agents. Unlike protocol-specific solutions,
+                    ATP works across all agent protocols (MCP, Swarm, ADK, A2A) providing universal quantum-safe security,
                     cross-protocol trust, and unified audit trails. It's protocol-agnostic - it doesn't replace protocols, it secures them.
                   </AccordionContent>
                 </AccordionItem>
@@ -896,7 +896,7 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
                     Do I need ATP services running to use the SDK?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    No! The SDK works immediately with basic features (quantum-safe identity, signatures) without any services. 
+                    No! The SDK works immediately with basic features (quantum-safe identity, signatures) without any services.
                     For full features like identity registration, credentials, and permissions, you can run ATP services locally or use our cloud offering.
                   </AccordionContent>
                 </AccordionItem>
@@ -905,8 +905,8 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
                     Is ATP really quantum-safe by default?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    Yes! All new agents created with <code className="text-primary">Agent.create()</code> automatically use 
-                    hybrid ML-DSA + Ed25519 cryptography. ML-DSA (Dilithium successor) is NIST-standardized post-quantum cryptography 
+                    Yes! All new agents created with <code className="text-primary">Agent.create()</code> automatically use
+                    hybrid ML-DSA + Ed25519 cryptography. ML-DSA (Dilithium successor) is NIST-standardized post-quantum cryptography
                     that protects against future quantum computing attacks, while Ed25519 provides current security.
                   </AccordionContent>
                 </AccordionItem>
@@ -915,8 +915,8 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
                     Can I use ATP with my existing agent protocol?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    Absolutely! ATP is protocol-agnostic and works with any agent protocol. We provide adapters for MCP, Swarm, ADK, 
-                    and A2A, but you can also create custom adapters for your protocol. ATP adds a security layer without requiring 
+                    Absolutely! ATP is protocol-agnostic and works with any agent protocol. We provide adapters for MCP, Swarm, ADK,
+                    and A2A, but you can also create custom adapters for your protocol. ATP adds a security layer without requiring
                     you to change your existing agent implementation.
                   </AccordionContent>
                 </AccordionItem>
@@ -925,8 +925,8 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
                     What's the difference between open source and enterprise?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    The <strong>open source core</strong> is free forever and includes the complete protocol, 3-line SDK integration, 
-                    quantum-safe cryptography, and basic trust scoring. <strong>Enterprise</strong> adds advanced monitoring dashboards, 
+                    The <strong>open source core</strong> is free forever and includes the complete protocol, 3-line SDK integration,
+                    quantum-safe cryptography, and basic trust scoring. <strong>Enterprise</strong> adds advanced monitoring dashboards,
                     enterprise SSO & RBAC, compliance reporting (SOC 2, HIPAA, GDPR), high availability clustering, and 24/7 priority support.
                   </AccordionContent>
                 </AccordionItem>
@@ -935,7 +935,7 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
                     How do I contribute to ATP?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    We welcome contributions! Visit our <a href="https://github.com/agent-trust-protocol/core" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">GitHub repository</a> to 
+                    We welcome contributions! Visit our <a href="https://github.com/agent-trust-protocol/core" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">GitHub repository</a> to
                     see open issues, submit pull requests, or join our community discussions. All contributions are appreciated!
                   </AccordionContent>
                 </AccordionItem>
@@ -1094,5 +1094,5 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
         </div>
       </div>
     </div>
-  )
+  );
 }

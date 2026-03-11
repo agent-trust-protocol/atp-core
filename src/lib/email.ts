@@ -18,7 +18,7 @@ class EmailService {
     // Configure email service
     // Supports multiple providers: SendGrid, Resend, SMTP, etc.
     const emailProvider = process.env.EMAIL_PROVIDER || 'smtp';
-    
+
     // Use Resend's onboarding domain in development if main domain not verified
     const isDevelopment = process.env.NODE_ENV !== 'production';
     this.fromEmail = process.env.EMAIL_FROM || (isDevelopment ? 'onboarding@resend.dev' : 'noreply@agenttrustprotocol.com');
@@ -58,7 +58,7 @@ class EmailService {
     try {
       if (!this.transporter && !this.resend) {
         // Log email clearly for development/testing
-        console.log('\n' + '='.repeat(60));
+        console.log(`\n${  '='.repeat(60)}`);
         console.log('📧 EMAIL (Development Mode - No email provider configured)');
         console.log('='.repeat(60));
         console.log(`To: ${options.to}`);
@@ -70,7 +70,7 @@ class EmailService {
           console.log('\n🔗 MAGIC LINK URL (click or copy this):');
           console.log(urlMatch[1]);
         }
-        console.log('='.repeat(60) + '\n');
+        console.log(`${'='.repeat(60)  }\n`);
         return true; // Return true so the flow continues
       }
 
@@ -122,7 +122,7 @@ class EmailService {
     message?: string;
   }): Promise<boolean> {
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@agenttrustprotocol.com';
-    
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -261,7 +261,7 @@ class EmailService {
     console.log('   To:', email);
     console.log('   URL:', url);
     console.log('   Provider:', this.resend ? 'Resend' : this.transporter ? 'SMTP' : 'Console (dev mode)');
-    
+
     const html = `
       <!DOCTYPE html>
       <html>

@@ -1,6 +1,6 @@
-"use client"
+'use client';
 
-import { useState, useEffect, ReactNode } from 'react'
+import { useState, useEffect, ReactNode } from 'react';
 
 interface HydrationSafeProps {
   children: ReactNode
@@ -12,17 +12,17 @@ interface HydrationSafeProps {
  * Only renders children on client-side after hydration
  */
 export function HydrationSafe({ children, fallback = null }: HydrationSafeProps) {
-  const [isClient, setIsClient] = useState(false)
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true)
-  }, [])
+    setIsClient(true);
+  }, []);
 
   if (!isClient) {
-    return <>{fallback}</>
+    return <>{fallback}</>;
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }
 
 /**
@@ -34,32 +34,32 @@ interface TimeDisplayProps {
 }
 
 export function TimeDisplay({ format = 'time', className }: TimeDisplayProps) {
-  const [time, setTime] = useState<Date | null>(null)
+  const [time, setTime] = useState<Date | null>(null);
 
   useEffect(() => {
-    setTime(new Date())
-  }, [])
+    setTime(new Date());
+  }, []);
 
   if (!time) {
-    return <span className={className}>Loading...</span>
+    return <span className={className}>Loading...</span>;
   }
 
   const formatTime = () => {
     switch (format) {
       case 'time':
-        return time.toLocaleTimeString()
+        return time.toLocaleTimeString();
       case 'date':
-        return time.toLocaleDateString()
+        return time.toLocaleDateString();
       case 'datetime':
-        return time.toLocaleString()
+        return time.toLocaleString();
       default:
-        return time.toLocaleTimeString()
+        return time.toLocaleTimeString();
     }
-  }
+  };
 
   return (
     <span className={className} suppressHydrationWarning>
       {formatTime()}
     </span>
-  )
+  );
 }

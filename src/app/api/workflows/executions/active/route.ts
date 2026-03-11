@@ -15,7 +15,7 @@ const mockActiveExecutions = [
   },
   {
     executionId: 'exec-running-2',
-    workflowId: 'workflow-2', 
+    workflowId: 'workflow-2',
     workflowName: 'Trust Score Monitoring',
     state: 'running',
     startTime: new Date(Date.now() - 8 * 60 * 1000).toISOString(),

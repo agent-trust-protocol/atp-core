@@ -1,30 +1,30 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 
 /**
  * Hook to prevent hydration mismatches for client-only values
  */
 export function useHydrationSafe() {
-  const [isClient, setIsClient] = useState(false)
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true)
-  }, [])
+    setIsClient(true);
+  }, []);
 
-  return isClient
+  return isClient;
 }
 
 /**
  * Hook for hydration-safe timestamps
  */
 export function useCurrentTime() {
-  const [currentTime, setCurrentTime] = useState<Date | null>(null)
-  const isClient = useHydrationSafe()
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
+  const isClient = useHydrationSafe();
 
   useEffect(() => {
     if (isClient) {
-      setCurrentTime(new Date())
+      setCurrentTime(new Date());
     }
-  }, [isClient])
+  }, [isClient]);
 
-  return currentTime
+  return currentTime;
 }

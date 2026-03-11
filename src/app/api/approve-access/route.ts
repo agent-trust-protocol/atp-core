@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * Admin endpoint to approve user access
- * 
+ *
  * Usage: POST /api/approve-access
  * Body: { email: string }
- * 
+ *
  * This sets a cookie that allows the user to access the site.
  * In production, you'd want to:
  * 1. Add authentication/authorization to this endpoint

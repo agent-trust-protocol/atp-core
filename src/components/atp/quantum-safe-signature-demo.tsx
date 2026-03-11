@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Textarea } from "@/components/ui/textarea"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Shield,
   Key,
@@ -18,7 +18,7 @@ import {
   Atom,
   Clock,
   AlertTriangle
-} from "lucide-react"
+} from 'lucide-react';
 
 interface SignatureResult {
   message: string
@@ -35,31 +35,31 @@ interface SignatureResult {
 }
 
 export function QuantumSafeSignatureDemo() {
-  const [message, setMessage] = useState("Hello, ATP World! This message demonstrates quantum-safe cryptography.")
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [isVerifying, setIsVerifying] = useState(false)
-  const [signature, setSignature] = useState<SignatureResult | null>(null)
-  const [activeDemo, setActiveDemo] = useState<'sign' | 'verify'>('sign')
-  const [error, setError] = useState<string | null>(null)
+  const [message, setMessage] = useState('Hello, ATP World! This message demonstrates quantum-safe cryptography.');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [signature, setSignature] = useState<SignatureResult | null>(null);
+  const [activeDemo, setActiveDemo] = useState<'sign' | 'verify'>('sign');
+  const [error, setError] = useState<string | null>(null);
 
   // Generate quantum-safe signature using actual SDK
   const generateSignature = async () => {
-    setIsGenerating(true)
-    setError(null)
+    setIsGenerating(true);
+    setError(null);
 
     try {
       const response = await fetch('/api/crypto/generate-signature', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message })
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to generate signature')
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate signature');
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
     const result: SignatureResult = {
         message: data.message,
@@ -73,26 +73,26 @@ export function QuantumSafeSignatureDemo() {
         signature: data.signature, // Store full signature for verification
         quantumSafe: data.quantumSafe,
         algorithm: data.algorithm
-    }
+    };
 
-    setSignature(result)
+    setSignature(result);
     } catch (err: any) {
-      setError(err.message || 'An error occurred')
-      console.error('Signature generation error:', err)
+      setError(err.message || 'An error occurred');
+      console.error('Signature generation error:', err);
     } finally {
-    setIsGenerating(false)
+    setIsGenerating(false);
   }
-  }
+  };
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-  }
+    navigator.clipboard.writeText(text);
+  };
 
   const verifySignature = async () => {
-    if (!signature || !signature.publicKey) return
+    if (!signature?.publicKey) return;
 
-    setIsVerifying(true)
-    setError(null)
+    setIsVerifying(true);
+    setError(null);
 
     try {
       // Get the full signature from the hybrid signature
@@ -106,30 +106,30 @@ export function QuantumSafeSignatureDemo() {
           signature: signature.signature, // Use full hybrid signature
           publicKey: signature.publicKey
         })
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to verify signature')
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to verify signature');
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       setSignature({
         ...signature,
         verification: data.valid ? 'valid' : 'invalid'
-      })
+      });
     } catch (err: any) {
-      setError(err.message || 'Verification failed')
-      console.error('Signature verification error:', err)
+      setError(err.message || 'Verification failed');
+      console.error('Signature verification error:', err);
       setSignature({
         ...signature,
         verification: 'invalid'
-      })
+      });
     } finally {
-      setIsVerifying(false)
+      setIsVerifying(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -423,5 +423,5 @@ export function QuantumSafeSignatureDemo() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

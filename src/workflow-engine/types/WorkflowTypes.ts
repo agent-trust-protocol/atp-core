@@ -181,8 +181,8 @@ export interface WorkflowValidationResult {
 export interface NodeExecutor {
   type: string;
   execute: (
-    inputs: any, 
-    config: NodeConfig, 
+    inputs: any,
+    config: NodeConfig,
     context: WorkflowExecutionContext
   ) => Promise<any>;
   validate?: (config: NodeConfig) => boolean;
@@ -194,7 +194,7 @@ export interface NodeExecutor {
 }
 
 export interface WorkflowEvent {
-  type: 'workflow:started' | 'workflow:completed' | 'workflow:failed' | 
+  type: 'workflow:started' | 'workflow:completed' | 'workflow:failed' |
         'workflow:paused' | 'workflow:resumed' | 'workflow:cancelled' |
         'node:executing' | 'node:completed' | 'node:failed';
   timestamp: Date;
@@ -247,7 +247,7 @@ export interface WorkflowStatistics {
   }>;
 }
 
-export type NodeCategory = 
+export type NodeCategory =
   | 'trigger'
   | 'action'
   | 'condition'
