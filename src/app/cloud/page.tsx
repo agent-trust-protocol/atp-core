@@ -1,12 +1,12 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { 
-  Shield, 
-  Users, 
-  Activity, 
-  BarChart3, 
-  Settings, 
+import { useState, useEffect } from 'react';
+import {
+  Shield,
+  Users,
+  Activity,
+  BarChart3,
+  Settings,
   Database,
   Server,
   Zap,
@@ -18,12 +18,12 @@ import {
   Lock,
   Network,
   Cloud
-} from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Subnav } from "@/components/ui/subnav"
-import type { Metadata } from 'next'
+} from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Subnav } from '@/components/ui/subnav';
+import type { Metadata } from 'next';
 
 interface DashboardStats {
   totalTenants: number
@@ -39,16 +39,16 @@ export default function CloudDashboardPage() {
     activeTenants: 8,
     totalRequests: 45231,
     totalBandwidth: 2.4 * 1024 * 1024 * 1024 // 2.4 GB
-  }
+  };
 
   const formatBytes = (bytes: number): string => {
-    const gb = bytes / (1024 * 1024 * 1024)
-    if (gb >= 1) return `${gb.toFixed(1)} GB`
-    const mb = bytes / (1024 * 1024)
-    if (mb >= 1) return `${mb.toFixed(1)} MB`
-    const kb = bytes / 1024
-    return `${kb.toFixed(1)} KB`
-  }
+    const gb = bytes / (1024 * 1024 * 1024);
+    if (gb >= 1) return `${gb.toFixed(1)} GB`;
+    const mb = bytes / (1024 * 1024);
+    if (mb >= 1) return `${mb.toFixed(1)} MB`;
+    const kb = bytes / 1024;
+    return `${kb.toFixed(1)} KB`;
+  };
 
   const cloudTabs = [
     {
@@ -75,16 +75,16 @@ export default function CloudDashboardPage() {
       href: '/cloud/services',
       icon: <Settings className="h-4 w-4" />
     }
-  ]
+  ];
 
   const breadcrumbs = [
     { label: 'Cloud Dashboard', href: '/cloud' }
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-background">
-      <Subnav 
-        tabs={cloudTabs} 
+      <Subnav
+        tabs={cloudTabs}
         breadcrumbs={breadcrumbs}
         variant="both"
       />
@@ -318,5 +318,5 @@ export default function CloudDashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

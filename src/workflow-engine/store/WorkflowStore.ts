@@ -2,11 +2,11 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { persist } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
-import { 
-  Workflow, 
-  WorkflowNode, 
-  WorkflowEdge, 
-  WorkflowState, 
+import {
+  Workflow,
+  WorkflowNode,
+  WorkflowEdge,
+  WorkflowState,
   WorkflowExecutionContext,
   ExecutionResult,
   WorkflowHistory,
@@ -23,45 +23,45 @@ interface WorkflowStoreState {
   selectedNode: string | null;
   isExecuting: boolean;
   errors: string[];
-  
+
   // Actions
   createWorkflow: (workflow: Partial<Workflow>) => string;
   updateWorkflow: (id: string, updates: Partial<Workflow>) => void;
   deleteWorkflow: (id: string) => void;
   duplicateWorkflow: (id: string) => string;
-  
+
   // Node operations
   addNode: (workflowId: string, node: WorkflowNode) => void;
   updateNode: (workflowId: string, nodeId: string, updates: Partial<WorkflowNode>) => void;
   removeNode: (workflowId: string, nodeId: string) => void;
-  
+
   // Edge operations
   addEdge: (workflowId: string, edge: WorkflowEdge) => void;
   updateEdge: (workflowId: string, edgeId: string, updates: Partial<WorkflowEdge>) => void;
   removeEdge: (workflowId: string, edgeId: string) => void;
-  
+
   // Execution
   startExecution: (workflowId: string, initialData?: any) => string;
   updateExecution: (executionId: string, updates: Partial<WorkflowExecutionContext>) => void;
   completeExecution: (executionId: string, result: ExecutionResult) => void;
   cancelExecution: (executionId: string) => void;
-  
+
   // History
   addToHistory: (history: WorkflowHistory) => void;
   clearHistory: () => void;
   getExecutionHistory: (workflowId?: string) => WorkflowHistory[];
-  
+
   // Statistics
   updateStatistics: (workflowId: string, executionResult: ExecutionResult) => void;
   getStatistics: (workflowId: string) => WorkflowStatistics | null;
-  
+
   // UI State
   setSelectedWorkflow: (workflowId: string | null) => void;
   setSelectedNode: (nodeId: string | null) => void;
   setIsExecuting: (executing: boolean) => void;
   addError: (error: string) => void;
   clearErrors: () => void;
-  
+
   // Export/Import
   exportWorkflow: (workflowId: string) => Workflow | null;
   importWorkflow: (workflow: Workflow) => string;
@@ -84,7 +84,7 @@ export const useWorkflowStore = create<WorkflowStoreState>()(
       createWorkflow: (workflow) => {
         const id = uuidv4();
         const now = new Date();
-        
+
         set((state) => {
           state.workflows[id] = {
             id,
@@ -104,7 +104,7 @@ export const useWorkflowStore = create<WorkflowStoreState>()(
             }
           };
         });
-        
+
         return id;
       },
 
@@ -121,12 +121,12 @@ export const useWorkflowStore = create<WorkflowStoreState>()(
         set((state) => {
           delete state.workflows[id];
           delete state.workflowStatistics[id];
-          
+
           // Remove from execution history
           state.executionHistory = state.executionHistory.filter(
             h => h.workflowId !== id
           );
-          
+
           // Clear selection if deleted workflow was selected
           if (state.selectedWorkflow === id) {
             state.selectedWorkflow = null;
@@ -138,7 +138,7 @@ export const useWorkflowStore = create<WorkflowStoreState>()(
       duplicateWorkflow: (id) => {
         const workflow = get().workflows[id];
         if (!workflow) return '';
-        
+
         const newId = uuidv4();
         const duplicatedWorkflow = {
           ...workflow,
@@ -150,11 +150,11 @@ export const useWorkflowStore = create<WorkflowStoreState>()(
             updatedAt: new Date()
           }
         };
-        
+
         set((state) => {
           state.workflows[newId] = duplicatedWorkflow;
         });
-        
+
         return newId;
       },
 
@@ -186,14 +186,14 @@ export const useWorkflowStore = create<WorkflowStoreState>()(
           if (workflow) {
             // Remove node
             workflow.nodes = workflow.nodes.filter(n => n.id !== nodeId);
-            
+
             // Remove connected edges
             workflow.edges = workflow.edges.filter(
               e => e.sourceNodeId !== nodeId && e.targetNodeId !== nodeId
             );
-            
+
             workflow.metadata!.updatedAt = new Date();
-            
+
             // Clear selection if deleted node was selected
             if (state.selectedNode === nodeId) {
               state.selectedNode = null;
@@ -237,7 +237,7 @@ export const useWorkflowStore = create<WorkflowStoreState>()(
       startExecution: (workflowId, initialData = {}) => {
         const executionId = uuidv4();
         const now = new Date();
-        
+
         set((state) => {
           state.activeExecutions[executionId] = {
             executionId,
@@ -256,7 +256,7 @@ export const useWorkflowStore = create<WorkflowStoreState>()(
           };
           state.isExecuting = true;
         });
-        
+
         return executionId;
       },
 
@@ -274,7 +274,7 @@ export const useWorkflowStore = create<WorkflowStoreState>()(
           if (execution) {
             execution.state = result.success ? WorkflowState.COMPLETED : WorkflowState.FAILED;
             execution.endTime = new Date();
-            
+
             // Add to history
             const history: WorkflowHistory = {
               executionId,
@@ -287,15 +287,15 @@ export const useWorkflowStore = create<WorkflowStoreState>()(
               events: [],
               nodeExecutions: []
             };
-            
+
             state.executionHistory.unshift(history);
-            
+
             // Update statistics
             get().updateStatistics(execution.workflowId, result);
-            
+
             // Remove from active executions
             delete state.activeExecutions[executionId];
-            
+
             // Update executing state
             state.isExecuting = Object.keys(state.activeExecutions).length > 0;
           }
@@ -308,7 +308,7 @@ export const useWorkflowStore = create<WorkflowStoreState>()(
           if (execution) {
             execution.state = WorkflowState.CANCELLED;
             execution.endTime = new Date();
-            
+
             delete state.activeExecutions[executionId];
             state.isExecuting = Object.keys(state.activeExecutions).length > 0;
           }
@@ -333,7 +333,7 @@ export const useWorkflowStore = create<WorkflowStoreState>()(
 
       getExecutionHistory: (workflowId) => {
         const history = get().executionHistory;
-        return workflowId 
+        return workflowId
           ? history.filter(h => h.workflowId === workflowId)
           : history;
       },
@@ -350,21 +350,21 @@ export const useWorkflowStore = create<WorkflowStoreState>()(
               nodeStatistics: new Map()
             };
           }
-          
+
           const stats = state.workflowStatistics[workflowId];
           stats.totalExecutions++;
-          
+
           if (executionResult.success) {
             stats.successfulExecutions++;
           } else {
             stats.failedExecutions++;
           }
-          
+
           // Update average duration
           const oldAvg = stats.averageDuration;
           const newDuration = executionResult.duration;
           stats.averageDuration = (oldAvg * (stats.totalExecutions - 1) + newDuration) / stats.totalExecutions;
-          
+
           stats.lastExecutionTime = new Date();
         });
       },
@@ -410,7 +410,7 @@ export const useWorkflowStore = create<WorkflowStoreState>()(
 
       importWorkflow: (workflow) => {
         const id = workflow.id || uuidv4();
-        
+
         set((state) => {
           state.workflows[id] = {
             ...workflow,
@@ -421,7 +421,7 @@ export const useWorkflowStore = create<WorkflowStoreState>()(
             }
           };
         });
-        
+
         return id;
       },
 

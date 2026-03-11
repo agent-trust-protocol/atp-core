@@ -1,7 +1,7 @@
 import { RequireAuth } from '@/components/auth/RequireAuth';
 
 export default function WorkflowDesignerLayout({
-  children,
+  children
 }: {
   children: React.ReactNode;
 }) {

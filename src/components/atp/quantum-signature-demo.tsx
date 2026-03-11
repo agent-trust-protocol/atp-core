@@ -1,12 +1,12 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Shield, Key, Atom } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
-import { generateMockSignature } from "@/lib/utils"
+import { useState } from 'react';
+import { Shield, Key, Atom } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { generateMockSignature } from '@/lib/utils';
 
 interface SignatureResult {
   message: string
@@ -25,27 +25,27 @@ interface SignatureResult {
 
 export function QuantumSignatureDemo() {
   const [message, setMessage] = useState(
-    "Hello from Agent Trust Protocol! This message will be signed with quantum-safe cryptography."
-  )
-  const [isLoading, setIsLoading] = useState(false)
-  const [result, setResult] = useState<SignatureResult | null>(null)
-  const [error, setError] = useState<string | null>(null)
+    'Hello from Agent Trust Protocol! This message will be signed with quantum-safe cryptography.'
+  );
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<SignatureResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const generateSignature = async () => {
     if (!message.trim()) {
-      setError("Please enter a message to sign")
-      return
+      setError('Please enter a message to sign');
+      return;
     }
 
-    setIsLoading(true)
-    setError(null)
-    
+    setIsLoading(true);
+    setError(null);
+
     try {
       // Simulate signature generation delay
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      const signature = generateMockSignature(message)
-      
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      const signature = generateMockSignature(message);
+
       const signatureResult: SignatureResult = {
         message: message.trim(),
         timestamp: Date.now().toString(),
@@ -59,15 +59,15 @@ export function QuantumSignatureDemo() {
           algorithm: 'Ed25519 + Dilithium',
           security_level: 'Post-Quantum'
         }
-      }
-      
-      setResult(signatureResult)
+      };
+
+      setResult(signatureResult);
     } catch (err) {
-      setError(`Signature generation failed: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      setError(`Signature generation failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Card className="w-full hover:shadow-lg transition-shadow duration-300">
@@ -82,7 +82,7 @@ export function QuantumSignatureDemo() {
           Generate hybrid cryptographic signatures using Ed25519 + Dilithium for quantum resistance
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent className="space-y-6">
         <div className="space-y-3">
           <h4 className="text-sm font-medium">Generate Hybrid Signature</h4>
@@ -99,7 +99,7 @@ export function QuantumSignatureDemo() {
               className="resize-none"
             />
           </div>
-          <Button 
+          <Button
             onClick={generateSignature}
             disabled={isLoading}
             variant="atp"
@@ -112,19 +112,19 @@ export function QuantumSignatureDemo() {
             ) : (
               <Key className="h-4 w-4 mr-2" />
             )}
-            {isLoading ? "Generating..." : "Generate Signature"}
+            {isLoading ? 'Generating...' : 'Generate Signature'}
           </Button>
         </div>
 
         <div className="space-y-3">
           <h4 className="text-sm font-medium">Signature Result</h4>
-          
+
           {error && (
             <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm dark:bg-red-900/30 dark:border-red-700 dark:text-red-300">
               {error}
             </div>
           )}
-          
+
           {result ? (
             <div className="space-y-4">
               <div className="p-4 rounded-lg bg-green-50 border border-green-200 dark:bg-green-900/30 dark:border-green-700">
@@ -132,7 +132,7 @@ export function QuantumSignatureDemo() {
                   {JSON.stringify(result, null, 2)}
                 </pre>
               </div>
-              
+
               <div className="flex flex-wrap gap-2">
                 <Badge variant="quantum" className="animate-pulse">
                   <Atom className="h-3 w-3 mr-1" />
@@ -154,5 +154,5 @@ export function QuantumSignatureDemo() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -1,19 +1,19 @@
-import { 
-  NodeExecutor, 
-  NodeDefinition, 
-  NodeInput, 
+import {
+  NodeExecutor,
+  NodeDefinition,
+  NodeInput,
   NodeOutput,
-  WorkflowExecutionContext 
+  WorkflowExecutionContext
 } from '../../types/WorkflowTypes';
 
 export const policyChangeExecutor: NodeExecutor = {
   type: 'policy-change-trigger',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Policy Change Trigger] Monitoring policy changes...');
-    
+
     const policyId = inputs.policyId || config.policyId;
     const changeTypes = inputs.changeTypes || config.changeTypes || ['create', 'update', 'delete'];
-    
+
     const simulatedChange = {
       policyId: policyId || 'policy-123',
       changeType: 'update',
@@ -26,7 +26,7 @@ export const policyChangeExecutor: NodeExecutor = {
         actions: ['Updated alert threshold']
       }
     };
-    
+
     return {
       triggered: true,
       policyChange: simulatedChange,
@@ -36,11 +36,11 @@ export const policyChangeExecutor: NodeExecutor = {
       }
     };
   },
-  
+
   validate(config: any) {
     return true;
   },
-  
+
   getSchema() {
     return {
       inputs: [
@@ -73,10 +73,10 @@ export const policyViolationExecutor: NodeExecutor = {
   type: 'policy-violation-trigger',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Policy Violation Trigger] Monitoring violations...');
-    
+
     const severityThreshold = inputs.severityThreshold || config.severityThreshold || 'medium';
     const policyTypes = inputs.policyTypes || config.policyTypes || ['trust', 'access', 'compliance'];
-    
+
     const simulatedViolation = {
       violationId: `violation-${Date.now()}`,
       policyId: 'policy-456',
@@ -96,14 +96,14 @@ export const policyViolationExecutor: NodeExecutor = {
       },
       timestamp: new Date()
     };
-    
+
     return {
       triggered: true,
       violation: simulatedViolation,
       requiresAction: simulatedViolation.severity === 'high' || simulatedViolation.severity === 'critical'
     };
   },
-  
+
   validate(config: any) {
     const validSeverities = ['low', 'medium', 'high', 'critical'];
     if (config.severityThreshold && !validSeverities.includes(config.severityThreshold)) {
@@ -111,7 +111,7 @@ export const policyViolationExecutor: NodeExecutor = {
     }
     return true;
   },
-  
+
   getSchema() {
     return {
       inputs: [
@@ -151,24 +151,24 @@ export const createPolicyExecutor: NodeExecutor = {
   type: 'create-policy',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Create Policy] Creating new policy...');
-    
+
     const policyName = inputs.name || config.name;
     const policyType = inputs.type || config.type || 'trust';
     const rules = inputs.rules || config.rules || [];
     const actions = inputs.actions || config.actions || [];
-    
+
     if (!policyName) {
       throw new Error('Policy name is required');
     }
-    
+
     const newPolicy = {
       id: `policy-${Date.now()}`,
       name: policyName,
       type: policyType,
       version: '1.0.0',
       status: 'draft',
-      rules: rules,
-      actions: actions,
+      rules,
+      actions,
       createdBy: context.user?.id || 'system',
       createdAt: new Date(),
       metadata: {
@@ -176,20 +176,20 @@ export const createPolicyExecutor: NodeExecutor = {
         executionId: context.executionId
       }
     };
-    
+
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     return {
       success: true,
       policy: newPolicy,
       message: `Policy "${policyName}" created successfully`
     };
   },
-  
+
   validate(config: any) {
     return config.name && typeof config.name === 'string';
   },
-  
+
   getSchema() {
     return {
       inputs: [
@@ -239,21 +239,21 @@ export const updatePolicyExecutor: NodeExecutor = {
   type: 'update-policy',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Update Policy] Updating policy...');
-    
+
     const policyId = inputs.policyId || config.policyId;
     const updates = inputs.updates || config.updates || {};
-    
+
     if (!policyId) {
       throw new Error('Policy ID is required');
     }
-    
+
     const existingPolicy = {
       id: policyId,
       name: 'Existing Policy',
       version: '1.0.0',
       status: 'active'
     };
-    
+
     const updatedPolicy = {
       ...existingPolicy,
       ...updates,
@@ -262,9 +262,9 @@ export const updatePolicyExecutor: NodeExecutor = {
       updatedAt: new Date(),
       previousVersion: existingPolicy.version
     };
-    
+
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     return {
       success: true,
       policy: updatedPolicy,
@@ -272,11 +272,11 @@ export const updatePolicyExecutor: NodeExecutor = {
       message: `Policy "${policyId}" updated successfully`
     };
   },
-  
+
   validate(config: any) {
     return config.policyId && typeof config.policyId === 'string';
   },
-  
+
   getSchema() {
     return {
       inputs: [
@@ -313,39 +313,39 @@ export const deployPolicyExecutor: NodeExecutor = {
   type: 'deploy-policy',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Deploy Policy] Deploying policy...');
-    
+
     const policyId = inputs.policyId || config.policyId;
     const targetEnvironment = inputs.environment || config.environment || 'production';
     const targetAgents = inputs.agents || config.agents || ['all'];
-    
+
     if (!policyId) {
       throw new Error('Policy ID is required for deployment');
     }
-    
+
     console.log(`Deploying policy ${policyId} to ${targetEnvironment}...`);
-    
+
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     const deployment = {
       deploymentId: `deploy-${Date.now()}`,
-      policyId: policyId,
+      policyId,
       environment: targetEnvironment,
       status: 'deployed',
-      deployedTo: targetAgents.length === 1 && targetAgents[0] === 'all' 
+      deployedTo: targetAgents.length === 1 && targetAgents[0] === 'all'
         ? { type: 'broadcast', count: 42 }
         : { type: 'targeted', agents: targetAgents },
       deployedBy: context.user?.id || 'system',
       deployedAt: new Date(),
       rollbackVersion: '1.0.0'
     };
-    
+
     return {
       success: true,
-      deployment: deployment,
+      deployment,
       message: `Policy deployed to ${targetEnvironment} successfully`
     };
   },
-  
+
   validate(config: any) {
     const validEnvironments = ['development', 'staging', 'production'];
     if (config.environment && !validEnvironments.includes(config.environment)) {
@@ -353,7 +353,7 @@ export const deployPolicyExecutor: NodeExecutor = {
     }
     return config.policyId && typeof config.policyId === 'string';
   },
-  
+
   getSchema() {
     return {
       inputs: [
@@ -394,13 +394,13 @@ export const policyValidConditionExecutor: NodeExecutor = {
   type: 'policy-valid',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Policy Valid Condition] Validating policy...');
-    
+
     const policyId = inputs.policyId || config.policyId;
     const validationRules = inputs.validationRules || config.validationRules || ['syntax', 'logic', 'conflicts'];
-    
+
     const validationResult = {
       isValid: Math.random() > 0.2,
-      policyId: policyId,
+      policyId,
       validationTime: new Date(),
       checks: {
         syntax: { passed: true, message: 'Syntax is valid' },
@@ -410,19 +410,19 @@ export const policyValidConditionExecutor: NodeExecutor = {
       errors: [],
       warnings: []
     };
-    
+
     if (!validationResult.checks.conflicts.passed) {
       validationResult.isValid = false;
       validationResult.errors.push('Policy conflicts with existing rules');
     }
-    
+
     return validationResult;
   },
-  
+
   validate(config: any) {
     return true;
   },
-  
+
   getSchema() {
     return {
       inputs: [
@@ -464,21 +464,21 @@ export const policyCompliantConditionExecutor: NodeExecutor = {
   type: 'policy-compliant',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Policy Compliant Condition] Checking compliance...');
-    
+
     const agentDid = inputs.agentDid || config.agentDid;
     const policyId = inputs.policyId || config.policyId;
     const complianceLevel = inputs.complianceLevel || config.complianceLevel || 0.8;
-    
+
     const complianceCheck = {
       isCompliant: Math.random() > 0.3,
       complianceScore: Math.random(),
-      agentDid: agentDid,
-      policyId: policyId,
+      agentDid,
+      policyId,
       checkedAt: new Date(),
       violations: [],
       recommendations: []
     };
-    
+
     if (complianceCheck.complianceScore < complianceLevel) {
       complianceCheck.isCompliant = false;
       complianceCheck.violations.push({
@@ -488,17 +488,17 @@ export const policyCompliantConditionExecutor: NodeExecutor = {
       });
       complianceCheck.recommendations.push('Increase agent trust level');
     }
-    
+
     return complianceCheck;
   },
-  
+
   validate(config: any) {
     if (config.complianceLevel && (config.complianceLevel < 0 || config.complianceLevel > 1)) {
       return false;
     }
     return true;
   },
-  
+
   getSchema() {
     return {
       inputs: [

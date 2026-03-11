@@ -54,18 +54,18 @@ export class ATPIntegration extends EventEmitter {
 
     try {
       console.log('Initializing ATP integration...');
-      
+
       // Set up ATP-specific workflow mappings
       await this.setupPolicyWorkflows();
       await this.setupTrustWorkflows();
       await this.setupMonitoringWorkflows();
-      
+
       // Set up event listeners for ATP events
       this.setupEventListeners();
-      
+
       this.isInitialized = true;
       console.log('ATP integration initialized successfully');
-      
+
       this.emit('initialized');
     } catch (error) {
       console.error('Failed to initialize ATP integration:', error);
@@ -75,7 +75,7 @@ export class ATPIntegration extends EventEmitter {
 
   private async setupPolicyWorkflows() {
     console.log('Setting up policy workflow mappings...');
-    
+
     // Policy change detection workflow
     const policyChangeWorkflowId = await workflowRepository.createWorkflow({
       name: 'Policy Change Handler',
@@ -150,7 +150,7 @@ export class ATPIntegration extends EventEmitter {
 
   private async setupTrustWorkflows() {
     console.log('Setting up trust workflow mappings...');
-    
+
     // Trust evaluation workflow
     const trustEvaluationWorkflowId = await workflowRepository.createWorkflow({
       name: 'Trust Level Monitoring',
@@ -181,7 +181,7 @@ export class ATPIntegration extends EventEmitter {
           id: 'send-alert',
           type: 'send-alert',
           label: 'Send Security Alert',
-          config: { 
+          config: {
             severity: 'high',
             channels: ['email', 'slack']
           },
@@ -246,7 +246,7 @@ export class ATPIntegration extends EventEmitter {
 
   private async setupMonitoringWorkflows() {
     console.log('Setting up monitoring workflow mappings...');
-    
+
     // Security monitoring workflow
     const securityMonitoringWorkflowId = await workflowRepository.createWorkflow({
       name: 'Security Incident Response',
@@ -270,7 +270,7 @@ export class ATPIntegration extends EventEmitter {
           id: 'immediate-response',
           type: 'send-alert',
           label: 'Immediate Alert',
-          config: { 
+          config: {
             severity: 'critical',
             channels: ['email', 'sms', 'slack'],
             title: 'Critical Security Incident'
@@ -370,7 +370,7 @@ export class ATPIntegration extends EventEmitter {
           id: 'send-violation-alert',
           type: 'send-alert',
           label: 'Send Violation Alert',
-          config: { 
+          config: {
             severity: 'high',
             title: 'Compliance Violation Detected'
           },
@@ -418,7 +418,7 @@ export class ATPIntegration extends EventEmitter {
 
   private setupEventListeners() {
     console.log('Setting up ATP event listeners...');
-    
+
     // Listen for workflow execution events
     this.eventService.on('workflow:executed', (data) => {
       console.log(`Workflow executed: ${data.workflowId} - ${data.result.success ? 'SUCCESS' : 'FAILED'}`);
@@ -434,14 +434,14 @@ export class ATPIntegration extends EventEmitter {
   // ATP Policy Integration Methods
   async handlePolicyChange(policy: ATPPolicy, changeType: 'created' | 'updated' | 'deleted') {
     console.log(`Processing policy ${changeType}: ${policy.id}`);
-    
+
     await this.eventService.publishPolicyEvent(`policy-${changeType}`, {
       policyId: policy.id,
       policyName: policy.name,
       version: policy.version,
       changeType,
       timestamp: new Date(),
-      policy: policy
+      policy
     });
   }
 
@@ -453,14 +453,14 @@ export class ATPIntegration extends EventEmitter {
     details: any;
   }) {
     console.log(`Processing policy violation: ${violation.policyId} by ${violation.agentDid}`);
-    
+
     await this.eventService.publishPolicyEvent('policy-violated', violation);
   }
 
   // ATP Trust Integration Methods
   async handleTrustLevelChange(trustMetrics: ATPTrustMetrics) {
     console.log(`Processing trust change for agent: ${trustMetrics.agentDid}`);
-    
+
     await this.eventService.publishTrustEvent('trust-changed', {
       agentDid: trustMetrics.agentDid,
       trustLevel: trustMetrics.trustLevel,
@@ -478,7 +478,7 @@ export class ATPIntegration extends EventEmitter {
     recommendedActions: string[];
   }) {
     console.log(`Processing risk detection: ${risk.riskType} - ${risk.riskLevel}`);
-    
+
     await this.eventService.publishTrustEvent('risk-detected', risk);
   }
 
@@ -493,23 +493,23 @@ export class ATPIntegration extends EventEmitter {
     recommendedActions: string[];
   }) {
     console.log(`Processing security alert: ${alert.alertId} - ${alert.severity}`);
-    
+
     await this.eventService.publishSecurityEvent('security-alert', alert);
   }
 
   // ATP Agent Integration Methods
   async onAgentRegistration(agent: ATPAgent) {
     console.log(`Agent registered: ${agent.did}`);
-    
+
     // Create initial trust evaluation workflow for new agent
     await this.createAgentTrustWorkflow(agent.did);
-    
+
     this.emit('agent:registered', agent);
   }
 
   async onAgentStatusChange(agentDid: string, newStatus: string, oldStatus: string) {
     console.log(`Agent status changed: ${agentDid} - ${oldStatus} -> ${newStatus}`);
-    
+
     await this.eventService.publishEvent({
       type: 'atp.agent.status-changed',
       data: { agentDid, newStatus, oldStatus, timestamp: new Date() },
@@ -591,10 +591,10 @@ export class ATPIntegration extends EventEmitter {
 
   async shutdown() {
     console.log('Shutting down ATP integration...');
-    
+
     this.isInitialized = false;
     this.emit('shutdown');
-    
+
     console.log('ATP integration shutdown complete');
   }
 }

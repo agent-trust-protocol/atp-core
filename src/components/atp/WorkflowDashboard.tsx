@@ -1,23 +1,23 @@
-"use client"
+'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Play, 
-  Pause, 
-  Square, 
-  Activity, 
-  Clock, 
-  CheckCircle, 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Play,
+  Pause,
+  Square,
+  Activity,
+  Clock,
+  CheckCircle,
   XCircle,
   GitBranch,
   Zap,
   AlertTriangle,
   RefreshCw,
   Plus
-} from "lucide-react";
+} from 'lucide-react';
 
 interface WorkflowSummary {
   id: string;
@@ -77,7 +77,7 @@ export function WorkflowDashboard() {
   const loadWorkflows = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(WORKFLOW_ENGINE_API + '&action=list');
+      const response = await fetch(`${WORKFLOW_ENGINE_API  }&action=list`);
       if (response.ok) {
         const data = await response.json();
         // Transform workflow data to summary format
@@ -124,7 +124,7 @@ export function WorkflowDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ initialData: {} })
       });
-      
+
       if (response.ok) {
         await loadExecutions(); // Refresh executions
       } else {
@@ -138,7 +138,7 @@ export function WorkflowDashboard() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'running': return <Activity className="h-4 w-4 text-blue-500 animate-pulse" />;
-      case 'completed': 
+      case 'completed':
       case 'success': return <CheckCircle className="h-4 w-4 text-green-500" />;
       case 'failed': return <XCircle className="h-4 w-4 text-red-500" />;
       case 'cancelled': return <Square className="h-4 w-4 text-gray-500" />;
@@ -147,7 +147,7 @@ export function WorkflowDashboard() {
   };
 
   const getStatusBadge = (status: string) => {
-    const variant = status === 'active' ? 'default' : 
+    const variant = status === 'active' ? 'default' :
                    status === 'draft' ? 'secondary' : 'outline';
     return <Badge variant={variant}>{status}</Badge>;
   };
@@ -219,9 +219,9 @@ export function WorkflowDashboard() {
               <h4 className="font-medium text-red-900">Connection Issue</h4>
               <p className="text-red-700 mt-1 text-sm">{error}</p>
               <div className="mt-3 flex items-center gap-2">
-                <Button 
-                  size="sm" 
-                  variant="outline" 
+                <Button
+                  size="sm"
+                  variant="outline"
                   onClick={() => {
                     setError(null);
                     checkEngineStatus();
@@ -231,9 +231,9 @@ export function WorkflowDashboard() {
                   <RefreshCw className="h-3 w-3 mr-1" />
                   Try Again
                 </Button>
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
+                <Button
+                  size="sm"
+                  variant="ghost"
                   onClick={() => window.location.href = '/dashboard/workflows/health'}
                   className="text-red-700 hover:bg-red-100"
                 >
@@ -349,14 +349,14 @@ export function WorkflowDashboard() {
                         <span className="text-gray-600">Nodes:</span>
                         <span className="font-medium">{workflow.nodeCount}</span>
                       </div>
-                      
+
                       {workflow.schedule && (
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-600">Schedule:</span>
                           <span className="font-mono text-xs">{workflow.schedule}</span>
                         </div>
                       )}
-                      
+
                       {workflow.lastExecution && (
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-600">Last run:</span>
@@ -368,20 +368,20 @@ export function WorkflowDashboard() {
                           </div>
                         </div>
                       )}
-                      
+
                       <div className="flex gap-2 pt-2">
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           onClick={() => executeWorkflow(workflow.id)}
                           disabled={workflow.status !== 'active'}
                         >
                           <Play className="h-3 w-3 mr-1" />
                           Run
                         </Button>
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant="outline"
-                          onClick={() => alert('Workflow details: ' + workflow.name)}
+                          onClick={() => alert(`Workflow details: ${  workflow.name}`)}
                         >
                           View
                         </Button>
@@ -402,32 +402,32 @@ export function WorkflowDashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            <Button 
-              variant="default" 
+            <Button
+              variant="default"
               className="h-20 flex-col bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg"
               onClick={() => window.location.href = '/dashboard/workflows/designer'}
             >
               <GitBranch className="h-6 w-6 mb-2" />
               <span className="font-medium">Create Workflow</span>
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-20 flex-col border-2 hover:bg-blue-50 hover:border-blue-300 transition-colors"
               onClick={() => window.location.href = '/dashboard/workflows/nodes'}
             >
               <Zap className="h-6 w-6 mb-2 text-blue-600" />
               <span>Browse Nodes</span>
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-20 flex-col border-2 hover:bg-green-50 hover:border-green-300 transition-colors"
               onClick={() => window.location.href = '/dashboard/workflows/executions'}
             >
               <Activity className="h-6 w-6 mb-2 text-green-600" />
               <span>View Executions</span>
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-20 flex-col border-2 hover:bg-purple-50 hover:border-purple-300 transition-colors"
               onClick={() => window.location.href = '/dashboard/workflows/health'}
             >

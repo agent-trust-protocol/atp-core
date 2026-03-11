@@ -3,12 +3,12 @@ import { Pool } from 'pg';
 /**
  * Shared PostgreSQL connection pool for the application.
  * Uses DATABASE_URL from environment variables.
- * 
+ *
  * In development: connects to local PostgreSQL
  * In production: connects to managed PostgreSQL (e.g., Neon, Supabase, RDS)
  */
 
-const DATABASE_URL = process.env.DATABASE_URL;
+const {DATABASE_URL} = process.env;
 
 // Only warn at runtime, not during build
 if (!DATABASE_URL && typeof globalThis !== 'undefined' && process.env.NEXT_PHASE !== 'phase-production-build') {
@@ -37,7 +37,7 @@ export function getPool(): Pool {
       // SSL: disabled for local dev and Fly internal network; enabled for external DBs
       ssl: DATABASE_URL.includes('localhost') || DATABASE_URL.includes('127.0.0.1') || DATABASE_URL.includes('sslmode=disable') || DATABASE_URL.includes('.flycast')
         ? false
-        : { rejectUnauthorized: false },
+        : { rejectUnauthorized: false }
     });
 
     pool.on('error', (err) => {

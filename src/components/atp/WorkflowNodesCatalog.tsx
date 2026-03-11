@@ -1,12 +1,12 @@
-"use client"
+'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
   Search,
   Filter,
   Zap,
@@ -22,7 +22,7 @@ import {
   Bell,
   Settings,
   RefreshCw
-} from "lucide-react";
+} from 'lucide-react';
 
 interface WorkflowNode {
   type: string;
@@ -235,7 +235,7 @@ export function WorkflowNodesCatalog() {
     let filtered = nodes;
 
     if (searchTerm) {
-      filtered = filtered.filter(node => 
+      filtered = filtered.filter(node =>
         node.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
         node.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         node.type.toLowerCase().includes(searchTerm.toLowerCase())
@@ -418,7 +418,7 @@ export function WorkflowNodesCatalog() {
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
-                  <div 
+                  <div
                     className="p-2 rounded-lg text-white"
                     style={{ backgroundColor: node.color }}
                   >
@@ -427,8 +427,8 @@ export function WorkflowNodesCatalog() {
                   <div>
                     <CardTitle className="text-sm">{node.label}</CardTitle>
                     <div className="flex items-center gap-1 mt-1">
-                      <Badge 
-                        variant="outline" 
+                      <Badge
+                        variant="outline"
                         className={`text-xs ${getCategoryColor(node.category)}`}
                       >
                         {node.category}
@@ -445,7 +445,7 @@ export function WorkflowNodesCatalog() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 mb-3">{node.description}</p>
-              
+
               {node.inputs && node.inputs.length > 0 && (
                 <div className="mb-2">
                   <div className="text-xs font-medium text-gray-500 mb-1">Inputs:</div>
@@ -458,7 +458,7 @@ export function WorkflowNodesCatalog() {
                   </div>
                 </div>
               )}
-              
+
               {node.outputs && node.outputs.length > 0 && (
                 <div className="mb-3">
                   <div className="text-xs font-medium text-gray-500 mb-1">Outputs:</div>
@@ -471,7 +471,7 @@ export function WorkflowNodesCatalog() {
                   </div>
                 </div>
               )}
-              
+
               <div className="flex items-center justify-between text-xs">
                 <span className="text-gray-500">
                   {node.configurable ? 'Configurable' : 'Fixed'}

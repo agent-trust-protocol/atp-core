@@ -1,12 +1,12 @@
-import Link from "next/link"
-import { 
-  Shield, 
-  Building, 
-  Users, 
-  Award, 
-  TrendingUp, 
-  Lock, 
-  Eye, 
+import Link from 'next/link';
+import {
+  Shield,
+  Building,
+  Users,
+  Award,
+  TrendingUp,
+  Lock,
+  Eye,
   Settings,
   ArrowRight,
   CheckCircle,
@@ -15,16 +15,16 @@ import {
   Headphones,
   FileText,
   Activity
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import type { Metadata } from 'next'
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Enterprise — Agent Trust Protocol',
   description: 'Quantum-safe AI security for enterprises with compliance, audit, and 24/7 support.'
-}
+};
 
 export default function EnterprisePage() {
   return (
@@ -41,7 +41,7 @@ export default function EnterprisePage() {
             Enterprise Security
           </h1>
           <p className="text-lg sm:text-xl text-foreground/80 mb-8 max-w-4xl mx-auto leading-relaxed animate-fade-in-up">
-            Production-ready <span className="atp-gradient-text font-medium">quantum-safe security</span> 
+            Production-ready <span className="atp-gradient-text font-medium">quantum-safe security</span>
             with enterprise-grade features, compliance, and 24/7 support.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-8 animate-fade-in-up">
@@ -300,7 +300,7 @@ export default function EnterprisePage() {
                   <div>
                     <h3 className="font-semibold mb-2">Future-Proof Security</h3>
                     <p className="text-sm text-foreground/70">
-                      Quantum-safe cryptography protects your agents against both current and future threats, 
+                      Quantum-safe cryptography protects your agents against both current and future threats,
                       ensuring long-term security for your AI infrastructure.
                     </p>
                   </div>
@@ -312,7 +312,7 @@ export default function EnterprisePage() {
                   <div>
                     <h3 className="font-semibold mb-2">Regulatory Compliance</h3>
                     <p className="text-sm text-foreground/70">
-                      Built-in compliance features for SOC 2, HIPAA, GDPR, and other regulatory frameworks 
+                      Built-in compliance features for SOC 2, HIPAA, GDPR, and other regulatory frameworks
                       reduce compliance burden and audit costs.
                     </p>
                   </div>
@@ -324,7 +324,7 @@ export default function EnterprisePage() {
                   <div>
                     <h3 className="font-semibold mb-2">Zero-Trust Architecture</h3>
                     <p className="text-sm text-foreground/70">
-                      Every agent interaction is cryptographically verified with granular permission controls, 
+                      Every agent interaction is cryptographically verified with granular permission controls,
                       eliminating trust assumptions and reducing attack surface.
                     </p>
                   </div>
@@ -341,7 +341,7 @@ export default function EnterprisePage() {
                   <div>
                     <h3 className="font-semibold mb-2">Operational Excellence</h3>
                     <p className="text-sm text-foreground/70">
-                      Advanced monitoring, alerting, and analytics provide complete visibility into your 
+                      Advanced monitoring, alerting, and analytics provide complete visibility into your
                       agent ecosystem with automated incident response.
                     </p>
                   </div>
@@ -353,7 +353,7 @@ export default function EnterprisePage() {
                   <div>
                     <h3 className="font-semibold mb-2">Rapid Deployment</h3>
                     <p className="text-sm text-foreground/70">
-                      Pre-built enterprise features and professional services ensure quick time-to-value 
+                      Pre-built enterprise features and professional services ensure quick time-to-value
                       with minimal disruption to existing systems.
                     </p>
                   </div>
@@ -365,7 +365,7 @@ export default function EnterprisePage() {
                   <div>
                     <h3 className="font-semibold mb-2">Expert Support</h3>
                     <p className="text-sm text-foreground/70">
-                      Dedicated customer success managers and 24/7 support ensure your team has the 
+                      Dedicated customer success managers and 24/7 support ensure your team has the
                       expertise needed for successful deployment and operation.
                     </p>
                   </div>
@@ -396,7 +396,7 @@ export default function EnterprisePage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-foreground/70 mb-4">
-                  Secure multi-bank fraud detection, automated compliance reporting, 
+                  Secure multi-bank fraud detection, automated compliance reporting,
                   and cross-institutional data sharing with privacy preservation.
                 </p>
                 <ul className="text-xs text-foreground/60 space-y-1">
@@ -416,7 +416,7 @@ export default function EnterprisePage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-foreground/70 mb-4">
-                  HIPAA-compliant federated diagnosis, secure medical record sharing, 
+                  HIPAA-compliant federated diagnosis, secure medical record sharing,
                   and multi-provider care coordination with full audit trails.
                 </p>
                 <ul className="text-xs text-foreground/60 space-y-1">
@@ -436,7 +436,7 @@ export default function EnterprisePage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-foreground/70 mb-4">
-                  Supply chain transparency, automated quality control, 
+                  Supply chain transparency, automated quality control,
                   and cross-supplier collaboration with intellectual property protection.
                 </p>
                 <ul className="text-xs text-foreground/60 space-y-1">
@@ -474,5 +474,5 @@ export default function EnterprisePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

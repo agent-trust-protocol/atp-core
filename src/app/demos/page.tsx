@@ -1,9 +1,9 @@
-"use client"
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Atom,
   Settings,
@@ -14,9 +14,9 @@ import {
   Lock,
   ArrowRight,
   Play
-} from "lucide-react"
-import Link from 'next/link'
-import { QuantumSafeSignatureDemoGated } from "@/components/atp/quantum-safe-signature-demo-gated"
+} from 'lucide-react';
+import Link from 'next/link';
+import { QuantumSafeSignatureDemoGated } from '@/components/atp/quantum-safe-signature-demo-gated';
 
 export default function DemosPage() {
   return (
@@ -224,5 +224,5 @@ export default function DemosPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

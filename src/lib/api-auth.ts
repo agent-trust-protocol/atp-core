@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from './auth';
-import { 
-  logApiAuthSuccess, 
+import {
+  logApiAuthSuccess,
   logApiAuthFailure,
-  authLogger 
+  authLogger
 } from './auth-logger';
-import { 
-  rateLimiter, 
-  getClientIp, 
-  getUserAgent 
+import {
+  rateLimiter,
+  getClientIp,
+  getUserAgent
 } from './rate-limiter';
 
 /**
@@ -32,10 +32,10 @@ export async function checkApiAuth(request: NextRequest): Promise<AuthResult> {
   try {
     // Check rate limit first
     const rateLimitResult = rateLimiter.check(ip, 'apiAuth', userAgent);
-    
+
     if (!rateLimitResult.allowed) {
       logApiAuthFailure(ip, userAgent, endpoint, 'Rate limit exceeded');
-      
+
       return {
         isAuthenticated: false,
         error: NextResponse.json(
@@ -43,15 +43,15 @@ export async function checkApiAuth(request: NextRequest): Promise<AuthResult> {
             error: 'Rate limit exceeded',
             message: 'Too many requests. Please try again later.',
             code: 'RATE_LIMIT_EXCEEDED',
-            retryAfter: rateLimitResult.retryAfter,
+            retryAfter: rateLimitResult.retryAfter
           },
-          { 
+          {
             status: 429,
             headers: {
               'Retry-After': String(rateLimitResult.retryAfter || 60),
               'X-RateLimit-Limit': '60',
               'X-RateLimit-Remaining': '0',
-              'X-RateLimit-Reset': String(Date.now() + (rateLimitResult.retryAfter || 60) * 1000),
+              'X-RateLimit-Reset': String(Date.now() + (rateLimitResult.retryAfter || 60) * 1000)
             }
           }
         )
@@ -60,16 +60,16 @@ export async function checkApiAuth(request: NextRequest): Promise<AuthResult> {
 
     // Verify session using Better Auth
     const session = await auth.api.getSession({
-      headers: request.headers,
+      headers: request.headers
     });
 
-    if (!session || !session.user) {
+    if (!session?.user) {
       logApiAuthFailure(ip, userAgent, endpoint, 'No valid session');
-      
+
       return {
         isAuthenticated: false,
         error: NextResponse.json(
-          { 
+          {
             error: 'Authentication required',
             message: 'This endpoint requires authentication. Please log in to access this data.',
             code: 'AUTH_REQUIRED',
@@ -84,7 +84,7 @@ export async function checkApiAuth(request: NextRequest): Promise<AuthResult> {
     logApiAuthSuccess(session.user.id, ip, userAgent, endpoint);
 
     // Session is valid
-    return { 
+    return {
       isAuthenticated: true,
       user: session.user,
       session: session.session
@@ -92,7 +92,7 @@ export async function checkApiAuth(request: NextRequest): Promise<AuthResult> {
   } catch (error) {
     console.error('Authentication error:', error);
     logApiAuthFailure(ip, userAgent, endpoint, 'Internal error');
-    
+
     return {
       isAuthenticated: false,
       error: NextResponse.json(

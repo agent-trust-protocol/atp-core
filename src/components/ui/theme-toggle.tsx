@@ -1,26 +1,26 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { Moon, Sun, Monitor, Sparkles } from 'lucide-react'
-import { useTheme } from '@/components/theme-provider'
-import { Button } from '@/components/ui/button'
-import { AnimatedIcon } from '@/components/ui/animated-icon'
+import * as React from 'react';
+import { Moon, Sun, Monitor, Sparkles } from 'lucide-react';
+import { useTheme } from '@/components/theme-provider';
+import { Button } from '@/components/ui/button';
+import { AnimatedIcon } from '@/components/ui/animated-icon';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
-  const [isOpen, setIsOpen] = React.useState(false)
-  const [mounted, setMounted] = React.useState(false)
+  const { theme, setTheme } = useTheme();
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
 
   // Prevent hydration mismatch by only rendering after mount
   React.useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   // Return a placeholder during SSR to prevent hydration mismatch
   if (!mounted) {
@@ -34,21 +34,21 @@ export function ThemeToggle() {
         <Sun size={20} className="opacity-50" />
         <span className="sr-only">Toggle theme</span>
       </Button>
-    )
+    );
   }
 
   const getCurrentIcon = () => {
-    if (theme === 'light') return Sun
-    if (theme === 'dark') return Moon
-    return Monitor
-  }
+    if (theme === 'light') return Sun;
+    if (theme === 'dark') return Moon;
+    return Monitor;
+  };
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="outline" 
-          size="icon" 
+        <Button
+          variant="outline"
+          size="icon"
           className="glass border-atp-electric-cyan/20 hover:bg-atp-electric-cyan/10 transition-all duration-300"
         >
           <div className="relative">
@@ -59,7 +59,7 @@ export function ThemeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="glass border-atp-electric-cyan/20">
-        <DropdownMenuItem 
+        <DropdownMenuItem
           onClick={() => setTheme('light')}
           className="cursor-pointer hover:bg-atp-electric-cyan/10 transition-all duration-200"
         >
@@ -69,7 +69,7 @@ export function ThemeToggle() {
             <Sparkles size={12} className="ml-auto text-atp-amber icon-glow" />
           )}
         </DropdownMenuItem>
-        <DropdownMenuItem 
+        <DropdownMenuItem
           onClick={() => setTheme('dark')}
           className="cursor-pointer hover:bg-atp-electric-cyan/10 transition-all duration-200"
         >
@@ -79,7 +79,7 @@ export function ThemeToggle() {
             <Sparkles size={12} className="ml-auto text-atp-electric-cyan icon-glow" />
           )}
         </DropdownMenuItem>
-        <DropdownMenuItem 
+        <DropdownMenuItem
           onClick={() => setTheme('system')}
           className="cursor-pointer hover:bg-atp-electric-cyan/10 transition-all duration-200"
         >
@@ -91,5 +91,5 @@ export function ThemeToggle() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

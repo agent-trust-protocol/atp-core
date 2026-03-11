@@ -1,11 +1,11 @@
-"use client"
+'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import {
   CheckCircle,
   AlertTriangle,
   XCircle,
@@ -22,7 +22,7 @@ import {
   TrendingUp,
   TrendingDown,
   Minus
-} from "lucide-react";
+} from 'lucide-react';
 
 interface SystemHealthData {
   status: 'healthy' | 'warning' | 'critical';
@@ -242,7 +242,7 @@ export function WorkflowSystemHealth() {
     const days = Math.floor(seconds / 86400);
     const hours = Math.floor((seconds % 86400) / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    
+
     if (days > 0) return `${days}d ${hours}h ${minutes}m`;
     if (hours > 0) return `${hours}h ${minutes}m`;
     return `${minutes}m`;

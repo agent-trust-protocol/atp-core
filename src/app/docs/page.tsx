@@ -1,10 +1,10 @@
-import Link from "next/link"
-import { 
-  Book, 
-  Shield, 
-  Zap, 
-  Globe, 
-  Code, 
+import Link from 'next/link';
+import {
+  Book,
+  Shield,
+  Zap,
+  Globe,
+  Code,
   ArrowRight,
   CheckCircle,
   Terminal,
@@ -20,13 +20,13 @@ import {
   HelpCircle,
   Lightbulb,
   Rocket
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon, SecureConnectionIcon, PolicyFlowIcon } from "@/components/ui/atp-icons"
-import type { Metadata } from 'next'
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon, SecureConnectionIcon, PolicyFlowIcon } from '@/components/ui/atp-icons';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Documentation — Agent Trust Protocol',
@@ -41,8 +41,8 @@ export const metadata: Metadata = {
     'Ed25519',
     'Dilithium',
     'post-quantum cryptography'
-  ],
-}
+  ]
+};
 
 export default function DocsPage() {
   return (
@@ -59,7 +59,7 @@ export default function DocsPage() {
             <span className="atp-gradient-text">Documentation</span>
           </h1>
           <p className="text-lg sm:text-xl text-foreground/80 mb-8 max-w-4xl mx-auto leading-relaxed animate-fade-in-up">
-            Complete guide to implementing <span className="atp-gradient-text font-medium">quantum-safe security</span> 
+            Complete guide to implementing <span className="atp-gradient-text font-medium">quantum-safe security</span>
             for your AI agents with ATP's enterprise-grade protocol.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8 animate-fade-in-up">
@@ -129,13 +129,13 @@ export default function DocsPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="bg-card/50 border border-border/50 rounded-lg p-4 font-mono text-sm">
-                    <div className="text-muted-foreground mb-2">{"// Initialize ATP client"}</div>
+                    <div className="text-muted-foreground mb-2">{'// Initialize ATP client'}</div>
                     <div className="text-foreground">const atp = new ATPClient()</div>
-                    <div className="text-muted-foreground mt-2">{"// Register agent"}</div>
-                    <div className="text-foreground">const agent = await atp.registerAgent({"{"}
-                      <br />{"  "}name: "MyAgent",
-                      <br />{"  "}capabilities: ["read", "write"]
-                      <br />{"}"})
+                    <div className="text-muted-foreground mt-2">{'// Register agent'}</div>
+                    <div className="text-foreground">const agent = await atp.registerAgent({'{'}
+                      <br />{'  '}name: "MyAgent",
+                      <br />{'  '}capabilities: ["read", "write"]
+                      <br />{'}'})
                     </div>
                   </div>
                   <Button asChild variant="outline" size="sm" className="w-full glass border-atp-electric-cyan/30 hover:bg-atp-electric-cyan/10 hover:border-atp-electric-cyan/50 hover:scale-105 transition-all duration-300">
@@ -193,8 +193,8 @@ export default function DocsPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm leading-relaxed">
-                    ATP is the world's first quantum-safe protocol specifically designed for AI agent interactions. 
-                    It provides cryptographic trust, identity verification, and capability-based access control 
+                    ATP is the world's first quantum-safe protocol specifically designed for AI agent interactions.
+                    It provides cryptographic trust, identity verification, and capability-based access control
                     using post-quantum cryptography.
                   </p>
                   <div className="space-y-2">
@@ -226,8 +226,8 @@ export default function DocsPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm leading-relaxed">
-                    Quantum computers pose an existential threat to current cryptographic systems. 
-                    ATP uses NIST-approved post-quantum algorithms to ensure your AI agents remain 
+                    Quantum computers pose an existential threat to current cryptographic systems.
+                    ATP uses NIST-approved post-quantum algorithms to ensure your AI agents remain
                     secure even against quantum attacks.
                   </p>
                   <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
@@ -303,7 +303,7 @@ export default function DocsPage() {
                       <h3 className="font-medium text-green-400 mb-2">SDK Integration</h3>
                       <p className="text-sm text-muted-foreground mb-3">Direct integration with TypeScript/JavaScript SDK</p>
                       <div className="bg-card/50 rounded p-3 font-mono text-xs">
-                        import {"{"}ATPClient{"}"} from 'atp-sdk'<br />
+                        import {'{'}ATPClient{'}'} from 'atp-sdk'<br />
                         const client = new ATPClient()
                       </div>
                     </div>
@@ -321,7 +321,7 @@ export default function DocsPage() {
                       <p className="text-sm text-muted-foreground mb-3">Language-agnostic HTTP API integration</p>
                       <div className="bg-card/50 rounded p-3 font-mono text-xs">
                         POST /agents/register<br />
-                        {"{"}"name": "MyAgent"{"}"}<br />
+                        {'{'}"name": "MyAgent"{'}'}<br />
                         Authorization: Bearer token
                       </div>
                     </div>
@@ -693,8 +693,8 @@ export default function DocsPage() {
                   <div className="border-l-2 border-primary/30 pl-4">
                     <h4 className="font-medium mb-2">Q: How does ATP compare to traditional API authentication?</h4>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      ATP goes beyond simple API keys or OAuth tokens. It provides cryptographic identity verification, 
-                      capability-based access control, and quantum-safe security. Traditional authentication is 
+                      ATP goes beyond simple API keys or OAuth tokens. It provides cryptographic identity verification,
+                      capability-based access control, and quantum-safe security. Traditional authentication is
                       vulnerable to quantum attacks, while ATP is designed for long-term security.
                     </p>
                   </div>
@@ -702,7 +702,7 @@ export default function DocsPage() {
                   <div className="border-l-2 border-secondary/30 pl-4">
                     <h4 className="font-medium mb-2">Q: What's the performance impact of post-quantum cryptography?</h4>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      ATP's hybrid approach maintains excellent performance. Ed25519 provides fast signatures for immediate use, 
+                      ATP's hybrid approach maintains excellent performance. Ed25519 provides fast signatures for immediate use,
                       while Dilithium adds quantum-safe security. Total overhead is typically &lt;5ms for most operations.
                     </p>
                   </div>
@@ -710,7 +710,7 @@ export default function DocsPage() {
                   <div className="border-l-2 border-accent/30 pl-4">
                     <h4 className="font-medium mb-2">Q: Can I integrate ATP with existing AI frameworks?</h4>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Yes! ATP is designed to be framework-agnostic. We provide SDKs for popular languages and 
+                      Yes! ATP is designed to be framework-agnostic. We provide SDKs for popular languages and
                       direct integrations for LangChain, with more frameworks coming soon. The REST API works with any system.
                     </p>
                   </div>
@@ -718,7 +718,7 @@ export default function DocsPage() {
                   <div className="border-l-2 border-purple-500/30 pl-4">
                     <h4 className="font-medium mb-2">Q: Is ATP suitable for real-time applications?</h4>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Absolutely. ATP is optimized for high-throughput scenarios with sub-millisecond response times. 
+                      Absolutely. ATP is optimized for high-throughput scenarios with sub-millisecond response times.
                       The trust level system reduces validation overhead for trusted agents.
                     </p>
                   </div>
@@ -726,7 +726,7 @@ export default function DocsPage() {
                   <div className="border-l-2 border-green-500/30 pl-4">
                     <h4 className="font-medium mb-2">Q: What compliance standards does ATP support?</h4>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      ATP supports SOC 2, ISO 27001, GDPR, HIPAA, and other major compliance frameworks. 
+                      ATP supports SOC 2, ISO 27001, GDPR, HIPAA, and other major compliance frameworks.
                       Comprehensive audit logging and policy enforcement make compliance verification straightforward.
                     </p>
                   </div>
@@ -734,7 +734,7 @@ export default function DocsPage() {
                   <div className="border-l-2 border-amber-500/30 pl-4">
                     <h4 className="font-medium mb-2">Q: How do I migrate from my current authentication system?</h4>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      ATP can run alongside existing authentication systems during migration. Start by registering 
+                      ATP can run alongside existing authentication systems during migration. Start by registering
                       new agents with ATP while maintaining legacy systems, then gradually migrate existing agents.
                     </p>
                   </div>
@@ -793,5 +793,5 @@ export default function DocsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,10 +1,10 @@
-"use client"
+'use client';
 
-import Image from "next/image"
-import { useState, useEffect } from "react"
+import Image from 'next/image';
+import { useState, useEffect } from 'react';
 
 type BrandLogoProps = {
-  variant?: "mark" | "lockup"
+  variant?: 'mark' | 'lockup'
   size?: number
   className?: string
   alt?: string
@@ -20,53 +20,53 @@ type BrandLogoProps = {
  *
  * If a file is missing, this component falls back to `/atp-logo.svg`.
  */
-export function BrandLogo({ variant = "mark", size = 32, className = "", alt }: BrandLogoProps) {
+export function BrandLogo({ variant = 'mark', size = 32, className = '', alt }: BrandLogoProps) {
   const [src, setSrc] = useState<string>(
-    variant === "lockup" ? "/brand/atp-lockup.png" : "/brand/atp-shield-mark.png"
-  )
-  const [isDarkMode, setIsDarkMode] = useState(false)
+    variant === 'lockup' ? '/brand/atp-lockup.png' : '/brand/atp-shield-mark.png'
+  );
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     // Check for dark mode on mount and when theme changes
     const checkDarkMode = () => {
       if (typeof window !== 'undefined') {
-        const htmlElement = document.documentElement
+        const htmlElement = document.documentElement;
         const isDark = htmlElement.classList.contains('dark') ||
-                      window.matchMedia('(prefers-color-scheme: dark)').matches
-        setIsDarkMode(isDark)
+                      window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setIsDarkMode(isDark);
       }
-    }
+    };
 
-    checkDarkMode()
+    checkDarkMode();
 
     // Listen for theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const observer = new MutationObserver(checkDarkMode)
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const observer = new MutationObserver(checkDarkMode);
 
-    mediaQuery.addListener(checkDarkMode)
+    mediaQuery.addListener(checkDarkMode);
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class']
-    })
+    });
 
     return () => {
-      mediaQuery.removeListener(checkDarkMode)
-      observer.disconnect()
-    }
-  }, [])
+      mediaQuery.removeListener(checkDarkMode);
+      observer.disconnect();
+    };
+  }, []);
 
-  const effectiveAlt = alt ?? (variant === "lockup" ? "Agent Trust Protocol Logo" : "ATP Logo")
+  const effectiveAlt = alt ?? (variant === 'lockup' ? 'Agent Trust Protocol Logo' : 'ATP Logo');
 
   // Enhanced styling for dark mode visibility
   const darkModeClasses = isDarkMode
-    ? "brightness-110 contrast-110 drop-shadow-2xl"
-    : "brightness-100 contrast-100 drop-shadow-lg"
+    ? 'brightness-110 contrast-110 drop-shadow-2xl'
+    : 'brightness-100 contrast-100 drop-shadow-lg';
 
   // Only apply gradient background to larger logos (size > 40)
-  const hasBackground = size > 40
+  const hasBackground = size > 40;
 
   return (
-    <div className={`relative inline-flex items-center justify-center group`}>
+    <div className={'relative inline-flex items-center justify-center group'}>
       {/* Modern gradient background - only for larger logos */}
       {hasBackground && (
         <>
@@ -93,8 +93,8 @@ export function BrandLogo({ variant = "mark", size = 32, className = "", alt }: 
         className={`relative z-10 object-contain transition-all duration-300 ${darkModeClasses} ${className} ${hasBackground ? 'p-1.5' : ''}`}
         priority
         unoptimized
-        onError={() => setSrc("/atp-logo.svg")}
+        onError={() => setSrc('/atp-logo.svg')}
       />
     </div>
-  )
+  );
 }

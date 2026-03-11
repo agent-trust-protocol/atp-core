@@ -49,7 +49,7 @@ class DatabaseConnection {
         max: config.maxConnections || 20,
         connect_timeout: config.connectionTimeout || 10,
         idle_timeout: 20,
-        prepare: false, // Disable prepared statements for better compatibility
+        prepare: false // Disable prepared statements for better compatibility
       });
 
       // Initialize Drizzle ORM
@@ -72,7 +72,7 @@ class DatabaseConnection {
       password: process.env.DATABASE_PASSWORD || '',
       ssl: process.env.DATABASE_SSL === 'true',
       maxConnections: parseInt(process.env.DATABASE_MAX_CONNECTIONS || '20'),
-      connectionTimeout: parseInt(process.env.DATABASE_TIMEOUT || '10'),
+      connectionTimeout: parseInt(process.env.DATABASE_TIMEOUT || '10')
     };
 
     // Support for DATABASE_URL

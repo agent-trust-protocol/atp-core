@@ -1,16 +1,16 @@
-import type { Metadata, Viewport } from 'next'
-import { Navbar } from '@/components/ui/navbar'
-import { Footer } from '@/components/ui/footer'
-import { ThemeProvider } from '@/components/theme-provider'
-import './globals.css'
-import '@/styles/atp-theme.css'
+import type { Metadata, Viewport } from 'next';
+import { Navbar } from '@/components/ui/navbar';
+import { Footer } from '@/components/ui/footer';
+import { ThemeProvider } from '@/components/theme-provider';
+import './globals.css';
+import '@/styles/atp-theme.css';
 
 // Font variables - using CSS fallback stack instead of remote fonts
 const fontStyles = {
   '--font-inter': 'sans-serif',
   '--font-inter-tight': 'sans-serif',
-  '--font-jetbrains-mono': 'monospace',
-} as React.CSSProperties
+  '--font-jetbrains-mono': 'monospace'
+} as React.CSSProperties;
 
 export const metadata: Metadata = {
   title: 'Agent Trust Protocol™ - Quantum-Safe AI Security',
@@ -31,9 +31,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'ATP™ - Quantum-Safe AI Agent Protocol',
     description: 'Enterprise quantum-safe security for AI agents',
-    type: 'website',
-  },
-}
+    type: 'website'
+  }
+};
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -43,11 +43,11 @@ export const viewport: Viewport = {
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#0A2463' },
     { media: '(prefers-color-scheme: dark)', color: '#00D9FF' }
-  ],
-}
+  ]
+};
 
 export default function RootLayout({
-  children,
+  children
 }: {
   children: React.ReactNode
 }) {
@@ -71,7 +71,7 @@ export default function RootLayout({
                 // Fallback to light mode if there's an error
                 document.documentElement.classList.add('light');
               }
-            `,
+            `
           }}
         />
       </head>
@@ -85,5 +85,5 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

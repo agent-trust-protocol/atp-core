@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { 
-  Settings, 
-  Server, 
-  Database, 
-  Globe, 
+import { useState } from 'react';
+import {
+  Settings,
+  Server,
+  Database,
+  Globe,
   Activity,
   Play,
   Pause,
@@ -18,16 +18,16 @@ import {
   BarChart3,
   Users,
   Cloud
-} from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Subnav } from "@/components/ui/subnav"
-import Link from "next/link"
+} from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Subnav } from '@/components/ui/subnav';
+import Link from 'next/link';
 
 export default function ServicesPage() {
-  const [selectedService, setSelectedService] = useState<string | null>(null)
-  
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+
   // Mock services data
   const services = [
     {
@@ -115,45 +115,45 @@ export default function ServicesPage() {
       },
       icon: CheckCircle
     }
-  ]
+  ];
 
   const getStatusColor = (status: string) => {
     switch(status) {
-      case 'healthy': return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
-      case 'warning': return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800'
-      case 'degraded': return 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800'
-      case 'down': return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'
-      default: return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800'
+      case 'healthy': return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
+      case 'warning': return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800';
+      case 'degraded': return 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800';
+      case 'down': return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
+      default: return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800';
     }
-  }
+  };
 
   const getStatusIcon = (status: string) => {
     switch(status) {
-      case 'healthy': return CheckCircle
-      case 'warning': return AlertCircle
-      case 'degraded': return Clock
-      case 'down': return XCircle
-      default: return AlertCircle
+      case 'healthy': return CheckCircle;
+      case 'warning': return AlertCircle;
+      case 'degraded': return Clock;
+      case 'down': return XCircle;
+      default: return AlertCircle;
     }
-  }
+  };
 
   const formatUptime = (uptime: number) => {
-    return `${uptime.toFixed(2)}%`
-  }
+    return `${uptime.toFixed(2)}%`;
+  };
 
   const formatLastUpdated = (timestamp: string) => {
-    const date = new Date(timestamp)
-    const now = new Date()
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
-    
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+
     if (diffInMinutes < 60) {
-      return `${diffInMinutes} minutes ago`
+      return `${diffInMinutes} minutes ago`;
     } else if (diffInMinutes < 1440) {
-      return `${Math.floor(diffInMinutes / 60)} hours ago`
+      return `${Math.floor(diffInMinutes / 60)} hours ago`;
     } else {
-      return `${Math.floor(diffInMinutes / 1440)} days ago`
+      return `${Math.floor(diffInMinutes / 1440)} days ago`;
     }
-  }
+  };
 
   const cloudTabs = [
     {
@@ -180,17 +180,17 @@ export default function ServicesPage() {
       href: '/cloud/services',
       icon: <Settings className="h-4 w-4" />
     }
-  ]
+  ];
 
   const breadcrumbs = [
     { label: 'Cloud Dashboard', href: '/cloud' },
     { label: 'Services', href: '/cloud/services' }
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-background">
-      <Subnav 
-        tabs={cloudTabs} 
+      <Subnav
+        tabs={cloudTabs}
         breadcrumbs={breadcrumbs}
         variant="both"
       />
@@ -281,9 +281,9 @@ export default function ServicesPage() {
             <CardContent>
               <div className="space-y-4">
                 {services.map((service) => {
-                  const StatusIcon = getStatusIcon(service.status)
-                  const ServiceIcon = service.icon
-                  
+                  const StatusIcon = getStatusIcon(service.status);
+                  const ServiceIcon = service.icon;
+
                   return (
                     <div key={service.id} className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow">
                       <div className="flex items-center justify-between">
@@ -326,7 +326,7 @@ export default function ServicesPage() {
                           </Button>
                         </div>
                       </div>
-                      
+
                       {/* Service Metrics */}
                       <div className="mt-4 pt-4 border-t">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -342,7 +342,7 @@ export default function ServicesPage() {
                             <p className="text-xs text-muted-foreground">CPU Usage</p>
                             <div className="flex items-center gap-2">
                               <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                                <div 
+                                <div
                                   className={`h-full rounded-full transition-all duration-300 ${
                                     service.metrics.cpu > 80 ? 'bg-red-500' :
                                     service.metrics.cpu > 60 ? 'bg-yellow-500' : 'bg-green-500'
@@ -357,7 +357,7 @@ export default function ServicesPage() {
                             <p className="text-xs text-muted-foreground">Memory Usage</p>
                             <div className="flex items-center gap-2">
                               <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                                <div 
+                                <div
                                   className={`h-full rounded-full transition-all duration-300 ${
                                     service.metrics.memory > 80 ? 'bg-red-500' :
                                     service.metrics.memory > 60 ? 'bg-yellow-500' : 'bg-green-500'
@@ -371,7 +371,7 @@ export default function ServicesPage() {
                         </div>
                       </div>
                     </div>
-                  )
+                  );
                 })}
               </div>
             </CardContent>
@@ -443,5 +443,5 @@ export default function ServicesPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

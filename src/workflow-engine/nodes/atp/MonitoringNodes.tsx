@@ -1,30 +1,30 @@
-import { 
-  NodeExecutor, 
-  NodeDefinition, 
-  NodeInput, 
+import {
+  NodeExecutor,
+  NodeDefinition,
+  NodeInput,
   NodeOutput,
-  WorkflowExecutionContext 
+  WorkflowExecutionContext
 } from '../../types/WorkflowTypes';
 
 export const metricThresholdExecutor: NodeExecutor = {
   type: 'metric-threshold-trigger',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Metric Threshold Trigger] Monitoring metrics...');
-    
+
     const metricName = inputs.metricName || config.metricName;
     const threshold = inputs.threshold || config.threshold;
     const operator = inputs.operator || config.operator || 'gt';
     const windowSize = inputs.windowSize || config.windowSize || 300;
-    
+
     if (!metricName || threshold === undefined) {
       throw new Error('Metric name and threshold are required');
     }
-    
+
     const currentValue = 85 + Math.random() * 30 - 15;
     const avgValue = 75;
     const maxValue = 95;
     const minValue = 65;
-    
+
     let triggered: boolean;
     switch (operator) {
       case 'gt':
@@ -45,27 +45,27 @@ export const metricThresholdExecutor: NodeExecutor = {
       default:
         triggered = currentValue > threshold;
     }
-    
+
     const metricEvent = {
-      metricName: metricName,
-      currentValue: currentValue,
-      threshold: threshold,
-      operator: operator,
-      triggered: triggered,
+      metricName,
+      currentValue,
+      threshold,
+      operator,
+      triggered,
       statistics: {
         average: avgValue,
         max: maxValue,
         min: minValue,
         samples: Math.floor(windowSize / 10)
       },
-      windowSize: windowSize,
+      windowSize,
       unit: 'percent',
       timestamp: new Date(),
       source: 'monitoring-system'
     };
-    
+
     return {
-      triggered: triggered,
+      triggered,
       metric: metricEvent,
       alert: triggered && (currentValue > 90 || currentValue < 10),
       metadata: {
@@ -74,7 +74,7 @@ export const metricThresholdExecutor: NodeExecutor = {
       }
     };
   },
-  
+
   validate(config: any) {
     if (!config.metricName || !config.threshold) {
       return false;
@@ -85,7 +85,7 @@ export const metricThresholdExecutor: NodeExecutor = {
     }
     return true;
   },
-  
+
   getSchema() {
     return {
       inputs: [
@@ -139,10 +139,10 @@ export const securityAlertExecutor: NodeExecutor = {
   type: 'security-alert-trigger',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Security Alert Trigger] Monitoring security events...');
-    
+
     const alertTypes = inputs.alertTypes || config.alertTypes || ['intrusion', 'authentication', 'authorization', 'data'];
     const severityLevel = inputs.severityLevel || config.severityLevel || 'medium';
-    
+
     const securityAlert = {
       alertId: `sec-${Date.now()}`,
       type: 'authentication',
@@ -172,15 +172,15 @@ export const securityAlertExecutor: NodeExecutor = {
       timestamp: new Date(),
       ttl: 3600
     };
-    
+
     const severityValues = { low: 1, medium: 2, high: 3, critical: 4 };
     const alertSeverityValue = severityValues[securityAlert.severity as keyof typeof severityValues];
     const thresholdSeverityValue = severityValues[severityLevel as keyof typeof severityValues];
-    
+
     const triggered = alertSeverityValue >= thresholdSeverityValue && alertTypes.includes(securityAlert.type);
-    
+
     return {
-      triggered: triggered,
+      triggered,
       alert: securityAlert,
       requiresImmediateResponse: securityAlert.severity === 'critical' || securityAlert.severity === 'high',
       metadata: {
@@ -189,7 +189,7 @@ export const securityAlertExecutor: NodeExecutor = {
       }
     };
   },
-  
+
   validate(config: any) {
     const validSeverities = ['low', 'medium', 'high', 'critical'];
     if (config.severityLevel && !validSeverities.includes(config.severityLevel)) {
@@ -197,7 +197,7 @@ export const securityAlertExecutor: NodeExecutor = {
     }
     return true;
   },
-  
+
   getSchema() {
     return {
       inputs: [
@@ -239,20 +239,20 @@ export const generateReportExecutor: NodeExecutor = {
   type: 'generate-report',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Generate Report] Creating report...');
-    
+
     const reportType = inputs.reportType || config.reportType || 'compliance';
     const period = inputs.period || config.period || { start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), end: new Date() };
     const format = inputs.format || config.format || 'json';
     const includeMetrics = inputs.includeMetrics || config.includeMetrics || ['trust', 'compliance', 'security', 'performance'];
-    
+
     const report = {
       reportId: `report-${Date.now()}`,
       type: reportType,
       title: `${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report`,
-      period: period,
+      period,
       generatedAt: new Date(),
       generatedBy: context.user?.id || 'system',
-      format: format,
+      format,
       summary: {
         totalAgents: 142,
         activeAgents: 128,
@@ -294,20 +294,20 @@ export const generateReportExecutor: NodeExecutor = {
       ],
       exportUrl: `/api/reports/${reportType}/${Date.now()}.${format}`
     };
-    
+
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     return {
       success: true,
-      report: report,
+      report,
       message: `${reportType} report generated successfully`
     };
   },
-  
+
   validate(config: any) {
     const validTypes = ['compliance', 'security', 'performance', 'audit', 'executive'];
     const validFormats = ['json', 'pdf', 'csv', 'html'];
-    
+
     if (config.reportType && !validTypes.includes(config.reportType)) {
       return false;
     }
@@ -316,7 +316,7 @@ export const generateReportExecutor: NodeExecutor = {
     }
     return true;
   },
-  
+
   getSchema() {
     return {
       inputs: [
@@ -373,51 +373,51 @@ export const sendAlertExecutor: NodeExecutor = {
   type: 'send-alert',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Send Alert] Sending notification...');
-    
+
     const alertTitle = inputs.title || config.title || 'System Alert';
     const alertMessage = inputs.message || config.message || 'An event requiring attention has occurred';
     const severity = inputs.severity || config.severity || 'medium';
     const channels = inputs.channels || config.channels || ['email'];
     const recipients = inputs.recipients || config.recipients || [];
-    
+
     const notifications = channels.map((channel: string) => ({
-      channel: channel,
+      channel,
       status: 'sent',
       sentAt: new Date(),
       recipients: channel === 'email' ? recipients : [],
       messageId: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     }));
-    
+
     const alert = {
       alertId: `alert-${Date.now()}`,
       title: alertTitle,
       message: alertMessage,
-      severity: severity,
+      severity,
       source: 'workflow-engine',
       workflowId: context.workflowId,
       executionId: context.executionId,
       createdAt: new Date(),
-      notifications: notifications,
+      notifications,
       metadata: {
         triggeredBy: context.user?.id || 'system',
         environment: 'production'
       }
     };
-    
+
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     return {
       success: true,
-      alert: alert,
+      alert,
       notificationsSent: notifications.length,
       message: `Alert sent via ${channels.join(', ')}`
     };
   },
-  
+
   validate(config: any) {
     const validSeverities = ['low', 'medium', 'high', 'critical'];
     const validChannels = ['email', 'sms', 'slack', 'webhook', 'dashboard'];
-    
+
     if (config.severity && !validSeverities.includes(config.severity)) {
       return false;
     }
@@ -430,7 +430,7 @@ export const sendAlertExecutor: NodeExecutor = {
     }
     return true;
   },
-  
+
   getSchema() {
     return {
       inputs: [
@@ -491,11 +491,11 @@ export const complianceStatusConditionExecutor: NodeExecutor = {
   type: 'compliance-status',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Compliance Status Condition] Checking compliance...');
-    
+
     const complianceType = inputs.complianceType || config.complianceType || 'general';
     const requiredScore = inputs.requiredScore || config.requiredScore || 0.8;
     const checkPeriod = inputs.checkPeriod || config.checkPeriod || 30;
-    
+
     const complianceCheck = {
       type: complianceType,
       score: 0.75 + Math.random() * 0.25,
@@ -517,9 +517,9 @@ export const complianceStatusConditionExecutor: NodeExecutor = {
       nonCompliantItems: [],
       recommendations: []
     };
-    
+
     complianceCheck.isCompliant = complianceCheck.score >= requiredScore;
-    
+
     if (!complianceCheck.isCompliant) {
       complianceCheck.nonCompliantItems = [
         'Encryption key rotation overdue',
@@ -531,10 +531,10 @@ export const complianceStatusConditionExecutor: NodeExecutor = {
         'Review access control policies'
       ];
     }
-    
+
     return complianceCheck;
   },
-  
+
   validate(config: any) {
     if (config.requiredScore && (config.requiredScore < 0 || config.requiredScore > 1)) {
       return false;
@@ -544,7 +544,7 @@ export const complianceStatusConditionExecutor: NodeExecutor = {
     }
     return true;
   },
-  
+
   getSchema() {
     return {
       inputs: [
@@ -604,12 +604,12 @@ export const performanceMetricsConditionExecutor: NodeExecutor = {
   type: 'performance-metrics',
   async execute(inputs: any, config: any, context: WorkflowExecutionContext) {
     console.log('[Performance Metrics Condition] Evaluating performance...');
-    
+
     const metricType = inputs.metricType || config.metricType || 'response_time';
     const threshold = inputs.threshold || config.threshold;
     const aggregation = inputs.aggregation || config.aggregation || 'average';
     const windowMinutes = inputs.windowMinutes || config.windowMinutes || 5;
-    
+
     const metrics = {
       response_time: {
         average: 234,
@@ -639,16 +639,16 @@ export const performanceMetricsConditionExecutor: NodeExecutor = {
         max: 92
       }
     };
-    
+
     const selectedMetric = metrics[metricType as keyof typeof metrics] || metrics.response_time;
     const value = selectedMetric[aggregation as keyof typeof selectedMetric] || selectedMetric.average;
-    
+
     const performanceCheck = {
       meetsThreshold: threshold ? value <= threshold : true,
-      metricType: metricType,
+      metricType,
       currentValue: value,
-      threshold: threshold,
-      aggregation: aggregation,
+      threshold,
+      aggregation,
       window: windowMinutes,
       trend: Math.random() > 0.5 ? 'improving' : 'degrading',
       status: value <= (threshold || Infinity) ? 'healthy' : 'degraded',
@@ -660,14 +660,14 @@ export const performanceMetricsConditionExecutor: NodeExecutor = {
       ] : [],
       evaluatedAt: new Date()
     };
-    
+
     return performanceCheck;
   },
-  
+
   validate(config: any) {
     const validMetrics = ['response_time', 'throughput', 'error_rate', 'cpu_usage', 'memory_usage'];
     const validAggregations = ['average', 'current', 'max', 'min', 'p50', 'p95', 'p99'];
-    
+
     if (config.metricType && !validMetrics.includes(config.metricType)) {
       return false;
     }
@@ -676,7 +676,7 @@ export const performanceMetricsConditionExecutor: NodeExecutor = {
     }
     return true;
   },
-  
+
   getSchema() {
     return {
       inputs: [

@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server';
 import { checkApiAuth, createDemoResponse } from '@/lib/api-auth';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
-const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL || 'http://localhost:3007'
+const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL || 'http://localhost:3007';
 
 // Workflow data
 const mockWorkflows = [
@@ -24,7 +24,7 @@ const mockWorkflows = [
     schedule: '0 */4 * * *'
   },
   {
-    id: 'workflow-2', 
+    id: 'workflow-2',
     name: 'Trust Score Monitoring',
     status: 'active',
     nodes: [
@@ -33,7 +33,7 @@ const mockWorkflows = [
       { id: 'condition-2', type: 'trust-threshold', label: 'Check Trust Threshold' }
     ],
     lastExecution: {
-      status: 'success', 
+      status: 'success',
       timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
       duration: 850
     },
@@ -49,7 +49,7 @@ const mockWorkflows = [
       { id: 'action-4', type: 'generate-report', label: 'Generate Incident Report' }
     ]
   }
-]
+];
 
 const mockActiveExecutions = [
   {
@@ -63,14 +63,14 @@ const mockActiveExecutions = [
   },
   {
     executionId: 'exec-running-2',
-    workflowId: 'workflow-2', 
+    workflowId: 'workflow-2',
     workflowName: 'Trust Score Monitoring',
     state: 'running',
     startTime: new Date(Date.now() - 8 * 60 * 1000).toISOString(),
     progress: 90,
     currentStep: 'Generating trust report'
   }
-]
+];
 
 async function handleWorkflowRequest(searchParams: URLSearchParams, request: NextRequest) {
   // Check authentication for workflow data - contains valuable IP
@@ -79,8 +79,8 @@ async function handleWorkflowRequest(searchParams: URLSearchParams, request: Nex
     return authResult.error || createDemoResponse('monitoring-workflows');
   }
 
-  const action = searchParams.get('action') || 'list'
-  
+  const action = searchParams.get('action') || 'list';
+
   switch (action) {
     case 'health':
       return NextResponse.json({
@@ -88,22 +88,22 @@ async function handleWorkflowRequest(searchParams: URLSearchParams, request: Nex
         timestamp: new Date().toISOString(),
         service: 'workflow-engine',
         version: '1.0.0'
-      })
-    
+      });
+
     case 'list':
       return NextResponse.json({
         workflows: mockWorkflows,
         total: mockWorkflows.length,
         timestamp: new Date().toISOString()
-      })
-    
+      });
+
     case 'executions':
       return NextResponse.json({
         executions: mockActiveExecutions,
         count: mockActiveExecutions.length,
         timestamp: new Date().toISOString()
-      })
-    
+      });
+
     case 'nodes':
       const workflowNodes = [
         {
@@ -117,7 +117,7 @@ async function handleWorkflowRequest(searchParams: URLSearchParams, request: Nex
         {
           type: 'trust-change-trigger',
           category: 'trigger',
-          label: 'Trust Change Trigger', 
+          label: 'Trust Change Trigger',
           description: 'Triggers when trust scores change significantly',
           icon: '🔄',
           color: '#06B6D4'
@@ -130,67 +130,67 @@ async function handleWorkflowRequest(searchParams: URLSearchParams, request: Nex
           icon: '🚨',
           color: '#DC2626'
         }
-      ]
+      ];
       return NextResponse.json({
         nodes: workflowNodes,
         categories: ['trigger', 'action', 'condition'],
         total: workflowNodes.length
-      })
-    
+      });
+
     default:
-      return NextResponse.json({ error: 'Unknown workflow action' }, { status: 400 })
+      return NextResponse.json({ error: 'Unknown workflow action' }, { status: 400 });
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams
-    const endpoint = searchParams.get('endpoint') || 'dashboard'
-    
+    const {searchParams} = request.nextUrl;
+    const endpoint = searchParams.get('endpoint') || 'dashboard';
+
     // Handle workflow endpoints
     if (endpoint === 'workflows') {
-      return handleWorkflowRequest(searchParams, request)
+      return handleWorkflowRequest(searchParams, request);
     }
-    
-    let monitoringUrl = `${MONITORING_SERVICE_URL}/api/monitoring/${endpoint}`
-    
+
+    let monitoringUrl = `${MONITORING_SERVICE_URL}/api/monitoring/${endpoint}`;
+
     // Forward query parameters
-    const params = new URLSearchParams()
+    const params = new URLSearchParams();
     searchParams.forEach((value, key) => {
       if (key !== 'endpoint') {
-        params.append(key, value)
+        params.append(key, value);
       }
-    })
-    
+    });
+
     if (params.toString()) {
-      monitoringUrl += `?${params.toString()}`
+      monitoringUrl += `?${params.toString()}`;
     }
 
     const response = await fetch(monitoringUrl, {
       headers: {
         'User-Agent': 'ATP-Website/1.0',
-        'Accept': 'application/json',
+        'Accept': 'application/json'
       },
       // Add timeout
       signal: AbortSignal.timeout(10000)
-    })
+    });
 
     if (!response.ok) {
-      throw new Error(`Monitoring service responded with ${response.status}`)
+      throw new Error(`Monitoring service responded with ${response.status}`);
     }
 
-    const data = await response.json()
-    
+    const data = await response.json();
+
     return NextResponse.json(data, {
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0'
       }
-    })
+    });
   } catch (error) {
-    console.error('Monitoring API proxy error:', error)
-    
+    console.error('Monitoring API proxy error:', error);
+
     return NextResponse.json(
       {
         success: false,
@@ -198,7 +198,7 @@ export async function GET(request: NextRequest) {
         details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -208,20 +208,20 @@ export async function HEAD() {
     const response = await fetch(`${MONITORING_SERVICE_URL}/api/monitoring/health`, {
       method: 'HEAD',
       signal: AbortSignal.timeout(5000)
-    })
-    
-    return new NextResponse(null, { 
+    });
+
+    return new NextResponse(null, {
       status: response.ok ? 200 : 503,
       headers: {
         'X-Monitoring-Service': response.ok ? 'healthy' : 'unhealthy'
       }
-    })
+    });
   } catch (error) {
-    return new NextResponse(null, { 
+    return new NextResponse(null, {
       status: 503,
       headers: {
         'X-Monitoring-Service': 'unreachable'
       }
-    })
+    });
   }
 }

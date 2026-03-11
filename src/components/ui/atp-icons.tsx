@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { cn } from '@/lib/utils'
+import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   size?: number
@@ -9,8 +9,8 @@ interface IconProps extends React.SVGProps<SVGSVGElement> {
 }
 
 export function QuantumShieldIcon({ size = 24, gradient = false, className, ...props }: IconProps) {
-  const id = React.useId()
-  
+  const id = React.useId();
+
   return (
     <svg
       width={size}
@@ -49,12 +49,12 @@ export function QuantumShieldIcon({ size = 24, gradient = false, className, ...p
         strokeLinecap="round"
       />
     </svg>
-  )
+  );
 }
 
 export function TrustNetworkIcon({ size = 24, gradient = false, className, ...props }: IconProps) {
-  const id = React.useId()
-  
+  const id = React.useId();
+
   return (
     <svg
       width={size}
@@ -88,12 +88,12 @@ export function TrustNetworkIcon({ size = 24, gradient = false, className, ...pr
         fill={gradient ? `url(#trust-${id})` : 'currentColor'}
       />
     </svg>
-  )
+  );
 }
 
 export function QuantumKeyIcon({ size = 24, gradient = false, className, ...props }: IconProps) {
-  const id = React.useId()
-  
+  const id = React.useId();
+
   return (
     <svg
       width={size}
@@ -131,12 +131,12 @@ export function QuantumKeyIcon({ size = 24, gradient = false, className, ...prop
         fill={gradient ? `url(#key-${id})` : 'currentColor'}
       />
     </svg>
-  )
+  );
 }
 
 export function SecureConnectionIcon({ size = 24, gradient = false, className, ...props }: IconProps) {
-  const id = React.useId()
-  
+  const id = React.useId();
+
   return (
     <svg
       width={size}
@@ -181,12 +181,12 @@ export function SecureConnectionIcon({ size = 24, gradient = false, className, .
         strokeLinecap="round"
       />
     </svg>
-  )
+  );
 }
 
 export function PolicyFlowIcon({ size = 24, gradient = false, className, ...props }: IconProps) {
-  const id = React.useId()
-  
+  const id = React.useId();
+
   return (
     <svg
       width={size}
@@ -238,5 +238,5 @@ export function PolicyFlowIcon({ size = 24, gradient = false, className, ...prop
         strokeLinecap="round"
       />
     </svg>
-  )
+  );
 }

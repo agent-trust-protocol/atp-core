@@ -1,12 +1,12 @@
-import Link from 'next/link'
-import { Separator } from './separator'
-import { Badge } from './badge'
-import Image from 'next/image'
-import { BrandLogo } from '@/components/ui/brand-logo'
+import Link from 'next/link';
+import { Separator } from './separator';
+import { Badge } from './badge';
+import Image from 'next/image';
+import { BrandLogo } from '@/components/ui/brand-logo';
 
 export function Footer() {
-  const currentYear = new Date().getFullYear()
-  
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="w-full border-t bg-gradient-to-b from-background to-[hsl(var(--atp-surface))]">
       <div className="container mx-auto px-4 py-16">
@@ -117,9 +117,9 @@ export function Footer() {
             <h3 className="font-semibold text-sm">Repositories</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a 
-                  href="https://github.com/agent-trust-protocol/core" 
-                  target="_blank" 
+                <a
+                  href="https://github.com/agent-trust-protocol/core"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                 >
@@ -132,9 +132,9 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a 
-                  href="https://github.com/agent-trust-protocol" 
-                  target="_blank" 
+                <a
+                  href="https://github.com/agent-trust-protocol"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                 >
@@ -157,7 +157,7 @@ export function Footer() {
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
             <span>© {currentYear} Agent Trust Protocol™. All rights reserved.</span>
           </div>
-          
+
           <div className="flex items-center space-x-6 text-sm">
             <Link href="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
               Terms of Service
@@ -172,5 +172,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

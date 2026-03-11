@@ -23,7 +23,7 @@ export { WorkflowEventService } from './services/WorkflowEventService';
 export { ATPIntegration } from './integration/ATPIntegration';
 
 // State management
-export { 
+export {
   useWorkflowStore,
   useWorkflow,
   useWorkflows,
@@ -33,7 +33,7 @@ export {
 } from './store/WorkflowStore';
 
 // Configuration
-export { 
+export {
   configManager,
   ConfigManager,
   type WorkflowConfig

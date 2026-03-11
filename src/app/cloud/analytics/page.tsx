@@ -1,26 +1,26 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Activity, 
-  Users, 
+import { useState } from 'react';
+import {
+  BarChart3,
+  TrendingUp,
+  Activity,
+  Users,
   Globe,
   Clock,
   Download,
   Filter,
   Calendar,
   Cloud
-} from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Subnav } from "@/components/ui/subnav"
-import Link from "next/link"
+} from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Subnav } from '@/components/ui/subnav';
+import Link from 'next/link';
 
 export default function AnalyticsPage() {
-  const [timeRange, setTimeRange] = useState('7d')
-  
+  const [timeRange, setTimeRange] = useState('7d');
+
   // Mock analytics data
   const analytics = {
     overview: {
@@ -46,7 +46,7 @@ export default function AnalyticsPage() {
       { name: 'Innovation Hub', requests: 19847, growth: 22.4 },
       { name: 'Digital Dynamics', requests: 16503, growth: 5.9 }
     ]
-  }
+  };
 
   const cloudTabs = [
     {
@@ -73,17 +73,17 @@ export default function AnalyticsPage() {
       href: '/cloud/services',
       icon: <Activity className="h-4 w-4" />
     }
-  ]
+  ];
 
   const breadcrumbs = [
     { label: 'Cloud Dashboard', href: '/cloud' },
     { label: 'Analytics', href: '/cloud/analytics' }
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-background">
-      <Subnav 
-        tabs={cloudTabs} 
+      <Subnav
+        tabs={cloudTabs}
         breadcrumbs={breadcrumbs}
         variant="both"
       />
@@ -104,13 +104,13 @@ export default function AnalyticsPage() {
                 </p>
               </div>
             </div>
-            
+
             {/* Controls */}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                <select 
-                  value={timeRange} 
+                <select
+                  value={timeRange}
                   onChange={(e) => setTimeRange(e.target.value)}
                   className="bg-background border border-border rounded-md px-3 py-1 text-sm"
                 >
@@ -225,7 +225,7 @@ export default function AnalyticsPage() {
                       <span className="text-sm text-muted-foreground w-16">{data.hour}</span>
                       <div className="flex-1 mx-4">
                         <div className="h-2 bg-muted rounded-full overflow-hidden">
-                          <div 
+                          <div
                             className="h-full bg-primary rounded-full transition-all duration-300"
                             style={{ width: `${(data.requests / 5000) * 100}%` }}
                           />
@@ -299,7 +299,7 @@ export default function AnalyticsPage() {
                     <div className="h-full bg-orange-500 rounded-full w-3/4" />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">Success Rate</p>
                   <p className="text-xl font-bold">99.2%</p>
@@ -307,7 +307,7 @@ export default function AnalyticsPage() {
                     <div className="h-full bg-green-500 rounded-full w-11/12" />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">Error Rate</p>
                   <p className="text-xl font-bold">0.8%</p>
@@ -321,5 +321,5 @@ export default function AnalyticsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

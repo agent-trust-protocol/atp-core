@@ -31,12 +31,12 @@ const publicRoutes = [
   '/policies',
   '/playground', // Public for developer acquisition
   '/integrations', // Integration docs
-  '/sales-guide', // Sales materials - publicly accessible
+  '/sales-guide' // Sales materials - publicly accessible
 ];
 
 function isPublicRoute(pathname: string): boolean {
   return publicRoutes.some(route =>
-    pathname === route || pathname.startsWith(route + '/')
+    pathname === route || pathname.startsWith(`${route  }/`)
   );
 }
 
@@ -102,6 +102,6 @@ export const config = {
      * - favicon.ico, robots.txt, sitemap.xml
      * - files with extensions (images, etc.)
      */
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
-  ],
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)'
+  ]
 };

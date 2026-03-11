@@ -1,10 +1,10 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { 
-  GitBranch, 
-  Plus, 
-  Search, 
+import { useState } from 'react';
+import {
+  GitBranch,
+  Plus,
+  Search,
   Filter,
   Clock,
   Play,
@@ -39,21 +39,21 @@ import {
   CheckCircle,
   XCircle,
   Info
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
+  AccordionTrigger
+} from '@/components/ui/accordion';
 import {
   Dialog,
   DialogContent,
@@ -62,18 +62,18 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter
-} from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { NodeCategory } from "@/workflow-engine/types/WorkflowTypes"
+  TableRow
+} from '@/components/ui/table';
+import { NodeCategory } from '@/workflow-engine/types/WorkflowTypes';
 
 interface NodeTemplate {
   id: string
@@ -377,16 +377,16 @@ const nodeTemplates: Record<NodeCategory, NodeTemplate[]> = {
       icon: <XCircle className="h-4 w-4" />
     }
   ]
-}
+};
 
 export function WorkflowDesignerLayout({ children }: { children?: React.ReactNode }) {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState<NodeCategory | 'all'>('all')
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<NodeCategory | 'all'>('all');
   const [variables, setVariables] = useState<WorkflowVariable[]>([
     { name: 'apiKey', type: 'string', value: '***', isSecret: true },
     { name: 'maxRetries', type: 'number', value: 3 },
     { name: 'environment', type: 'string', value: 'production' }
-  ])
+  ]);
   const [executionHistory, setExecutionHistory] = useState<ExecutionHistoryItem[]>([
     {
       id: '1',
@@ -407,31 +407,31 @@ export function WorkflowDesignerLayout({ children }: { children?: React.ReactNod
       triggeredBy: 'Manual',
       error: 'Connection timeout'
     }
-  ])
-  const [showVariableDialog, setShowVariableDialog] = useState(false)
-  const [newVariable, setNewVariable] = useState<Partial<WorkflowVariable>>({})
+  ]);
+  const [showVariableDialog, setShowVariableDialog] = useState(false);
+  const [newVariable, setNewVariable] = useState<Partial<WorkflowVariable>>({});
 
   const filteredNodes = Object.entries(nodeTemplates).reduce((acc, [category, nodes]) => {
     if (selectedCategory !== 'all' && category !== selectedCategory) {
-      return acc
+      return acc;
     }
-    
-    const filtered = nodes.filter(node => 
+
+    const filtered = nodes.filter(node =>
       node.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
       node.description.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    
+    );
+
     if (filtered.length > 0) {
-      acc[category as NodeCategory] = filtered
+      acc[category as NodeCategory] = filtered;
     }
-    
-    return acc
-  }, {} as Record<NodeCategory, NodeTemplate[]>)
+
+    return acc;
+  }, {} as Record<NodeCategory, NodeTemplate[]>);
 
   const onDragStart = (event: React.DragEvent, node: NodeTemplate) => {
-    event.dataTransfer.setData('application/reactflow', JSON.stringify(node))
-    event.dataTransfer.effectAllowed = 'move'
-  }
+    event.dataTransfer.setData('application/reactflow', JSON.stringify(node));
+    event.dataTransfer.effectAllowed = 'move';
+  };
 
   const addVariable = () => {
     if (newVariable.name && newVariable.type) {
@@ -441,25 +441,25 @@ export function WorkflowDesignerLayout({ children }: { children?: React.ReactNod
         value: newVariable.value || '',
         description: newVariable.description,
         isSecret: newVariable.isSecret
-      }])
-      setNewVariable({})
-      setShowVariableDialog(false)
+      }]);
+      setNewVariable({});
+      setShowVariableDialog(false);
     }
-  }
+  };
 
   const deleteVariable = (name: string) => {
-    setVariables(variables.filter(v => v.name !== name))
-  }
+    setVariables(variables.filter(v => v.name !== name));
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'success': return <CheckCircle className="h-4 w-4 text-green-500" />
-      case 'failed': return <XCircle className="h-4 w-4 text-red-500" />
-      case 'running': return <Activity className="h-4 w-4 text-blue-500 animate-pulse" />
-      case 'cancelled': return <XCircle className="h-4 w-4 text-gray-500" />
-      default: return <Info className="h-4 w-4 text-gray-500" />
+      case 'success': return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'failed': return <XCircle className="h-4 w-4 text-red-500" />;
+      case 'running': return <Activity className="h-4 w-4 text-blue-500 animate-pulse" />;
+      case 'cancelled': return <XCircle className="h-4 w-4 text-gray-500" />;
+      default: return <Info className="h-4 w-4 text-gray-500" />;
     }
-  }
+  };
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -643,7 +643,7 @@ export function WorkflowDesignerLayout({ children }: { children?: React.ReactNod
                   </DialogContent>
                 </Dialog>
               </div>
-              
+
               <ScrollArea className="h-[400px]">
                 <div className="space-y-2">
                   {variables.map((variable) => (
@@ -738,7 +738,7 @@ export function WorkflowDesignerLayout({ children }: { children?: React.ReactNod
         </Tabs>
       </div>
     </div>
-  )
+  );
 }
 
 import {
@@ -747,4 +747,4 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue
-} from "@/components/ui/select"
+} from '@/components/ui/select';

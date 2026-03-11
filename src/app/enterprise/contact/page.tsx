@@ -1,35 +1,35 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { 
-  Building, 
-  Users, 
-  Calendar, 
-  Shield, 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import {
+  Building,
+  Users,
+  Calendar,
+  Shield,
   CheckCircle,
   ArrowLeft,
   Mail,
   Phone,
   Globe
-} from "lucide-react"
-import Link from "next/link"
-import type { Metadata } from 'next'
+} from 'lucide-react';
+import Link from 'next/link';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Enterprise Contact — Agent Trust Protocol',
   description: 'Get in touch with our enterprise sales team for quantum-safe AI security solutions.'
-}
+};
 
 export default function EnterpriseContactPage() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-atp-midnight via-atp-navy to-slate-900" />
-      
+
       <div className="relative z-10">
         <div className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
           {/* Breadcrumb */}
@@ -235,14 +235,14 @@ export default function EnterpriseContactPage() {
                       <div className="flex items-start gap-3">
                         <input type="checkbox" id="consent" name="consent" required className="mt-1" />
                         <Label htmlFor="consent" className="text-sm text-foreground/70 leading-relaxed">
-                          I agree to receive communications from Agent Trust Protocol regarding enterprise solutions. 
+                          I agree to receive communications from Agent Trust Protocol regarding enterprise solutions.
                           We respect your privacy and will never share your information.
                         </Label>
                       </div>
 
-                      <Button 
-                        type="submit" 
-                        size="lg" 
+                      <Button
+                        type="submit"
+                        size="lg"
                         className="w-full bg-gradient-to-r from-[hsl(var(--atp-quantum))] to-[hsl(var(--atp-primary))] text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 h-14 text-lg font-semibold"
                       >
                         <Calendar className="h-5 w-5 mr-3" />
@@ -376,5 +376,5 @@ export default function EnterpriseContactPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Users,
   Shield,
@@ -23,7 +23,7 @@ import {
   RefreshCw,
   Plus,
   ArrowRight
-} from "lucide-react"
+} from 'lucide-react';
 
 interface Agent {
   id: string
@@ -100,51 +100,51 @@ const DEMO_AGENTS: Agent[] = [
     riskFactors: ['unverified_source', 'limited_history'],
     accessLevel: 'basic'
   }
-]
+];
 
 export function TrustLevelManagementDemo() {
-  const router = useRouter()
-  const [agents, setAgents] = useState<Agent[]>(DEMO_AGENTS)
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(agents[0])
-  const [newAgentName, setNewAgentName] = useState('')
-  const [isRegistering, setIsRegistering] = useState(false)
+  const router = useRouter();
+  const [agents, setAgents] = useState<Agent[]>(DEMO_AGENTS);
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(agents[0]);
+  const [newAgentName, setNewAgentName] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
   const [metrics, setMetrics] = useState<TrustMetrics>({
     averageTrust: 78,
     totalAgents: 4,
     verifiedAgents: 3,
     suspiciousActivity: 1,
     trustTrend: 'up'
-  })
+  });
 
   const getTrustColor = (trust: number) => {
-    if (trust >= 90) return 'text-green-500'
-    if (trust >= 70) return 'text-yellow-500'
-    return 'text-red-500'
-  }
+    if (trust >= 90) return 'text-green-500';
+    if (trust >= 70) return 'text-yellow-500';
+    return 'text-red-500';
+  };
 
   const getTrustBadge = (trust: number) => {
-    if (trust >= 90) return { label: 'Highly Trusted', color: 'bg-green-500/10 text-green-500 border-green-500/20' }
-    if (trust >= 70) return { label: 'Trusted', color: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' }
-    return { label: 'Limited Trust', color: 'bg-red-500/10 text-red-500 border-red-500/20' }
-  }
+    if (trust >= 90) return { label: 'Highly Trusted', color: 'bg-green-500/10 text-green-500 border-green-500/20' };
+    if (trust >= 70) return { label: 'Trusted', color: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' };
+    return { label: 'Limited Trust', color: 'bg-red-500/10 text-red-500 border-red-500/20' };
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'active': return { label: 'Active', color: 'bg-green-500/10 text-green-500 border-green-500/20' }
-      case 'inactive': return { label: 'Inactive', color: 'bg-gray-500/10 text-gray-500 border-gray-500/20' }
-      case 'suspended': return { label: 'Suspended', color: 'bg-red-500/10 text-red-500 border-red-500/20' }
-      case 'pending': return { label: 'Pending Review', color: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' }
-      default: return { label: status, color: 'bg-gray-500/10 text-gray-500 border-gray-500/20' }
+      case 'active': return { label: 'Active', color: 'bg-green-500/10 text-green-500 border-green-500/20' };
+      case 'inactive': return { label: 'Inactive', color: 'bg-gray-500/10 text-gray-500 border-gray-500/20' };
+      case 'suspended': return { label: 'Suspended', color: 'bg-red-500/10 text-red-500 border-red-500/20' };
+      case 'pending': return { label: 'Pending Review', color: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' };
+      default: return { label: status, color: 'bg-gray-500/10 text-gray-500 border-gray-500/20' };
     }
-  }
+  };
 
   const registerNewAgent = async () => {
-    if (!newAgentName.trim()) return
+    if (!newAgentName.trim()) return;
 
-    setIsRegistering(true)
+    setIsRegistering(true);
 
     // Simulate registration process
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     const newAgent: Agent = {
       id: `agent-${Date.now()}`,
@@ -158,33 +158,33 @@ export function TrustLevelManagementDemo() {
       failedOperations: 0,
       riskFactors: ['unverified_source', 'new_agent'],
       accessLevel: 'basic'
-    }
+    };
 
-    setAgents(prev => [...prev, newAgent])
-    setNewAgentName('')
-    setIsRegistering(false)
-    setSelectedAgent(newAgent)
+    setAgents(prev => [...prev, newAgent]);
+    setNewAgentName('');
+    setIsRegistering(false);
+    setSelectedAgent(newAgent);
 
     // Update metrics
     setMetrics(prev => ({
       ...prev,
       totalAgents: prev.totalAgents + 1
-    }))
-  }
+    }));
+  };
 
   const updateTrustLevel = (agentId: string, change: number) => {
     setAgents(prev => prev.map(agent => {
       if (agent.id === agentId) {
-        const newTrust = Math.max(0, Math.min(100, agent.trustLevel + change))
-        return { ...agent, trustLevel: newTrust }
+        const newTrust = Math.max(0, Math.min(100, agent.trustLevel + change));
+        return { ...agent, trustLevel: newTrust };
       }
-      return agent
-    }))
+      return agent;
+    }));
 
     if (selectedAgent?.id === agentId) {
-      setSelectedAgent(prev => prev ? { ...prev, trustLevel: Math.max(0, Math.min(100, prev.trustLevel + change)) } : null)
+      setSelectedAgent(prev => prev ? { ...prev, trustLevel: Math.max(0, Math.min(100, prev.trustLevel + change)) } : null);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -296,8 +296,8 @@ export function TrustLevelManagementDemo() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {agents.map(agent => {
-                  const trustBadge = getTrustBadge(agent.trustLevel)
-                  const statusBadge = getStatusBadge(agent.status)
+                  const trustBadge = getTrustBadge(agent.trustLevel);
+                  const statusBadge = getStatusBadge(agent.status);
 
                   return (
                     <div
@@ -336,7 +336,7 @@ export function TrustLevelManagementDemo() {
                         </div>
                       )}
                     </div>
-                  )
+                  );
                 })}
               </CardContent>
             </Card>
@@ -564,5 +564,5 @@ export function TrustLevelManagementDemo() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

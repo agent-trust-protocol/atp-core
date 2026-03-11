@@ -1,9 +1,9 @@
-import Link from "next/link"
-import { 
-  Shield, 
-  Users, 
+import Link from 'next/link';
+import {
+  Shield,
+  Users,
   Zap,
-  Code, 
+  Code,
   ArrowRight,
   CheckCircle,
   Terminal,
@@ -20,12 +20,12 @@ import {
   Eye,
   Database,
   Rocket
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { Metadata } from 'next'
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'OpenClaw Integration — Agent Trust Protocol',
@@ -40,8 +40,8 @@ export const metadata: Metadata = {
     'agent graph validation',
     'tool-level security',
     'agent identity'
-  ],
-}
+  ]
+};
 
 export default function OpenClawIntegrationPage() {
   return (
@@ -58,7 +58,7 @@ export default function OpenClawIntegrationPage() {
             <span className="atp-gradient-text">OpenClaw</span> + ATP
           </h1>
           <p className="text-lg sm:text-xl text-foreground/80 mb-8 max-w-4xl mx-auto leading-relaxed animate-fade-in-up">
-            Secure your <span className="atp-gradient-text font-medium">multi-agent workflows</span> with 
+            Secure your <span className="atp-gradient-text font-medium">multi-agent workflows</span> with
             quantum-safe cryptography, tool-level security, and dynamic trust scoring.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8 animate-fade-in-up">
@@ -597,7 +597,7 @@ const token = await secretManager.getSecret('api-key', {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-foreground/70 mb-4">
-                  Build trading crews with researcher, trader, and compliance agents. 
+                  Build trading crews with researcher, trader, and compliance agents.
                   ATP ensures only trusted agents can execute trades, with full audit trails.
                 </p>
                 <Link href="/docs">
@@ -616,7 +616,7 @@ const token = await secretManager.getSecret('api-key', {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-foreground/70 mb-4">
-                  Create support crews with triage, specialist, and escalation agents. 
+                  Create support crews with triage, specialist, and escalation agents.
                   Trust scores determine which agents handle sensitive customer data.
                 </p>
                 <Link href="/docs">
@@ -635,7 +635,7 @@ const token = await secretManager.getSecret('api-key', {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-foreground/70 mb-4">
-                  Build research crews with data collectors, analyzers, and report generators. 
+                  Build research crews with data collectors, analyzers, and report generators.
                   Graph validation prevents infinite loops and ensures data integrity.
                 </p>
                 <Link href="/docs">
@@ -742,5 +742,5 @@ const token = await secretManager.getSecret('api-key', {
         </section>
       </div>
     </div>
-  )
+  );
 }

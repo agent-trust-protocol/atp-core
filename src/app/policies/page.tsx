@@ -1,9 +1,9 @@
 'use client';
 
-import { RequireAuth } from "@/components/auth/RequireAuth"
-import { PolicyManagement } from "@/components/atp/policy-management"
-import { Subnav } from "@/components/ui/subnav"
-import { Shield, Edit3, Play, BarChart3 } from "lucide-react"
+import { RequireAuth } from '@/components/auth/RequireAuth';
+import { PolicyManagement } from '@/components/atp/policy-management';
+import { Subnav } from '@/components/ui/subnav';
+import { Shield, Edit3, Play, BarChart3 } from 'lucide-react';
 
 export default function PoliciesPage() {
   const policyTabs = [
@@ -31,12 +31,12 @@ export default function PoliciesPage() {
       href: '/dashboard',
       icon: <BarChart3 className="h-4 w-4" />
     }
-  ]
+  ];
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Policy Management' }
-  ]
+  ];
 
   return (
     <RequireAuth tier="startup" feature="policy-management">
@@ -51,5 +51,5 @@ export default function PoliciesPage() {
       </div>
     </div>
     </RequireAuth>
-  )
+  );
 }

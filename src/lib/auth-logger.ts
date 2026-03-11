@@ -9,19 +9,19 @@ export enum AuthEventType {
   SIGNUP_SUCCESS = 'signup_success',
   LOGOUT_SUCCESS = 'logout_success',
   SESSION_REFRESH = 'session_refresh',
-  
+
   // Failure events
   LOGIN_FAILED = 'login_failed',
   SIGNUP_FAILED = 'signup_failed',
   TOKEN_INVALID = 'token_invalid',
   SESSION_EXPIRED = 'session_expired',
-  
+
   // Security events
   SUSPICIOUS_ACTIVITY = 'suspicious_activity',
   RATE_LIMIT_EXCEEDED = 'rate_limit_exceeded',
   BRUTE_FORCE_DETECTED = 'brute_force_detected',
   ACCOUNT_LOCKED = 'account_locked',
-  
+
   // API access
   API_AUTH_SUCCESS = 'api_auth_success',
   API_AUTH_FAILED = 'api_auth_failed',
@@ -68,12 +68,12 @@ class AuthLogger {
   log(event: Omit<AuthEvent, 'timestamp'>): void {
     const fullEvent: AuthEvent = {
       ...event,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     };
 
     // Add to in-memory store
     this.events.push(fullEvent);
-    
+
     // Keep only recent events
     if (this.events.length > this.MAX_EVENTS) {
       this.events = this.events.slice(-this.MAX_EVENTS);
@@ -81,7 +81,7 @@ class AuthLogger {
 
     // Console logging with appropriate level
     const logMessage = `[AUTH] ${fullEvent.type} - ${fullEvent.email || fullEvent.userId || 'unknown'} from ${fullEvent.ip}`;
-    
+
     switch (fullEvent.severity) {
       case AuthEventSeverity.INFO:
         console.info(logMessage, fullEvent);
@@ -126,7 +126,7 @@ class AuthLogger {
    */
   getFailedAttempts(identifier: string, withinMinutes: number = 15): AuthEvent[] {
     const cutoff = Date.now() - withinMinutes * 60 * 1000;
-    return this.events.filter(event => 
+    return this.events.filter(event =>
       event.type === AuthEventType.LOGIN_FAILED &&
       new Date(event.timestamp).getTime() > cutoff &&
       (event.email === identifier || event.ip === identifier)
@@ -157,7 +157,7 @@ class AuthLogger {
       suspiciousActivity: recentEvents.filter(e => e.type === AuthEventType.SUSPICIOUS_ACTIVITY).length,
       rateLimitExceeded: recentEvents.filter(e => e.type === AuthEventType.RATE_LIMIT_EXCEEDED).length,
       uniqueUsers: new Set(recentEvents.filter(e => e.userId).map(e => e.userId!)),
-      uniqueIPs: new Set(recentEvents.map(e => e.ip)),
+      uniqueIPs: new Set(recentEvents.map(e => e.ip))
     };
   }
 
@@ -194,7 +194,7 @@ export function logLoginSuccess(userId: string, email: string, ip: string, userA
     email,
     ip,
     userAgent,
-    success: true,
+    success: true
   });
 }
 
@@ -206,7 +206,7 @@ export function logLoginFailure(email: string, ip: string, userAgent: string, re
     ip,
     userAgent,
     success: false,
-    errorMessage: reason,
+    errorMessage: reason
   });
 }
 
@@ -218,7 +218,7 @@ export function logSignupSuccess(userId: string, email: string, ip: string, user
     email,
     ip,
     userAgent,
-    success: true,
+    success: true
   });
 }
 
@@ -235,7 +235,7 @@ export function logSuspiciousActivity(
     userAgent,
     success: false,
     errorMessage: reason,
-    metadata,
+    metadata
   });
 }
 
@@ -251,7 +251,7 @@ export function logRateLimitExceeded(
     userAgent,
     endpoint,
     success: false,
-    errorMessage: `Rate limit exceeded for ${endpoint}`,
+    errorMessage: `Rate limit exceeded for ${endpoint}`
   });
 }
 
@@ -263,7 +263,7 @@ export function logApiAuthSuccess(userId: string, ip: string, userAgent: string,
     ip,
     userAgent,
     endpoint,
-    success: true,
+    success: true
   });
 }
 
@@ -275,7 +275,7 @@ export function logApiAuthFailure(ip: string, userAgent: string, endpoint: strin
     userAgent,
     endpoint,
     success: false,
-    errorMessage: reason,
+    errorMessage: reason
   });
 }
 

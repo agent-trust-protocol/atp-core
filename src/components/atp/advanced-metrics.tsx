@@ -1,12 +1,12 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Activity, 
-  Clock, 
-  Target, 
+import { useState, useEffect } from 'react';
+import {
+  TrendingUp,
+  TrendingDown,
+  Activity,
+  Clock,
+  Target,
   BarChart3,
   LineChart,
   PieChart,
@@ -21,12 +21,12 @@ import {
   ArrowDownRight,
   Minus,
   Cpu
-} from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { HydrationSafe } from "@/components/ui/hydration-safe"
+} from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { HydrationSafe } from '@/components/ui/hydration-safe';
 
 interface SystemMetrics {
   totalAgents: number
@@ -83,15 +83,15 @@ interface Props {
 }
 
 export function AdvancedMetrics({ metrics, realTimeData }: Props) {
-  const [selectedTimeframe, setSelectedTimeframe] = useState<'1h' | '24h' | '7d' | '30d'>('24h')
-  const [isLoading, setIsLoading] = useState(false)
+  const [selectedTimeframe, setSelectedTimeframe] = useState<'1h' | '24h' | '7d' | '30d'>('24h');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Calculate trends based on real-time data
   const calculateTrends = (): MetricTrend[] => {
-    if (realTimeData.length < 2) return []
+    if (realTimeData.length < 2) return [];
 
-    const current = realTimeData[realTimeData.length - 1]
-    const previous = realTimeData[Math.floor(realTimeData.length / 2)]
+    const current = realTimeData[realTimeData.length - 1];
+    const previous = realTimeData[Math.floor(realTimeData.length / 2)];
 
     return [
       {
@@ -130,25 +130,25 @@ export function AdvancedMetrics({ metrics, realTimeData }: Props) {
         icon: Users,
         color: 'text-atp-electric-cyan'
       }
-    ]
-  }
+    ];
+  };
 
-  const trends = calculateTrends()
+  const trends = calculateTrends();
 
   const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
     switch (trend) {
-      case 'up': return <ArrowUpRight className="h-4 w-4 text-green-600" />
-      case 'down': return <ArrowDownRight className="h-4 w-4 text-red-600" />
-      case 'stable': return <Minus className="h-4 w-4 text-gray-600" />
+      case 'up': return <ArrowUpRight className="h-4 w-4 text-green-600" />;
+      case 'down': return <ArrowDownRight className="h-4 w-4 text-red-600" />;
+      case 'stable': return <Minus className="h-4 w-4 text-gray-600" />;
     }
-  }
+  };
 
   const getTrendColor = (trend: 'up' | 'down' | 'stable', metric: string) => {
     if (metric === 'Response Time' || metric === 'Error Rate') {
-      return trend === 'down' ? 'text-green-600' : trend === 'up' ? 'text-red-600' : 'text-gray-600'
+      return trend === 'down' ? 'text-green-600' : trend === 'up' ? 'text-red-600' : 'text-gray-600';
     }
-    return trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-gray-600'
-  }
+    return trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-gray-600';
+  };
 
   const generateChartData = () => {
     return realTimeData.map((data, index) => ({
@@ -157,10 +157,10 @@ export function AdvancedMetrics({ metrics, realTimeData }: Props) {
       responseTime: data.avgResponseTime,
       connections: data.activeConnections,
       errors: data.errorRate * 100
-    }))
-  }
+    }));
+  };
 
-  const chartData = generateChartData()
+  const chartData = generateChartData();
 
   return (
     <div className="space-y-6">
@@ -182,7 +182,7 @@ export function AdvancedMetrics({ metrics, realTimeData }: Props) {
       {/* Trend Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {trends.map((trend) => {
-          const Icon = trend.icon
+          const Icon = trend.icon;
           return (
             <Card key={trend.name} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-2">
@@ -199,7 +199,7 @@ export function AdvancedMetrics({ metrics, realTimeData }: Props) {
                 </div>
               </CardContent>
             </Card>
-          )
+          );
         })}
       </div>
 
@@ -227,7 +227,7 @@ export function AdvancedMetrics({ metrics, realTimeData }: Props) {
               <div className="h-32 bg-gray-50 rounded-lg flex items-end justify-between p-4">
                 {chartData.slice(-10).map((data, index) => (
                   <div key={index} className="flex flex-col items-center">
-                    <div 
+                    <div
                       className="bg-blue-500 rounded-t w-4"
                       style={{ height: `${(data.responseTime / 50) * 100}%` }}
                     />
@@ -265,7 +265,7 @@ export function AdvancedMetrics({ metrics, realTimeData }: Props) {
               <div className="h-32 bg-gray-50 rounded-lg flex items-end justify-between p-4">
                 {chartData.slice(-10).map((data, index) => (
                   <div key={index} className="flex flex-col items-center">
-                    <div 
+                    <div
                       className="bg-green-500 rounded-t w-4"
                       style={{ height: `${(data.requests / 200) * 100}%` }}
                     />
@@ -357,17 +357,17 @@ export function AdvancedMetrics({ metrics, realTimeData }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               {Object.entries(metrics.trustLevelDistribution).map(([level, count]) => {
-                const percentage = ((count / metrics.totalAgents) * 100).toFixed(1)
+                const percentage = ((count / metrics.totalAgents) * 100).toFixed(1);
                 const getLevelColor = (level: string) => {
                   switch (level) {
-                    case 'enterprise': return 'bg-purple-500'
-                    case 'premium': return 'bg-blue-500'
-                    case 'verified': return 'bg-green-500'
-                    case 'basic': return 'bg-yellow-500'
-                    case 'untrusted': return 'bg-red-500'
-                    default: return 'bg-gray-500'
+                    case 'enterprise': return 'bg-purple-500';
+                    case 'premium': return 'bg-blue-500';
+                    case 'verified': return 'bg-green-500';
+                    case 'basic': return 'bg-yellow-500';
+                    case 'untrusted': return 'bg-red-500';
+                    default: return 'bg-gray-500';
                   }
-                }
+                };
                 return (
                   <div key={level} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -379,27 +379,27 @@ export function AdvancedMetrics({ metrics, realTimeData }: Props) {
                       <div className="text-xs text-muted-foreground">{percentage}%</div>
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
             <div className="flex items-center justify-center">
               <div className="relative w-32 h-32">
                 <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 32 32">
                   {Object.entries(metrics.trustLevelDistribution).map(([level, count], index) => {
-                    const percentage = (count / metrics.totalAgents) * 100
-                    const circumference = 2 * Math.PI * 14
-                    const strokeDasharray = (percentage / 100) * circumference
-                    const strokeDashoffset = circumference - strokeDasharray
+                    const percentage = (count / metrics.totalAgents) * 100;
+                    const circumference = 2 * Math.PI * 14;
+                    const strokeDasharray = (percentage / 100) * circumference;
+                    const strokeDashoffset = circumference - strokeDasharray;
                     const getLevelColor = (level: string) => {
                       switch (level) {
-                        case 'enterprise': return '#8b5cf6'
-                        case 'premium': return '#3b82f6'
-                        case 'verified': return '#10b981'
-                        case 'basic': return '#f59e0b'
-                        case 'untrusted': return '#ef4444'
-                        default: return '#6b7280'
+                        case 'enterprise': return '#8b5cf6';
+                        case 'premium': return '#3b82f6';
+                        case 'verified': return '#10b981';
+                        case 'basic': return '#f59e0b';
+                        case 'untrusted': return '#ef4444';
+                        default: return '#6b7280';
                       }
-                    }
+                    };
                     return (
                       <circle
                         key={level}
@@ -417,7 +417,7 @@ export function AdvancedMetrics({ metrics, realTimeData }: Props) {
                           transform: `rotate(${index * 72}deg)`
                         }}
                       />
-                    )
+                    );
                   })}
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -447,16 +447,16 @@ export function AdvancedMetrics({ metrics, realTimeData }: Props) {
               <div key={compliance} className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium dark:text-white text-foreground">{compliance.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
-                  <Badge 
+                  <Badge
                     variant={score > 95 ? 'default' : score > 90 ? 'secondary' : 'destructive'}
                     className={score > 95 ? 'bg-green-500 text-white' : score > 90 ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white'}
                   >
                     {score}%
                   </Badge>
                 </div>
-                <Progress 
-                  value={score} 
-                  className="h-2" 
+                <Progress
+                  value={score}
+                  className="h-2"
                   style={{
                     '--progress-background': score > 95 ? 'hsl(142, 76%, 36%)' : score > 90 ? 'hsl(38, 92%, 50%)' : 'hsl(0, 84%, 60%)'
                   } as React.CSSProperties}
@@ -485,5 +485,5 @@ export function AdvancedMetrics({ metrics, realTimeData }: Props) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

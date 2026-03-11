@@ -36,7 +36,7 @@ export default function RequestAccessPage() {
       const response = await fetch('/api/request-access', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData)
       });
 
       const data = await response.json();
@@ -144,7 +144,7 @@ export default function RequestAccessPage() {
                     placeholder="John"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Last Name *</Label>
                   <Input
@@ -188,7 +188,7 @@ export default function RequestAccessPage() {
                     placeholder="Your Company Inc."
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="companySize">Company Size *</Label>
                   <Select
@@ -272,15 +272,15 @@ export default function RequestAccessPage() {
                 <AlertDescription className="text-blue-900 dark:text-blue-100">
                   <strong>Why private access?</strong>
                   <p className="text-sm mt-1">
-                    We're protecting our intellectual property while allowing qualified users to evaluate ATP. 
+                    We're protecting our intellectual property while allowing qualified users to evaluate ATP.
                     Demo credentials will be sent via email after review.
                   </p>
                 </AlertDescription>
               </Alert>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
+              <Button
+                type="submit"
+                className="w-full"
                 disabled={loading}
                 size="lg"
               >
@@ -292,7 +292,7 @@ export default function RequestAccessPage() {
 
         {/* Footer Note */}
         <p className="text-center text-sm text-muted-foreground">
-          By requesting access, you agree to use ATP solely for evaluation purposes. 
+          By requesting access, you agree to use ATP solely for evaluation purposes.
           Unauthorized access or sharing of credentials is prohibited.
         </p>
       </div>

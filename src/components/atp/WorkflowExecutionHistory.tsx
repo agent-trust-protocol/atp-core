@@ -1,12 +1,12 @@
-"use client"
+'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
   Search,
   Filter,
   Activity,
@@ -23,7 +23,7 @@ import {
   BarChart3,
   Eye,
   Download
-} from "lucide-react";
+} from 'lucide-react';
 
 interface WorkflowExecution {
   executionId: string;
@@ -156,7 +156,7 @@ export function WorkflowExecutionHistory() {
     let filtered = executions;
 
     if (searchTerm) {
-      filtered = filtered.filter(exec => 
+      filtered = filtered.filter(exec =>
         exec.workflowName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         exec.executionId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         exec.trigger.toLowerCase().includes(searchTerm.toLowerCase())
@@ -176,13 +176,13 @@ export function WorkflowExecutionHistory() {
       '30d': 30 * 24 * 60 * 60 * 1000,
       'all': Infinity
     };
-    
+
     if (timeFilter !== 'all') {
       const cutoff = now - timeFilters[timeFilter as keyof typeof timeFilters];
       filtered = filtered.filter(exec => new Date(exec.startTime).getTime() > cutoff);
     }
 
-    setFilteredExecutions(filtered.sort((a, b) => 
+    setFilteredExecutions(filtered.sort((a, b) =>
       new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
     ));
   };
@@ -218,7 +218,7 @@ export function WorkflowExecutionHistory() {
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
-    
+
     if (hours > 0) return `${hours}h ${minutes % 60}m`;
     if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
     return `${seconds}s`;
@@ -382,7 +382,7 @@ export function WorkflowExecutionHistory() {
                       </div>
                       {getStatusBadge(execution.state)}
                     </div>
-                    
+
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <span className="text-gray-500">Started:</span>
@@ -390,7 +390,7 @@ export function WorkflowExecutionHistory() {
                           {new Date(execution.startTime).toLocaleString()}
                         </div>
                       </div>
-                      
+
                       {execution.endTime && (
                         <div>
                           <span className="text-gray-500">Ended:</span>
@@ -399,12 +399,12 @@ export function WorkflowExecutionHistory() {
                           </div>
                         </div>
                       )}
-                      
+
                       <div>
                         <span className="text-gray-500">Duration:</span>
                         <div className="font-medium">{formatDuration(execution.duration)}</div>
                       </div>
-                      
+
                       {execution.progress !== undefined && (
                         <div>
                           <span className="text-gray-500">Progress:</span>
@@ -412,21 +412,21 @@ export function WorkflowExecutionHistory() {
                         </div>
                       )}
                     </div>
-                    
+
                     {execution.currentStep && (
                       <div className="mt-2 text-sm">
                         <span className="text-gray-500">Current Step:</span>
                         <span className="ml-2 font-medium">{execution.currentStep}</span>
                       </div>
                     )}
-                    
+
                     {execution.error && (
                       <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-800">
                         <strong>Error:</strong> {execution.error}
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="flex gap-2 ml-4">
                     <Button size="sm" variant="outline">
                       <Eye className="h-3 w-3 mr-1" />

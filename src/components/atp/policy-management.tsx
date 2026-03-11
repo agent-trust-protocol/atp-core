@@ -1,14 +1,14 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { 
-  FolderOpen, 
-  Save, 
-  Trash2, 
-  Copy, 
-  Edit, 
-  Eye, 
-  Download, 
+import { useState, useEffect } from 'react';
+import {
+  FolderOpen,
+  Save,
+  Trash2,
+  Copy,
+  Edit,
+  Eye,
+  Download,
   Upload,
   Search,
   Filter,
@@ -18,15 +18,15 @@ import {
   Clock,
   CheckCircle,
   AlertTriangle
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface Policy {
   id: string
@@ -103,63 +103,63 @@ export function PolicyManagement() {
         successRate: 95.8
       }
     }
-  ])
+  ]);
 
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'active' | 'archived'>('all')
-  const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null)
-  const [isEditorOpen, setIsEditorOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'active' | 'archived'>('all');
+  const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [form, setForm] = useState({
     name: '',
     description: '',
     version: '1.0.0',
     status: 'draft' as Policy['status'],
     tags: ''
-  })
-  const [formError, setFormError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [apiError, setApiError] = useState<string | null>(null)
+  });
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const resetForm = () => {
-    setForm({ name: '', description: '', version: '1.0.0', status: 'draft', tags: '' })
-    setFormError(null)
-  }
+    setForm({ name: '', description: '', version: '1.0.0', status: 'draft', tags: '' });
+    setFormError(null);
+  };
 
   const openCreate = () => {
-    resetForm()
-    setSelectedPolicy(null)
-    setIsEditorOpen(true)
-  }
+    resetForm();
+    setSelectedPolicy(null);
+    setIsEditorOpen(true);
+  };
 
   const openEdit = (policy: Policy) => {
-    setSelectedPolicy(policy)
+    setSelectedPolicy(policy);
     setForm({
       name: policy.name,
       description: policy.description,
       version: policy.version,
       status: policy.status,
       tags: (policy.tags || []).join(', ')
-    })
-    setIsEditorOpen(true)
-  }
+    });
+    setIsEditorOpen(true);
+  };
 
   const validateForm = (): boolean => {
     if (!form.name.trim()) {
-      setFormError('Name is required')
-      return false
+      setFormError('Name is required');
+      return false;
     }
     if (form.description.trim().length < 10) {
-      setFormError('Description should be at least 10 characters')
-      return false
+      setFormError('Description should be at least 10 characters');
+      return false;
     }
-    setFormError(null)
-    return true
-  }
+    setFormError(null);
+    return true;
+  };
 
   const savePolicy = () => {
-    if (!validateForm()) return
-    const now = new Date().toISOString()
-    const tags = form.tags.split(',').map(t => t.trim()).filter(Boolean)
+    if (!validateForm()) return;
+    const now = new Date().toISOString();
+    const tags = form.tags.split(',').map(t => t.trim()).filter(Boolean);
     if (selectedPolicy) {
       setPolicies(prev => prev.map(p => p.id === selectedPolicy.id ? {
         ...p,
@@ -169,7 +169,7 @@ export function PolicyManagement() {
         status: form.status,
         tags,
         updatedAt: now
-      } : p))
+      } : p));
     } else {
       const newPolicy: Policy = {
         id: (globalThis.crypto?.randomUUID?.() ?? Date.now().toString()),
@@ -184,24 +184,24 @@ export function PolicyManagement() {
         nodes: [],
         edges: [],
         usage: { evaluations: 0, lastUsed: '', successRate: 0 }
-      }
-      setPolicies(prev => [newPolicy, ...prev])
-      setSelectedPolicy(newPolicy)
+      };
+      setPolicies(prev => [newPolicy, ...prev]);
+      setSelectedPolicy(newPolicy);
     }
-    setIsEditorOpen(false)
-  }
+    setIsEditorOpen(false);
+  };
 
   // Load policies from Permission Service if available
   useEffect(() => {
     const load = async () => {
       try {
-        setIsLoading(true)
-        setApiError(null)
-        const baseUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003'
-        const res = await fetch(`${baseUrl}/policies`)
-        if (!res.ok) return
-        const data = await res.json()
-        if (!data || !Array.isArray(data.policies)) return
+        setIsLoading(true);
+        setApiError(null);
+        const baseUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003';
+        const res = await fetch(`${baseUrl}/policies`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data || !Array.isArray(data.policies)) return;
         const mapped: Policy[] = data.policies.map((p: any) => ({
           id: p.id || p.policyId || String(Date.now()),
           name: p.name || 'Untitled Policy',
@@ -219,23 +219,23 @@ export function PolicyManagement() {
             lastUsed: p.lastUsed || '',
             successRate: typeof p.successRate === 'number' ? p.successRate : 0
           }
-        }))
-        if (mapped.length > 0) setPolicies(mapped)
+        }));
+        if (mapped.length > 0) setPolicies(mapped);
       } catch (err) {
-        setApiError('Failed to load policies from service')
+        setApiError('Failed to load policies from service');
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
-    load()
-  }, [])
+    };
+    load();
+  }, []);
 
   // Persist changes to backend (best-effort, non-blocking; shows alert on failure)
   useEffect(() => {
     const sync = async () => {
-      if (!selectedPolicy) return
+      if (!selectedPolicy) return;
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003'
+        const baseUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003';
         const body = {
           document: {
             id: selectedPolicy.id,
@@ -250,53 +250,53 @@ export function PolicyManagement() {
           name: selectedPolicy.name,
           description: selectedPolicy.description,
           createdBy: selectedPolicy.author
-        }
+        };
         // Try PUT first; if 404, try POST
         const putRes = await fetch(`${baseUrl}/policies/${encodeURIComponent(selectedPolicy.id)}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
-        })
+        });
         if (!putRes.ok) {
           await fetch(`${baseUrl}/policies`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
-          })
+          });
         }
       } catch (err) {
-        setApiError('Failed to persist policy to service (will remain local)')
+        setApiError('Failed to persist policy to service (will remain local)');
       }
-    }
-    sync()
+    };
+    sync();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPolicy?.id, selectedPolicy?.name, selectedPolicy?.description, selectedPolicy?.tags, selectedPolicy?.nodes, selectedPolicy?.edges])
+  }, [selectedPolicy?.id, selectedPolicy?.name, selectedPolicy?.description, selectedPolicy?.tags, selectedPolicy?.nodes, selectedPolicy?.edges]);
 
   const filteredPolicies = policies.filter(policy => {
     const matchesSearch = policy.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          policy.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (policy.tags || []).some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-    const matchesStatus = statusFilter === 'all' || policy.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+                         (policy.tags || []).some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesStatus = statusFilter === 'all' || policy.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800 border-green-200'
-      case 'draft': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'archived': return 'bg-gray-100 text-gray-800 border-gray-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      case 'active': return 'bg-green-100 text-green-800 border-green-200';
+      case 'draft': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'archived': return 'bg-gray-100 text-gray-800 border-gray-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
-  }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'active': return <CheckCircle className="h-4 w-4" />
-      case 'draft': return <Edit className="h-4 w-4" />
-      case 'archived': return <Clock className="h-4 w-4" />
-      default: return <AlertTriangle className="h-4 w-4" />
+      case 'active': return <CheckCircle className="h-4 w-4" />;
+      case 'draft': return <Edit className="h-4 w-4" />;
+      case 'archived': return <Clock className="h-4 w-4" />;
+      default: return <AlertTriangle className="h-4 w-4" />;
     }
-  }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -305,8 +305,8 @@ export function PolicyManagement() {
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
-    })
-  }
+    });
+  };
 
   const duplicatePolicy = (policy: Policy) => {
     const newPolicy: Policy = {
@@ -322,29 +322,29 @@ export function PolicyManagement() {
         lastUsed: '',
         successRate: 0
       }
-    }
-    setPolicies(prev => [...prev, newPolicy])
-  }
+    };
+    setPolicies(prev => [...prev, newPolicy]);
+  };
 
   const deletePolicy = async (policyId: string) => {
-    setPolicies(prev => prev.filter(p => p.id !== policyId))
+    setPolicies(prev => prev.filter(p => p.id !== policyId));
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003'
-      await fetch(`${baseUrl}/policies/${encodeURIComponent(policyId)}`, { method: 'DELETE' })
+      const baseUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003';
+      await fetch(`${baseUrl}/policies/${encodeURIComponent(policyId)}`, { method: 'DELETE' });
     } catch (err) {
-      setApiError('Failed to delete policy on service')
+      setApiError('Failed to delete policy on service');
     }
-  }
+  };
 
   const exportPolicy = (policy: Policy) => {
-    const blob = new Blob([JSON.stringify(policy, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${policy.name.replace(/\s+/g, '-').toLowerCase()}-v${policy.version}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+    const blob = new Blob([JSON.stringify(policy, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${policy.name.replace(/\s+/g, '-').toLowerCase()}-v${policy.version}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-6">
@@ -483,9 +483,9 @@ export function PolicyManagement() {
                 <Button variant="outline" size="sm" onClick={() => exportPolicy(policy)}>
                   <Download className="h-3 w-3" />
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => deletePolicy(policy.id)}
                   className="text-red-600 hover:text-red-700"
                 >
@@ -551,7 +551,7 @@ export function PolicyManagement() {
             <FolderOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No policies found</h3>
             <p className="text-gray-600 mb-4">
-              {searchTerm || statusFilter !== 'all' 
+              {searchTerm || statusFilter !== 'all'
                 ? 'Try adjusting your search or filters'
                 : 'Get started by creating your first trust policy'
               }
@@ -598,5 +598,5 @@ export function PolicyManagement() {
         </CardContent>
       </Card>
     </div>
-  )
-} 
+  );
+}

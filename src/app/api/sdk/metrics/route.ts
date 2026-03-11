@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { checkApiAuth, createDemoResponse } from '@/lib/api-auth'
+import { NextRequest, NextResponse } from 'next/server';
+import { checkApiAuth, createDemoResponse } from '@/lib/api-auth';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 /**
  * SDK Metrics API Types
@@ -90,7 +90,7 @@ function generateDemoMetrics(): SDKMetrics {
       errorRate: 0.02,
       uptime: 99.97
     }
-  }
+  };
 }
 
 /**
@@ -110,18 +110,18 @@ export async function GET(request: NextRequest) {
         data: generateDemoMetrics()
       }, {
         headers: {
-          'Cache-Control': 'public, max-age=60',
+          'Cache-Control': 'public, max-age=60'
         }
       });
     }
 
-    const searchParams = request.nextUrl.searchParams
-    const timeRange = searchParams.get('timeRange') || '24h'
-    const includeHistory = searchParams.get('history') === 'true'
+    const {searchParams} = request.nextUrl;
+    const timeRange = searchParams.get('timeRange') || '24h';
+    const includeHistory = searchParams.get('history') === 'true';
 
     // In production, this would query the SDK backend service
     // For now, generate metrics based on the authenticated user's context
-    const metrics = await getSDKMetricsForUser(authResult.user?.id, timeRange, includeHistory)
+    const metrics = await getSDKMetricsForUser(authResult.user?.id, timeRange, includeHistory);
 
     return NextResponse.json({
       success: true,
@@ -137,9 +137,9 @@ export async function GET(request: NextRequest) {
         'Pragma': 'no-cache',
         'Expires': '0'
       }
-    })
+    });
   } catch (error) {
-    console.error('SDK Metrics API error:', error)
+    console.error('SDK Metrics API error:', error);
 
     return NextResponse.json(
       {
@@ -149,7 +149,7 @@ export async function GET(request: NextRequest) {
         code: 'SDK_METRICS_ERROR'
       },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json()
+    const body = await request.json();
 
     // Validate the metrics payload
     if (!body.events || !Array.isArray(body.events)) {
@@ -183,11 +183,11 @@ export async function POST(request: NextRequest) {
           code: 'INVALID_PAYLOAD'
         },
         { status: 400 }
-      )
+      );
     }
 
     // Process and store metrics
-    const processed = await processSDKMetrics(authResult.user?.id, body.events)
+    const processed = await processSDKMetrics(authResult.user?.id, body.events);
 
     return NextResponse.json({
       success: true,
@@ -197,9 +197,9 @@ export async function POST(request: NextRequest) {
         failed: processed.failed,
         timestamp: new Date().toISOString()
       }
-    }, { status: 201 })
+    }, { status: 201 });
   } catch (error) {
-    console.error('SDK Metrics POST error:', error)
+    console.error('SDK Metrics POST error:', error);
 
     return NextResponse.json(
       {
@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
         code: 'SDK_METRICS_PROCESS_ERROR'
       },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -224,11 +224,11 @@ async function getSDKMetricsForUser(
 ): Promise<SDKMetrics & { history?: any[] }> {
   // TODO: Replace with actual backend service call
   // This simulates real metrics with some variation based on user
-  const baseMetrics = generateDemoMetrics()
+  const baseMetrics = generateDemoMetrics();
 
   // Add some pseudo-random variation based on userId hash
-  const userHash = userId ? hashCode(userId) : 0
-  const variation = (userHash % 100) / 100 // 0-1 variation factor
+  const userHash = userId ? hashCode(userId) : 0;
+  const variation = (userHash % 100) / 100; // 0-1 variation factor
 
   const metrics: SDKMetrics = {
     ...baseMetrics,
@@ -243,16 +243,16 @@ async function getSDKMetricsForUser(
       ...baseMetrics.trust,
       averageScore: Math.round((0.5 + variation * 0.5) * 100) / 100
     }
-  }
+  };
 
   if (includeHistory) {
     // Generate time-series history data
-    const historyPoints = getHistoryPointCount(timeRange)
-    const history = generateHistoryData(historyPoints, timeRange)
-    return { ...metrics, history }
+    const historyPoints = getHistoryPointCount(timeRange);
+    const history = generateHistoryData(historyPoints, timeRange);
+    return { ...metrics, history };
   }
 
-  return metrics
+  return metrics;
 }
 
 /**
@@ -265,37 +265,37 @@ async function processSDKMetrics(
   // TODO: Implement actual metric storage
   // This would write to a time-series database or analytics service
 
-  let count = 0
-  let failed = 0
+  let count = 0;
+  let failed = 0;
 
   for (const event of events) {
     try {
       // Validate event structure
       if (event.type && event.timestamp && event.data) {
         // In production: store to database
-        count++
+        count++;
       } else {
-        failed++
+        failed++;
       }
     } catch {
-      failed++
+      failed++;
     }
   }
 
-  return { count, failed }
+  return { count, failed };
 }
 
 /**
  * Simple hash function for consistent pseudo-random variation
  */
 function hashCode(str: string): number {
-  let hash = 0
+  let hash = 0;
   for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i)
-    hash = ((hash << 5) - hash) + char
-    hash = hash & hash
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
   }
-  return Math.abs(hash)
+  return Math.abs(hash);
 }
 
 /**
@@ -303,12 +303,12 @@ function hashCode(str: string): number {
  */
 function getHistoryPointCount(timeRange: string): number {
   switch (timeRange) {
-    case '1h': return 12      // 5-minute intervals
-    case '6h': return 24      // 15-minute intervals
-    case '24h': return 48     // 30-minute intervals
-    case '7d': return 42      // 4-hour intervals
-    case '30d': return 60     // 12-hour intervals
-    default: return 24
+    case '1h': return 12;      // 5-minute intervals
+    case '6h': return 24;      // 15-minute intervals
+    case '24h': return 48;     // 30-minute intervals
+    case '7d': return 42;      // 4-hour intervals
+    case '30d': return 60;     // 12-hour intervals
+    default: return 24;
   }
 }
 
@@ -316,13 +316,13 @@ function getHistoryPointCount(timeRange: string): number {
  * Generate mock history data for time-series charts
  */
 function generateHistoryData(points: number, timeRange: string): any[] {
-  const history = []
-  const now = Date.now()
-  const intervalMs = getIntervalMs(timeRange) / points
+  const history = [];
+  const now = Date.now();
+  const intervalMs = getIntervalMs(timeRange) / points;
 
   for (let i = points - 1; i >= 0; i--) {
-    const timestamp = new Date(now - (i * intervalMs)).toISOString()
-    const variation = Math.sin(i / 4) * 0.2 + 0.9 // Sinusoidal variation 0.7-1.1
+    const timestamp = new Date(now - (i * intervalMs)).toISOString();
+    const variation = Math.sin(i / 4) * 0.2 + 0.9; // Sinusoidal variation 0.7-1.1
 
     history.push({
       timestamp,
@@ -331,10 +331,10 @@ function generateHistoryData(points: number, timeRange: string): any[] {
       apiCalls: Math.floor(1000 * variation),
       avgTrustScore: Math.round(0.7 * variation * 100) / 100,
       errorRate: Math.round((0.02 / variation) * 1000) / 1000
-    })
+    });
   }
 
-  return history
+  return history;
 }
 
 /**
@@ -342,11 +342,11 @@ function generateHistoryData(points: number, timeRange: string): any[] {
  */
 function getIntervalMs(timeRange: string): number {
   switch (timeRange) {
-    case '1h': return 60 * 60 * 1000
-    case '6h': return 6 * 60 * 60 * 1000
-    case '24h': return 24 * 60 * 60 * 1000
-    case '7d': return 7 * 24 * 60 * 60 * 1000
-    case '30d': return 30 * 24 * 60 * 60 * 1000
-    default: return 24 * 60 * 60 * 1000
+    case '1h': return 60 * 60 * 1000;
+    case '6h': return 6 * 60 * 60 * 1000;
+    case '24h': return 24 * 60 * 60 * 1000;
+    case '7d': return 7 * 24 * 60 * 60 * 1000;
+    case '30d': return 30 * 24 * 60 * 60 * 1000;
+    default: return 24 * 60 * 60 * 1000;
   }
 }
