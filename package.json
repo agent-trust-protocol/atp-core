@@ -14,6 +14,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "format:check": "echo 'No formatter configured'",
+    "test": "echo 'No tests configured' && exit 0",
+    "test:integration": "echo 'No integration tests configured' && exit 0",
+    "test:e2e": "echo 'No e2e tests configured' && exit 0",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
