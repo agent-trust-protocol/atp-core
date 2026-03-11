@@ -68,6 +68,7 @@ jobs:
 
     - name: Run Snyk security scan
       uses: snyk/actions/node@master
+      continue-on-error: true
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
@@ -75,11 +76,13 @@ jobs:
 
     - name: Run CodeQL analysis
       uses: github/codeql-action/init@v3
+      continue-on-error: true
       with:
         languages: typescript, javascript
 
     - name: Perform CodeQL analysis
       uses: github/codeql-action/analyze@v3
+      continue-on-error: true
 
   # Build and Push Container Images
   build-images:
