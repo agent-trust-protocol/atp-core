@@ -28,23 +28,23 @@ class RateLimiter {
     login: {
       windowMs: 15 * 60 * 1000, // 15 minutes
       maxRequests: 5, // 5 attempts per 15 minutes
-      blockDurationMs: 30 * 60 * 1000, // Block for 30 minutes after exceeding
+      blockDurationMs: 30 * 60 * 1000 // Block for 30 minutes after exceeding
     },
     signup: {
       windowMs: 60 * 60 * 1000, // 1 hour
       maxRequests: 3, // 3 signups per hour per IP
-      blockDurationMs: 60 * 60 * 1000, // Block for 1 hour
+      blockDurationMs: 60 * 60 * 1000 // Block for 1 hour
     },
     apiAuth: {
       windowMs: 60 * 1000, // 1 minute
       maxRequests: 60, // 60 requests per minute
-      blockDurationMs: 5 * 60 * 1000, // Block for 5 minutes
+      blockDurationMs: 5 * 60 * 1000 // Block for 5 minutes
     },
     passwordReset: {
       windowMs: 60 * 60 * 1000, // 1 hour
       maxRequests: 3, // 3 reset attempts per hour
-      blockDurationMs: 60 * 60 * 1000, // Block for 1 hour
-    },
+      blockDurationMs: 60 * 60 * 1000 // Block for 1 hour
+    }
   };
 
   private constructor() {
@@ -83,7 +83,7 @@ class RateLimiter {
     // Check if currently blocked
     if (entry?.blocked && entry.blockedUntil && entry.blockedUntil > now) {
       const retryAfter = Math.ceil((entry.blockedUntil - now) / 1000);
-      
+
       // Log repeated attempts while blocked (suspicious)
       if (entry.count > config.maxRequests + 5) {
         logSuspiciousActivity(
@@ -93,11 +93,11 @@ class RateLimiter {
           { endpoint, attempts: entry.count }
         );
       }
-      
+
       return {
         allowed: false,
         retryAfter,
-        remaining: 0,
+        remaining: 0
       };
     }
 
@@ -107,11 +107,11 @@ class RateLimiter {
       this.store.set(key, {
         count: 1,
         resetTime: now + config.windowMs,
-        blocked: false,
+        blocked: false
       });
       return {
         allowed: true,
-        remaining: config.maxRequests - 1,
+        remaining: config.maxRequests - 1
       };
     }
 
@@ -134,7 +134,7 @@ class RateLimiter {
       return {
         allowed: false,
         retryAfter,
-        remaining: 0,
+        remaining: 0
       };
     }
 
@@ -142,7 +142,7 @@ class RateLimiter {
 
     return {
       allowed: true,
-      remaining: config.maxRequests - entry.count,
+      remaining: config.maxRequests - entry.count
     };
   }
 
@@ -160,12 +160,12 @@ class RateLimiter {
   block(identifier: string, endpoint: string, durationMs: number): void {
     const key = `${endpoint}:${identifier}`;
     const now = Date.now();
-    
+
     this.store.set(key, {
       count: 999,
       resetTime: now + durationMs,
       blocked: true,
-      blockedUntil: now + durationMs,
+      blockedUntil: now + durationMs
     });
   }
 
@@ -176,7 +176,7 @@ class RateLimiter {
     const key = `${endpoint}:${identifier}`;
     const entry = this.store.get(key);
     const now = Date.now();
-    
+
     return !!(entry?.blocked && entry.blockedUntil && entry.blockedUntil > now);
   }
 
@@ -201,7 +201,7 @@ class RateLimiter {
         count: 0,
         remaining: config.maxRequests,
         resetTime: now + config.windowMs,
-        blocked: false,
+        blocked: false
       };
     }
 
@@ -209,7 +209,7 @@ class RateLimiter {
       count: entry.count,
       remaining: Math.max(0, config.maxRequests - entry.count),
       resetTime: entry.resetTime,
-      blocked: entry.blocked || false,
+      blocked: entry.blocked || false
     };
   }
 
@@ -262,7 +262,7 @@ class RateLimiter {
     return {
       totalEntries: this.store.size,
       blockedCount,
-      entriesByEndpoint,
+      entriesByEndpoint
     };
   }
 

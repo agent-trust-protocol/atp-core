@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Activity, Shield, Users, CheckCircle2, AlertCircle, ArrowRight } from "lucide-react"
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Activity, Shield, Users, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 
 // Synthetic demo data - not real API calls
 const generateDemoData = () => {
@@ -47,11 +47,11 @@ const generateDemoData = () => {
       { type: 'info', message: 'Policy POL-004 updated successfully', time: '12 mins ago' },
       { type: 'success', message: 'All systems operational', time: '1 hour ago' }
     ]
-  }
-}
+  };
+};
 
 export function SimpleDemoDashboard() {
-  const [data] = useState(generateDemoData())
+  const [data] = useState(generateDemoData());
 
   return (
     <div className="space-y-6">
@@ -210,5 +210,5 @@ export function SimpleDemoDashboard() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

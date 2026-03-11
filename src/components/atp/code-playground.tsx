@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Play, Copy, Check, RotateCcw, Terminal } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Play, Copy, Check, RotateCcw, Terminal } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface CodePlaygroundProps {
   initialCode?: string
@@ -17,15 +17,15 @@ export function CodePlayground({ initialCode = `import { Agent } from 'atp-sdk';
 const agent = await Agent.create('MyBot');
 console.log('DID:', agent.getDID());
 console.log('Quantum-safe:', agent.isQuantumSafe());` }: CodePlaygroundProps) {
-  const [code, setCode] = useState(initialCode)
-  const [output, setOutput] = useState<string>('')
-  const [isRunning, setIsRunning] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const [code, setCode] = useState(initialCode);
+  const [output, setOutput] = useState<string>('');
+  const [isRunning, setIsRunning] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const runCode = async () => {
-    setIsRunning(true)
-    setOutput('')
-    
+    setIsRunning(true);
+    setOutput('');
+
     // Simulate code execution
     setTimeout(() => {
       // In a real implementation, this would execute the code
@@ -34,21 +34,21 @@ console.log('Quantum-safe:', agent.isQuantumSafe());` }: CodePlaygroundProps) {
 DID: did:atp:testnet:agent-${Math.random().toString(36).substr(2, 9)}
 Quantum-safe: true
 Trust Level: BASIC
-Status: Ready`)
-      setIsRunning(false)
-    }, 1000)
-  }
+Status: Ready`);
+      setIsRunning(false);
+    }, 1000);
+  };
 
   const copyCode = async () => {
-    await navigator.clipboard.writeText(code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const resetCode = () => {
-    setCode(initialCode)
-    setOutput('')
-  }
+    setCode(initialCode);
+    setOutput('');
+  };
 
   return (
     <Card className="glass border-primary/30">
@@ -126,6 +126,6 @@ Status: Ready`)
         </Alert>
       </CardContent>
     </Card>
-  )
+  );
 }
 

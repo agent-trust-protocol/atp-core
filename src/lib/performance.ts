@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 interface RequestCache {
   [key: string]: {
@@ -15,12 +15,12 @@ class ClientCache {
   get<T>(key: string): T | null {
     const entry = this.cache[key];
     if (!entry) return null;
-    
+
     if (Date.now() > entry.timestamp + entry.ttl) {
       delete this.cache[key];
       return null;
     }
-    
+
     return entry.data;
   }
 
@@ -55,9 +55,9 @@ class PerformanceMonitor {
     if (!this.requestTimes[endpoint]) {
       this.requestTimes[endpoint] = [];
     }
-    
+
     this.requestTimes[endpoint].push(responseTime);
-    
+
     // Keep only last 100 requests per endpoint
     if (this.requestTimes[endpoint].length > 100) {
       this.requestTimes[endpoint] = this.requestTimes[endpoint].slice(-100);
@@ -87,10 +87,10 @@ class PerformanceMonitor {
     } = {};
 
     for (const [endpoint, times] of Object.entries(this.requestTimes)) {
-      const avgResponseTime = times.length > 0 
-        ? times.reduce((sum, time) => sum + time, 0) / times.length 
+      const avgResponseTime = times.length > 0
+        ? times.reduce((sum, time) => sum + time, 0) / times.length
         : 0;
-        
+
       const requestCount = times.length;
       const errorCount = this.errorCounts[endpoint] || 0;
       const errorRate = requestCount > 0 ? (errorCount / requestCount) * 100 : 0;
@@ -131,7 +131,7 @@ export const performanceMonitor = new PerformanceMonitor();
 // Enhanced fetch with caching and performance monitoring
 export async function cachedFetch<T>(
   url: string,
-  options?: RequestInit & { 
+  options?: RequestInit & {
     cacheKey?: string;
     cacheTTL?: number;
     skipCache?: boolean;
@@ -139,7 +139,7 @@ export async function cachedFetch<T>(
 ): Promise<T> {
   const cacheKey = options?.cacheKey || url;
   const startTime = Date.now();
-  
+
   try {
     // Check cache first (unless explicitly skipped)
     if (!options?.skipCache) {
@@ -153,22 +153,22 @@ export async function cachedFetch<T>(
 
     // Make the actual request
     const response = await fetch(url, options);
-    
+
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
     const data = await response.json();
-    
+
     // Cache the response (unless explicitly skipped)
     if (!options?.skipCache) {
       clientCache.set(cacheKey, data, options?.cacheTTL);
       performanceMonitor.recordCacheMiss();
     }
-    
+
     performanceMonitor.recordRequest(url, Date.now() - startTime);
     return data;
-    
+
   } catch (error) {
     performanceMonitor.recordError(url);
     performanceMonitor.recordRequest(url, Date.now() - startTime);
@@ -223,10 +223,10 @@ export function debounce<T extends (...args: any[]) => any>(
   wait: number
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout | null = null;
-  
+
   return (...args: Parameters<T>) => {
     if (timeout) clearTimeout(timeout);
-    
+
     timeout = setTimeout(() => {
       func(...args);
     }, wait);
@@ -239,7 +239,7 @@ export function throttle<T extends (...args: any[]) => any>(
   limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle = false;
-  
+
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
       func(...args);

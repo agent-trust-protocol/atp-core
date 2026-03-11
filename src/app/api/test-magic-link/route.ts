@@ -15,9 +15,9 @@ export async function POST(request: NextRequest) {
 
     // Import and use the email service
     const { emailService } = await import('@/lib/email');
-    
+
     // Generate a test token (in real flow, Better Auth does this)
-    const testToken = 'test_' + Math.random().toString(36).substring(2, 15);
+    const testToken = `test_${  Math.random().toString(36).substring(2, 15)}`;
     const testUrl = `http://localhost:3000/api/auth/callback?token=${testToken}`;
 
     console.log('🔗 Test URL:', testUrl);
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('❌ TEST ERROR:', error);
     return NextResponse.json(
-      { error: 'Test failed: ' + (error instanceof Error ? error.message : 'Unknown error') },
+      { error: `Test failed: ${  error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     );
   }

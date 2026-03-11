@@ -1,9 +1,9 @@
-"use client"
+'use client';
 
 import { WorkflowSystemHealth } from '@/components/atp/WorkflowSystemHealth';
-import { Subnav } from "@/components/ui/subnav"
-import { Activity, Shield, Building2, BarChart3, GitBranch, CheckCircle } from "lucide-react"
-import type { Metadata } from 'next'
+import { Subnav } from '@/components/ui/subnav';
+import { Activity, Shield, Building2, BarChart3, GitBranch, CheckCircle } from 'lucide-react';
+import type { Metadata } from 'next';
 
 export default function WorkflowHealthPage() {
   const dashboardTabs = [
@@ -43,18 +43,18 @@ export default function WorkflowHealthPage() {
       href: '/enterprise',
       icon: <Building2 className="h-4 w-4" />
     }
-  ]
+  ];
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Workflows', href: '/dashboard/workflows' },
     { label: 'System Health', href: '/dashboard/workflows/health' }
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-background">
-      <Subnav 
-        tabs={dashboardTabs} 
+      <Subnav
+        tabs={dashboardTabs}
         breadcrumbs={breadcrumbs}
         variant="both"
       />
@@ -68,7 +68,7 @@ export default function WorkflowHealthPage() {
             Monitor the health and performance of your workflow automation system
           </p>
         </div>
-        
+
         <WorkflowSystemHealth />
       </div>
     </div>

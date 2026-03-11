@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { ArrowLeft, UserPlus, Shield, Building, Star, Users } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import Link from "next/link"
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, UserPlus, Shield, Building, Star, Users } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 interface AgentFormData {
   name: string
@@ -19,53 +19,53 @@ interface AgentFormData {
 }
 
 export default function NewAgentPage() {
-  const router = useRouter()
+  const router = useRouter();
   const [formData, setFormData] = useState<AgentFormData>({
     name: '',
     did: '',
     organization: '',
     trustLevel: 'basic',
     description: ''
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    
+    e.preventDefault();
+    setIsSubmitting(true);
+
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     // In a real app, you would make an API call here
-    console.log('Creating agent:', formData)
-    
-    setIsSubmitting(false)
-    router.push('/dashboard')
-  }
+    console.log('Creating agent:', formData);
+
+    setIsSubmitting(false);
+    router.push('/dashboard');
+  };
 
   const handleInputChange = (field: keyof AgentFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   const getTrustLevelIcon = (level: string) => {
     switch (level) {
-      case 'enterprise': return Building
-      case 'premium': return Star
-      case 'verified': return Shield
-      case 'basic': return UserPlus
-      default: return Users
+      case 'enterprise': return Building;
+      case 'premium': return Star;
+      case 'verified': return Shield;
+      case 'basic': return UserPlus;
+      default: return Users;
     }
-  }
+  };
 
   const getTrustLevelColor = (level: string) => {
     switch (level) {
-      case 'enterprise': return 'bg-purple-100 text-purple-800 border-purple-200'
-      case 'premium': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'verified': return 'bg-green-100 text-green-800 border-green-200'
-      case 'basic': return 'bg-blue-100 text-blue-800 border-blue-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      case 'enterprise': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'premium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'verified': return 'bg-green-100 text-green-800 border-green-200';
+      case 'basic': return 'bg-blue-100 text-blue-800 border-blue-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -155,7 +155,7 @@ export default function NewAgentPage() {
                 </select>
                 <div className="flex items-center gap-2 mt-2">
                   {(() => {
-                    const IconComponent = getTrustLevelIcon(formData.trustLevel)
+                    const IconComponent = getTrustLevelIcon(formData.trustLevel);
                     return (
                       <>
                         <IconComponent className="h-4 w-4" />
@@ -163,7 +163,7 @@ export default function NewAgentPage() {
                           {formData.trustLevel}
                         </Badge>
                       </>
-                    )
+                    );
                   })()}
                 </div>
               </div>
@@ -182,8 +182,8 @@ export default function NewAgentPage() {
 
               {/* Submit Button */}
               <div className="flex items-center gap-4 pt-4">
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={isSubmitting || !formData.name || !formData.did}
                   className="flex items-center gap-2"
                 >
@@ -199,5 +199,5 @@ export default function NewAgentPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

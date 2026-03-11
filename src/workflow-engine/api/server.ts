@@ -37,12 +37,12 @@ export class WorkflowApiServer {
     this.app.use((req, res, next) => {
       const start = Date.now();
       console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
-      
+
       res.on('finish', () => {
         const duration = Date.now() - start;
         console.log(`${new Date().toISOString()} ${req.method} ${req.path} ${res.statusCode} ${duration}ms`);
       });
-      
+
       next();
     });
 
@@ -59,11 +59,11 @@ export class WorkflowApiServer {
       this.app.use((req, res, next) => {
         const apiKey = req.headers['x-api-key'];
         const validApiKey = process.env.API_KEY;
-        
+
         if (!apiKey || apiKey !== validApiKey) {
           return res.status(401).json({ error: 'Invalid or missing API key' });
         }
-        
+
         next();
       });
     }
@@ -111,10 +111,10 @@ export class WorkflowApiServer {
     // Global error handler
     this.app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
       console.error('Unhandled error:', error);
-      
+
       // Don't leak error details in production
       const isProduction = process.env.NODE_ENV === 'production';
-      
+
       res.status(500).json({
         error: 'Internal server error',
         message: isProduction ? 'Something went wrong' : error.message,
@@ -128,22 +128,22 @@ export class WorkflowApiServer {
       // Initialize database connection
       console.log('Initializing database connection...');
       dbConnection.initializeFromEnv();
-      
+
       const isConnected = await dbConnection.testConnection();
       if (!isConnected) {
         throw new Error('Database connection failed');
       }
-      
+
       console.log('Database connection established');
 
       // Initialize scheduler
       console.log('Initializing workflow scheduler...');
       await this.scheduler.initialize();
-      
+
       // Initialize event service
       console.log('Initializing event service...');
       await this.eventService.initialize();
-      
+
       console.log('Workflow API server initialized successfully');
     } catch (error) {
       console.error('Failed to initialize workflow API server:', error);
@@ -153,7 +153,7 @@ export class WorkflowApiServer {
 
   async start(port: number = 3005) {
     await this.initialize();
-    
+
     this.server = this.app.listen(port, () => {
       console.log(`Workflow API server listening on port ${port}`);
       console.log(`Health check: http://localhost:${port}/health`);
@@ -169,7 +169,7 @@ export class WorkflowApiServer {
 
   async shutdown() {
     console.log('Shutting down workflow API server...');
-    
+
     try {
       // Stop accepting new connections
       if (this.server) {
@@ -207,7 +207,7 @@ export class WorkflowApiServer {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const server = new WorkflowApiServer();
   const port = parseInt(process.env.WORKFLOW_API_PORT || '3005');
-  
+
   server.start(port).catch((error) => {
     console.error('Failed to start workflow API server:', error);
     process.exit(1);

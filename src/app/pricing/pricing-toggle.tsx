@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Badge } from '@/components/ui/badge'
+import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 
 export function PricingToggle() {
-  const [isAnnual, setIsAnnual] = useState(true)
+  const [isAnnual, setIsAnnual] = useState(true);
 
   return (
     <div className="flex items-center justify-center gap-4 mb-8 animate-fade-in-up">
@@ -32,5 +32,5 @@ export function PricingToggle() {
         </Badge>
       </button>
     </div>
-  )
+  );
 }

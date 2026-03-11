@@ -34,7 +34,7 @@ class GeoBlockingService {
       mode: 'block',
       countries: process.env.BLOCKED_COUNTRIES?.split(',') || [],
       allowVPN: true,
-      allowTor: false,
+      allowTor: false
     };
   }
 
@@ -66,7 +66,7 @@ class GeoBlockingService {
     try {
       // Use multiple geo-IP services for redundancy
       const location = await this.fetchFromGeoIPService(ip);
-      
+
       if (location) {
         this.geoCache.set(ip, { location, timestamp: Date.now() });
         return location;
@@ -92,14 +92,14 @@ class GeoBlockingService {
     }
 
     const location = await this.getLocation(ip);
-    
+
     if (!location) {
       // If we can't determine location, allow by default (or block if paranoid)
       return { blocked: false };
     }
 
     // Check VPN/Proxy
-    if (location.isp?.toLowerCase().includes('vpn') || 
+    if (location.isp?.toLowerCase().includes('vpn') ||
         location.isp?.toLowerCase().includes('proxy')) {
       if (!this.config.allowVPN) {
         logSuspiciousActivity('VPN connection blocked', ip, userAgent, {
@@ -141,7 +141,7 @@ class GeoBlockingService {
         );
         return {
           blocked: true,
-          reason: `Access is only allowed from specific countries`,
+          reason: 'Access is only allowed from specific countries',
           location
         };
       }
@@ -167,7 +167,7 @@ class GeoBlockingService {
             city: data.city,
             latitude: data.latitude,
             longitude: data.longitude,
-            isp: data.org,
+            isp: data.org
           };
         }
       }
@@ -184,14 +184,14 @@ class GeoBlockingService {
             city: data.city,
             latitude: data.lat,
             longitude: data.lon,
-            isp: data.isp,
+            isp: data.isp
           };
         }
       }
 
       // Option 3: Fallback to MaxMind GeoLite2 (requires local database)
       // In production, use MaxMind GeoIP2 with local database for better performance
-      
+
       return null;
     } catch (error) {
       console.error('[GeoBlocking] Geo-IP lookup failed:', error);
@@ -212,13 +212,13 @@ class GeoBlockingService {
     if (parts.length === 4) {
       const first = parseInt(parts[0]);
       const second = parseInt(parts[1]);
-      
+
       // 10.0.0.0 - 10.255.255.255
       if (first === 10) return true;
-      
+
       // 172.16.0.0 - 172.31.255.255
       if (first === 172 && second >= 16 && second <= 31) return true;
-      
+
       // 192.168.0.0 - 192.168.255.255
       if (first === 192 && second === 168) return true;
     }
@@ -248,7 +248,7 @@ class GeoBlockingService {
       totalCached: this.geoCache.size,
       countryCounts,
       blockedCountries: this.config.countries,
-      mode: this.config.mode,
+      mode: this.config.mode
     };
   }
 
@@ -268,7 +268,7 @@ export const geoBlocking = GeoBlockingService.getInstance();
 export const HIGH_RISK_COUNTRIES = [
   'KP', // North Korea
   'IR', // Iran
-  'SY', // Syria
+  'SY' // Syria
   // Add more as needed
 ];
 
@@ -276,12 +276,12 @@ export const COMMON_BLOCKED_COUNTRIES = [
   'CN', // China (high bot traffic)
   'RU', // Russia
   'KP', // North Korea
-  'IR', // Iran
+  'IR' // Iran
 ];
 
 export const GDPR_COUNTRIES = [
   'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR',
   'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL',
-  'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'GB',
+  'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'GB'
 ];
 

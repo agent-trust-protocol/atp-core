@@ -13,14 +13,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('[VERIFY] Attempting to verify token:', token.substring(0, 10) + '...');
+    console.log('[VERIFY] Attempting to verify token:', `${token.substring(0, 10)  }...`);
 
     const pool = getPool();
     const now = new Date();
 
     // Find verification token
     const verifyResult = await pool.query(
-      `SELECT * FROM verification WHERE value = $1 AND "expiresAt" > $2`,
+      'SELECT * FROM verification WHERE value = $1 AND "expiresAt" > $2',
       [token, now]
     );
     const verification = verifyResult.rows[0];
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     // Update user emailVerified status
     const updateResult = await pool.query(
-      `UPDATE "user" SET "emailVerified" = true, "updatedAt" = $1 WHERE email = $2`,
+      'UPDATE "user" SET "emailVerified" = true, "updatedAt" = $1 WHERE email = $2',
       [now, email]
     );
 

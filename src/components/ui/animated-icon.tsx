@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { LucideIcon } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import * as React from 'react';
+import { LucideIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AnimatedIconProps {
   icon: LucideIcon
@@ -23,7 +23,7 @@ export function AnimatedIcon({
   gradient = false,
   glassmorphic = false,
   interactive = true,
-  hoverEffect = 'none',
+  hoverEffect = 'none'
 }: AnimatedIconProps) {
   const animationClasses = {
     pulse: 'animate-pulse',
@@ -33,21 +33,21 @@ export function AnimatedIcon({
     wiggle: 'icon-wiggle',
     breathe: 'icon-breathe',
     'bounce-in': 'icon-bounce-in',
-    none: '',
-  }
+    none: ''
+  };
 
   const hoverClasses = {
     lift: 'icon-hover-lift',
     glow: 'icon-hover-glow',
     spin: 'icon-hover-spin',
-    none: '',
-  }
+    none: ''
+  };
 
   const gradientClasses = {
     primary: 'icon-gradient-primary',
     success: 'icon-gradient-success',
-    warning: 'icon-gradient-warning',
-  }
+    warning: 'icon-gradient-warning'
+  };
 
   const wrapperClasses = cn(
     'relative inline-flex items-center justify-center',
@@ -55,14 +55,14 @@ export function AnimatedIcon({
     interactive && 'transition-all duration-300',
     interactive && hoverClasses[hoverEffect],
     className
-  )
+  );
 
   const iconClasses = cn(
     animationClasses[animate],
     gradient === true && 'atp-gradient-text',
     typeof gradient === 'string' && gradientClasses[gradient],
     interactive && 'transition-all duration-300'
-  )
+  );
 
   const renderIcon = () => {
     return (
@@ -71,8 +71,8 @@ export function AnimatedIcon({
         className={iconClasses}
         strokeWidth={1.5}
       />
-    )
-  }
+    );
+  };
 
   return (
     <div className={wrapperClasses}>
@@ -81,7 +81,7 @@ export function AnimatedIcon({
       )}
       {renderIcon()}
     </div>
-  )
+  );
 }
 
 interface IconWithBadgeProps extends AnimatedIconProps {
@@ -99,8 +99,8 @@ export function IconWithBadge({
     secondary: 'bg-secondary text-secondary-foreground',
     success: 'bg-atp-emerald text-white',
     warning: 'bg-atp-amber text-white',
-    danger: 'bg-atp-crimson text-white',
-  }
+    danger: 'bg-atp-crimson text-white'
+  };
 
   return (
     <div className="relative inline-flex">
@@ -117,7 +117,7 @@ export function IconWithBadge({
         </span>
       )}
     </div>
-  )
+  );
 }
 
 interface FloatingIconProps extends AnimatedIconProps {
@@ -132,9 +132,9 @@ export function FloatingIcon({
 }: FloatingIconProps) {
   const floatStyle = float
     ? {
-        animation: `float ${floatDuration}s ease-in-out infinite`,
+        animation: `float ${floatDuration}s ease-in-out infinite`
       }
-    : {}
+    : {};
 
   return (
     <>
@@ -152,5 +152,5 @@ export function FloatingIcon({
         <AnimatedIcon {...iconProps} />
       </div>
     </>
-  )
+  );
 }

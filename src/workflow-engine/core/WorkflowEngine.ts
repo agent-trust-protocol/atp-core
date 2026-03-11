@@ -1,9 +1,9 @@
 import { EventEmitter } from 'events';
-import { 
-  Workflow, 
-  WorkflowNode, 
-  WorkflowEdge, 
-  WorkflowState, 
+import {
+  Workflow,
+  WorkflowNode,
+  WorkflowEdge,
+  WorkflowState,
   WorkflowExecutionContext,
   ExecutionResult,
   WorkflowValidationResult,
@@ -26,14 +26,14 @@ export class WorkflowEngine extends EventEmitter {
     if (!validation.isValid) {
       throw new Error(`Workflow validation failed: ${validation.errors.join(', ')}`);
     }
-    
+
     this.workflows.set(workflow.id, workflow);
     this.emit('workflow:registered', workflow);
   }
 
   async executeWorkflow(
-    workflowId: string, 
-    initialData?: any, 
+    workflowId: string,
+    initialData?: any,
     context?: Partial<WorkflowExecutionContext>
   ): Promise<ExecutionResult> {
     const workflow = this.workflows.get(workflowId);
@@ -79,7 +79,7 @@ export class WorkflowEngine extends EventEmitter {
   }
 
   private async runWorkflow(
-    workflow: Workflow, 
+    workflow: Workflow,
     context: WorkflowExecutionContext
   ): Promise<ExecutionResult> {
     const startNode = this.findStartNode(workflow);
@@ -93,26 +93,26 @@ export class WorkflowEngine extends EventEmitter {
 
     while (queue.length > 0) {
       const node = queue.shift()!;
-      
+
       if (visited.has(node.id)) {
         continue;
       }
-      
+
       visited.add(node.id);
       context.currentNodeId = node.id;
-      
+
       this.emit('node:executing', { node, context });
-      
+
       try {
         const nodeHandler = this.nodeRegistry.getNode(node.type);
         const inputs = this.gatherNodeInputs(node, results, context);
         const output = await nodeHandler.execute(inputs, node.config, context);
-        
+
         results.set(node.id, output);
         context.completedNodes.push(node.id);
-        
+
         this.emit('node:completed', { node, output, context });
-        
+
         const nextNodes = this.getNextNodes(workflow, node, output);
         queue.push(...nextNodes);
       } catch (error) {
@@ -125,50 +125,50 @@ export class WorkflowEngine extends EventEmitter {
       success: true,
       data: results.get(visited.values().next().value),
       executionId: context.executionId,
-      duration: context.endTime ? 
+      duration: context.endTime ?
         context.endTime.getTime() - context.startTime.getTime() : 0
     };
   }
 
   private async validateWorkflow(workflow: Workflow): Promise<WorkflowValidationResult> {
     const errors: string[] = [];
-    
+
     if (!workflow.id || !workflow.name) {
       errors.push('Workflow must have an id and name');
     }
-    
+
     if (!workflow.nodes || workflow.nodes.length === 0) {
       errors.push('Workflow must have at least one node');
     }
-    
+
     const nodeIds = new Set(workflow.nodes.map(n => n.id));
     const startNodes = workflow.nodes.filter(n => n.isStartNode);
-    
+
     if (startNodes.length === 0) {
       errors.push('Workflow must have at least one start node');
     }
-    
+
     if (startNodes.length > 1) {
       errors.push('Workflow can only have one start node');
     }
-    
+
     for (const edge of workflow.edges) {
       if (!nodeIds.has(edge.sourceNodeId) || !nodeIds.has(edge.targetNodeId)) {
         errors.push(`Edge references non-existent node: ${edge.sourceNodeId} -> ${edge.targetNodeId}`);
       }
     }
-    
+
     for (const node of workflow.nodes) {
       if (!this.nodeRegistry.hasNode(node.type)) {
         errors.push(`Unknown node type: ${node.type}`);
       }
     }
-    
+
     const hasCycles = this.detectCycles(workflow);
     if (hasCycles) {
       errors.push('Workflow contains cycles');
     }
-    
+
     return {
       isValid: errors.length === 0,
       errors
@@ -177,22 +177,22 @@ export class WorkflowEngine extends EventEmitter {
 
   private detectCycles(workflow: Workflow): boolean {
     const adjacencyList = new Map<string, string[]>();
-    
+
     for (const node of workflow.nodes) {
       adjacencyList.set(node.id, []);
     }
-    
+
     for (const edge of workflow.edges) {
       adjacencyList.get(edge.sourceNodeId)?.push(edge.targetNodeId);
     }
-    
+
     const visited = new Set<string>();
     const recursionStack = new Set<string>();
-    
+
     const hasCycleDFS = (nodeId: string): boolean => {
       visited.add(nodeId);
       recursionStack.add(nodeId);
-      
+
       const neighbors = adjacencyList.get(nodeId) || [];
       for (const neighbor of neighbors) {
         if (!visited.has(neighbor)) {
@@ -203,11 +203,11 @@ export class WorkflowEngine extends EventEmitter {
           return true;
         }
       }
-      
+
       recursionStack.delete(nodeId);
       return false;
     };
-    
+
     for (const nodeId of adjacencyList.keys()) {
       if (!visited.has(nodeId)) {
         if (hasCycleDFS(nodeId)) {
@@ -215,7 +215,7 @@ export class WorkflowEngine extends EventEmitter {
         }
       }
     }
-    
+
     return false;
   }
 
@@ -224,25 +224,25 @@ export class WorkflowEngine extends EventEmitter {
   }
 
   private getNextNodes(
-    workflow: Workflow, 
-    currentNode: WorkflowNode, 
+    workflow: Workflow,
+    currentNode: WorkflowNode,
     output: any
   ): WorkflowNode[] {
     const edges = workflow.edges.filter(e => e.sourceNodeId === currentNode.id);
     const nextNodeIds = edges
       .filter(edge => this.evaluateCondition(edge.condition, output))
       .map(edge => edge.targetNodeId);
-    
+
     return workflow.nodes.filter(n => nextNodeIds.includes(n.id));
   }
 
   private evaluateCondition(condition: any, data: any): boolean {
     if (!condition) return true;
-    
+
     if (typeof condition === 'function') {
       return condition(data);
     }
-    
+
     if (typeof condition === 'object' && condition.expression) {
       try {
         return new Function('data', `return ${condition.expression}`)(data);
@@ -250,17 +250,17 @@ export class WorkflowEngine extends EventEmitter {
         return false;
       }
     }
-    
+
     return true;
   }
 
   private gatherNodeInputs(
-    node: WorkflowNode, 
-    results: Map<string, any>, 
+    node: WorkflowNode,
+    results: Map<string, any>,
     context: WorkflowExecutionContext
   ): any {
     const inputs: any = {};
-    
+
     if (node.inputs) {
       for (const [key, inputConfig] of Object.entries(node.inputs)) {
         if (typeof inputConfig === 'string') {
@@ -278,7 +278,7 @@ export class WorkflowEngine extends EventEmitter {
         }
       }
     }
-    
+
     return inputs;
   }
 

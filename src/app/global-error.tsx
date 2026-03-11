@@ -2,7 +2,7 @@
 
 export default function GlobalError({
   error,
-  reset,
+  reset
 }: {
   error: Error & { digest?: string };
   reset: () => void;
@@ -17,7 +17,7 @@ export default function GlobalError({
           justifyContent: 'center',
           fontFamily: 'system-ui, -apple-system, sans-serif',
           backgroundColor: '#f8f9fa',
-          padding: '1rem',
+          padding: '1rem'
         }}>
           <div style={{
             maxWidth: '400px',
@@ -26,7 +26,7 @@ export default function GlobalError({
             padding: '2rem',
             backgroundColor: 'white',
             borderRadius: '8px',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
           }}>
             <h1 style={{ fontSize: '2rem', color: '#dc3545', marginBottom: '1rem' }}>
               Application Error
@@ -48,7 +48,7 @@ export default function GlobalError({
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
-                  cursor: 'pointer',
+                  cursor: 'pointer'
                 }}
               >
                 Try Again
@@ -61,7 +61,7 @@ export default function GlobalError({
                   color: '#0d6efd',
                   border: '1px solid #0d6efd',
                   borderRadius: '4px',
-                  cursor: 'pointer',
+                  cursor: 'pointer'
                 }}
               >
                 Go Home

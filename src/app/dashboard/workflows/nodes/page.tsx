@@ -1,9 +1,9 @@
-"use client"
+'use client';
 
 import { WorkflowNodesCatalog } from '@/components/atp/WorkflowNodesCatalog';
-import { Subnav } from "@/components/ui/subnav"
-import { Activity, Shield, Building2, BarChart3, GitBranch, Zap } from "lucide-react"
-import type { Metadata } from 'next'
+import { Subnav } from '@/components/ui/subnav';
+import { Activity, Shield, Building2, BarChart3, GitBranch, Zap } from 'lucide-react';
+import type { Metadata } from 'next';
 
 export default function WorkflowNodesPage() {
   const dashboardTabs = [
@@ -43,18 +43,18 @@ export default function WorkflowNodesPage() {
       href: '/enterprise',
       icon: <Building2 className="h-4 w-4" />
     }
-  ]
+  ];
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Workflows', href: '/dashboard/workflows' },
     { label: 'Available Nodes', href: '/dashboard/workflows/nodes' }
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-background">
-      <Subnav 
-        tabs={dashboardTabs} 
+      <Subnav
+        tabs={dashboardTabs}
         breadcrumbs={breadcrumbs}
         variant="both"
       />
@@ -68,7 +68,7 @@ export default function WorkflowNodesPage() {
             Explore and understand the building blocks for your ATP workflow automations
           </p>
         </div>
-        
+
         <WorkflowNodesCatalog />
       </div>
     </div>

@@ -1,12 +1,12 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Activity,
   Zap,
@@ -23,7 +23,7 @@ import {
   ArrowRight,
   RefreshCw,
   BarChart3
-} from "lucide-react"
+} from 'lucide-react';
 
 interface MetricData {
   value: number
@@ -40,9 +40,9 @@ interface SystemStatus {
 }
 
 export function PerformanceMetricsPreview() {
-  const router = useRouter()
-  const [isLive, setIsLive] = useState(false)
-  const [lastUpdate, setLastUpdate] = useState(new Date())
+  const router = useRouter();
+  const [isLive, setIsLive] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState(new Date());
 
   // Demo metrics that update periodically
   const [metrics, setMetrics] = useState({
@@ -52,7 +52,7 @@ export function PerformanceMetricsPreview() {
     uptime: { value: 99.97, change: 0.02, trend: 'up' as const, unit: '%' },
     errorRate: { value: 0.03, change: -0.01, trend: 'down' as const, unit: '%' },
     throughput: { value: 4327, change: 156, trend: 'up' as const, unit: 'req/min' }
-  })
+  });
 
   const [systemStatus] = useState<SystemStatus[]>([
     {
@@ -79,11 +79,11 @@ export function PerformanceMetricsPreview() {
       uptime: 100.0,
       lastCheck: '15 seconds ago'
     }
-  ])
+  ]);
 
   // Simulate live updates
   useEffect(() => {
-    if (!isLive) return
+    if (!isLive) return;
 
     const interval = setInterval(() => {
       setMetrics(prev => ({
@@ -107,30 +107,30 @@ export function PerformanceMetricsPreview() {
           value: prev.throughput.value + Math.floor(Math.random() * 200 - 100),
           change: Math.floor(Math.random() * 300 - 150)
         }
-      }))
-      setLastUpdate(new Date())
-    }, 3000)
+      }));
+      setLastUpdate(new Date());
+    }, 3000);
 
-    return () => clearInterval(interval)
-  }, [isLive])
+    return () => clearInterval(interval);
+  }, [isLive]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'healthy': return 'bg-green-500/10 text-green-500 border-green-500/20'
-      case 'warning': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
-      case 'critical': return 'bg-red-500/10 text-red-500 border-red-500/20'
-      default: return 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+      case 'healthy': return 'bg-green-500/10 text-green-500 border-green-500/20';
+      case 'warning': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
+      case 'critical': return 'bg-red-500/10 text-red-500 border-red-500/20';
+      default: return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
     }
-  }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'healthy': return <CheckCircle className="h-4 w-4" />
-      case 'warning': return <AlertTriangle className="h-4 w-4" />
-      case 'critical': return <AlertTriangle className="h-4 w-4" />
-      default: return <CheckCircle className="h-4 w-4" />
+      case 'healthy': return <CheckCircle className="h-4 w-4" />;
+      case 'warning': return <AlertTriangle className="h-4 w-4" />;
+      case 'critical': return <AlertTriangle className="h-4 w-4" />;
+      default: return <CheckCircle className="h-4 w-4" />;
     }
-  }
+  };
 
   const MetricCard = ({ title, icon: Icon, metric, description }: {
     title: string
@@ -169,7 +169,7 @@ export function PerformanceMetricsPreview() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 
   return (
     <div className="space-y-6">
@@ -202,7 +202,7 @@ export function PerformanceMetricsPreview() {
       {/* Demo Controls */}
       <div className="flex items-center justify-center gap-4">
         <Button
-          variant={isLive ? "default" : "outline"}
+          variant={isLive ? 'default' : 'outline'}
           onClick={() => setIsLive(!isLive)}
           className="gap-2"
         >
@@ -474,5 +474,5 @@ export function PerformanceMetricsPreview() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

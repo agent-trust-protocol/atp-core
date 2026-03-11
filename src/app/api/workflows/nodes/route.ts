@@ -16,7 +16,7 @@ const workflowNodes = [
   },
   {
     type: 'policy-violation-trigger',
-    category: 'trigger', 
+    category: 'trigger',
     label: 'Policy Violation Trigger',
     description: 'Triggers when a policy violation is detected',
     icon: '⚠️',
@@ -54,12 +54,12 @@ const workflowNodes = [
     inputs: [{ name: 'validationResult', type: 'object', required: true }],
     outputs: [{ name: 'true', type: 'boolean' }, { name: 'false', type: 'boolean' }]
   },
-  
+
   // Trust Nodes
   {
     type: 'trust-change-trigger',
     category: 'trigger',
-    label: 'Trust Change Trigger', 
+    label: 'Trust Change Trigger',
     description: 'Triggers when trust scores change significantly',
     icon: '🔄',
     color: '#06B6D4',
@@ -86,7 +86,7 @@ const workflowNodes = [
     inputs: [{ name: 'trustScore', type: 'number', required: true }, { name: 'threshold', type: 'number', required: true }],
     outputs: [{ name: 'above', type: 'boolean' }, { name: 'below', type: 'boolean' }]
   },
-  
+
   // Monitoring Nodes
   {
     type: 'security-alert-trigger',
@@ -130,14 +130,14 @@ export async function GET(request: NextRequest) {
 
     const url = new URL(request.url);
     const category = url.searchParams.get('category');
-    
+
     let nodes = [...workflowNodes];
-    
+
     // Filter by category if provided
     if (category) {
       nodes = nodes.filter(node => node.category === category);
     }
-    
+
     return NextResponse.json({
       nodes,
       categories: ['trigger', 'action', 'condition'],

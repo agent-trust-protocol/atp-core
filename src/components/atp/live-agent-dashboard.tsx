@@ -1,13 +1,13 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { HydrationSafe } from "@/components/ui/hydration-safe"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { 
-  RefreshCw, 
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { HydrationSafe } from '@/components/ui/hydration-safe';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import {
+  RefreshCw,
   Shield,
   Users,
   Activity,
@@ -15,7 +15,7 @@ import {
   XCircle,
   Clock,
   AlertTriangle
-} from "lucide-react"
+} from 'lucide-react';
 
 interface AgentData {
   id: string;
@@ -27,33 +27,33 @@ interface AgentData {
 }
 
 export function LiveAgentDashboard() {
-  const [agents, setAgents] = useState<AgentData[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
+  const [agents, setAgents] = useState<AgentData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [stats, setStats] = useState({
     totalAgents: 0,
     trustedAgents: 0,
     quantumSafeAgents: 0,
     recentActivity: 0
-  })
+  });
 
   const fetchAgentData = async () => {
     try {
-      setIsLoading(true)
-      const identityUrl = process.env.NEXT_PUBLIC_ATP_IDENTITY_URL || 'http://localhost:3001'
-      
+      setIsLoading(true);
+      const identityUrl = process.env.NEXT_PUBLIC_ATP_IDENTITY_URL || 'http://localhost:3001';
+
       // Get list of agent DIDs
-      const listResponse = await fetch(`${identityUrl}/identity`)
-      const listData = await listResponse.json()
-      
+      const listResponse = await fetch(`${identityUrl}/identity`);
+      const listData = await listResponse.json();
+
       if (listData.success && listData.data) {
         // Fetch details for each agent
         const agentDetails = await Promise.all(
           listData.data.slice(0, 10).map(async (did: string) => {
             try {
-              const detailResponse = await fetch(`${identityUrl}/identity/${did}`)
-              const detailData = await detailResponse.json()
-              
+              const detailResponse = await fetch(`${identityUrl}/identity/${did}`);
+              const detailData = await detailResponse.json();
+
               if (detailData.success && detailData.data) {
                 return {
                   id: did,
@@ -62,68 +62,68 @@ export function LiveAgentDashboard() {
                   isQuantumSafe: detailData.data.metadata?.additionalInfo?.isQuantumSafe || false,
                   supportedAlgorithms: detailData.data.metadata?.additionalInfo?.supportedAlgorithms || [],
                   lastActivity: new Date().toISOString() // Simulate recent activity
-                }
+                };
               }
-              return null
+              return null;
             } catch (error) {
-              console.warn(`Failed to fetch details for ${did}:`, error)
-              return null
+              console.warn(`Failed to fetch details for ${did}:`, error);
+              return null;
             }
           })
-        )
-        
-        const validAgents = agentDetails.filter(agent => agent !== null) as AgentData[]
-        setAgents(validAgents)
-        
+        );
+
+        const validAgents = agentDetails.filter(agent => agent !== null) as AgentData[];
+        setAgents(validAgents);
+
         // Calculate stats
         setStats({
           totalAgents: validAgents.length,
           trustedAgents: validAgents.filter(a => a.trustLevel !== 'untrusted').length,
           quantumSafeAgents: validAgents.filter(a => a.isQuantumSafe).length,
           recentActivity: Math.floor(Math.random() * validAgents.length) + 1 // Simulate activity
-        })
+        });
       }
-      
-      setLastRefresh(new Date())
+
+      setLastRefresh(new Date());
     } catch (error) {
-      console.error('Failed to fetch agent data:', error)
+      console.error('Failed to fetch agent data:', error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchAgentData()
+    fetchAgentData();
     // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchAgentData, 30000)
-    return () => clearInterval(interval)
-  }, [])
+    const interval = setInterval(fetchAgentData, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const getTrustLevelColor = (trustLevel: string) => {
     switch (trustLevel) {
-      case 'untrusted': return 'bg-red-500'
-      case 'basic': return 'bg-yellow-500'
-      case 'verified': return 'bg-blue-500'
-      case 'trusted': return 'bg-green-500'
-      case 'privileged': return 'bg-purple-500'
-      default: return 'bg-gray-500'
+      case 'untrusted': return 'bg-red-500';
+      case 'basic': return 'bg-yellow-500';
+      case 'verified': return 'bg-blue-500';
+      case 'trusted': return 'bg-green-500';
+      case 'privileged': return 'bg-purple-500';
+      default: return 'bg-gray-500';
     }
-  }
+  };
 
   const getTrustLevelIcon = (trustLevel: string) => {
     switch (trustLevel) {
       case 'trusted':
       case 'privileged':
-        return <CheckCircle className="h-4 w-4 text-green-600" />
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'verified':
-        return <Shield className="h-4 w-4 text-blue-600" />
+        return <Shield className="h-4 w-4 text-blue-600" />;
       case 'basic':
-        return <AlertTriangle className="h-4 w-4 text-yellow-600" />
+        return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
       case 'untrusted':
       default:
-        return <XCircle className="h-4 w-4 text-red-600" />
+        return <XCircle className="h-4 w-4 text-red-600" />;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -263,8 +263,8 @@ export function LiveAgentDashboard() {
         <CardContent>
           <div className="space-y-4">
             {['untrusted', 'basic', 'verified', 'trusted', 'privileged'].map((level) => {
-              const count = agents.filter(a => a.trustLevel === level).length
-              const percentage = agents.length > 0 ? (count / agents.length) * 100 : 0
+              const count = agents.filter(a => a.trustLevel === level).length;
+              const percentage = agents.length > 0 ? (count / agents.length) * 100 : 0;
               return (
                 <div key={level} className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
@@ -273,11 +273,11 @@ export function LiveAgentDashboard() {
                   </div>
                   <Progress value={percentage} className="h-2" />
                 </div>
-              )
+              );
             })}
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

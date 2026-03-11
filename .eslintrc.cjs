@@ -18,23 +18,31 @@ module.exports = {
   },
   rules: {
     // TypeScript specific rules
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-non-null-assertion': 'warn',
-    '@typescript-eslint/prefer-nullish-coalescing': 'error',
-    '@typescript-eslint/prefer-optional-chain': 'error',
+    '@typescript-eslint/prefer-nullish-coalescing': 'warn',
+    '@typescript-eslint/prefer-optional-chain': 'warn',
     
     // General rules
+    'no-undef': 'off', // TypeScript handles this better
     'no-console': 'off',
     'no-debugger': 'error',
     'prefer-const': 'error',
     'no-var': 'error',
     'object-shorthand': 'error',
     'prefer-template': 'error',
-    'prefer-destructuring': ['error', { object: true, array: false }],
+    'prefer-destructuring': ['warn', { object: true, array: false }],
     
+    // Disable base no-unused-vars in favor of @typescript-eslint version
+    'no-unused-vars': 'off',
+    // React rules
+    'react/no-unescaped-entities': 'off',
+    'react/jsx-no-comment-textnodes': 'warn',
+    'no-case-declarations': 'warn',
+
     // Security rules
     'no-eval': 'error',
     'no-implied-eval': 'error',

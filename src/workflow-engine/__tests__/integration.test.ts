@@ -10,12 +10,12 @@ describe('Workflow Engine Integration Tests', () => {
 
   beforeEach(() => {
     nodeRegistry = new NodeRegistry();
-    
+
     // Register all ATP nodes
     [...policyNodeDefinitions, ...trustNodeDefinitions, ...monitoringNodeDefinitions].forEach(def => {
       nodeRegistry.registerNode(def);
     });
-    
+
     engine = new WorkflowEngine(nodeRegistry);
   });
 
@@ -45,7 +45,7 @@ describe('Workflow Engine Integration Tests', () => {
             id: 'deploy-policy',
             type: 'deploy-policy',
             label: 'Deploy Policy',
-            config: { 
+            config: {
               policyId: 'test-policy-123',
               environment: 'production'
             },
@@ -71,7 +71,7 @@ describe('Workflow Engine Integration Tests', () => {
       };
 
       await engine.registerWorkflow(policyWorkflow);
-      
+
       const result = await engine.executeWorkflow('policy-change-workflow', {
         policyId: 'test-policy-123',
         changeType: 'update',
@@ -119,7 +119,7 @@ describe('Workflow Engine Integration Tests', () => {
       };
 
       await engine.registerWorkflow(failureWorkflow);
-      
+
       const result = await engine.executeWorkflow('policy-validation-failure', {
         policyId: 'invalid-policy'
       });
@@ -155,7 +155,7 @@ describe('Workflow Engine Integration Tests', () => {
             id: 'check-threshold',
             type: 'trust-threshold',
             label: 'Check Threshold',
-            config: { 
+            config: {
               agentDid: 'did:atp:test-agent',
               threshold: 0.7,
               operator: 'gte'
@@ -182,7 +182,7 @@ describe('Workflow Engine Integration Tests', () => {
       };
 
       await engine.registerWorkflow(trustWorkflow);
-      
+
       const result = await engine.executeWorkflow('trust-evaluation-workflow', {
         agentDid: 'did:atp:test-agent',
         trustLevel: 0.65
@@ -217,7 +217,7 @@ describe('Workflow Engine Integration Tests', () => {
             id: 'adjust-trust',
             type: 'adjust-trust',
             label: 'Adjust Trust',
-            config: { 
+            config: {
               agentDid: 'did:atp:test-agent',
               adjustment: -0.1,
               adjustmentType: 'relative',
@@ -245,7 +245,7 @@ describe('Workflow Engine Integration Tests', () => {
       };
 
       await engine.registerWorkflow(riskWorkflow);
-      
+
       const result = await engine.executeWorkflow('risk-assessment-workflow', {
         riskType: 'security',
         riskLevel: 'high'
@@ -274,7 +274,7 @@ describe('Workflow Engine Integration Tests', () => {
             id: 'generate-report',
             type: 'generate-report',
             label: 'Generate Security Report',
-            config: { 
+            config: {
               reportType: 'security',
               format: 'json'
             },
@@ -284,7 +284,7 @@ describe('Workflow Engine Integration Tests', () => {
             id: 'send-alert',
             type: 'send-alert',
             label: 'Send Alert',
-            config: { 
+            config: {
               severity: 'high',
               channels: ['email', 'slack'],
               title: 'Security Incident Report'
@@ -311,7 +311,7 @@ describe('Workflow Engine Integration Tests', () => {
       };
 
       await engine.registerWorkflow(securityWorkflow);
-      
+
       const result = await engine.executeWorkflow('security-monitoring-workflow', {
         alertType: 'intrusion',
         severity: 'high'
@@ -331,7 +331,7 @@ describe('Workflow Engine Integration Tests', () => {
             type: 'compliance-status',
             label: 'Check Compliance',
             isStartNode: true,
-            config: { 
+            config: {
               complianceType: 'general',
               requiredScore: 0.9
             },
@@ -341,7 +341,7 @@ describe('Workflow Engine Integration Tests', () => {
             id: 'performance-check',
             type: 'performance-metrics',
             label: 'Check Performance',
-            config: { 
+            config: {
               metricType: 'response_time',
               threshold: 500,
               aggregation: 'average'
@@ -352,7 +352,7 @@ describe('Workflow Engine Integration Tests', () => {
             id: 'generate-compliance-report',
             type: 'generate-report',
             label: 'Generate Compliance Report',
-            config: { 
+            config: {
               reportType: 'compliance',
               format: 'pdf'
             },
@@ -378,7 +378,7 @@ describe('Workflow Engine Integration Tests', () => {
       };
 
       await engine.registerWorkflow(complianceWorkflow);
-      
+
       const result = await engine.executeWorkflow('compliance-monitoring-workflow', {
         checkType: 'scheduled'
       });
@@ -406,7 +406,7 @@ describe('Workflow Engine Integration Tests', () => {
             id: 'check-trust',
             type: 'trust-threshold',
             label: 'Check Trust Level',
-            config: { 
+            config: {
               agentDid: 'did:atp:test-agent',
               threshold: 0.5,
               operator: 'gte'
@@ -424,7 +424,7 @@ describe('Workflow Engine Integration Tests', () => {
             id: 'low-trust-action',
             type: 'adjust-trust',
             label: 'Low Trust Action',
-            config: { 
+            config: {
               agentDid: 'did:atp:test-agent',
               adjustment: 0.1,
               adjustmentType: 'relative'
@@ -458,7 +458,7 @@ describe('Workflow Engine Integration Tests', () => {
       };
 
       await engine.registerWorkflow(conditionalWorkflow);
-      
+
       const result = await engine.executeWorkflow('conditional-workflow', {
         agentDid: 'did:atp:test-agent',
         trustLevel: 0.3 // Low trust to trigger low-trust path
@@ -506,7 +506,7 @@ describe('Workflow Engine Integration Tests', () => {
             id: 'send-notification',
             type: 'send-alert',
             label: 'Send Notification',
-            config: { 
+            config: {
               severity: 'high',
               channels: ['email']
             },
@@ -516,7 +516,7 @@ describe('Workflow Engine Integration Tests', () => {
             id: 'generate-incident-report',
             type: 'generate-report',
             label: 'Generate Incident Report',
-            config: { 
+            config: {
               reportType: 'security',
               format: 'json'
             },
@@ -558,7 +558,7 @@ describe('Workflow Engine Integration Tests', () => {
       };
 
       await engine.registerWorkflow(complexWorkflow);
-      
+
       const result = await engine.executeWorkflow('complex-atp-workflow', {
         policyId: 'policy-123',
         agentDid: 'did:atp:violating-agent',
@@ -609,7 +609,7 @@ describe('Workflow Engine Integration Tests', () => {
       };
 
       await engine.registerWorkflow(errorWorkflow);
-      
+
       await expect(engine.executeWorkflow('error-handling-workflow')).rejects.toThrow();
     });
 
@@ -644,7 +644,7 @@ describe('Workflow Engine Integration Tests', () => {
       // Create a workflow with many nodes
       const nodes = [];
       const edges = [];
-      
+
       // Create a chain of 50 nodes
       for (let i = 0; i < 50; i++) {
         nodes.push({
@@ -655,7 +655,7 @@ describe('Workflow Engine Integration Tests', () => {
           config: { agentDid: `did:atp:agent-${i}` },
           position: { x: i * 100, y: 100 }
         });
-        
+
         if (i > 0) {
           edges.push({
             id: `edge-${i}`,
@@ -678,12 +678,12 @@ describe('Workflow Engine Integration Tests', () => {
       };
 
       const startTime = Date.now();
-      
+
       await engine.registerWorkflow(largeWorkflow);
       const result = await engine.executeWorkflow('large-workflow');
-      
+
       const duration = Date.now() - startTime;
-      
+
       expect(result.success).toBe(true);
       expect(duration).toBeLessThan(10000); // Should complete within 10 seconds
     });

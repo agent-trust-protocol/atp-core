@@ -1,6 +1,6 @@
-"use client"
+'use client';
 
-import { useState, useCallback, useMemo } from "react"
+import { useState, useCallback, useMemo } from 'react';
 import ReactFlow, {
   Node,
   Edge,
@@ -17,15 +17,15 @@ import ReactFlow, {
   ReactFlowProvider,
   Handle,
   Position
-} from "reactflow"
-import "reactflow/dist/style.css"
-import { 
-  Shield, 
-  Users, 
-  Lock, 
-  Eye, 
-  Clock, 
-  Globe, 
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+import {
+  Shield,
+  Users,
+  Lock,
+  Eye,
+  Clock,
+  Globe,
   Building,
   CheckCircle,
   XCircle,
@@ -55,27 +55,27 @@ import {
   LogOut,
   RefreshCw,
   PauseCircle
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { 
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue 
-} from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import { Separator } from "@/components/ui/separator"
-import { WorkflowEngine } from "@/workflow-engine/core/WorkflowEngine"
-import { NodeRegistry } from "@/workflow-engine/core/NodeRegistry"
-import { WorkflowNode, WorkflowEdge, Workflow, NodeCategory } from "@/workflow-engine/types/WorkflowTypes"
+  SelectValue
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import { WorkflowEngine } from '@/workflow-engine/core/WorkflowEngine';
+import { NodeRegistry } from '@/workflow-engine/core/NodeRegistry';
+import { WorkflowNode, WorkflowEdge, Workflow, NodeCategory } from '@/workflow-engine/types/WorkflowTypes';
 
 interface BaseNodeData {
   label: string
@@ -114,36 +114,36 @@ interface TransformNodeData extends BaseNodeData {
   mappings?: Record<string, string>
 }
 
-const BaseNode = ({ 
-  data, 
+const BaseNode = ({
+  data,
   selected,
-  children 
-}: { 
+  children
+}: {
   data: BaseNodeData
   selected?: boolean
-  children: React.ReactNode 
+  children: React.ReactNode
 }) => {
   const getCategoryColor = (category: NodeCategory) => {
     switch (category) {
-      case 'trigger': return 'border-purple-500 bg-purple-50'
-      case 'action': return 'border-blue-500 bg-blue-50'
-      case 'condition': return 'border-yellow-500 bg-yellow-50'
-      case 'transform': return 'border-green-500 bg-green-50'
-      case 'integration': return 'border-indigo-500 bg-indigo-50'
-      case 'utility': return 'border-gray-500 bg-gray-50'
-      case 'loop': return 'border-orange-500 bg-orange-50'
-      case 'output': return 'border-red-500 bg-red-50'
-      default: return 'border-gray-400 bg-white'
+      case 'trigger': return 'border-purple-500 bg-purple-50';
+      case 'action': return 'border-blue-500 bg-blue-50';
+      case 'condition': return 'border-yellow-500 bg-yellow-50';
+      case 'transform': return 'border-green-500 bg-green-50';
+      case 'integration': return 'border-indigo-500 bg-indigo-50';
+      case 'utility': return 'border-gray-500 bg-gray-50';
+      case 'loop': return 'border-orange-500 bg-orange-50';
+      case 'output': return 'border-red-500 bg-red-50';
+      default: return 'border-gray-400 bg-white';
     }
-  }
+  };
 
-  const statusBorder = data.hasError 
-    ? 'border-red-500 border-2' 
-    : data.isExecuting 
-    ? 'border-green-500 border-2 animate-pulse' 
-    : selected 
-    ? 'border-2' 
-    : 'border'
+  const statusBorder = data.hasError
+    ? 'border-red-500 border-2'
+    : data.isExecuting
+    ? 'border-green-500 border-2 animate-pulse'
+    : selected
+    ? 'border-2'
+    : 'border';
 
   return (
     <div className={`rounded-lg shadow-lg ${getCategoryColor(data.category)} ${statusBorder} min-w-[200px]`}>
@@ -166,21 +166,21 @@ const BaseNode = ({
         {children}
       </div>
     </div>
-  )
-}
+  );
+};
 
 const TriggerNode = ({ data, selected }: { data: TriggerNodeData; selected?: boolean }) => {
   const getTriggerIcon = (type: string) => {
     switch (type) {
-      case 'manual': return <Play className="h-4 w-4" />
-      case 'schedule': return <Calendar className="h-4 w-4" />
-      case 'webhook': return <Webhook className="h-4 w-4" />
-      case 'event': return <Zap className="h-4 w-4" />
-      case 'policy-change': return <Shield className="h-4 w-4" />
-      case 'trust-change': return <Activity className="h-4 w-4" />
-      default: return <Clock className="h-4 w-4" />
+      case 'manual': return <Play className="h-4 w-4" />;
+      case 'schedule': return <Calendar className="h-4 w-4" />;
+      case 'webhook': return <Webhook className="h-4 w-4" />;
+      case 'event': return <Zap className="h-4 w-4" />;
+      case 'policy-change': return <Shield className="h-4 w-4" />;
+      case 'trust-change': return <Activity className="h-4 w-4" />;
+      default: return <Clock className="h-4 w-4" />;
     }
-  }
+  };
 
   return (
     <BaseNode data={{ ...data, icon: getTriggerIcon(data.triggerType) }} selected={selected}>
@@ -204,25 +204,25 @@ const TriggerNode = ({ data, selected }: { data: TriggerNodeData; selected?: boo
         )}
       </div>
     </BaseNode>
-  )
-}
+  );
+};
 
 const ActionNode = ({ data, selected }: { data: ActionNodeData; selected?: boolean }) => {
   const getActionIcon = (type: string) => {
     switch (type) {
-      case 'create-policy': return <FileText className="h-4 w-4" />
-      case 'update-policy': return <RefreshCw className="h-4 w-4" />
-      case 'deploy-policy': return <Upload className="h-4 w-4" />
-      case 'evaluate-trust': return <Shield className="h-4 w-4" />
-      case 'adjust-trust': return <Activity className="h-4 w-4" />
-      case 'generate-report': return <FileText className="h-4 w-4" />
-      case 'send-alert': return <Mail className="h-4 w-4" />
-      case 'database-query': return <Database className="h-4 w-4" />
-      case 'api-call': return <Globe className="h-4 w-4" />
-      case 'transform-data': return <GitBranch className="h-4 w-4" />
-      default: return <Zap className="h-4 w-4" />
+      case 'create-policy': return <FileText className="h-4 w-4" />;
+      case 'update-policy': return <RefreshCw className="h-4 w-4" />;
+      case 'deploy-policy': return <Upload className="h-4 w-4" />;
+      case 'evaluate-trust': return <Shield className="h-4 w-4" />;
+      case 'adjust-trust': return <Activity className="h-4 w-4" />;
+      case 'generate-report': return <FileText className="h-4 w-4" />;
+      case 'send-alert': return <Mail className="h-4 w-4" />;
+      case 'database-query': return <Database className="h-4 w-4" />;
+      case 'api-call': return <Globe className="h-4 w-4" />;
+      case 'transform-data': return <GitBranch className="h-4 w-4" />;
+      default: return <Zap className="h-4 w-4" />;
     }
-  }
+  };
 
   return (
     <BaseNode data={{ ...data, icon: getActionIcon(data.actionType) }} selected={selected}>
@@ -237,8 +237,8 @@ const ActionNode = ({ data, selected }: { data: ActionNodeData; selected?: boole
         ))}
       </div>
     </BaseNode>
-  )
-}
+  );
+};
 
 const ConditionNode = ({ data, selected }: { data: ConditionNodeData; selected?: boolean }) => {
   return (
@@ -262,8 +262,8 @@ const ConditionNode = ({ data, selected }: { data: ConditionNodeData; selected?:
         <Badge variant="outline" className="text-xs">True</Badge>
       </div>
     </BaseNode>
-  )
-}
+  );
+};
 
 const LoopNode = ({ data, selected }: { data: BaseNodeData; selected?: boolean }) => {
   return (
@@ -282,29 +282,29 @@ const LoopNode = ({ data, selected }: { data: BaseNodeData; selected?: boolean }
         </div>
       </div>
     </BaseNode>
-  )
-}
+  );
+};
 
 const nodeTypes: NodeTypes = {
   trigger: TriggerNode,
   action: ActionNode,
   condition: ConditionNode,
-  loop: LoopNode,
-}
+  loop: LoopNode
+};
 
 function WorkflowDesigner() {
-  const [nodes, setNodes, onNodesChange] = useNodesState<any>([])
-  const [edges, setEdges, onEdgesChange] = useEdgesState([])
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null)
-  const [workflowName, setWorkflowName] = useState("ATP Workflow")
-  const [workflowDescription, setWorkflowDescription] = useState("")
-  const [validationErrors, setValidationErrors] = useState<string[]>([])
-  const [isExecuting, setIsExecuting] = useState(false)
-  const [executionResults, setExecutionResults] = useState<any>(null)
-  const [showVariables, setShowVariables] = useState(false)
-  const [workflowVariables, setWorkflowVariables] = useState<Record<string, any>>({})
+  const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [workflowName, setWorkflowName] = useState('ATP Workflow');
+  const [workflowDescription, setWorkflowDescription] = useState('');
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [executionResults, setExecutionResults] = useState<any>(null);
+  const [showVariables, setShowVariables] = useState(false);
+  const [workflowVariables, setWorkflowVariables] = useState<Record<string, any>>({});
 
-  const { addNodes, getNodes, getEdges, screenToFlowPosition, fitView } = useReactFlow()
+  const { addNodes, getNodes, getEdges, screenToFlowPosition, fitView } = useReactFlow();
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -313,31 +313,31 @@ function WorkflowDesigner() {
         type: 'smoothstep',
         animated: true,
         style: { stroke: '#94a3b8', strokeWidth: 2 }
-      }
-      setEdges((eds) => addEdge(newEdge, eds))
+      };
+      setEdges((eds) => addEdge(newEdge, eds));
     },
     [setEdges]
-  )
+  );
 
   const onDragOver = useCallback((event: React.DragEvent) => {
-    event.preventDefault()
-    event.dataTransfer.dropEffect = 'move'
-  }, [])
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
 
   const onDrop = useCallback(
     (event: React.DragEvent) => {
-      event.preventDefault()
+      event.preventDefault();
 
-      const reactFlowBounds = event.currentTarget.getBoundingClientRect()
-      const data = event.dataTransfer.getData('application/reactflow')
+      const reactFlowBounds = event.currentTarget.getBoundingClientRect();
+      const data = event.dataTransfer.getData('application/reactflow');
 
-      if (!data) return
+      if (!data) return;
 
-      const nodeData = JSON.parse(data)
+      const nodeData = JSON.parse(data);
       const position = screenToFlowPosition({
         x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
-      })
+        y: event.clientY - reactFlowBounds.top
+      });
 
       const newNode: Node = {
         id: `${nodeData.category}-${Date.now()}`,
@@ -351,16 +351,16 @@ function WorkflowDesigner() {
           isValid: true,
           config: nodeData.config || {}
         }
-      }
+      };
 
-      addNodes(newNode)
+      addNodes(newNode);
     },
     [addNodes, screenToFlowPosition]
-  )
+  );
 
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
-    setSelectedNode(node)
-  }, [])
+    setSelectedNode(node);
+  }, []);
 
   const updateNodeData = (nodeId: string, data: Partial<any>) => {
     setNodes((nds) =>
@@ -369,52 +369,52 @@ function WorkflowDesigner() {
           ? { ...node, data: { ...node.data, ...data } }
           : node
       )
-    )
-  }
+    );
+  };
 
   const deleteSelectedNode = () => {
     if (selectedNode) {
-      setNodes((nds) => nds.filter((n) => n.id !== selectedNode.id))
-      setEdges((eds) => eds.filter((e) => 
+      setNodes((nds) => nds.filter((n) => n.id !== selectedNode.id));
+      setEdges((eds) => eds.filter((e) =>
         e.source !== selectedNode.id && e.target !== selectedNode.id
-      ))
-      setSelectedNode(null)
+      ));
+      setSelectedNode(null);
     }
-  }
+  };
 
   const validateWorkflow = () => {
-    const errors: string[] = []
-    const currentNodes = getNodes()
-    const currentEdges = getEdges()
+    const errors: string[] = [];
+    const currentNodes = getNodes();
+    const currentEdges = getEdges();
 
-    const triggers = currentNodes.filter(n => n.data.category === 'trigger')
+    const triggers = currentNodes.filter(n => n.data.category === 'trigger');
     if (triggers.length === 0) {
-      errors.push("Workflow must have at least one trigger")
+      errors.push('Workflow must have at least one trigger');
     }
 
     const disconnectedNodes = currentNodes.filter(node => {
-      const hasConnection = currentEdges.some(edge => 
+      const hasConnection = currentEdges.some(edge =>
         edge.source === node.id || edge.target === node.id
-      )
-      return !hasConnection && currentNodes.length > 1
-    })
+      );
+      return !hasConnection && currentNodes.length > 1;
+    });
 
     if (disconnectedNodes.length > 0) {
-      errors.push(`${disconnectedNodes.length} node(s) are not connected`)
+      errors.push(`${disconnectedNodes.length} node(s) are not connected`);
     }
 
-    setValidationErrors(errors)
-    return errors.length === 0
-  }
+    setValidationErrors(errors);
+    return errors.length === 0;
+  };
 
   const exportWorkflow = () => {
-    if (!validateWorkflow()) return
+    if (!validateWorkflow()) return;
 
     const workflow: Workflow = {
       id: `workflow-${Date.now()}`,
       name: workflowName,
       description: workflowDescription,
-      version: "1.0.0",
+      version: '1.0.0',
       nodes: getNodes().map(n => ({
         id: n.id,
         type: n.type || 'action',
@@ -435,47 +435,47 @@ function WorkflowDesigner() {
         createdAt: new Date(),
         updatedAt: new Date()
       }
-    }
+    };
 
-    const blob = new Blob([JSON.stringify(workflow, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${workflowName.replace(/\s+/g, '-').toLowerCase()}-workflow.json`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+    const blob = new Blob([JSON.stringify(workflow, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${workflowName.replace(/\s+/g, '-').toLowerCase()}-workflow.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const executeWorkflow = async () => {
-    if (!validateWorkflow()) return
+    if (!validateWorkflow()) return;
 
-    setIsExecuting(true)
-    setExecutionResults(null)
+    setIsExecuting(true);
+    setExecutionResults(null);
 
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     setExecutionResults({
       success: true,
       executionId: `exec-${Date.now()}`,
       duration: 1234,
       steps: [
-        { node: "Manual Trigger", status: "completed", duration: 10 },
-        { node: "Check Trust Level", status: "completed", duration: 150 },
-        { node: "Evaluate Policy", status: "completed", duration: 320 },
-        { node: "Send Notification", status: "completed", duration: 754 }
+        { node: 'Manual Trigger', status: 'completed', duration: 10 },
+        { node: 'Check Trust Level', status: 'completed', duration: 150 },
+        { node: 'Evaluate Policy', status: 'completed', duration: 320 },
+        { node: 'Send Notification', status: 'completed', duration: 754 }
       ]
-    })
+    });
 
-    setIsExecuting(false)
-  }
+    setIsExecuting(false);
+  };
 
   const clearCanvas = () => {
-    setNodes([])
-    setEdges([])
-    setSelectedNode(null)
-    setValidationErrors([])
-    setExecutionResults(null)
-  }
+    setNodes([]);
+    setEdges([]);
+    setSelectedNode(null);
+    setValidationErrors([]);
+    setExecutionResults(null);
+  };
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
@@ -502,9 +502,9 @@ function WorkflowDesigner() {
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Validate
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={executeWorkflow}
                 disabled={isExecuting}
               >
@@ -546,14 +546,14 @@ function WorkflowDesigner() {
           >
             <Background gap={12} size={1} />
             <Controls />
-            <MiniMap 
+            <MiniMap
               nodeColor={(node) => {
                 switch (node.data?.category) {
-                  case 'trigger': return '#a855f7'
-                  case 'action': return '#3b82f6'
-                  case 'condition': return '#eab308'
-                  case 'transform': return '#10b981'
-                  default: return '#6b7280'
+                  case 'trigger': return '#a855f7';
+                  case 'action': return '#3b82f6';
+                  case 'condition': return '#eab308';
+                  case 'transform': return '#10b981';
+                  default: return '#6b7280';
                 }
               }}
             />
@@ -605,7 +605,7 @@ function WorkflowDesigner() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export function EnhancedWorkflowDesigner() {
@@ -613,5 +613,5 @@ export function EnhancedWorkflowDesigner() {
     <ReactFlowProvider>
       <WorkflowDesigner />
     </ReactFlowProvider>
-  )
+  );
 }

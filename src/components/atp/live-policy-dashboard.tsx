@@ -1,12 +1,12 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { HydrationSafe } from "@/components/ui/hydration-safe"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { 
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { HydrationSafe } from '@/components/ui/hydration-safe';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import {
   RefreshCw,
   FileText,
   CheckCircle,
@@ -16,7 +16,7 @@ import {
   Activity,
   Gauge,
   Eye
-} from "lucide-react"
+} from 'lucide-react';
 
 interface PolicyData {
   id: string;
@@ -36,89 +36,89 @@ interface PolicyData {
 }
 
 export function LivePolicyDashboard() {
-  const [policies, setPolicies] = useState<PolicyData[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
+  const [policies, setPolicies] = useState<PolicyData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [stats, setStats] = useState({
     totalPolicies: 0,
     activePolicies: 0,
     totalRules: 0,
     allowRules: 0,
     denyRules: 0
-  })
+  });
 
   const fetchPolicyData = async () => {
     try {
-      setIsLoading(true)
-      const permissionUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003'
-      
-      const response = await fetch(`${permissionUrl}/policies`)
-      const data = await response.json()
-      
+      setIsLoading(true);
+      const permissionUrl = process.env.NEXT_PUBLIC_ATP_PERMISSION_URL || 'http://localhost:3003';
+
+      const response = await fetch(`${permissionUrl}/policies`);
+      const data = await response.json();
+
       if (data.policies) {
         // Normalize incoming data to avoid runtime errors when optional fields are missing
         const normalizedPolicies: PolicyData[] = data.policies.map((p: any) => ({
           ...p,
           tags: Array.isArray(p?.tags) ? p.tags : [],
           rules: Array.isArray(p?.rules) ? p.rules : []
-        }))
+        }));
 
-        setPolicies(normalizedPolicies)
-        
+        setPolicies(normalizedPolicies);
+
         // Calculate stats
-        const totalRules = normalizedPolicies.reduce((sum: number, p: PolicyData) => sum + p.rules.length, 0)
-        const allowRules = normalizedPolicies.reduce((sum: number, p: PolicyData) => 
-          sum + p.rules.filter(r => r.action.type === 'allow').length, 0)
-        const denyRules = normalizedPolicies.reduce((sum: number, p: PolicyData) => 
-          sum + p.rules.filter(r => r.action.type === 'deny').length, 0)
-        
+        const totalRules = normalizedPolicies.reduce((sum: number, p: PolicyData) => sum + p.rules.length, 0);
+        const allowRules = normalizedPolicies.reduce((sum: number, p: PolicyData) =>
+          sum + p.rules.filter(r => r.action.type === 'allow').length, 0);
+        const denyRules = normalizedPolicies.reduce((sum: number, p: PolicyData) =>
+          sum + p.rules.filter(r => r.action.type === 'deny').length, 0);
+
         setStats({
           totalPolicies: normalizedPolicies.length,
           activePolicies: normalizedPolicies.filter((p: PolicyData) => p.enabled).length,
           totalRules,
           allowRules,
           denyRules
-        })
+        });
       }
-      
-      setLastRefresh(new Date())
+
+      setLastRefresh(new Date());
     } catch (error) {
-      console.error('Failed to fetch policy data:', error)
+      console.error('Failed to fetch policy data:', error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchPolicyData()
+    fetchPolicyData();
     // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchPolicyData, 30000)
-    return () => clearInterval(interval)
-  }, [])
+    const interval = setInterval(fetchPolicyData, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const getActionColor = (actionType: string) => {
     switch (actionType) {
-      case 'allow': return 'text-green-600'
-      case 'deny': return 'text-red-600'
-      case 'throttle': return 'text-yellow-600'
-      case 'require_approval': return 'text-purple-600'
-      case 'log': return 'text-blue-600'
-      case 'alert': return 'text-orange-600'
-      default: return 'text-gray-600'
+      case 'allow': return 'text-green-600';
+      case 'deny': return 'text-red-600';
+      case 'throttle': return 'text-yellow-600';
+      case 'require_approval': return 'text-purple-600';
+      case 'log': return 'text-blue-600';
+      case 'alert': return 'text-orange-600';
+      default: return 'text-gray-600';
     }
-  }
+  };
 
   const getActionIcon = (actionType: string) => {
     switch (actionType) {
-      case 'allow': return <CheckCircle className="h-4 w-4 text-green-600" />
-      case 'deny': return <XCircle className="h-4 w-4 text-red-600" />
-      case 'throttle': return <Gauge className="h-4 w-4 text-yellow-600" />
-      case 'require_approval': return <AlertTriangle className="h-4 w-4 text-purple-600" />
-      case 'log': return <FileText className="h-4 w-4 text-blue-600" />
-      case 'alert': return <AlertTriangle className="h-4 w-4 text-orange-600" />
-      default: return <Eye className="h-4 w-4 text-gray-600" />
+      case 'allow': return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'deny': return <XCircle className="h-4 w-4 text-red-600" />;
+      case 'throttle': return <Gauge className="h-4 w-4 text-yellow-600" />;
+      case 'require_approval': return <AlertTriangle className="h-4 w-4 text-purple-600" />;
+      case 'log': return <FileText className="h-4 w-4 text-blue-600" />;
+      case 'alert': return <AlertTriangle className="h-4 w-4 text-orange-600" />;
+      default: return <Eye className="h-4 w-4 text-gray-600" />;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -236,8 +236,8 @@ export function LivePolicyDashboard() {
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <h3 className="font-medium">{policy.name}</h3>
-                        <Badge variant={policy.enabled ? "default" : "secondary"}>
-                          {policy.enabled ? "Active" : "Inactive"}
+                        <Badge variant={policy.enabled ? 'default' : 'secondary'}>
+                          {policy.enabled ? 'Active' : 'Inactive'}
                         </Badge>
                       </div>
                       {policy.description && (
@@ -270,8 +270,8 @@ export function LivePolicyDashboard() {
                               <Badge variant="outline" className={getActionColor(rule.action.type)}>
                                 {rule.action.type}
                               </Badge>
-                              <Badge variant={rule.enabled ? "default" : "secondary"} className="text-xs">
-                                {rule.enabled ? "On" : "Off"}
+                              <Badge variant={rule.enabled ? 'default' : 'secondary'} className="text-xs">
+                                {rule.enabled ? 'On' : 'Off'}
                               </Badge>
                             </div>
                           </div>
@@ -308,12 +308,12 @@ export function LivePolicyDashboard() {
         <CardContent>
           <div className="space-y-4">
             {['allow', 'deny', 'throttle', 'log', 'alert', 'require_approval'].map((actionType) => {
-              const count = policies.reduce((sum, p) => 
-                sum + p.rules.filter(r => r.action.type === actionType).length, 0)
-              const percentage = stats.totalRules > 0 ? (count / stats.totalRules) * 100 : 0
-              
-              if (count === 0) return null
-              
+              const count = policies.reduce((sum, p) =>
+                sum + p.rules.filter(r => r.action.type === actionType).length, 0);
+              const percentage = stats.totalRules > 0 ? (count / stats.totalRules) * 100 : 0;
+
+              if (count === 0) return null;
+
               return (
                 <div key={actionType} className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
@@ -325,11 +325,11 @@ export function LivePolicyDashboard() {
                   </div>
                   <Progress value={percentage} className="h-2" />
                 </div>
-              )
+              );
             })}
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

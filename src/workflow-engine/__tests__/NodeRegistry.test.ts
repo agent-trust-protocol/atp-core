@@ -181,7 +181,7 @@ describe('NodeRegistry', () => {
     it('should get all nodes', () => {
       const allNodes = registry.getAllNodes();
       expect(allNodes).toHaveLength(3);
-      
+
       const nodeTypes = allNodes.map(n => n.type);
       expect(nodeTypes).toContain('action-node');
       expect(nodeTypes).toContain('trigger-node');
@@ -191,10 +191,10 @@ describe('NodeRegistry', () => {
     it('should get all categories with nodes', () => {
       const categories = registry.getAllCategories();
       expect(categories).toHaveLength(8); // All 8 categories, some empty
-      
+
       const actionCategory = categories.find(c => c.category === 'action');
       expect(actionCategory?.nodes).toHaveLength(1);
-      
+
       const triggerCategory = categories.find(c => c.category === 'trigger');
       expect(triggerCategory?.nodes).toHaveLength(1);
     });
@@ -273,7 +273,7 @@ describe('NodeRegistry', () => {
           return { success: true };
         },
         validate: (config) => {
-          return config && config.required === true;
+          return config?.required === true;
         }
       };
 

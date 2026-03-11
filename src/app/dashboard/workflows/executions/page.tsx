@@ -1,9 +1,9 @@
-"use client"
+'use client';
 
 import { WorkflowExecutionHistory } from '@/components/atp/WorkflowExecutionHistory';
-import { Subnav } from "@/components/ui/subnav"
-import { Activity, Shield, Building2, BarChart3, GitBranch } from "lucide-react"
-import type { Metadata } from 'next'
+import { Subnav } from '@/components/ui/subnav';
+import { Activity, Shield, Building2, BarChart3, GitBranch } from 'lucide-react';
+import type { Metadata } from 'next';
 
 export default function WorkflowExecutionsPage() {
   const dashboardTabs = [
@@ -43,18 +43,18 @@ export default function WorkflowExecutionsPage() {
       href: '/enterprise',
       icon: <Building2 className="h-4 w-4" />
     }
-  ]
+  ];
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Workflows', href: '/dashboard/workflows' },
     { label: 'Execution History', href: '/dashboard/workflows/executions' }
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-background">
-      <Subnav 
-        tabs={dashboardTabs} 
+      <Subnav
+        tabs={dashboardTabs}
         breadcrumbs={breadcrumbs}
         variant="both"
       />
@@ -68,7 +68,7 @@ export default function WorkflowExecutionsPage() {
             Monitor and analyze workflow execution performance and results
           </p>
         </div>
-        
+
         <WorkflowExecutionHistory />
       </div>
     </div>

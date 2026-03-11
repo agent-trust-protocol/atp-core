@@ -117,7 +117,7 @@ interface ValidationResponse {
 export async function POST(request: NextRequest) {
   try {
     const body: PolicyValidationRequest = await request.json();
-    
+
     // Validate request structure
     if (!body.validationType) {
       return NextResponse.json({
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
 
 /**
  * PROPRIETARY ALGORITHM: Secure graph validation
- * 
+ *
  * This function contains advanced algorithms for validating visual policy graphs
  * including sophisticated node relationship analysis, flow validation, and
  * security vulnerability detection.
@@ -200,13 +200,13 @@ async function validatePolicyGraphSecure(request: PolicyValidationRequest): Prom
 
 /**
  * PROPRIETARY ALGORITHM: Secure policy document validation
- * 
+ *
  * Contains advanced algorithms for validating complete ATP policy documents
  * including schema validation, consistency checking, and optimization analysis.
  */
 async function validatePolicyDocumentSecure(request: PolicyValidationRequest): Promise<ValidationResponse> {
   const { policy, strictMode = false } = request;
-  
+
   if (!policy) {
     return {
       success: false,
@@ -249,7 +249,7 @@ async function validatePolicyDocumentSecure(request: PolicyValidationRequest): P
 
 /**
  * PROPRIETARY ALGORITHM: Comprehensive validation system
- * 
+ *
  * Combines multiple validation algorithms to provide complete policy analysis
  * including advanced threat modeling and optimization recommendations.
  */
@@ -271,7 +271,7 @@ async function validateComprehensiveSecure(request: PolicyValidationRequest): Pr
   // Run policy document validation if policy is provided
   let analysis: PolicyAnalysisResult | undefined;
   let securityScore = 0;
-  
+
   if (request.policy) {
     const policyResult = await validatePolicyDocumentSecure(request);
     errors.push(...policyResult.errors);
@@ -318,7 +318,7 @@ async function validateNodeStructureSecure(nodes: PolicyValidationRequest['nodes
   if (conditionNodes.length === 0) {
     errors.push('Policy must contain at least one condition');
   }
-  
+
   if (actionNodes.length === 0) {
     errors.push('Policy must contain at least one action');
   }
@@ -328,7 +328,7 @@ async function validateNodeStructureSecure(nodes: PolicyValidationRequest['nodes
     if (!node.data.type) {
       errors.push(`Node ${node.id} missing type information`);
     }
-    
+
     if (!node.data.parameters) {
       warnings.push(`Node ${node.id} has no parameters`);
     }
@@ -346,8 +346,8 @@ async function validateNodeStructureSecure(nodes: PolicyValidationRequest['nodes
  * PROPRIETARY: Advanced edge connectivity validation algorithm
  */
 async function validateEdgeConnectivitySecure(
-  nodes: PolicyValidationRequest['nodes'], 
-  edges: PolicyValidationRequest['edges'], 
+  nodes: PolicyValidationRequest['nodes'],
+  edges: PolicyValidationRequest['edges'],
   strictMode: boolean
 ) {
   const errors: string[] = [];
@@ -416,10 +416,10 @@ async function validatePolicyFlowSecure(
 
   // PROPRIETARY: Advanced flow analysis
   const actionNodes = nodes.filter(n => n.type === 'action');
-  
+
   for (const actionNode of actionNodes) {
     const pathsToAction = findAllPathsToNode(actionNode.id, nodes, edges);
-    
+
     if (pathsToAction.length === 0) {
       warnings.push(`Action "${actionNode.id}" has no incoming paths`);
     }
@@ -455,11 +455,11 @@ async function calculateSecurityScoreSecure(
   const actionNodes = nodes.filter(n => n.type === 'action');
 
   // PROPRIETARY: Security deductions based on advanced analysis
-  
+
   // Penalize policies with only allow actions (security risk)
   const allowActions = actionNodes.filter(n => n.data.actionType === 'allow');
   const denyActions = actionNodes.filter(n => n.data.actionType === 'deny');
-  
+
   if (allowActions.length > 0 && denyActions.length === 0) {
     score -= 20; // No explicit deny rules
   }
@@ -561,13 +561,13 @@ function validateConditionParameters(conditionType: string, parameters: Record<s
         errors.push('DID condition requires did or didPattern parameter');
       }
       break;
-    
+
     case 'trustLevel':
       if (strictMode && !parameters.level && !parameters.minTrustLevel) {
         errors.push('Trust level condition requires level or minTrustLevel parameter');
       }
       break;
-    
+
     case 'vc':
       if (strictMode && !parameters.credentialType && !parameters.schema) {
         warnings.push('VC condition should specify credentialType or schema');
@@ -579,7 +579,7 @@ function validateConditionParameters(conditionType: string, parameters: Record<s
 }
 
 /**
- * PROPRIETARY: Action parameter validation algorithm  
+ * PROPRIETARY: Action parameter validation algorithm
  */
 function validateActionParameters(actionType: string, parameters: Record<string, any>, strictMode: boolean) {
   const errors: string[] = [];
@@ -592,13 +592,13 @@ function validateActionParameters(actionType: string, parameters: Record<string,
         warnings.push('Throttle action should specify rate limits');
       }
       break;
-    
+
     case 'alert':
       if (strictMode && !parameters.alertChannel && !parameters.recipients) {
         errors.push('Alert action requires channel or recipients');
       }
       break;
-    
+
     case 'require_approval':
       if (strictMode && !parameters.approvers) {
         errors.push('Approval action requires approvers list');
@@ -617,14 +617,14 @@ function validateConnectionType(sourceNode: any, targetNode: any): { valid: bool
   if (sourceNode.type === 'condition' && (targetNode.type === 'operator' || targetNode.type === 'action')) {
     return { valid: true };
   }
-  
+
   if (sourceNode.type === 'operator' && (targetNode.type === 'operator' || targetNode.type === 'action')) {
     return { valid: true };
   }
-  
-  return { 
-    valid: false, 
-    reason: `Cannot connect ${sourceNode.type} to ${targetNode.type}` 
+
+  return {
+    valid: false,
+    reason: `Cannot connect ${sourceNode.type} to ${targetNode.type}`
   };
 }
 
@@ -640,7 +640,7 @@ function findAllPathsToNode(nodeId: string, nodes: any[], edges: any[]): string[
     visited.add(currentId);
 
     const incomingEdges = edges.filter(e => e.target === currentId);
-    
+
     if (incomingEdges.length === 0) {
       paths.push([...path, currentId]);
       return;
@@ -678,7 +678,7 @@ function detectCircularDependencies(nodes: any[], edges: any[]): string[][] {
     recursionStack.add(nodeId);
 
     const outgoingEdges = edges.filter(e => e.source === nodeId);
-    
+
     for (const edge of outgoingEdges) {
       if (dfs(edge.target, [...path, nodeId])) {
         return true;
@@ -702,8 +702,8 @@ function detectCircularDependencies(nodes: any[], edges: any[]): string[][] {
  * PROPRIETARY: Graph-policy consistency validation algorithm
  */
 async function validateGraphPolicyConsistency(
-  nodes: any[], 
-  edges: any[], 
+  nodes: any[],
+  edges: any[],
   policy: ATPVisualPolicy
 ) {
   const errors: string[] = [];

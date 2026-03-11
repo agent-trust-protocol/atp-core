@@ -1,7 +1,7 @@
 import { RequireAuth } from '@/components/auth/RequireAuth';
 
 export default function MonitoringLayout({
-  children,
+  children
 }: {
   children: React.ReactNode;
 }) {

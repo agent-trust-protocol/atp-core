@@ -1,49 +1,49 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { 
-  Shield, 
-  Key, 
-  Lock, 
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Shield,
+  Key,
+  Lock,
   AlertCircle,
   LogIn,
   UserPlus
-} from "lucide-react"
-import Link from "next/link"
-import { QuantumSafeSignatureDemo } from "./quantum-safe-signature-demo"
+} from 'lucide-react';
+import Link from 'next/link';
+import { QuantumSafeSignatureDemo } from './quantum-safe-signature-demo';
 
 interface QuantumSafeSignatureDemoGatedProps {
   showPreview?: boolean
 }
 
 export function QuantumSafeSignatureDemoGated({ showPreview = true }: QuantumSafeSignatureDemoGatedProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   // Check if user has auth token
   const checkAuth = () => {
     if (typeof document !== 'undefined') {
-      const token = document.cookie.split('; ').find(row => row.startsWith('atp_token='))
+      const token = document.cookie.split('; ').find(row => row.startsWith('atp_token='));
       if (token) {
-        setIsAuthenticated(true)
-        return true
+        setIsAuthenticated(true);
+        return true;
       }
     }
-    setIsAuthenticated(false)
-    return false
-  }
+    setIsAuthenticated(false);
+    return false;
+  };
 
   // Check auth on mount and periodically
   useEffect(() => {
-    checkAuth()
-    const interval = setInterval(checkAuth, 1000)
-    return () => clearInterval(interval)
-  }, [])
+    checkAuth();
+    const interval = setInterval(checkAuth, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   if (isAuthenticated) {
-    return <QuantumSafeSignatureDemo />
+    return <QuantumSafeSignatureDemo />;
   }
 
   return (
@@ -72,7 +72,7 @@ export function QuantumSafeSignatureDemoGated({ showPreview = true }: QuantumSaf
                 🔒 Protected Intellectual Property
               </p>
               <p className="text-sm text-blue-700 dark:text-blue-300">
-                This demo uses our proprietary quantum-safe hybrid cryptography implementation (Ed25519 + ML-DSA). 
+                This demo uses our proprietary quantum-safe hybrid cryptography implementation (Ed25519 + ML-DSA).
                 Full access requires authentication to protect our intellectual property.
               </p>
             </div>
@@ -111,6 +111,6 @@ export function QuantumSafeSignatureDemoGated({ showPreview = true }: QuantumSaf
         </p>
       </CardContent>
     </Card>
-  )
+  );
 }
 

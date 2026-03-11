@@ -16,7 +16,7 @@ const MonitoringDashboard = dynamic(
           </div>
         </div>
       </div>
-    ),
+    )
   }
 );
 

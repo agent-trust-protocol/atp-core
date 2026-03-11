@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react';
 
 /**
  * SDK Metrics Types
@@ -115,24 +115,24 @@ export function useSDKMetrics(options: UseSDKMetricsOptions = {}): UseSDKMetrics
     includeHistory = false,
     refreshInterval = 30000,
     enabled = true
-  } = options
+  } = options;
 
-  const [data, setData] = useState<SDKMetrics | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [isDemo, setIsDemo] = useState(false)
-  const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange)
+  const [data, setData] = useState<SDKMetrics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isDemo, setIsDemo] = useState(false);
+  const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
 
   const fetchMetrics = useCallback(async () => {
-    if (!enabled) return
+    if (!enabled) return;
 
     try {
-      setError(null)
+      setError(null);
 
-      const params = new URLSearchParams()
-      params.append('timeRange', timeRange)
+      const params = new URLSearchParams();
+      params.append('timeRange', timeRange);
       if (includeHistory) {
-        params.append('history', 'true')
+        params.append('history', 'true');
       }
 
       const response = await fetch(`/api/sdk/metrics?${params.toString()}`, {
@@ -140,45 +140,45 @@ export function useSDKMetrics(options: UseSDKMetricsOptions = {}): UseSDKMetrics
         headers: {
           'Accept': 'application/json'
         }
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch metrics: ${response.status}`)
+        throw new Error(`Failed to fetch metrics: ${response.status}`);
       }
 
-      const result: SDKMetricsResponse = await response.json()
+      const result: SDKMetricsResponse = await response.json();
 
       if (!result.success && !result.demo) {
-        throw new Error(result.message || 'Failed to fetch metrics')
+        throw new Error(result.message || 'Failed to fetch metrics');
       }
 
-      setData(result.data)
-      setIsDemo(result.demo || false)
+      setData(result.data);
+      setIsDemo(result.demo || false);
     } catch (err) {
-      console.error('SDK Metrics fetch error:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch metrics')
+      console.error('SDK Metrics fetch error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch metrics');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [timeRange, includeHistory, enabled])
+  }, [timeRange, includeHistory, enabled]);
 
   // Initial fetch
   useEffect(() => {
-    fetchMetrics()
-  }, [fetchMetrics])
+    fetchMetrics();
+  }, [fetchMetrics]);
 
   // Auto-refresh
   useEffect(() => {
-    if (!enabled || refreshInterval <= 0) return
+    if (!enabled || refreshInterval <= 0) return;
 
-    const interval = setInterval(fetchMetrics, refreshInterval)
-    return () => clearInterval(interval)
-  }, [fetchMetrics, refreshInterval, enabled])
+    const interval = setInterval(fetchMetrics, refreshInterval);
+    return () => clearInterval(interval);
+  }, [fetchMetrics, refreshInterval, enabled]);
 
   const refresh = useCallback(async () => {
-    setLoading(true)
-    await fetchMetrics()
-  }, [fetchMetrics])
+    setLoading(true);
+    await fetchMetrics();
+  }, [fetchMetrics]);
 
   return {
     data,
@@ -188,7 +188,7 @@ export function useSDKMetrics(options: UseSDKMetricsOptions = {}): UseSDKMetrics
     refresh,
     setTimeRange,
     timeRange
-  }
+  };
 }
 
 /**
@@ -214,32 +214,32 @@ export interface SDKHealthStatus {
 }
 
 export function useSDKHealth(refreshInterval = 60000) {
-  const [health, setHealth] = useState<SDKHealthStatus | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [health, setHealth] = useState<SDKHealthStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchHealth = useCallback(async () => {
     try {
-      const response = await fetch('/api/sdk/health')
-      const data = await response.json()
-      setHealth(data)
-      setError(null)
+      const response = await fetch('/api/sdk/health');
+      const data = await response.json();
+      setHealth(data);
+      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch health')
+      setError(err instanceof Error ? err.message : 'Failed to fetch health');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    fetchHealth()
+    fetchHealth();
     if (refreshInterval > 0) {
-      const interval = setInterval(fetchHealth, refreshInterval)
-      return () => clearInterval(interval)
+      const interval = setInterval(fetchHealth, refreshInterval);
+      return () => clearInterval(interval);
     }
-  }, [fetchHealth, refreshInterval])
+  }, [fetchHealth, refreshInterval]);
 
-  return { health, loading, error, refresh: fetchHealth }
+  return { health, loading, error, refresh: fetchHealth };
 }
 
 /**
@@ -262,30 +262,30 @@ export interface APIKey {
 }
 
 export function useAPIKeys() {
-  const [keys, setKeys] = useState<APIKey[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [keys, setKeys] = useState<APIKey[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchKeys = useCallback(async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       const response = await fetch('/api/sdk/keys', {
         credentials: 'include'
-      })
-      const data = await response.json()
+      });
+      const data = await response.json();
 
       if (data.success) {
-        setKeys(data.data.keys || [])
+        setKeys(data.data.keys || []);
       } else {
-        throw new Error(data.error || 'Failed to fetch API keys')
+        throw new Error(data.error || 'Failed to fetch API keys');
       }
-      setError(null)
+      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch API keys')
+      setError(err instanceof Error ? err.message : 'Failed to fetch API keys');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [])
+  }, []);
 
   const createKey = useCallback(async (params: {
     name: string
@@ -299,36 +299,36 @@ export function useAPIKeys() {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params)
-    })
-    const data = await response.json()
+    });
+    const data = await response.json();
 
     if (!data.success) {
-      throw new Error(data.error || 'Failed to create API key')
+      throw new Error(data.error || 'Failed to create API key');
     }
 
-    await fetchKeys()
-    return data.data // Contains the full key (shown only once)
-  }, [fetchKeys])
+    await fetchKeys();
+    return data.data; // Contains the full key (shown only once)
+  }, [fetchKeys]);
 
   const revokeKey = useCallback(async (keyId: string) => {
     const response = await fetch(`/api/sdk/keys?id=${keyId}`, {
       method: 'DELETE',
       credentials: 'include'
-    })
-    const data = await response.json()
+    });
+    const data = await response.json();
 
     if (!data.success) {
-      throw new Error(data.error || 'Failed to revoke API key')
+      throw new Error(data.error || 'Failed to revoke API key');
     }
 
-    await fetchKeys()
-  }, [fetchKeys])
+    await fetchKeys();
+  }, [fetchKeys]);
 
   useEffect(() => {
-    fetchKeys()
-  }, [fetchKeys])
+    fetchKeys();
+  }, [fetchKeys]);
 
-  return { keys, loading, error, createKey, revokeKey, refresh: fetchKeys }
+  return { keys, loading, error, createKey, revokeKey, refresh: fetchKeys };
 }
 
-export default useSDKMetrics
+export default useSDKMetrics;

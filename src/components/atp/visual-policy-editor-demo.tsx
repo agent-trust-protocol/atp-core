@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import { useState, useRef, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useState, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Shield,
   Plus,
@@ -24,7 +24,7 @@ import {
   Eye,
   Settings,
   ArrowRight
-} from "lucide-react"
+} from 'lucide-react';
 
 interface PolicyNode {
   id: string
@@ -85,10 +85,10 @@ const NODE_TYPES = {
       { title: 'Payment System', desc: 'Financial transactions' }
     ]
   }
-}
+};
 
 export function VisualPolicyEditorDemo() {
-  const router = useRouter()
+  const router = useRouter();
   const [currentRule, setCurrentRule] = useState<PolicyRule>({
     id: 'demo-rule-1',
     name: 'Data Access Policy',
@@ -137,11 +137,11 @@ export function VisualPolicyEditorDemo() {
     ],
     status: 'active',
     lastModified: new Date().toISOString()
-  })
+  });
 
-  const [selectedNode, setSelectedNode] = useState<PolicyNode | null>(null)
-  const [testResult, setTestResult] = useState<any>(null)
-  const [isValidating, setIsValidating] = useState(false)
+  const [selectedNode, setSelectedNode] = useState<PolicyNode | null>(null);
+  const [testResult, setTestResult] = useState<any>(null);
+  const [isValidating, setIsValidating] = useState(false);
 
   const addNode = (type: keyof typeof NODE_TYPES) => {
     const newNode: PolicyNode = {
@@ -151,27 +151,27 @@ export function VisualPolicyEditorDemo() {
       config: {},
       position: { x: 100 + Math.random() * 200, y: 100 + Math.random() * 200 },
       connections: []
-    }
+    };
 
     setCurrentRule(prev => ({
       ...prev,
       nodes: [...prev.nodes, newNode]
-    }))
-  }
+    }));
+  };
 
   const deleteNode = (nodeId: string) => {
     setCurrentRule(prev => ({
       ...prev,
       nodes: prev.nodes.filter(node => node.id !== nodeId)
-    }))
-    setSelectedNode(null)
-  }
+    }));
+    setSelectedNode(null);
+  };
 
   const testPolicy = async () => {
-    setIsValidating(true)
+    setIsValidating(true);
 
     // Simulate policy validation
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     const scenarios = [
       {
@@ -198,13 +198,13 @@ export function VisualPolicyEditorDemo() {
         reason: 'Insufficient trust level',
         color: 'text-red-500'
       }
-    ]
+    ];
 
-    setTestResult(scenarios)
-    setIsValidating(false)
-  }
+    setTestResult(scenarios);
+    setIsValidating(false);
+  };
 
-  const NodeIcon = selectedNode ? NODE_TYPES[selectedNode.type]?.icon : Shield
+  const NodeIcon = selectedNode ? NODE_TYPES[selectedNode.type]?.icon : Shield;
 
   return (
     <div className="space-y-6">
@@ -251,7 +251,7 @@ export function VisualPolicyEditorDemo() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {Object.entries(NODE_TYPES).map(([type, config]) => {
-                  const Icon = config.icon
+                  const Icon = config.icon;
                   return (
                     <div key={type}>
                       <div className="flex items-center justify-between mb-2">
@@ -279,7 +279,7 @@ export function VisualPolicyEditorDemo() {
                         ))}
                       </div>
                     </div>
-                  )
+                  );
                 })}
               </CardContent>
             </Card>
@@ -307,8 +307,8 @@ export function VisualPolicyEditorDemo() {
                     {/* Simplified visual representation */}
                     <div className="flex items-center justify-center space-x-8">
                       {currentRule.nodes.map((node, index) => {
-                        const NodeType = NODE_TYPES[node.type]
-                        const Icon = NodeType.icon
+                        const NodeType = NODE_TYPES[node.type];
+                        const Icon = NodeType.icon;
                         return (
                           <div key={node.id} className="flex flex-col items-center">
                             <div
@@ -326,7 +326,7 @@ export function VisualPolicyEditorDemo() {
                               <ArrowRight className="h-4 w-4 mt-4 text-muted-foreground" />
                             )}
                           </div>
-                        )
+                        );
                       })}
                     </div>
 
@@ -363,12 +363,12 @@ export function VisualPolicyEditorDemo() {
                         <Input
                           value={selectedNode.title}
                           onChange={(e) => {
-                            const updated = { ...selectedNode, title: e.target.value }
-                            setSelectedNode(updated)
+                            const updated = { ...selectedNode, title: e.target.value };
+                            setSelectedNode(updated);
                             setCurrentRule(prev => ({
                               ...prev,
                               nodes: prev.nodes.map(n => n.id === updated.id ? updated : n)
-                            }))
+                            }));
                           }}
                           className="mt-1"
                         />
@@ -544,5 +544,5 @@ export function VisualPolicyEditorDemo() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

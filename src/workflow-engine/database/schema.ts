@@ -14,7 +14,7 @@ export const workflows = pgTable('workflows', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   isTemplate: boolean('is_template').notNull().default(false),
   category: varchar('category', { length: 100 }),
-  tags: jsonb('tags').default('[]'), // Array of tags
+  tags: jsonb('tags').default('[]') // Array of tags
 });
 
 // Workflow executions table
@@ -31,7 +31,7 @@ export const workflowExecutions = pgTable('workflow_executions', {
   inputData: jsonb('input_data'),
   outputData: jsonb('output_data'),
   errorMessage: text('error_message'),
-  metadata: jsonb('metadata'),
+  metadata: jsonb('metadata')
 });
 
 // Node executions table (for detailed execution tracking)
@@ -47,7 +47,7 @@ export const nodeExecutions = pgTable('node_executions', {
   inputData: jsonb('input_data'),
   outputData: jsonb('output_data'),
   errorMessage: text('error_message'),
-  retryCount: integer('retry_count').notNull().default(0),
+  retryCount: integer('retry_count').notNull().default(0)
 });
 
 // Workflow variables table
@@ -60,7 +60,7 @@ export const workflowVariables = pgTable('workflow_variables', {
   isSecret: boolean('is_secret').notNull().default(false),
   description: text('description'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
 
 // Workflow triggers table
@@ -74,7 +74,7 @@ export const workflowTriggers = pgTable('workflow_triggers', {
   lastTriggered: timestamp('last_triggered'),
   triggerCount: integer('trigger_count').notNull().default(0),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
 
 // Workflow statistics table
@@ -87,7 +87,7 @@ export const workflowStats = pgTable('workflow_stats', {
   averageDuration: decimal('average_duration', { precision: 10, scale: 2 }),
   lastExecutionTime: timestamp('last_execution_time'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
 
 // Node statistics table
@@ -102,7 +102,7 @@ export const nodeStats = pgTable('node_stats', {
   averageDuration: decimal('average_duration', { precision: 10, scale: 2 }),
   lastExecutionTime: timestamp('last_execution_time'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
 
 // Audit log table
@@ -117,7 +117,7 @@ export const auditLogs = pgTable('audit_logs', {
   metadata: jsonb('metadata'),
   ipAddress: varchar('ip_address', { length: 45 }),
   userAgent: text('user_agent'),
-  timestamp: timestamp('timestamp').notNull().defaultNow(),
+  timestamp: timestamp('timestamp').notNull().defaultNow()
 });
 
 // Policy workflow mappings (ATP-specific)
@@ -129,7 +129,7 @@ export const policyWorkflows = pgTable('policy_workflows', {
   isActive: boolean('is_active').notNull().default(true),
   priority: integer('priority').notNull().default(0),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
 
 // Trust workflow mappings (ATP-specific)
@@ -141,7 +141,7 @@ export const trustWorkflows = pgTable('trust_workflows', {
   thresholds: jsonb('thresholds'), // Trust level thresholds
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
 
 // Relations
@@ -152,64 +152,64 @@ export const workflowsRelations = relations(workflows, ({ many }) => ({
   stats: many(workflowStats),
   nodeStats: many(nodeStats),
   policyMappings: many(policyWorkflows),
-  trustMappings: many(trustWorkflows),
+  trustMappings: many(trustWorkflows)
 }));
 
 export const workflowExecutionsRelations = relations(workflowExecutions, ({ one, many }) => ({
   workflow: one(workflows, {
     fields: [workflowExecutions.workflowId],
-    references: [workflows.id],
+    references: [workflows.id]
   }),
-  nodeExecutions: many(nodeExecutions),
+  nodeExecutions: many(nodeExecutions)
 }));
 
 export const nodeExecutionsRelations = relations(nodeExecutions, ({ one }) => ({
   execution: one(workflowExecutions, {
     fields: [nodeExecutions.executionId],
-    references: [workflowExecutions.id],
-  }),
+    references: [workflowExecutions.id]
+  })
 }));
 
 export const workflowVariablesRelations = relations(workflowVariables, ({ one }) => ({
   workflow: one(workflows, {
     fields: [workflowVariables.workflowId],
-    references: [workflows.id],
-  }),
+    references: [workflows.id]
+  })
 }));
 
 export const workflowTriggersRelations = relations(workflowTriggers, ({ one }) => ({
   workflow: one(workflows, {
     fields: [workflowTriggers.workflowId],
-    references: [workflows.id],
-  }),
+    references: [workflows.id]
+  })
 }));
 
 export const workflowStatsRelations = relations(workflowStats, ({ one }) => ({
   workflow: one(workflows, {
     fields: [workflowStats.workflowId],
-    references: [workflows.id],
-  }),
+    references: [workflows.id]
+  })
 }));
 
 export const nodeStatsRelations = relations(nodeStats, ({ one }) => ({
   workflow: one(workflows, {
     fields: [nodeStats.workflowId],
-    references: [workflows.id],
-  }),
+    references: [workflows.id]
+  })
 }));
 
 export const policyWorkflowsRelations = relations(policyWorkflows, ({ one }) => ({
   workflow: one(workflows, {
     fields: [policyWorkflows.workflowId],
-    references: [workflows.id],
-  }),
+    references: [workflows.id]
+  })
 }));
 
 export const trustWorkflowsRelations = relations(trustWorkflows, ({ one }) => ({
   workflow: one(workflows, {
     fields: [trustWorkflows.workflowId],
-    references: [workflows.id],
-  }),
+    references: [workflows.id]
+  })
 }));
 
 // Type exports for use in application

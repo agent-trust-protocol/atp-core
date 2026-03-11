@@ -34,13 +34,13 @@ export class WorkflowScheduler extends EventEmitter {
 
     try {
       console.log('Initializing workflow scheduler...');
-      
+
       // Load scheduled workflows from database
       await this.loadScheduledWorkflows();
-      
+
       this.isInitialized = true;
       console.log(`Workflow scheduler initialized with ${this.scheduledWorkflows.size} scheduled workflows`);
-      
+
       this.emit('initialized');
     } catch (error) {
       console.error('Failed to initialize workflow scheduler:', error);
@@ -52,7 +52,7 @@ export class WorkflowScheduler extends EventEmitter {
     try {
       // Get all workflows with schedule triggers
       const workflows = await workflowRepository.listWorkflows(1000, 0);
-      
+
       for (const workflow of workflows) {
         const scheduleTriggers = workflow.triggers?.filter(
           trigger => trigger.type === 'schedule' && trigger.config?.schedule
@@ -82,10 +82,10 @@ export class WorkflowScheduler extends EventEmitter {
     try {
       // Validate cron expression
       cronParser.parseExpression(cronExpression);
-      
+
       // Remove existing schedule if any
       await this.unscheduleWorkflow(workflowId);
-      
+
       // Create new cron job
       const job = new CronJob(
         cronExpression,
@@ -111,10 +111,10 @@ export class WorkflowScheduler extends EventEmitter {
       }
 
       this.scheduledWorkflows.set(workflowId, scheduledWorkflow);
-      
+
       console.log(`Scheduled workflow ${workflowId} with expression: ${cronExpression}`);
       this.emit('workflow:scheduled', { workflowId, cronExpression, enabled });
-      
+
     } catch (error) {
       console.error(`Failed to schedule workflow ${workflowId}:`, error);
       throw new Error(`Invalid cron expression: ${cronExpression}`);
@@ -123,12 +123,12 @@ export class WorkflowScheduler extends EventEmitter {
 
   async unscheduleWorkflow(workflowId: string): Promise<void> {
     const scheduled = this.scheduledWorkflows.get(workflowId);
-    
+
     if (scheduled) {
       scheduled.job.stop();
       scheduled.job.destroy();
       this.scheduledWorkflows.delete(workflowId);
-      
+
       console.log(`Unscheduled workflow ${workflowId}`);
       this.emit('workflow:unscheduled', { workflowId });
     }
@@ -136,15 +136,15 @@ export class WorkflowScheduler extends EventEmitter {
 
   async enableSchedule(workflowId: string): Promise<void> {
     const scheduled = this.scheduledWorkflows.get(workflowId);
-    
+
     if (scheduled) {
       scheduled.enabled = true;
       scheduled.job.start();
-      
+
       // Update next run time
       const interval = cronParser.parseExpression(scheduled.cronExpression);
       scheduled.nextRun = interval.next().toDate();
-      
+
       console.log(`Enabled schedule for workflow ${workflowId}`);
       this.emit('workflow:schedule-enabled', { workflowId });
     } else {
@@ -154,12 +154,12 @@ export class WorkflowScheduler extends EventEmitter {
 
   async disableSchedule(workflowId: string): Promise<void> {
     const scheduled = this.scheduledWorkflows.get(workflowId);
-    
+
     if (scheduled) {
       scheduled.enabled = false;
       scheduled.job.stop();
       scheduled.nextRun = undefined;
-      
+
       console.log(`Disabled schedule for workflow ${workflowId}`);
       this.emit('workflow:schedule-disabled', { workflowId });
     } else {
@@ -169,25 +169,25 @@ export class WorkflowScheduler extends EventEmitter {
 
   private async executeScheduledWorkflow(workflowId: string): Promise<void> {
     const scheduled = this.scheduledWorkflows.get(workflowId);
-    
-    if (!scheduled || !scheduled.enabled) {
+
+    if (!scheduled?.enabled) {
       return;
     }
 
     try {
       console.log(`Executing scheduled workflow: ${workflowId}`);
-      
+
       // Update last run time
       scheduled.lastRun = new Date();
       scheduled.runCount++;
-      
+
       // Calculate next run time
       const interval = cronParser.parseExpression(scheduled.cronExpression);
       scheduled.nextRun = interval.next().toDate();
-      
+
       // Get workflow from database
       const workflow = await workflowRepository.getWorkflow(workflowId);
-      
+
       if (!workflow) {
         console.error(`Scheduled workflow ${workflowId} not found in database`);
         await this.unscheduleWorkflow(workflowId);
@@ -196,7 +196,7 @@ export class WorkflowScheduler extends EventEmitter {
 
       // Register and execute workflow
       await this.workflowEngine.registerWorkflow(workflow);
-      
+
       const result = await this.workflowEngine.executeWorkflow(
         workflowId,
         {},
@@ -218,19 +218,19 @@ export class WorkflowScheduler extends EventEmitter {
 
       // Update statistics
       await workflowRepository.updateWorkflowStats(workflowId, result);
-      
+
       console.log(`Scheduled workflow ${workflowId} completed:`, result.success ? 'SUCCESS' : 'FAILED');
-      
+
       this.emit('workflow:executed', {
         workflowId,
         result,
         trigger: 'schedule',
         timestamp: new Date()
       });
-      
+
     } catch (error) {
       console.error(`Error executing scheduled workflow ${workflowId}:`, error);
-      
+
       this.emit('workflow:execution-failed', {
         workflowId,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -260,7 +260,7 @@ export class WorkflowScheduler extends EventEmitter {
 
   getSchedule(workflowId: string) {
     const scheduled = this.scheduledWorkflows.get(workflowId);
-    
+
     if (!scheduled) {
       return null;
     }
@@ -282,7 +282,7 @@ export class WorkflowScheduler extends EventEmitter {
   ): Promise<void> {
     const existing = this.scheduledWorkflows.get(workflowId);
     const shouldEnable = enabled !== undefined ? enabled : existing?.enabled || true;
-    
+
     await this.scheduleWorkflow(workflowId, cronExpression, shouldEnable);
   }
 
@@ -306,17 +306,17 @@ export class WorkflowScheduler extends EventEmitter {
 
   async shutdown(): Promise<void> {
     console.log('Shutting down workflow scheduler...');
-    
+
     // Stop all scheduled jobs
     for (const [workflowId, scheduled] of this.scheduledWorkflows) {
       scheduled.job.stop();
       scheduled.job.destroy();
       console.log(`Stopped schedule for workflow: ${workflowId}`);
     }
-    
+
     this.scheduledWorkflows.clear();
     this.isInitialized = false;
-    
+
     this.emit('shutdown');
     console.log('Workflow scheduler shutdown complete');
   }
@@ -327,7 +327,7 @@ export class WorkflowScheduler extends EventEmitter {
 
   getStatistics() {
     const schedules = this.getScheduledWorkflows();
-    
+
     return {
       totalScheduled: schedules.length,
       enabled: schedules.filter(s => s.enabled).length,

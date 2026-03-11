@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { checkApiAuth } from '@/lib/api-auth'
-import { query, queryOne, execute, initializeAppTables } from '@/lib/db'
-import { randomBytes, createHash } from 'crypto'
+import { NextRequest, NextResponse } from 'next/server';
+import { checkApiAuth } from '@/lib/api-auth';
+import { query, queryOne, execute, initializeAppTables } from '@/lib/db';
+import { randomBytes, createHash } from 'crypto';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 // Ensure tables exist on first request
 let tablesInitialized = false;
@@ -38,25 +38,25 @@ const DEFAULT_RATE_LIMITS = {
   development: { requestsPerMinute: 100, requestsPerDay: 10000 },
   staging: { requestsPerMinute: 500, requestsPerDay: 50000 },
   production: { requestsPerMinute: 1000, requestsPerDay: 100000 }
-}
+};
 
 const AVAILABLE_PERMISSIONS = [
   'read:agents', 'write:agents', 'read:credentials', 'write:credentials',
   'read:audit', 'write:audit', 'read:permissions', 'write:permissions',
   'read:metrics', 'admin:keys'
-] as const
+] as const;
 
 /**
  * GET /api/sdk/keys — List all API keys for the authenticated user
  */
 export async function GET(request: NextRequest) {
   try {
-    const authResult = await checkApiAuth(request)
+    const authResult = await checkApiAuth(request);
     if (!authResult.isAuthenticated) {
       return authResult.error || NextResponse.json(
         { error: 'Authentication required', code: 'AUTH_REQUIRED' },
         { status: 401 }
-      )
+      );
     }
 
     await ensureTables();
@@ -87,13 +87,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: { keys: safeKeys, total: safeKeys.length, availablePermissions: AVAILABLE_PERMISSIONS }
-    })
+    });
   } catch (error) {
-    console.error('API Keys GET error:', error)
+    console.error('API Keys GET error:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch API keys', code: 'KEYS_FETCH_ERROR' },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -102,12 +102,12 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const authResult = await checkApiAuth(request)
+    const authResult = await checkApiAuth(request);
     if (!authResult.isAuthenticated) {
       return authResult.error || NextResponse.json(
         { error: 'Authentication required', code: 'AUTH_REQUIRED' },
         { status: 401 }
-      )
+      );
     }
 
     await ensureTables();
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'Key name is required', code: 'INVALID_NAME' },
         { status: 400 }
-      )
+      );
     }
 
     const permissions = body.permissions || ['read:agents', 'read:credentials'];
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: `Invalid permissions: ${invalidPermissions.join(', ')}`, code: 'INVALID_PERMISSIONS' },
         { status: 400 }
-      )
+      );
     }
 
     const rawKey = `atp_${randomBytes(32).toString('hex')}`;
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
         body.rateLimit?.requestsPerMinute || defaults.requestsPerMinute,
         body.rateLimit?.requestsPerDay || defaults.requestsPerDay,
         body.description || null,
-        body.ipWhitelist || null,
+        body.ipWhitelist || null
       ]
     );
 
@@ -167,17 +167,17 @@ export async function POST(request: NextRequest) {
         expiresAt: expiresAt?.toISOString() || null,
         rateLimit: {
           requestsPerMinute: body.rateLimit?.requestsPerMinute || defaults.requestsPerMinute,
-          requestsPerDay: body.rateLimit?.requestsPerDay || defaults.requestsPerDay,
+          requestsPerDay: body.rateLimit?.requestsPerDay || defaults.requestsPerDay
         }
       },
       warning: 'Store this API key securely. It will not be displayed again.'
-    }, { status: 201 })
+    }, { status: 201 });
   } catch (error) {
-    console.error('API Keys POST error:', error)
+    console.error('API Keys POST error:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to create API key', code: 'KEY_CREATE_ERROR' },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -186,12 +186,12 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const authResult = await checkApiAuth(request)
+    const authResult = await checkApiAuth(request);
     if (!authResult.isAuthenticated) {
       return authResult.error || NextResponse.json(
         { error: 'Authentication required', code: 'AUTH_REQUIRED' },
         { status: 401 }
-      )
+      );
     }
 
     await ensureTables();
@@ -203,11 +203,11 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'Key ID is required', code: 'MISSING_KEY_ID' },
         { status: 400 }
-      )
+      );
     }
 
     const affected = await execute(
-      `UPDATE api_keys SET status = 'revoked' WHERE id = $1 AND user_id = $2 AND status = 'active'`,
+      'UPDATE api_keys SET status = \'revoked\' WHERE id = $1 AND user_id = $2 AND status = \'active\'',
       [keyId, userId]
     );
 
@@ -215,20 +215,20 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'API key not found or already revoked', code: 'KEY_NOT_FOUND' },
         { status: 404 }
-      )
+      );
     }
 
     return NextResponse.json({
       success: true,
       message: 'API key revoked successfully',
       data: { id: keyId, status: 'revoked', revokedAt: new Date().toISOString() }
-    })
+    });
   } catch (error) {
-    console.error('API Keys DELETE error:', error)
+    console.error('API Keys DELETE error:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to revoke API key', code: 'KEY_REVOKE_ERROR' },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -237,12 +237,12 @@ export async function DELETE(request: NextRequest) {
  */
 export async function PATCH(request: NextRequest) {
   try {
-    const authResult = await checkApiAuth(request)
+    const authResult = await checkApiAuth(request);
     if (!authResult.isAuthenticated) {
       return authResult.error || NextResponse.json(
         { error: 'Authentication required', code: 'AUTH_REQUIRED' },
         { status: 401 }
-      )
+      );
     }
 
     await ensureTables();
@@ -254,11 +254,11 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'Key ID is required', code: 'MISSING_KEY_ID' },
         { status: 400 }
-      )
+      );
     }
 
     const key = await queryOne(
-      `SELECT * FROM api_keys WHERE id = $1 AND user_id = $2`,
+      'SELECT * FROM api_keys WHERE id = $1 AND user_id = $2',
       [id, userId]
     );
 
@@ -266,14 +266,14 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'API key not found', code: 'KEY_NOT_FOUND' },
         { status: 404 }
-      )
+      );
     }
 
     if (key.status !== 'active') {
       return NextResponse.json(
         { success: false, error: 'Cannot update a revoked or expired key', code: 'KEY_INACTIVE' },
         { status: 400 }
-      )
+      );
     }
 
     if (permissions) {
@@ -282,7 +282,7 @@ export async function PATCH(request: NextRequest) {
         return NextResponse.json(
           { success: false, error: `Invalid permissions: ${invalid.join(', ')}`, code: 'INVALID_PERMISSIONS' },
           { status: 400 }
-        )
+        );
       }
     }
 
@@ -300,7 +300,7 @@ export async function PATCH(request: NextRequest) {
         rateLimit?.requestsPerMinute || null,
         rateLimit?.requestsPerDay || null,
         description ?? null,
-        id, userId,
+        id, userId
       ]
     );
 
@@ -308,12 +308,12 @@ export async function PATCH(request: NextRequest) {
       success: true,
       message: 'API key updated successfully',
       data: { id, name: name || key.name, permissions: permissions || key.permissions }
-    })
+    });
   } catch (error) {
-    console.error('API Keys PATCH error:', error)
+    console.error('API Keys PATCH error:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update API key', code: 'KEY_UPDATE_ERROR' },
       { status: 500 }
-    )
+    );
   }
 }

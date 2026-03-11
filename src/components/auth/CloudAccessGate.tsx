@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
+import { useState } from 'react';
 import {
   Cloud,
   Shield,
@@ -15,20 +15,20 @@ import {
   Mail,
   Phone,
   User
-} from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
+} from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 
 interface CloudAccessGateProps {
   feature?: string
   tier?: string
 }
 
-export function CloudAccessGate({ feature = "cloud-platform", tier = "startup" }: CloudAccessGateProps) {
+export function CloudAccessGate({ feature = 'cloud-platform', tier = 'startup' }: CloudAccessGateProps) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -37,43 +37,43 @@ export function CloudAccessGate({ feature = "cloud-platform", tier = "startup" }
     useCase: '',
     agents: '',
     timeline: ''
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setError(null)
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
 
     try {
       const response = await fetch('/api/cloud/access-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
-      })
+      });
 
       if (response.ok) {
-        setIsSubmitted(true)
+        setIsSubmitted(true);
       } else {
-        const data = await response.json()
-        setError(data.error || 'Failed to submit request. Please try again.')
+        const data = await response.json();
+        setError(data.error || 'Failed to submit request. Please try again.');
       }
     } catch (err) {
-      console.error('Cloud access request error:', err)
-      setError('Network error. Please check your connection and try again.')
+      console.error('Cloud access request error:', err);
+      setError('Network error. Please check your connection and try again.');
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
-    }))
-  }
+    }));
+  };
 
   if (isSubmitted) {
     return (
@@ -107,7 +107,7 @@ export function CloudAccessGate({ feature = "cloud-platform", tier = "startup" }
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
@@ -394,5 +394,5 @@ export function CloudAccessGate({ feature = "cloud-platform", tier = "startup" }
 
       </div>
     </div>
-  )
+  );
 }
