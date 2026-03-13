@@ -9,7 +9,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  output: 'standalone', // Enable standalone output for Docker
   env: {
     ATP_API_URL: process.env.ATP_API_URL || 'http://localhost:3000',
     ATP_QUANTUM_URL: process.env.ATP_QUANTUM_URL || 'http://localhost:3008',
