@@ -6,25 +6,17 @@ import { PermissionController } from './controllers/permission.js';
 import { DatabaseConfig, VisualPolicyStorageService, PolicyEvaluator, RedisCache, createCache, PerformanceOptimizer, createPerformanceOptimizer } from '@atp/shared';
 import { PolicyController } from './controllers/policy.js';
 import { PolicyEvaluationController } from './controllers/evaluation.js';
+import { config } from './config.js';
 
 const app = express();
-const port = process.env.PORT || 3003;
-
-// SECURITY: JWT_SECRET must be set in production
-const secretKey = process.env.JWT_SECRET;
-if (!secretKey && process.env.NODE_ENV === 'production') {
-  console.error('FATAL: JWT_SECRET environment variable is required in production');
-  process.exit(1);
-}
-const jwtSecret = secretKey || 'dev-only-secret-not-for-production';
 
 app.use(cors());
 app.use(express.json());
 
 // PostgreSQL configuration
 const dbConfig: DatabaseConfig = {
-  connectionString: process.env.DATABASE_URL || 'postgresql://atp_user:password@localhost:5432/atp_production',
-  ssl: process.env.NODE_ENV === 'production',
+  connectionString: config.DATABASE_URL,
+  ssl: config.NODE_ENV === 'production',
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
@@ -32,20 +24,22 @@ const dbConfig: DatabaseConfig = {
 
 // Redis Cache configuration
 const cacheConfig = {
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
-  db: parseInt(process.env.REDIS_DB || '0'),
+  host: config.REDIS_HOST,
+  port: config.REDIS_PORT,
+  password: config.REDIS_PASSWORD,
+  db: config.REDIS_DB,
   keyPrefix: 'atp:permission',
-  ttl: parseInt(process.env.CACHE_TTL || '300') // 5 minutes default
+  ttl: config.CACHE_TTL,
 };
 
 const cache = createCache(cacheConfig);
 const performanceOptimizer = createPerformanceOptimizer(cache);
 
+const jwtSecret = config.JWT_SECRET || 'dev-only-secret-not-for-production';
+
 const storage = new StorageService(dbConfig);
 const visualPolicyStorage = new VisualPolicyStorageService(dbConfig);
-const permissionService = new PermissionService(storage, secretKey);
+const permissionService = new PermissionService(storage, jwtSecret);
 const permissionController = new PermissionController(permissionService);
 const policyController = new PolicyController(visualPolicyStorage, cache, performanceOptimizer);
 const evaluationController = new PolicyEvaluationController(visualPolicyStorage);
@@ -99,8 +93,8 @@ async function startServer() {
     await permissionService.loadPolicyRules();
     console.log('Policy rules loaded');
     
-    app.listen(port, () => {
-      console.log(`Permission Service running on port ${port}`);
+    app.listen(config.PORT, () => {
+      console.log(`Permission Service running on port ${config.PORT}`);
     });
   } catch (error) {
     console.error('Failed to start Permission Service:', error);

@@ -5,26 +5,24 @@ import { IPFSService } from './services/ipfs.js';
 import { AuditService } from './services/audit.js';
 import { AuditController } from './controllers/audit.js';
 import { DatabaseConfig } from '@atp/shared';
+import { config } from './config.js';
 
 const app = express();
-const port = process.env.PORT || 3005;
 
 app.use(cors());
 app.use(express.json());
 
 // PostgreSQL configuration
-console.log('DATABASE_URL environment variable:', process.env.DATABASE_URL);
 const dbConfig: DatabaseConfig = {
-  connectionString: process.env.DATABASE_URL || 'postgresql://atp_user:password@agent-trust-protocol-1-postgres-1:5432/atp_production',
-  ssl: process.env.NODE_ENV === 'production',
+  connectionString: config.DATABASE_URL,
+  ssl: config.NODE_ENV === 'production',
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 };
-console.log('Using database connection string:', dbConfig.connectionString);
 
 const storage = new AuditStorageService(dbConfig);
-const ipfs = new IPFSService(process.env.IPFS_URL);
+const ipfs = new IPFSService(config.IPFS_URL);
 const auditService = new AuditService(storage, ipfs);
 const auditController = new AuditController(auditService);
 
@@ -61,8 +59,8 @@ async function startServer() {
     await storage.initialize();
     console.log('Database connection established');
     
-    app.listen(port, () => {
-      console.log(`Audit Logger Service running on port ${port}`);
+    app.listen(config.PORT, () => {
+      console.log(`Audit Logger Service running on port ${config.PORT}`);
       console.log('Agent Trust Protocol™ - Audit Logger Service v0.1.0');
     });
   } catch (error) {
