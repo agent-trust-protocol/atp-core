@@ -34,6 +34,8 @@ const pool = DATABASE_URL ? new Pool({
     : { rejectUnauthorized: false }
 }) : undefined;
 
+export type { Session } from 'better-auth';
+
 export const auth = betterAuth({
   secret: authSecret,
   baseURL,

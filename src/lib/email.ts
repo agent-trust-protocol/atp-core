@@ -26,7 +26,7 @@ class EmailService {
 
     if (emailProvider === 'sendgrid' && process.env.SENDGRID_API_KEY) {
       // SendGrid via SMTP
-      this.transporter = nodemailer.createTransporter({
+      this.transporter = nodemailer.createTransport({
         host: 'smtp.sendgrid.net',
         port: 465,
         secure: true,
@@ -40,7 +40,7 @@ class EmailService {
       this.resend = new Resend(process.env.RESEND_API_KEY);
     } else if (process.env.SMTP_HOST) {
       // Generic SMTP
-      this.transporter = nodemailer.createTransporter({
+      this.transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT || '587'),
         secure: process.env.SMTP_SECURE === 'true',
