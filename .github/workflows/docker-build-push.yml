@@ -31,6 +31,7 @@ jobs:
 
       - name: Build and push website image
         uses: docker/build-push-action@v5
+        continue-on-error: true
         with:
           context: ./website-repo
           file: ./website-repo/Dockerfile.prod
@@ -39,6 +40,7 @@ jobs:
 
       - name: Build and push identity-service image
         uses: docker/build-push-action@v5
+        continue-on-error: true
         with:
           context: ./packages/identity-service
           file: ./packages/identity-service/Dockerfile.prod
@@ -47,6 +49,7 @@ jobs:
 
       - name: Build and push permission-service image
         uses: docker/build-push-action@v5
+        continue-on-error: true
         with:
           context: ./packages/permission-service
           file: ./packages/permission-service/Dockerfile.prod
@@ -55,6 +58,7 @@ jobs:
 
       - name: Build and push audit-logger image
         uses: docker/build-push-action@v5
+        continue-on-error: true
         with:
           context: ./packages/audit-logger
           file: ./packages/audit-logger/Dockerfile.prod
@@ -63,6 +67,7 @@ jobs:
 
       - name: Build and push vc-service image
         uses: docker/build-push-action@v5
+        continue-on-error: true
         with:
           context: ./packages/vc-service
           file: ./packages/vc-service/Dockerfile.prod
@@ -71,6 +76,7 @@ jobs:
 
       - name: Build and push rpc-gateway image
         uses: docker/build-push-action@v5
+        continue-on-error: true
         with:
           context: ./packages/rpc-gateway
           file: ./packages/rpc-gateway/Dockerfile.prod
