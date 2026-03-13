@@ -18,7 +18,8 @@
     "helmet": "^7.0.0",
     "node-cron": "^3.0.0",
     "sqlite3": "^5.1.0",
-    "ws": "^8.14.0"
+    "ws": "^8.14.0",
+    "zod": "^3.21.0"
   },
   "devDependencies": {
     "@types/compression": "^1.7.0",

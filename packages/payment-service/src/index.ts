@@ -10,9 +10,9 @@ import { mandateRouter } from './controllers/mandate.controller.js';
 import { checkoutRouter } from './controllers/checkout.controller.js';
 import { policyRouter } from './controllers/policy.controller.js';
 import { transactionRouter } from './controllers/transaction.controller.js';
+import { config } from './config.js';
 
 const app = express();
-const PORT = process.env.PORT || 3009;
 
 // Middleware
 app.use(cors());
@@ -56,18 +56,18 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   res.status(err.statusCode || 500).json({
     error: err.name || 'Internal Server Error',
     message: err.message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    ...(config.NODE_ENV === 'development' && { stack: err.stack })
   });
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(config.PORT, () => {
   console.log('╔════════════════════════════════════════════════════════════════╗');
   console.log('║         ATP Payment Service (MVP) - Starting...               ║');
   console.log('╚════════════════════════════════════════════════════════════════╝');
   console.log();
-  console.log(`💳 Payment Service listening on port ${PORT}`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+  console.log(`💳 Payment Service listening on port ${config.PORT}`);
+  console.log(`🔗 Health check: http://localhost:${config.PORT}/health`);
   console.log();
   console.log('📡 Supported Protocols:');
   console.log('   ├─ Google AP2 (Agent Payments Protocol)');

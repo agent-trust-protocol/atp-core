@@ -11,14 +11,14 @@ import { WebSocketServer } from 'ws';
 import { MonitoringController } from './controllers/monitoring.js';
 import { MetricsCollector } from './services/metrics-collector.js';
 import cron from 'node-cron';
+import { config } from './config.js';
 
 const app = express();
-const PORT = process.env.ATP_MONITORING_PORT || 3005;
 
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
+  origin: config.NODE_ENV === 'production'
     ? ['https://agenttrustprotocol.com', 'https://agenttrust.dev']
     : true,
   credentials: true
@@ -57,10 +57,10 @@ app.get('/monitoring/metrics', (req, res) => monitoringController.getCurrentMetr
 app.get('/monitoring/dashboard', (req, res) => monitoringController.getDashboardData(req, res));
 
 // WebSocket for real-time updates
-const server = app.listen(PORT, () => {
-  console.log(`🔍 ATP™ Monitoring Service started on port ${PORT}`);
-  console.log(`📊 Dashboard: http://localhost:${PORT}/api/monitoring/dashboard`);
-  console.log(`🚨 Alerts: http://localhost:${PORT}/api/monitoring/alerts`);
+const server = app.listen(config.ATP_MONITORING_PORT, () => {
+  console.log(`🔍 ATP™ Monitoring Service started on port ${config.ATP_MONITORING_PORT}`);
+  console.log(`📊 Dashboard: http://localhost:${config.ATP_MONITORING_PORT}/api/monitoring/dashboard`);
+  console.log(`🚨 Alerts: http://localhost:${config.ATP_MONITORING_PORT}/api/monitoring/alerts`);
 });
 
 const wss = new WebSocketServer({ server, path: '/ws' });
