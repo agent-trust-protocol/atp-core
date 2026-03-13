@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+.next/
+*.js
+*.mjs
+*.cjs
+src/workflow-engine/

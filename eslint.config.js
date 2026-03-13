@@ -3,6 +3,7 @@ import typescriptParser from '@typescript-eslint/parser';
 import js from '@eslint/js';
 
 export default [
+  { ignores: ['src/workflow-engine/**', 'node_modules/**', 'dist/**', 'coverage/**', '.next/**'] },
   js.configs.recommended,
   {
     files: ['src/**/*.ts', 'src/**/*.tsx'],
