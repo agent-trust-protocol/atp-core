@@ -11,8 +11,7 @@ export const {
   signIn,
   signUp,
   signOut,
-  useSession,
-  user
+  useSession
 } = authClient;
 
 // Social sign-in helpers

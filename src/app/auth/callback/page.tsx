@@ -33,7 +33,7 @@ function AuthCallbackContent() {
         // We just need to verify the session exists and redirect.
 
         // Check for error param (OAuth failures)
-        const error = searchParams.get('error');
+        const error = searchParams?.get('error');
         if (error) {
           setStatus('error');
           setMessage(`Authentication failed: ${error}. Please try again.`);
@@ -57,7 +57,7 @@ function AuthCallbackContent() {
               setStatus('success');
               setMessage('Authentication successful! Redirecting...');
 
-              const returnTo = searchParams.get('returnTo') || '/portal';
+              const returnTo = searchParams?.get('returnTo') || '/portal';
               setTimeout(() => {
                 router.push(returnTo);
               }, 1000);
