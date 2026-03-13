@@ -212,6 +212,32 @@ services:
       start_period: 40s
     restart: unless-stopped
 
+  monitoring-service:
+    build:
+      context: .
+      dockerfile: docker/monitoring-service.Dockerfile
+    ports:
+      - "3010:3005"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - ATP_MONITORING_PORT=3005
+      - ATP_IDENTITY_URL=http://identity-service:3001
+      - ATP_CREDENTIALS_URL=http://vc-service:3002
+      - ATP_PERMISSIONS_URL=http://permission-service:3003
+      - ATP_AUDIT_URL=http://audit-logger:3005
+      - ATP_GATEWAY_URL=http://rpc-gateway:3000
+      - ATP_ALERT_WEBHOOK_URL=${ATP_ALERT_WEBHOOK_URL:-}
+    depends_on:
+      - identity-service
+      - audit-logger
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
   rpc-gateway:
     build:
       context: .
