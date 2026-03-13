@@ -3,9 +3,23 @@ import { nextCookies } from 'better-auth/next-js';
 import { magicLink } from 'better-auth/plugins';
 import { Pool } from 'pg';
 
-// Use a fallback secret during build (when real secrets aren't available)
-// At runtime in production, BETTER_AUTH_SECRET must be set via environment
-const secret = process.env.BETTER_AUTH_SECRET || 'dev-only-secret-not-for-production';
+// BETTER_AUTH_SECRET is required at runtime in production.
+// During `next build` the env is not available, so a placeholder is used for
+// the build phase only — it is never used to sign real sessions.
+const isNextBuild = process.env.NEXT_PHASE === 'phase-production-build';
+const secret = process.env.BETTER_AUTH_SECRET;
+
+if (!secret && !isNextBuild) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      '[auth] BETTER_AUTH_SECRET environment variable is not set. ' +
+      'Generate one with: openssl rand -base64 32'
+    );
+  }
+  console.warn('[auth] BETTER_AUTH_SECRET not set — using insecure dev fallback. Never use this in production.');
+}
+
+const authSecret = secret ?? 'dev-only-secret-not-for-production';
 
 const baseURL = process.env.BETTER_AUTH_URL || 'http://localhost:3000';
 
@@ -21,7 +35,7 @@ const pool = DATABASE_URL ? new Pool({
 }) : undefined;
 
 export const auth = betterAuth({
-  secret,
+  secret: authSecret,
   baseURL,
   database: pool as any, // Better Auth accepts a pg Pool directly
   emailAndPassword: {

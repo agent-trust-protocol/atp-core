@@ -1,6 +1,59 @@
 version: '3.8'
 
+# ─── Local development compose ────────────────────────────────────────────────
+# Copy .env.example to .env and fill in values before running.
+# On Railway, DATABASE_URL is injected automatically per-service.
+#
+# Start everything:  docker compose up
+# First-time setup:  docker compose up db-migrate   (runs once, then exits)
+
 services:
+
+  # ── Database ──────────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-atp_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-atp_local}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-atp_user}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # ── Migrations (runs once, exits) ─────────────────────────────────────────────
+  db-migrate:
+    image: postgres:16-alpine
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./packages/shared/src/database/migrations:/migrations:ro
+    command: >
+      sh -c "
+        echo 'Waiting for postgres...' &&
+        until pg_isready -h postgres -U ${POSTGRES_USER:-atp_user}; do sleep 1; done &&
+        echo 'Running init-db.sql...' &&
+        psql -h postgres -U ${POSTGRES_USER:-atp_user} -d ${POSTGRES_DB:-atp_local} -f /docker-entrypoint-initdb.d/01-init.sql &&
+        echo 'Running migrations...' &&
+        for f in /migrations/*.sql; do
+          echo \"  applying \$$f\" &&
+          psql -h postgres -U ${POSTGRES_USER:-atp_user} -d ${POSTGRES_DB:-atp_local} -f \$$f;
+        done &&
+        echo 'Migrations complete.'
+      "
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: no
+
+  # ── Backend services ──────────────────────────────────────────────────────────
   identity-service:
     build:
       context: .
@@ -9,15 +62,19 @@ services:
       - "3001:3001"
     environment:
       - PORT=3001
-      - DB_PATH=/data/identity.db
-      - DATABASE_URL=postgresql://atp_user:staging-password-change-in-production@agent-trust-protocol-1-postgres-1:5432/atp_staging
-    volumes:
-      - identity_data:/data
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://${POSTGRES_USER:-atp_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-atp_local}}
+      - SESSION_SECRET=${SESSION_SECRET:?SESSION_SECRET is required}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 15s
     restart: unless-stopped
 
   vc-service:
@@ -28,15 +85,17 @@ services:
       - "3002:3002"
     environment:
       - PORT=3002
-      - DB_PATH=/data/vc.db
-      - DATABASE_URL=postgresql://atp_user:staging-password-change-in-production@agent-trust-protocol-1-postgres-1:5432/atp_staging
-    volumes:
-      - vc_data:/data
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://${POSTGRES_USER:-atp_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-atp_local}}
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 15s
     restart: unless-stopped
 
   permission-service:
@@ -47,16 +106,21 @@ services:
       - "3003:3003"
     environment:
       - PORT=3003
-      - DB_PATH=/data/permission.db
-      - JWT_SECRET=your-secret-key-change-in-production
-      - DATABASE_URL=postgresql://atp_user:staging-password-change-in-production@agent-trust-protocol-1-postgres-1:5432/atp_staging
-    volumes:
-      - permission_data:/data
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://${POSTGRES_USER:-atp_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-atp_local}}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
+      - REDIS_HOST=${REDIS_HOST:-localhost}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 15s
     restart: unless-stopped
 
   audit-logger:
@@ -67,16 +131,19 @@ services:
       - "3005:3005"
     environment:
       - PORT=3005
-      - DB_PATH=/data/audit.db
-      - IPFS_URL=http://ipfs:5001
-      - DATABASE_URL=postgresql://atp_user:staging-password-change-in-production@agent-trust-protocol-1-postgres-1:5432/atp_staging
-    volumes:
-      - audit_data:/data
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://${POSTGRES_USER:-atp_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-atp_local}}
+      - AUDIT_ENCRYPTION_KEY=${AUDIT_ENCRYPTION_KEY:?AUDIT_ENCRYPTION_KEY is required}
+      - IPFS_URL=${IPFS_URL:-http://ipfs:5001}
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 15s
     restart: unless-stopped
 
   protocol-integrations:
@@ -107,12 +174,11 @@ services:
       - "3009:3009"
     environment:
       - PORT=3009
-      - DATABASE_URL=postgresql://atp_user:staging-password-change-in-production@agent-trust-protocol-1-postgres-1:5432/atp_staging
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://${POSTGRES_USER:-atp_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-atp_local}}
     depends_on:
-      - identity-service
-      - vc-service
-      - audit-logger
+      db-migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3009/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
       interval: 30s
@@ -120,10 +186,7 @@ services:
       retries: 3
       start_period: 10s
     restart: unless-stopped
-    labels:
-      - "description=ATP Payment Service - AP2 & ACP Protocol Support (MVP)"
 
-  # 🛡️ Quantum-Safe MCP Server - Production Ready
   quantum-safe-server:
     build:
       context: .
@@ -132,9 +195,9 @@ services:
     ports:
       - "3008:3008"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV:-production}
       - PORT=3008
-      - ATP_LOG_LEVEL=info
+      - ATP_LOG_LEVEL=${ATP_LOG_LEVEL:-info}
       - ATP_QUANTUM_SAFE=true
       - ATP_TRUST_LEVELS=basic,verified,enterprise
       - ATP_RATE_LIMIT_ENABLED=true
@@ -148,8 +211,6 @@ services:
       retries: 3
       start_period: 40s
     restart: unless-stopped
-    labels:
-      - "description=ATP Quantum-Safe MCP Server - World's First Quantum-Safe AI Agent Protocol"
 
   rpc-gateway:
     build:
@@ -185,12 +246,6 @@ services:
       - ./docker/ssl:/etc/ssl/certs:ro
     depends_on:
       - rpc-gateway
-      - identity-service
-      - vc-service
-      - permission-service
-      - audit-logger
-      - protocol-integrations
-      - payment-service
     restart: unless-stopped
 
   ipfs:
@@ -204,6 +259,7 @@ services:
     restart: unless-stopped
 
 volumes:
+  postgres_data:
   identity_data:
   vc_data:
   permission_data:
