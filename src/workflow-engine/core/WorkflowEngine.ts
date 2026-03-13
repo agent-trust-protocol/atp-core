@@ -245,6 +245,7 @@ export class WorkflowEngine extends EventEmitter {
 
     if (typeof condition === 'object' && condition.expression) {
       try {
+        // eslint-disable-next-line no-new-func
         return new Function('data', `return ${condition.expression}`)(data);
       } catch {
         return false;
