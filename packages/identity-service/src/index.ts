@@ -7,30 +7,23 @@ import { IdentityController } from './controllers/identity.js';
 import { MFAController } from './controllers/mfa.js';
 import { DatabaseConfig } from '@atp/shared';
 import { Pool } from 'pg';
+import { config } from './config.js';
 
 const app = express();
-const port = process.env.PORT || 3001;
 
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: config.CORS_ORIGIN,
   credentials: true
 }));
 app.use(express.json());
 
-// SECURITY: SESSION_SECRET must be set in production
-const sessionSecret = process.env.SESSION_SECRET;
-if (!sessionSecret && process.env.NODE_ENV === 'production') {
-  console.error('FATAL: SESSION_SECRET environment variable is required in production');
-  process.exit(1);
-}
-
 // Session configuration for MFA setup
 app.use(session({
-  secret: sessionSecret || 'dev-only-session-secret-not-for-production',
+  secret: config.SESSION_SECRET || 'dev-only-session-secret-not-for-production',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: config.NODE_ENV === 'production',
     httpOnly: true,
     maxAge: 15 * 60 * 1000 // 15 minutes
   }
@@ -38,8 +31,8 @@ app.use(session({
 
 // PostgreSQL configuration
 const dbConfig: DatabaseConfig = {
-  connectionString: process.env.DATABASE_URL || 'postgresql://atp_user:password@localhost:5432/atp_production',
-  ssl: process.env.NODE_ENV === 'production',
+  connectionString: config.DATABASE_URL,
+  ssl: config.NODE_ENV === 'production',
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
@@ -104,8 +97,8 @@ async function startServer() {
     await storage.initialize();
     console.log('Database connection established');
     
-    app.listen(port, () => {
-      console.log(`Identity Service running on port ${port}`);
+    app.listen(config.PORT, () => {
+      console.log(`Identity Service running on port ${config.PORT}`);
     });
   } catch (error) {
     console.error('Failed to start Identity Service:', error);
