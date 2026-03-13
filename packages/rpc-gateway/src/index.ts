@@ -7,19 +7,18 @@ import { AuthService } from './services/auth.js';
 import { MTLSService } from './services/mtls.js';
 import { DIDJWTService } from './services/did-jwt.js';
 import { ATPMetricsService } from '@atp/shared';
+import { config } from './config.js';
 
 const app = express();
-const port = process.env.PORT || 3000;
-const httpsPort = process.env.HTTPS_PORT || 3443;
 
 app.use(cors());
 app.use(express.json());
 
 // Initialize mTLS service if TLS config is provided
 let mtlsService: MTLSService | undefined;
-if (process.env.TLS_CONFIG_PATH) {
+if (config.TLS_CONFIG_PATH) {
   try {
-    const tlsConfig = MTLSService.loadTLSConfig(process.env.TLS_CONFIG_PATH);
+    const tlsConfig = MTLSService.loadTLSConfig(config.TLS_CONFIG_PATH);
     mtlsService = new MTLSService(tlsConfig);
     console.log('mTLS enabled');
   } catch (error) {
@@ -323,17 +322,17 @@ metricsService.startSystemMetricsCollection(30000);
 metricsService.recordMetric('service_starts_total', 1, 'counter');
 
 // Start HTTP server
-app.listen(port, () => {
+app.listen(config.PORT, () => {
   console.log(`Agent Trust Protocol™ - RPC Gateway v0.1.0`);
-  console.log(`HTTP server running on port ${port}`);
-  console.log(`WebSocket server running on port ${process.env.WS_PORT || '8081'}`);
+  console.log(`HTTP server running on port ${config.PORT}`);
+  console.log(`WebSocket server running on port ${config.WS_PORT}`);
 });
 
 // Start HTTPS server with mTLS if configured
 if (mtlsService) {
   const httpsServer = mtlsService.createHTTPSServer(app);
-  httpsServer.listen(httpsPort, () => {
-    console.log(`HTTPS server with mTLS running on port ${httpsPort}`);
+  httpsServer.listen(config.HTTPS_PORT, () => {
+    console.log(`HTTPS server with mTLS running on port ${config.HTTPS_PORT}`);
   });
 }
 
