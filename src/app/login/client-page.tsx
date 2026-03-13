@@ -13,7 +13,7 @@ import { Mail, CheckCircle } from 'lucide-react';
 
 function LoginForm() {
   const searchParams = useSearchParams();
-  const returnTo = searchParams.get('returnTo') || '/portal';
+  const returnTo = searchParams?.get('returnTo') || '/portal';
 
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');

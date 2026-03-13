@@ -87,6 +87,7 @@ export function PerformanceMetricsPreview() {
 
     const interval = setInterval(() => {
       setMetrics(prev => ({
+        ...prev,
         activeConnections: {
           ...prev.activeConnections,
           value: prev.activeConnections.value + Math.floor(Math.random() * 10 - 3),

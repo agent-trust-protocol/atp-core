@@ -7,7 +7,8 @@ import {
   WorkflowExecutionContext,
   ExecutionResult,
   WorkflowValidationResult,
-  WorkflowTrigger
+  WorkflowTrigger,
+  NodeConfig
 } from '../types/WorkflowTypes';
 import { NodeRegistry } from './NodeRegistry';
 
@@ -106,7 +107,7 @@ export class WorkflowEngine extends EventEmitter {
       try {
         const nodeHandler = this.nodeRegistry.getNode(node.type);
         const inputs = this.gatherNodeInputs(node, results, context);
-        const output = await nodeHandler.execute(inputs, node.config, context);
+        const output = await nodeHandler.execute(inputs, node.config as NodeConfig, context);
 
         results.set(node.id, output);
         context.completedNodes.push(node.id);
@@ -123,7 +124,7 @@ export class WorkflowEngine extends EventEmitter {
 
     return {
       success: true,
-      data: results.get(visited.values().next().value),
+      data: results.get(visited.values().next().value as string),
       executionId: context.executionId,
       duration: context.endTime ?
         context.endTime.getTime() - context.startTime.getTime() : 0
