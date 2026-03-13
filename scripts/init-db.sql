@@ -11,6 +11,7 @@ CREATE SCHEMA IF NOT EXISTS atp_credentials;
 CREATE SCHEMA IF NOT EXISTS atp_permissions;
 CREATE SCHEMA IF NOT EXISTS atp_audit;
 CREATE SCHEMA IF NOT EXISTS atp_metrics;
+CREATE SCHEMA IF NOT EXISTS atp_payments;
 
 -- Set default permissions
 GRANT USAGE ON SCHEMA atp_identity TO atp_user;
@@ -18,12 +19,14 @@ GRANT USAGE ON SCHEMA atp_credentials TO atp_user;
 GRANT USAGE ON SCHEMA atp_permissions TO atp_user;
 GRANT USAGE ON SCHEMA atp_audit TO atp_user;
 GRANT USAGE ON SCHEMA atp_metrics TO atp_user;
+GRANT USAGE ON SCHEMA atp_payments TO atp_user;
 
 GRANT CREATE ON SCHEMA atp_identity TO atp_user;
 GRANT CREATE ON SCHEMA atp_credentials TO atp_user;
 GRANT CREATE ON SCHEMA atp_permissions TO atp_user;
 GRANT CREATE ON SCHEMA atp_audit TO atp_user;
 GRANT CREATE ON SCHEMA atp_metrics TO atp_user;
+GRANT CREATE ON SCHEMA atp_payments TO atp_user;
 
 -- Identity Management Tables
 CREATE TABLE IF NOT EXISTS atp_identity.agents (
@@ -348,9 +351,144 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA atp_credentials TO atp_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA atp_permissions TO atp_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA atp_audit TO atp_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA atp_metrics TO atp_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA atp_payments TO atp_user;
 
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA atp_identity TO atp_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA atp_credentials TO atp_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA atp_permissions TO atp_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA atp_audit TO atp_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA atp_metrics TO atp_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA atp_payments TO atp_user;
+
+-- ============================================================
+-- Payment Service Tables (atp_payments schema)
+-- ============================================================
+
+-- Payment methods stored per user DID
+CREATE TABLE IF NOT EXISTS atp_payments.payment_methods (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_did VARCHAR(255) NOT NULL,
+    type VARCHAR(20) NOT NULL CHECK (type IN ('card', 'bank', 'crypto', 'stablecoin')),
+    details JSONB NOT NULL DEFAULT '{}',
+    is_default BOOLEAN NOT NULL DEFAULT FALSE,
+    status VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'expired', 'blocked')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    verified_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX IF NOT EXISTS idx_payment_methods_user_did ON atp_payments.payment_methods(user_did);
+CREATE INDEX IF NOT EXISTS idx_payment_methods_status ON atp_payments.payment_methods(status);
+
+-- Intent mandates (AP2 protocol — agent authorised to spend up to maxAmount)
+CREATE TABLE IF NOT EXISTS atp_payments.intent_mandates (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_did VARCHAR(255) NOT NULL,
+    agent_did VARCHAR(255) NOT NULL,
+    purpose TEXT NOT NULL,
+    max_amount NUMERIC(18, 6) NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'USD',
+    restrictions JSONB DEFAULT '{}',
+    status VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'revoked', 'expired', 'used')),
+    verifiable_credential JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    expires_at TIMESTAMP WITH TIME ZONE,
+    revoked_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX IF NOT EXISTS idx_intent_mandates_user_did ON atp_payments.intent_mandates(user_did);
+CREATE INDEX IF NOT EXISTS idx_intent_mandates_agent_did ON atp_payments.intent_mandates(agent_did);
+CREATE INDEX IF NOT EXISTS idx_intent_mandates_status ON atp_payments.intent_mandates(status);
+
+-- Cart mandates (AP2 protocol — agent authorised for a specific cart)
+CREATE TABLE IF NOT EXISTS atp_payments.cart_mandates (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    intent_mandate_id UUID REFERENCES atp_payments.intent_mandates(id) ON DELETE SET NULL,
+    merchant VARCHAR(255) NOT NULL,
+    items JSONB NOT NULL DEFAULT '[]',
+    total NUMERIC(18, 6) NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'USD',
+    cart_hash VARCHAR(64) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'revoked', 'expired', 'used')),
+    verifiable_credential JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    expires_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX IF NOT EXISTS idx_cart_mandates_intent_mandate_id ON atp_payments.cart_mandates(intent_mandate_id);
+CREATE INDEX IF NOT EXISTS idx_cart_mandates_status ON atp_payments.cart_mandates(status);
+
+-- ACP checkout sessions (agent-initiated checkout via merchant API)
+CREATE TABLE IF NOT EXISTS atp_payments.checkout_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    merchant_id VARCHAR(255) NOT NULL,
+    agent_did VARCHAR(255) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'created' CHECK (status IN ('created', 'pending', 'completed', 'expired', 'cancelled')),
+    items JSONB NOT NULL DEFAULT '[]',
+    subtotal NUMERIC(18, 6) NOT NULL,
+    tax NUMERIC(18, 6),
+    shipping NUMERIC(18, 6),
+    total NUMERIC(18, 6) NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'USD',
+    shipping_address JSONB,
+    billing_address JSONB,
+    customer_email VARCHAR(255),
+    payment_intent VARCHAR(255),
+    shared_payment_token VARCHAR(255),
+    metadata JSONB DEFAULT '{}',
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    completed_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX IF NOT EXISTS idx_checkout_sessions_agent_did ON atp_payments.checkout_sessions(agent_did);
+CREATE INDEX IF NOT EXISTS idx_checkout_sessions_merchant_id ON atp_payments.checkout_sessions(merchant_id);
+CREATE INDEX IF NOT EXISTS idx_checkout_sessions_status ON atp_payments.checkout_sessions(status);
+
+-- Payment transactions (final record of executed payments)
+CREATE TABLE IF NOT EXISTS atp_payments.transactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    protocol_type VARCHAR(10) NOT NULL CHECK (protocol_type IN ('ap2', 'acp')),
+    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'failed', 'refunded')),
+    user_did VARCHAR(255) NOT NULL,
+    agent_did VARCHAR(255) NOT NULL,
+    merchant_id VARCHAR(255) NOT NULL,
+    amount NUMERIC(18, 6) NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'USD',
+    mandate_id UUID,
+    checkout_session_id UUID REFERENCES atp_payments.checkout_sessions(id) ON DELETE SET NULL,
+    payment_method_id UUID REFERENCES atp_payments.payment_methods(id) ON DELETE SET NULL,
+    failure_reason TEXT,
+    metadata JSONB DEFAULT '{}',
+    mock_processor_response JSONB,
+    mock_transaction_id VARCHAR(255),
+    mock_success BOOLEAN,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    completed_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX IF NOT EXISTS idx_transactions_user_did ON atp_payments.transactions(user_did);
+CREATE INDEX IF NOT EXISTS idx_transactions_agent_did ON atp_payments.transactions(agent_did);
+CREATE INDEX IF NOT EXISTS idx_transactions_status ON atp_payments.transactions(status);
+CREATE INDEX IF NOT EXISTS idx_transactions_created_at ON atp_payments.transactions(created_at DESC);
+
+-- Payment policies (per-agent spending rules)
+CREATE TABLE IF NOT EXISTS atp_payments.payment_policies (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    agent_did VARCHAR(255) NOT NULL,
+    max_transaction_amount NUMERIC(18, 6) NOT NULL,
+    daily_limit NUMERIC(18, 6),
+    monthly_limit NUMERIC(18, 6),
+    allowed_merchants TEXT[],
+    allowed_categories TEXT[],
+    blocked_merchants TEXT[],
+    requires_approval BOOLEAN NOT NULL DEFAULT FALSE,
+    notification_threshold NUMERIC(18, 6),
+    status VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'suspended', 'deleted')),
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_payment_policies_agent_did ON atp_payments.payment_policies(agent_did);
+CREATE INDEX IF NOT EXISTS idx_payment_policies_status ON atp_payments.payment_policies(status);
