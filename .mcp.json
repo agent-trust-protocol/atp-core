@@ -6,7 +6,7 @@
         "@jpisnice/shadcn-ui-mcp-server"
       ],
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "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"
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
       }
     }
   }

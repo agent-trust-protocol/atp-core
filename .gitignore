@@ -140,6 +140,9 @@ tmp/
 temp/
 .cache/
 
+# MCP config (may contain tokens)
+.mcp.json
+
 # AI assistant configurations
 .clinerules/
 .kilocode/
