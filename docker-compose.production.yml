@@ -104,7 +104,7 @@ services:
       postgres:
         condition: service_healthy
       ipfs:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
       interval: ${HEALTH_CHECK_INTERVAL:-30s}
@@ -179,6 +179,34 @@ services:
     networks:
       - atp-network
 
+  monitoring-service:
+    build:
+      context: .
+      dockerfile: docker/monitoring-service.Dockerfile
+    ports:
+      - "${ATP_MONITORING_PORT:-3010}:3005"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - ATP_MONITORING_PORT=3005
+      - ATP_IDENTITY_URL=http://identity-service:3001
+      - ATP_CREDENTIALS_URL=http://vc-service:3002
+      - ATP_PERMISSIONS_URL=http://permission-service:3003
+      - ATP_AUDIT_URL=http://audit-logger:3005
+      - ATP_GATEWAY_URL=http://rpc-gateway:3000
+      - ATP_ALERT_WEBHOOK_URL=${ATP_ALERT_WEBHOOK_URL:-}
+    depends_on:
+      - identity-service
+      - audit-logger
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
+      interval: ${HEALTH_CHECK_INTERVAL:-30s}
+      timeout: ${HEALTH_CHECK_TIMEOUT:-10s}
+      retries: ${HEALTH_CHECK_RETRIES:-3}
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - atp-network
+
   # Infrastructure Services
   ipfs:
     image: ipfs/kubo:latest
@@ -198,6 +226,12 @@ services:
         ipfs config --json API.HTTPHeaders.Access-Control-Allow-Headers '[\"Authorization\", \"Content-Type\"]' &&
         ipfs daemon --migrate=true
       "
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5001/api/v0/id"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     restart: unless-stopped
     networks:
       - atp-network
@@ -244,7 +278,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     ports:
-      - "3001:3000"
+      - "3004:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
     volumes:
