@@ -11,6 +11,7 @@ jobs:
   deploy-backend:
     name: Deploy services to Railway
     runs-on: ubuntu-latest
+    if: secrets.RAILWAY_TOKEN != ''
     strategy:
       matrix:
         service:
