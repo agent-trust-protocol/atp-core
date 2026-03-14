@@ -24,8 +24,8 @@ export const signInWithGithub = () => {
 };
 
 // Magic link sign-in
-export const signInWithMagicLink = (email: string) => {
-  return authClient.signIn.magicLink({ email });
+export const signInWithMagicLink = (email: string, callbackURL?: string) => {
+  return authClient.signIn.magicLink({ email, callbackURL: callbackURL || '/portal' });
 };
 
 // Helper hooks for common auth operations

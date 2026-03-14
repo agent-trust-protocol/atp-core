@@ -26,7 +26,7 @@ function LoginForm() {
     setError('');
 
     try {
-      await signInWithMagicLink(email);
+      await signInWithMagicLink(email, returnTo);
       setMagicLinkSent(true);
     } catch (err) {
       setError('Failed to send magic link. Please try again.');
