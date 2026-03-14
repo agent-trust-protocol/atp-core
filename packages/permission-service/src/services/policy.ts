@@ -1,5 +1,4 @@
 import { PolicyRule, PermissionGrant, Scope } from '../models/permission.js';
-import { Parser } from 'expr-eval';
 
 export interface PolicyContext {
   subject: string;
@@ -12,6 +11,158 @@ export interface PolicyContext {
 export interface PolicyResult {
   allowed: boolean;
   reason?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Safe expression evaluator (replaces expr-eval which has prototype pollution
+// vulnerabilities - GHSA-8gw3-rxh4-v6jx, GHSA-jc85-fpwf-qm7x).
+// Supports: ==, ===, !=, !==, >, <, >=, <=, &&, ||, !, dotted property
+// access, string/number/boolean literals, and safe allow-listed methods
+// (includes, startsWith, endsWith, length).
+// ---------------------------------------------------------------------------
+
+type Primitive = string | number | boolean | null | undefined;
+type CtxValue = Primitive | CtxValue[] | Record<string, unknown>;
+
+function getPath(obj: Record<string, CtxValue>, path: string): CtxValue {
+  return path.split('.').reduce((cur: CtxValue, key) => {
+    if (cur !== null && cur !== undefined && typeof cur === 'object' && !Array.isArray(cur)) {
+      return (cur as Record<string, CtxValue>)[key];
+    }
+    return undefined;
+  }, obj as CtxValue);
+}
+
+class SafeEvaluator {
+  private pos = 0;
+  private expr: string;
+  private ctx: Record<string, CtxValue>;
+
+  constructor(expr: string, ctx: Record<string, CtxValue>) {
+    this.expr = expr.trim();
+    this.ctx = ctx;
+  }
+
+  evaluate(): boolean | null {
+    try {
+      const result = this.parseOr();
+      this.skip();
+      // If there are unconsumed characters, the expression was invalid
+      if (this.pos < this.expr.length) return null;
+      return typeof result === 'boolean' ? result : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private skip() {
+    while (this.pos < this.expr.length && /\s/.test(this.expr[this.pos])) this.pos++;
+  }
+
+  private peek(s: string): boolean {
+    this.skip();
+    return this.expr.startsWith(s, this.pos);
+  }
+
+  private consume(s: string): boolean {
+    this.skip();
+    if (this.expr.startsWith(s, this.pos)) { this.pos += s.length; return true; }
+    return false;
+  }
+
+  private parseOr(): CtxValue {
+    let left = this.parseAnd();
+    while (this.peek('||')) { this.consume('||'); left = left || this.parseAnd(); }
+    return left;
+  }
+
+  private parseAnd(): CtxValue {
+    let left = this.parseNot();
+    while (this.peek('&&')) { this.consume('&&'); left = left && this.parseNot(); }
+    return left;
+  }
+
+  private parseNot(): CtxValue {
+    if (this.consume('!')) {
+      const val = this.parseComparison();
+      return !val;
+    }
+    return this.parseComparison();
+  }
+
+  private parseComparison(): CtxValue {
+    const left = this.parsePrimary();
+    this.skip();
+    for (const op of ['===', '!==', '==', '!=', '>=', '<=', '>', '<']) {
+      if (this.consume(op)) {
+        const right = this.parsePrimary();
+        switch (op) {
+          case '===': return left === right;
+          case '!==': return left !== right;
+          case '==':  return left == right; // eslint-disable-line eqeqeq
+          case '!=':  return left != right; // eslint-disable-line eqeqeq
+          case '>':   return (left as number) > (right as number);
+          case '<':   return (left as number) < (right as number);
+          case '>=':  return (left as number) >= (right as number);
+          case '<=':  return (left as number) <= (right as number);
+        }
+      }
+    }
+    return left;
+  }
+
+  private parsePrimary(): CtxValue {
+    this.skip();
+    // String literal
+    if (this.expr[this.pos] === '"' || this.expr[this.pos] === "'") {
+      const quote = this.expr[this.pos++];
+      let s = '';
+      while (this.pos < this.expr.length && this.expr[this.pos] !== quote) {
+        s += this.expr[this.pos++];
+      }
+      this.pos++; // closing quote
+      return s;
+    }
+    // Parenthesised
+    if (this.consume('(')) {
+      const val = this.parseOr();
+      this.consume(')');
+      return val;
+    }
+    // Number
+    const numMatch = this.expr.slice(this.pos).match(/^-?\d+(\.\d+)?/);
+    if (numMatch) { this.pos += numMatch[0].length; return parseFloat(numMatch[0]); }
+    // Keyword or identifier chain
+    const idMatch = this.expr.slice(this.pos).match(/^[a-zA-Z_$][a-zA-Z0-9_$.]*/);;
+    if (idMatch) {
+      this.pos += idMatch[0].length;
+      const token = idMatch[0];
+      if (token === 'true') return true;
+      if (token === 'false') return false;
+      if (token === 'null') return null;
+      if (token === 'undefined') return undefined;
+      // Method call: token.includes("x") etc.
+      if (this.consume('(')) {
+        const arg = this.parsePrimary();
+        this.consume(')');
+        // token is like "context.grant.scopes.includes"
+        const dotIdx = token.lastIndexOf('.');
+        if (dotIdx !== -1) {
+          const objPath = token.slice(0, dotIdx);
+          const method = token.slice(dotIdx + 1);
+          const obj = getPath(this.ctx, objPath);
+          const SAFE_METHODS = ['includes', 'startsWith', 'endsWith'];
+          if (SAFE_METHODS.includes(method) && (Array.isArray(obj) || typeof obj === 'string')) {
+            return (obj as string[]).includes(arg as string);
+          }
+        }
+        return null;
+      }
+      // Property access
+      return getPath(this.ctx, token);
+    }
+    return null;
+  }
 }
 
 export class PolicyEngine {
@@ -55,22 +206,14 @@ export class PolicyEngine {
   private evaluateRule(rule: PolicyRule, context: PolicyContext): boolean | null {
     try {
       const safeContext = this.createSafeContext(context);
-      
-      // Use safe expression parser instead of new Function()
-      const parser = new Parser();
-      const expr = parser.parse(rule.condition);
-      
-      // Evaluate with limited context to prevent code injection
-      const result = expr.evaluate(safeContext);
-      
-      return typeof result === 'boolean' ? result : null;
+      return new SafeEvaluator(rule.condition, safeContext).evaluate();
     } catch (error) {
       console.error('Policy evaluation error:', error);
       return null;
     }
   }
 
-  private createSafeContext(context: PolicyContext): Record<string, any> {
+  private createSafeContext(context: PolicyContext): Record<string, CtxValue> {
     return {
       subject: context.subject,
       action: context.action,
@@ -83,8 +226,8 @@ export class PolicyEngine {
         resource: context.grant.resource,
         createdAt: context.grant.createdAt,
         expiresAt: context.grant.expiresAt,
-      },
-      context: context.context || {},
+      } as unknown as CtxValue,
+      context: (context.context || {}) as CtxValue,
       now: Date.now(),
     };
   }
