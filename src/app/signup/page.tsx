@@ -1,11 +1,11 @@
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 
 // Force dynamic rendering - don't prerender this page
-export const dynamicSetting = 'force-dynamic';
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 // Dynamically import client component to prevent SSR issues with Better Auth
-const SignupClient = dynamic(
+const SignupClient = nextDynamic(
   () => import('./client-page'),
   {
     ssr: false,

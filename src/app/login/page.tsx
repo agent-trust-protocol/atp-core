@@ -1,9 +1,9 @@
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 
-export const dynamicSetting = 'force-dynamic';
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-const LoginClient = dynamic(
+const LoginClient = nextDynamic(
   () => import('./client-page'),
   {
     ssr: false,
