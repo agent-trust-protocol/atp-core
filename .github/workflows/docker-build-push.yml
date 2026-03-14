@@ -30,15 +30,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push website image
-        uses: docker/build-push-action@v5
-        continue-on-error: true
-        with:
-          context: ./website-repo
-          file: ./website-repo/Dockerfile.prod
-          push: true
-          tags: ghcr.io/${{ env.IMAGE_OWNER }}/atp-website:latest
-
       - name: Build and push identity-service image
         uses: docker/build-push-action@v5
         continue-on-error: true
