@@ -70,7 +70,7 @@ docker-compose up -d
 
 # Or run locally
 git clone https://github.com/agent-trust-protocol/core.git
-cd agent-trust-protocol && npm run services
+cd core && npm install && npm run dev
 ```
 
 Then use your agent with full features:
