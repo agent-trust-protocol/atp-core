@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'crypto';
-import { sha256 } from '@noble/hashes/sha256';
+import { sha256 } from '@noble/hashes/sha2.js';
 
 export interface BlockchainBlock {
   index: number;
