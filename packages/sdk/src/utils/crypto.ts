@@ -1,10 +1,10 @@
 import * as ed25519 from '@noble/ed25519';
-import { sha256 } from '@noble/hashes/sha256';
-import { sha512 } from '@noble/hashes/sha512';
+import { sha256 } from '@noble/hashes/sha2.js';
+import { sha512 } from '@noble/hashes/sha2.js';
 import { ml_dsa65 } from '@noble/post-quantum/ml-dsa';
 import { randomBytes as cryptoRandomBytes, createCipheriv, createDecipheriv } from 'crypto';
 import { x25519 } from '@noble/curves/ed25519';
-import { hkdf } from '@noble/hashes/hkdf';
+import { hkdf } from '@noble/hashes/hkdf.js';
 
 // Configure @noble/ed25519 to use SHA-512
 ed25519.etc.sha512Sync = (...m) => sha512(ed25519.etc.concatBytes(...m));

@@ -1,6 +1,6 @@
 // packages/shared/src/crypto/pqc-crypto.ts
 
-import { sha512 } from '@noble/hashes/sha512';
+import { sha512 } from '@noble/hashes/sha2.js';
 import * as ed25519 from '@noble/ed25519';
 import { ml_dsa65 } from '@noble/post-quantum/ml-dsa';
 import { ml_kem768 } from '@noble/post-quantum/ml-kem';

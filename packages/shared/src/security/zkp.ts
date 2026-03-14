@@ -1,5 +1,5 @@
 import { randomBytes, createHash } from 'crypto';
-import { sha256 } from '@noble/hashes/sha256';
+import { sha256 } from '@noble/hashes/sha2.js';
 import { ed25519 } from '@noble/curves/ed25519';
 
 export interface ZKProof {

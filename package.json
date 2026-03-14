@@ -59,7 +59,16 @@
     "recharts": "^3.2.0",
     "resend": "^6.5.2",
     "tailwind-merge": "^2.0.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "@noble/ed25519": "^2.0.0",
+    "@scure/base": "^1.1.0",
+    "axios": "^1.6.0",
+    "expr-eval": "^2.0.2",
+    "did-jwt": "^7.4.0",
+    "ws": "^8.14.0",
+    "@noble/post-quantum": "^0.4.1",
+    "ioredis": "^5.0.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/jest": "^29.0.0",

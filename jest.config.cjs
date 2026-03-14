@@ -1,8 +1,7 @@
 /** @type {import('jest').Config} */
 module.exports = {
   // Basic configuration
-  preset: 'ts-jest/presets/default-esm',
-  extensionsToTreatAsEsm: ['.ts'],
+  preset: 'ts-jest',
   testEnvironment: 'node',
   verbose: true,
   
@@ -19,16 +18,27 @@ module.exports = {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   
-  // Transform configuration for ESM
+  // Transform configuration - compile TS to CJS, also transform ESM-only node_modules
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
-      useESM: true,
+      useESM: false,
       tsconfig: {
-        module: 'esnext',
+        module: 'commonjs',
         target: 'es2020',
         moduleResolution: 'node',
         allowSyntheticDefaultImports: true,
-        esModuleInterop: true
+        esModuleInterop: true,
+        allowJs: true
+      }
+    }],
+    '^.+\\.js$': ['ts-jest', {
+      useESM: false,
+      tsconfig: {
+        module: 'commonjs',
+        target: 'es2020',
+        allowSyntheticDefaultImports: true,
+        esModuleInterop: true,
+        allowJs: true
       }
     }]
   },
@@ -60,10 +70,10 @@ module.exports = {
   // Setup and teardown
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   
-  // Clear mocks between tests
+  // Clear mock call history between tests but keep implementations
   clearMocks: true,
-  resetMocks: true,
-  restoreMocks: true,
+  resetMocks: false,
+  restoreMocks: false,
   
   // Error handling
   errorOnDeprecated: true,
@@ -82,13 +92,13 @@ module.exports = {
   
   // Transform ignore patterns - allow transformation of ESM modules
   transformIgnorePatterns: [
-    'node_modules/(?!(@noble|@atp)/)'
+    'node_modules/(?!(@noble|@atp|jose|did-jwt|did-resolver|axios)/)'
   ],
   
   // Global setup for crypto polyfills
   globals: {
     'ts-jest': {
-      useESM: true
+      useESM: false
     }
   },
   
