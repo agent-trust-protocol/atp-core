@@ -1,5 +1,5 @@
 import { webcrypto } from 'crypto';
-import { sha512 } from '@noble/hashes/sha512';
+import { sha512 } from '@noble/hashes/sha2.js';
 import * as ed25519 from '@noble/ed25519';
 
 /**

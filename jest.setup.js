@@ -4,7 +4,7 @@
  */
 
 // Jest setup file to polyfill Web Crypto API for Node.js
-import { webcrypto } from 'crypto';
+const { webcrypto } = require('crypto');
 
 // Polyfill Web Crypto API for @noble/ed25519
 if (!globalThis.crypto) {
@@ -69,7 +69,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 // Export test configuration (optional, only if needed elsewhere)
-export const testConfig = {
+module.exports.testConfig = {
   timeout: 10000,
   cryptoAvailable: !!globalThis.crypto
 };

@@ -35,7 +35,7 @@ export class PolicyEngine {
     for (const rule of applicableRules) {
       try {
         const result = this.evaluateRule(rule, context);
-        if (result !== null) {
+        if (result === true) {
           return {
             allowed: rule.effect === 'allow',
             reason: `Policy rule '${rule.name}' ${rule.effect}ed access`,

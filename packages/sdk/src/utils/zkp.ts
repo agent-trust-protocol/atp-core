@@ -7,8 +7,8 @@
  */
 
 import { createHash, randomBytes } from 'crypto';
-import { sha256 } from '@noble/hashes/sha256';
-import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
+import { sha256 } from '@noble/hashes/sha2.js';
+import { bytesToHex, hexToBytes } from '@noble/hashes/utils.js';
 import * as ed25519 from '@noble/ed25519';
 import {
   ZKProofType,
