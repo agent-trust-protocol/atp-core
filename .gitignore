@@ -126,7 +126,7 @@ dist/
 *.sqlite3
 
 # Internal monitoring and configs
-monitoring/
+/monitoring/
 ecosystem.config.js
 
 # AI/ML model files and data
