@@ -3,14 +3,14 @@ import { checkApiAuth, createDemoResponse } from '@/lib/api-auth';
 
 export const dynamic = 'force-dynamic';
 
-const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL || 'http://localhost:3007';
+const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL ?? 'http://localhost:3007';
 
 export async function GET(request: NextRequest) {
   try {
     // Check authentication - metrics data contains sensitive operational information
     const authResult = await checkApiAuth(request);
     if (!authResult.isAuthenticated) {
-      return authResult.error || createDemoResponse('metrics');
+      return authResult.error ?? createDemoResponse('metrics');
     }
 
     const {searchParams} = request.nextUrl;
@@ -21,9 +21,9 @@ export async function GET(request: NextRequest) {
     if (searchParams.has('timeRange') || searchParams.has('services') || searchParams.has('limit')) {
       monitoringUrl += '/history';
       const params = new URLSearchParams();
-      if (searchParams.has('timeRange')) params.append('timeRange', searchParams.get('timeRange')!);
-      if (searchParams.has('services')) params.append('services', searchParams.get('services')!);
-      if (searchParams.has('limit')) params.append('limit', searchParams.get('limit')!);
+      if (searchParams.has('timeRange')) params.append('timeRange', searchParams.get('timeRange') ?? '');
+      if (searchParams.has('services')) params.append('services', searchParams.get('services') ?? '');
+      if (searchParams.has('limit')) params.append('limit', searchParams.get('limit') ?? '');
 
       if (params.toString()) {
         monitoringUrl += `?${params.toString()}`;

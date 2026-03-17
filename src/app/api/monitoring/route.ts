@@ -3,7 +3,7 @@ import { checkApiAuth, createDemoResponse } from '@/lib/api-auth';
 
 export const dynamic = 'force-dynamic';
 
-const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL || 'http://localhost:3007';
+const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL ?? 'http://localhost:3007';
 
 // Workflow data
 const mockWorkflows = [
@@ -76,10 +76,10 @@ async function handleWorkflowRequest(searchParams: URLSearchParams, request: Nex
   // Check authentication for workflow data - contains valuable IP
   const authResult = await checkApiAuth(request);
   if (!authResult.isAuthenticated) {
-    return authResult.error || createDemoResponse('monitoring-workflows');
+    return authResult.error ?? createDemoResponse('monitoring-workflows');
   }
 
-  const action = searchParams.get('action') || 'list';
+  const action = searchParams.get('action') ?? 'list';
 
   switch (action) {
     case 'health':
@@ -104,7 +104,7 @@ async function handleWorkflowRequest(searchParams: URLSearchParams, request: Nex
         timestamp: new Date().toISOString()
       });
 
-    case 'nodes':
+    case 'nodes': {
       const workflowNodes = [
         {
           type: 'policy-change-trigger',
@@ -136,6 +136,7 @@ async function handleWorkflowRequest(searchParams: URLSearchParams, request: Nex
         categories: ['trigger', 'action', 'condition'],
         total: workflowNodes.length
       });
+    }
 
     default:
       return NextResponse.json({ error: 'Unknown workflow action' }, { status: 400 });
@@ -145,7 +146,7 @@ async function handleWorkflowRequest(searchParams: URLSearchParams, request: Nex
 export async function GET(request: NextRequest) {
   try {
     const {searchParams} = request.nextUrl;
-    const endpoint = searchParams.get('endpoint') || 'dashboard';
+    const endpoint = searchParams.get('endpoint') ?? 'dashboard';
 
     // Handle workflow endpoints
     if (endpoint === 'workflows') {
@@ -216,7 +217,7 @@ export async function HEAD() {
         'X-Monitoring-Service': response.ok ? 'healthy' : 'unhealthy'
       }
     });
-  } catch (error) {
+  } catch {
     return new NextResponse(null, {
       status: 503,
       headers: {

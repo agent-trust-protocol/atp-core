@@ -45,7 +45,7 @@ export async function GET() {
         if (Array.isArray(contributorsData)) {
           // If we got 100, there might be more - check Link header
           const linkHeader = contributorsResponse.headers.get('link');
-          if (linkHeader && linkHeader.includes('rel="last"')) {
+          if (linkHeader?.includes('rel="last"')) {
             const lastPageMatch = linkHeader.match(/page=(\d+)>; rel="last"/);
             if (lastPageMatch) {
               contributors = parseInt(lastPageMatch[1], 10) * 100;
@@ -60,13 +60,13 @@ export async function GET() {
     } catch (error) {
       console.error('Error fetching contributors:', error);
       // Use a fallback estimate based on stars (rough heuristic)
-      contributors = Math.max(1, Math.floor((repoData.stargazers_count || 0) / 50));
+      contributors = Math.max(1, Math.floor((repoData.stargazers_count ?? 0) / 50));
     }
 
     const stats: GitHubStats = {
-      stars: repoData.stargazers_count || 0,
-      forks: repoData.forks_count || 0,
-      contributors: contributors || 0
+      stars: repoData.stargazers_count ?? 0,
+      forks: repoData.forks_count ?? 0,
+      contributors: contributors ?? 0
     };
 
     return NextResponse.json(stats);

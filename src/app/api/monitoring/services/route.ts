@@ -3,14 +3,14 @@ import { checkApiAuth, createDemoResponse } from '@/lib/api-auth';
 
 export const dynamic = 'force-dynamic';
 
-const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL || 'http://localhost:3007';
+const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL ?? 'http://localhost:3007';
 
 export async function GET(request: NextRequest) {
   try {
     // Check authentication - service health data exposes architecture and URLs
     const authResult = await checkApiAuth(request);
     if (!authResult.isAuthenticated) {
-      return authResult.error || createDemoResponse('services');
+      return authResult.error ?? createDemoResponse('services');
     }
 
     const response = await fetch(`${MONITORING_SERVICE_URL}/api/monitoring/services`, {

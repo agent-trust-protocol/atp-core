@@ -16,7 +16,7 @@ const CryptoUtils = {
     };
   },
 
-  signData: async (message: string, privateKeyHex: string, quantumSafe: boolean = true) => {
+  signData: async (message: string, privateKeyHex: string, _quantumSafe: boolean = true) => {
     // Create signature using hmac for demo
     const signature = crypto.createHmac('sha512', privateKeyHex)
       .update(message)
@@ -35,7 +35,7 @@ const CryptoUtils = {
 
 export async function POST(request: NextRequest) {
   // Check authentication - CRITICAL IP PROTECTION
-  const token = request.cookies.get('atp_token')?.value ||
+  const token = request.cookies.get('atp_token')?.value ??
                 request.headers.get('Authorization')?.replace('Bearer ', '');
 
   if (!token) {
@@ -83,10 +83,11 @@ export async function POST(request: NextRequest) {
       quantumSafe: keyPair.quantumSafe,
       algorithm: 'hybrid-ed25519-demo'
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Unknown error';
     console.error('Signature generation error:', error);
     return NextResponse.json(
-      { error: 'Failed to generate signature', details: error.message },
+      { error: 'Failed to generate signature', details: msg },
       { status: 500 }
     );
   }
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   // Check authentication for API info endpoint too
-  const token = request.cookies.get('atp_token')?.value ||
+  const token = request.cookies.get('atp_token')?.value ??
                 request.headers.get('Authorization')?.replace('Bearer ', '');
 
   if (!token) {

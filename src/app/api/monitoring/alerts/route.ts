@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkApiAuth, createDemoResponse } from '@/lib/api-auth';
 
-const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL || 'http://localhost:3007';
+const MONITORING_SERVICE_URL = process.env.ATP_MONITORING_URL ?? 'http://localhost:3007';
 
 export async function GET(request: NextRequest) {
   try {
     // Check authentication - alerts contain sensitive security information
     const authResult = await checkApiAuth(request);
     if (!authResult.isAuthenticated) {
-      return authResult.error || createDemoResponse('alerts');
+      return authResult.error ?? createDemoResponse('alerts');
     }
 
     const { searchParams } = new URL(request.url);
@@ -17,8 +17,8 @@ export async function GET(request: NextRequest) {
 
     // Forward query parameters
     const params = new URLSearchParams();
-    if (searchParams.has('resolved')) params.append('resolved', searchParams.get('resolved')!);
-    if (searchParams.has('limit')) params.append('limit', searchParams.get('limit')!);
+    if (searchParams.has('resolved')) params.append('resolved', searchParams.get('resolved') ?? '');
+    if (searchParams.has('limit')) params.append('limit', searchParams.get('limit') ?? '');
 
     if (params.toString()) {
       monitoringUrl += `?${params.toString()}`;
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     // Check authentication - alert management requires authentication
     const authResult = await checkApiAuth(request);
     if (!authResult.isAuthenticated) {
-      return authResult.error || NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      return authResult.error ?? NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
