@@ -28,8 +28,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'OpenClaw Integration — Agent Trust Protocol',
-  description: 'Secure your OpenClaw multi-agent systems with ATP quantum-safe security. Complete guide to implementing agent identities, tool security, graph validation, and trust scoring.',
+  title: 'ATP Runtime Guard for OpenClaw — Agent Trust Protocol',
+  description: 'ATP Runtime Guard secures your OpenClaw multi-agent systems with quantum-safe cryptography, agent identity, tool-level security, graph validation, and dynamic trust scoring.',
   keywords: [
     'OpenClaw integration',
     'multi-agent security',
@@ -55,10 +55,10 @@ export default function OpenClawIntegrationPage() {
             </div>
           </div>
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extralight mb-6 animate-fade-in-up">
-            <span className="atp-gradient-text">OpenClaw</span> + ATP
+            <span className="atp-gradient-text">ATP Runtime Guard</span> for OpenClaw
           </h1>
           <p className="text-lg sm:text-xl text-foreground/80 mb-8 max-w-4xl mx-auto leading-relaxed animate-fade-in-up">
-            Secure your <span className="atp-gradient-text font-medium">multi-agent workflows</span> with
+            Drop ATP&apos;s runtime guard into your <span className="atp-gradient-text font-medium">OpenClaw workflows</span> to add
             quantum-safe cryptography, tool-level security, and dynamic trust scoring.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8 animate-fade-in-up">
@@ -350,7 +350,7 @@ export default function OpenClawIntegrationPage() {
               <Card className="glass border-0">
                 <CardHeader>
                   <CardTitle className="font-display">Install Package</CardTitle>
-                  <CardDescription>Add ATP OpenClaw integration to your project</CardDescription>
+                  <CardDescription>Add ATP Runtime Guard to your OpenClaw project</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="bg-black/60 rounded-lg p-4 font-mono text-sm overflow-x-auto">
@@ -649,10 +649,10 @@ const token = await secretManager.getSecret('api-key', {
           </div>
         </section>
 
-        {/* Why ATP + NemoClaw */}
+        {/* Why ATP Runtime Guard for OpenClaw */}
         <section className="mb-16">
           <h2 className="font-display text-3xl font-light mb-4 text-center">
-            <span className="atp-gradient-text">Why ATP + NemoClaw?</span>
+            <span className="atp-gradient-text">Why ATP Runtime Guard?</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Card className="glass border-0">
@@ -661,13 +661,13 @@ const token = await secretManager.getSecret('api-key', {
                   <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
                     <Key className="text-cyan-400" size={20} />
                   </div>
-                  <CardTitle className="font-display text-base">The Identity Layer NemoClaw Needs</CardTitle>
+                  <CardTitle className="font-display text-base">Cryptographic Agent Identity</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-foreground/70">
-                  NemoClaw provides powerful multi-agent orchestration; ATP adds cryptographic agent identity (DIDs),
-                  so every agent action is attributable and verifiable.
+                  ATP Runtime Guard gives every OpenClaw agent a cryptographic DID, so every action is
+                  attributable, verifiable, and auditable — not just assumed.
                 </p>
               </CardContent>
             </Card>
@@ -683,8 +683,8 @@ const token = await secretManager.getSecret('api-key', {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-foreground/70">
-                  NemoClaw agents communicate freely; ATP wraps those communications with ML-DSA (Dilithium) signatures,
-                  future-proofing your workflows against quantum threats.
+                  ATP wraps OpenClaw agent communications with ML-DSA (Dilithium) signatures,
+                  future-proofing your workflows against quantum threats without code changes.
                 </p>
               </CardContent>
             </Card>
@@ -700,14 +700,14 @@ const token = await secretManager.getSecret('api-key', {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-foreground/70">
-                  Instead of assuming agents are well-behaved, ATP&apos;s dynamic trust scoring lets NemoClaw workflows
-                  adapt in real time — restricting low-trust agents, elevating proven ones.
+                  ATP&apos;s dynamic trust scoring lets your OpenClaw workflows adapt in real time —
+                  restricting low-trust agents, elevating proven ones, automatically.
                 </p>
               </CardContent>
             </Card>
           </div>
           <p className="text-center text-foreground/60 text-sm italic">
-            NemoClaw handles the &quot;how&quot; of multi-agent work. ATP handles the &quot;who&quot; and &quot;should they&quot;.
+            OpenClaw handles the &quot;how&quot; of multi-agent work. ATP Runtime Guard handles the &quot;who&quot; and &quot;should they&quot;.
           </p>
         </section>
 
@@ -783,7 +783,7 @@ const token = await secretManager.getSecret('api-key', {
                 Ready to Secure Your Multi-Agent System?
               </CardTitle>
               <CardDescription className="text-base">
-                Install the ATP OpenClaw integration and add quantum-safe security in minutes
+                Install ATP Runtime Guard and add quantum-safe security to your OpenClaw agents in minutes
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col sm:flex-row gap-4 justify-center">
