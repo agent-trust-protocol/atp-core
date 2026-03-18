@@ -287,7 +287,12 @@ export default function HomePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Quantum-safe signature demo available soon</p>
+                <Button asChild variant="outline" size="sm" className="glass border-cyan-500/30 hover:bg-cyan-500/10">
+                  <Link href="/playground">
+                    Try Demo
+                    <ArrowRight size={12} className="ml-1" />
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
 
@@ -304,7 +309,12 @@ export default function HomePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Trust level management demo available soon</p>
+                <Button asChild variant="outline" size="sm" className="glass border-purple-500/30 hover:bg-purple-500/10">
+                  <Link href="/playground">
+                    Try Demo
+                    <ArrowRight size={12} className="ml-1" />
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -322,7 +332,12 @@ export default function HomePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Performance metrics demo available soon</p>
+              <Button asChild variant="outline" size="sm" className="glass border-green-500/30 hover:bg-green-500/10">
+                <Link href="/playground">
+                  Try Demo
+                  <ArrowRight size={12} className="ml-1" />
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         </div>

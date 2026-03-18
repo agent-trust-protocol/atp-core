@@ -649,6 +649,68 @@ const token = await secretManager.getSecret('api-key', {
           </div>
         </section>
 
+        {/* Why ATP + NemoClaw */}
+        <section className="mb-16">
+          <h2 className="font-display text-3xl font-light mb-4 text-center">
+            <span className="atp-gradient-text">Why ATP + NemoClaw?</span>
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <Card className="glass border-0">
+              <CardHeader>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+                    <Key className="text-cyan-400" size={20} />
+                  </div>
+                  <CardTitle className="font-display text-base">The Identity Layer NemoClaw Needs</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-foreground/70">
+                  NemoClaw provides powerful multi-agent orchestration; ATP adds cryptographic agent identity (DIDs),
+                  so every agent action is attributable and verifiable.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="glass border-0">
+              <CardHeader>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                    <Shield className="text-purple-400" size={20} />
+                  </div>
+                  <CardTitle className="font-display text-base">Quantum-Safe by Default</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-foreground/70">
+                  NemoClaw agents communicate freely; ATP wraps those communications with ML-DSA (Dilithium) signatures,
+                  future-proofing your workflows against quantum threats.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="glass border-0">
+              <CardHeader>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20">
+                    <TrendingUp className="text-green-400" size={20} />
+                  </div>
+                  <CardTitle className="font-display text-base">Trust Without Blind Faith</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-foreground/70">
+                  Instead of assuming agents are well-behaved, ATP&apos;s dynamic trust scoring lets NemoClaw workflows
+                  adapt in real time — restricting low-trust agents, elevating proven ones.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+          <p className="text-center text-foreground/60 text-sm italic">
+            NemoClaw handles the &quot;how&quot; of multi-agent work. ATP handles the &quot;who&quot; and &quot;should they&quot;.
+          </p>
+        </section>
+
         {/* Resources */}
         <section className="mb-16">
           <h2 className="font-display text-3xl font-light mb-8 text-center">
