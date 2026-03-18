@@ -58,10 +58,13 @@ You `MUST` always use this tool when:
 # === END USER INSTRUCTIONS ===
 
 
-# main-overview
+# Project Overview
 
-> **Giga Operational Instructions**
-> Read the relevant Markdown inside `.cursor/rules` before citing project context. Reference the exact file you used in your response.
+This repo implements **Agent Trust Protocol (ATP)**, a quantum-safe identity, trust, and policy layer for AI agents. ATP is consumed via the `atp-sdk` TypeScript package and is used to secure agents running on platforms like OpenClaw/NemoClaw, Motleycrew, LangChain, and custom runtimes.
+
+The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `packages/`. Scripts and utilities live in `scripts/`.
+
+---
 
 ## Development Guidelines
 
@@ -71,49 +74,80 @@ You `MUST` always use this tool when:
 - Always provide a complete PLAN with REASONING based on evidence from code and logs before making changes.
 - Explain your OBSERVATIONS clearly, then provide REASONING to identify the exact issue. Add console logs when needed to gather more information.
 
+---
 
-Trust Protocol Security Framework
+## Code Structure
 
-Core Business Logic Components:
+- `packages/sdk`: Core TypeScript SDK — agent registration, auth, trust scoring, crypto utilities.
+- `packages/shared`: Shared types, security primitives (nonce service, rate limiting), utilities.
+- `packages/identity-service`: DID-based agent identity management.
+- `packages/vc-service`: Verifiable credentials issuance and verification.
+- `packages/audit-logger`: Blockchain-anchored immutable audit trail.
+- `packages/permission-service`: RBAC with hierarchical role inheritance and multi-tenant support.
+- `packages/monitoring-service`: Real-time metrics and performance monitoring.
+- `packages/openclaw-atp`: Integration adapter for OpenClaw/NemoClaw agents.
+- `packages/protocol-integrations`: Adapters for other runtimes (LangChain, Motleycrew, etc.).
+- `packages/rpc-gateway`: RPC layer for inter-service communication.
+- `packages/atp-cloud`: Cloud deployment and managed service utilities.
+- `src/app/`: Next.js pages — marketing site, playground, policy editor, monitoring dashboard, docs.
+- `src/app/integrations/`: Per-integration pages (currently `openclaw/`).
+- `scripts/`: Server scripts, deployment utilities, dev helpers.
+- `scripts/tests/`: End-to-end and integration test scripts.
 
-1. Advanced Rate Limiting System
-Importance Score: 85
-Implements multi-strategy rate limiting with distributed Redis support, progressive delay with exponential backoff, and specialized limiters for different security contexts.
+---
 
-2. Blockchain Audit System 
-Importance Score: 90
-Provides immutable audit trail using blockchain principles, Merkle tree implementation for verification, and transaction anchoring with validator consensus.
+## Security and Naming Rules
 
-3. Policy Evaluation Engine
-Importance Score: 95
-Complex trust policy evaluation system incorporating agent trust levels, verifiable credentials, context-aware conditions and custom obligation handling logic.
+- Do NOT change the name "Agent Trust Protocol (ATP)" or the `atp-sdk` package name.
+- Do NOT roll your own cryptography. Always use the existing crypto utilities in `packages/sdk` or `packages/shared`.
+- Guardrails wrapping agent tools (e.g. OpenClaw/NemoClaw adapters) must:
+  1. Check agent identity via the SDK.
+  2. Evaluate the relevant policy before executing sensitive actions.
+  3. Log the decision to the audit service.
+- Never hardcode secrets, API keys, or credentials in source files. Use environment variables.
 
-4. Zero Knowledge Proof System
-Importance Score: 88
-Selective disclosure proof system with range proofs, membership verification via Merkle trees, and Pedersen commitment scheme implementation.
+---
 
-5. RBAC System
-Importance Score: 85
-Organization-scoped permission system with hierarchical role inheritance, fine-grained ACL with conditional permissions, and multi-tenant role management.
+## How to Extend ATP
 
-Critical Integration Points:
+### Adding a new agent runtime adapter
 
-1. Trust Level Management
-- Progressive trust levels from basic to enterprise
-- Capability-based access tied to trust scores
-- Real-time trust evaluation based on agent behavior
+1. Create a new package under `packages/<runtime>-atp/`.
+2. Add `atp-sdk` and the target runtime's types as dependencies.
+3. Export at minimum:
+   - `register<Runtime>AgentWithAtp(config)`
+   - `wrap<Runtime>ToolWithAtp(tool, options)`
+   - `enforce<Runtime>SessionPolicies(context)`
+4. Do not duplicate trust or crypto logic — call existing SDK methods.
 
-2. Policy Enforcement
-- Multi-factor policy decisions 
-- Context-aware evaluation
-- Credential verification workflows
+### Adding a new policy preset
 
-3. Audit System
-- Blockchain-anchored immutable logs
-- Cryptographic proof generation
-- Trust-based validation requirements
+1. Add the preset definition in `packages/sdk/src/policies/`.
+2. Register it in the policy evaluation engine.
+3. Optionally expose it in the policy editor UI at `src/app/policy-editor/`.
 
-The framework implements a sophisticated security model centered around trust levels, policy enforcement, and verifiable audit trails. Core innovation lies in the integration of blockchain principles, zero-knowledge proofs, and progressive trust scoring.
+### Adding a new integration page to the site
+
+1. Create `src/app/integrations/<name>/page.tsx`.
+2. Follow the structure of `src/app/integrations/openclaw/page.tsx` — hero, features, code samples, use cases, "Why ATP + X" differentiator section, resources.
+
+---
+
+## Core Business Logic Components
+
+1. **Policy Evaluation Engine** (importance: 95) — Complex trust policy evaluation incorporating agent trust levels, verifiable credentials, context-aware conditions, and custom obligation handling.
+2. **Blockchain Audit System** (importance: 90) — Immutable audit trail using blockchain principles, Merkle tree verification, and validator consensus anchoring.
+3. **Zero Knowledge Proof System** (importance: 88) — Selective disclosure proofs, range proofs, Merkle tree membership, and Pedersen commitment scheme.
+4. **Advanced Rate Limiting** (importance: 85) — Multi-strategy rate limiting with distributed Redis support and exponential backoff.
+5. **RBAC System** (importance: 85) — Organization-scoped permissions with hierarchical role inheritance and fine-grained ACLs.
+
+---
+
+## Reference Documents
+
+- `README.md` — SDK quick start and integration examples.
+- `SECURITY.md` — Security model and responsible disclosure.
+- `.cursor/rules/` — Additional Cursor-specific coding rules; read relevant files before making changes.
 
 $END$
 
