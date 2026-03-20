@@ -1,6 +1,7 @@
 {
   "name": "@atp/support-agent",
   "version": "1.0.0",
+  "private": true,
   "description": "AI-powered customer support agent using Agent Trust Protocol",
   "main": "dist/index.js",
   "scripts": {

@@ -1,6 +1,7 @@
 {
   "name": "@atp/vc-service",
   "version": "0.1.0",
+  "private": true,
   "type": "module",
   "description": "W3C Verifiable Credentials service for Agent Trust Protocol",
   "main": "dist/index.js",

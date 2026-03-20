@@ -1,6 +1,7 @@
 {
   "name": "@atp/session-sync-mcp",
   "version": "1.0.0",
+  "private": true,
   "description": "MCP Server for cross-agent session synchronization between Cursor and Claude Code",
   "type": "module",
   "main": "dist/index.js",
