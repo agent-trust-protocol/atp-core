@@ -86,11 +86,22 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
 - `packages/permission-service`: RBAC with hierarchical role inheritance and multi-tenant support.
 - `packages/monitoring-service`: Real-time metrics and performance monitoring.
 - `packages/openclaw-atp`: Integration adapter for OpenClaw/NemoClaw agents.
+  - `src/agent/` — DID registration, trust scoring (`registerAgentWithAtp`, `updateAgentTrust`)
+  - `src/tools/` — `ATPToolWrapper`, `secureTools` (per-call auth + audit + rate-limit)
+  - `src/session/` — State-machine policy enforcement (`enforceAtpPoliciesForClawSession`, `defaultClawStatePolicy`); states: planning | executing | communicating | completed
+  - `src/claw-api.ts` — Canonical public aliases: `registerClawWithAtp`, `wrapSkillWithAtp`
+  - `src/policy/` — Policy profiles (strictDev, productionFinance, researchWorkflow)
+  - `src/graph/` — Agent graph / crew topology validation
+  - `src/tasks/` — Task-level security decorator and validator
+  - `src/observability/` — Lunary exporter and behaviour monitor
+  - `src/connectors/` — Secret manager and service connector
+  - `src/__tests__/` — Jest unit tests (registration, wrapper, session enforcement)
+  - `examples/` — `finance-workflow.ts`, `stateful-session.ts`
 - `packages/protocol-integrations`: Adapters for other runtimes (LangChain, Motleycrew, etc.).
 - `packages/rpc-gateway`: RPC layer for inter-service communication.
 - `packages/atp-cloud`: Cloud deployment and managed service utilities.
 - `src/app/`: Next.js pages — marketing site, playground, policy editor, monitoring dashboard, docs.
-- `src/app/integrations/`: Per-integration pages (currently `openclaw/`).
+- `src/app/integrations/`: Per-integration pages (`openclaw/` main page and `openclaw/agents/` live agent dashboard).
 - `scripts/`: Server scripts, deployment utilities, dev helpers.
 - `scripts/tests/`: End-to-end and integration test scripts.
 
@@ -115,9 +126,9 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
 1. Create a new package under `packages/<runtime>-atp/`.
 2. Add `atp-sdk` and the target runtime's types as dependencies.
 3. Export at minimum:
-   - `register<Runtime>AgentWithAtp(config)`
-   - `wrap<Runtime>ToolWithAtp(tool, options)`
-   - `enforce<Runtime>SessionPolicies(context)`
+   - `register<Runtime>AgentWithAtp(config)` → see `registerClawWithAtp` in `packages/openclaw-atp/src/claw-api.ts`
+   - `wrap<Runtime>ToolWithAtp(tool, options)` → see `wrapSkillWithAtp` in `packages/openclaw-atp/src/claw-api.ts`
+   - `enforce<Runtime>SessionPolicies(context)` → see `enforceAtpPoliciesForClawSession` in `packages/openclaw-atp/src/session/enforce.ts`
 4. Do not duplicate trust or crypto logic — call existing SDK methods.
 
 ### Adding a new policy preset
@@ -130,6 +141,28 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
 
 1. Create `src/app/integrations/<name>/page.tsx`.
 2. Follow the structure of `src/app/integrations/openclaw/page.tsx` — hero, features, code samples, use cases, "Why ATP + X" differentiator section, resources.
+
+---
+
+## packages/openclaw-atp — Public API
+
+| Export | File | Purpose |
+|---|---|---|
+| `registerClawWithAtp(atpClient, config)` | `src/claw-api.ts` | Register an OpenClaw agent; returns DID, keys, and trust score |
+| `wrapSkillWithAtp(skill, atpClient, opts?)` | `src/claw-api.ts` | Secure a skill function with auth, policy, rate-limit, and audit |
+| `enforceAtpPoliciesForClawSession(ctx, atpClient, opts?)` | `src/session/enforce.ts` | Evaluate tool permissions for a given lifecycle state |
+| `defaultClawStatePolicy` | `src/session/enforce.ts` | Default state → tools map for all four states |
+| `ATPToolWrapper` | `src/tools/wrapper.ts` | Class-based tool wrapper (underlying engine for `wrapSkillWithAtp`) |
+| `secureTools(tools[], atpClient, config?)` | `src/tools/wrapper.ts` | Batch-wrap multiple tools at once |
+| `OpenClawATPClient` | `src/client.ts` | Pre-configured ATP client factory for OpenClaw |
+
+**Session States** (`planning → executing → communicating → completed`):
+- `planning`: no tools allowed; shell/http/fs restricted
+- `executing`: http + fs allowed; shell-dangerous restricted
+- `communicating`: messaging allowed; external-send requires approval
+- `completed`: read-only-logs only; shell/fs/http restricted
+
+To run the unit tests: `cd packages/openclaw-atp && npm test` — covers registration, tool wrapping, and all four session states.
 
 ---
 
@@ -148,6 +181,9 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
 - `README.md` — SDK quick start and integration examples.
 - `SECURITY.md` — Security model and responsible disclosure.
 - `.cursor/rules/` — Additional Cursor-specific coding rules; read relevant files before making changes.
+- `packages/openclaw-atp/README.md` — Full OpenClaw integration guide, quick-start, and all config options.
+- `packages/openclaw-atp/INTEGRATION-GUIDE.md` — Step-by-step setup for production deployments.
+- `packages/openclaw-atp/examples/` — Runnable examples: `finance-workflow.ts` (trading crew), `stateful-session.ts` (state machine walk-through).
 
 $END$
 
