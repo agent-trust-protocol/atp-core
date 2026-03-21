@@ -81,7 +81,11 @@ export function middleware(request: NextRequest) {
     const demoToken = request.cookies.get('atp_token');
 
     if (!sessionCookie && !demoToken) {
-      // Redirect to login with return URL
+      // API routes return 401 JSON instead of redirecting
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      // Redirect page routes to login with return URL
       const loginUrl = new URL('/login', request.url);
       if (pathname !== '/') {
         loginUrl.searchParams.set('returnTo', pathname);

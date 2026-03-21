@@ -118,7 +118,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <a
-                  href="https://github.com/agent-trust-protocol/core"
+                  href="https://github.com/agent-trust-protocol/atp-core"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"

@@ -17,15 +17,15 @@ import {
   ATPPolicyProfile,
   ATPConfigProfile,
   createTaskMetadata
-} from '@atp/motleycrew-atp';
+} from '@atpdevelopment/openclaw-atp';
 
-// Mock Motleycrew imports (would be real in actual usage)
-// import { MotleyCrew } from 'motleycrew';
-// import { ReActToolCallingMotleyAgent } from 'motleycrew/agents/langchain';
-// import { SimpleTask } from 'motleycrew/tasks';
+// Mock OpenClaw imports (would be real in actual usage)
+// import { OpenClaw } from '@atpdevelopment/openclaw-atp';
+// import { ReActToolCallingClawAgent } from '@atpdevelopment/openclaw-atp/agents';
+// import { SimpleTask } from '@atpdevelopment/openclaw-atp/tasks';
 
 async function main() {
-  console.log('🔐 ATP Motleycrew Finance Workflow Example\n');
+  console.log('🔐 ATP OpenClaw Finance Workflow Example\n');
 
   // 1. Initialize ATP Client
   const atpConfig = ATPConfigProfile.productionFinance('https://atp.company.com', {

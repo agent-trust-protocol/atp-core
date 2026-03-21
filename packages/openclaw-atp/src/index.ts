@@ -38,6 +38,21 @@ export { ATPSecretManager } from './connectors/secrets.js';
 export { ATPServiceConnector } from './connectors/service-connector.js';
 export type { ConnectorConfig, CredentialScope } from './connectors/types.js';
 
+// Session Policy Enforcement
+export { enforceAtpPoliciesForClawSession, defaultClawStatePolicy } from './session/enforce.js';
+export type {
+  SessionState,
+  ClawStatePolicy,
+  ClawStatePermissions,
+  ClawSessionContext,
+  SessionPolicyResult,
+  EnforceSessionOptions
+} from './session/types.js';
+
+// OpenClaw Convenience API (canonical function names)
+export { registerClawWithAtp, wrapSkillWithAtp } from './claw-api.js';
+export type { ClawConfig } from './claw-api.js';
+
 // Utilities
 export { OpenClawATPClient } from './client.js';
 export type { OpenClawIntegrationConfig } from './types.js';

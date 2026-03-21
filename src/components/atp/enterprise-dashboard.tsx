@@ -1,42 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Shield,
   Users,
   Activity,
-  Database,
   Zap,
   Clock,
   AlertTriangle,
   CheckCircle,
-  TrendingUp,
-  TrendingDown,
   Server,
   Globe,
   Lock,
   Eye,
-  Settings,
   BarChart3,
-  PieChart,
-  LineChart,
-  Cpu,
-  HardDrive,
-  Network,
   ShieldCheck,
   AlertCircle,
   Info,
   RefreshCw,
-  Filter,
   Download,
-  Calendar,
-  Target,
   Award,
   Gauge
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -81,7 +68,7 @@ interface ServiceStatus {
   responseTime: number
   uptime: number
   version: string
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   lastUpdated: Date
   healthScore: number
 }
@@ -200,7 +187,7 @@ export function EnterpriseDashboard() {
     }
   });
 
-  const [alerts, setAlerts] = useState<SecurityAlert[]>([
+  const [alerts] = useState<SecurityAlert[]>([
     {
       id: '1',
       type: 'warning',

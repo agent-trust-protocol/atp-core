@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import * as crypto from 'crypto';
 
 // Simple crypto utilities for demo purposes
 const CryptoUtils = {
-  verifySignature: async (message: string, signature: string, publicKey: string, quantumSafe: boolean = true) => {
+  verifySignature: async (message: string, signature: string, publicKey: string, _quantumSafe: boolean = true) => {
     // For demo purposes, we verify using HMAC consistency
     // In production, this would use proper Ed25519 verification
     try {
@@ -17,7 +16,7 @@ const CryptoUtils = {
 
 export async function POST(request: NextRequest) {
   // Check authentication - CRITICAL IP PROTECTION
-  const token = request.cookies.get('atp_token')?.value ||
+  const token = request.cookies.get('atp_token')?.value ??
                 request.headers.get('Authorization')?.replace('Bearer ', '');
 
   if (!token) {
@@ -52,10 +51,11 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
       algorithm: 'hybrid-ed25519-demo'
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('Signature verification error:', error);
     return NextResponse.json(
-      { error: 'Failed to verify signature', details: error.message },
+      { error: 'Failed to verify signature', details: message },
       { status: 500 }
     );
   }

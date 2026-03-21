@@ -15,6 +15,45 @@ export interface RateLimitResult {
   resetTime: number;
 }
 
+/** In-memory fallback store used when Redis is unavailable. */
+interface FallbackEntry {
+  count: number;
+  resetAt: number; // epoch ms when this window expires
+}
+
+const fallbackStore = new Map<string, FallbackEntry>();
+
+/** Prune entries older than their window every 5 minutes to bound memory use. */
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of fallbackStore) {
+    if (entry.resetAt <= now) fallbackStore.delete(key);
+  }
+}, 5 * 60 * 1000).unref?.();
+
+function checkFallback(key: string, maxRequests: number, windowMs: number, now: number): RateLimitResult {
+  const entry = fallbackStore.get(key);
+  if (!entry || entry.resetAt <= now) {
+    // Start a fresh window
+    fallbackStore.set(key, { count: 1, resetAt: now + windowMs });
+    return {
+      allowed: true,
+      totalHits: 1,
+      remainingRequests: maxRequests - 1,
+      resetTime: now + windowMs,
+    };
+  }
+
+  entry.count += 1;
+  const allowed = entry.count <= maxRequests;
+  return {
+    allowed,
+    totalHits: entry.count,
+    remainingRequests: Math.max(0, maxRequests - entry.count),
+    resetTime: entry.resetAt,
+  };
+}
+
 export class RateLimiter {
   private cache: RedisCache;
   private config: RateLimitConfig;
@@ -27,7 +66,6 @@ export class RateLimiter {
   async checkLimit(identifier: string, endpoint?: string): Promise<RateLimitResult> {
     const key = this.generateKey(identifier, endpoint);
     const now = Date.now();
-    const windowStart = now - this.config.windowMs;
 
     try {
       // Get current count and last reset time
@@ -43,7 +81,7 @@ export class RateLimiter {
           allowed: true,
           totalHits: 1,
           remainingRequests: this.config.maxRequests - 1,
-          resetTime: now + this.config.windowMs
+          resetTime: now + this.config.windowMs,
         };
       }
 
@@ -53,7 +91,7 @@ export class RateLimiter {
           allowed: false,
           totalHits: currentCount,
           remainingRequests: 0,
-          resetTime: lastReset + this.config.windowMs
+          resetTime: lastReset + this.config.windowMs,
         };
       }
 
@@ -64,18 +102,13 @@ export class RateLimiter {
         allowed: true,
         totalHits: newCount,
         remainingRequests: Math.max(0, this.config.maxRequests - newCount),
-        resetTime: lastReset + this.config.windowMs
+        resetTime: lastReset + this.config.windowMs,
       };
 
     } catch (error) {
-      console.error('Rate limiter error:', error);
-      // Fail open - allow request if Redis is down
-      return {
-        allowed: true,
-        totalHits: 0,
-        remainingRequests: this.config.maxRequests,
-        resetTime: now + this.config.windowMs
-      };
+      // Redis unavailable — fall back to in-process rate limiting (fail-closed)
+      console.warn('[RateLimiter] Redis unavailable, using in-memory fallback (fail-closed):', (error as Error).message);
+      return checkFallback(key, this.config.maxRequests, this.config.windowMs, now);
     }
   }
 
@@ -84,7 +117,11 @@ export class RateLimiter {
     if (this.config.skipFailedRequests && !success) return;
 
     const key = this.generateKey(identifier, endpoint);
-    await this.cache.incr(key, Math.ceil(this.config.windowMs / 1000));
+    try {
+      await this.cache.incr(key, Math.ceil(this.config.windowMs / 1000));
+    } catch {
+      // Best-effort; fallback store is already incremented via checkLimit
+    }
   }
 
   async getRemainingRequests(identifier: string, endpoint?: string): Promise<number> {
@@ -94,8 +131,13 @@ export class RateLimiter {
 
   async resetLimit(identifier: string, endpoint?: string): Promise<void> {
     const key = this.generateKey(identifier, endpoint);
-    await this.cache.del(key);
-    await this.cache.del(`${key}:reset`);
+    fallbackStore.delete(key);
+    try {
+      await this.cache.del(key);
+      await this.cache.del(`${key}:reset`);
+    } catch {
+      // Ignore Redis errors on reset
+    }
   }
 
   private generateKey(identifier: string, endpoint?: string): string {

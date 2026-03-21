@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     // Check authentication for workflow-related endpoints
     const authResult = await checkApiAuth(request);
     if (!authResult.isAuthenticated) {
-      return authResult.error || createDemoResponse('workflow-health');
+      return authResult.error ?? createDemoResponse('workflow-health');
     }
 
     switch (action) {
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
           timestamp: new Date().toISOString()
         });
 
-      case 'nodes':
+      case 'nodes': {
         const workflowNodes = [
           {
             type: 'policy-change-trigger',
@@ -128,6 +128,7 @@ export async function GET(request: NextRequest) {
           categories: ['trigger', 'action', 'condition'],
           total: workflowNodes.length
         });
+      }
 
       default:
         return NextResponse.json({ error: 'Unknown workflow action' }, { status: 400 });

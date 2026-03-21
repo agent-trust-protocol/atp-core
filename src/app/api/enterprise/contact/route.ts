@@ -110,18 +110,8 @@ export async function POST(request: NextRequest) {
     const leadScore = calculateLeadScore(contactData);
     const priority = getLeadPriority(leadScore);
 
-    // Create enriched lead data
-    const leadData = {
-      ...contactData,
-      leadScore,
-      priority,
-      submittedAt: new Date().toISOString(),
-      source: 'enterprise-contact-form',
-      followUpRequired: priority === 'High' ? 'immediate' : priority === 'Medium' ? '24h' : '72h'
-    };
-
     // TODO: In production, integrate with CRM (Salesforce, HubSpot, etc.)
-    // await saveToCRM(leadData);
+    // await saveToCRM({ ...contactData, leadScore, priority, submittedAt: new Date().toISOString(), source: 'enterprise-contact-form' });
 
     // TODO: Send internal notification for high-priority leads
     if (priority === 'High') {

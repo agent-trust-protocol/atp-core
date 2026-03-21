@@ -9,8 +9,8 @@
  * with cryptographic verification and audit trails.
  */
 
-import { BaseClient } from './base';
-import { CryptoUtils } from '../utils/crypto';
+import { BaseClient } from './base.js';
+import { CryptoUtils } from '../utils/crypto.js';
 import type {
   ATPConfig,
   ATPResponse,
@@ -22,7 +22,7 @@ import type {
   PaymentResult,
   ACPCheckoutSession,
   PaymentPolicy
-} from '../types';
+} from '../types.js';
 
 export class PaymentsClient extends BaseClient {
   constructor(config: ATPConfig) {

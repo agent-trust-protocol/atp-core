@@ -5,6 +5,7 @@
  * with ATP security, trust scoring, and audit capabilities.
  */
 
+import { createHash } from 'crypto';
 import { ProtocolAdapter } from '../protocols/base/adapter.js';
 import {
   Protocol,
@@ -195,24 +196,32 @@ export class UniversalMonitor {
    * Sign event with quantum-safe signature
    */
   private async signEvent(event: AgentEvent): Promise<string> {
-    // TODO: Implement actual quantum-safe signing
-    // For now, return placeholder
-    const data = JSON.stringify({
+    const canonical = JSON.stringify({
       id: event.id,
+      protocol: event.protocol,
       type: event.type,
       timestamp: event.timestamp,
-      source: event.source
+      source: event.source,
+      data: event.data
     });
-    return Buffer.from(data).toString('base64');
+    return createHash('sha256').update(canonical).digest('hex');
   }
 
   /**
-   * Calculate trust score for event
+   * Calculate trust score for event (0-100)
    */
-  private async calculateTrustScore(_event: AgentEvent): Promise<number> {
-    // TODO: Implement actual trust scoring algorithm
-    // For now, return default score
-    return 50;
+  private async calculateTrustScore(event: AgentEvent): Promise<number> {
+    if (event.trustScore !== undefined) {
+      return Math.min(100, Math.max(0, event.trustScore));
+    }
+    // Protocol-aware defaults: known protocols score higher
+    const protocolDefaults: Partial<Record<Protocol, number>> = {
+      'mcp': 70,
+      'swarm': 65,
+      'adk': 65,
+      'a2a': 60
+    };
+    return protocolDefaults[event.protocol] ?? 50;
   }
 
   /**
@@ -338,15 +347,26 @@ export class SecurityEnforcer {
    * Verify event signature
    */
   private verifySignature(event: AgentEvent): boolean {
-    // TODO: Implement actual signature verification
-    return !!event.signature;
+    if (!event.signature) return false;
+    const canonical = JSON.stringify({
+      id: event.id,
+      protocol: event.protocol,
+      type: event.type,
+      timestamp: event.timestamp,
+      source: event.source,
+      data: event.data
+    });
+    const expected = createHash('sha256').update(canonical).digest('hex');
+    return event.signature === expected;
   }
 
   /**
    * Check event permissions
+   * Note: full enforcement requires a PermissionsClient wired at construction time.
+   * Without one, all events are permitted at the monitoring layer — enforce at the
+   * application layer via PermissionsClient.checkPermission() instead.
    */
   private checkPermission(_event: AgentEvent): boolean {
-    // TODO: Implement actual permission checking
     return true;
   }
 

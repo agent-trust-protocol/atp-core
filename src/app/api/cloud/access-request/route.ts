@@ -102,9 +102,9 @@ export async function POST(request: NextRequest) {
       </html>
     `;
 
-    const emailSent = await emailService.sendEmail({
+    await emailService.sendEmail({
       to: recipientEmail,
-      subject: `🚀 ATP Cloud Request: ${body.company} (${body.agents || 'Size not specified'})`,
+      subject: `🚀 ATP Cloud Request: ${body.company} (${body.agents ?? 'Size not specified'})`,
       html
     });
 

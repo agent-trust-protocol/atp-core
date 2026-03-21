@@ -135,8 +135,6 @@ export async function applyRateLimit(
   }
 
   // Add rate limit headers to successful responses
-  const remainingRequests = Math.max(0, limitConfig.maxRequests - entry.count);
-
   // Return null to indicate request should proceed
   // Headers will be added by the wrapper
   return null;
@@ -147,12 +145,11 @@ export async function applyRateLimit(
  */
 function generateRateLimitKey(request: NextRequest, type: string): string {
   // Get identifier components
-  const ip = request.headers.get('x-forwarded-for') ||
-             request.headers.get('x-real-ip') ||
+  const ip = request.headers.get('x-forwarded-for') ??
+             request.headers.get('x-real-ip') ??
              'unknown';
 
   const path = request.nextUrl.pathname;
-  const userAgent = request.headers.get('user-agent') || 'unknown';
 
   // For auth endpoints, also include username/email if present
   let identifier = `${type}:${ip}:${path}`;
