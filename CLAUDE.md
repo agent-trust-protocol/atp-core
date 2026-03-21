@@ -58,6 +58,47 @@ You `MUST` always use this tool when:
 # === END USER INSTRUCTIONS ===
 
 
+# Project Overview
+
+ATP (Agent Trust Protocol) is a quantum-safe identity, trust, and policy framework for AI agents. It provides decentralized identity (DID), verifiable credentials, trust scoring, policy-based access control, and blockchain-anchored audit trails. The project is a TypeScript/Node.js monorepo with a Next.js frontend.
+
+Core package: `atp-sdk` (v1.2.1)
+
+## Monorepo Architecture (`packages/`)
+
+| Package | Description |
+|---------|-------------|
+| `sdk/` | **Core SDK** — Agent registration, DID, credentials, permissions, audit, payments, crypto (quantum-safe ML-DSA + Ed25519), ZKP authentication |
+| `openclaw-atp/` | **OpenClaw/NemoClaw adapter** — First-class integration wrapping SDK primitives for OpenClaw agents (tool security, policy profiles, graph validation, observability) |
+| `identity-service/` | Identity management service |
+| `permission-service/` | RBAC and policy enforcement service |
+| `vc-service/` | Verifiable Credentials service |
+| `audit-logger/` | Blockchain-anchored audit logging service |
+| `payment-service/` | Payment protocol (AP2/ACP) service |
+| `rpc-gateway/` | RPC/API gateway layer |
+| `monitoring-service/` | Observability and monitoring |
+| `protocol-integrations/` | Multi-protocol adapters (MCP, Swarm, A2A) |
+| `shared/` | Shared types and utilities |
+| `atp-cloud/` | Cloud deployment infrastructure |
+| `atp-support-agent/` | Support agent implementation |
+| `session-sync-mcp/` | Session synchronization MCP |
+
+## Core SDK vs Adapters
+
+- **`packages/sdk/`** provides the foundational primitives: identity, crypto, permissions, audit, credentials, payments, and protocol detection.
+- **Adapters** (like `packages/openclaw-atp/`) depend on `atp-sdk` and wrap its primitives for specific agent runtimes.
+- **OpenClaw/NemoClaw** is a first-class integration target with full tool wrapping (`ATPToolWrapper`, `secureTools`), pre-built policy profiles (`strictDev`, `productionFinance`, `piiWorkflow`, `researchWorkflow`), graph validation, and observability hooks.
+- To integrate a new runtime, follow the `openclaw-atp` pattern: create a new adapter package that depends on `atp-sdk`.
+
+## Development Rules
+
+- **Do not add runtime-specific code** (OpenClaw, LangChain, CrewAI, etc.) into `packages/sdk/`. Create or extend an adapter package instead.
+- **Always use SDK crypto and auth utilities** (`CryptoUtils`, `DIDUtils`, `JWTUtils`) — never roll your own cryptography or authentication.
+- **New integrations must follow the adapter pattern**: depend on `atp-sdk`, wrap SDK primitives, expose integration-specific APIs. Use `packages/openclaw-atp/` as the reference implementation.
+- **Keep adapter packages self-contained** with their own types, tests, and documentation.
+
+---
+
 # main-overview
 
 > **Giga Operational Instructions**
