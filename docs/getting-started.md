@@ -248,23 +248,23 @@ if (permCheck.result.data.allowed) {
 }
 ```
 
-## Multi-Agent Workflows with Motleycrew
+## Multi-Agent Workflows with OpenClaw
 
-ATP now supports [Motleycrew](https://github.com/ShoggothAI/motleycrew) multi-agent systems with quantum-safe security:
+ATP now supports [OpenClaw](https://openclaw.dev) multi-agent systems with quantum-safe security:
 
-### Quick Start with Motleycrew
+### Quick Start with OpenClaw
 
 ```bash
-# Install Motleycrew integration
-npm install @atp/motleycrew-atp motleycrew
+# Install OpenClaw integration
+npm install @atpdevelopment/openclaw-atp
 ```
 
 ```typescript
-import { MotleycrewATPClient } from '@atp/motleycrew-atp';
-import { MotleyCrew, ReActToolCallingMotleyAgent } from 'motleycrew';
+import { OpenClawATPClient } from '@atpdevelopment/openclaw-atp';
+import { OpenClaw, ReActToolCallingClawAgent } from '@atpdevelopment/openclaw-atp';
 
 // 1. Initialize ATP client
-const atpClient = new MotleycrewATPClient({
+const atpClient = new OpenClawATPClient({
   atpServiceUrl: 'http://localhost:3000',
   profile: 'strictDev', // Pre-configured security profile
   enableMonitoring: true
@@ -273,7 +273,7 @@ const atpClient = new MotleycrewATPClient({
 await atpClient.initialize();
 
 // 2. Create and register agent
-const researcher = new ReActToolCallingMotleyAgent({
+const researcher = new ReActToolCallingClawAgent({
   name: 'Researcher',
   description: 'Analyzes market data',
   tools: researchTools
@@ -288,7 +288,7 @@ const { agent, registration } = await atpClient.registerAgent(researcher, {
 console.log(`✅ Agent registered with DID: ${registration.did}`);
 
 // 3. Create crew and validate
-const crew = new MotleyCrew();
+const crew = new OpenClaw();
 crew.add_agent(agent);
 
 const validation = await atpClient.validateCrew(crew);
@@ -301,14 +301,14 @@ if (!validation.isValid) {
 const result = await crew.run('Analyze market trends');
 ```
 
-Your Motleycrew agents now have:
+Your OpenClaw agents now have:
 - 🔐 Quantum-safe identities (hybrid Ed25519 + Dilithium3)
 - 🛡️ Tool-level security validation
 - 📊 Policy-based graph constraints
 - 🎯 Dynamic trust scoring
 - 📈 Lunary observability integration
 
-**Learn more:** [Motleycrew Integration Guide](./motleycrew-integration.md)
+**Learn more:** [OpenClaw Integration Guide](./openclaw-integration.md)
 
 ---
 
@@ -332,7 +332,7 @@ npm run demo
 ## Next Steps
 
 - **Explore the API**: Read the [API Reference](api/README.md)
-- **Secure Multi-Agent Systems**: See [Motleycrew Integration](./motleycrew-integration.md)
+- **Secure Multi-Agent Systems**: See [OpenClaw Integration](./openclaw-integration.md)
 - **Build Multi-Agent Workflows**: See [Integration Guide](integration.md)
 - **Understand Security**: Review [Security Model](security.md)
 - **Deploy to Production**: Check [Deployment Guide](deployment.md)

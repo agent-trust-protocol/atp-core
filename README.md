@@ -39,7 +39,7 @@ Explore ATP features interactively in the **[ATP Playground →](https://www.age
 - 🤖 Create quantum-safe agents
 - 📊 See trust scoring in action
 - 🔐 Test quantum-safe signatures
-- 🚀 Run Motleycrew multi-agent workflows
+- 🚀 Run OpenClaw multi-agent workflows
 - 📜 Explore the policy engine
 - 🔗 Verify blockchain audit trails
 
@@ -139,13 +139,13 @@ console.log('Verified:', result.verified); // true
 
 ### Integration with Popular Frameworks
 
-**Motleycrew (Multi-Agent Systems):**
+**OpenClaw (Multi-Agent Systems):**
 ```typescript
-import { registerAgentWithAtp, secureTools } from '@atp/motleycrew-atp';
+import { registerAgentWithAtp, secureTools } from '@atpdevelopment/openclaw-atp';
 import { ATPClient } from 'atp-sdk';
 
 const atp = new ATPClient();
-const { agent } = await registerAgentWithAtp(atp, motleycrewAgent, {
+const { agent } = await registerAgentWithAtp(atp, openClawAgent, {
   name: 'trader-agent',
   capabilities: ['trading', 'analysis'],
   trustLevel: 'high'
@@ -204,7 +204,7 @@ ATP now includes Context7 MCP server for enhanced documentation capabilities:
 ATP provides universal security across all AI agent protocols:
 
 ```
-Your AI Agents (LangChain, Motleycrew, AutoGPT, MCP, Swarm, ADK, A2A)
+Your AI Agents (LangChain, OpenClaw, AutoGPT, MCP, Swarm, ADK, A2A)
          │
          ▼
     ┌──────────────────────────────────────┐
@@ -244,23 +244,23 @@ pnpm add atp-sdk
 
 - **[Quick Start Guide](./docs/getting-started.md)** - 5-minute setup
 - **[API Reference](./packages/sdk/docs/api/README.md)** - Complete API docs
-- **[Motleycrew Integration](./docs/motleycrew-integration.md)** - Secure multi-agent workflows
+- **[OpenClaw Integration](./docs/openclaw-integration.md)** - Secure multi-agent workflows
 - **[Examples](./packages/sdk/examples/)** - Working code examples
 - **[Multi-Protocol Support](./docs/multi-protocol.md)** - MCP, Swarm, ADK, A2A
 - **[Troubleshooting](./docs/troubleshooting.md)** - Common issues
 
 ---
 
-## 🤖 Multi-Agent Systems with Motleycrew
+## 🤖 Multi-Agent Systems with OpenClaw
 
-ATP now provides first-class support for [Motleycrew](https://github.com/ShoggothAI/motleycrew) multi-agent frameworks. Secure entire agent crews with quantum-safe cryptography:
+ATP now provides first-class support for OpenClaw (formerly ClawBot / MotlBot) multi-agent frameworks. Secure entire agent crews with quantum-safe cryptography:
 
 ```typescript
-import { MotleycrewATPClient } from '@atp/motleycrew-atp';
-import { MotleyCrew } from 'motleycrew';
+import { OpenClawATPClient } from '@atpdevelopment/openclaw-atp';
+import { OpenClaw } from '@atpdevelopment/openclaw-atp';
 
-// Initialize ATP client with Motleycrew
-const atpClient = new MotleycrewATPClient({
+// Initialize ATP client with OpenClaw
+const atpClient = new OpenClawATPClient({
   profile: 'productionFinance', // Pre-configured security profiles
   enableMonitoring: true
 });
@@ -283,14 +283,14 @@ const validation = await atpClient.validateCrew(crew);
 ```
 
 **Features:**
-- 🔐 **Quantum-safe agent identities** for every Motleycrew agent
+- 🔐 **Quantum-safe agent identities** for every OpenClaw agent
 - 🛡️ **Tool-level security** with ATP permission checks on every call
 - 📊 **Graph validation** - Policy-based constraints on agent interactions
 - 🎯 **Trust-based access control** - Dynamic trust scores adjust permissions
 - 📈 **Lunary integration** - Observability feeds into ATP trust engine
 - 🔑 **Secret management** - Short-lived, scoped credentials for external services
 
-[Read the full guide →](./docs/motleycrew-integration.md)
+[Read the full guide →](./docs/openclaw-integration.md)
 
 ---
 
