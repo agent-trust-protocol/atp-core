@@ -144,7 +144,8 @@ export class DIDJWTService {
   private async resolveDID(did: string): Promise<any> {
     try {
       // Call identity service to resolve DID
-      const response = await fetch(`http://localhost:3001/identity/${encodeURIComponent(did)}`);
+      const identityUrl = process.env.ATP_IDENTITY_URL ?? 'http://localhost:3001';
+      const response = await fetch(`${identityUrl}/identity/${encodeURIComponent(did)}`);
       if (!response.ok) {
         return null;
       }

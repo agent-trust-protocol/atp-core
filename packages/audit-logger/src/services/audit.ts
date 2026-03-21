@@ -1,25 +1,35 @@
-import { randomUUID } from 'crypto';
-import { createHash } from 'crypto';
+import { randomUUID, createHash, createHmac } from 'crypto';
 import { AuditEvent, AuditEventRequest, AuditQuery } from '../models/audit.js';
 import { IAuditStorageService } from '../interfaces/storage.js';
 import { IPFSService } from './ipfs.js';
-// import { ATPEncryptionService } from '@atp/shared'; // TEMPORARILY DISABLED
+import { ATPEncryptionService } from '@atp/shared';
 
 export class AuditService {
-  private encryptionKey: string;
-  
+  private encryptionKey: Buffer;
+  private signingKey: string;
+
   constructor(
     private storage: IAuditStorageService,
     private ipfs: IPFSService
   ) {
-    // Generate or load master encryption key for audit logs - TEMPORARILY DISABLED
-    this.encryptionKey = process.env.AUDIT_ENCRYPTION_KEY || 'temporary-key-for-compatibility';
+    // Derive a 32-byte AES key from the env var using SHA-256
+    const rawKey = process.env.AUDIT_ENCRYPTION_KEY || '';
+    if (!rawKey && process.env.NODE_ENV === 'production') {
+      throw new Error('AUDIT_ENCRYPTION_KEY must be set in production');
+    }
+    this.encryptionKey = createHash('sha256').update(rawKey || randomUUID()).digest();
+
+    // Signing key for HMAC-SHA256 audit event signatures
+    this.signingKey = process.env.AUDIT_SIGNING_KEY || process.env.AUDIT_ENCRYPTION_KEY || '';
+    if (!this.signingKey && process.env.NODE_ENV === 'production') {
+      throw new Error('AUDIT_SIGNING_KEY (or AUDIT_ENCRYPTION_KEY) must be set in production');
+    }
   }
 
   async logEvent(request: AuditEventRequest): Promise<AuditEvent> {
     const timestamp = new Date().toISOString();
     const id = randomUUID();
-    
+
     // Get the last event to create an immutable chain
     const lastEvent = await this.storage.getLastEvent();
     const previousHash = lastEvent?.hash || '0'.repeat(64); // Genesis hash
@@ -41,9 +51,17 @@ export class AuditService {
     // Generate cryptographic hash for integrity (SHA-256)
     const hash = this.generateSecureHash(eventData);
 
-    // Create digital signature for non-repudiation - TEMPORARILY DISABLED
-    // const signature = await this.signEvent(eventData);
-    const signature = 'signature-disabled-for-compatibility';
+    // Create HMAC-SHA256 signature for non-repudiation
+    const signature = await this.signEvent(eventData);
+
+    let details = request.details;
+    let encrypted = false;
+
+    // Encrypt sensitive details before storage
+    if (request.details && this.containsSensitiveData(request.details)) {
+      details = await this.encryptSensitiveData(request.details);
+      encrypted = true;
+    }
 
     const event: AuditEvent = {
       id,
@@ -52,27 +70,20 @@ export class AuditService {
       action: request.action,
       resource: request.resource,
       actor: request.actor,
-      details: request.details,
+      details,
       hash,
       previousHash,
       signature,
       blockNumber: eventData.blockNumber,
       nonce: eventData.nonce,
+      encrypted,
     };
 
-    // Encrypt sensitive details before storage - TEMPORARILY DISABLED
-    // if (request.details && this.containsSensitiveData(request.details)) {
-    //   event.details = await this.encryptSensitiveData(request.details);
-    //   event.encrypted = true;
-    // }
-    console.log('Encryption temporarily disabled for compatibility');
-
-    // Store in IPFS for immutability (with encryption) - TEMPORARILY DISABLED
-    // const ipfsHash = await this.storeInIPFS(event);
-    // if (ipfsHash) {
-    //   event.ipfsHash = ipfsHash;
-    // }
-    console.log('IPFS storage temporarily disabled for compatibility');
+    // Store in IPFS for immutability (gracefully skipped when IPFS is unavailable)
+    const ipfsHash = await this.storeInIPFS(event);
+    if (ipfsHash) {
+      event.ipfsHash = ipfsHash;
+    }
 
     // Store in local database
     await this.storage.storeEvent(event);
@@ -116,17 +127,12 @@ export class AuditService {
   }
 
   private async signEvent(eventData: any): Promise<string> {
-    try {
-      // Generate signature using ATP™ service key - TEMPORARILY DISABLED
-      // In production, this should use a dedicated audit signing key
-      // const serviceKeyPair = await ATPEncryptionService.generateKeyPair();
-      const dataString = JSON.stringify(eventData, Object.keys(eventData).sort());
-      // return await ATPEncryptionService.sign(dataString, serviceKeyPair.privateKey);
-      return createHash('sha256').update(dataString + 'temp-signing-key').digest('hex');
-    } catch (error) {
-      console.warn('Failed to sign audit event:', error);
-      return 'unsigned';
+    const dataString = JSON.stringify(eventData, Object.keys(eventData).sort());
+    if (!this.signingKey) {
+      // No key configured — fall back to a hash-only signature in non-production
+      return createHash('sha256').update(dataString).digest('hex');
     }
+    return createHmac('sha256', this.signingKey).update(dataString).digest('hex');
   }
 
   private containsSensitiveData(details: Record<string, any>): boolean {
@@ -134,23 +140,20 @@ export class AuditService {
       'password', 'privateKey', 'secret', 'token', 'key',
       'credential', 'authorization', 'session', 'cookie'
     ];
-    
     const dataString = JSON.stringify(details).toLowerCase();
     return sensitiveKeys.some(key => dataString.includes(key));
   }
 
   private async encryptSensitiveData(details: Record<string, any>): Promise<Record<string, any>> {
     try {
-      // const encrypted = await ATPEncryptionService.encryptForStorage(
-      //   JSON.stringify(details),
-      //   this.encryptionKey
-      // );
-      
+      const encrypted = ATPEncryptionService.encryptWithKey(
+        JSON.stringify(details),
+        this.encryptionKey
+      );
       return {
         __encrypted: true,
         __algorithm: 'aes-256-gcm',
-        __data: 'encrypted-data-placeholder',
-        __notice: 'Sensitive data encrypted for security (temporarily disabled)'
+        __data: encrypted,
       };
     } catch (error) {
       console.warn('Failed to encrypt sensitive audit data:', error);
@@ -163,21 +166,6 @@ export class AuditService {
 
   private async storeInIPFS(event: AuditEvent): Promise<string> {
     try {
-      // Create a tamper-evident IPFS record
-      const ipfsRecord = {
-        event,
-        metadata: {
-          timestamp: new Date().toISOString(),
-          version: '1.0.0',
-          protocol: 'Agent Trust Protocol™',
-          audit: {
-            encrypted: event.encrypted || false,
-            signed: !!event.signature,
-            chainPosition: event.blockNumber,
-          }
-        }
-      };
-
       return await this.ipfs.storeEvent(event);
     } catch (error) {
       console.warn('Failed to store in IPFS:', error);
@@ -188,12 +176,12 @@ export class AuditService {
   private async verifyChainIntegrity(): Promise<{ valid: boolean; brokenAt?: string; totalEvents: number }> {
     try {
       const events = await this.storage.queryEvents({ limit: 10000 });
-      const sortedEvents = events.events.sort((a, b) => 
+      const sortedEvents = events.events.sort((a, b) =>
         (a.blockNumber || 0) - (b.blockNumber || 0)
       );
 
       let previousHash = '0'.repeat(64); // Genesis hash
-      
+
       for (const event of sortedEvents) {
         if (event.previousHash !== previousHash) {
           return {
@@ -202,7 +190,7 @@ export class AuditService {
             totalEvents: sortedEvents.length
           };
         }
-        
+
         // Verify event hash
         const expectedHash = this.generateSecureHash({
           id: event.id,
@@ -216,7 +204,7 @@ export class AuditService {
           nonce: event.nonce,
           blockNumber: event.blockNumber,
         });
-        
+
         if (event.hash !== expectedHash) {
           return {
             valid: false,
@@ -224,7 +212,7 @@ export class AuditService {
             totalEvents: sortedEvents.length
           };
         }
-        
+
         previousHash = event.hash;
       }
 
@@ -249,7 +237,7 @@ export class AuditService {
     ipfsAvailable: boolean;
   }> {
     const allEvents = await this.storage.queryEvents({ limit: 10000 });
-    
+
     const eventsBySource: Record<string, number> = {};
     const eventsByAction: Record<string, number> = {};
 
