@@ -27,10 +27,8 @@ import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon, SecureConnectionIc
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-// Demo components temporarily disabled for compilation
-// import { QuantumSafeSignatureDemo } from "@/components/atp/quantum-safe-signature-demo"
-// import { TrustLevelManagementDemo } from "@/components/atp/trust-level-management-demo"
-// import { PerformanceMetricsPreview } from "@/components/atp/performance-metrics-preview"
+import { QuantumSafeSignatureDemo } from "@/components/atp/quantum-safe-signature-demo"
+import { TrustLevelManagementDemo } from "@/components/atp/trust-level-management-demo"
 import { QuickAccess } from '@/components/ui/quick-access';
 
 export default function HomePage() {
@@ -274,49 +272,8 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-            <Card className="glass atp-trust-indicator">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 font-display text-xl">
-                  <div className="icon-glow">
-                    <QuantumKeyIcon size={20} gradient />
-                  </div>
-                  Quantum-Safe Signatures
-                </CardTitle>
-                <CardDescription className="text-foreground/70">
-                  Generate and verify quantum-safe signatures in real-time
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild variant="outline" size="sm" className="glass border-cyan-500/30 hover:bg-cyan-500/10">
-                  <Link href="/playground">
-                    Try Demo
-                    <ArrowRight size={12} className="ml-1" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="glass atp-trust-indicator">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 font-display text-xl">
-                  <div className="animate-pulse">
-                    <TrustNetworkIcon size={20} gradient />
-                  </div>
-                  Trust Level System
-                </CardTitle>
-                <CardDescription className="text-foreground/70">
-                  Register agents and manage trust levels dynamically
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild variant="outline" size="sm" className="glass border-purple-500/30 hover:bg-purple-500/10">
-                  <Link href="/playground">
-                    Try Demo
-                    <ArrowRight size={12} className="ml-1" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
+            <QuantumSafeSignatureDemo />
+            <TrustLevelManagementDemo />
           </div>
 
           <Card className="glass atp-trust-indicator">
