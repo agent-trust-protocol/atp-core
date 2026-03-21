@@ -190,3 +190,4 @@ deployment-backups/
 website-repo-old/
 atp-ip-protection-deploy.tar.gz
 *.tar.gz
+.npmrc
