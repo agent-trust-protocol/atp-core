@@ -15,7 +15,6 @@
 import WebSocket from 'ws';
 import { randomUUID } from 'crypto';
 import { 
-  generateHybridKeyPair, 
   createHybridSignature, 
   generateKeysForDID 
 } from './quantum-crypto-utils.js';
