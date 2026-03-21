@@ -1,6 +1,6 @@
 {
   "name": "@atpdevelopment/openclaw-atp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ATP (Agent Trust Protocol) security integration for OpenClaw agents",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
