@@ -27,8 +27,8 @@ import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon, SecureConnectionIc
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { QuantumSafeSignatureDemo } from "@/components/atp/quantum-safe-signature-demo"
-import { TrustLevelManagementDemo } from "@/components/atp/trust-level-management-demo"
+import { QuantumSafeSignatureDemo } from '@/components/atp/quantum-safe-signature-demo';
+import { TrustLevelManagementDemo } from '@/components/atp/trust-level-management-demo';
 import { QuickAccess } from '@/components/ui/quick-access';
 
 export default function HomePage() {
