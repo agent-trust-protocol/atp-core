@@ -1,6 +1,7 @@
 # Agent Trust Protocol SDK 🛡️
 
 [![npm version](https://badge.fury.io/js/atp-sdk.svg)](https://www.npmjs.com/package/atp-sdk)
+[![Publish to npm](https://github.com/agent-trust-protocol/atp-core/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/agent-trust-protocol/atp-core/actions/workflows/npm-publish.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![Quantum Safe](https://img.shields.io/badge/Security-Quantum%20Safe-blueviolet)](https://github.com/agent-trust-protocol/core)

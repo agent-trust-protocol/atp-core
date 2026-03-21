@@ -7,6 +7,7 @@ ATP provides universal quantum-safe security for all AI agent protocols (MCP, Sw
 **One unified SDK** - Quantum-safe cryptography + ZKP authentication + Identity + Credentials + Payments - all included.
 
 [![npm version](https://badge.fury.io/js/atp-sdk.svg)](https://www.npmjs.com/package/atp-sdk)
+[![Publish to npm](https://github.com/agent-trust-protocol/atp-core/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/agent-trust-protocol/atp-core/actions/workflows/npm-publish.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![Quantum Safe](https://img.shields.io/badge/Security-Quantum%20Safe-blueviolet)](https://github.com/agent-trust-protocol/core)
@@ -966,6 +967,20 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 4. Add tests for new functionality
 5. Ensure all tests pass
 6. Submit a pull request
+
+### Releasing a New Version
+
+Publishing is fully automated via the [npm-publish workflow](https://github.com/agent-trust-protocol/atp-core/actions/workflows/npm-publish.yml).
+
+1. Bump the version in `package.json`
+2. Push a version tag to trigger automatic publishing:
+   ```bash
+   git tag v1.2.2
+   git push origin v1.2.2
+   ```
+3. The workflow will build, test, and publish both `atp-sdk` and `@atpdevelopment/openclaw-atp` to npm in parallel.
+
+To do a dry run without publishing (builds and packs only), use **Actions → Publish to npm → Run workflow** and enable the `dry_run` option.
 
 ### Code Standards
 
