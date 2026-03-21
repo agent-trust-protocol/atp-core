@@ -249,7 +249,7 @@ async function demonstrateClaudeATPIntegration() {
     await client.connect();
 
     // List available tools
-    const tools = await client.listTools();
+    await client.listTools();
 
     // Discover other agents
     await client.discoverAgents(['weather-current'], 'basic');
