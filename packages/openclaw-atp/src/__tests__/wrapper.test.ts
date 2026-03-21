@@ -9,7 +9,7 @@ function makeAgentContext(trustScore = 0.8): AgentContext {
       publicKey: 'pub',
       privateKey: 'priv',
       trustScore,
-      trustLevel: 'VERIFIED' as const,
+      trustLevel: 'verified' as const,
       policyProfileId: 'default',
       role: 'researcher',
       capabilities: [],
