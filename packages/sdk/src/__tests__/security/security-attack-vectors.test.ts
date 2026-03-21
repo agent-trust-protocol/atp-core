@@ -127,7 +127,7 @@ describe('Key Confusion', () => {
     // Attempt to verify with quantum-safe=false (Ed25519-only mode)
     // The hybrid sig format is different from a plain Ed25519 sig, so this should fail
     // or at least not produce a false positive confirming integrity
-    const result = await CryptoUtils.verifySignature(message, hybridSig, kp.publicKey, false);
+    await CryptoUtils.verifySignature(message, hybridSig, kp.publicKey, false);
     // Ed25519-only mode slices first 64 bytes of combined sig — it may return true
     // (the Ed25519 component is valid) but we document that mixed-mode usage is
     // discouraged. The key assertion is that a WRONG key still fails:
