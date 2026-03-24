@@ -1,21 +1,7 @@
-import nextDynamic from 'next/dynamic';
+import SignupClient from './client-page';
 
-// Force dynamic rendering - don't prerender this page
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-// Dynamically import client component to prevent SSR issues with Better Auth
-const SignupClient = nextDynamic(
-  () => import('./client-page'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
-      </div>
-    )
-  }
-);
 
 export default function SignupPage() {
   return <SignupClient />;
