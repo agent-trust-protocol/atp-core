@@ -1,11 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  eslint: {
-    // Disable the indent rule specifically to avoid the stack overflow on large files.
-    // All other rules remain enforced.
-    dirs: ['src'],
-  },
+  turbopack: {},
   env: {
     ATP_API_URL: process.env.ATP_API_URL || 'http://localhost:3000',
     ATP_QUANTUM_URL: process.env.ATP_QUANTUM_URL || 'http://localhost:3008',
@@ -15,8 +11,6 @@ const nextConfig = {
   },
   // Increase timeout for static generation to prevent premature termination
   staticPageGenerationTimeout: 180,
-  // Performance optimizations
-  swcMinify: true,
   // Optimize module resolution
   modularizeImports: {
     '@radix-ui': {
