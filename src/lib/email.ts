@@ -322,10 +322,6 @@ class EmailService {
     lastName: string;
     email: string;
     loginUrl: string;
-    credentials?: {
-      email: string;
-      password: string;
-    };
   }): Promise<boolean> {
     const html = `
       <!DOCTYPE html>
@@ -336,39 +332,33 @@ class EmailService {
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
             .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
             .content { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-top: none; }
-            .credentials-box { background: #fff3cd; border: 2px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; }
+            .info-box { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0; border-radius: 4px; }
             .button { display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 4px; margin-top: 20px; }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
-              <h1>🎉 Access Approved!</h1>
+              <h1>Access Approved!</h1>
             </div>
             <div class="content">
               <p>Hi ${request.firstName},</p>
-              
+
               <p>Great news! Your access request for Agent Trust Protocol has been approved.</p>
-              
-              ${request.credentials ? `
-              <div class="credentials-box">
-                <h3>Your Demo Credentials:</h3>
-                <p><strong>Email:</strong> ${request.credentials.email}</p>
-                <p><strong>Password:</strong> ${request.credentials.password}</p>
-                <p style="font-size: 12px; color: #666; margin-top: 10px;">
-                  ⚠️ Please keep these credentials secure and don't share them.
-                </p>
+
+              <div class="info-box">
+                <strong>How to sign in:</strong>
+                <p>Click the button below and enter your email address. We'll send you a secure magic link — no password needed.</p>
               </div>
-              ` : ''}
-              
+
               <p>
                 <a href="${request.loginUrl}" class="button">
-                  Access ATP Platform
+                  Sign In to ATP
                 </a>
               </p>
-              
+
               <p>If you have any questions or need assistance, please don't hesitate to reach out.</p>
-              
+
               <p>Welcome to ATP!<br>The ATP Team</p>
             </div>
           </div>
@@ -378,7 +368,7 @@ class EmailService {
 
     return this.sendEmail({
       to: request.email,
-      subject: 'ATP Access Approved - Your Demo Credentials',
+      subject: 'ATP Access Approved - You Can Now Sign In',
       html
     });
   }

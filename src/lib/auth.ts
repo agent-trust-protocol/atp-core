@@ -21,7 +21,8 @@ if (!secret && !isNextBuild) {
 
 const authSecret = secret ?? 'dev-only-secret-not-for-production';
 
-const baseURL = process.env.BETTER_AUTH_URL || 'http://localhost:3000';
+// Must match NEXT_PUBLIC_BASE_URL used by the auth client (src/lib/auth-client.ts)
+const baseURL = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
 // PostgreSQL connection for Better Auth
 const {DATABASE_URL} = process.env;
@@ -58,7 +59,10 @@ export const auth = betterAuth({
       sendMagicLink: async ({ email, url }) => {
         // Dynamic import to avoid circular dependency
         const { emailService } = await import('./email');
-        await emailService.sendMagicLinkEmail(email, url);
+        const sent = await emailService.sendMagicLinkEmail(email, url);
+        if (!sent) {
+          throw new Error('Failed to send magic link email. Please try again.');
+        }
       },
       expiresIn: 60 * 15 // 15 minutes
     })
