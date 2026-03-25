@@ -24,28 +24,6 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
-  // Webpack optimizations
-  webpack: (config, { dev, isServer }) => {
-    // Optimize in development
-    if (dev && !isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            vendor: {
-              name: 'vendor',
-              chunks: 'all',
-              test: /node_modules/,
-            },
-          },
-        },
-      };
-    }
-    return config;
-  },
 }
 
 module.exports = nextConfig
