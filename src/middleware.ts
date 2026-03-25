@@ -6,6 +6,7 @@ const publicRoutes = [
   '/signup',
   '/request-access',
   '/api/request-access',
+  '/api/invites/validate',
   '/api/webhooks',
   '/api/auth', // Better Auth endpoints
   '/auth/callback', // Magic link callback

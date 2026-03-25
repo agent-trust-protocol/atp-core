@@ -492,3 +492,37 @@ CREATE TABLE IF NOT EXISTS atp_payments.payment_policies (
 
 CREATE INDEX IF NOT EXISTS idx_payment_policies_agent_did ON atp_payments.payment_policies(agent_did);
 CREATE INDEX IF NOT EXISTS idx_payment_policies_status ON atp_payments.payment_policies(status);
+
+-- Waitlist & Invites (invite-only access wall)
+CREATE TABLE IF NOT EXISTS waitlist (
+  id TEXT PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
+  company TEXT NOT NULL,
+  company_size TEXT NOT NULL,
+  role TEXT NOT NULL,
+  use_case TEXT NOT NULL,
+  message TEXT,
+  status TEXT NOT NULL DEFAULT 'pending',
+  ip_address TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  reviewed_at TIMESTAMPTZ,
+  CONSTRAINT valid_waitlist_status CHECK (status IN ('pending', 'approved', 'rejected'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_waitlist_email ON waitlist(email);
+CREATE INDEX IF NOT EXISTS idx_waitlist_status ON waitlist(status);
+
+CREATE TABLE IF NOT EXISTS invites (
+  id TEXT PRIMARY KEY,
+  email TEXT NOT NULL,
+  code TEXT NOT NULL UNIQUE,
+  waitlist_id TEXT REFERENCES waitlist(id) ON DELETE SET NULL,
+  used_at TIMESTAMPTZ,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_invites_code ON invites(code);
+CREATE INDEX IF NOT EXISTS idx_invites_email ON invites(email);

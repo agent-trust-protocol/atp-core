@@ -317,6 +317,70 @@ class EmailService {
     });
   }
 
+  async sendInviteEmail(request: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    signupUrl: string;
+  }): Promise<boolean> {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background: #f5f5f5; }
+            .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
+            .card { background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+            .header { background: linear-gradient(135deg, #00D9FF 0%, #0066FF 100%); color: white; padding: 30px; text-align: center; }
+            .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+            .content { padding: 40px 30px; }
+            .button { display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #00D9FF 0%, #0066FF 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; margin: 20px 0; }
+            .info-box { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0; border-radius: 4px; }
+            .expiry { color: #666; font-size: 14px; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="card">
+              <div class="header">
+                <h1>You're Invited!</h1>
+              </div>
+              <div class="content">
+                <p>Hi ${request.firstName},</p>
+
+                <p>Great news! Your access request for Agent Trust Protocol&#8482; has been approved.</p>
+
+                <div class="info-box">
+                  <strong>Create your account:</strong>
+                  <p>Click the button below to set up your ATP account. No password needed — we'll send you a secure magic link to sign in.</p>
+                </div>
+
+                <p style="text-align: center;">
+                  <a href="${request.signupUrl}" class="button">Create Your Account</a>
+                </p>
+
+                <p class="expiry">This invite link expires in 7 days and can only be used once.</p>
+
+                <p style="font-size: 12px; color: #999; margin-top: 20px;">
+                  Or copy and paste this link in your browser:<br>
+                  <code style="word-break: break-all; font-size: 11px;">${request.signupUrl}</code>
+                </p>
+
+                <p>Welcome to ATP!<br>The ATP Team at Sovr INC</p>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    return this.sendEmail({
+      to: request.email,
+      subject: "You're Invited to Agent Trust Protocol\u2122",
+      html
+    });
+  }
+
   async sendAccessApprovedEmail(request: {
     firstName: string;
     lastName: string;

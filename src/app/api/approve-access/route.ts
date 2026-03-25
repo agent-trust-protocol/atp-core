@@ -1,20 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { query, queryOne } from '@/lib/db';
+import { emailService } from '@/lib/email';
+import crypto from 'crypto';
 
-/**
- * Admin endpoint to approve user access
- *
- * Usage: POST /api/approve-access
- * Body: { email: string }
- *
- * This sets a cookie that allows the user to access the site.
- * In production, you'd want to:
- * 1. Add authentication/authorization to this endpoint
- * 2. Store approval status in a database
- * 3. Send email with login credentials
- * 4. Set expiration dates for access
- */
-
-// Simple admin token validation (use proper auth in production)
 function isValidAdminToken(token: string | null): boolean {
   if (!token) return false;
   const adminSecret = process.env.ADMIN_API_SECRET;
@@ -27,7 +15,7 @@ function isValidAdminToken(token: string | null): boolean {
 
 export async function POST(request: NextRequest) {
   try {
-    // SECURITY: Require admin authentication
+    // Require admin authentication
     const authHeader = request.headers.get('authorization');
     if (!isValidAdminToken(authHeader)) {
       return NextResponse.json(
@@ -46,23 +34,68 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: In production:
-    // 1. Store approval in database with email, timestamp, expiration
-    // 2. Send email to user with login credentials
-    // 3. Log the approval action
+    // Look up waitlist entry
+    const waitlistEntry = await queryOne<{
+      id: string;
+      first_name: string;
+      last_name: string;
+      status: string;
+    }>(
+      'SELECT id, first_name, last_name, status FROM waitlist WHERE email = $1',
+      [email]
+    );
 
-    console.log(`Access approved for: ${email}`);
+    if (!waitlistEntry) {
+      return NextResponse.json(
+        { error: 'No waitlist entry found for this email' },
+        { status: 404 }
+      );
+    }
 
-    // Return success - the admin will need to manually set the cookie
-    // or use a different mechanism to grant access
+    if (waitlistEntry.status === 'approved') {
+      return NextResponse.json(
+        { error: 'This user has already been approved' },
+        { status: 409 }
+      );
+    }
+
+    // Generate invite code
+    const inviteCode = crypto.randomBytes(32).toString('base64url');
+    const inviteId = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+    // Insert invite
+    await query(
+      `INSERT INTO invites (id, email, code, waitlist_id, expires_at)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [inviteId, email, inviteCode, waitlistEntry.id, expiresAt.toISOString()]
+    );
+
+    // Update waitlist status
+    await query(
+      `UPDATE waitlist SET status = 'approved', reviewed_at = NOW() WHERE id = $1`,
+      [waitlistEntry.id]
+    );
+
+    // Build signup URL
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const signupUrl = `${baseUrl}/signup?code=${inviteCode}`;
+
+    // Send invite email
+    await emailService.sendInviteEmail({
+      firstName: waitlistEntry.first_name,
+      lastName: waitlistEntry.last_name,
+      email,
+      signupUrl
+    });
+
+    console.log(`Access approved for: ${email} (invite code: ${inviteCode.slice(0, 8)}...)`);
+
     return NextResponse.json({
       success: true,
-      message: `Access approved for ${email}. Set cookie 'atp-approved-access=true' for this user.`,
-      instructions: [
-        '1. Send login credentials to the user via email',
-        '2. User can access the site with the credentials',
-        '3. Or set cookie manually: atp-approved-access=true'
-      ]
+      message: `Access approved for ${email}. Invite email sent.`,
+      email,
+      expiresAt: expiresAt.toISOString()
     });
 
   } catch (error) {
@@ -73,4 +106,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

@@ -108,8 +108,8 @@ function LoginForm() {
 
           <div className="text-center text-sm">
             Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-primary hover:underline">
-              Start 14-day trial
+            <Link href="/request-access" className="text-primary hover:underline">
+              Request access
             </Link>
           </div>
         </CardContent>

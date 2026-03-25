@@ -77,13 +77,13 @@ export default function RequestAccessPage() {
                 <strong>What happens next?</strong>
                 <ul className="mt-2 space-y-1 text-sm list-disc list-inside">
                   <li>Our team will review your request</li>
-                  <li>You'll receive an email with demo login credentials</li>
-                  <li>Access will be granted within 1-2 business days</li>
+                  <li>If approved, you'll receive an invite link to create your account</li>
+                  <li>Reviews are typically completed within 1-2 business days</li>
                 </ul>
               </AlertDescription>
             </Alert>
             <p className="text-sm text-muted-foreground text-center">
-              We'll send login information to <strong>{formData.email}</strong> once your request is approved.
+              We'll send an invite link to <strong>{formData.email}</strong> once your request is approved.
             </p>
           </CardContent>
         </Card>
@@ -118,7 +118,7 @@ export default function RequestAccessPage() {
               Request Demo Access
             </CardTitle>
             <CardDescription>
-              Fill out the form below and we'll send you demo login credentials
+              Fill out the form below and we'll send you an invite link once approved
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -273,7 +273,7 @@ export default function RequestAccessPage() {
                   <strong>Why private access?</strong>
                   <p className="text-sm mt-1">
                     We're protecting our intellectual property while allowing qualified users to evaluate ATP.
-                    Demo credentials will be sent via email after review.
+                    An invite link will be sent via email after review.
                   </p>
                 </AlertDescription>
               </Alert>
