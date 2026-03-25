@@ -22,7 +22,7 @@ class EmailService {
     // Use Resend's onboarding domain in development if main domain not verified
     const isDevelopment = process.env.NODE_ENV !== 'production';
     this.fromEmail = process.env.EMAIL_FROM || (isDevelopment ? 'onboarding@resend.dev' : 'noreply@agenttrustprotocol.com');
-    this.fromName = process.env.EMAIL_FROM_NAME || 'Agent Trust Protocol';
+    this.fromName = process.env.EMAIL_FROM_NAME || 'Agent Trust Protocol™ by Sovr INC';
 
     if (emailProvider === 'sendgrid' && process.env.SENDGRID_API_KEY) {
       // SendGrid via SMTP
@@ -144,7 +144,7 @@ class EmailService {
               <h1>New ATP Access Request</h1>
             </div>
             <div class="content">
-              <p>A new access request has been submitted for Agent Trust Protocol.</p>
+              <p>A new access request has been submitted for Agent Trust Protocol™.</p>
               
               <div class="field">
                 <span class="label">Name:</span>
@@ -226,7 +226,7 @@ class EmailService {
             <div class="content">
               <p>Hi ${request.firstName},</p>
               
-              <p>Thank you for your interest in Agent Trust Protocol!</p>
+              <p>Thank you for your interest in Agent Trust Protocol™!</p>
               
               <p>We've received your access request and our team will review it shortly. You'll receive an email with your demo login credentials once your request is approved (typically within 1-2 business days).</p>
               
@@ -288,7 +288,7 @@ class EmailService {
                 <h1>Sign in to ATP</h1>
               </div>
               <div class="content">
-                <p>Click the button below to securely sign in to your Agent Trust Protocol account.</p>
+                <p>Click the button below to securely sign in to your Agent Trust Protocol™ account.</p>
 
                 <a href="${url}" class="button">Sign In to ATP</a>
 
@@ -312,7 +312,7 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'Sign in to Agent Trust Protocol',
+      subject: 'Sign in to Agent Trust Protocol™',
       html
     });
   }
@@ -344,7 +344,7 @@ class EmailService {
             <div class="content">
               <p>Hi ${request.firstName},</p>
 
-              <p>Great news! Your access request for Agent Trust Protocol has been approved.</p>
+              <p>Great news! Your access request for Agent Trust Protocol™ has been approved.</p>
 
               <div class="info-box">
                 <strong>How to sign in:</strong>

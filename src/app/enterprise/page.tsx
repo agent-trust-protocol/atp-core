@@ -22,7 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Enterprise — Agent Trust Protocol',
+  title: 'Enterprise — Agent Trust Protocol™',
   description: 'Quantum-safe AI security for enterprises with compliance, audit, and 24/7 support.'
 };
 

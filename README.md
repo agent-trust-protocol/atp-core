@@ -1,4 +1,4 @@
-# Agent Trust Protocol SDK 🛡️
+# Agent Trust Protocol™ SDK 🛡️
 
 [![npm version](https://badge.fury.io/js/atp-sdk.svg)](https://www.npmjs.com/package/atp-sdk)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -350,6 +350,8 @@ Found a security issue? Email llewis@agenttrustprotocol.com
 
 ---
 
-**Agent Trust Protocol™** - Protecting AI agents from today's threats and tomorrow's quantum computers.
+**Agent Trust Protocol™** is developed and operated by **Sovr INC**. It is not affiliated with zCloak Network's similarly named protocol or any Binance-hosted initiatives.
+
+Agent Trust Protocol™ — Protecting AI agents from today's threats and tomorrow's quantum computers.
 
 [Website](https://agenttrustprotocol.com) • [Documentation](https://docs.atp.dev) • [GitHub](https://github.com/agent-trust-protocol/core)

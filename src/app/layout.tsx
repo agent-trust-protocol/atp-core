@@ -13,8 +13,8 @@ const fontStyles = {
 } as React.CSSProperties;
 
 export const metadata: Metadata = {
-  title: 'Agent Trust Protocol™ - Quantum-Safe AI Security',
-  description: 'World\'s First Quantum-Safe AI Agent Protocol - Enterprise-grade security with glassmorphic UI, visual policy editor, and real-time monitoring.',
+  title: 'Agent Trust Protocol™ by Sovr INC - Quantum-Safe AI Security',
+  description: 'World\'s First Quantum-Safe AI Agent Protocol by Sovr INC - Enterprise-grade security with visual policy editor and real-time monitoring.',
   keywords: [
     'AI agents',
     'quantum-safe',
@@ -27,10 +27,10 @@ export const metadata: Metadata = {
     'glassmorphism',
     'enterprise'
   ],
-  authors: [{ name: 'Agent Trust Protocol Team' }],
+  authors: [{ name: 'Sovr INC' }],
   openGraph: {
-    title: 'ATP™ - Quantum-Safe AI Agent Protocol',
-    description: 'Enterprise quantum-safe security for AI agents',
+    title: 'Agent Trust Protocol™ by Sovr INC - Quantum-Safe AI Agent Protocol',
+    description: 'Enterprise quantum-safe security for AI agents by Sovr INC',
     type: 'website'
   }
 };

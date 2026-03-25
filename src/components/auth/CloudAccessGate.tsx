@@ -122,7 +122,7 @@ export function CloudAccessGate({ feature = 'cloud-platform', tier = 'startup' }
             <h1 className="text-4xl font-bold atp-gradient-text">ATP™ Cloud Platform</h1>
           </div>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Enterprise-grade multi-tenant Agent Trust Protocol platform with quantum-safe security,
+            Enterprise-grade multi-tenant Agent Trust Protocol™ platform with quantum-safe security,
             advanced analytics, and global infrastructure. Request access to our private beta.
           </p>
           <div className="flex flex-wrap justify-center gap-3">

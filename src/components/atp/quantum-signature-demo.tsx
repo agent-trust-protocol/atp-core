@@ -25,7 +25,7 @@ interface SignatureResult {
 
 export function QuantumSignatureDemo() {
   const [message, setMessage] = useState(
-    'Hello from Agent Trust Protocol! This message will be signed with quantum-safe cryptography.'
+    'Hello from Agent Trust Protocol™! This message will be signed with quantum-safe cryptography.'
   );
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<SignatureResult | null>(null);

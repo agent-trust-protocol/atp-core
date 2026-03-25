@@ -21,7 +21,7 @@ import { PricingToggle } from './pricing-toggle';
 import { PricingCalculator } from './pricing-calculator';
 
 export const metadata: Metadata = {
-  title: 'Pricing — Agent Trust Protocol',
+  title: 'Pricing — Agent Trust Protocol™',
   description: 'OpenCore pricing: start free with open source; upgrade to Enterprise for production.'
 };
 

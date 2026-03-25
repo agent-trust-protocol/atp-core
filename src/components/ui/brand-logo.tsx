@@ -55,7 +55,7 @@ export function BrandLogo({ variant = 'mark', size = 32, className = '', alt }: 
     };
   }, []);
 
-  const effectiveAlt = alt ?? (variant === 'lockup' ? 'Agent Trust Protocol Logo' : 'ATP Logo');
+  const effectiveAlt = alt ?? (variant === 'lockup' ? 'Agent Trust Protocol™ Logo' : 'ATP™ Logo');
 
   // Enhanced styling for dark mode visibility
   const darkModeClasses = isDarkMode

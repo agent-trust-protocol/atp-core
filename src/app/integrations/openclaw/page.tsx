@@ -28,7 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'OpenClaw Integration — Agent Trust Protocol',
+  title: 'OpenClaw Integration — Agent Trust Protocol™',
   description: 'Secure your OpenClaw multi-agent systems with ATP quantum-safe security. Complete guide to implementing agent identities, tool security, graph validation, and trust scoring.',
   keywords: [
     'OpenClaw integration',

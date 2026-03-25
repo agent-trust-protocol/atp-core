@@ -67,7 +67,7 @@ export default function RequestAccessPage() {
             </div>
             <CardTitle className="text-2xl text-green-600 dark:text-green-400">Request Submitted</CardTitle>
             <CardDescription className="mt-2">
-              Thank you for your interest in Agent Trust Protocol
+              Thank you for your interest in Agent Trust Protocol™
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -98,7 +98,7 @@ export default function RequestAccessPage() {
         <div className="text-center space-y-4">
           <div className="flex justify-center mb-4">
             <div className="relative w-32 h-20 atp-quantum-glow rounded-xl bg-gradient-to-br from-primary/5 to-secondary/5 dark:from-primary/15 dark:to-secondary/15 flex items-center justify-center border border-primary/20 dark:border-cyan-400/30">
-              <BrandLogo variant="lockup" size={200} className="animate-in zoom-in-50 duration-1000" alt="Agent Trust Protocol Official Logo" />
+              <BrandLogo variant="lockup" size={200} className="animate-in zoom-in-50 duration-1000" alt="Agent Trust Protocol™ Official Logo" />
             </div>
           </div>
           <div className="flex items-center justify-center gap-2 mb-2">
@@ -106,7 +106,7 @@ export default function RequestAccessPage() {
             <h1 className="text-3xl font-bold">Private Access Only</h1>
           </div>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Agent Trust Protocol is currently in private beta. Request access to test our quantum-safe AI agent security platform.
+            Agent Trust Protocol™ is currently in private beta. Request access to test our quantum-safe AI agent security platform.
           </p>
         </div>
 
