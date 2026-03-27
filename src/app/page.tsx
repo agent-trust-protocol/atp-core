@@ -30,6 +30,8 @@ import { Badge } from '@/components/ui/badge';
 import { QuantumSafeSignatureDemo } from "@/components/atp/quantum-safe-signature-demo"
 import { TrustLevelManagementDemo } from "@/components/atp/trust-level-management-demo"
 import { PerformanceMetricsPreview } from "@/components/atp/performance-metrics-preview"
+import { QuantumSafeSignatureDemo } from '@/components/atp/quantum-safe-signature-demo';
+import { TrustLevelManagementDemo } from '@/components/atp/trust-level-management-demo';
 import { QuickAccess } from '@/components/ui/quick-access';
 
 export default function HomePage() {
@@ -272,10 +274,9 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             <QuantumSafeSignatureDemo />
             <TrustLevelManagementDemo />
-            <PerformanceMetricsPreview />
           </div>
         </div>
 

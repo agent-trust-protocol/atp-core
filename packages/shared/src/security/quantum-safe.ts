@@ -1,32 +1,56 @@
 /**
  * Quantum-Safe Signature Module
- * Placeholder for quantum-safe cryptography implementation
+ * Uses ML-DSA-65 (CRYSTALS-Dilithium) via @noble/post-quantum for real post-quantum signatures.
  */
 
-import { createHash } from 'crypto';
+import { ml_dsa65 } from '@noble/post-quantum/ml-dsa';
+import { randomBytes } from 'crypto';
 
 export class QuantumSafeSignature {
-  private privateKey: string;
-  private publicKey: string;
+  private secretKey: Uint8Array;
+  private _publicKey: Uint8Array;
 
   constructor(privateKey?: string, publicKey?: string) {
-    this.privateKey = privateKey || 'mock-private-key';
-    this.publicKey = publicKey || 'mock-public-key';
+    if (privateKey && publicKey) {
+      this.secretKey = Buffer.from(privateKey, 'hex');
+      this._publicKey = Buffer.from(publicKey, 'hex');
+    } else {
+      // Generate a fresh ML-DSA-65 key pair
+      const seed = randomBytes(32);
+      const keyPair = ml_dsa65.keygen(seed);
+      this.secretKey = keyPair.secretKey;
+      this._publicKey = keyPair.publicKey;
+    }
   }
 
   async sign(message: string): Promise<string> {
-    // Simplified signature - in production would use CRYSTALS-Dilithium
-    return createHash('sha256').update(message + this.privateKey).digest('hex');
+    const msgBytes = Buffer.from(message, 'utf8');
+    const signature = ml_dsa65.sign(this.secretKey, msgBytes);
+    return Buffer.from(signature).toString('hex');
   }
 
   async verify(message: string, signature: string): Promise<boolean> {
-    // Simplified verification
-    const expectedSignature = createHash('sha256').update(message + this.privateKey).digest('hex');
-    return signature === expectedSignature;
+    try {
+      const msgBytes = Buffer.from(message, 'utf8');
+      const sigBytes = Buffer.from(signature, 'hex');
+      return ml_dsa65.verify(this._publicKey, msgBytes, sigBytes);
+    } catch {
+      return false;
+    }
   }
 
   getPublicKey(): string {
-    return this.publicKey;
+    return Buffer.from(this._publicKey).toString('hex');
+  }
+
+  /** Generate a new ML-DSA-65 key pair and return hex-encoded strings. */
+  static generateKeyPair(): { privateKey: string; publicKey: string } {
+    const seed = randomBytes(32);
+    const keyPair = ml_dsa65.keygen(seed);
+    return {
+      privateKey: Buffer.from(keyPair.secretKey).toString('hex'),
+      publicKey: Buffer.from(keyPair.publicKey).toString('hex'),
+    };
   }
 }
 

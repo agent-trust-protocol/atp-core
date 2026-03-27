@@ -1,6 +1,7 @@
 {
   "name": "@atp/permission-service",
   "version": "0.1.0",
+  "private": true,
   "type": "module",
   "description": "OAuth2-inspired capability-based permission service for Agent Trust Protocol",
   "main": "dist/index.js",

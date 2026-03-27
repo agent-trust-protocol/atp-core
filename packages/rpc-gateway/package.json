@@ -1,6 +1,7 @@
 {
   "name": "@atp/rpc-gateway",
   "version": "0.1.0",
+  "private": true,
   "type": "module",
   "description": "JSON-RPC 2.0 gateway with WebSocket support for Agent Trust Protocol",
   "main": "dist/index.js",

@@ -1,6 +1,6 @@
-# 🔐 ATP Motleycrew Integration Guide
+# 🔐 ATP OpenClaw Integration Guide
 
-Complete guide for integrating Agent Trust Protocol™ with Motleycrew agents.
+Complete guide for integrating Agent Trust Protocol™ with OpenClaw agents.
 
 ## Table of Contents
 
@@ -17,13 +17,13 @@ Complete guide for integrating Agent Trust Protocol™ with Motleycrew agents.
 ### TypeScript/JavaScript
 
 ```bash
-npm install @atp/motleycrew-atp atp-sdk
+npm install @atpdevelopment/openclaw-atp atp-sdk
 ```
 
 ### Python (Coming Soon)
 
 ```bash
-pip install motleycrew-atp atp-sdk
+pip install atpdevelopment-openclaw-atp atp-sdk
 ```
 
 ## Quick Start
@@ -32,7 +32,7 @@ pip install motleycrew-atp atp-sdk
 
 ```typescript
 import { ATPClient } from 'atp-sdk';
-import { ATPConfigProfile } from '@atp/motleycrew-atp';
+import { ATPConfigProfile } from '@atpdevelopment/openclaw-atp';
 
 // For development
 const atpConfig = ATPConfigProfile.strictDev('http://localhost:3000');
@@ -46,7 +46,7 @@ const atp = new ATPClient(atpConfig);
 ### 2. Register Agents
 
 ```typescript
-import { registerAgentWithAtp } from '@atp/motleycrew-atp';
+import { registerAgentWithAtp } from '@atpdevelopment/openclaw-atp';
 
 const writerMeta = await registerAgentWithAtp(atp, {
   name: 'content-writer',
@@ -62,7 +62,7 @@ console.log('Trust Score:', writerMeta.trustScore);
 ### 3. Secure Tools
 
 ```typescript
-import { secureTools } from '@atp/motleycrew-atp';
+import { secureTools } from '@atpdevelopment/openclaw-atp';
 
 // Original tools
 const rawTools = [searchTool, writeTool, publishTool];
@@ -74,8 +74,8 @@ const securedTools = secureTools(rawTools, atp, {
   rateLimit: 60 // calls per minute
 });
 
-// Use secured tools with Motleycrew agent
-const writer = new ReActToolCallingMotleyAgent({
+// Use secured tools with OpenClaw agent
+const writer = new ReActToolCallingClawAgent({
   name: 'writer',
   tools: securedTools,
   metadata: { atp: writerMeta }
@@ -85,7 +85,7 @@ const writer = new ReActToolCallingMotleyAgent({
 ### 4. Protect Tasks
 
 ```typescript
-import { createTaskMetadata } from '@atp/motleycrew-atp';
+import { createTaskMetadata } from '@atpdevelopment/openclaw-atp';
 
 const writeTask = new SimpleTask({
   crew,
@@ -103,7 +103,7 @@ const writeTask = new SimpleTask({
 ### 5. Validate Agent Graph
 
 ```typescript
-import { ATPGraphValidator, ATPPolicyProfile } from '@atp/motleycrew-atp';
+import { ATPGraphValidator, ATPPolicyProfile } from '@atpdevelopment/openclaw-atp';
 
 // Get policy profile
 const policy = ATPPolicyProfile.researchWorkflow();
@@ -131,7 +131,7 @@ await crew.run();
 
 ### 1. Agent Identity
 
-Every Motleycrew agent gets:
+Every OpenClaw agent gets:
 - **Quantum-safe DID** (Decentralized Identifier)
 - **Hybrid cryptographic keys** (Ed25519 + Dilithium)
 - **Trust score** (0.0 - 1.0)
@@ -178,7 +178,7 @@ const agentMeta = await registerAgentWithAtp(atp, {
 const securedTools = secureTools(rawTools, atp);
 
 // 3. Create agent with ATP metadata
-const agent = new ReActToolCallingMotleyAgent({
+const agent = new ReActToolCallingClawAgent({
   name: 'simple-agent',
   tools: securedTools,
   metadata: { atp: agentMeta }
@@ -190,10 +190,10 @@ const agent = new ReActToolCallingMotleyAgent({
 ### Pattern 2: Multi-Agent Workflow
 
 ```typescript
-import { MotleycrewATPClient, ATPPolicyProfile } from '@atp/motleycrew-atp';
+import { OpenClawATPClient, ATPPolicyProfile } from '@atpdevelopment/openclaw-atp';
 
 // Create integrated client
-const client = new MotleycrewATPClient({
+const client = new OpenClawATPClient({
   atpClient: atp,
   interAgentPolicies: ATPPolicyProfile.researchWorkflow().interAgentRules,
   workflowConstraints: {
@@ -334,7 +334,7 @@ const adminTools = secureTools(adminTools, atp, { minTrustScore: 0.95, rateLimit
 ### 4. Monitor Trust Scores
 
 ```typescript
-import { ATPMonitor } from '@atp/motleycrew-atp';
+import { ATPMonitor } from '@atpdevelopment/openclaw-atp';
 
 const monitor = new ATPMonitor(atp);
 
@@ -431,7 +431,7 @@ try {
 
 ## Support
 
-- **Documentation**: https://docs.atp.dev/motleycrew
+- **Documentation**: https://docs.atp.dev/openclaw
 - **Examples**: [./examples](./examples)
 - **Issues**: https://github.com/agent-trust-protocol/core/issues
 - **Discord**: https://discord.gg/atp

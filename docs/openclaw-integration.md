@@ -1,11 +1,11 @@
-# 🤖 Motleycrew + ATP Integration Guide
+# 🤖 OpenClaw + ATP Integration Guide
 
-Comprehensive guide for securing [Motleycrew](https://github.com/ShoggothAI/motleycrew) multi-agent systems with Agent Trust Protocol™.
+Comprehensive guide for securing [OpenClaw](https://openclaw.dev) multi-agent systems with Agent Trust Protocol™.
 
 ## Overview
 
-The ATP Motleycrew integration provides quantum-safe security for multi-agent workflows by:
-- **Agent Identity**: Each Motleycrew agent gets a quantum-safe DID (Decentralized Identifier)
+The ATP OpenClaw integration provides quantum-safe security for multi-agent workflows by:
+- **Agent Identity**: Each OpenClaw agent gets a quantum-safe DID (Decentralized Identifier)
 - **Tool Security**: ATP intercepts and validates every tool call
 - **Graph Validation**: Policy-based constraints on agent interactions and data flows
 - **Trust Scoring**: Dynamic trust levels adjust based on agent behavior
@@ -15,18 +15,18 @@ The ATP Motleycrew integration provides quantum-safe security for multi-agent wo
 
 ### Prerequisites
 - Node.js 18+
-- Motleycrew installed (`npm install motleycrew`)
+- OpenClaw installed (`npm install @atpdevelopment/openclaw-atp`)
 - ATP services running (see [Getting Started](./getting-started.md))
 
-### Install ATP Motleycrew Package
+### Install ATP OpenClaw Package
 
 ```bash
-npm install @atp/motleycrew-atp atp-sdk
+npm install @atpdevelopment/openclaw-atp atp-sdk
 ```
 
 Or with yarn:
 ```bash
-yarn add @atp/motleycrew-atp atp-sdk
+yarn add @atpdevelopment/openclaw-atp atp-sdk
 ```
 
 ## Quick Start (5 Minutes)
@@ -34,9 +34,9 @@ yarn add @atp/motleycrew-atp atp-sdk
 ### 1. Initialize ATP Client
 
 ```typescript
-import { MotleycrewATPClient } from '@atp/motleycrew-atp';
+import { OpenClawATPClient } from '@atpdevelopment/openclaw-atp';
 
-const atpClient = new MotleycrewATPClient({
+const atpClient = new OpenClawATPClient({
   atpServiceUrl: 'http://localhost:3000',
   profile: 'strictDev', // or 'productionFinance', 'piiWorkflow', 'researchWorkflow'
   enableMonitoring: true
@@ -48,10 +48,10 @@ await atpClient.initialize();
 ### 2. Register Your Agents
 
 ```typescript
-import { ReActToolCallingMotleyAgent } from 'motleycrew/agents/langchain';
+import { ReActToolCallingClawAgent } from '@atpdevelopment/openclaw-atp/agents';
 
-// Create Motleycrew agent
-const researchAgent = new ReActToolCallingMotleyAgent({
+// Create OpenClaw agent
+const researchAgent = new ReActToolCallingClawAgent({
   name: 'Researcher',
   description: 'Analyzes market data',
   tools: researchTools
@@ -71,7 +71,7 @@ console.log(`🔐 Trust score: ${registration.trustScore}`);
 ### 3. Secure Agent Tools
 
 ```typescript
-import { secureTools } from '@atp/motleycrew-atp';
+import { secureTools } from '@atpdevelopment/openclaw-atp';
 
 // Wrap tools with ATP security
 const securedTools = secureTools(registration.did, researchTools, atpClient.atpClient, {
@@ -91,9 +91,9 @@ researchAgent.tools = securedTools;
 Before running your crew, validate the agent interaction graph:
 
 ```typescript
-import { MotleyCrew } from 'motleycrew';
+import { OpenClaw } from '@atpdevelopment/openclaw-atp';
 
-const crew = new MotleyCrew();
+const crew = new OpenClaw();
 crew.add_agent(researchAgent);
 crew.add_agent(tradingAgent);
 
@@ -128,7 +128,7 @@ That's it! Your multi-agent system now has:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                 Motleycrew Agent Crew                   │
+│                 OpenClaw Agent Crew                   │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐             │
 │  │  Agent A │──│  Agent B │──│  Agent C │             │
 │  │ (DID:..1)│  │ (DID:..2)│  │ (DID:..3)│             │
@@ -137,7 +137,7 @@ That's it! Your multi-agent system now has:
          │             │             │
          ▼             ▼             ▼
 ┌─────────────────────────────────────────────────────────┐
-│             ATP Motleycrew Security Layer               │
+│             ATP OpenClaw Security Layer               │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐             │
 │  │  Agent   │  │   Tool   │  │  Graph   │             │
 │  │  Wrapper │  │  Wrapper │  │ Validator│             │
@@ -161,7 +161,7 @@ That's it! Your multi-agent system now has:
 
 ### Agent Registration
 
-Every Motleycrew agent gets a quantum-safe identity:
+Every OpenClaw agent gets a quantum-safe identity:
 
 ```typescript
 const { agent, registration } = await registerAgentWithAtp(atpClient, motleyAgent, {
@@ -189,7 +189,7 @@ const { agent, registration } = await registerAgentWithAtp(atpClient, motleyAgen
 ATP intercepts every tool call with 5-step validation:
 
 ```typescript
-import { ATPToolWrapper } from '@atp/motleycrew-atp';
+import { ATPToolWrapper } from '@atpdevelopment/openclaw-atp';
 
 const wrapper = new ATPToolWrapper(
   agentDid,
@@ -227,10 +227,10 @@ const result = await wrapper.execute({ input: 'analyze data' });
 
 ### Task Protection
 
-Add security metadata to Motleycrew tasks:
+Add security metadata to OpenClaw tasks:
 
 ```typescript
-import { atpProtectedTask, createTaskMetadata } from '@atp/motleycrew-atp';
+import { atpProtectedTask, createTaskMetadata } from '@atpdevelopment/openclaw-atp';
 
 // Option 1: Use decorator
 @atpProtectedTask({
@@ -272,7 +272,7 @@ const task = new SimpleTask({
 Validate agent interaction graphs before execution:
 
 ```typescript
-import { ATPGraphValidator, ATPPolicyProfile } from '@atp/motleycrew-atp';
+import { ATPGraphValidator, ATPPolicyProfile } from '@atpdevelopment/openclaw-atp';
 
 const validator = new ATPGraphValidator(atpClient);
 const policy = ATPPolicyProfile.productionFinance();
@@ -311,7 +311,7 @@ console.log('Metrics:', result.metrics);
 ATP provides pre-configured security profiles:
 
 ```typescript
-import { ATPPolicyProfile } from '@atp/motleycrew-atp';
+import { ATPPolicyProfile } from '@atpdevelopment/openclaw-atp';
 
 // Development (relaxed security, fast iteration)
 const devProfile = ATPPolicyProfile.strictDev();
@@ -360,7 +360,7 @@ const customProfile = new ATPPolicyProfile({
 Integration with Lunary for metrics and anomaly detection:
 
 ```typescript
-import { ATPMonitor, ATPLunaryExporter } from '@atp/motleycrew-atp';
+import { ATPMonitor, ATPLunaryExporter } from '@atpdevelopment/openclaw-atp';
 
 // Create monitor
 const monitor = new ATPMonitor(atpClient);
@@ -404,7 +404,7 @@ await exporter.start();
 Manage credentials and service access:
 
 ```typescript
-import { ATPSecretManager, ATPServiceConnector } from '@atp/motleycrew-atp';
+import { ATPSecretManager, ATPServiceConnector } from '@atpdevelopment/openclaw-atp';
 
 // Secret management (short-lived, scoped tokens)
 const secretManager = new ATPSecretManager(atpClient);
@@ -439,13 +439,13 @@ const response = await connector.request(traderAgent.did, {
 ## Complete Example: Finance Trading Workflow
 
 ```typescript
-import { MotleycrewATPClient, ATPPolicyProfile } from '@atp/motleycrew-atp';
-import { MotleyCrew } from 'motleycrew';
-import { ReActToolCallingMotleyAgent } from 'motleycrew/agents/langchain';
+import { OpenClawATPClient, ATPPolicyProfile } from '@atpdevelopment/openclaw-atp';
+import { OpenClaw } from '@atpdevelopment/openclaw-atp';
+import { ReActToolCallingClawAgent } from '@atpdevelopment/openclaw-atp/agents';
 
 async function main() {
   // 1. Initialize ATP
-  const atpClient = new MotleycrewATPClient({
+  const atpClient = new OpenClawATPClient({
     atpServiceUrl: 'http://localhost:3000',
     profile: 'productionFinance',
     enableMonitoring: true
@@ -454,7 +454,7 @@ async function main() {
 
   // 2. Create and register agents
   const researcher = await atpClient.registerAgent(
-    new ReActToolCallingMotleyAgent({
+    new ReActToolCallingClawAgent({
       name: 'Researcher',
       description: 'Market data analyst',
       tools: researchTools
@@ -467,7 +467,7 @@ async function main() {
   );
 
   const trader = await atpClient.registerAgent(
-    new ReActToolCallingMotleyAgent({
+    new ReActToolCallingClawAgent({
       name: 'Trader',
       description: 'Executes trades',
       tools: tradingTools
@@ -480,7 +480,7 @@ async function main() {
   );
 
   const reviewer = await atpClient.registerAgent(
-    new ReActToolCallingMotleyAgent({
+    new ReActToolCallingClawAgent({
       name: 'Reviewer',
       description: 'Reviews trades for compliance',
       tools: reviewTools
@@ -493,7 +493,7 @@ async function main() {
   );
 
   // 3. Create crew
-  const crew = new MotleyCrew();
+  const crew = new OpenClaw();
   crew.add_agent(researcher.agent);
   crew.add_agent(trader.agent);
   crew.add_agent(reviewer.agent);
@@ -647,32 +647,32 @@ const securedTools = secureTools(agentDid, tools, atpClient, {
 ## API Reference
 
 Full API documentation:
-- [`MotleycrewATPClient`](../packages/motleycrew-atp/README.md#motleycrew-atp-client)
-- [`registerAgentWithAtp()`](../packages/motleycrew-atp/README.md#register-agent)
-- [`secureTools()`](../packages/motleycrew-atp/README.md#secure-tools)
-- [`ATPGraphValidator`](../packages/motleycrew-atp/README.md#graph-validator)
-- [`ATPPolicyProfile`](../packages/motleycrew-atp/README.md#policy-profiles)
-- [`ATPMonitor`](../packages/motleycrew-atp/README.md#monitoring)
+- [`OpenClawATPClient`](../packages/openclaw-atp/README.md#openclaw-atp-client)
+- [`registerAgentWithAtp()`](../packages/openclaw-atp/README.md#register-agent)
+- [`secureTools()`](../packages/openclaw-atp/README.md#secure-tools)
+- [`ATPGraphValidator`](../packages/openclaw-atp/README.md#graph-validator)
+- [`ATPPolicyProfile`](../packages/openclaw-atp/README.md#policy-profiles)
+- [`ATPMonitor`](../packages/openclaw-atp/README.md#monitoring)
 
 ## Examples
 
 Explore complete working examples:
-- [Finance Trading Workflow](../packages/motleycrew-atp/examples/finance-workflow.ts)
-- [Research Crew](../packages/motleycrew-atp/examples/research-crew.ts) (coming soon)
-- [Customer Service](../packages/motleycrew-atp/examples/customer-service.ts) (coming soon)
+- [Finance Trading Workflow](../packages/openclaw-atp/examples/finance-workflow.ts)
+- [Research Crew](../packages/openclaw-atp/examples/research-crew.ts) (coming soon)
+- [Customer Service](../packages/openclaw-atp/examples/customer-service.ts) (coming soon)
 
 ## Migration Guide
 
-### From Unprotected Motleycrew
+### From Unprotected OpenClaw
 
 ```diff
-  import { MotleyCrew } from 'motleycrew';
-+ import { MotleycrewATPClient } from '@atp/motleycrew-atp';
+  import { OpenClaw } from '@atpdevelopment/openclaw-atp';
++ import { OpenClawATPClient } from '@atpdevelopment/openclaw-atp';
 
-+ const atpClient = new MotleycrewATPClient({ profile: 'strictDev' });
++ const atpClient = new OpenClawATPClient({ profile: 'strictDev' });
 + await atpClient.initialize();
 
-  const crew = new MotleyCrew();
+  const crew = new OpenClaw();
   
 - crew.add_agent(agent1);
 + const { agent: securedAgent1 } = await atpClient.registerAgent(agent1, {
@@ -692,9 +692,9 @@ Explore complete working examples:
 Python bindings coming soon:
 
 ```python
-from motleycrew_atp import MotleycrewATPClient
+from openclaw_atp import OpenClawATPClient
 
-client = MotleycrewATPClient(profile='production_finance')
+client = OpenClawATPClient(profile='production_finance')
 await client.initialize()
 
 agent = await client.register_agent(motley_agent, 
@@ -705,11 +705,11 @@ agent = await client.register_agent(motley_agent,
 
 ## Resources
 
-- **Documentation**: [https://docs.atp.dev/motleycrew](https://docs.atp.dev/motleycrew)
-- **Examples**: [/packages/motleycrew-atp/examples](../packages/motleycrew-atp/examples/)
+- **Documentation**: [https://docs.atp.dev/openclaw](https://docs.atp.dev/openclaw)
+- **Examples**: [/packages/openclaw-atp/examples](../packages/openclaw-atp/examples/)
 - **GitHub**: [https://github.com/agent-trust-protocol/atp](https://github.com/agent-trust-protocol/atp)
 - **Discord**: [https://discord.gg/atp-dev](https://discord.gg/atp-dev)
-- **Motleycrew Docs**: [https://motleycrew.ai](https://motleycrew.ai)
+- **OpenClaw Docs**: [https://openclaw.dev](https://openclaw.dev)
 
 ## License
 
@@ -720,6 +720,6 @@ Apache 2.0 - See [LICENSE](../LICENSE)
 **Next Steps:**
 1. [Install the package](#installation)
 2. [Try the quick start](#quick-start-5-minutes)
-3. [Explore the finance example](../packages/motleycrew-atp/examples/finance-workflow.ts)
+3. [Explore the finance example](../packages/openclaw-atp/examples/finance-workflow.ts)
 4. [Read security best practices](#security-best-practices)
 5. [Join our Discord](https://discord.gg/atp-dev) for support

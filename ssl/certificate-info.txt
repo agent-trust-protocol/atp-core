@@ -1,0 +1,46 @@
+ATP™ SSL Certificate Information
+Generated: Sat Jun 28 00:23:24 CDT 2025
+Environment: development
+Domain: localhost
+Validity: 365 days
+
+Files Generated:
+================
+
+Certificate Authority:
+- ca-private-key.pem      (CA private key - KEEP SECURE)
+- ca-certificate.pem      (CA public certificate)
+
+Server Certificate:
+- atp-private-key.pem     (Server private key)
+- atp-certificate.pem     (Server public certificate)
+- atp-server-bundle.p12   (Server PKCS#12 bundle)
+
+Client Certificates (for mTLS):
+- identity-service-private-key.pem & identity-service-certificate.pem
+- vc-service-private-key.pem & vc-service-certificate.pem
+- permission-service-private-key.pem & permission-service-certificate.pem
+- rpc-gateway-private-key.pem & rpc-gateway-certificate.pem
+- audit-logger-private-key.pem & audit-logger-certificate.pem
+
+PKCS#12 Bundles:
+- *-client-bundle.p12     (Client bundles for services)
+
+Security Notes:
+===============
+- Keep all private keys (.pem files) secure and never commit to version control
+- CA private key is protected with passphrase: atp_ca_passphrase_change_in_production
+- PKCS#12 bundles use passwords: atp_server_bundle_password / atp_client_bundle_password
+- Change all default passwords in production
+- Regularly rotate certificates (recommend every 1-2 years)
+
+Verification Commands:
+=====================
+# Verify server certificate
+openssl x509 -in atp-certificate.pem -text -noout
+
+# Verify certificate chain
+openssl verify -CAfile ca-certificate.pem atp-certificate.pem
+
+# Test server certificate
+openssl s_client -connect localhost:443 -CAfile ca-certificate.pem
