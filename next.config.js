@@ -2,6 +2,15 @@
 const nextConfig = {
   reactStrictMode: true,
   turbopack: {},
+  // ESLint runs separately in CI (ci.yml) — skip during next build to
+  // prevent warnings from blocking Vercel deployments.
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  // TypeScript type-checking also runs in CI — skip during build for speed.
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   env: {
     ATP_API_URL: process.env.ATP_API_URL || 'http://localhost:3000',
     ATP_QUANTUM_URL: process.env.ATP_QUANTUM_URL || 'http://localhost:3008',
