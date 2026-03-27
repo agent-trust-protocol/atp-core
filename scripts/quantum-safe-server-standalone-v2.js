@@ -138,7 +138,7 @@ class StandaloneQuantumSafeMCPServer extends BaseQuantumSafeMCPServer {
 
 // Start the server
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const server = new StandaloneQuantumSafeMCPServer({
+  new StandaloneQuantumSafeMCPServer({
     port: process.env.PORT || 3008
   });
   console.log('🔄 Demo server is running and waiting for connections...');

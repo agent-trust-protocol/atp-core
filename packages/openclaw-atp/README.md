@@ -1,5 +1,10 @@
 # 🔐 ATP OpenClaw Integration
 
+[![npm version](https://badge.fury.io/js/%40atpdevelopment%2Fopenclaw-atp.svg)](https://www.npmjs.com/package/@atpdevelopment/openclaw-atp)
+[![Publish to npm](https://github.com/agent-trust-protocol/atp-core/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/agent-trust-protocol/atp-core/actions/workflows/npm-publish.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+
 **Quantum-safe security layer for OpenClaw AI agents**
 
 This package provides seamless integration between the Agent Trust Protocol™ (ATP) and OpenClaw, enabling enterprise-grade security, trust scoring, and policy enforcement for multi-agent AI systems.
@@ -19,10 +24,41 @@ This package provides seamless integration between the Agent Trust Protocol™ (
 
 ### Installation
 
+**TypeScript / Node.js (this package):**
 ```bash
-pip install openclaw-atp  # Python package
+npm install @atpdevelopment/openclaw-atp atp-sdk
 # or
-npm install @atpdevelopment/openclaw-atp  # For TypeScript projects
+yarn add @atpdevelopment/openclaw-atp atp-sdk
+```
+
+**Python:**
+```bash
+pip install openclaw-atp
+```
+
+### Basic Usage (TypeScript)
+
+```typescript
+import { registerClawWithAtp, wrapSkillWithAtp, enforceAtpPoliciesForClawSession } from '@atpdevelopment/openclaw-atp';
+import { ATPClient } from 'atp-sdk';
+
+const atp = new ATPClient({ baseUrl: 'https://api.atp.dev' });
+
+// Register an OpenClaw agent with ATP identity
+const { did, trustScore } = await registerClawWithAtp(atp, {
+  name: 'trader-agent',
+  capabilities: ['trading', 'analysis'],
+  trustLevel: 'high'
+});
+
+// Secure a tool/skill with auth + policy + rate-limit + audit
+const secureTrade = wrapSkillWithAtp(tradeTool, atp, { agentDid: did });
+
+// Enforce session-state policies before each lifecycle step
+await enforceAtpPoliciesForClawSession(
+  { state: 'executing', agentDid: did, requestedTools: ['http'] },
+  atp
+);
 ```
 
 ### Basic Usage (Python)
@@ -255,6 +291,18 @@ test_crew_security(crew, atp_client)
 - **Issues**: https://github.com/agent-trust-protocol/core/issues
 - **Discord**: https://discord.gg/atp
 - **Email**: support@atp.protocol
+
+## 🚢 Releasing
+
+Publishing is automated via the [npm-publish workflow](https://github.com/agent-trust-protocol/atp-core/actions/workflows/npm-publish.yml). Both `atp-sdk` and `@atpdevelopment/openclaw-atp` are published together on every version tag.
+
+```bash
+# Bump version in package.json, then:
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+The workflow builds, tests, and publishes automatically. For a dry run (no actual publish), use **Actions → Publish to npm → Run workflow** with `dry_run` enabled.
 
 ## 📄 License
 

@@ -1,6 +1,7 @@
 {
   "name": "@atp/protocol-integrations",
   "version": "0.1.0",
+  "private": true,
   "description": "Protocol integrations for Agent Trust Protocol™ - MCP, A2A, and other agent protocols",
   "main": "dist/index.js",
   "type": "module",

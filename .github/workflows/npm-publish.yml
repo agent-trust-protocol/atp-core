@@ -1,0 +1,220 @@
+name: Publish to npm
+
+# Trigger on version tags (e.g. v1.2.2) or manual dispatch
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (build + pack, no publish)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  # ── Gate: build + test both packages before attempting any publish ──────────
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci --include=dev
+
+      - name: Build atp-sdk
+        working-directory: packages/sdk
+        run: npm ci --include=dev && npm run build
+
+      - name: Test atp-sdk
+        working-directory: packages/sdk
+        run: npm test -- --ci --passWithNoTests
+
+      - name: Build openclaw-atp
+        working-directory: packages/openclaw-atp
+        run: npm ci --include=dev && npm run build
+
+      - name: Test openclaw-atp
+        working-directory: packages/openclaw-atp
+        run: npm test -- --ci
+
+      # Upload built dist/ folders for publish jobs to consume
+      - name: Upload sdk dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdk-dist
+          path: packages/sdk/dist/
+          retention-days: 1
+
+      - name: Upload openclaw-atp dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: openclaw-dist
+          path: packages/openclaw-atp/dist/
+          retention-days: 1
+
+  # ── Publish atp-sdk ─────────────────────────────────────────────────────────
+  publish-sdk:
+    name: Publish atp-sdk
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    environment: npm-publish
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Restore built dist
+        uses: actions/download-artifact@v4
+        with:
+          name: sdk-dist
+          path: packages/sdk/dist/
+
+      - name: Install production dependencies only
+        working-directory: packages/sdk
+        run: npm ci --omit=dev
+
+      - name: Check if version already published
+        id: version-check
+        working-directory: packages/sdk
+        run: |
+          LOCAL=$(node -p "require('./package.json').version")
+          PUBLISHED=$(npm view atp-sdk version 2>/dev/null || echo "0.0.0")
+          echo "local=$LOCAL" >> $GITHUB_OUTPUT
+          echo "published=$PUBLISHED" >> $GITHUB_OUTPUT
+          if [ "$LOCAL" = "$PUBLISHED" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "⚠️  atp-sdk@$LOCAL is already on npm — skipping publish."
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "✅  atp-sdk: $PUBLISHED → $LOCAL (will publish)"
+          fi
+
+      - name: Dry run pack
+        if: inputs.dry_run == true
+        working-directory: packages/sdk
+        run: npm pack --dry-run
+
+      - name: Publish atp-sdk
+        if: steps.version-check.outputs.skip == 'false' && inputs.dry_run != true
+        working-directory: packages/sdk
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.version-check.outputs.skip }}" = "true" ]; then
+            echo "### atp-sdk — already published (${{ steps.version-check.outputs.local }}), skipped." >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "### atp-sdk — dry run only, not published." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ✅ atp-sdk@${{ steps.version-check.outputs.local }} published to npm" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ── Publish @atpdevelopment/openclaw-atp ────────────────────────────────────
+  publish-openclaw:
+    name: Publish @atpdevelopment/openclaw-atp
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    environment: npm-publish
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Restore built dist
+        uses: actions/download-artifact@v4
+        with:
+          name: openclaw-dist
+          path: packages/openclaw-atp/dist/
+
+      - name: Install production dependencies only
+        working-directory: packages/openclaw-atp
+        run: npm ci --omit=dev
+
+      - name: Check if version already published
+        id: version-check
+        working-directory: packages/openclaw-atp
+        run: |
+          LOCAL=$(node -p "require('./package.json').version")
+          PUBLISHED=$(npm view @atpdevelopment/openclaw-atp version 2>/dev/null || echo "0.0.0")
+          echo "local=$LOCAL" >> $GITHUB_OUTPUT
+          echo "published=$PUBLISHED" >> $GITHUB_OUTPUT
+          if [ "$LOCAL" = "$PUBLISHED" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "⚠️  @atpdevelopment/openclaw-atp@$LOCAL is already on npm — skipping publish."
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "✅  openclaw-atp: $PUBLISHED → $LOCAL (will publish)"
+          fi
+
+      - name: Dry run pack
+        if: inputs.dry_run == true
+        working-directory: packages/openclaw-atp
+        run: npm pack --dry-run
+
+      - name: Publish @atpdevelopment/openclaw-atp
+        if: steps.version-check.outputs.skip == 'false' && inputs.dry_run != true
+        working-directory: packages/openclaw-atp
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.version-check.outputs.skip }}" = "true" ]; then
+            echo "### @atpdevelopment/openclaw-atp — already published (${{ steps.version-check.outputs.local }}), skipped." >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "### @atpdevelopment/openclaw-atp — dry run only, not published." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ✅ @atpdevelopment/openclaw-atp@${{ steps.version-check.outputs.local }} published to npm" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ── Create GitHub Release with publish notes ────────────────────────────────
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [publish-sdk, publish-openclaw]
+    if: startsWith(github.ref, 'refs/tags/v') && inputs.dry_run != true
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract versions
+        id: versions
+        run: |
+          SDK=$(node -p "require('./packages/sdk/package.json').version")
+          CLAW=$(node -p "require('./packages/openclaw-atp/package.json').version")
+          echo "sdk=$SDK" >> $GITHUB_OUTPUT
+          echo "claw=$CLAW" >> $GITHUB_OUTPUT
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          body: |
+            ## npm packages
+
+            | Package | Version | Install |
+            |---------|---------|---------|
+            | `atp-sdk` | `${{ steps.versions.outputs.sdk }}` | `npm install atp-sdk` |
+            | `@atpdevelopment/openclaw-atp` | `${{ steps.versions.outputs.claw }}` | `npm install @atpdevelopment/openclaw-atp` |

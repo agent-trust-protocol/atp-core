@@ -382,7 +382,7 @@ class ImprovedQuantumSafeMCPServer {
 
 // Start the server
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const server = new ImprovedQuantumSafeMCPServer(3008);
+  new ImprovedQuantumSafeMCPServer(3008);
 }
 
 export { ImprovedQuantumSafeMCPServer };

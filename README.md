@@ -1,9 +1,12 @@
-# Agent Trust Protocol™ SDK 🛡️
+# Agent Trust Protocol™ (ATP) SDK 🛡️
+
+*The original Agent Trust Protocol — securing AI agents since March 2025*
 
 [![npm version](https://badge.fury.io/js/atp-sdk.svg)](https://www.npmjs.com/package/atp-sdk)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
-[![Quantum Safe](https://img.shields.io/badge/Security-Quantum%20Safe-blueviolet)](https://github.com/agent-trust-protocol/core)
+[![Quantum Safe](https://img.shields.io/badge/Security-Quantum%20Safe-blueviolet)](https://github.com/agent-trust-protocol/atp-core)
+[![Est. March 2025](https://img.shields.io/badge/Est.-March%202025-green)](https://github.com/agent-trust-protocol/atp-core)
 
 **Build secure AI agents in 3 lines of code.** The world's first quantum-safe security protocol for AI agents with zero-knowledge proof authentication.
 
@@ -25,6 +28,7 @@ console.log(await agent.getTrustScore('did:atp:other'));
 ```
 
 **That's it!** Your AI agent now has:
+
 - ✅ **Quantum-safe cryptography** (hybrid Ed25519 + ML-DSA)
 - ✅ **Decentralized Identity** (DID)
 - ✅ **Cryptographic signatures** for every action
@@ -39,7 +43,7 @@ Explore ATP features interactively in the **[ATP Playground →](https://www.age
 - 🤖 Create quantum-safe agents
 - 📊 See trust scoring in action
 - 🔐 Test quantum-safe signatures
-- 🚀 Run Motleycrew multi-agent workflows
+- 🚀 Run OpenClaw multi-agent workflows
 - 📜 Explore the policy engine
 - 🔗 Verify blockchain audit trails
 
@@ -69,8 +73,8 @@ For production use with identity registration and trust scoring:
 docker-compose up -d
 
 # Or run locally
-git clone https://github.com/agent-trust-protocol/core.git
-cd core && npm install && npm run dev
+git clone https://github.com/agent-trust-protocol/atp-core.git
+cd agent-trust-protocol && npm run services
 ```
 
 Then use your agent with full features:
@@ -92,7 +96,7 @@ await agent.initialize(); // Connect to ATP network
 ## 🎯 What Makes ATP Different?
 
 | Feature | Traditional Security | **ATP (Quantum-Safe)** |
-|---------|---------------------|------------------------|
+| --- | --- | --- |
 | **Setup** | Complex infrastructure | 3 lines of code |
 | **Quantum Safe** | ❌ Vulnerable | ✅ **Protected** |
 | **Identity** | Username/password | Cryptographic DID |
@@ -139,13 +143,14 @@ console.log('Verified:', result.verified); // true
 
 ### Integration with Popular Frameworks
 
-**Motleycrew (Multi-Agent Systems):**
+**OpenClaw (Multi-Agent Systems):**
+
 ```typescript
-import { registerAgentWithAtp, secureTools } from '@atp/motleycrew-atp';
+import { registerAgentWithAtp, secureTools } from '@atpdevelopment/openclaw-atp';
 import { ATPClient } from 'atp-sdk';
 
 const atp = new ATPClient();
-const { agent } = await registerAgentWithAtp(atp, motleycrewAgent, {
+const { agent } = await registerAgentWithAtp(atp, openclawAgent, {
   name: 'trader-agent',
   capabilities: ['trading', 'analysis'],
   trustLevel: 'high'
@@ -156,6 +161,7 @@ const securedTools = secureTools(agent.did, tools, atp);
 ```
 
 **LangChain:**
+
 ```typescript
 import { ATPSecurityWrapper } from 'atp-sdk/langchain';
 const secureChain = new ATPSecurityWrapper(langchainAgent, {
@@ -164,6 +170,7 @@ const secureChain = new ATPSecurityWrapper(langchainAgent, {
 ```
 
 **MCP (Model Context Protocol):**
+
 ```typescript
 import { MCPServer } from 'atp-sdk/mcp';
 const server = new MCPServer({
@@ -172,31 +179,6 @@ const server = new MCPServer({
 });
 ```
 
-### Context7 MCP Integration
-
-ATP now includes Context7 MCP server for enhanced documentation capabilities:
-
-```json
-{
-  "mcpServers": {
-    "context7": {
-      "type": "http",
-      "url": "https://mcp.context7.com/mcp",
-      "headers": {
-        "CONTEXT7_API_KEY": "YOUR_CONTEXT7_API_KEY"
-      }
-    }
-  }
-}
-```
-
-**Setup:**
-1. Get your API key from [Context7](https://mcp.context7.com/)
-2. Replace `YOUR_API_KEY` in the configuration
-3. Restart your MCP client
-
----
-
 ---
 
 ## 🏗️ Architecture
@@ -204,7 +186,7 @@ ATP now includes Context7 MCP server for enhanced documentation capabilities:
 ATP provides universal security across all AI agent protocols:
 
 ```
-Your AI Agents (LangChain, Motleycrew, AutoGPT, MCP, Swarm, ADK, A2A)
+Your AI Agents (LangChain, OpenClaw, AutoGPT, MCP, Swarm, ADK, A2A)
          │
          ▼
     ┌──────────────────────────────────────┐
@@ -242,25 +224,24 @@ pnpm add atp-sdk
 
 ## 📖 Documentation
 
-- **[Quick Start Guide](./docs/getting-started.md)** - 5-minute setup
-- **[API Reference](./packages/sdk/docs/api/README.md)** - Complete API docs
-- **[Motleycrew Integration](./docs/motleycrew-integration.md)** - Secure multi-agent workflows
-- **[Examples](./packages/sdk/examples/)** - Working code examples
-- **[Multi-Protocol Support](./docs/multi-protocol.md)** - MCP, Swarm, ADK, A2A
-- **[Troubleshooting](./docs/troubleshooting.md)** - Common issues
+- **[Quick Start Guide](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/getting-started.md)** - 5-minute setup
+- **[API Reference](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/docs/api/README.md)** - Complete API docs
+- **[OpenClaw Integration](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/openclaw-integration.md)** - Secure multi-agent workflows
+- **[Examples](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/examples)** - Working code examples
+- **[Multi-Protocol Support](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/multi-protocol.md)** - MCP, Swarm, ADK, A2A
+- **[Troubleshooting](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/troubleshooting.md)** - Common issues
 
 ---
 
-## 🤖 Multi-Agent Systems with Motleycrew
+## 🤖 Multi-Agent Systems with OpenClaw
 
-ATP now provides first-class support for [Motleycrew](https://github.com/ShoggothAI/motleycrew) multi-agent frameworks. Secure entire agent crews with quantum-safe cryptography:
+ATP now provides first-class support for [OpenClaw](https://openclaw.ai) multi-agent frameworks via the [`@atpdevelopment/openclaw-atp`](https://www.npmjs.com/package/@atpdevelopment/openclaw-atp) package. Secure entire agent crews with quantum-safe cryptography:
 
 ```typescript
-import { MotleycrewATPClient } from '@atp/motleycrew-atp';
-import { MotleyCrew } from 'motleycrew';
+import { OpenClawATPClient } from '@atpdevelopment/openclaw-atp';
 
-// Initialize ATP client with Motleycrew
-const atpClient = new MotleycrewATPClient({
+// Initialize ATP client with OpenClaw
+const atpClient = new OpenClawATPClient({
   profile: 'productionFinance', // Pre-configured security profiles
   enableMonitoring: true
 });
@@ -283,20 +264,21 @@ const validation = await atpClient.validateCrew(crew);
 ```
 
 **Features:**
-- 🔐 **Quantum-safe agent identities** for every Motleycrew agent
+
+- 🔐 **Quantum-safe agent identities** for every OpenClaw agent
 - 🛡️ **Tool-level security** with ATP permission checks on every call
 - 📊 **Graph validation** - Policy-based constraints on agent interactions
 - 🎯 **Trust-based access control** - Dynamic trust scores adjust permissions
-- 📈 **Lunary integration** - Observability feeds into ATP trust engine
+- 📈 **Observability integration** - Monitoring feeds into ATP trust engine
 - 🔑 **Secret management** - Short-lived, scoped credentials for external services
 
-[Read the full guide →](./docs/motleycrew-integration.md)
+[Read the full guide →](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/openclaw-integration.md)
 
 ---
 
-##  Community
+## Community
 
-- **GitHub**: [Issues & Discussions](https://github.com/agent-trust-protocol/core/discussions)
+- **GitHub**: [Issues & Discussions](https://github.com/agent-trust-protocol/atp-core/discussions)
 - **Discord**: [Join our community](https://discord.gg/agenttrustprotocol)
 - **Twitter**: [@agenttrustproto](https://twitter.com/agenttrustproto)
 - **Blog**: [ATP Developer Blog](https://blog.agenttrustprotocol.com)
@@ -305,53 +287,32 @@ const validation = await atpClient.validateCrew(crew);
 
 ## 📊 Stats
 
-[![GitHub stars](https://img.shields.io/github/stars/agent-trust-protocol/core?style=social)](https://github.com/agent-trust-protocol/core)
+[![GitHub stars](https://img.shields.io/github/stars/agent-trust-protocol/atp-core?style=social)](https://github.com/agent-trust-protocol/atp-core)
 [![npm downloads](https://img.shields.io/npm/dm/atp-sdk)](https://www.npmjs.com/package/atp-sdk)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](./LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](https://github.com/agent-trust-protocol/atp-core/blob/main/LICENSE)
 
 ---
 
 ## 🚀 Ready to Build?
 
-<table>
-<tr>
-<td>
-
-### 🧑‍💻 Developers
-**Start coding in 30 seconds**
-```bash
-npm install atp-sdk
-```
-[View Quick Start →](./docs/getting-started.md)
-
-</td>
-<td>
-
-### 🏢 Enterprise
-**Production-ready security**
-- SOC2 compliance ready
-- Enterprise support
-- Custom deployment
-[Contact Sales →](mailto:llewis@agenttrustprotocol.com)
-
-</td>
-</tr>
-</table>
+| | |
+| --- | --- |
+| 🧑‍💻 Developers<br>**Start coding in 30 seconds**<br>`npm install atp-sdk`<br>[View Quick Start →](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/getting-started.md) | 🏢 Enterprise<br>**Production-ready security**<br>• SOC2 compliance ready<br>• Enterprise support<br>• Custom deployment<br>[Contact Sales →](mailto:llewis@agenttrustprotocol.com) |
 
 ---
 
 ## 📄 License
 
-Licensed under [Apache 2.0](./LICENSE) - free for commercial use.
+Licensed under [Apache 2.0](https://github.com/agent-trust-protocol/atp-core/blob/main/LICENSE) - free for commercial use.
 
 ## 🛡️ Security
 
-Found a security issue? Email llewis@agenttrustprotocol.com
+Found a security issue? Email [llewis@agenttrustprotocol.com](mailto:llewis@agenttrustprotocol.com)
 
 ---
 
-**Agent Trust Protocol™** is developed and operated by **Sovr INC**. It is not affiliated with zCloak Network's similarly named protocol or any Binance-hosted initiatives.
+**Agent Trust Protocol™ (ATP)** is developed and operated by **Sovr INC**. It is not affiliated with zCloak Network's similarly named protocol or any Binance-hosted initiatives.
 
-Agent Trust Protocol™ — Protecting AI agents from today's threats and tomorrow's quantum computers.
+Agent Trust Protocol™ — The original agent trust protocol, securing AI agents since March 2025. Protecting AI agents from today's threats and tomorrow's quantum computers.
 
-[Website](https://agenttrustprotocol.com) • [Documentation](https://docs.atp.dev) • [GitHub](https://github.com/agent-trust-protocol/core)
+[Website](https://agenttrustprotocol.com) • [Documentation](https://agenttrustprotocol.com/docs) • [GitHub](https://github.com/agent-trust-protocol/atp-core)

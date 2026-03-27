@@ -123,7 +123,40 @@ export class IdentityService {
   }
 
   async resolveDID(did: string): Promise<DIDDocument | null> {
-    return await this.storage.getDIDDocument(did);
+    // 1. Always check local storage first (covers did:atp: DIDs and cached externals)
+    const local = await this.storage.getDIDDocument(did);
+    if (local) return local;
+
+    // 2. For non-ATP DIDs, try the universal resolver or a configured external resolver
+    if (!did.startsWith('did:atp:')) {
+      return this.resolveExternalDID(did);
+    }
+
+    return null;
+  }
+
+  private async resolveExternalDID(did: string): Promise<DIDDocument | null> {
+    const resolverUrl = process.env.DID_UNIVERSAL_RESOLVER_URL ?? 'https://dev.uniresolver.io';
+    try {
+      const response = await fetch(
+        `${resolverUrl}/1.0/identifiers/${encodeURIComponent(did)}`,
+        {
+          headers: { Accept: 'application/json' },
+          signal: AbortSignal.timeout(5000),
+        }
+      );
+      if (!response.ok) return null;
+
+      const body = await response.json() as { didDocument?: DIDDocument };
+      if (!body.didDocument) return null;
+
+      // Cache the resolved document locally so subsequent lookups are fast
+      await this.storage.storeDIDDocument(body.didDocument);
+      return body.didDocument;
+    } catch (error) {
+      console.warn(`[IdentityService] External DID resolution failed for ${did}:`, (error as Error).message);
+      return null;
+    }
   }
 
   async rotateKeys(did: string): Promise<DIDDocument | null> {
