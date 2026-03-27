@@ -49,7 +49,7 @@ function isMaintenanceModeEnabled(): boolean {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const hostname = request.headers.get('host') || '';
+  const hostname = request.headers.get('host') ?? '';
 
   // Domain-based routing: agenttrust.dev → /developers
   if (hostname.includes('agenttrust.dev') && pathname === '/') {
@@ -60,7 +60,10 @@ export function middleware(request: NextRequest) {
   const maintenanceEnabled = isMaintenanceModeEnabled();
 
   if (maintenanceEnabled) {
-    const allowedRoutes = ['/maintenance', '/api/health', '/_next', '/favicon.ico', '/robots.txt', '/sitemap.xml'];
+    const allowedRoutes = [
+      '/maintenance', '/api/health', '/_next',
+      '/favicon.ico', '/robots.txt', '/sitemap.xml',
+    ];
     const isAllowedRoute = allowedRoutes.some(route => pathname.startsWith(route));
 
     if (isAllowedRoute) {
@@ -107,6 +110,7 @@ export const config = {
      * - favicon.ico, robots.txt, sitemap.xml
      * - files with extensions (images, etc.)
      */
+    // eslint-disable-next-line max-len
     '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)'
   ]
 };

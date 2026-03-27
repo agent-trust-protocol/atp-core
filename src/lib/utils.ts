@@ -13,7 +13,7 @@ export function truncateString(str: string, length: number): string {
   return str.length > length ? `${str.substring(0, length)}...` : str;
 }
 
-export function generateMockSignature(message: string) {
+export function generateMockSignature(_message: string) {
   // Generate realistic-looking mock signatures for demo
   const ed25519 = Array.from({ length: 64 }, () =>
     Math.floor(Math.random() * 16).toString(16)

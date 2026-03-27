@@ -17,7 +17,7 @@ function Error({ statusCode }: { statusCode?: number }) {
         boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
       }}>
         <h1 style={{ fontSize: '4rem', color: statusCode === 404 ? '#6c757d' : '#dc3545' }}>
-          {statusCode || 'Error'}
+          {statusCode ?? 'Error'}
         </h1>
         <p style={{ color: '#6c757d' }}>
           {statusCode === 404 ? 'Page not found' : 'An error occurred'}
@@ -35,7 +35,7 @@ function Error({ statusCode }: { statusCode?: number }) {
   );
 }
 
-Error.getInitialProps = ({ res, err }: any) => {
+Error.getInitialProps = ({ res, err }: { res?: { statusCode: number }; err?: { statusCode: number } }) => {
   const statusCode = res ? res.statusCode : err ? err.statusCode : 404;
   return { statusCode };
 };
