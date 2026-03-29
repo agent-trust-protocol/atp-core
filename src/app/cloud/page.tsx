@@ -101,7 +101,7 @@ export default function CloudDashboardPage() {
                   ATP™ Cloud Dashboard
                 </h1>
                 <p className="text-muted-foreground">
-                  Multi-tenant Agent Trust Protocol Cloud Platform Management
+                  Multi-tenant Agent Trust Protocol™ Cloud Platform Management
                 </p>
               </div>
             </div>

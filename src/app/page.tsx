@@ -23,7 +23,7 @@ import {
   Code2
 } from 'lucide-react';
 import { AnimatedIcon, IconWithBadge, FloatingIcon } from '@/components/ui/animated-icon';
-import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon, SecureConnectionIcon, PolicyFlowIcon } from '@/components/ui/atp-icons';
+import { QuantumShieldIcon, TrustNetworkIcon, PolicyFlowIcon } from '@/components/ui/atp-icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -41,7 +41,7 @@ export default function HomePage() {
           <div className="text-center max-w-5xl mx-auto space-y-12">
           <div className="flex items-center justify-center mb-8 animate-fade-in-up">
             <div className="relative w-40 h-24 sm:w-56 sm:h-32 lg:w-72 lg:h-40 mb-4 atp-quantum-glow rounded-2xl bg-gradient-to-br from-primary/5 to-secondary/5 dark:from-primary/15 dark:to-secondary/15 flex items-center justify-center border border-primary/20 dark:border-cyan-400/30">
-              <BrandLogo variant="lockup" size={320} className="animate-in zoom-in-50 duration-1000" alt="Agent Trust Protocol Official Logo" />
+              <BrandLogo variant="lockup" size={320} className="animate-in zoom-in-50 duration-1000" alt="Agent Trust Protocol™ Official Logo" />
               {/* Enhanced dark mode backdrop */}
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-transparent via-cyan-400/5 to-blue-500/5 dark:from-cyan-400/15 dark:via-blue-500/10 dark:to-purple-500/15 pointer-events-none" />
             </div>
@@ -49,7 +49,7 @@ export default function HomePage() {
               <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-extralight leading-tight animate-fade-in-up text-foreground dark:text-white">
                 World's First <span className="atp-gradient-text font-semibold">Quantum-Safe</span>
             <br />
-            AI Agent Protocol
+            AI Agent Protocol™
           </h1>
               <p className="text-xl sm:text-2xl text-foreground/90 dark:text-gray-200 max-w-4xl mx-auto leading-relaxed animate-fade-in-up">
             Enterprise-grade security with <strong className="text-foreground dark:text-white">visual policy management</strong> and <span className="text-foreground dark:text-cyan-300 font-medium">real-time monitoring</span>. Trust your AI agents with quantum-level protection.
@@ -275,28 +275,6 @@ export default function HomePage() {
             <QuantumSafeSignatureDemo />
             <TrustLevelManagementDemo />
           </div>
-
-          <Card className="glass atp-trust-indicator">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 font-display text-xl">
-                <div className="animate-pulse">
-                  <SecureConnectionIcon size={20} gradient />
-                </div>
-                Real-Time Monitoring
-              </CardTitle>
-              <CardDescription className="text-foreground/70">
-                Live system metrics and performance monitoring
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild variant="outline" size="sm" className="glass border-green-500/30 hover:bg-green-500/10">
-                <Link href="/playground">
-                  Try Demo
-                  <ArrowRight size={12} className="ml-1" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Interactive Demos CTA */}

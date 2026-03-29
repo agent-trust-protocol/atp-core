@@ -20,7 +20,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Enterprise Contact — Agent Trust Protocol',
+  title: 'Enterprise Contact — Agent Trust Protocol™',
   description: 'Get in touch with our enterprise sales team for quantum-safe AI security solutions.'
 };
 
@@ -235,7 +235,7 @@ export default function EnterpriseContactPage() {
                       <div className="flex items-start gap-3">
                         <input type="checkbox" id="consent" name="consent" required className="mt-1" />
                         <Label htmlFor="consent" className="text-sm text-foreground/70 leading-relaxed">
-                          I agree to receive communications from Agent Trust Protocol regarding enterprise solutions.
+                          I agree to receive communications from Sovr INC regarding Agent Trust Protocol™ enterprise solutions.
                           We respect your privacy and will never share your information.
                         </Label>
                       </div>

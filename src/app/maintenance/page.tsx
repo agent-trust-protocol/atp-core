@@ -30,7 +30,7 @@ export default function MaintenancePage() {
           </div>
           <CardTitle className="text-3xl font-bold">We're Making Improvements</CardTitle>
           <CardDescription className="text-lg mt-2">
-            Agent Trust Protocol is currently undergoing maintenance
+            Agent Trust Protocol™ is currently undergoing maintenance
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

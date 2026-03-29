@@ -30,7 +30,7 @@ import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon, SecureConnectionIc
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Examples — Agent Trust Protocol',
+  title: 'Examples — Agent Trust Protocol™',
   description: 'Real-world examples, integration patterns, and best practices for implementing ATP quantum-safe security in your AI agents.',
   keywords: [
     'ATP examples',

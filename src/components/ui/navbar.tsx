@@ -21,7 +21,7 @@ export function Navbar() {
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold atp-gradient-text">ATP™</span>
-              <span className="text-xs text-gray-500 dark:text-gray-400 -mt-1">Agent Trust Protocol</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 -mt-1">Agent Trust Protocol™</span>
             </div>
           </Link>
 

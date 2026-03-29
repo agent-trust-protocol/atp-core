@@ -17,6 +17,9 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { QuantumSafeSignatureDemoGated } from '@/components/atp/quantum-safe-signature-demo-gated';
+import { VisualPolicyEditorDemo } from '@/components/atp/visual-policy-editor-demo';
+import { TrustLevelManagementDemo } from '@/components/atp/trust-level-management-demo';
+import { PerformanceMetricsPreview } from '@/components/atp/performance-metrics-preview';
 
 export default function DemosPage() {
   return (
@@ -82,39 +85,15 @@ export default function DemosPage() {
           </TabsContent>
 
           <TabsContent value="policies">
-            <Card>
-              <CardHeader>
-                <CardTitle>Visual Policy Editor Demo</CardTitle>
-                <CardDescription>Design trust policies with drag-and-drop simplicity</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Interactive demo coming soon. Contact us for early access.</p>
-              </CardContent>
-            </Card>
+            <VisualPolicyEditorDemo />
           </TabsContent>
 
           <TabsContent value="trust">
-            <Card>
-              <CardHeader>
-                <CardTitle>Trust Level Management Demo</CardTitle>
-                <CardDescription>Dynamic agent registration and trust evaluation</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Interactive demo coming soon. Contact us for early access.</p>
-              </CardContent>
-            </Card>
+            <TrustLevelManagementDemo />
           </TabsContent>
 
           <TabsContent value="metrics">
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance Metrics Demo</CardTitle>
-                <CardDescription>Real-time system monitoring and analytics</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Interactive demo coming soon. Contact us for early access.</p>
-              </CardContent>
-            </Card>
+            <PerformanceMetricsPreview />
           </TabsContent>
         </Tabs>
 

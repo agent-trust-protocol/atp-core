@@ -28,7 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'ATP Runtime Guard for OpenClaw — Agent Trust Protocol',
+  title: 'ATP Runtime Guard for OpenClaw — Agent Trust Protocol™',
   description: 'ATP Runtime Guard secures your OpenClaw multi-agent systems with quantum-safe cryptography, agent identity, tool-level security, graph validation, and dynamic trust scoring.',
   keywords: [
     'OpenClaw integration',

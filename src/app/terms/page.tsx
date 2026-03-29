@@ -75,7 +75,7 @@ export default function TermsPage() {
               <h2 className="text-xl font-semibold">7. Intellectual Property</h2>
               <p className="text-muted-foreground leading-relaxed">
                 The Service, including all software, documentation, and content, is the
-                property of Agent Trust Protocol and protected by intellectual property laws.
+                property of Sovr INC. Agent Trust Protocol™ is a trademark of Sovr INC and is protected by intellectual property laws.
                 Open-source components are governed by their respective licenses.
               </p>
             </section>

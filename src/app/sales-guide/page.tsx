@@ -30,7 +30,7 @@ import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon } from '@/component
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Sales Guide — Agent Trust Protocol',
+  title: 'Sales Guide — Agent Trust Protocol™',
   description: 'Internal sales and promotion guide for ATP: key selling points, target audiences, pricing justification, and competitive advantages.',
   keywords: [
     'ATP sales guide',
@@ -70,7 +70,7 @@ export default function SalesGuidePage() {
             <span className="atp-gradient-text">Sales & Promotion Guide</span>
           </h1>
           <p className="text-lg sm:text-xl text-foreground/80 mb-8 max-w-4xl mx-auto leading-relaxed animate-fade-in-up">
-            Complete sales toolkit for promoting <span className="atp-gradient-text font-medium">Agent Trust Protocol</span>
+            Complete sales toolkit for promoting <span className="atp-gradient-text font-medium">Agent Trust Protocol™</span>
             with key selling points, target audiences, and competitive strategies.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8 animate-fade-in-up">

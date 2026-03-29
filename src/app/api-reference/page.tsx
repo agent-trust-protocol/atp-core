@@ -26,7 +26,7 @@ import { GatedAPIReference } from './gated';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'API Reference — Agent Trust Protocol',
+  title: 'API Reference — Agent Trust Protocol™',
   description: 'Complete API documentation for ATP: authentication methods, endpoints, SDKs, rate limits, and error codes.'
 };
 

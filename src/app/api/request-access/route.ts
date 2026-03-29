@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// In production, you'd store this in a database
-// For now, we'll just log it and return success
-// You can integrate with your CRM (HubSpot, Salesforce, etc.) or email service
+import { query, queryOne } from '@/lib/db';
+import { emailService } from '@/lib/email';
+import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,39 +34,53 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: In production, you would:
-    // 1. Store the request in a database
-    // 2. Send an email notification to your team
-    // 3. Send a confirmation email to the requester
-    // 4. Integrate with your CRM system
-    // 5. Set up automated approval workflow if needed
+    // Check for existing waitlist entry
+    const existing = await queryOne<{ status: string }>(
+      'SELECT status FROM waitlist WHERE email = $1',
+      [email]
+    );
 
-    // For now, log the request (in production, save to database)
-    console.log('Access Request Received:', {
-      name: `${firstName} ${lastName}`,
+    if (existing) {
+      if (existing.status === 'approved') {
+        return NextResponse.json({
+          success: true,
+          message: 'Your access has already been approved. Check your email for the invite link.'
+        });
+      }
+      return NextResponse.json({
+        success: true,
+        message: 'Your request has already been submitted. We\'ll review it shortly.'
+      });
+    }
+
+    // Insert into waitlist
+    const id = crypto.randomUUID();
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+
+    await query(
+      `INSERT INTO waitlist (id, email, first_name, last_name, company, company_size, role, use_case, message, ip_address)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [id, email, firstName, lastName, company, companySize, role, useCase, message || null, ip]
+    );
+
+    // Send confirmation email to user
+    await emailService.sendAccessRequestConfirmation({
+      firstName,
+      lastName,
+      email
+    });
+
+    // Send notification to admin
+    await emailService.sendAccessRequestNotification({
+      firstName,
+      lastName,
       email,
       company,
       companySize,
       role,
       useCase,
-      message,
-      timestamp: new Date().toISOString(),
-      ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+      message
     });
-
-    // TODO: Send email notification to your team
-    // Example: await sendEmail({
-    //   to: 'team@agenttrustprotocol.com',
-    //   subject: `New ATP Access Request from ${firstName} ${lastName}`,
-    //   body: `...`
-    // });
-
-    // TODO: Send confirmation email to requester
-    // Example: await sendEmail({
-    //   to: email,
-    //   subject: 'ATP Access Request Received',
-    //   body: `Thank you for your interest...`
-    // });
 
     return NextResponse.json({
       success: true,
@@ -82,4 +95,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

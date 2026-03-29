@@ -1038,4 +1038,4 @@ The ATP SDK integrates with industry-leading payment platforms:
 
 Built and maintained by [Sovr Labs](https://sovrlabs.com) | [Enterprise](https://sovrlabs.com/enterprise)
 
-© 2025 Sovr Labs. Apache-2.0 License.
+© 2026 Sovr Labs. Apache-2.0 License.

@@ -33,7 +33,7 @@ Context7 provides advanced documentation and context management capabilities. Ad
       "type": "http",
       "url": "https://mcp.context7.com/mcp",
       "headers": {
-        "CONTEXT7_API_KEY": "ctx7sk-b6fb0035-0a69-483a-9886-7c6b8c040995Y"
+        "CONTEXT7_API_KEY": "YOUR_CONTEXT7_API_KEY"
       }
     }
   }

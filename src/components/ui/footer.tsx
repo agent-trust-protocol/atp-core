@@ -20,7 +20,7 @@ export function Footer() {
               </div>
               <div>
                 <span className="font-bold text-xl">Agent Trust Protocol™</span>
-                <p className="text-sm text-muted-foreground">Quantum-Safe AI Security</p>
+                <p className="text-sm text-muted-foreground">by Sovr INC</p>
               </div>
             </div>
             <p className="text-sm text-muted-foreground max-w-xs">
@@ -155,7 +155,7 @@ export function Footer() {
         {/* Bottom Footer */}
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-            <span>© {currentYear} Agent Trust Protocol™. All rights reserved.</span>
+            <span>© {currentYear} Sovr INC. Agent Trust Protocol™ is a trademark of Sovr INC. All rights reserved.</span>
           </div>
 
           <div className="flex items-center space-x-6 text-sm">

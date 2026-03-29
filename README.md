@@ -311,8 +311,8 @@ Found a security issue? Email [llewis@agenttrustprotocol.com](mailto:llewis@agen
 
 ---
 
-**Agent Trust Protocol™ (ATP)** — The original agent trust protocol, securing AI agents since March 2025. Protecting AI agents from today's threats and tomorrow's quantum computers.
+**Agent Trust Protocol™ (ATP)** is developed and operated by **Sovr INC**. It is not affiliated with zCloak Network's similarly named protocol or any Binance-hosted initiatives.
 
-> **Note:** Agent Trust Protocol™ is the original ATP, established in March 2025. Other projects may use similar names — this is the authoritative open-source implementation with quantum-safe cryptography, DID-based identity, and universal protocol bridging.
+Agent Trust Protocol™ — The original agent trust protocol, securing AI agents since March 2025. Protecting AI agents from today's threats and tomorrow's quantum computers.
 
 [Website](https://agenttrustprotocol.com) • [Documentation](https://agenttrustprotocol.com/docs) • [GitHub](https://github.com/agent-trust-protocol/atp-core)

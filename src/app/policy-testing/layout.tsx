@@ -2,7 +2,7 @@ import { RequireAuth } from '@/components/auth/RequireAuth';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Policy Testing — Agent Trust Protocol',
+  title: 'Policy Testing — Agent Trust Protocol™',
   description: 'Comprehensive testing and validation for trust policies.'
 };
 

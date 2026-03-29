@@ -320,7 +320,7 @@ export function EnterpriseDashboard() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">ATP Enterprise Dashboard</h1>
           <p className="text-gray-600 mt-1">
-            Real-time monitoring and management for Agent Trust Protocol
+            Real-time monitoring and management for Agent Trust Protocol™
           </p>
         </div>
         <div className="flex items-center gap-3">

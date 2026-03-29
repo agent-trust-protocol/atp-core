@@ -10,7 +10,7 @@ import { Shield, Zap, Target } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Contact Us - Agent Trust Protocol™',
-  description: 'Get in touch with the Agent Trust Protocol team for enterprise inquiries, technical support, or partnership opportunities.'
+  description: 'Get in touch with the Agent Trust Protocol™ team at Sovr INC for enterprise inquiries, technical support, or partnership opportunities.'
 };
 
 export default function ContactPage() {

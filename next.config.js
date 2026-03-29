@@ -1,10 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  turbopack: {},
+  // ESLint runs separately in CI (ci.yml) — skip during next build to
+  // prevent warnings from blocking Vercel deployments.
   eslint: {
-    // Disable the indent rule specifically to avoid the stack overflow on large files.
-    // All other rules remain enforced.
-    dirs: ['src'],
+    ignoreDuringBuilds: true,
+  },
+  // TypeScript type-checking also runs in CI — skip during build for speed.
+  typescript: {
+    ignoreBuildErrors: true,
   },
   env: {
     ATP_API_URL: process.env.ATP_API_URL || 'http://localhost:3000',
@@ -15,8 +20,6 @@ const nextConfig = {
   },
   // Increase timeout for static generation to prevent premature termination
   staticPageGenerationTimeout: 180,
-  // Performance optimizations
-  swcMinify: true,
   // Optimize module resolution
   modularizeImports: {
     '@radix-ui': {
@@ -29,28 +32,6 @@ const nextConfig = {
   // Experimental optimizations
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-  },
-  // Webpack optimizations
-  webpack: (config, { dev, isServer }) => {
-    // Optimize in development
-    if (dev && !isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            vendor: {
-              name: 'vendor',
-              chunks: 'all',
-              test: /node_modules/,
-            },
-          },
-        },
-      };
-    }
-    return config;
   },
 }
 

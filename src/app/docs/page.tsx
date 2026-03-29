@@ -29,7 +29,7 @@ import { QuantumShieldIcon, TrustNetworkIcon, QuantumKeyIcon, SecureConnectionIc
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Documentation — Agent Trust Protocol',
+  title: 'Documentation — Agent Trust Protocol™',
   description: 'Complete documentation for ATP quantum-safe security: getting started, API reference, integration guides, and deployment options.',
   keywords: [
     'ATP documentation',
@@ -189,7 +189,7 @@ export default function DocsPage() {
                     </div>
                     <CardTitle className="font-display text-xl">What is ATP?</CardTitle>
                   </div>
-                  <CardDescription>Agent Trust Protocol fundamentals</CardDescription>
+                  <CardDescription>Agent Trust Protocol™ fundamentals</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm leading-relaxed">
@@ -736,6 +736,15 @@ export default function DocsPage() {
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       ATP can run alongside existing authentication systems during migration. Start by registering
                       new agents with ATP while maintaining legacy systems, then gradually migrate existing agents.
+                    </p>
+                  </div>
+
+                  <div className="border-l-2 border-cyan-500/30 pl-4">
+                    <h4 className="font-medium mb-2">Q: Who develops and operates Agent Trust Protocol™?</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Agent Trust Protocol™ (ATP) is developed and operated by <strong>Sovr INC</strong>. It is not affiliated with
+                      zCloak Network&apos;s similarly named protocol or any Binance-hosted initiatives. Agent Trust Protocol™ is a
+                      trademark of Sovr INC.
                     </p>
                   </div>
                 </div>

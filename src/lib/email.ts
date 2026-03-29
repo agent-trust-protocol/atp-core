@@ -22,7 +22,7 @@ class EmailService {
     // Use Resend's onboarding domain in development if main domain not verified
     const isDevelopment = process.env.NODE_ENV !== 'production';
     this.fromEmail = process.env.EMAIL_FROM || (isDevelopment ? 'onboarding@resend.dev' : 'noreply@agenttrustprotocol.com');
-    this.fromName = process.env.EMAIL_FROM_NAME || 'Agent Trust Protocol';
+    this.fromName = process.env.EMAIL_FROM_NAME || 'Agent Trust Protocol™ by Sovr INC';
 
     if (emailProvider === 'sendgrid' && process.env.SENDGRID_API_KEY) {
       // SendGrid via SMTP
@@ -144,7 +144,7 @@ class EmailService {
               <h1>New ATP Access Request</h1>
             </div>
             <div class="content">
-              <p>A new access request has been submitted for Agent Trust Protocol.</p>
+              <p>A new access request has been submitted for Agent Trust Protocol™.</p>
               
               <div class="field">
                 <span class="label">Name:</span>
@@ -226,7 +226,7 @@ class EmailService {
             <div class="content">
               <p>Hi ${request.firstName},</p>
               
-              <p>Thank you for your interest in Agent Trust Protocol!</p>
+              <p>Thank you for your interest in Agent Trust Protocol™!</p>
               
               <p>We've received your access request and our team will review it shortly. You'll receive an email with your demo login credentials once your request is approved (typically within 1-2 business days).</p>
               
@@ -288,7 +288,7 @@ class EmailService {
                 <h1>Sign in to ATP</h1>
               </div>
               <div class="content">
-                <p>Click the button below to securely sign in to your Agent Trust Protocol account.</p>
+                <p>Click the button below to securely sign in to your Agent Trust Protocol™ account.</p>
 
                 <a href="${url}" class="button">Sign In to ATP</a>
 
@@ -312,7 +312,71 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'Sign in to Agent Trust Protocol',
+      subject: 'Sign in to Agent Trust Protocol™',
+      html
+    });
+  }
+
+  async sendInviteEmail(request: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    signupUrl: string;
+  }): Promise<boolean> {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background: #f5f5f5; }
+            .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
+            .card { background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+            .header { background: linear-gradient(135deg, #00D9FF 0%, #0066FF 100%); color: white; padding: 30px; text-align: center; }
+            .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+            .content { padding: 40px 30px; }
+            .button { display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #00D9FF 0%, #0066FF 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; margin: 20px 0; }
+            .info-box { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0; border-radius: 4px; }
+            .expiry { color: #666; font-size: 14px; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="card">
+              <div class="header">
+                <h1>You're Invited!</h1>
+              </div>
+              <div class="content">
+                <p>Hi ${request.firstName},</p>
+
+                <p>Great news! Your access request for Agent Trust Protocol&#8482; has been approved.</p>
+
+                <div class="info-box">
+                  <strong>Create your account:</strong>
+                  <p>Click the button below to set up your ATP account. No password needed — we'll send you a secure magic link to sign in.</p>
+                </div>
+
+                <p style="text-align: center;">
+                  <a href="${request.signupUrl}" class="button">Create Your Account</a>
+                </p>
+
+                <p class="expiry">This invite link expires in 7 days and can only be used once.</p>
+
+                <p style="font-size: 12px; color: #999; margin-top: 20px;">
+                  Or copy and paste this link in your browser:<br>
+                  <code style="word-break: break-all; font-size: 11px;">${request.signupUrl}</code>
+                </p>
+
+                <p>Welcome to ATP!<br>The ATP Team at Sovr INC</p>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    return this.sendEmail({
+      to: request.email,
+      subject: "You're Invited to Agent Trust Protocol\u2122",
       html
     });
   }
@@ -322,10 +386,6 @@ class EmailService {
     lastName: string;
     email: string;
     loginUrl: string;
-    credentials?: {
-      email: string;
-      password: string;
-    };
   }): Promise<boolean> {
     const html = `
       <!DOCTYPE html>
@@ -336,39 +396,33 @@ class EmailService {
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
             .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
             .content { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-top: none; }
-            .credentials-box { background: #fff3cd; border: 2px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; }
+            .info-box { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0; border-radius: 4px; }
             .button { display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 4px; margin-top: 20px; }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
-              <h1>🎉 Access Approved!</h1>
+              <h1>Access Approved!</h1>
             </div>
             <div class="content">
               <p>Hi ${request.firstName},</p>
-              
-              <p>Great news! Your access request for Agent Trust Protocol has been approved.</p>
-              
-              ${request.credentials ? `
-              <div class="credentials-box">
-                <h3>Your Demo Credentials:</h3>
-                <p><strong>Email:</strong> ${request.credentials.email}</p>
-                <p><strong>Password:</strong> ${request.credentials.password}</p>
-                <p style="font-size: 12px; color: #666; margin-top: 10px;">
-                  ⚠️ Please keep these credentials secure and don't share them.
-                </p>
+
+              <p>Great news! Your access request for Agent Trust Protocol™ has been approved.</p>
+
+              <div class="info-box">
+                <strong>How to sign in:</strong>
+                <p>Click the button below and enter your email address. We'll send you a secure magic link — no password needed.</p>
               </div>
-              ` : ''}
-              
+
               <p>
                 <a href="${request.loginUrl}" class="button">
-                  Access ATP Platform
+                  Sign In to ATP
                 </a>
               </p>
-              
+
               <p>If you have any questions or need assistance, please don't hesitate to reach out.</p>
-              
+
               <p>Welcome to ATP!<br>The ATP Team</p>
             </div>
           </div>
@@ -378,7 +432,7 @@ class EmailService {
 
     return this.sendEmail({
       to: request.email,
-      subject: 'ATP Access Approved - Your Demo Credentials',
+      subject: 'ATP Access Approved - You Can Now Sign In',
       html
     });
   }
