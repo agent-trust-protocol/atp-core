@@ -51,7 +51,7 @@ module.exports = {
     
     // Style rules
     'comma-dangle': ['error', 'never'],
-    'quotes': ['error', 'single', { avoidEscape: true }],
+    'quotes': ['error', 'single', { avoidEscape: true, allowTemplateLiterals: true }],
     'semi': ['error', 'always'],
     // Disable indent rule - causes stack overflow on complex TSX files
     'indent': 'off',
