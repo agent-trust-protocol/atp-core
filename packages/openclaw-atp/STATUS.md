@@ -96,6 +96,6 @@ Python bindings coming soon to support Python-based OpenClaw users.
 
 ---
 
-**Documentation**: [ATP OpenClaw Docs](https://docs.atp.dev/openclaw)  
+**Documentation**: [ATP OpenClaw Docs](https://github.com/agent-trust-protocol/atp-core/tree/main/docs/openclaw)  
 **Support**: support@atp.protocol  
 **License**: Apache-2.0

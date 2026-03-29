@@ -53,9 +53,17 @@ No installation required — runs entirely in your browser.
 
 ## 🚀 Quick Start (2 Minutes)
 
-### Option 1: Works Immediately (No Setup)
+### One-Line Setup (Recommended)
 
-Perfect for testing and development - no services required:
+```bash
+npx create-atp-agent
+```
+
+### Or Install the SDK Directly
+
+```bash
+npm install atp-sdk
+```
 
 ```typescript
 import { Agent } from 'atp-sdk';

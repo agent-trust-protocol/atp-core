@@ -705,7 +705,7 @@ agent = await client.register_agent(motley_agent,
 
 ## Resources
 
-- **Documentation**: [https://docs.atp.dev/openclaw](https://docs.atp.dev/openclaw)
+- **Documentation**: [https://github.com/agent-trust-protocol/atp-core/tree/main/docs/openclaw](https://github.com/agent-trust-protocol/atp-core/tree/main/docs/openclaw)
 - **Examples**: [/packages/openclaw-atp/examples](../packages/openclaw-atp/examples/)
 - **GitHub**: [https://github.com/agent-trust-protocol/atp](https://github.com/agent-trust-protocol/atp)
 - **Discord**: [https://discord.gg/atp-dev](https://discord.gg/atp-dev)

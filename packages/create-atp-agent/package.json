@@ -1,0 +1,39 @@
+{
+  "name": "create-atp-agent",
+  "version": "1.0.0",
+  "description": "Bootstrap a quantum-safe ATP agent in seconds",
+  "main": "dist/index.js",
+  "bin": {
+    "create-atp-agent": "./dist/index.js",
+    "atp-init": "./dist/index.js"
+  },
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "atp",
+    "agent-trust-protocol",
+    "quantum-safe",
+    "ai-agent",
+    "did",
+    "scaffolder"
+  ],
+  "author": {
+    "name": "Sovr INC",
+    "url": "https://agenttrustprotocol.com"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agent-trust-protocol/atp-core.git",
+    "directory": "packages/create-atp-agent"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

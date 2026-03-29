@@ -212,7 +212,7 @@ cd packages/protocol-integrations && npm publish --access public
 
 ### Documentation Links
 - **GitHub Repository**: https://github.com/agent-trust-protocol/atp
-- **API Documentation**: https://docs.atp.dev
+- **API Documentation**: https://github.com/agent-trust-protocol/atp-core/tree/main/docs
 - **Examples Repository**: https://github.com/agent-trust-protocol/examples
 - **Demo Site**: https://demo.atp.dev
 

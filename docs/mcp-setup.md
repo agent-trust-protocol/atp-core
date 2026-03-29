@@ -178,6 +178,6 @@ secure_agent = ATPSecurityWrapper(agent, {
 
 ## Support
 
-- **Documentation**: [ATP MCP Docs](https://docs.atp.dev/mcp)
+- **Documentation**: [ATP MCP Docs](https://github.com/agent-trust-protocol/atp-core/tree/main/docs/mcp)
 - **Context7**: [Context7 MCP](https://mcp.context7.com/)
 - **Issues**: [GitHub Issues](https://github.com/agent-trust-protocol/core/issues)

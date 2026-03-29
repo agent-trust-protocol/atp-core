@@ -193,16 +193,16 @@ All systems are running normally. Check https://status.atp.dev for real-time upd
     const links: string[] = [];
     
     if (response.toLowerCase().includes('integration')) {
-      links.push('https://docs.atp.dev/quickstart');
+      links.push('https://github.com/agent-trust-protocol/atp-core/tree/main/docs/quickstart');
     }
     if (response.toLowerCase().includes('pricing')) {
       links.push('https://atp.dev/pricing');
     }
     if (response.toLowerCase().includes('trust')) {
-      links.push('https://docs.atp.dev/trust-scoring');
+      links.push('https://github.com/agent-trust-protocol/atp-core/tree/main/docs/trust-scoring');
     }
     if (response.toLowerCase().includes('api')) {
-      links.push('https://docs.atp.dev/api-reference');
+      links.push('https://github.com/agent-trust-protocol/atp-core/tree/main/docs/api-reference');
     }
     
     return links;
@@ -261,13 +261,13 @@ All systems are running normally. Check https://status.atp.dev for real-time upd
       response: `I apologize, but I'm experiencing some technical difficulties right now. 
 
 For immediate assistance:
-• Documentation: https://docs.atp.dev
+• Documentation: https://github.com/agent-trust-protocol/atp-core/tree/main/docs
 • Email Support: support@atp.dev
 • GitHub Issues: https://github.com/agent-trust-protocol/issues
 
 If this is urgent, please email support@atp.dev and we'll respond within 4 hours for enterprise customers.`,
       confidence: 0.5,
-      documentationLinks: ['https://docs.atp.dev'],
+      documentationLinks: ['https://github.com/agent-trust-protocol/atp-core/tree/main/docs'],
       requiresEscalation: true,
       aiEnhanced: false
     };

@@ -431,7 +431,7 @@ try {
 
 ## Support
 
-- **Documentation**: https://docs.atp.dev/openclaw
+- **Documentation**: https://github.com/agent-trust-protocol/atp-core/tree/main/docs/openclaw
 - **Examples**: [./examples](./examples)
 - **Issues**: https://github.com/agent-trust-protocol/core/issues
 - **Discord**: https://discord.gg/atp

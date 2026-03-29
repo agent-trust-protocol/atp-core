@@ -71,6 +71,7 @@ quick-*.sh
 force-*.sh
 godaddy-*.sh
 health-*.sh
+!scripts/dev/health-check.sh
 manual-*.sh
 mock-*.sh
 monitor-*.sh
@@ -150,6 +151,8 @@ temp/
 .roo/
 .windsurf/
 .cursor/
+.giga/
+.roomodes
 .kiro/
 .qoder/
 .augment/

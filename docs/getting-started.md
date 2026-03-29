@@ -369,7 +369,7 @@ docker network inspect atp-network
 
 ### Need Help?
 
-- 📖 [Documentation](https://docs.atp.dev)
+- 📖 [Documentation](https://github.com/agent-trust-protocol/atp-core/tree/main/docs)
 - 💬 [Discord Community](https://discord.gg/atp-dev)  
 - 🐛 [Report Issues](https://github.com/agent-trust-protocol/atp/issues)
 - 📧 [Email Support](mailto:support@atp.dev)
