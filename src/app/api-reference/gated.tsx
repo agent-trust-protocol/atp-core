@@ -4,14 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
   Lock,
   ArrowRight,
   CheckCircle,
   Code2,
-  Key,
-  Shield,
   BookOpen,
   FileCode,
   Webhook
@@ -34,7 +31,7 @@ export function GatedAPIReference({ children }: GatedAPIReferenceProps) {
           credentials: 'include'
         });
         setIsAuthenticated(response.ok);
-      } catch (error) {
+      } catch (_error) {
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);

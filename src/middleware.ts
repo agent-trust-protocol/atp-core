@@ -62,7 +62,7 @@ export function middleware(request: NextRequest) {
   if (maintenanceEnabled) {
     const allowedRoutes = [
       '/maintenance', '/api/health', '/_next',
-      '/favicon.ico', '/robots.txt', '/sitemap.xml',
+      '/favicon.ico', '/robots.txt', '/sitemap.xml'
     ];
     const isAllowedRoute = allowedRoutes.some(route => pathname.startsWith(route));
 
