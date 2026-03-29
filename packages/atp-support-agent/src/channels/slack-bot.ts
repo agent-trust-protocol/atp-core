@@ -208,7 +208,7 @@ export class ATPSlackBot {
           type: 'mrkdwn',
           text: '*📚 Relevant Documentation:*\n' +
                 response.documentationLinks.map((link: string) => 
-                  `• <https://docs.atp.dev${link}|${link}>`
+                  `• <https://github.com/agent-trust-protocol/atp-core/tree/main/docs${link}|${link}>`
                 ).join('\n')
         }
       });

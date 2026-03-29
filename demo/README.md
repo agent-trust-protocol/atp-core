@@ -248,7 +248,7 @@ npm --version
 
 ### Demo Support
 - **Email**: dev@agenttrustprotocol.com
-- **Documentation**: https://docs.atp.dev/demo
+- **Documentation**: https://github.com/agent-trust-protocol/atp-core/tree/main/docs/demo
 - **Issues**: https://github.com/atp-protocol/agent-trust-protocol/issues
 
 ### Sales Support

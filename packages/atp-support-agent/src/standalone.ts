@@ -136,7 +136,7 @@ Trust scores range from 0.0 to 1.0, with:
 - 0.5-0.7 = Moderate trust
 - <0.5 = Low trust
 
-Learn more: https://docs.atp.dev/trust-scoring`
+Learn more: https://github.com/agent-trust-protocol/atp-core/tree/main/docs/trust-scoring`
     });
   }
 
@@ -154,7 +154,7 @@ Learn more: https://docs.atp.dev/trust-scoring`
         response: `Here's how to integrate ATP with ${language}:`,
         confidence: 0.9,
         codeExample: this.knowledgeBase.get('integration')[language],
-        documentationLinks: [`https://docs.atp.dev/quickstart/${language}`],
+        documentationLinks: [`https://github.com/agent-trust-protocol/atp-core/tree/main/docs/quickstart/${language}`],
         requiresEscalation: false
       };
     }
@@ -176,7 +176,7 @@ Learn more: https://docs.atp.dev/trust-scoring`
         queryId: query.id,
         response: this.knowledgeBase.get('trust').response,
         confidence: 0.95,
-        documentationLinks: ['https://docs.atp.dev/trust-scoring'],
+        documentationLinks: ['https://github.com/agent-trust-protocol/atp-core/tree/main/docs/trust-scoring'],
         requiresEscalation: false
       };
     }
@@ -197,13 +197,13 @@ Learn more: https://docs.atp.dev/trust-scoring`
       response: `I can help you with ATP integration, pricing, trust scoring, and technical questions. 
 
 For your specific question, here are some resources:
-- Documentation: https://docs.atp.dev
+- Documentation: https://github.com/agent-trust-protocol/atp-core/tree/main/docs
 - GitHub: https://github.com/agent-trust-protocol
 - Contact Sales: https://atp.dev/contact
 
 Would you like me to escalate this to a human support engineer?`,
       confidence: 0.6,
-      documentationLinks: ['https://docs.atp.dev'],
+      documentationLinks: ['https://github.com/agent-trust-protocol/atp-core/tree/main/docs'],
       requiresEscalation: false
     };
   }

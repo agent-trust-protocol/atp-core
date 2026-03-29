@@ -94,7 +94,7 @@ export class WorkflowApiServer {
           nodes: '/api/workflows/nodes',
           executions: '/api/workflows/executions'
         },
-        documentation: 'https://docs.atp.dev/workflow-engine'
+        documentation: 'https://github.com/agent-trust-protocol/atp-core/tree/main/docs/workflow-engine'
       });
     });
 

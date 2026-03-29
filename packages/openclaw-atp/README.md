@@ -287,7 +287,7 @@ test_crew_security(crew, atp_client)
 
 ## 🆘 Support
 
-- **Documentation**: https://docs.atp.dev/openclaw
+- **Documentation**: https://github.com/agent-trust-protocol/atp-core/tree/main/docs/openclaw
 - **Issues**: https://github.com/agent-trust-protocol/core/issues
 - **Discord**: https://discord.gg/atp
 - **Email**: support@atp.protocol

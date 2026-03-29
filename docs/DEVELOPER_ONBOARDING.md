@@ -553,7 +553,7 @@ Follow our [Agent Development Tutorial](./AGENT_TUTORIAL.md) to create your firs
 
 - **GitHub**: [agent-trust-protocol/atp](https://github.com/agent-trust-protocol/atp)
 - **Discord**: [ATP™ Developer Community](https://discord.gg/atp)
-- **Documentation**: [docs.atp.dev](https://docs.atp.dev)
+- **Documentation**: [ATP Documentation](https://github.com/agent-trust-protocol/atp-core/tree/main/docs)
 
 ---
 
