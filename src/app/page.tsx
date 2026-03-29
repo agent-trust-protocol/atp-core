@@ -29,7 +29,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { QuantumSafeSignatureDemo } from '@/components/atp/quantum-safe-signature-demo';
 import { TrustLevelManagementDemo } from '@/components/atp/trust-level-management-demo';
-import { PerformanceMetricsPreview } from '@/components/atp/performance-metrics-preview';
 import { QuickAccess } from '@/components/ui/quick-access';
 
 export default function HomePage() {
