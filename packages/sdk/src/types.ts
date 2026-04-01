@@ -212,6 +212,8 @@ export interface ATPConfig {
   debug?: boolean;
   /** Custom headers for requests */
   headers?: Record<string, string>;
+  /** ATP security profile ID to apply */
+  profileId?: string;
 }
 
 export interface ATPResponse<T = any> {

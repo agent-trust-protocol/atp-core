@@ -97,10 +97,12 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
   - `src/connectors/` — Secret manager and service connector
   - `src/__tests__/` — Jest unit tests (registration, wrapper, session enforcement)
   - `examples/` — `finance-workflow.ts`, `stateful-session.ts`
+- `packages/atp-profiles`: Built-in ATP security profiles and runtime-agnostic profile schema. Profiles define controls (shell, filesystem, network, credentials, messaging), state policies, logging, and trust scoring. Built-in profiles: `safe-default`, `dev-mode`, `enterprise-locked`, `openclaw-sandbox`.
 - `packages/protocol-integrations`: Adapters for other runtimes (LangChain, Motleycrew, etc.).
 - `packages/rpc-gateway`: RPC layer for inter-service communication.
 - `packages/atp-cloud`: Cloud deployment and managed service utilities.
 - `src/app/`: Next.js pages — marketing site, playground, policy editor, monitoring dashboard, docs.
+- `src/app/onboard/agent/`: Agent onboarding wizard — multi-step form (runtime, name, profile, confirm) that registers an agent with ATP and assigns a security profile.
 - `src/app/integrations/`: Per-integration pages (`openclaw/` main page and `openclaw/agents/` live agent dashboard).
 - `scripts/`: Server scripts, deployment utilities, dev helpers.
 - `scripts/tests/`: End-to-end and integration test scripts.
@@ -116,6 +118,8 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
   2. Evaluate the relevant policy before executing sensitive actions.
   3. Log the decision to the audit service.
 - Never hardcode secrets, API keys, or credentials in source files. Use environment variables.
+- Profiles must be runtime-agnostic. Adapters do mapping runtime → actionType → policy.
+- Do not hardcode policies in adapters; always go through profiles and `evaluateActionWithProfile`.
 
 ---
 
@@ -130,6 +134,14 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
    - `wrap<Runtime>ToolWithAtp(tool, options)` → see `wrapSkillWithAtp` in `packages/openclaw-atp/src/claw-api.ts`
    - `enforce<Runtime>SessionPolicies(context)` → see `enforceAtpPoliciesForClawSession` in `packages/openclaw-atp/src/session/enforce.ts`
 4. Do not duplicate trust or crypto logic — call existing SDK methods.
+
+### Adding a new security profile
+
+1. Create a new file in `packages/atp-profiles/src/profiles/<profile-name>.ts` exporting an `AtpSecurityProfile` object.
+2. Register it in `packages/atp-profiles/src/index.ts` by adding to `BUILTIN_PROFILES` and re-exporting.
+3. Profiles must be runtime-agnostic. Adapters do the mapping from runtime → actionType → policy.
+4. Do not hardcode policies in adapters; always go through profiles and `evaluateActionWithProfile`.
+5. Optionally expose the profile in the onboarding wizard (`src/app/onboard/agent/client-page.tsx`) and the CLI (`packages/create-atp-agent/src/onboard.ts`).
 
 ### Adding a new policy preset
 

@@ -5,6 +5,7 @@ import { PermissionsClient } from './permissions.js';
 import { AuditClient } from './audit.js';
 import { GatewayClient } from './gateway.js';
 import { PaymentsClient } from './payments.js';
+import { BUILTIN_PROFILES, AtpSecurityProfile } from 'atp-profiles';
 
 /**
  * Main ATP™ SDK Client
@@ -19,6 +20,7 @@ export class ATPClient {
   public readonly audit: AuditClient;
   public readonly gateway: GatewayClient;
   public readonly payments: PaymentsClient;
+  private profile?: AtpSecurityProfile;
 
   constructor(private config: ATPConfig) {
     this.identity = new IdentityClient(config);
@@ -27,6 +29,10 @@ export class ATPClient {
     this.audit = new AuditClient(config);
     this.gateway = new GatewayClient(config);
     this.payments = new PaymentsClient(config);
+
+    if (config.profileId) {
+      this.profile = BUILTIN_PROFILES[config.profileId];
+    }
   }
 
   /**
@@ -110,6 +116,61 @@ export class ATPClient {
     }
 
     return results;
+  }
+
+  /**
+   * Set a security profile by ID
+   */
+  setProfile(profileId: string): void {
+    const profile = BUILTIN_PROFILES[profileId];
+    if (!profile) throw new Error(`Unknown ATP profile: ${profileId}`);
+    this.profile = profile;
+  }
+
+  /**
+   * Get the currently active security profile
+   */
+  getProfile(): AtpSecurityProfile | undefined {
+    return this.profile;
+  }
+
+  /**
+   * Evaluate whether an action is allowed under the active profile.
+   * Returns "allow", "deny", or "require_approval".
+   */
+  evaluateActionWithProfile(params: {
+    profileId?: string;
+    state?: string;
+    actionType: string;
+    metadata?: Record<string, unknown>;
+  }): "allow" | "deny" | "require_approval" {
+    const profile = params.profileId
+      ? BUILTIN_PROFILES[params.profileId]
+      : this.profile;
+
+    if (!profile) return "allow";
+
+    const { controls, state_policies } = profile;
+    const { actionType, state } = params;
+
+    // Basic control-level check
+    const control = (controls as Record<string, any>)[actionType];
+    if (control && control.allowed === false) {
+      return control.require_approval ? "require_approval" : "deny";
+    }
+
+    // State-based overrides
+    if (state && state_policies?.[state]) {
+      const policy = state_policies[state];
+      if (policy.restricted_tools?.includes(actionType)) {
+        return "deny";
+      }
+      if (policy.require_approval_for?.includes(actionType)) {
+        return "require_approval";
+      }
+    }
+
+    return "allow";
   }
 
   /**
