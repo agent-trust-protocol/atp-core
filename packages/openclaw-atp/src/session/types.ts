@@ -49,4 +49,6 @@ export interface EnforceSessionOptions {
    * Useful for offline or low-latency scenarios.
    */
   localOnly?: boolean;
+  /** ATP security profile ID for profile-based evaluation */
+  profileId?: string;
 }

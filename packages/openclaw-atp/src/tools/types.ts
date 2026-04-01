@@ -10,6 +10,9 @@ export interface ToolSecurityConfig {
   
   /** Required policy set */
   requiredPolicy?: string;
+
+  /** ATP action type for profile-based evaluation */
+  actionType?: "shell" | "filesystem" | "network" | "credentials" | "messaging";
   
   /** Enable audit logging */
   auditRequired?: boolean;

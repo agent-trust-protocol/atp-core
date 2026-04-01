@@ -12,17 +12,17 @@ export const OPENCLAW_SANDBOX_PROFILE: AtpSecurityProfile = {
     prod: "enterprise-locked",
   },
   controls: {
-    shell: { allowed: false, require_approval: true, allowed_commands: ["echo", "date", "whoami"] },
+    shell: { allowed: false, require_approval: true, allowed_commands: ["ls", "cat", "echo"] },
     filesystem: {
       allowed: true,
       modes: ["read", "write"],
-      allowed_paths: ["/workspace", "/tmp/sandbox"],
+      allowed_paths: ["/workspace", "/workspace/sandbox"],
       blocked_paths: ["/", "/etc", "/home", "/var"],
     },
     network: {
       allowed: true,
-      allowed_domains: ["internal.api.local", "*.openclaw.io"],
-      blocked_domains: [],
+      allowed_domains: ["internal.api.local", "company.com"],
+      blocked_domains: ["*"],
       require_approval_for_external: true,
     },
     credentials: { allowed: false, require_approval: true },
@@ -31,12 +31,12 @@ export const OPENCLAW_SANDBOX_PROFILE: AtpSecurityProfile = {
   state_policies: {
     planning: {
       allowed_tools: [],
-      restricted_tools: ["shell", "filesystem", "network"],
+      restricted_tools: ["shell", "filesystem", "network", "credentials"],
     },
     executing: {
       allowed_tools: ["filesystem", "network"],
       restricted_tools: ["shell"],
-      require_approval_for: ["credentials"],
+      require_approval_for: ["credentials", "messaging"],
     },
     communicating: {
       allowed_tools: ["messaging"],
@@ -50,8 +50,8 @@ export const OPENCLAW_SANDBOX_PROFILE: AtpSecurityProfile = {
   },
   logging: {
     log_all_actions: true,
-    log_sensitive_inputs: false,
-    redact_fields: ["password", "api_key", "secret"],
+    log_sensitive_inputs: true,
+    redact_fields: ["password", "api_key", "secret", "apiKey"],
   },
   trust_scoring: {
     start_score: 0.5,

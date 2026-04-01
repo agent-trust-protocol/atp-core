@@ -5,7 +5,7 @@ import {
 import type { ATPClient } from 'atp-sdk';
 import type { ClawSessionContext, SessionState } from '../session/types';
 
-function makeMockClient(checkAccessAllowed = true): ATPClient {
+function makeMockClient(checkAccessAllowed = true, profileDecision?: 'allow' | 'deny' | 'require_approval'): ATPClient {
   return {
     identity: {},
     permissions: {
@@ -14,6 +14,7 @@ function makeMockClient(checkAccessAllowed = true): ATPClient {
     audit: {
       log: jest.fn().mockResolvedValue({ id: 'audit-1' })
     },
+    evaluateActionWithProfile: jest.fn().mockReturnValue(profileDecision ?? 'allow'),
     credentials: {},
     trust: {},
     config: {}
@@ -147,6 +148,45 @@ describe('enforceAtpPoliciesForClawSession', () => {
       expect(result.agentDid).toBe('did:atp:session-agent');
       expect(result.state).toBe('completed');
       expect(result.evaluatedAt).toBeInstanceOf(Date);
+    });
+  });
+
+  describe('profile-based enforcement', () => {
+    it('moves tools to forbidden when profile denies them', async () => {
+      const client = makeMockClient(true, 'deny');
+      const result = await enforceAtpPoliciesForClawSession(
+        makeCtx('executing'),
+        client,
+        { profileId: 'openclaw-sandbox' }
+      );
+
+      // Profile denies all tools → they move from allowed to forbidden
+      expect(result.allowedTools).toHaveLength(0);
+      expect(result.forbiddenTools).toEqual(expect.arrayContaining(['http', 'fs']));
+    });
+
+    it('moves tools to requiresApproval when profile says require_approval', async () => {
+      const client = makeMockClient(true, 'require_approval');
+      const result = await enforceAtpPoliciesForClawSession(
+        makeCtx('executing'),
+        client,
+        { profileId: 'openclaw-sandbox' }
+      );
+
+      expect(result.allowedTools).toHaveLength(0);
+      expect(result.requiresApproval).toEqual(expect.arrayContaining(['http', 'fs']));
+    });
+
+    it('does not invoke profile evaluation when profileId is omitted', async () => {
+      const client = makeMockClient(true, 'deny');
+      const result = await enforceAtpPoliciesForClawSession(
+        makeCtx('executing'),
+        client
+      );
+
+      expect((client as any).evaluateActionWithProfile).not.toHaveBeenCalled();
+      // Without profile, http and fs should still be allowed (ATP approved them)
+      expect(result.allowedTools).toEqual(expect.arrayContaining(['http', 'fs']));
     });
   });
 });

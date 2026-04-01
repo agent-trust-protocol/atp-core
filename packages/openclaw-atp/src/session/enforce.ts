@@ -14,6 +14,18 @@ import type {
 } from './types.js';
 
 /**
+ * Maps OpenClaw tool names to ATP profile action types.
+ * Profiles use "filesystem"/"network" while OpenClaw uses "fs"/"http".
+ */
+const TOOL_TO_ACTION_TYPE: Record<string, string> = {
+  shell: 'shell',
+  fs: 'filesystem',
+  http: 'network',
+  messaging: 'messaging',
+  credentials: 'credentials',
+};
+
+/**
  * Default state-to-permissions map for OpenClaw agent sessions.
  * Can be overridden per-call via EnforceSessionOptions.policyOverride.
  */
@@ -54,7 +66,7 @@ export async function enforceAtpPoliciesForClawSession(
   options: EnforceSessionOptions = {}
 ): Promise<SessionPolicyResult> {
   const { agentDid, state, environmentTags, sessionId } = sessionContext;
-  const { policyOverride, localOnly = false } = options;
+  const { policyOverride, localOnly = false, profileId } = options;
 
   // Build effective policy: start from defaults, deep-merge overrides per state
   const effectivePolicy: ClawStatePolicy = Object.fromEntries(
@@ -95,6 +107,28 @@ export async function enforceAtpPoliciesForClawSession(
     );
     allowedTools.length = 0;
     allowedTools.push(...atpAllowed);
+  }
+
+  // Profile-based evaluation (additive gate after permission checks)
+  if (profileId && (atpClient as any).evaluateActionWithProfile) {
+    const profileAllowed: string[] = [];
+    for (const tool of [...allowedTools]) {
+      const actionType = TOOL_TO_ACTION_TYPE[tool] || tool;
+      const decision = (atpClient as any).evaluateActionWithProfile({
+        profileId,
+        state,
+        actionType,
+      });
+      if (decision === 'deny') {
+        forbiddenTools.push(tool);
+      } else if (decision === 'require_approval') {
+        requiresApproval.push(tool);
+      } else {
+        profileAllowed.push(tool);
+      }
+    }
+    allowedTools.length = 0;
+    allowedTools.push(...profileAllowed);
   }
 
   // Audit-log the enforcement decision
