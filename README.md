@@ -154,18 +154,22 @@ console.log('Verified:', result.verified); // true
 **OpenClaw (Multi-Agent Systems):**
 
 ```typescript
-import { registerAgentWithAtp, secureTools } from '@atpdevelopment/openclaw-atp';
+import { registerClawWithAtp, wrapSkillWithAtp } from '@atpdevelopment/openclaw-atp';
 import { ATPClient } from 'atp-sdk';
 
-const atp = new ATPClient();
-const { agent } = await registerAgentWithAtp(atp, openclawAgent, {
+// Initialize with a security profile
+const atp = new ATPClient({ baseUrl: 'https://api.atp.dev', profileId: 'openclaw-sandbox' });
+
+// Register agent
+const { did, trustScore } = await registerClawWithAtp(atp, {
   name: 'trader-agent',
   capabilities: ['trading', 'analysis'],
   trustLevel: 'high'
 });
 
-// Secure all tools with ATP
-const securedTools = secureTools(agent.did, tools, atp);
+// Secure tools with profile-based action gating
+const secureTrade = wrapSkillWithAtp(tradeTool, atp, { actionType: 'network' });
+const secureShell = wrapSkillWithAtp(shellTool, atp, { actionType: 'shell' });
 ```
 
 **LangChain:**
@@ -186,6 +190,48 @@ const server = new MCPServer({
   quantum_safe: true
 });
 ```
+
+### Security Profiles
+
+ATP includes built-in security profiles that control what agents can and cannot do:
+
+```typescript
+import { ATPClient, BUILTIN_PROFILES } from 'atp-sdk';
+
+// Select a profile at initialization
+const client = new ATPClient({ baseUrl: 'https://api.atp.dev', profileId: 'safe-default' });
+
+// Or set/change at runtime
+client.setProfile('enterprise-locked');
+
+// Evaluate whether an action is allowed
+const decision = client.evaluateActionWithProfile({
+  actionType: 'shell',        // shell | filesystem | network | credentials | messaging
+  state: 'executing',         // planning | executing | communicating | completed
+});
+console.log(decision); // "allow" | "deny" | "require_approval"
+```
+
+| Profile | Description | Use Case |
+| --- | --- | --- |
+| `safe-default` | Read-only FS, shell blocked, full audit | Most agents |
+| `dev-mode` | All tools enabled, no approval gates | Local development |
+| `enterprise-locked` | Maximum security, strict controls | Production |
+| `openclaw-sandbox` | OpenClaw-tuned sandbox, state-based | OpenClaw agents |
+
+### Onboarding
+
+Register agents via the web wizard or CLI:
+
+```bash
+# Interactive CLI onboarding
+npx atp-onboard-agent
+
+# Or visit the web wizard
+# https://your-atp-instance.com/onboard/agent
+```
+
+The wizard guides you through: runtime selection, agent naming, profile selection, and control confirmation.
 
 ---
 
@@ -275,6 +321,7 @@ const validation = await atpClient.validateCrew(crew);
 
 - 🔐 **Quantum-safe agent identities** for every OpenClaw agent
 - 🛡️ **Tool-level security** with ATP permission checks on every call
+- 🎛️ **Security profiles** - Built-in profiles (safe-default, dev-mode, enterprise-locked, openclaw-sandbox) with `evaluateActionWithProfile`
 - 📊 **Graph validation** - Policy-based constraints on agent interactions
 - 🎯 **Trust-based access control** - Dynamic trust scores adjust permissions
 - 📈 **Observability integration** - Monitoring feeds into ATP trust engine

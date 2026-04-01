@@ -42,7 +42,8 @@ pip install openclaw-atp
 import { registerClawWithAtp, wrapSkillWithAtp, enforceAtpPoliciesForClawSession } from '@atpdevelopment/openclaw-atp';
 import { ATPClient } from 'atp-sdk';
 
-const atp = new ATPClient({ baseUrl: 'https://api.atp.dev' });
+// Initialize with a security profile
+const atp = new ATPClient({ baseUrl: 'https://api.atp.dev', profileId: 'openclaw-sandbox' });
 
 // Register an OpenClaw agent with ATP identity
 const { did, trustScore } = await registerClawWithAtp(atp, {
@@ -51,13 +52,16 @@ const { did, trustScore } = await registerClawWithAtp(atp, {
   trustLevel: 'high'
 });
 
-// Secure a tool/skill with auth + policy + rate-limit + audit
-const secureTrade = wrapSkillWithAtp(tradeTool, atp, { agentDid: did });
+// Secure tools with profile-based action gating
+const secureTrade = wrapSkillWithAtp(tradeTool, atp, { actionType: 'network' });
+const secureShell = wrapSkillWithAtp(shellTool, atp, { actionType: 'shell' });
+const secureFs    = wrapSkillWithAtp(fileTool, atp, { actionType: 'filesystem' });
 
-// Enforce session-state policies before each lifecycle step
+// Enforce session-state policies with profile
 await enforceAtpPoliciesForClawSession(
-  { state: 'executing', agentDid: did, requestedTools: ['http'] },
-  atp
+  { state: 'executing', agentDid: did },
+  atp,
+  { profileId: 'openclaw-sandbox' }
 );
 ```
 
@@ -147,7 +151,65 @@ if not validation_result.is_valid:
 crew.run()
 ```
 
-## 📋 Configuration Profiles
+## 📋 Security Profiles
+
+ATP includes built-in security profiles that control what agents can do. Profiles are enforced per-tool-call via `evaluateActionWithProfile`.
+
+### Built-in Profiles
+
+| Profile | Shell | Filesystem | Network | Best For |
+| --- | --- | --- | --- | --- |
+| `safe-default` | Blocked | Read-only | Internal only | Most agents |
+| `dev-mode` | Allowed | Read + Write | All domains | Local dev |
+| `enterprise-locked` | Blocked | Approved paths | Internal corp | Production |
+| `openclaw-sandbox` | Blocked (allowlist: ls, cat, echo) | Sandbox paths | Internal + partners | OpenClaw agents |
+
+### Profile-Based Tool Wrapping (TypeScript)
+
+Every tool call goes through the profile before executing:
+
+```typescript
+import { wrapSkillWithAtp, enforceAtpPoliciesForClawSession } from '@atpdevelopment/openclaw-atp';
+import { ATPClient } from 'atp-sdk';
+
+const atp = new ATPClient({ baseUrl: 'https://api.atp.dev', profileId: 'openclaw-sandbox' });
+
+// Map each tool to an ATP action type
+const secureShell = wrapSkillWithAtp(rawShellTool, atp, { actionType: 'shell' });
+const secureFs    = wrapSkillWithAtp(rawFsTool,    atp, { actionType: 'filesystem' });
+const secureHttp  = wrapSkillWithAtp(rawHttpTool,  atp, { actionType: 'network' });
+const secureCreds = wrapSkillWithAtp(rawCredsTool, atp, { actionType: 'credentials' });
+const secureMsg   = wrapSkillWithAtp(rawMsgTool,   atp, { actionType: 'messaging' });
+
+// Register secure tools instead of raw tools in your OpenClaw config
+// ATP now decides per call: allow / deny / require_approval
+```
+
+### Session Enforcement with Profiles
+
+```typescript
+// Evaluate session-level policies with a profile
+const result = await enforceAtpPoliciesForClawSession(
+  { state: 'executing', agentDid: agent.did },
+  atp,
+  { profileId: 'openclaw-sandbox' }
+);
+
+console.log(result.allowedTools);     // ["filesystem", "network"] (if profile allows)
+console.log(result.forbiddenTools);   // ["shell", ...]
+console.log(result.requiresApproval); // ["credentials", "messaging"]
+```
+
+### OpenClaw Sandbox State Behavior
+
+| State | Behavior |
+| --- | --- |
+| **planning** | No shell, no file writes, no outbound network. Analysis and reading only. |
+| **executing** | Filesystem and network allowed. Shell only via allowlisted commands with approval. Credentials gated. |
+| **communicating** | Internal messaging allowed. External send requires approval. |
+| **completed** | Read-only: inspect logs/results, no further writes or network calls. |
+
+### Configuration Profiles (Python)
 
 ```python
 from openclaw_atp import ATPConfigProfile
@@ -183,11 +245,12 @@ Every OpenClaw agent gets:
 ### 2. Tool Call Interception
 
 ATP intercepts all tool calls to:
+- **Evaluate security profile** (`evaluateActionWithProfile`) for the action type and session state
 - Verify agent authentication
 - Check policy permissions
 - Log actions for audit
 - Update trust scores
-- Block unauthorized access
+- Block unauthorized access (deny) or require human approval (require_approval)
 
 ### 3. Task Security Metadata
 
@@ -261,9 +324,13 @@ test_crew_security(crew, atp_client)
 
 ### Core Functions
 
-- `register_agent_with_atp(client, name, role, trust_level)` - Register agent identity
-- `secure_tools(tools, client)` - Wrap tools with ATP security
-- `atp_protected_task(required_trust, policy, data_classification)` - Decorator for tasks
+- `registerClawWithAtp(atpClient, config)` - Register an OpenClaw agent; returns DID, keys, and trust score
+- `wrapSkillWithAtp(skill, atpClient, options)` - Secure a skill with auth, profile evaluation, rate-limit, and audit. Pass `actionType` to enable profile-based gating.
+- `enforceAtpPoliciesForClawSession(ctx, atpClient, options)` - Evaluate tool permissions for a session state. Pass `profileId` to use profile-based enforcement.
+- `secureTools(tools, atpClient, config)` - Batch-wrap multiple tools at once
+- `register_agent_with_atp(client, name, role, trust_level)` - Register agent identity (Python)
+- `secure_tools(tools, client)` - Wrap tools with ATP security (Python)
+- `atp_protected_task(required_trust, policy, data_classification)` - Decorator for tasks (Python)
 - `validate_crew_with_atp(crew, client, policy)` - Validate agent graph
 
 ### Classes
