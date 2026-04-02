@@ -29,8 +29,10 @@ export class NonceService {
       lazyConnect: true
     });
 
-    // Start cleanup timer
-    this.startCleanup();
+    // Start cleanup timer (skip in test environment)
+    if (process.env.NODE_ENV !== 'test') {
+      this.startCleanup();
+    }
   }
 
   /**
@@ -97,6 +99,16 @@ export class NonceService {
         console.error('Nonce cleanup error:', error);
       });
     }, this.cleanupIntervalMs);
+  }
+
+  /**
+   * Stops the cleanup process
+   */
+  private stopCleanup(): void {
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+      this.cleanupTimer = null;
+    }
   }
 
   /**
