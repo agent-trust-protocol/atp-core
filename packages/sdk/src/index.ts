@@ -215,12 +215,12 @@ export {
   DEV_MODE_PROFILE,
   ENTERPRISE_LOCKED_PROFILE,
   OPENCLAW_SANDBOX_PROFILE,
-} from 'atp-profiles';
+} from './profiles/index.js';
 
 export type {
   AtpSecurityProfile,
   RuntimeTarget,
-} from 'atp-profiles';
+} from './profiles/index.js';
 
 // Version information
 export const VERSION = '1.2.0';

@@ -5,7 +5,7 @@ import { PermissionsClient } from './permissions.js';
 import { AuditClient } from './audit.js';
 import { GatewayClient } from './gateway.js';
 import { PaymentsClient } from './payments.js';
-import { BUILTIN_PROFILES, AtpSecurityProfile } from 'atp-profiles';
+import { BUILTIN_PROFILES, AtpSecurityProfile } from '../profiles/index.js';
 
 /**
  * Main ATP™ SDK Client
