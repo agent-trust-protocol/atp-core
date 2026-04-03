@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       runtime,
       environment,
       profileId,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString()
     });
   } catch (err: any) {
     return NextResponse.json(

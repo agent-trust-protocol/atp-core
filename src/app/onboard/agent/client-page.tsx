@@ -29,36 +29,36 @@ const PROFILES: ProfileSummary[] = [
     name: 'Safe Default',
     description: 'Conservative profile for most agents: limited tools, strong auditing.',
     runtime_targets: ['openclaw', 'mcp', 'langchain', 'custom'],
-    highlights: ['Read-only filesystem', 'Shell disabled', 'Full audit trail'],
+    highlights: ['Read-only filesystem', 'Shell disabled', 'Full audit trail']
   },
   {
     id: 'dev-mode',
     name: 'Dev Mode',
     description: 'Permissive profile for local development: most tools allowed, minimal restrictions.',
     runtime_targets: ['openclaw', 'mcp', 'langchain', 'custom'],
-    highlights: ['All tools enabled', 'No approval gates', 'Action logging on'],
+    highlights: ['All tools enabled', 'No approval gates', 'Action logging on']
   },
   {
     id: 'enterprise-locked',
     name: 'Enterprise Locked',
     description: 'Maximum security for production: strict controls, full audit, approval required.',
     runtime_targets: ['openclaw', 'mcp', 'langchain', 'custom'],
-    highlights: ['Shell fully blocked', 'Credentials blocked', 'Sensitive field redaction'],
+    highlights: ['Shell fully blocked', 'Credentials blocked', 'Sensitive field redaction']
   },
   {
     id: 'openclaw-sandbox',
     name: 'OpenClaw Sandbox',
     description: 'Sandbox profile tuned for OpenClaw/NemoClaw agents with state-based enforcement.',
     runtime_targets: ['openclaw'],
-    highlights: ['OpenClaw-optimized', 'Sandbox paths only', 'State-based policies'],
-  },
+    highlights: ['OpenClaw-optimized', 'Sandbox paths only', 'State-based policies']
+  }
 ];
 
 const RUNTIMES: { value: RuntimeTarget; label: string; description: string }[] = [
   { value: 'openclaw', label: 'OpenClaw / NemoClaw', description: 'Multi-agent crew orchestration' },
   { value: 'mcp', label: 'MCP', description: 'Model Context Protocol servers' },
   { value: 'langchain', label: 'LangChain', description: 'LangChain / LangGraph agents' },
-  { value: 'custom', label: 'Custom Runtime', description: 'Your own agent framework' },
+  { value: 'custom', label: 'Custom Runtime', description: 'Your own agent framework' }
 ];
 
 const ENVIRONMENTS = ['dev', 'staging', 'prod'] as const;
@@ -74,29 +74,29 @@ const CONTROL_DETAILS: Record<string, Record<string, string>> = {
     Filesystem: 'Read-only, restricted paths',
     Network: 'Internal only, approval for external',
     Credentials: 'Blocked (approval required)',
-    Messaging: 'Allowed, approval for external',
+    Messaging: 'Allowed, approval for external'
   },
   'dev-mode': {
     Shell: 'Allowed, no restrictions',
     Filesystem: 'Read + Write, all paths',
     Network: 'All domains allowed',
     Credentials: 'Allowed',
-    Messaging: 'Allowed, no restrictions',
+    Messaging: 'Allowed, no restrictions'
   },
   'enterprise-locked': {
     Shell: 'Fully blocked',
     Filesystem: 'Read-only, approved paths only',
     Network: 'Internal corp only',
     Credentials: 'Fully blocked',
-    Messaging: 'Allowed, approval for external',
+    Messaging: 'Allowed, approval for external'
   },
   'openclaw-sandbox': {
     Shell: 'Blocked (approval, limited commands)',
     Filesystem: 'Read + Write, sandbox paths',
     Network: 'Internal + OpenClaw domains',
     Credentials: 'Blocked (approval required)',
-    Messaging: 'Allowed, approval for external',
-  },
+    Messaging: 'Allowed, approval for external'
+  }
 };
 
 // ---------------------------------------------------------------------------
@@ -127,7 +127,7 @@ export default function OnboardAgentClient() {
       const res = await fetch('/api/agents/onboard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ runtime, name: agentName, environment, profileId }),
+        body: JSON.stringify({ runtime, name: agentName, environment, profileId })
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
