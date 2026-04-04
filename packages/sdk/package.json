@@ -27,7 +27,7 @@
     "lint:check": "eslint src",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
-    "clean": "rm -rf dist coverage",
+    "clean": "rm -rf dist coverage tsconfig.tsbuildinfo",
     "docs": "typedoc src/index.ts --out docs/api-generated",
     "examples": "node examples/index.js",
     "prepublishOnly": "npm run test && npm run build",
