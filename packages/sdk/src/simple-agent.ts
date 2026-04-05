@@ -197,7 +197,11 @@ export class Agent extends EventEmitter {
 
       this.initialized = true;
     } catch (error) {
-      throw new Error(`Failed to initialize agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // Rethrow enriched network/auth errors as-is so callers see the full
+      // message (URL, status code) produced by the service clients.
+      // Only wrap truly unexpected non-Error throws.
+      if (error instanceof Error) throw error;
+      throw new Error(`Failed to initialize agent: ${String(error)}`);
     }
   }
 

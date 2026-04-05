@@ -131,8 +131,22 @@ export abstract class BaseClient {
   }
 
   private handleError(error: any): ATPError {
-    if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
-      return new ATPNetworkError(`Network error: ${error.message}`, error);
+    // Build a URL string from axios config when available (for diagnostics)
+    const requestUrl = error.config
+      ? `${error.config.baseURL || ''}${error.config.url || ''}`
+      : null;
+    const urlSuffix = requestUrl ? ` (url: ${requestUrl})` : '';
+
+    if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT' || error.code === 'ENOTFOUND') {
+      // error.message can be empty in some axios/Node versions; fall back to the error code
+      const detail = error.message || error.code;
+      return new ATPNetworkError(`Network error: ${detail}${urlSuffix}`, error);
+    }
+
+    // Request was sent but no response received (server dropped connection, timeout, etc.)
+    if (error.request && !error.response) {
+      const detail = error.message || error.code || 'no response from server';
+      return new ATPNetworkError(`Network error: ${detail}${urlSuffix}`, error);
     }
 
     if (error.response) {
