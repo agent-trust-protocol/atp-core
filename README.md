@@ -164,26 +164,20 @@ const { agent } = await registerAgentWithAtp(atp, openclawAgent, {
   trustLevel: 'high'
 });
 
-// Secure all tools with ATP
-const securedTools = secureTools(agent.did, tools, atp);
+// Secure all tools with ATP (auth + policy + audit per call)
+const securedTools = secureTools(tools, atp);
 ```
 
-**LangChain:**
+**LangChain / MCP:**
 
 ```typescript
-import { ATPSecurityWrapper } from 'atp-sdk/langchain';
-const secureChain = new ATPSecurityWrapper(langchainAgent, {
-  agentName: 'langchain-bot'
-});
-```
+// LangChain & MCP adapters live in @atpdevelopment/protocol-integrations
+import { ATPMCPServer } from '@atpdevelopment/protocol-integrations';
 
-**MCP (Model Context Protocol):**
-
-```typescript
-import { MCPServer } from 'atp-sdk/mcp';
-const server = new MCPServer({
+const server = new ATPMCPServer({
   name: 'secure-mcp-server',
-  quantum_safe: true
+  atpEndpoint: 'http://localhost:3000',
+  quantumSafe: true
 });
 ```
 

@@ -311,12 +311,12 @@ await crew.run();
 
 ```typescript
 // ❌ DON'T: Use same trust level for everything
-const lowRiskAgent = await registerAgent({ trustLevel: 'privileged' });
-const highRiskAgent = await registerAgent({ trustLevel: 'privileged' });
+const lowRiskAgent = await registerAgentWithAtp(atp, { trustLevel: 'privileged' });
+const highRiskAgent = await registerAgentWithAtp(atp, { trustLevel: 'privileged' });
 
 // ✅ DO: Match trust to risk
-const lowRiskAgent = await registerAgent({ trustLevel: 'verified' }); // 0.75
-const highRiskAgent = await registerAgent({ trustLevel: 'privileged' }); // 0.95
+const lowRiskAgent = await registerAgentWithAtp(atp, { trustLevel: 'verified' }); // 0.75
+const highRiskAgent = await registerAgentWithAtp(atp, { trustLevel: 'privileged' }); // 0.95
 ```
 
 ### 3. Implement Proper Tool Security

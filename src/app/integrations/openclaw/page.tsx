@@ -355,13 +355,13 @@ export default function OpenClawIntegrationPage() {
                 <CardContent>
                   <div className="bg-black/60 rounded-lg p-4 font-mono text-sm overflow-x-auto">
                     <pre className="text-green-300">
-{`npm install @atp/openclaw-atp atp-sdk
+{`npm install @atpdevelopment/openclaw-atp atp-sdk
 
 # or with yarn
-yarn add @atp/openclaw-atp atp-sdk
+yarn add @atpdevelopment/openclaw-atp atp-sdk
 
 # or with pnpm
-pnpm add @atp/openclaw-atp atp-sdk`}
+pnpm add @atpdevelopment/openclaw-atp atp-sdk`}
                     </pre>
                   </div>
                 </CardContent>
@@ -377,7 +377,7 @@ pnpm add @atp/openclaw-atp atp-sdk`}
                 <CardContent>
                   <div className="bg-black/60 rounded-lg p-4 font-mono text-xs overflow-x-auto">
                     <pre className="text-blue-300">
-{`import { OpenClawATPClient } from '@atp/openclaw-atp';
+{`import { OpenClawATPClient } from '@atpdevelopment/openclaw-atp';
 import { OpenClaw } from 'openclaw';
 
 // 1. Initialize ATP client
@@ -432,7 +432,7 @@ const result = await crew.run('Execute trading strategy');`}
   ATPPolicyProfile, 
   ATPMonitor,
   ATPSecretManager 
-} from '@atp/openclaw-atp';
+} from '@atpdevelopment/openclaw-atp';
 
 // Custom policy profile
 const customPolicy = new ATPPolicyProfile({

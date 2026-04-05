@@ -1,6 +1,6 @@
-# 🚀 ATP Quick Start Guide
+# ATP Quick Start Guide
 
-Get your AI agents secured with quantum-safe cryptography in under 5 minutes!
+Get your AI agents secured with quantum-safe cryptography in under 5 minutes.
 
 ## Prerequisites
 
@@ -28,16 +28,12 @@ yarn add atp-sdk
 const { Agent } = require('atp-sdk');
 
 async function main() {
-  // Create an AI agent with a unique name
-  const myAgent = new Agent('my-first-agent');
-  
-  // Initialize with quantum-safe security
-  await myAgent.initialize();
-  
+  // Create an AI agent with quantum-safe identity (private constructor + init in one call)
+  const myAgent = await Agent.create('my-first-agent');
+
   // Your agent now has:
-  console.log('Agent DID:', myAgent.did);
-  console.log('Public Key:', myAgent.publicKey);
-  console.log('Quantum-Safe:', myAgent.isQuantumSafe); // true
+  console.log('Agent DID:', myAgent.getDID());        // e.g. did:atp:abc123...
+  console.log('Quantum-Safe:', myAgent.isQuantumSafe()); // true
 }
 
 main().catch(console.error);
@@ -52,29 +48,23 @@ const { Agent } = require('atp-sdk');
 
 async function secureMessaging() {
   // Create two agents
-  const alice = new Agent('alice');
-  const bob = new Agent('bob');
-  
-  // Initialize both agents
-  await Promise.all([
-    alice.initialize(),
-    bob.initialize()
-  ]);
-  
-  // Alice trusts Bob
-  await alice.trust(bob.did, { level: 0.8 });
-  
-  // Alice sends a signed message to Bob
-  const message = await alice.send(bob.did, {
+  const alice = await Agent.create('alice');
+  const bob = await Agent.create('bob');
+
+  // Alice establishes trust with Bob
+  const trust = await alice.establishTrust(bob.getDID());
+  console.log('Trust established:', trust.established, 'level:', trust.level);
+
+  // Alice sends a signed message to Bob (optionally encrypted)
+  const result = await alice.send(bob.getDID(), {
     type: 'greeting',
     content: 'Hello Bob, this is a secure message!'
+  }, {
+    recipientEncryptionKey: bob.getEncryptionPublicKey(),
   });
-  
-  console.log('Message sent with signature:', message.signature);
-  
-  // Bob verifies the message is from Alice
-  const verified = await bob.verify(message);
-  console.log('Message verified:', verified); // true
+
+  console.log('Message ID:', result.messageId);
+  console.log('Encrypted:', result.encrypted);
 }
 
 secureMessaging().catch(console.error);
@@ -82,7 +72,7 @@ secureMessaging().catch(console.error);
 
 ## 4. Connecting to ATP Services (4 minutes)
 
-### Using the RPC Gateway
+### Using the ATPClient directly
 
 ```javascript
 const { ATPClient } = require('atp-sdk');
@@ -90,37 +80,40 @@ const { ATPClient } = require('atp-sdk');
 async function connectToATP() {
   // Connect to ATP services
   const client = new ATPClient({
-    gateway: process.env.ATP_GATEWAY || 'ws://localhost:3000',
-    agent: 'my-app-agent'
+    baseUrl: process.env.ATP_SERVER_URL || 'http://localhost',
+    services: {
+      identity:    process.env.ATP_IDENTITY_URL    || 'http://localhost:3001',
+      credentials: process.env.ATP_CREDENTIALS_URL || 'http://localhost:3002',
+      permissions: process.env.ATP_PERMISSIONS_URL || 'http://localhost:3003',
+      audit:       process.env.ATP_AUDIT_URL       || 'http://localhost:3005',
+      gateway:     process.env.ATP_GATEWAY_URL     || 'http://localhost:3000',
+    }
   });
-  
-  await client.connect();
-  
-  // Create a verifiable credential
-  const credential = await client.credentials.create({
-    type: 'AIAgentCredential',
+
+  // Issue a verifiable credential
+  const credential = await client.credentials.issueCredential({
+    subjectDID: 'did:atp:agent-123',
+    credentialType: 'AIAgentCredential',
     claims: {
       model: 'gpt-4',
       capabilities: ['text-generation', 'code-analysis'],
       owner: 'ACME Corp'
-    }
+    },
+    expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
   });
-  
-  console.log('Credential issued:', credential.id);
-  
+
+  console.log('Credential issued:', credential.data?.id);
+
   // Set access policy
-  const policy = await client.permissions.createPolicy({
+  const policy = await client.permissions.grantPermission({
+    subject: 'did:atp:agent-123',
     resource: 'production-database',
-    rules: [{
-      actions: ['read'],
-      conditions: {
-        trustLevel: { min: 0.7 },
-        credentials: ['AIAgentCredential']
-      }
-    }]
+    action: 'read',
+    conditions: {},
+    expiresAt: new Date(Date.now() + 86400000).toISOString()
   });
-  
-  console.log('Policy created:', policy.id);
+
+  console.log('Permission granted');
 }
 
 connectToATP().catch(console.error);
@@ -128,76 +121,45 @@ connectToATP().catch(console.error);
 
 ## 5. Integration Examples
 
-### With Express.js API
+### With OpenClaw
 
 ```javascript
-const express = require('express');
-const { atpMiddleware } = require('atp-sdk/middleware');
+const { ATPClient } = require('atp-sdk');
+const { registerAgentWithAtp, secureTools } = require('@atpdevelopment/openclaw-atp');
 
-const app = express();
-
-// Protect your API with ATP
-app.use(atpMiddleware({
-  minTrustLevel: 0.6,
-  requireSignature: true,
-  quantum_safe: true
-}));
-
-app.post('/api/ai-action', async (req, res) => {
-  // Only verified AI agents can access this
-  const agent = req.agent;
-  
-  console.log('Request from verified agent:', agent.did);
-  console.log('Trust level:', agent.trustScore);
-  
-  // Process the AI action
-  res.json({ 
-    status: 'authorized',
-    agent: agent.did 
+async function secureOpenClaw() {
+  const atp = new ATPClient({
+    baseUrl: 'http://localhost',
+    services: {
+      identity: 'http://localhost:3001',
+      credentials: 'http://localhost:3002',
+      permissions: 'http://localhost:3003',
+      audit: 'http://localhost:3005',
+      gateway: 'http://localhost:3000',
+    }
   });
-});
 
-app.listen(3001, () => {
-  console.log('Secure API running on port 3001');
-});
+  // Register agent with ATP identity
+  const registration = await registerAgentWithAtp(atp, {
+    name: 'my-claw-agent',
+    capabilities: ['analysis', 'reporting'],
+    trustLevel: 'high'
+  });
+
+  console.log('Agent DID:', registration.did);
+  console.log('Trust score:', registration.trustScore);
+
+  // Wrap tools with ATP security (auth + policy + audit per call)
+  const rawTools = [myTool1, myTool2];
+  const secured = secureTools(rawTools, atp);
+}
+
+secureOpenClaw().catch(console.error);
 ```
 
 ### With LangChain
 
-```javascript
-const { ATPSecurityWrapper } = require('atp-sdk');
-const { OpenAI } = require('langchain/llms/openai');
-const { ConversationChain } = require('langchain/chains');
-
-async function secureLangChain() {
-  // Create LangChain LLM
-  const llm = new OpenAI({ 
-    temperature: 0,
-    openAIApiKey: process.env.OPENAI_API_KEY 
-  });
-  
-  // Wrap with ATP security
-  const secureLLM = new ATPSecurityWrapper(llm, {
-    agentName: 'langchain-bot',
-    signAllRequests: true,
-    auditLog: true
-  });
-  
-  // Use in a conversation chain
-  const chain = new ConversationChain({ 
-    llm: secureLLM 
-  });
-  
-  // All LLM calls are now cryptographically signed
-  const response = await chain.call({ 
-    input: "What's the weather like?" 
-  });
-  
-  console.log('Signed response:', response);
-}
-
-secureLangChain().catch(console.error);
-```
+See `packages/protocol-integrations/` for full LangChain adapter usage.
 
 ## 6. Environment Configuration
 
@@ -205,26 +167,24 @@ secureLangChain().catch(console.error);
 
 ```bash
 # ATP Configuration
-ATP_GATEWAY=ws://localhost:3000
-ATP_AGENT_NAME=dev-agent
-ATP_LOG_LEVEL=debug
-
-# Optional: Use mock services for testing
-ATP_USE_MOCK=true
+ATP_SERVER_URL=http://localhost
+ATP_IDENTITY_URL=http://localhost:3001
+ATP_CREDENTIALS_URL=http://localhost:3002
+ATP_PERMISSIONS_URL=http://localhost:3003
+ATP_AUDIT_URL=http://localhost:3005
+ATP_GATEWAY_URL=http://localhost:3000
 ```
 
 ### Production (.env.production)
 
 ```bash
 # ATP Configuration
-ATP_GATEWAY=wss://atp.your-domain.com
-ATP_AGENT_NAME=prod-agent
-ATP_LOG_LEVEL=info
-ATP_QUANTUM_SAFE=true
-ATP_AUDIT_LEVEL=full
-
-# Database for audit logs
-DATABASE_URL=postgresql://user:pass@localhost:5432/atp_production
+ATP_SERVER_URL=https://atp.your-domain.com
+ATP_IDENTITY_URL=https://identity.atp.your-domain.com
+ATP_CREDENTIALS_URL=https://credentials.atp.your-domain.com
+ATP_PERMISSIONS_URL=https://permissions.atp.your-domain.com
+ATP_AUDIT_URL=https://audit.atp.your-domain.com
+ATP_GATEWAY_URL=https://gateway.atp.your-domain.com
 ```
 
 ## 7. Testing Your Integration
@@ -236,28 +196,27 @@ const { Agent } = require('atp-sdk');
 const assert = require('assert');
 
 async function testATP() {
-  const agent = new Agent('test-agent');
-  await agent.initialize();
-  
+  const agent = await Agent.create('test-agent');
+
   // Test 1: Agent has DID
-  assert(agent.did.startsWith('did:atp:'));
-  console.log('✅ Agent has valid DID');
-  
-  // Test 2: Can create signatures
-  const signature = await agent.sign({ test: 'data' });
-  assert(signature.length > 0);
-  console.log('✅ Agent can create signatures');
-  
-  // Test 3: Can verify signatures
-  const verified = await agent.verifySignature(
-    { test: 'data' }, 
-    signature,
-    agent.publicKey
-  );
-  assert(verified === true);
-  console.log('✅ Agent can verify signatures');
-  
-  console.log('\n🎉 All tests passed!');
+  assert(agent.getDID().startsWith('did:atp:'));
+  console.log('Agent has valid DID');
+
+  // Test 2: Quantum-safe crypto is enabled
+  assert(agent.isQuantumSafe() === true);
+  console.log('Agent uses quantum-safe cryptography');
+
+  // Test 3: Can assess trust
+  const trust = await agent.assessTrust(agent.getDID());
+  assert(typeof trust.score === 'number');
+  console.log('Trust assessment works, score:', trust.score);
+
+  // Test 4: Can send messages
+  const result = await agent.send(agent.getDID(), { test: 'self-message' });
+  assert(result.messageId);
+  console.log('Message sending works');
+
+  console.log('\nAll tests passed!');
 }
 
 testATP().catch(console.error);
@@ -268,30 +227,29 @@ testATP().catch(console.error);
 ### Pattern 1: Agent Registry
 
 ```javascript
+const { Agent } = require('atp-sdk');
+
 class AgentRegistry {
   constructor() {
     this.agents = new Map();
   }
-  
-  async registerAgent(name, config = {}) {
-    const agent = new Agent(name, config);
-    await agent.initialize();
+
+  async registerAgent(name, options = {}) {
+    const agent = await Agent.create(name, options);
     this.agents.set(name, agent);
     return agent;
   }
-  
+
   getAgent(name) {
     return this.agents.get(name);
   }
-  
-  async trustNetwork(trustLevel = 0.5) {
-    // Create trust relationships between all agents
+
+  async trustNetwork(minLevel = 0.5) {
     const agentList = Array.from(this.agents.values());
-    
-    for (const agent1 of agentList) {
-      for (const agent2 of agentList) {
-        if (agent1 !== agent2) {
-          await agent1.trust(agent2.did, { level: trustLevel });
+    for (const a of agentList) {
+      for (const b of agentList) {
+        if (a !== b) {
+          await a.establishTrust(b.getDID(), minLevel);
         }
       }
     }
@@ -306,97 +264,87 @@ await registry.registerAgent('worker-2');
 await registry.trustNetwork(0.7);
 ```
 
-### Pattern 2: Audit Logger
+### Pattern 2: Audit Trail with ATPClient
 
 ```javascript
-const { AuditLogger } = require('atp-sdk');
+const { ATPClient } = require('atp-sdk');
 
-class SecureAIOperations {
-  constructor() {
-    this.audit = new AuditLogger({
-      service: 'ai-operations',
-      output: './audit.log'
-    });
-  }
-  
-  async executeAction(agent, action, params) {
-    // Log the attempt
-    await this.audit.log({
-      event: 'action_attempted',
-      agent: agent.did,
-      action: action,
-      params: params,
-      timestamp: new Date().toISOString()
-    });
-    
-    try {
-      // Execute the action
-      const result = await this.performAction(action, params);
-      
-      // Log success
-      await this.audit.log({
-        event: 'action_completed',
-        agent: agent.did,
-        action: action,
-        result: 'success',
-        timestamp: new Date().toISOString()
-      });
-      
-      return result;
-    } catch (error) {
-      // Log failure
-      await this.audit.log({
-        event: 'action_failed',
-        agent: agent.did,
-        action: action,
-        error: error.message,
-        timestamp: new Date().toISOString()
-      });
-      
-      throw error;
+async function auditExample() {
+  const client = new ATPClient({
+    baseUrl: 'http://localhost',
+    services: {
+      audit: 'http://localhost:3005',
+      identity: 'http://localhost:3001',
+      credentials: 'http://localhost:3002',
+      permissions: 'http://localhost:3003',
+      gateway: 'http://localhost:3000',
     }
-  }
-  
-  async performAction(action, params) {
-    // Your actual AI operation logic here
-    console.log(`Performing ${action} with`, params);
-    return { status: 'completed' };
-  }
+  });
+
+  // Log an event
+  await client.audit.logEvent({
+    source: 'my-service',
+    action: 'action_attempted',
+    resource: 'resource-id',
+    actor: 'did:atp:agent-123',
+    details: {
+      operation: 'data-processing',
+      timestamp: new Date().toISOString()
+    }
+  });
+
+  // Query events
+  const events = await client.audit.queryEvents({
+    actor: 'did:atp:agent-123',
+    limit: 10
+  });
+
+  console.log('Audit events:', events.data?.events?.length);
 }
+
+auditExample().catch(console.error);
 ```
 
 ## 9. Troubleshooting
 
-### Issue: "Cannot connect to ATP gateway"
+### Issue: "Network error: connect ECONNREFUSED ..."
+
+This means ATP services are not running at the configured URL. The error message
+includes the exact URL that was unreachable.
 
 ```javascript
-// Solution 1: Check if services are running
-const { healthCheck } = require('atp-sdk/utils');
+// Solution 1: Check services are running
+const { ATPClient } = require('atp-sdk');
 
-const health = await healthCheck('http://localhost:3000/health');
-console.log('Gateway health:', health);
-
-// Solution 2: Use mock services for development
 const client = new ATPClient({
-  gateway: 'ws://localhost:3000',
-  useMock: true  // Use mock services
+  baseUrl: 'http://localhost',
+  services: { identity: 'http://localhost:3001' }
 });
+
+// This will show the full URL in the error if it fails
+try {
+  await client.identity.getHealth();
+  console.log('Identity service is reachable');
+} catch (error) {
+  console.error('Service unreachable:', error.message);
+  // e.g. "Network error: connect ECONNREFUSED 127.0.0.1:3001 (url: http://localhost:3001/health)"
+}
 ```
 
 ### Issue: "Agent initialization fails"
 
 ```javascript
-// Solution: Add error handling and retry logic
+// Solution: Add error handling — the error now includes the URL that failed
+const { Agent } = require('atp-sdk');
+
 async function initializeWithRetry(agentName, maxRetries = 3) {
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const agent = new Agent(agentName);
-      await agent.initialize();
-      return agent;
+      return await Agent.create(agentName);
     } catch (error) {
       console.log(`Attempt ${i + 1} failed:`, error.message);
       if (i === maxRetries - 1) throw error;
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
     }
   }
 }
@@ -407,151 +355,147 @@ const agent = await initializeWithRetry('my-agent');
 ## 10. Next Steps
 
 ### Learn More
-- 📖 [Full API Documentation](./api/)
-- 🏗️ [Architecture Guide](./architecture.md)
-- 🔒 [Security Best Practices](./security.md)
-- 📊 [Performance Optimization](./performance.md)
+- [Full API Documentation](./api/)
+- [Architecture Guide](./architecture.md)
+- [Security Best Practices](./security.md)
 
 ### Get Help
-- 💬 [GitHub Discussions](https://github.com/agent-trust-protocol/core/discussions)
-- 🐛 [Report Issues](https://github.com/agent-trust-protocol/core/issues)
-- 📧 [Email Support](mailto:dev@agenttrustprotocol.com)
+- [GitHub Discussions](https://github.com/agent-trust-protocol/core/discussions)
+- [Report Issues](https://github.com/agent-trust-protocol/core/issues)
+- [Email Support](mailto:dev@agenttrustprotocol.com)
 
 ### Deploy to Production
-- 🚀 [Production Deployment Guide](./deployment/)
-- ☁️ [Cloud Services Setup](./cloud/)
-- 🏢 [Enterprise Configuration](./enterprise/)
+- [Production Deployment Guide](./deployment/)
+- [Cloud Services Setup](./cloud/)
+- [Enterprise Configuration](./enterprise/)
 
 ---
 
-## Complete Example: Secure AI Chat Service
+## Complete Example: Secure Agent Service
 
 Here's a complete example that ties everything together:
 
 ```javascript
 const express = require('express');
-const { Agent, ATPClient, atpMiddleware } = require('atp-sdk');
+const { Agent, ATPClient } = require('atp-sdk');
 
-class SecureAIChatService {
+class SecureAgentService {
   constructor() {
     this.app = express();
     this.agents = new Map();
     this.client = null;
   }
-  
+
   async initialize() {
-    // Connect to ATP
+    // Set up ATP client
     this.client = new ATPClient({
-      gateway: process.env.ATP_GATEWAY || 'ws://localhost:3000'
+      baseUrl: process.env.ATP_SERVER_URL || 'http://localhost',
+      services: {
+        identity:    process.env.ATP_IDENTITY_URL    || 'http://localhost:3001',
+        credentials: process.env.ATP_CREDENTIALS_URL || 'http://localhost:3002',
+        permissions: process.env.ATP_PERMISSIONS_URL || 'http://localhost:3003',
+        audit:       process.env.ATP_AUDIT_URL       || 'http://localhost:3005',
+        gateway:     process.env.ATP_GATEWAY_URL     || 'http://localhost:3000',
+      }
     });
-    await this.client.connect();
-    
+
     // Create service agent
-    const serviceAgent = new Agent('chat-service');
-    await serviceAgent.initialize();
+    const serviceAgent = await Agent.create('chat-service');
     this.agents.set('service', serviceAgent);
-    
-    // Setup Express with ATP middleware
+
+    // Setup Express
     this.app.use(express.json());
-    this.app.use(atpMiddleware({
-      agent: serviceAgent,
-      minTrustLevel: 0.5
-    }));
-    
-    // Define routes
     this.setupRoutes();
-    
+
     // Start server
     const port = process.env.PORT || 3002;
     this.app.listen(port, () => {
-      console.log(`Secure AI Chat Service running on port ${port}`);
-      console.log(`Service DID: ${serviceAgent.did}`);
+      console.log(`Secure Agent Service running on port ${port}`);
+      console.log(`Service DID: ${serviceAgent.getDID()}`);
     });
   }
-  
+
   setupRoutes() {
     // Register a new AI agent
     this.app.post('/agents/register', async (req, res) => {
       const { name } = req.body;
-      
-      const agent = new Agent(name);
-      await agent.initialize();
+
+      const agent = await Agent.create(name);
       this.agents.set(name, agent);
-      
+
       // Issue credential
-      const credential = await this.client.credentials.create({
-        type: 'ChatAgentCredential',
-        subject: agent.did,
+      const credential = await this.client.credentials.issueCredential({
+        subjectDID: agent.getDID(),
+        credentialType: 'ServiceAgentCredential',
         claims: {
-          name: name,
+          name,
           registered: new Date().toISOString()
-        }
+        },
+        expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
       });
-      
+
       res.json({
-        did: agent.did,
-        credential: credential.id,
+        did: agent.getDID(),
+        credential: credential.data?.id,
         status: 'registered'
       });
     });
-    
+
     // Send a message between agents
     this.app.post('/chat/send', async (req, res) => {
       const { from, to, message } = req.body;
-      
+
       const fromAgent = this.agents.get(from);
       const toAgent = this.agents.get(to);
-      
+
       if (!fromAgent || !toAgent) {
         return res.status(404).json({ error: 'Agent not found' });
       }
-      
-      // Send signed message
-      const signedMessage = await fromAgent.send(toAgent.did, {
+
+      // Send signed + encrypted message
+      const result = await fromAgent.send(toAgent.getDID(), {
         content: message,
         timestamp: new Date().toISOString()
+      }, {
+        recipientEncryptionKey: toAgent.getEncryptionPublicKey(),
       });
-      
-      // Verify and deliver
-      const verified = await toAgent.verify(signedMessage);
-      
+
       res.json({
-        delivered: verified,
-        signature: signedMessage.signature,
-        from: fromAgent.did,
-        to: toAgent.did
+        messageId: result.messageId,
+        encrypted: result.encrypted,
+        from: fromAgent.getDID(),
+        to: toAgent.getDID()
       });
     });
-    
-    // Get agent trust level
+
+    // Get agent trust assessment
     this.app.get('/agents/:name/trust', async (req, res) => {
       const agent = this.agents.get(req.params.name);
-      
+
       if (!agent) {
         return res.status(404).json({ error: 'Agent not found' });
       }
-      
-      const trustScore = await this.client.trust.getScore(agent.did);
-      
+
+      const trust = await agent.assessTrust(agent.getDID());
+
       res.json({
-        agent: agent.did,
-        trustScore: trustScore,
-        level: trustScore > 0.7 ? 'high' : trustScore > 0.4 ? 'medium' : 'low'
+        agent: agent.getDID(),
+        score: trust.score,
+        level: trust.level,
+        confidence: trust.confidence
       });
     });
   }
 }
 
 // Start the service
-const service = new SecureAIChatService();
+const service = new SecureAgentService();
 service.initialize().catch(console.error);
 ```
 
 ---
 
-**🎉 Congratulations!** You now have quantum-safe security for your AI agents. 
+You now have quantum-safe security for your AI agents.
+Every AI agent interaction is cryptographically signed, verified, and auditable.
 
-Remember: Every AI agent interaction is now cryptographically signed, verified, and auditable. You're protected against both today's threats and tomorrow's quantum computers.
-
-Happy coding! 🚀
-
+Happy coding!
