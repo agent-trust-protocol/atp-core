@@ -92,6 +92,7 @@ export class Agent extends EventEmitter {
   private name: string;
   private initialized = false;
   private _quantumSafe: boolean = false;
+  private _standalone: boolean = false;
   private eventHandlers: Map<AgentEventType, Set<(data: any) => void>> = new Map();
   // X25519 key pair for message encryption (separate from signing keys)
   private encryptionPublicKey: string | null = null;
@@ -164,22 +165,31 @@ export class Agent extends EventEmitter {
         // This provides protection against both classical and quantum attacks
         const keyPair = await CryptoUtils.generateKeyPair(true); // quantumSafe = true by default
 
-        const identity = await this.client.identity.registerDID({
-          publicKey: keyPair.publicKey,
-          metadata: {
-            name: this.name,
-            quantumSafe: keyPair.quantumSafe,
-            algorithm: keyPair.quantumSafe ? 'hybrid-ed25519-mldsa65' : 'ed25519'
-          }
-        });
+        try {
+          const identity = await this.client.identity.registerDID({
+            publicKey: keyPair.publicKey,
+            metadata: {
+              name: this.name,
+              quantumSafe: keyPair.quantumSafe,
+              algorithm: keyPair.quantumSafe ? 'hybrid-ed25519-mldsa65' : 'ed25519'
+            }
+          });
 
-        if (identity.data) {
-          this.did = identity.data.did;
+          if (identity.data) {
+            this.did = identity.data.did;
+            this.privateKey = keyPair.privateKey;
+            this._quantumSafe = keyPair.quantumSafe;
+          } else {
+            throw new Error('No DID returned from identity service');
+          }
+        } catch {
+          // Standalone mode: no ATP services available — generate DID locally
+          const pubKeyShort = keyPair.publicKey.slice(0, 16);
+          this.did = `did:atp:${pubKeyShort}`;
           this.privateKey = keyPair.privateKey;
-          // Store quantum-safe flag for signing operations
           this._quantumSafe = keyPair.quantumSafe;
-        } else {
-          throw new Error('Failed to register DID');
+          this._standalone = true;
+          console.log('\u26A1 Running in standalone mode (no ATP services detected). DID generated locally.');
         }
       }
 
@@ -479,6 +489,13 @@ export class Agent extends EventEmitter {
    */
   isQuantumSafe(): boolean {
     return this._quantumSafe === true || !!(this.privateKey && this.privateKey.length > 8000); // Hybrid keys are ~8000 hex chars (4032 bytes)
+  }
+
+  /**
+   * Check if the agent is running in standalone mode (no ATP services)
+   */
+  isStandalone(): boolean {
+    return this._standalone;
   }
 
   /**

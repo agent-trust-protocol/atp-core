@@ -246,6 +246,32 @@ export class ATPToolWrapper {
    * Check permissions
    */
   private async checkPermissions(context: ToolCallContext): Promise<{ allowed: boolean; reason?: string; policy?: string }> {
+    // Profile-based evaluation (runs before permission service check)
+    if (this.config.actionType && (this.atpClient as any).evaluateActionWithProfile) {
+      const profileDecision = (this.atpClient as any).evaluateActionWithProfile({
+        profileId: context.agentContext.atp.policyProfileId,
+        state: context.agentContext.state,
+        actionType: this.config.actionType,
+        metadata: context.arguments,
+      });
+
+      if (profileDecision === "deny") {
+        return {
+          allowed: false,
+          reason: `Profile denied ${this.config.actionType} action`,
+          policy: context.agentContext.atp.policyProfileId,
+        };
+      }
+
+      if (profileDecision === "require_approval") {
+        return {
+          allowed: false,
+          reason: `Action requires approval: ${this.config.actionType}`,
+          policy: context.agentContext.atp.policyProfileId,
+        };
+      }
+    }
+
     try {
       const decision = await this.atpClient.permissions.checkAccess({
         subject: context.agentContext.atp.did,

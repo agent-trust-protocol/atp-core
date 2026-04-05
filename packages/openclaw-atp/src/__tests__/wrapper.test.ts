@@ -22,6 +22,7 @@ function makeAgentContext(trustScore = 0.8): AgentContext {
 function makeMockClient(opts?: {
   getDIDFails?: boolean;
   checkAccessAllowed?: boolean;
+  profileDecision?: 'allow' | 'deny' | 'require_approval';
 }): ATPClient {
   return {
     identity: {
@@ -38,6 +39,7 @@ function makeMockClient(opts?: {
     audit: {
       log: jest.fn().mockResolvedValue({ id: 'audit-1' })
     },
+    evaluateActionWithProfile: jest.fn().mockReturnValue(opts?.profileDecision ?? 'allow'),
     credentials: {},
     trust: {},
     config: {}
@@ -101,5 +103,54 @@ describe('wrapSkillWithAtp', () => {
     await secured(makeAgentContext(0.8));
 
     expect(client.audit.log).toHaveBeenCalled();
+  });
+
+  describe('profile-based evaluation', () => {
+    it('blocks execution when profile denies the action type', async () => {
+      const skill = jest.fn();
+      const client = makeMockClient({ profileDecision: 'deny', checkAccessAllowed: true });
+      const secured = wrapSkillWithAtp(skill, client, { actionType: 'shell' });
+
+      const result = await secured(makeAgentContext(0.8));
+
+      expect(result.success).toBe(false);
+      expect(result.error?.message).toMatch(/profile denied/i);
+      expect(skill).not.toHaveBeenCalled();
+    });
+
+    it('blocks execution with approval message when profile requires approval', async () => {
+      const skill = jest.fn();
+      const client = makeMockClient({ profileDecision: 'require_approval', checkAccessAllowed: true });
+      const secured = wrapSkillWithAtp(skill, client, { actionType: 'credentials' });
+
+      const result = await secured(makeAgentContext(0.8));
+
+      expect(result.success).toBe(false);
+      expect(result.error?.message).toMatch(/requires approval/i);
+      expect(skill).not.toHaveBeenCalled();
+    });
+
+    it('falls through to checkAccess when profile allows', async () => {
+      const skill = jest.fn().mockResolvedValue('ok');
+      const client = makeMockClient({ profileDecision: 'allow', checkAccessAllowed: true });
+      const secured = wrapSkillWithAtp(skill, client, { actionType: 'filesystem' });
+
+      const result = await secured(makeAgentContext(0.8));
+
+      expect(result.success).toBe(true);
+      expect((client as any).evaluateActionWithProfile).toHaveBeenCalled();
+      expect(client.permissions.checkAccess).toHaveBeenCalled();
+    });
+
+    it('skips profile evaluation when no actionType is configured', async () => {
+      const skill = jest.fn().mockResolvedValue('ok');
+      const client = makeMockClient({ profileDecision: 'deny', checkAccessAllowed: true });
+      const secured = wrapSkillWithAtp(skill, client); // no actionType
+
+      const result = await secured(makeAgentContext(0.8));
+
+      expect(result.success).toBe(true);
+      expect((client as any).evaluateActionWithProfile).not.toHaveBeenCalled();
+    });
   });
 });

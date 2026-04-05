@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "bin": {
     "create-atp-agent": "./dist/index.js",
-    "atp-init": "./dist/index.js"
+    "atp-init": "./dist/index.js",
+    "atp-onboard-agent": "./dist/onboard.js"
   },
   "files": [
     "dist/"

@@ -4,7 +4,7 @@ import { ATPConfig, ATPError, ATPNetworkError, ATPAuthenticationError, ATPRespon
 
 export abstract class BaseClient {
   protected http: AxiosInstance;
-  protected config: Required<ATPConfig>;
+  protected config: Required<Omit<ATPConfig, 'profileId'>> & Pick<ATPConfig, 'profileId'>;
 
   constructor(config: ATPConfig, serviceKey: 'identity' | 'credentials' | 'permissions' | 'audit' | 'gateway' | 'payments') {
     this.config = this.normalizeConfig(config);
@@ -25,7 +25,7 @@ export abstract class BaseClient {
     this.setupInterceptors();
   }
 
-  private normalizeConfig(config: ATPConfig): Required<ATPConfig> {
+  private normalizeConfig(config: ATPConfig): Required<Omit<ATPConfig, 'profileId'>> & Pick<ATPConfig, 'profileId'> {
     return {
       baseUrl: config.baseUrl,
       services: {
@@ -47,7 +47,8 @@ export abstract class BaseClient {
       retries: config.retries || 3,
       retryDelay: config.retryDelay || 1000,
       debug: config.debug || false,
-      headers: config.headers || {}
+      headers: config.headers || {},
+      profileId: config.profileId
     };
   }
 
