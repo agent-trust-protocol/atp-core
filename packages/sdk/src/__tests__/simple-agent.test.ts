@@ -153,10 +153,13 @@ describe('Agent', () => {
       expect(CryptoUtils.generateKeyPair).not.toHaveBeenCalled();
     });
 
-    it('should throw error if DID registration fails', async () => {
+    it('should fall back to standalone mode if DID registration fails', async () => {
       mockIdentityClient.registerDID.mockResolvedValue({ data: null });
 
-      await expect(Agent.create('FailBot')).rejects.toThrow('Failed to register DID');
+      const agent = await Agent.create('FailBot');
+      expect(agent.isStandalone()).toBe(true);
+      expect(agent.getDID()).toMatch(/^did:atp:/);
+      expect(agent.isInitialized()).toBe(true);
     });
 
     it('should use custom server URL from options', async () => {
