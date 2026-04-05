@@ -10,8 +10,7 @@
 import { mkdirSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import * as readline from 'readline';
-import { exec } from 'child_process';
-import { get } from 'http';
+import { startDashboard } from './dashboard.js';
 
 const VERSION = '1.1.0';
 const CYAN  = '\x1b[36m';
@@ -144,34 +143,8 @@ docker-compose up -d
   hint(`cd ${dir} && npm install && npm start`);
   hint('Docs: https://github.com/agent-trust-protocol/atp-core/tree/main/docs\n');
 
-  // Try to auto-open the onboarding dashboard if the dev server is running
-  const onboardUrl = 'http://localhost:3000/onboard/agent';
-  tryOpenDashboard(onboardUrl);
-}
-
-function tryOpenDashboard(url: string): void {
-  const req = get('http://localhost:3000', { timeout: 2000 }, (res) => {
-    // Server is running — open the onboarding dashboard
-    if (res.statusCode && res.statusCode < 500) {
-      const platform = process.platform;
-      const cmd = platform === 'darwin' ? 'open'
-        : platform === 'win32' ? 'start'
-        : 'xdg-open';
-      exec(`${cmd} ${url}`);
-      hint(`Opening onboarding dashboard: ${url}`);
-    }
-    res.resume();
-  });
-
-  req.on('error', () => {
-    // Server not running — print manual hint
-    hint(`Start the ATP dev server, then visit: ${url}`);
-  });
-
-  req.on('timeout', () => {
-    req.destroy();
-    hint(`Start the ATP dev server, then visit: ${url}`);
-  });
+  // Launch the embedded onboarding dashboard and auto-open browser
+  startDashboard(name, dir);
 }
 
 main().catch(err => {
