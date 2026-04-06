@@ -10,7 +10,7 @@
 import { mkdirSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import * as readline from 'readline';
-import { startDashboard } from './dashboard.js';
+import { startDashboard } from './dashboard';
 
 const VERSION = '1.1.0';
 const CYAN  = '\x1b[36m';
