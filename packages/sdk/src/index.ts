@@ -208,6 +208,20 @@ export type {
   SecurityEvent
 } from './client/gateway.js';
 
+// Security Profiles (runtime-agnostic policy profiles)
+export {
+  BUILTIN_PROFILES,
+  SAFE_DEFAULT_PROFILE,
+  DEV_MODE_PROFILE,
+  ENTERPRISE_LOCKED_PROFILE,
+  OPENCLAW_SANDBOX_PROFILE,
+} from './profiles/index.js';
+
+export type {
+  AtpSecurityProfile,
+  RuntimeTarget,
+} from './profiles/index.js';
+
 // Version information
 export const VERSION = '1.2.0';
 export const PROTOCOL_VERSION = '1.0';

@@ -237,6 +237,77 @@ The ATP™ SDK provides a unified interface to multiple microservices:
                └─────────────────┘ └─────────────────┘ └────────────────┘
 ```
 
+## 🎛️ Security Profiles
+
+ATP includes built-in security profiles that define what agents can and cannot do. Profiles are **runtime-agnostic** and work across OpenClaw, MCP, LangChain, and custom runtimes.
+
+### Built-in Profiles
+
+| Profile | Description | Shell | Filesystem | Network | Credentials |
+| --- | --- | --- | --- | --- | --- |
+| `safe-default` | Conservative defaults | Blocked | Read-only | Internal only | Blocked |
+| `dev-mode` | Permissive for development | Allowed | Read + Write | All domains | Allowed |
+| `enterprise-locked` | Maximum production security | Blocked | Read, approved paths | Internal corp | Blocked |
+| `openclaw-sandbox` | OpenClaw-tuned sandbox | Blocked (allowlist) | Sandbox paths | Internal + partners | Approval required |
+
+### Using Profiles
+
+```typescript
+import { ATPClient, BUILTIN_PROFILES } from 'atp-sdk';
+
+// Set profile at initialization
+const client = new ATPClient({
+  baseUrl: 'https://api.atp.dev',
+  profileId: 'safe-default'
+});
+
+// Or change at runtime
+client.setProfile('enterprise-locked');
+
+// Get the current profile
+const profile = client.getProfile();
+console.log(profile?.name); // "Enterprise Locked"
+
+// Evaluate an action against the profile
+const decision = client.evaluateActionWithProfile({
+  actionType: 'shell',     // "shell" | "filesystem" | "network" | "credentials" | "messaging"
+  state: 'executing',      // "planning" | "executing" | "communicating" | "completed"
+});
+// Returns: "allow" | "deny" | "require_approval"
+
+// List all built-in profiles
+console.log(Object.keys(BUILTIN_PROFILES));
+// ["safe-default", "dev-mode", "enterprise-locked", "openclaw-sandbox"]
+```
+
+### State-Based Policies
+
+Each profile defines per-state rules. For example, `openclaw-sandbox`:
+
+| State | Allowed | Restricted | Requires Approval |
+| --- | --- | --- | --- |
+| `planning` | (none) | shell, filesystem, network, credentials | - |
+| `executing` | filesystem, network | shell | credentials, messaging |
+| `communicating` | messaging | shell, filesystem | external-messaging |
+| `completed` | logs-read | shell, filesystem, network, credentials, messaging | - |
+
+### Agent Onboarding
+
+Register agents with a profile via the CLI or web wizard:
+
+```bash
+# Interactive CLI
+npx atp-onboard-agent
+# → Select runtime (OpenClaw, MCP, LangChain, custom)
+# → Name your agent
+# → Choose security profile
+# → Done! Agent registered with DID + profile
+```
+
+Or use the web wizard at `/onboard/agent`.
+
+---
+
 ## 🔧 Installation & Setup
 
 ### Prerequisites
@@ -266,11 +337,12 @@ import { ATPClient, createQuickConfig } from 'atp-sdk';
 // Development (local services)
 const config = createQuickConfig('http://localhost');
 
-// Production (hosted services)
+// Production (hosted services) with security profile
 const config = {
   baseUrl: 'https://api.atp.example.com',
   timeout: 30000,
   retries: 3,
+  profileId: 'safe-default', // Built-in security profile
   auth: {
     did: process.env.ATP_DID,
     privateKey: process.env.ATP_PRIVATE_KEY
@@ -1012,6 +1084,7 @@ This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENS
 
 - [x] **v1.1.0** - Payment Protocols (AP2 & ACP) Integration
 - [x] **v1.2.0** - Zero-Knowledge Proof Authentication (Agent-to-Agent)
+- [x] **v1.2.1** - Security Profiles & Onboarding (profile-based action gating, CLI/web onboarding wizard)
 - [ ] **v1.3.0** - WebAssembly support for browser environments
 - [ ] **v1.4.0** - GraphQL API support
 - [ ] **v2.0.0** - ATP Protocol v2 compatibility

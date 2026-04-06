@@ -10,6 +10,7 @@
 import { mkdirSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import * as readline from 'readline';
+import { startDashboard } from './dashboard';
 
 const VERSION = '1.1.0';
 const CYAN  = '\x1b[36m';
@@ -81,21 +82,24 @@ async function main(): Promise<void> {
   // agent.ts
   const agentCode = `import { Agent } from 'atp-sdk';
 
-// Create quantum-safe agent — works immediately, no services needed
+// Create quantum-safe agent — works offline, no services needed
 const agent = await Agent.create('${name}');
 
-console.log('DID:', agent.getDID());
-console.log('Quantum-safe:', agent.isQuantumSafe()); // true
+console.log('\\n\\u26A1 Agent ready!');
+console.log('  DID:', agent.getDID());
+console.log('  Quantum-safe:', agent.isQuantumSafe());
+console.log('  Mode:', agent.isStandalone() ? 'standalone (local)' : 'connected');
+console.log();
 
-// Send a cryptographically signed message
-await agent.send(agent.getDID(), 'Hello from ${name}!');
+// When ATP services are running, uncomment these:
+// await agent.send(agent.getDID(), 'Hello from ${name}!');
+// const score = await agent.getTrustScore(agent.getDID());
+// console.log('Trust score:', score);
 
-const score = await agent.getTrustScore(agent.getDID());
-console.log('Trust score:', score); // 0.0 to 1.0
-
-// Next steps:
-// - docker-compose up -d  -> full ATP network features
-// - See README.md for docs links
+console.log('Next steps:');
+console.log('  \\u2192 Visit http://localhost:3000/onboard/agent to configure your security profile');
+console.log('  \\u2192 docker-compose up -d  for full ATP network features');
+console.log('  \\u2192 See README.md for docs');
 `;
   writeFileSync(join(dir, 'agent.ts'), agentCode);
 
@@ -138,6 +142,9 @@ docker-compose up -d
 
   hint(`cd ${dir} && npm install && npm start`);
   hint('Docs: https://github.com/agent-trust-protocol/atp-core/tree/main/docs\n');
+
+  // Launch the embedded onboarding dashboard and auto-open browser
+  startDashboard(name, dir);
 }
 
 main().catch(err => {
