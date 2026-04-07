@@ -194,3 +194,13 @@ website-repo-old/
 atp-ip-protection-deploy.tar.gz
 *.tar.gz
 .npmrc
+
+# Local dev artifacts (user-specific, not part of the project)
+quicksort.js
+agent-security/
+security-agent/
+security-dog/
+secuity-agent-bot/
+npm-publish.sh
+release-v*.sh
+.expert-coding-developer.agent.md
