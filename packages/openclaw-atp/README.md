@@ -342,6 +342,16 @@ test_crew_security(crew, atp_client)
 - `ATPMonitor` - Monitoring and metrics
 - `ATPLunaryExporter` - Lunary → ATP bridge
 
+## 🚀 Quick Agent Setup
+
+The fastest way to get started with an OpenClaw agent is:
+
+```bash
+npx create-atp-agent
+```
+
+This scaffolds an agent project with an embedded onboarding dashboard at `http://localhost:3456`. Select "OpenClaw" as your runtime and "openclaw-sandbox" as your security profile. Your agent works immediately in standalone mode - no backend services required.
+
 ## 🔐 Security Best Practices
 
 1. **Always validate crew graphs** before production runs
