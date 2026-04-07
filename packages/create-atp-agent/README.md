@@ -5,8 +5,21 @@
 [![npm version](https://badge.fury.io/js/create-atp-agent.svg)](https://www.npmjs.com/package/create-atp-agent)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-## One Command Setup
+## Zero Install (Node.js auto-detected)
 
+Don't have Node.js? No problem — the installer handles everything:
+
+**Mac / Linux:**
+```bash
+curl -fsSL https://agenttrustprotocol.com/install.sh | bash
+```
+
+**Windows (PowerShell as Admin):**
+```powershell
+irm https://agenttrustprotocol.com/install.ps1 | iex
+```
+
+**Already have Node.js?**
 ```bash
 npx create-atp-agent
 ```

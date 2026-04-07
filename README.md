@@ -49,7 +49,21 @@ No installation required — runs entirely in your browser.
 
 ## 🚀 Quick Start (60 Seconds)
 
-### One-Command Setup (Recommended)
+### Zero Install (Nothing on your machine? No problem.)
+
+**Mac / Linux:**
+```bash
+curl -fsSL https://agenttrustprotocol.com/install.sh | bash
+```
+
+**Windows (PowerShell as Admin):**
+```powershell
+irm https://agenttrustprotocol.com/install.ps1 | iex
+```
+
+This auto-installs Node.js if needed, then scaffolds your agent with an onboarding dashboard.
+
+### Already Have Node.js? One Command:
 
 ```bash
 npx create-atp-agent
