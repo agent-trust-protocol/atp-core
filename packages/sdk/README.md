@@ -2,7 +2,7 @@
 
 > **The First Quantum-Safe AI Agent SDK with Zero-Knowledge Proof Authentication**
 
-ATP provides universal quantum-safe security for all AI agent protocols (MCP, Swarm, ADK, A2A, and more). Build secure, verifiable, and trustworthy AI agents in 3 lines of code!
+ATP provides universal quantum-safe security for all AI agent protocols (MCP, Swarm, ADK, A2A, and more). Build secure, verifiable, and trustworthy AI agents in 1 line of code!
 
 **One unified SDK** - Quantum-safe cryptography + ZKP authentication + Identity + Credentials + Payments - all included.
 
@@ -14,23 +14,30 @@ ATP provides universal quantum-safe security for all AI agent protocols (MCP, Sw
 
 ## ⚡ Get Started in 30 Seconds
 
+### Option 1: Scaffold with Onboarding Dashboard
+
+```bash
+npx create-atp-agent
+```
+
+Scaffolds your project and opens an embedded onboarding dashboard at `http://localhost:3456` with a step-by-step wizard for runtime, security profile, and identity configuration.
+
+### Option 2: Install the SDK Directly
+
 ```bash
 npm install atp-sdk
 ```
 
 ```typescript
 import { Agent } from 'atp-sdk';
-
-// Option 1: Works immediately (no services needed)
-const agent = await Agent.create('MyBot');
-console.log('DID:', agent.getDID());
-console.log('Quantum-safe:', agent.isQuantumSafe()); // true
-
-// Option 2: Full features (with ATP services)
-await agent.initialize(); // Connects to ATP network
-await agent.send('did:atp:other', 'Hello!');
-console.log(await agent.getTrustScore('did:atp:other'));
+await Agent.quickstart('MyBot');
+// ⚡ MyBot ready!
+//   DID:          did:atp:a1b2c3...
+//   Quantum-safe: yes
+//   Mode:         standalone (local)
 ```
+
+One line. Auto-prints DID, quantum-safe status, and connection mode. Need the agent reference? Use `const agent = await Agent.quickstart('MyBot')`. Need silent creation for library use? Use `Agent.create('MyBot')` instead.
 
 **That's it!** Your agent now has:
 - ✅ Quantum-safe cryptography (hybrid Ed25519 + ML-DSA)
@@ -38,35 +45,36 @@ console.log(await agent.getTrustScore('did:atp:other'));
 - ✅ Cryptographic signatures
 - ✅ Trust scoring
 
-## 🚀 Setup Options
+## 🚀 Standalone Mode (Offline-First)
 
-### Quick Start (No Services Required)
-Works immediately - perfect for testing and development:
+`Agent.create()` works immediately without any backend services. When ATP services are unavailable, the agent automatically falls back to **standalone mode**:
+
+- DID is generated locally from the quantum-safe keypair
+- No 30-second timeout or crash
+- All crypto operations work offline
+- `agent.isStandalone()` returns `true`
+
+When ATP services are running, the agent connects automatically and `isStandalone()` returns `false`, enabling full features like trust scoring, verifiable credentials, and identity registration.
 
 ```typescript
-import { Agent } from 'atp-sdk';
 const agent = await Agent.create('MyBot');
-// Ready to use!
+
+if (agent.isStandalone()) {
+  console.log('Running offline - DID generated locally');
+} else {
+  console.log('Connected to ATP network');
+  await agent.send('did:atp:other', 'Hello!');
+  console.log(await agent.getTrustScore('did:atp:other'));
+}
 ```
 
 ### Full Setup (With ATP Services)
-For complete functionality including identity registration, credentials, and permissions:
 
 ```bash
-# Start ATP services (one command)
 docker-compose up -d
-
-# Or clone and start locally
-git clone https://github.com/agent-trust-protocol/core.git
-cd agent-trust-protocol
-./start-services.sh
 ```
 
-Then initialize your agent:
-```typescript
-const agent = await Agent.create('MyBot');
-await agent.initialize(); // Connects to ATP services
-```
+Then agents will automatically connect on creation - no code changes needed.
 
 ## 📖 Full SDK Documentation
 
@@ -1085,6 +1093,7 @@ This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENS
 - [x] **v1.1.0** - Payment Protocols (AP2 & ACP) Integration
 - [x] **v1.2.0** - Zero-Knowledge Proof Authentication (Agent-to-Agent)
 - [x] **v1.2.1** - Security Profiles & Onboarding (profile-based action gating, CLI/web onboarding wizard)
+- [x] **v1.2.2** - Standalone Mode & Embedded Dashboard (offline-first agents, `npx create-atp-agent` with browser-based onboarding)
 - [ ] **v1.3.0** - WebAssembly support for browser environments
 - [ ] **v1.4.0** - GraphQL API support
 - [ ] **v2.0.0** - ATP Protocol v2 compatibility

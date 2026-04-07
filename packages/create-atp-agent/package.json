@@ -1,6 +1,6 @@
 {
   "name": "create-atp-agent",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Bootstrap a quantum-safe ATP agent in seconds",
   "main": "dist/index.js",
   "bin": {
