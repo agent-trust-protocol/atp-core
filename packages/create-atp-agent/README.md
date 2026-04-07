@@ -45,11 +45,12 @@ The generated agent works immediately without any backend services:
 ```typescript
 import { Agent } from 'atp-sdk';
 
-const agent = await Agent.create('MyAgent');
-
-console.log('DID:', agent.getDID());           // did:atp:a1b2c3...
-console.log('Quantum-safe:', agent.isQuantumSafe()); // true
-console.log('Mode:', agent.isStandalone() ? 'standalone' : 'connected');
+// One line — creates agent and prints status automatically
+await Agent.quickstart('MyAgent');
+// ⚡ MyAgent ready!
+//   DID:          did:atp:a1b2c3...
+//   Quantum-safe: yes
+//   Mode:         standalone (local)
 ```
 
 When ATP services aren't running, `Agent.create()` automatically falls back to **standalone mode**:
