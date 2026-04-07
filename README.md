@@ -8,7 +8,7 @@
 [![Quantum Safe](https://img.shields.io/badge/Security-Quantum%20Safe-blueviolet)](https://github.com/agent-trust-protocol/atp-core)
 [![Est. March 2025](https://img.shields.io/badge/Est.-March%202025-green)](https://github.com/agent-trust-protocol/atp-core)
 
-**Build secure AI agents in 3 lines of code.** The world's first quantum-safe security protocol for AI agents with zero-knowledge proof authentication.
+**Build secure AI agents in 1 line of code.** The world's first quantum-safe security protocol for AI agents with zero-knowledge proof authentication.
 
 ```bash
 npm install atp-sdk
@@ -16,15 +16,11 @@ npm install atp-sdk
 
 ```typescript
 import { Agent } from 'atp-sdk';
-
-// Create quantum-safe agent (works immediately!)
-const agent = await Agent.create('MyBot');
-console.log('DID:', agent.getDID());
-console.log('Quantum-safe:', agent.isQuantumSafe()); // true
-
-// Send secure messages
-await agent.send('did:atp:other', 'Hello!');
-console.log(await agent.getTrustScore('did:atp:other'));
+await Agent.quickstart('MyBot');
+// ⚡ MyBot ready!
+//   DID:          did:atp:a1b2c3...
+//   Quantum-safe: yes
+//   Mode:         standalone (local)
 ```
 
 **That's it!** Your AI agent now has:
@@ -53,7 +49,21 @@ No installation required — runs entirely in your browser.
 
 ## 🚀 Quick Start (60 Seconds)
 
-### One-Command Setup (Recommended)
+### Zero Install (Nothing on your machine? No problem.)
+
+**Mac / Linux:**
+```bash
+curl -fsSL https://agenttrustprotocol.com/install.sh | bash
+```
+
+**Windows (PowerShell as Admin):**
+```powershell
+irm https://agenttrustprotocol.com/install.ps1 | iex
+```
+
+This auto-installs Node.js if needed, then scaffolds your agent with an onboarding dashboard.
+
+### Already Have Node.js? One Command:
 
 ```bash
 npx create-atp-agent
@@ -71,11 +81,8 @@ npm install atp-sdk
 
 ```typescript
 import { Agent } from 'atp-sdk';
-
-const agent = await Agent.create('MyBot');
-console.log('DID:', agent.getDID());
-console.log('Standalone:', agent.isStandalone()); // true (offline mode)
-console.log('Quantum-safe:', agent.isQuantumSafe()); // true
+await Agent.quickstart('MyBot');
+// Auto-prints DID, quantum-safe status, and connection mode
 ```
 
 ### Full Features (With ATP Services)
@@ -102,7 +109,7 @@ console.log(await agent.getTrustScore('did:atp:other'));
 
 | Feature | Traditional Security | **ATP (Quantum-Safe)** |
 | --- | --- | --- |
-| **Setup** | Complex infrastructure | 3 lines of code |
+| **Setup** | Complex infrastructure | 1 line of code |
 | **Quantum Safe** | ❌ Vulnerable | ✅ **Protected** |
 | **Identity** | Username/password | Cryptographic DID |
 | **Trust** | Manual verification | Dynamic scoring |

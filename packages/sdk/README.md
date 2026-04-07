@@ -2,7 +2,7 @@
 
 > **The First Quantum-Safe AI Agent SDK with Zero-Knowledge Proof Authentication**
 
-ATP provides universal quantum-safe security for all AI agent protocols (MCP, Swarm, ADK, A2A, and more). Build secure, verifiable, and trustworthy AI agents in 3 lines of code!
+ATP provides universal quantum-safe security for all AI agent protocols (MCP, Swarm, ADK, A2A, and more). Build secure, verifiable, and trustworthy AI agents in 1 line of code!
 
 **One unified SDK** - Quantum-safe cryptography + ZKP authentication + Identity + Credentials + Payments - all included.
 
@@ -30,12 +30,14 @@ npm install atp-sdk
 
 ```typescript
 import { Agent } from 'atp-sdk';
-
-const agent = await Agent.create('MyBot');
-console.log('DID:', agent.getDID());
-console.log('Quantum-safe:', agent.isQuantumSafe());  // true
-console.log('Standalone:', agent.isStandalone());      // true when offline
+await Agent.quickstart('MyBot');
+// ⚡ MyBot ready!
+//   DID:          did:atp:a1b2c3...
+//   Quantum-safe: yes
+//   Mode:         standalone (local)
 ```
+
+One line. Auto-prints DID, quantum-safe status, and connection mode. Need the agent reference? Use `const agent = await Agent.quickstart('MyBot')`. Need silent creation for library use? Use `Agent.create('MyBot')` instead.
 
 **That's it!** Your agent now has:
 - ✅ Quantum-safe cryptography (hybrid Ed25519 + ML-DSA)

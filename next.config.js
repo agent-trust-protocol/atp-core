@@ -18,6 +18,19 @@ const nextConfig = {
     NEXT_PUBLIC_APP_DOMAIN: process.env.NEXT_PUBLIC_APP_DOMAIN || 'http://localhost:3030',
     NEXT_PUBLIC_DEV_DOMAIN: process.env.NEXT_PUBLIC_DEV_DOMAIN || 'http://localhost:3000',
   },
+  // Serve installer scripts as plain text for curl/irm piping
+  async headers() {
+    return [
+      {
+        source: '/install.sh',
+        headers: [{ key: 'Content-Type', value: 'text/plain; charset=utf-8' }]
+      },
+      {
+        source: '/install.ps1',
+        headers: [{ key: 'Content-Type', value: 'text/plain; charset=utf-8' }]
+      }
+    ];
+  },
   // Increase timeout for static generation to prevent premature termination
   staticPageGenerationTimeout: 180,
   // Optimize module resolution

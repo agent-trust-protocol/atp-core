@@ -73,6 +73,8 @@ export interface SimpleAgentOptions {
   did?: string;
   /** Optional private key (required if DID is provided) */
   privateKey?: string;
+  /** Print agent status banner after creation (default: false) */
+  log?: boolean;
 }
 
 /**
@@ -152,7 +154,22 @@ export class Agent extends EventEmitter {
   static async create(name: string, options?: SimpleAgentOptions): Promise<Agent> {
     const agent = new Agent(name, options);
     await agent.initialize();
+    if (options?.log) {
+      agent.logBanner();
+    }
     return agent;
+  }
+
+  /**
+   * Create an agent and print its status — the 1-line quick start.
+   *
+   * @example
+   * ```typescript
+   * await Agent.quickstart('MyBot');
+   * ```
+   */
+  static async quickstart(name: string, options?: SimpleAgentOptions): Promise<Agent> {
+    return Agent.create(name, { ...options, log: true });
   }
 
   private async initialize(): Promise<void> {
@@ -209,6 +226,15 @@ export class Agent extends EventEmitter {
     } catch (error) {
       throw new Error(`Failed to initialize agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  private logBanner(): void {
+    const mode = this._standalone ? 'standalone (local)' : 'connected';
+    const qs = this.isQuantumSafe() ? 'yes' : 'no';
+    console.log(`\n\u26A1 ${this.name} ready!`);
+    console.log(`  DID:          ${this.did}`);
+    console.log(`  Quantum-safe: ${qs}`);
+    console.log(`  Mode:         ${mode}\n`);
   }
 
   /**

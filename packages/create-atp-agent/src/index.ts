@@ -82,24 +82,8 @@ async function main(): Promise<void> {
   // agent.ts
   const agentCode = `import { Agent } from 'atp-sdk';
 
-// Create quantum-safe agent — works offline, no services needed
-const agent = await Agent.create('${name}');
-
-console.log('\\n\\u26A1 Agent ready!');
-console.log('  DID:', agent.getDID());
-console.log('  Quantum-safe:', agent.isQuantumSafe());
-console.log('  Mode:', agent.isStandalone() ? 'standalone (local)' : 'connected');
-console.log();
-
-// When ATP services are running, uncomment these:
-// await agent.send(agent.getDID(), 'Hello from ${name}!');
-// const score = await agent.getTrustScore(agent.getDID());
-// console.log('Trust score:', score);
-
-console.log('Next steps:');
-console.log('  \\u2192 Visit http://localhost:3000/onboard/agent to configure your security profile');
-console.log('  \\u2192 docker-compose up -d  for full ATP network features');
-console.log('  \\u2192 See README.md for docs');
+// One line: create a quantum-safe agent with auto-logged status
+await Agent.quickstart('${name}');
 `;
   writeFileSync(join(dir, 'agent.ts'), agentCode);
 

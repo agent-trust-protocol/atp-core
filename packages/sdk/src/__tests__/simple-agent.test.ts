@@ -686,4 +686,69 @@ describe('Agent', () => {
       ).rejects.toThrow('Agent not initialized');
     });
   });
+
+  describe('Agent.quickstart', () => {
+    let consoleSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    });
+
+    afterEach(() => {
+      consoleSpy.mockRestore();
+    });
+
+    it('should create an agent and print status banner', async () => {
+      const agent = await Agent.quickstart('QuickBot');
+
+      expect(agent).toBeInstanceOf(Agent);
+      expect(agent.isInitialized()).toBe(true);
+      expect(agent.getDID()).toBe('did:atp:test123');
+
+      // Verify banner was printed
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('QuickBot ready!'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('DID:'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Quantum-safe:'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Mode:'));
+    });
+
+    it('should pass through options to create()', async () => {
+      await Agent.quickstart('CustomQuick', { serverUrl: 'http://custom' });
+
+      expect(ATPClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          baseUrl: 'http://custom'
+        })
+      );
+    });
+  });
+
+  describe('Agent.create with log option', () => {
+    let consoleSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    });
+
+    afterEach(() => {
+      consoleSpy.mockRestore();
+    });
+
+    it('should print banner when log: true', async () => {
+      await Agent.create('LogBot', { log: true });
+
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('LogBot ready!'));
+    });
+
+    it('should NOT print banner by default', async () => {
+      consoleSpy.mockClear();
+      await Agent.create('SilentBot');
+
+      // No banner calls (standalone mode log may occur but not the banner)
+      const bannerCalls = consoleSpy.mock.calls.filter(
+        (call: any[]) => typeof call[0] === 'string' && call[0].includes('ready!')
+      );
+      expect(bannerCalls).toHaveLength(0);
+    });
+  });
 });
