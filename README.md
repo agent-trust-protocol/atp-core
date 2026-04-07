@@ -51,13 +51,17 @@ No installation required — runs entirely in your browser.
 
 ---
 
-## 🚀 Quick Start (2 Minutes)
+## 🚀 Quick Start (60 Seconds)
 
-### One-Line Setup (Recommended)
+### One-Command Setup (Recommended)
 
 ```bash
 npx create-atp-agent
 ```
+
+This scaffolds your agent project **and** launches an embedded onboarding dashboard in your browser at `http://localhost:3456` - a step-by-step wizard to configure your runtime, security profile, and agent identity. No separate server needed.
+
+Your agent works immediately in **standalone mode** - no backend services, no timeouts, no configuration. Quantum-safe DID is generated locally.
 
 ### Or Install the SDK Directly
 
@@ -69,34 +73,27 @@ npm install atp-sdk
 import { Agent } from 'atp-sdk';
 
 const agent = await Agent.create('MyBot');
-// Ready to use! Quantum-safe by default
+console.log('DID:', agent.getDID());
+console.log('Standalone:', agent.isStandalone()); // true (offline mode)
+console.log('Quantum-safe:', agent.isQuantumSafe()); // true
 ```
 
-### Option 2: Full Features (With ATP Services)
+### Full Features (With ATP Services)
 
-For production use with identity registration and trust scoring:
+When you're ready for identity registration, trust scoring, and verifiable credentials:
 
 ```bash
-# Start ATP services (one command)
+# Start ATP services
 docker-compose up -d
-
-# Or run locally
-git clone https://github.com/agent-trust-protocol/atp-core.git
-cd agent-trust-protocol && npm run services
 ```
-
-Then use your agent with full features:
 
 ```typescript
 const agent = await Agent.create('MyBot');
-await agent.initialize(); // Connect to ATP network
+// Automatically connects to ATP services when available
+// isStandalone() returns false when connected
 
-// Now you have:
-// ✅ Identity registration
-// ✅ Trust scoring across agents
-// ✅ Verifiable credentials
-// ✅ Payment protocols
-// ✅ Audit trails
+await agent.send('did:atp:other', 'Hello!');
+console.log(await agent.getTrustScore('did:atp:other'));
 ```
 
 ---
@@ -221,17 +218,20 @@ console.log(decision); // "allow" | "deny" | "require_approval"
 
 ### Onboarding
 
-Register agents via the web wizard or CLI:
+Register agents via the embedded dashboard, CLI, or web wizard:
 
 ```bash
-# Interactive CLI onboarding
+# Scaffold + auto-launch onboarding dashboard in browser
+npx create-atp-agent
+
+# Interactive CLI onboarding (for existing agents)
 npx atp-onboard-agent
 
 # Or visit the web wizard
 # https://your-atp-instance.com/onboard/agent
 ```
 
-The wizard guides you through: runtime selection, agent naming, profile selection, and control confirmation.
+`npx create-atp-agent` launches a self-contained onboarding dashboard at `http://localhost:3456` - no separate server needed. The 4-step wizard guides you through runtime selection, agent naming, security profile, and confirmation.
 
 ---
 
