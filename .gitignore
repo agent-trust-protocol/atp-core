@@ -1,6 +1,8 @@
 # Dependencies
 node_modules/
 .pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
 
 # Next.js
 .next/
@@ -28,6 +30,11 @@ yarn-error.log*
 .idea/
 *.swp
 *.swo
+
+# IDE/Tool configurations (local development)
+.claude/
+.zenflow/
+.zencoder/
 
 # OS generated files
 .DS_Store
@@ -120,6 +127,8 @@ secrets/
 dist/
 **/dist/
 *.tsbuildinfo
+.turbo/
+.turbopack/
 
 # Database files
 *.db
@@ -141,6 +150,10 @@ collections/
 tmp/
 temp/
 .cache/
+.eslintcache
+.rts2_cache_*/
+.nyc_output/
+lerna-debug.log
 
 # MCP config (may contain tokens)
 .mcp.json
