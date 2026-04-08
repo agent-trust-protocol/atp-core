@@ -40,11 +40,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-20 sm:py-24 lg:py-32 relative">
           <div className="text-center max-w-5xl mx-auto space-y-12">
           <div className="flex items-center justify-center mb-8 animate-fade-in-up">
-            <div className="relative w-40 h-24 sm:w-56 sm:h-32 lg:w-72 lg:h-40 mb-4 atp-quantum-glow rounded-2xl bg-gradient-to-br from-primary/5 to-secondary/5 dark:from-primary/15 dark:to-secondary/15 flex items-center justify-center border border-primary/20 dark:border-cyan-400/30">
-              <BrandLogo variant="lockup" size={320} className="animate-in zoom-in-50 duration-1000" alt="Agent Trust Protocol™ Official Logo" />
-              {/* Enhanced dark mode backdrop */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-transparent via-cyan-400/5 to-blue-500/5 dark:from-cyan-400/15 dark:via-blue-500/10 dark:to-purple-500/15 pointer-events-none" />
-            </div>
+            <BrandLogo variant="lockup" size={320} className="animate-in zoom-in-50 duration-1000" alt="Agent Trust Protocol™ Official Logo" />
           </div>
               <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-extralight leading-tight animate-fade-in-up text-foreground dark:text-white">
                 World's First <span className="atp-gradient-text font-semibold">Quantum-Safe</span>
