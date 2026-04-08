@@ -99,7 +99,7 @@ export default function DocsPage() {
                     </div>
                     <CardTitle className="font-display text-xl">Quick Installation</CardTitle>
                   </div>
-                  <CardDescription>Get ATP running in under 5 minutes</CardDescription>
+                  <CardDescription>Get ATP running in 30 seconds</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="bg-card/50 border border-border/50 rounded-lg p-4 font-mono text-sm">
@@ -129,19 +129,18 @@ export default function DocsPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="bg-card/50 border border-border/50 rounded-lg p-4 font-mono text-sm">
-                    <div className="text-muted-foreground mb-2">{'// Initialize ATP client'}</div>
-                    <div className="text-foreground">const atp = new ATPClient()</div>
-                    <div className="text-muted-foreground mt-2">{'// Register agent'}</div>
-                    <div className="text-foreground">const agent = await atp.registerAgent({'{'}
-                      <br />{'  '}name: "MyAgent",
-                      <br />{'  '}capabilities: ["read", "write"]
-                      <br />{'}'})
-                    </div>
+                    <div className="text-muted-foreground mb-2">{'// Create quantum-safe agent in 1 line'}</div>
+                    <div className="text-foreground">const agent = await Agent.quickstart('MyBot')</div>
+                    <div className="text-muted-foreground mt-2">{'// Works immediately without any setup'}</div>
+                    <div className="text-foreground">console.log('Standalone:', agent.isStandalone())</div>
                   </div>
+                  <p className="text-xs text-muted-foreground bg-blue-500/10 border border-blue-500/30 rounded p-2">
+                    💡 <strong>Standalone Mode:</strong> Agent runs immediately with quantum-safe keys. Connects to ATP services automatically when available.
+                  </p>
                   <Button asChild variant="outline" size="sm" className="w-full glass border-atp-electric-cyan/30 hover:bg-atp-electric-cyan/10 hover:border-atp-electric-cyan/50 hover:scale-105 transition-all duration-300">
-                    <Link href="/dashboard">
+                    <Link href="/playground">
                       <Settings size={16} className="mr-2" />
-                      Try Live Demo
+                      Try Live Playground
                     </Link>
                   </Button>
                 </CardContent>
