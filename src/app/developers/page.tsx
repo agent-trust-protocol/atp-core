@@ -137,12 +137,14 @@ export default function DevelopersPage() {
   const quickStartCode = `import { Agent } from 'atp-sdk';
 
 // Create quantum-safe agent (works immediately!)
-const agent = await Agent.create('MyBot');
-console.log('DID:', agent.getDID());
-console.log('Quantum-safe:', agent.isQuantumSafe()); // true
+const agent = await Agent.quickstart('MyBot');
+console.log('Standalone:', agent.isStandalone());
+// ⚡ MyBot ready!
+//   DID:          did:atp:a1b2c3...
+//   Quantum-safe: yes
+//   Standalone:   true
 
-// Full features with ATP services
-await agent.initialize();
+// With ATP services running, enables full features
 await agent.send('did:atp:other', 'Hello!');
 console.log(await agent.getTrustScore('did:atp:other'));`;
 
@@ -163,13 +165,13 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
               <span className="atp-gradient-text">For Developers</span>
             </h1>
             <p className="text-xl sm:text-2xl text-foreground/80 mb-8 leading-relaxed animate-fade-in-up">
-              Build secure AI agents in <span className="atp-gradient-text font-semibold">3 lines of code</span> with
+              Build secure AI agents in <span className="atp-gradient-text font-semibold">1 line of code</span> in <span className="atp-gradient-text font-semibold">30 seconds</span> with
               the world's first <span className="text-primary font-medium">quantum-safe security protocol</span> for AI agents.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3 mb-8 animate-fade-in-up">
               <Badge className="text-sm px-4 py-2 border border-green-300/40 bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 font-semibold">
                 <Zap size={14} className="mr-2" />
-                3-Line Integration
+                1-Line Integration
               </Badge>
               <Badge className="text-sm px-4 py-2 border border-blue-300/40 bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 font-semibold">
                 <Shield size={14} className="mr-2" />
@@ -337,38 +339,44 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
                 Quick Start (30 Seconds)
               </CardTitle>
               <CardDescription className="text-base">
-                Get started with ATP in 3 lines of code - no services required for basic usage
+                Get started with ATP in 1 line of code - works immediately without any services
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <Tabs defaultValue="basic" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="basic">Basic (No Services)</TabsTrigger>
-                  <TabsTrigger value="full">Full Features</TabsTrigger>
+                  <TabsTrigger value="basic">Standalone Mode</TabsTrigger>
+                  <TabsTrigger value="full">With ATP Services</TabsTrigger>
                 </TabsList>
                 <TabsContent value="basic" className="space-y-4 mt-4">
-                  <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm border border-gray-800">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-muted-foreground text-xs">Works immediately - no setup needed</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 w-7 p-0"
-                        onClick={() => copyToClipboard(quickStartCode.split('\n').slice(0, 3).join('\n'), 'basic')}
-                      >
-                        {copied === 'basic' ? (
-                          <Check className="h-4 w-4 text-green-400" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </Button>
+                  <div className="space-y-3">
+                    <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm border border-gray-800">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-muted-foreground text-xs">Works immediately - no services needed</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0"
+                          onClick={() => copyToClipboard(`import { Agent } from 'atp-sdk';
+const agent = await Agent.quickstart('MyBot');
+console.log('Standalone:', agent.isStandalone());`, 'basic')}
+                        >
+                          {copied === 'basic' ? (
+                            <Check className="h-4 w-4 text-green-400" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-blue-400">import <span className="text-yellow-400">{'{ Agent }'}</span> from <span className="text-green-400">'atp-sdk'</span>;</div>
+                        <div className="text-blue-400">const <span className="text-purple-400">agent</span> = <span className="text-blue-400">await</span> <span className="text-yellow-400">Agent</span>.<span className="text-cyan-400">quickstart</span>(<span className="text-green-400">'MyBot'</span>);</div>
+                        <div><span className="text-yellow-400">console</span>.<span className="text-cyan-400">log</span>(<span className="text-green-400">'Standalone:'</span>, <span className="text-purple-400">agent</span>.<span className="text-cyan-400">isStandalone</span>());</div>
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <div className="text-blue-400">import <span className="text-yellow-400">{'{ Agent }'}</span> from <span className="text-green-400">'atp-sdk'</span>;</div>
-                      <div className="text-gray-400">// Create quantum-safe agent</div>
-                      <div className="text-blue-400">const <span className="text-purple-400">agent</span> = <span className="text-blue-400">await</span> <span className="text-yellow-400">Agent</span>.<span className="text-cyan-400">create</span>(<span className="text-green-400">'MyBot'</span>);</div>
-                      <div><span className="text-yellow-400">console</span>.<span className="text-cyan-400">log</span>(<span className="text-purple-400">agent</span>.<span className="text-cyan-400">getDID</span>());</div>
-                    </div>
+                    <p className="text-xs text-muted-foreground bg-blue-500/10 border border-blue-500/30 rounded p-2">
+                      ℹ️ <strong>Standalone mode:</strong> Agent runs offline with locally-generated DID and quantum-safe keys. No 30-second timeout or crash. When ATP services are available, connects automatically for full features.
+                    </p>
                   </div>
                 </TabsContent>
                 <TabsContent value="full" className="space-y-4 mt-4">
@@ -424,9 +432,9 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
               <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Zap className="h-7 w-7 text-green-400" />
               </div>
-              <CardTitle className="text-xl">3-Line Integration</CardTitle>
+              <CardTitle className="text-xl">1-Line Integration</CardTitle>
               <CardDescription>
-                Get quantum-safe security in 3 lines of code. No complex setup required.
+                Get quantum-safe security in 1 line of code. Works immediately - no setup required.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -905,7 +913,7 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
                     Is ATP really quantum-safe by default?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    Yes! All new agents created with <code className="text-primary">Agent.create()</code> automatically use
+                    Yes! All new agents created with <code className="text-primary">Agent.quickstart()</code> automatically use
                     hybrid ML-DSA + Ed25519 cryptography. ML-DSA (Dilithium successor) is NIST-standardized post-quantum cryptography
                     that protects against future quantum computing attacks, while Ed25519 provides current security.
                   </AccordionContent>
@@ -925,7 +933,7 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
                     What's the difference between open source and enterprise?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    The <strong>open source core</strong> is free forever and includes the complete protocol, 3-line SDK integration,
+                    The <strong>open source core</strong> is free forever and includes the complete protocol, 1-line SDK integration,
                     quantum-safe cryptography, and basic trust scoring. <strong>Enterprise</strong> adds advanced monitoring dashboards,
                     enterprise SSO & RBAC, compliance reporting (SOC 2, HIPAA, GDPR), high availability clustering, and 24/7 priority support.
                   </AccordionContent>
@@ -963,7 +971,7 @@ console.log(await agent.getTrustScore('did:atp:other'));`;
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
                       <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0 mt-0.5" />
-                      <span>3-line integration - fastest onboarding</span>
+                      <span>1-line integration - fastest onboarding</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0 mt-0.5" />
