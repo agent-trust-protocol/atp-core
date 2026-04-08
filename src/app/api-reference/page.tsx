@@ -119,13 +119,18 @@ await client.authenticate()`}
                   <h3 className="text-lg font-semibold">Create Agent</h3>
                   <div className="bg-gray-900 rounded-lg p-4">
                     <pre className="text-green-400 font-mono text-sm">
-{`const agent = await client.agents.create({
+{`// 1-line agent creation (recommended)
+const agent = await Agent.quickstart('MyAgent')
+
+console.log('Agent DID:', agent.getDID())
+console.log('Standalone:', agent.isStandalone())
+
+// Legacy API (still supported)
+const agent2 = await client.agents.create({
   name: 'My Agent',
   capabilities: ['read', 'write'],
   trustLevel: 'medium'
-})
-
-console.log('Agent created:', agent.id)`}
+})`}
                     </pre>
                   </div>
                 </div>
