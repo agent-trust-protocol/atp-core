@@ -30,16 +30,20 @@ npm install atp-sdk
 
 ```typescript
 import { Agent } from 'atp-sdk';
-await Agent.quickstart('MyBot');
+const agent = await Agent.quickstart('MyBot');
+console.log('Standalone:', agent.isStandalone());
 // ⚡ MyBot ready!
 //   DID:          did:atp:a1b2c3...
 //   Quantum-safe: yes
-//   Mode:         standalone (local)
+//   Standalone:   true
 ```
 
 One line. Auto-prints DID, quantum-safe status, and connection mode. Need the agent reference? Use `const agent = await Agent.quickstart('MyBot')`. Need silent creation for library use? Use `Agent.create('MyBot')` instead.
 
 **That's it!** Your agent now has:
+
+> 📌 Image guidance: any screenshots, badges, or marketing assets should feature the ATP shield logo for consistent branding.
+
 - ✅ Quantum-safe cryptography (hybrid Ed25519 + ML-DSA)
 - ✅ Decentralized Identity (DID)
 - ✅ Cryptographic signatures

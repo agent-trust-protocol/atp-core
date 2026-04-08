@@ -8,13 +8,41 @@
 
 import * as readline from 'readline';
 
-const VERSION = '1.0.0';
+const VERSION = '1.2.0';
 const CYAN  = '\x1b[36m';
 const GREEN = '\x1b[32m';
 const YELLOW = '\x1b[33m';
 const BOLD  = '\x1b[1m';
 const DIM   = '\x1b[2m';
 const RESET = '\x1b[0m';
+const args = process.argv.slice(2);
+
+function hasFlag(flag: string): boolean {
+  return args.includes(flag);
+}
+
+function getArg(flag: string): string | undefined {
+  const index = args.findIndex(arg => arg === flag);
+  if (index !== -1 && index + 1 < args.length) {
+    return args[index + 1];
+  }
+
+  const exact = args.find(arg => arg.startsWith(`${flag}=`));
+  return exact ? exact.split('=')[1] : undefined;
+}
+
+function showUsage(): void {
+  console.log(`Usage: npx atp-onboard-agent [options]
+
+Options:
+  -h, --help          Show this help text
+  --dry-run           Show what would be onboarded without interaction
+  -n, --name NAME     Provide an agent name non-interactively
+  -r, --runtime RUNTIME  Select runtime (openclaw|mcp|langchain|custom)
+  -p, --profile PROFILE  Select a security profile ID
+  -e, --env ENV         Select environment (dev|staging|prod)
+`);
+}
 
 // ---------------------------------------------------------------------------
 // Built-in profiles (mirrored from atp-profiles)
@@ -95,22 +123,33 @@ async function askChoice<T extends string>(prompt: string, choices: { value: T; 
 // ---------------------------------------------------------------------------
 
 async function main(): Promise<void> {
+  if (hasFlag('--help') || hasFlag('-h')) {
+    showUsage();
+    return;
+  }
+
   banner();
 
-  // Step 1: Runtime
-  const runtime = await askChoice('Select runtime:', RUNTIMES.map((r) => ({ value: r, label: r })));
+  const runtimeArg = getArg('--runtime') || getArg('-r');
+  const nameArg = getArg('--name') || getArg('-n');
+  const environmentArg = getArg('--env') || getArg('-e');
+  const profileArg = getArg('--profile') || getArg('-p');
+  const dryRun = hasFlag('--dry-run');
 
-  // Step 2: Agent name + environment
-  const name = await askInput('? Agent name: \u203a', 'MyAgent');
+  const runtime = runtimeArg || await askChoice('Select runtime:', RUNTIMES.map((r) => ({ value: r, label: r })));
+  const name = nameArg || await askInput('? Agent name: \u203a', 'MyAgent');
+  const environment = environmentArg || await askChoice('Select environment:', ENVIRONMENTS.map((e) => ({ value: e, label: e })));
+  const profileId = profileArg || await askChoice('Select ATP security profile:', PROFILES.map((p) => ({ value: p.id, label: `${p.name} ${DIM}(${p.id})${RESET} - ${p.description}` })));
 
-  const environment = await askChoice('Select environment:', ENVIRONMENTS.map((e) => ({ value: e, label: e })));
-
-  // Step 3: Security profile
-  const profileChoices = PROFILES.map((p) => ({
-    value: p.id,
-    label: `${p.name} ${DIM}(${p.id})${RESET} - ${p.description}`,
-  }));
-  const profileId = await askChoice('Select ATP security profile:', profileChoices);
+  if (dryRun) {
+    console.log('\nDry run: agent onboarding parameters');
+    console.log(`  runtime: ${runtime}`);
+    console.log(`  name: ${name}`);
+    console.log(`  environment: ${environment}`);
+    console.log(`  profile: ${profileId}`);
+    console.log('\nNo changes were made.');
+    return;
+  }
 
   // Summary
   console.log();

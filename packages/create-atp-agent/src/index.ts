@@ -12,13 +12,39 @@ import { join } from 'path';
 import * as readline from 'readline';
 import { startDashboard } from './dashboard';
 
-const VERSION = '1.1.0';
+const VERSION = '1.2.0';
 const CYAN  = '\x1b[36m';
 const GREEN = '\x1b[32m';
 const YELLOW = '\x1b[33m';
 const BOLD  = '\x1b[1m';
 const DIM   = '\x1b[2m';
 const RESET = '\x1b[0m';
+const args = process.argv.slice(2);
+
+function hasFlag(flag: string): boolean {
+  return args.includes(flag);
+}
+
+function getArg(flag: string): string | undefined {
+  const index = args.findIndex(arg => arg === flag);
+  if (index !== -1 && index + 1 < args.length) {
+    return args[index + 1];
+  }
+
+  const exact = args.find(arg => arg.startsWith(`${flag}=`));
+  return exact ? exact.split('=')[1] : undefined;
+}
+
+function showUsage(): void {
+  console.log(`Usage: npx create-atp-agent [options]
+
+Options:
+  -h, --help          Show this help text
+  --dry-run           Print what would be created without writing files
+  -n, --name NAME     Create the project using the given agent name
+  --skip-launch       Create the project without opening the browser dashboard
+`);
+}
 
 function banner(): void {
   console.log(`\n${CYAN}${BOLD} ATP - Agent Trust Protocol${RESET}`);
@@ -47,9 +73,17 @@ async function ask(q: string, fallback = ''): Promise<string> {
 }
 
 async function main(): Promise<void> {
+  if (hasFlag('--help') || hasFlag('-h')) {
+    showUsage();
+    return;
+  }
+
   banner();
 
-  const name = await ask('? Agent name: \u203a', 'MyAgent');
+  const nameArg = getArg('--name') || getArg('-n');
+  const dryRun = hasFlag('--dry-run');
+  const skipLaunch = hasFlag('--skip-launch');
+  const name = nameArg || await ask('? Agent name: \u203a', 'MyAgent');
   const dir  = name.toLowerCase().replace(/\s+/g, '-');
 
   if (existsSync(dir)) {
@@ -58,6 +92,17 @@ async function main(): Promise<void> {
   }
 
   console.log();
+
+  if (dryRun) {
+    console.log(`Dry run mode enabled. The following project would be created:\n`);
+    console.log(`  Project directory: ${dir}`);
+    console.log(`  npm package: atp-sdk@^${VERSION}`);
+    console.log(`  Entry file: agent.ts`);
+    console.log(`  Readme: README.md`);
+    console.log(`  Dashboard launch: ${skipLaunch ? 'skipped' : 'enabled'}`);
+    return;
+  }
+
   mkdirSync(dir, { recursive: true });
 
   // package.json
@@ -127,8 +172,12 @@ docker-compose up -d
   hint(`cd ${dir} && npm install && npm start`);
   hint('Docs: https://github.com/agent-trust-protocol/atp-core/tree/main/docs\n');
 
-  // Launch the embedded onboarding dashboard and auto-open browser
-  startDashboard(name, dir);
+  if (skipLaunch) {
+    hint('Dashboard launch skipped. Run `npx create-atp-agent` again without --skip-launch to open it.');
+  } else {
+    // Launch the embedded onboarding dashboard and auto-open browser
+    startDashboard(name, dir);
+  }
 }
 
 main().catch(err => {

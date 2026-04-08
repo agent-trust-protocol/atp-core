@@ -10,17 +10,20 @@
 
 **Build secure AI agents in 1 line of code.** The world's first quantum-safe security protocol for AI agents with zero-knowledge proof authentication.
 
+> 📌 Image guidance: any featured screenshot or illustration should include the ATP shield logo for consistent branding.
+
 ```bash
 npm install atp-sdk
 ```
 
 ```typescript
 import { Agent } from 'atp-sdk';
-await Agent.quickstart('MyBot');
+const agent = await Agent.quickstart('MyBot');
+console.log('Standalone:', agent.isStandalone());
 // ⚡ MyBot ready!
 //   DID:          did:atp:a1b2c3...
 //   Quantum-safe: yes
-//   Mode:         standalone (local)
+//   Standalone:   true
 ```
 
 **That's it!** Your AI agent now has:
@@ -34,7 +37,7 @@ await Agent.quickstart('MyBot');
 
 ## 🎮 Try It Now
 
-Explore ATP features interactively in the **[ATP Playground →](https://www.agenttrustprotocol.com/playground)**
+Follow the GitHub docs and examples below to get started with ATP, or use the hosted website and dashboard when available.
 
 - 🤖 Create quantum-safe agents
 - 📊 See trust scoring in action
@@ -42,8 +45,6 @@ Explore ATP features interactively in the **[ATP Playground →](https://www.age
 - 🚀 Run OpenClaw multi-agent workflows
 - 📜 Explore the policy engine
 - 🔗 Verify blockchain audit trails
-
-No installation required — runs entirely in your browser.
 
 ---
 
