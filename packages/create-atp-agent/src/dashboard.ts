@@ -111,7 +111,7 @@ button.btn{padding:.625rem 1.25rem;border-radius:8px;font-size:.875rem;font-weig
 <body>
 <div class="card">
   <div class="card-header">
-    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 64 64" role="img" aria-label="ATP logo"><defs><linearGradient id="atp-gradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00D9FF"/><stop offset="100%" stop-color="#0A2463"/></linearGradient></defs><text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" font-family="Inter,system-ui,-apple-system,sans-serif" font-size="28" font-weight="800" fill="url(#atp-gradient)" letter-spacing="1">ATP</text></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 64 64" role="img" aria-label="ATP Shield Logo"><defs><linearGradient id="shield-gradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00D9FF"/><stop offset="100%" stop-color="#0A2463"/></linearGradient></defs><path d="M32 8L48 16v16c0 12-16 20-16 20S16 44 16 32V16l16-8z" fill="url(#shield-gradient)" stroke="#00D9FF" stroke-width="1.5" stroke-linejoin="round"/><path d="M32 20L26 24v8c0 6 6 10 6 10s6-4 6-10v-8l-6-4z" fill="none" stroke="#00D9FF" stroke-width="1" stroke-linejoin="round" opacity="0.7"/></svg>
     <h1>Onboard Agent with ATP</h1>
     <p>Register your agent with Agent Trust Protocol and select a security profile.</p>
   </div>

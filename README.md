@@ -50,6 +50,40 @@ Follow the GitHub docs and examples below to get started with ATP, or use the ho
 
 ## 🚀 Quick Start (60 Seconds)
 
+### New Developers: Start with Scaffolding
+
+**Everything in one command:**
+
+```bash
+npx create-atp-agent
+```
+
+This creates a complete ATP agent project with:
+- Pre-configured `package.json` with `atp-sdk` included
+- `agent.ts` starter code
+- Embedded onboarding dashboard at `http://localhost:3456`
+
+Then in your new project folder:
+```bash
+cd my-agent
+npm install
+npm start
+```
+
+### Experienced Developers: Add to Existing Project
+
+**If you already have a project, just install the SDK:**
+
+```bash
+npm install atp-sdk
+```
+
+Then use it:
+```typescript
+import { Agent } from 'atp-sdk';
+const agent = await Agent.quickstart('MyBot');
+```
+
 ### Zero Install (Nothing on your machine? No problem.)
 
 **Mac / Linux:**
@@ -60,48 +94,6 @@ curl -fsSL https://agenttrustprotocol.com/install.sh | bash
 **Windows (PowerShell as Admin):**
 ```powershell
 irm https://agenttrustprotocol.com/install.ps1 | iex
-```
-
-This auto-installs Node.js if needed, then scaffolds your agent with an onboarding dashboard.
-
-### Already Have Node.js? One Command:
-
-```bash
-npx create-atp-agent
-```
-
-This scaffolds your agent project **and** launches an embedded onboarding dashboard in your browser at `http://localhost:3456` - a step-by-step wizard to configure your runtime, security profile, and agent identity. No separate server needed.
-
-Your agent works immediately in **standalone mode** - no backend services, no timeouts, no configuration. Quantum-safe DID is generated locally.
-
-### Or Install the SDK Directly
-
-```bash
-npm install atp-sdk
-```
-
-```typescript
-import { Agent } from 'atp-sdk';
-await Agent.quickstart('MyBot');
-// Auto-prints DID, quantum-safe status, and connection mode
-```
-
-### Full Features (With ATP Services)
-
-When you're ready for identity registration, trust scoring, and verifiable credentials:
-
-```bash
-# Start ATP services
-docker-compose up -d
-```
-
-```typescript
-const agent = await Agent.create('MyBot');
-// Automatically connects to ATP services when available
-// isStandalone() returns false when connected
-
-await agent.send('did:atp:other', 'Hello!');
-console.log(await agent.getTrustScore('did:atp:other'));
 ```
 
 ---
