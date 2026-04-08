@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  turbopack: {},
   // ESLint runs separately in CI (ci.yml) — skip during next build to
   // prevent warnings from blocking Vercel deployments.
   eslint: {
