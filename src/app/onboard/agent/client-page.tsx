@@ -369,6 +369,7 @@ export default function OnboardAgentClient() {
               height={64}
               className="h-16 w-16 object-contain"
               priority
+              unoptimized
             />
           </div>
           <CardTitle>Onboard Agent with ATP</CardTitle>
