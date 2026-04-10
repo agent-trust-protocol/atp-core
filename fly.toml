@@ -1,7 +1,7 @@
 # Fly.io configuration for Agent Trust Protocol Website
 # Reference: https://fly.io/docs/reference/configuration/
 
-app = "agent-trust-protocol"
+app = "atp-core-website"
 kill_signal = "SIGTERM"
 kill_timeout = "30s"
 

@@ -213,7 +213,14 @@ atp-ip-protection-deploy.tar.gz
 # They should NOT be committed to the codebase
 *-agent-bot/
 *-agent/
+# First-party CLI package name ends with -agent; keep it tracked
+!packages/create-atp-agent/
+!packages/create-atp-agent/**
+packages/create-atp-agent/node_modules/
+packages/create-atp-agent/dist/
+packages/create-atp-agent/.create-atp-agent/
 *-security/
 security-*/
 agent-*/
 .*.agent.md
+.env*.local

@@ -1,186 +1,141 @@
 #!/usr/bin/env node
-/**
- * ATP - create-atp-agent
- * Bootstrap a quantum-safe AI agent in under 60 seconds
- *
- * Usage: npx create-atp-agent
- *        npx atp-init
- */
+import { execSync } from 'child_process';
+import chalk from 'chalk';
+import { Command } from 'commander';
+import fs from 'fs-extra';
+import inquirer from 'inquirer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { startOnboardingDashboard } from './serve-dashboard.js';
 
-import { mkdirSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
-import * as readline from 'readline';
-import { startDashboard } from './dashboard';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const VERSION = '1.2.0';
-const CYAN  = '\x1b[36m';
-const GREEN = '\x1b[32m';
-const YELLOW = '\x1b[33m';
-const BOLD  = '\x1b[1m';
-const DIM   = '\x1b[2m';
-const RESET = '\x1b[0m';
-const args = process.argv.slice(2);
+const program = new Command();
 
-function hasFlag(flag: string): boolean {
-  return args.includes(flag);
-}
+program
+  .name('create-atp-agent')
+  .description('Create a new Agent Trust Protocol agent')
+  .option('--dashboard-only', 'Only serve the embedded onboarding UI on port 3456 (no scaffold)')
+  .option('--no-dashboard', 'After scaffolding, do not start the embedded onboarding UI')
+  .option('--no-open', 'Do not launch the system browser for the onboarding UI')
+  .argument('[project-name]', 'project directory')
+  .action(async function (this: Command, projectName?: string) {
+    const opts = this.opts<{
+      dashboardOnly?: boolean;
+      noDashboard?: boolean;
+      noOpen?: boolean;
+    }>();
 
-function getArg(flag: string): string | undefined {
-  const index = args.findIndex(arg => arg === flag);
-  if (index !== -1 && index + 1 < args.length) {
-    return args[index + 1];
-  }
+    const openBrowser =
+      !opts.noOpen && process.env.CREATE_ATP_AGENT_NO_OPEN !== '1';
 
-  const exact = args.find(arg => arg.startsWith(`${flag}=`));
-  return exact ? exact.split('=')[1] : undefined;
-}
+    console.log(chalk.blue('🛡️  Agent Trust Protocol — create-atp-agent\n'));
 
-function showUsage(): void {
-  console.log(`Usage: npx create-atp-agent [options]
-
-Options:
-  -h, --help          Show this help text
-  --dry-run           Print what would be created without writing files
-  -n, --name NAME     Create the project using the given agent name
-  --skip-launch       Create the project without opening the browser dashboard
-`);
-}
-
-function banner(): void {
-  console.log(`\n${CYAN}${BOLD} ATP - Agent Trust Protocol${RESET}`);
-  console.log(` ${DIM}The world's first quantum-safe AI agent protocol${RESET}\n`);
-}
-
-function ok(msg: string): void {
-  console.log(` ${GREEN}\u2713${RESET} ${msg}`);
-}
-
-function hint(msg: string): void {
-  console.log(` ${YELLOW}\u2192${RESET} ${msg}`);
-}
-
-async function ask(q: string, fallback = ''): Promise<string> {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-  return new Promise(resolve => {
-    rl.question(` ${q} `, ans => {
-      rl.close();
-      resolve(ans.trim() || fallback);
-    });
-  });
-}
-
-async function main(): Promise<void> {
-  if (hasFlag('--help') || hasFlag('-h')) {
-    showUsage();
-    return;
-  }
-
-  banner();
-
-  const nameArg = getArg('--name') || getArg('-n');
-  const dryRun = hasFlag('--dry-run');
-  const skipLaunch = hasFlag('--skip-launch');
-  const name = nameArg || await ask('? Agent name: \u203a', 'MyAgent');
-  const dir  = name.toLowerCase().replace(/\s+/g, '-');
-
-  if (existsSync(dir)) {
-    console.error(`\n Error: directory "${dir}" already exists.\n`);
-    process.exit(1);
-  }
-
-  console.log();
-
-  if (dryRun) {
-    console.log(`Dry run mode enabled. The following project would be created:\n`);
-    console.log(`  Project directory: ${dir}`);
-    console.log(`  npm package: atp-sdk@^${VERSION}`);
-    console.log(`  Entry file: agent.ts`);
-    console.log(`  Readme: README.md`);
-    console.log(`  Dashboard launch: ${skipLaunch ? 'skipped' : 'enabled'}`);
-    return;
-  }
-
-  mkdirSync(dir, { recursive: true });
-
-  // package.json
-  const pkg = {
-    name: dir,
-    version: '0.1.0',
-    type: 'module',
-    scripts: {
-      start: 'tsx agent.ts',
-      dev: 'tsx --watch agent.ts'
-    },
-    dependencies: {
-      'atp-sdk': `^${VERSION}`
-    },
-    devDependencies: {
-      tsx: '^4.0.0',
-      typescript: '^5.0.0'
+    if (opts.dashboardOnly) {
+      console.log(chalk.gray('Starting embedded onboarding dashboard (Ctrl+C to stop)…\n'));
+      await startOnboardingDashboard({ openBrowser });
+      return;
     }
-  };
-  writeFileSync(join(dir, 'package.json'), JSON.stringify(pkg, null, 2) + '\n');
 
-  // agent.ts
-  const agentCode = `import { Agent } from 'atp-sdk';
+    const answers = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'name',
+        message: 'Project name:',
+        default: projectName || 'my-atp-agent',
+        validate: (input: string) =>
+          /^[a-z0-9-_]+$/.test(input) || 'Use lowercase letters, numbers, hyphens, and underscores only'
+      },
+      {
+        type: 'list',
+        name: 'lang',
+        message: 'Language:',
+        choices: ['TypeScript', 'JavaScript'],
+        default: 'TypeScript'
+      },
+      {
+        type: 'list',
+        name: 'profile',
+        message: 'Security profile:',
+        choices: [
+          { name: 'safe-default (recommended)', value: 'safe-default' },
+          { name: 'dev-mode (all tools)', value: 'dev-mode' },
+          { name: 'enterprise-locked', value: 'enterprise-locked' }
+        ],
+        default: 'safe-default'
+      },
+      {
+        type: 'confirm',
+        name: 'install',
+        message: 'Install dependencies now?',
+        default: true
+      }
+    ]);
 
-// One line: create a quantum-safe agent with auto-logged status
-await Agent.quickstart('${name}');
-`;
-  writeFileSync(join(dir, 'agent.ts'), agentCode);
+    const targetDir = path.resolve(process.cwd(), answers.name as string);
 
-  // README.md
-  const readme = `# ${name}
+    if (fs.existsSync(targetDir)) {
+      console.log(chalk.red(`\n✗ Directory ${answers.name} already exists`));
+      process.exit(1);
+    }
 
-Quantum-safe AI agent built with [Agent Trust Protocol](https://agenttrustprotocol.com).
+    const templateDir = path.join(__dirname, '../template');
+    await fs.copy(templateDir, targetDir);
 
-## Start
+    const pkgPath = path.join(targetDir, 'package.json');
+    const pkg = (await fs.readJson(pkgPath)) as Record<string, unknown>;
+    pkg.name = answers.name;
 
-\`\`\`bash
-npm install
-npm start
-\`\`\`
+    const lang = answers.lang as string;
+    if (lang === 'JavaScript') {
+      await fs.remove(path.join(targetDir, 'agent.ts'));
+      pkg.scripts = {
+        start: 'node agent.mjs',
+        dev: 'node --watch agent.mjs'
+      };
+    } else {
+      await fs.remove(path.join(targetDir, 'agent.mjs'));
+      pkg.scripts = {
+        start: 'tsx agent.ts',
+        dev: 'tsx watch agent.ts',
+        build: 'tsc'
+      };
+    }
 
-## Full ATP network features
+    await fs.writeJson(pkgPath, pkg, { spaces: 2 });
 
-\`\`\`bash
-# From the atp-core repo root:
-docker-compose up -d
-\`\`\`
+    await fs.writeJson(
+      path.join(targetDir, '.atp.json'),
+      {
+        profile: answers.profile,
+        created: new Date().toISOString()
+      },
+      { spaces: 2 }
+    );
 
-## Docs
+    console.log(chalk.green(`\n✓ Created ${answers.name}`));
 
-- [Quick Start](https://github.com/agent-trust-protocol/atp-core/blob/main/QUICK_START.md)
-- [API Reference](https://github.com/agent-trust-protocol/atp-core/tree/main/docs)
-- [Examples](https://github.com/agent-trust-protocol/atp-core/tree/main/examples)
-- [Discord](https://discord.gg/agenttrustprotocol)
-`;
-  writeFileSync(join(dir, 'README.md'), readme);
+    if (answers.install) {
+      console.log(chalk.gray('\nInstalling dependencies...'));
+      execSync('npm install', { cwd: targetDir, stdio: 'inherit' });
+    }
 
-  ok(`Agent directory created: ${BOLD}${dir}/${RESET}`);
-  ok(`Quantum-safe keypair ready (ML-DSA + Ed25519)`);
-  ok(`DID: ${DIM}did:atp:zb2r... (generated at first run)${RESET}`);
+    console.log(chalk.blue('\n🚀 Next steps:'));
+    console.log(`  cd ${answers.name}`);
+    if (!answers.install) console.log('  npm install');
+    console.log('  npm start\n');
 
-  console.log(`\n ${BOLD}Created: ${dir}/${RESET}`);
-  console.log(' \u251C\u2500\u2500 agent.ts         \u2190 your agent');
-  console.log(' \u251C\u2500\u2500 package.json');
-  console.log(' \u2514\u2500\u2500 README.md\n');
+    console.log(chalk.gray('Your agent is quantum-safe and ready.'));
+    console.log(chalk.gray(`Profile: ${answers.profile}`));
 
-  hint(`cd ${dir} && npm install && npm start`);
-  hint('Docs: https://github.com/agent-trust-protocol/atp-core/tree/main/docs\n');
+    if (!opts.noDashboard) {
+      console.log(
+        openBrowser
+          ? chalk.blue('\nOpening local onboarding dashboard…')
+          : chalk.blue('\nStarting local onboarding dashboard (browser launch disabled)…')
+      );
+      await startOnboardingDashboard({ openBrowser });
+    }
+  });
 
-  if (skipLaunch) {
-    hint('Dashboard launch skipped. Run `npx create-atp-agent` again without --skip-launch to open it.');
-  } else {
-    // Launch the embedded onboarding dashboard and auto-open browser
-    startDashboard(name, dir);
-  }
-}
-
-main().catch(err => {
-  console.error(err.message);
-  process.exit(1);
-});
+program.parse();

@@ -1,124 +1,82 @@
 # create-atp-agent
 
-**Bootstrap a quantum-safe AI agent in under 60 seconds** with an embedded onboarding dashboard.
+Scaffold a new [Agent Trust Protocol](https://agenttrustprotocol.com) agent with an **ESM-first** template (`"type": "module"`), including a top-level `await` quickstart that runs on Node 18+.
 
-[![npm version](https://badge.fury.io/js/create-atp-agent.svg)](https://www.npmjs.com/package/create-atp-agent)
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+After scaffolding, the CLI **starts an embedded onboarding dashboard** on **port 3456** (or the next free port) and tries to open your browser. Use **`--no-dashboard`** to skip that step, or **`--dashboard-only`** to run the UI without creating a project.
 
-## Zero Install (Node.js auto-detected)
-
-Don't have Node.js? No problem — the installer handles everything:
-
-**Mac / Linux:**
-```bash
-curl -fsSL https://agenttrustprotocol.com/install.sh | bash
-```
-
-**Windows (PowerShell as Admin):**
-```powershell
-irm https://agenttrustprotocol.com/install.ps1 | iex
-```
-
-**Already have Node.js?**
-```bash
-npx create-atp-agent
-```
-
-That's it. This will:
-
-1. Ask for your agent name
-2. Scaffold a ready-to-run project (`agent.ts`, `package.json`, `README.md`)
-3. Launch an **embedded onboarding dashboard** in your browser at `http://localhost:3456`
-4. Generate a quantum-safe DID locally (no backend services required)
-
-## Embedded Onboarding Dashboard
-
-After scaffolding, a local web server starts automatically and opens a step-by-step onboarding wizard in your browser:
-
-- **Step 1: Runtime** - Select your agent runtime (OpenClaw, MCP, LangChain, ADK, or custom)
-- **Step 2: Agent Name** - Pre-filled from your CLI input
-- **Step 3: Security Profile** - Choose from 4 built-in profiles (`safe-default`, `dev-mode`, `enterprise-locked`, `openclaw-sandbox`)
-- **Step 4: Confirm** - Review your configuration and complete registration
-
-The dashboard uses a dark-mode UI matching the ATP web application design. No external dependencies needed - runs entirely on Node.js built-ins.
-
-## What Gets Created
-
-```
-my-agent/
-  |-- agent.ts         <- your agent (runs offline!)
-  |-- package.json
-  |-- README.md
-```
-
-## Standalone Mode (Offline-First)
-
-The generated agent works immediately without any backend services:
-
-```typescript
-import { Agent } from 'atp-sdk';
-
-// One line — creates agent and prints status automatically
-await Agent.quickstart('MyAgent');
-// ⚡ MyAgent ready!
-//   DID:          did:atp:a1b2c3...
-//   Quantum-safe: yes
-//   Mode:         standalone (local)
-```
-
-When ATP services aren't running, `Agent.create()` automatically falls back to **standalone mode**:
-- DID is generated locally from the cryptographic keypair
-- All quantum-safe crypto works offline
-- No 30-second timeout, no crash, no errors
-
-When you're ready for full features (trust scoring, verifiable credentials, identity registration), start the ATP services with `docker-compose up -d`.
-
-## Security Profiles
-
-Each profile defines what your agent can and cannot do:
-
-| Profile | Shell | Filesystem | Network | Best For |
-| --- | --- | --- | --- | --- |
-| `safe-default` | Blocked | Read-only | Internal only | Most agents |
-| `dev-mode` | Allowed | Read + Write | All domains | Local development |
-| `enterprise-locked` | Blocked | Approved paths | Internal corp | Production |
-| `openclaw-sandbox` | Allowlist only | Sandbox paths | Internal + partners | OpenClaw agents |
-
-## CLI Commands
+## Usage
 
 ```bash
-# Scaffold a new agent (interactive)
-npx create-atp-agent
-
-# Alternative alias
-npx atp-init
-
-# Onboard an existing agent via CLI wizard
-npx atp-onboard-agent
+npx create-atp-agent my-agent
+npx create-atp-agent --dashboard-only
+npx create-atp-agent my-agent --no-dashboard
 ```
 
-## Requirements
+### Flags
 
-- Node.js 18+
-- npm 7+
+| Flag | Purpose |
+| --- | --- |
+| `--dashboard-only` | Serve only the local onboarding UI (no scaffold). |
+| `--no-dashboard` | After scaffold, do not start the onboarding server. |
+| `--no-open` | Start the server but do not launch the system browser. |
 
-## Next Steps After Setup
+Set `CREATE_ATP_AGENT_NO_OPEN=1` for the same effect as `--no-open` (useful in CI or SSH sessions).
+
+## Test before production
+
+From this repo:
 
 ```bash
-cd my-agent
+cd packages/create-atp-agent
 npm install
-npm start
+npm run build
 ```
 
-Then:
-- Visit the onboarding dashboard at `http://localhost:3456` to configure your security profile
-- Run `docker-compose up -d` from the atp-core repo for full network features
-- Read the [ATP SDK docs](https://github.com/agent-trust-protocol/atp-core/tree/main/docs)
+**1. Dashboard only (smoke test, no browser)**
 
-## License
+```bash
+CREATE_ATP_AGENT_NO_OPEN=1 node dist/index.js --dashboard-only
+```
 
-Apache-2.0
+In another terminal:
 
----
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:3456/
+curl -s -X POST http://127.0.0.1:3456/api/agents/onboard \
+  -H "Content-Type: application/json" \
+  -d '{"runtime":"mcp","name":"SmokeBot","environment":"dev","profileId":"safe-default"}'
+```
 
-**Agent Trust Protocol** - The security layer for AI agents. Built by [Sovr INC](https://agenttrustprotocol.com).
+Expect `200` for both. Stop the server with Ctrl+C.
+
+**2. End-to-end CLI (interactive)**
+
+```bash
+npm link
+cd "$(mktemp -d)"
+create-atp-agent e2e-test-agent
+```
+
+Complete the prompts. Confirm a project folder is created, dependencies install (if you chose yes), and the browser opens to the wizard (unless `CREATE_ATP_AGENT_NO_OPEN=1`).
+
+**3. Published package (pre-release)**
+
+```bash
+npm pack
+npm install -g ./create-atp-agent-*.tgz
+create-atp-agent --dashboard-only --no-open
+```
+
+Verify the dashboard loads and onboarding completes.
+
+## Development
+
+```bash
+cd packages/create-atp-agent
+npm install
+npm run build
+npm link
+create-atp-agent test-bot
+```
+
+The CLI copies `template/` into the target directory, adjusts `package.json` for TypeScript vs JavaScript, writes `.atp.json` with the selected security profile, and serves `dashboard/` for the embedded wizard.

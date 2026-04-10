@@ -179,7 +179,7 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
 2. Register it in `packages/atp-profiles/src/index.ts` by adding to `BUILTIN_PROFILES` and re-exporting.
 3. Profiles must be runtime-agnostic. Adapters do the mapping from runtime → actionType → policy.
 4. Do not hardcode policies in adapters; always go through profiles and `evaluateActionWithProfile`.
-5. Optionally expose the profile in the onboarding wizard (`src/app/onboard/agent/client-page.tsx`) and the CLI (`packages/create-atp-agent/src/onboard.ts`).
+5. Optionally expose the profile in the onboarding wizard (`src/app/onboard/agent/client-page.tsx`) and the CLI (`packages/create-atp-agent/src/index.ts`).
 
 ### Adding a new policy preset
 

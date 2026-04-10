@@ -221,17 +221,21 @@ console.log(decision); // "allow" | "deny" | "require_approval"
 Register agents via the embedded dashboard, CLI, or web wizard:
 
 ```bash
-# Scaffold + auto-launch onboarding dashboard in browser
-npx create-atp-agent
+# Scaffold a new ESM-first agent project (interactive CLI).
+# After scaffolding, the CLI starts a local onboarding UI at http://127.0.0.1:3456 by default.
+npx create-atp-agent my-agent
+
+# Embedded onboarding UI only (no new project folder)
+npx create-atp-agent --dashboard-only
 
 # Interactive CLI onboarding (for existing agents)
 npx atp-onboard-agent
 
-# Or visit the web wizard
-# https://your-atp-instance.com/onboard/agent
+# Or visit the web wizard on your ATP site, for example:
+# /onboard/agent
 ```
 
-`npx create-atp-agent` launches a self-contained onboarding dashboard at `http://localhost:3456` - no separate server needed. The 4-step wizard guides you through runtime selection, agent naming, security profile, and confirmation.
+`create-atp-agent` ships a small static wizard plus a mock `POST /api/agents/onboard` on the same port (for local demos). The full Next.js wizard at `/onboard/agent` is separate and can be wired to real ATP services in production.
 
 ---
 

@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, CheckCircle, Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Textarea } from '@/components/ui/textarea';
+import { Shield, CheckCircle, Loader2, ArrowLeft, ArrowRight, Info, AlertTriangle } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
 // Built-in profiles (mirrored from atp-profiles for client-side rendering)
@@ -99,6 +101,25 @@ const CONTROL_DETAILS: Record<string, Record<string, string>> = {
   }
 };
 
+type PackageJsonModuleHint =
+  | null
+  | { kind: 'esm' }
+  | { kind: 'cjs'; reason: 'explicit' | 'implicit' }
+  | { kind: 'invalid' };
+
+function analyzePackageJsonModule(text: string): PackageJsonModuleHint {
+  const trimmed = text.trim();
+  if (!trimmed) return null;
+  try {
+    const pkg = JSON.parse(trimmed) as { type?: string };
+    if (pkg.type === 'module') return { kind: 'esm' };
+    if (pkg.type === 'commonjs') return { kind: 'cjs', reason: 'explicit' };
+    return { kind: 'cjs', reason: 'implicit' };
+  } catch {
+    return { kind: 'invalid' };
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -113,6 +134,12 @@ export default function OnboardAgentClient() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState<{ agentId: string; did: string } | null>(null);
+  const [packageJsonSnippet, setPackageJsonSnippet] = useState('');
+
+  const packageModuleHint = useMemo(
+    () => analyzePackageJsonModule(packageJsonSnippet),
+    [packageJsonSnippet]
+  );
 
   const canNext =
     (step === 0 && runtime !== '') ||
@@ -334,8 +361,15 @@ export default function OnboardAgentClient() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-2">
-            <Shield className="w-8 h-8 text-blue-600" />
+          <div className="mx-auto mb-2 flex justify-center">
+            <Image
+              src="/atp-logo.svg"
+              alt="Agent Trust Protocol logo"
+              width={64}
+              height={64}
+              className="h-16 w-16 object-contain"
+              priority
+            />
           </div>
           <CardTitle>Onboard Agent with ATP</CardTitle>
           <CardDescription>
@@ -346,6 +380,80 @@ export default function OnboardAgentClient() {
         <CardContent>
           {!done && (
             <>
+              <Alert className="mb-4">
+                <Info className="h-4 w-4" />
+                <AlertTitle className="text-sm">Node.js ESM and top-level await</AlertTitle>
+                <AlertDescription className="text-xs sm:text-sm">
+                  The ATP SDK quickstart uses <code className="rounded bg-muted px-1">import</code> and
+                  top-level <code className="rounded bg-muted px-1">await</code>. Use{' '}
+                  <code className="rounded bg-muted px-1">&quot;type&quot;: &quot;module&quot;</code> in{' '}
+                  <code className="rounded bg-muted px-1">package.json</code>, run{' '}
+                  <code className="rounded bg-muted px-1">.mjs</code> entry files, or wrap startup in an async
+                  function if you are on CommonJS.
+                </AlertDescription>
+              </Alert>
+
+              <div className="mb-4 space-y-2">
+                <Label htmlFor="pkg-json-paste">Optional: paste your project package.json</Label>
+                <Textarea
+                  id="pkg-json-paste"
+                  placeholder='{ "name": "my-agent" }'
+                  value={packageJsonSnippet}
+                  onChange={(e) => setPackageJsonSnippet(e.target.value)}
+                  className="font-mono text-xs min-h-[100px]"
+                />
+                <p className="text-xs text-muted-foreground">
+                  We only inspect the <code className="rounded bg-muted px-1">type</code> field locally in your
+                  browser to flag CommonJS setups.
+                </p>
+              </div>
+
+              {packageModuleHint?.kind === 'cjs' && (
+                <Alert variant="warning" className="mb-4">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle className="text-sm">CommonJS-style package detected</AlertTitle>
+                  <AlertDescription className="text-xs sm:text-sm space-y-2">
+                    <p>
+                      {packageModuleHint.reason === 'explicit'
+                        ? 'This package.json sets "type": "commonjs". Top-level await in a .js file will fail.'
+                        : 'No "type": "module" was found. Node treats .js as CommonJS by default, so top-level await in .js will fail unless you use .mjs or an async wrapper.'}
+                    </p>
+                    <p>
+                      Prefer{' '}
+                      <code className="rounded bg-muted px-1">&quot;type&quot;: &quot;module&quot;</code> or run an{' '}
+                      <code className="rounded bg-muted px-1">.mjs</code> entry (for example{' '}
+                      <code className="rounded bg-muted px-1">node agent.mjs</code>
+                      ). For CommonJS-only projects, use{' '}
+                      <code className="rounded bg-muted px-1">await import(&apos;atp-sdk&apos;)</code> inside an async
+                      IIFE.
+                    </p>
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {packageModuleHint?.kind === 'esm' && (
+                <Alert variant="success" className="mb-4">
+                  <CheckCircle className="h-4 w-4" />
+                  <AlertTitle className="text-sm">ESM package</AlertTitle>
+                  <AlertDescription className="text-xs sm:text-sm">
+                    <code className="rounded bg-muted px-1">&quot;type&quot;: &quot;module&quot;</code> is set — top-level
+                    await in <code className="rounded bg-muted px-1">.js</code> /{' '}
+                    <code className="rounded bg-muted px-1">.ts</code> is valid with a compatible runner (Node 18+ or
+                    tsx).
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {packageModuleHint?.kind === 'invalid' && packageJsonSnippet.trim() !== '' && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle className="text-sm">Could not parse JSON</AlertTitle>
+                  <AlertDescription className="text-xs sm:text-sm">
+                    Fix the JSON to check module type, or clear the field to dismiss.
+                  </AlertDescription>
+                </Alert>
+              )}
+
               {/* Progress indicator */}
               <div className="flex items-center justify-center gap-2 mb-6">
                 {stepLabels.map((label, i) => (
