@@ -28,12 +28,12 @@
 
 ### Installation
 ```bash
-npm install @atp/sdk
+npm install atp-sdk
 ```
 
 ### Quick Start
 ```typescript
-import { Agent } from '@atp/sdk';
+import { Agent } from 'atp-sdk';
 
 // Create quantum-safe agent
 const agent = await Agent.create('MyBot');

@@ -165,7 +165,7 @@ To create custom examples:
 5. Clean up resources in finally blocks
 
 ```javascript
-import { ATPClient, createQuickConfig } from '@atp/sdk';
+import { ATPClient, createQuickConfig } from 'atp-sdk';
 
 async function myCustomExample() {
   const client = new ATPClient(createQuickConfig('http://localhost'));

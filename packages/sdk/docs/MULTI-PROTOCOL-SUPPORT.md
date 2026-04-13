@@ -88,7 +88,7 @@ The `UniversalMonitor` class provides unified monitoring across all protocols:
 ### 1. Basic Protocol Detection
 
 ```typescript
-import { ProtocolDetector } from '@atp/sdk';
+import { ProtocolDetector } from 'atp-sdk';
 
 const agent = {
   did: 'did:atp:my-agent',
@@ -111,7 +111,7 @@ import {
   MCPAdapter,
   UniversalMonitor,
   Protocol
-} from '@atp/sdk';
+} from 'atp-sdk';
 
 // Initialize ATP client
 const config = createQuickConfig('http://localhost:3000', {
@@ -165,7 +165,7 @@ stream.subscribe({
 ### 3. Secure Message Exchange
 
 ```typescript
-import { MCPAdapter, Protocol } from '@atp/sdk';
+import { MCPAdapter, Protocol } from 'atp-sdk';
 
 const adapter = new MCPAdapter();
 await adapter.initialize({
@@ -197,7 +197,7 @@ console.log('Trust Score:', verification.trustScore);
 ### 4. Event Filtering
 
 ```typescript
-import { UniversalMonitor } from '@atp/sdk';
+import { UniversalMonitor } from 'atp-sdk';
 
 const monitor = new UniversalMonitor({
   minTrustLevel: 70,

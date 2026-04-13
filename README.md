@@ -33,6 +33,20 @@ console.log(await agent.getTrustScore('did:atp:other'));
 
 ---
 
+## 📦 Package Status
+
+| Package | Version | Status | Install |
+|---------|---------|--------|---------|
+| `atp-sdk` | ![npm](https://img.shields.io/npm/v/atp-sdk) | ✅ **Production** | `npm install atp-sdk` |
+| `@atpdevelopment/openclaw-atp` | ![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp) | ✅ **Production** | `npm install @atpdevelopment/openclaw-atp` |
+| `atp-core` | v1.0.0 | ⚠️ **Legacy** — Superseded by `atp-sdk` | — |
+| Services (`@atp/*`) | 0.1.0 | 🔄 **Development** | Monorepo only |
+
+**Use `atp-sdk`** — the only production-ready package for application development.  
+See [VERSIONING.md](./VERSIONING.md) for full policy.
+
+---
+
 ## 🎮 Try It Now
 
 Explore ATP features interactively in the **[ATP Playground →](https://www.agenttrustprotocol.com/playground)**
@@ -245,6 +259,7 @@ pnpm add atp-sdk
 
 - **[Quick Start Guide](./docs/getting-started.md)** - 5-minute setup
 - **[API Reference](./packages/sdk/docs/api/README.md)** - Complete API docs
+- **[VERSIONING.md](./VERSIONING.md)** - Package status and versioning policy
 - **[OpenClaw Integration](./docs/openclaw-integration.md)** - Secure multi-agent workflows
 - **[Examples](./packages/sdk/examples/)** - Working code examples
 - **[Multi-Protocol Support](./docs/multi-protocol.md)** - MCP, Swarm, ADK, A2A

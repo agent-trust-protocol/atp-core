@@ -341,13 +341,13 @@ export ENABLE_MTLS=false  # Enable for production
 ### Install ATP™ SDK
 
 ```bash
-npm install @atp/sdk
+npm install atp-sdk
 ```
 
 ### Basic SDK Usage
 
 ```javascript
-import { ATPClient } from '@atp/sdk';
+import { ATPClient } from 'atp-sdk';
 
 // Initialize client
 const atp = new ATPClient({

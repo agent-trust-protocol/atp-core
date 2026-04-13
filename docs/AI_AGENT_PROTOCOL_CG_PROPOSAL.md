@@ -161,11 +161,11 @@ cd agent-trust-protocol
 ./start-services.sh
 
 # Use the 3-line SDK
-npm install @atp/sdk
+npm install atp-sdk
 ```
 
 ```typescript
-import { Agent } from '@atp/sdk';
+import { Agent } from 'atp-sdk';
 
 const agent = await Agent.create('ANP-Compatible-Agent');
 await agent.send(otherAgent, 'Secure ANP message');
@@ -224,7 +224,7 @@ The CG white paper identifies key challenges. Here's how ATP addresses each:
 ### For CG Members
 1. **Try the Demo**: https://480de8e2ca61.ngrok-free.app
 2. **Review the Code**: https://github.com/agent-trust-protocol/core
-3. **Test the SDK**: `npm install @atp/sdk`
+3. **Test the SDK**: `npm install atp-sdk`
 4. **Join Discussion**: larry@sovrlabs.com
 
 ### For ANP Specification

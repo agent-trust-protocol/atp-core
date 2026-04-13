@@ -30,21 +30,21 @@ npm config get registry
 npm login --registry=https://npm.atp.example.com
 
 # Verify package name and version
-npm search @atp/sdk
+npm search atp-sdk
 ```
 
 **Issue: Version conflicts**
 ```bash
-npm ERR! peer dep missing: @atp/sdk@^1.0.0
+npm ERR! peer dep missing: atp-sdk@^1.0.0
 ```
 
 **Solution:**
 ```bash
 # Check installed versions
-npm ls @atp/sdk
+npm ls atp-sdk
 
 # Update to compatible version
-npm install @atp/sdk@^1.0.0
+npm install atp-sdk@^1.0.0
 
 # Clear npm cache if needed
 npm cache clean --force
@@ -65,16 +65,16 @@ SyntaxError: Cannot use import statement outside a module
 }
 
 // Option 2: Use CommonJS require
-const { ATPClient } = require('@atp/sdk');
+const { ATPClient } = require('atp-sdk');
 
 // Option 3: Use .mjs extension
 // file: app.mjs
-import { ATPClient } from '@atp/sdk';
+import { ATPClient } from 'atp-sdk';
 ```
 
 **Issue: TypeScript compilation errors**
 ```typescript
-TS2307: Cannot find module '@atp/sdk' or its corresponding type declarations
+TS2307: Cannot find module 'atp-sdk' or its corresponding type declarations
 ```
 
 **Solution:**
@@ -247,7 +247,7 @@ ATPValidationError: Invalid DID format
 
 **Diagnostic:**
 ```javascript
-import { DIDUtils } from '@atp/sdk';
+import { DIDUtils } from 'atp-sdk';
 
 function validateDID(did) {
   const parsed = DIDUtils.parseDID(did);
@@ -289,7 +289,7 @@ ATPAuthenticationError: Invalid signature
 
 **Diagnostic:**
 ```javascript
-import { CryptoUtils } from '@atp/sdk';
+import { CryptoUtils } from 'atp-sdk';
 
 async function testKeyPair(publicKey, privateKey) {
   try {
@@ -351,7 +351,7 @@ ATPAuthenticationError: Token expired
 
 **Diagnostic:**
 ```javascript
-import { JWTUtils } from '@atp/sdk';
+import { JWTUtils } from 'atp-sdk';
 
 function debugToken(token) {
   try {
@@ -813,7 +813,7 @@ console.log('System Info:', {
   nodeVersion: process.version,
   platform: process.platform,
   arch: process.arch,
-  atpSdkVersion: require('@atp/sdk/package.json').version
+  atpSdkVersion: require('atp-sdk/package.json').version
 });
 
 // Configuration (sanitized)

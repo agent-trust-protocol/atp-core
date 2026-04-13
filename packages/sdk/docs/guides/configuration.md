@@ -19,7 +19,7 @@ This guide covers advanced configuration options for the ATP™ SDK.
 For local development, use the `createQuickConfig` helper:
 
 ```javascript
-import { createQuickConfig } from '@atp/sdk';
+import { createQuickConfig } from 'atp-sdk';
 
 const config = createQuickConfig('http://localhost', {
   timeout: 30000,
@@ -108,7 +108,7 @@ ATP_TLS_VERIFY=true
 ### Loading from Environment
 
 ```javascript
-import { createConfigFromEnv } from '@atp/sdk';
+import { createConfigFromEnv } from 'atp-sdk';
 
 // Loads configuration from environment variables
 const config = createConfigFromEnv();
@@ -507,7 +507,7 @@ export const productionConfig = {
 Validate configuration before using:
 
 ```javascript
-import { validateConfig } from '@atp/sdk';
+import { validateConfig } from 'atp-sdk';
 
 const config = loadConfiguration();
 

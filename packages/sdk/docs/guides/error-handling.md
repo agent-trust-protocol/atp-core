@@ -27,7 +27,7 @@ import {
   ATPAuthorizationError,  // Permission/access errors
   ATPValidationError,     // Input validation errors
   ATPServiceError        // Service-specific errors
-} from '@atp/sdk';
+} from 'atp-sdk';
 ```
 
 ### Error Properties

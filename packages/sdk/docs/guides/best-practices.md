@@ -570,7 +570,7 @@ const config = {
 **DO:**
 ```javascript
 // Mock ATP client for unit tests
-jest.mock('@atp/sdk');
+jest.mock('atp-sdk');
 
 describe('UserService', () => {
   let userService, mockClient;
@@ -887,7 +887,7 @@ function someFunction() {
   "name": "my-atp-app",
   "version": "1.2.3",
   "dependencies": {
-    "@atp/sdk": "^1.0.0" // Pin major version
+    "atp-sdk": "^1.0.0" // Pin major version
   }
 }
 
@@ -906,7 +906,7 @@ function someFunction() {
 // Don't use loose version constraints
 {
   "dependencies": {
-    "@atp/sdk": "*" // ❌ Too loose
+    "atp-sdk": "*" // ❌ Too loose
   }
 }
 
