@@ -1,6 +1,14 @@
-# ATP Core - World's First Quantum-Safe AI Agent Protocol
+# ATP Core ⚠️ LEGACY
+
+> **⚠️ DEPRECATED:** This package is superseded by `atp-sdk`. Please use [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) for all new development.
+>
+> **Migration:** See [Migration Guide](../packages/sdk/docs/MIGRATION.md)
+
+---
 
 A minimal implementation of the Agent Trust Protocol with quantum-safe cryptography and MCP security wrapper.
+
+**Status:** ⚠️ Legacy (superseded by `atp-sdk`)
 
 ## Features
 
@@ -102,4 +110,4 @@ Edit `mcp-config.json` to add MCP tools:
 - **Audit Logging**: All MCP requests logged with metadata
 - **Rate Limiting**: Configurable per-agent limits
 
-**Total Code**: ~400 lines | **Status**: Production Ready | **Quantum-Safe**: ✅
+**Total Code**: ~400 lines | **Status**: ⚠️ Legacy (use `atp-sdk`) | **Quantum-Safe**: ✅

@@ -80,3 +80,8 @@ create-atp-agent test-bot
 ```
 
 The CLI copies `template/` into the target directory, adjusts `package.json` for TypeScript vs JavaScript, writes `.atp.json` with the selected security profile, and serves `dashboard/` for the embedded wizard.
+
+## Related
+
+- **[atp-sdk](https://www.npmjs.com/package/atp-sdk)** — runtime dependency added to generated projects
+- **[Agent Trust Protocol site](https://agenttrustprotocol.com)** — product and docs; production onboarding may use the full Next.js flow (`/onboard/agent`), while this CLI ships a **local** wizard with a mock `POST /api/agents/onboard` for quick demos
