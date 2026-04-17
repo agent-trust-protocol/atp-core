@@ -10,57 +10,9 @@
     }
   },
   "env": {
-    "NODE_ENV": {
-      "value": "production"
-    },
-    "BETTER_AUTH_SECRET": {
-      "description": "Auth secret (generate: openssl rand -base64 32) — REQUIRED"
-    },
-    "BETTER_AUTH_URL": {
-      "description": "Public auth callback URL",
-      "value": "https://your-domain.vercel.app"
-    },
-    "DATABASE_URL": {
-      "description": "PostgreSQL connection string (Better Auth sessions) — REQUIRED"
-    },
-    "RESEND_API_KEY": {
-      "description": "Resend.com email API key (for transactional emails)"
-    },
-    "NEXT_PUBLIC_ATP_IDENTITY_URL": {
-      "description": "Public identity service URL",
-      "value": "https://identity.yourdomain.com"
-    },
-    "NEXT_PUBLIC_ATP_PERMISSION_URL": {
-      "description": "Public permission service URL",
-      "value": "https://permission.yourdomain.com"
-    },
-    "NEXT_PUBLIC_ATP_AUDIT_URL": {
-      "description": "Public audit service URL",
-      "value": "https://audit.yourdomain.com"
-    },
-    "NEXT_PUBLIC_APP_URL": {
-      "description": "Public app URL",
-      "value": "https://your-domain.vercel.app"
-    },
-    "NEXT_PUBLIC_APP_DOMAIN": {
-      "description": "App domain (used for routing)",
-      "value": "https://your-domain.vercel.app"
-    },
-    "ATP_IDENTITY_URL": {
-      "description": "Private identity service URL (backend only)",
-      "value": "http://identity-service:3001"
-    },
-    "ATP_CREDENTIALS_URL": {
-      "description": "Private credentials service URL (backend only)",
-      "value": "http://credentials-service:3002"
-    },
-    "ATP_PERMISSIONS_URL": {
-      "description": "Private permissions service URL (backend only)",
-      "value": "http://permissions-service:3003"
-    },
-    "ATP_AUDIT_URL": {
-      "description": "Private audit service URL (backend only)",
-      "value": "http://audit-service:3005"
-    }
+    "NODE_ENV": "production",
+    "BETTER_AUTH_URL": "https://your-domain.vercel.app",
+    "NEXT_PUBLIC_APP_URL": "https://your-domain.vercel.app",
+    "NEXT_PUBLIC_APP_DOMAIN": "https://your-domain.vercel.app"
   }
 }
