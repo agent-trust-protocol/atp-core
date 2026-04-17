@@ -310,6 +310,30 @@ pnpm add atp-sdk
 
 ---
 
+## 🚀 Deployment
+
+### Vercel (Next.js Frontend)
+
+Deploy the ATP dashboard to Vercel with a single click:
+
+- **[Vercel Deployment Guide](./VERCEL_DEPLOYMENT.md)** - Full setup instructions (env vars, database, email, services)
+- **Auto-deploy:** Push to `main` → production | Push to `develop` → preview
+- **Quick start:** 
+  1. Connect this repo to [vercel.com/new](https://vercel.com/new)
+  2. Set environment variables from [.env.example](.env.example)
+  3. Click "Deploy"
+
+### Backend Services (Railway, Docker, Kubernetes)
+
+Each service in `packages/` has its own deployment guide:
+
+- **[packages/identity-service](./packages/identity-service/README.md)** - DID + agent identity
+- **[packages/permission-service](./packages/permission-service/README.md)** - RBAC + policies
+- **[packages/audit-logger](./packages/audit-logger/README.md)** - Blockchain audit
+- Other services: See individual `packages/*/README.md`
+
+---
+
 ## 🤖 Multi-Agent Systems with OpenClaw
 
 ATP now provides first-class support for [OpenClaw](https://openclaw.ai) multi-agent frameworks via the [`@atpdevelopment/openclaw-atp`](https://www.npmjs.com/package/@atpdevelopment/openclaw-atp) package. Secure entire agent crews with quantum-safe cryptography:

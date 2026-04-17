@@ -2,5 +2,82 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "installCommand": "npm ci",
-  "regions": ["iad1"]
+  "regions": ["iad1"],
+  "functions": {
+    "src/**/*.ts": {
+      "memory": 3008,
+      "maxDuration": 60
+    }
+  },
+  "env": [
+    {
+      "key": "NODE_ENV",
+      "value": "production"
+    },
+    {
+      "key": "BETTER_AUTH_SECRET",
+      "description": "Auth secret (generate: openssl rand -base64 32) — REQUIRED",
+      "value": ""
+    },
+    {
+      "key": "BETTER_AUTH_URL",
+      "description": "Public auth callback URL",
+      "value": "https://your-domain.vercel.app"
+    },
+    {
+      "key": "DATABASE_URL",
+      "description": "PostgreSQL connection string (Better Auth sessions) — REQUIRED",
+      "value": ""
+    },
+    {
+      "key": "RESEND_API_KEY",
+      "description": "Resend.com email API key (for transactional emails)",
+      "value": ""
+    },
+    {
+      "key": "NEXT_PUBLIC_ATP_IDENTITY_URL",
+      "description": "Public identity service URL",
+      "value": "https://identity.yourdomain.com"
+    },
+    {
+      "key": "NEXT_PUBLIC_ATP_PERMISSION_URL",
+      "description": "Public permission service URL",
+      "value": "https://permission.yourdomain.com"
+    },
+    {
+      "key": "NEXT_PUBLIC_ATP_AUDIT_URL",
+      "description": "Public audit service URL",
+      "value": "https://audit.yourdomain.com"
+    },
+    {
+      "key": "NEXT_PUBLIC_APP_URL",
+      "description": "Public app URL",
+      "value": "https://your-domain.vercel.app"
+    },
+    {
+      "key": "NEXT_PUBLIC_APP_DOMAIN",
+      "description": "App domain (used for routing)",
+      "value": "https://your-domain.vercel.app"
+    },
+    {
+      "key": "ATP_IDENTITY_URL",
+      "description": "Private identity service URL (backend only)",
+      "value": "http://identity-service:3001"
+    },
+    {
+      "key": "ATP_CREDENTIALS_URL",
+      "description": "Private credentials service URL (backend only)",
+      "value": "http://credentials-service:3002"
+    },
+    {
+      "key": "ATP_PERMISSIONS_URL",
+      "description": "Private permissions service URL (backend only)",
+      "value": "http://permissions-service:3003"
+    },
+    {
+      "key": "ATP_AUDIT_URL",
+      "description": "Private audit service URL (backend only)",
+      "value": "http://audit-service:3005"
+    }
+  ]
 }
