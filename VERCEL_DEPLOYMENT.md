@@ -17,89 +17,142 @@ This guide covers deploying the ATP Core Next.js frontend to Vercel.
 
 ## Environment Variables
 
-### Required (must be set before first deployment)
+### Required (app breaks without these)
 
-| Key | Example | Notes |
-|-----|---------|-------|
-| `BETTER_AUTH_SECRET` | `<openssl rand -base64 32>` | Auth secret. Generate once, keep safe. |
-| `BETTER_AUTH_URL` | `https://myapp.vercel.app` | Public auth callback URL. Use your Vercel domain. |
-| `DATABASE_URL` | `postgresql://user:pass@host:5432/db` | PostgreSQL connection. Better Auth uses this for sessions. |
+| Key | Source | Purpose | How to set |
+|-----|--------|---------|-----------|
+| `BETTER_AUTH_SECRET` | `src/lib/auth.ts` | Auth secret for session signing | Generate: `openssl rand -base64 32` |
+| `BETTER_AUTH_URL` | `src/lib/auth.ts` | Public auth callback URL | Use your Vercel domain: `https://your-domain.vercel.app` |
+| `DATABASE_URL` | Better Auth & email | PostgreSQL connection | See "Set up PostgreSQL" section below |
 
-### Recommended (for email & API features)
+### Recommended (features won't work without these)
 
-| Key | Example | Notes |
-|-----|---------|-------|
-| `RESEND_API_KEY` | `re_xxxxxxxxxxxxx` | Resend.com API key. Free tier available. |
-| `NEXT_PUBLIC_ATP_IDENTITY_URL` | `https://identity.myapp.com` | Public identity service URL. |
-| `NEXT_PUBLIC_ATP_PERMISSION_URL` | `https://permission.myapp.com` | Public permission service URL. |
-| `NEXT_PUBLIC_ATP_AUDIT_URL` | `https://audit.myapp.com` | Public audit service URL. |
-| `NEXT_PUBLIC_APP_URL` | `https://myapp.vercel.app` | Your deployed app URL. |
-| `NEXT_PUBLIC_APP_DOMAIN` | `https://myapp.vercel.app` | Domain for routing. Usually same as above. |
+| Key | Source | Purpose | Notes |
+|-----|--------|---------|-------|
+| `EMAIL_PROVIDER` | `src/lib/email.ts` | Email transport | Options: `resend`, `sendgrid`, `smtp` |
+| `RESEND_API_KEY` | `src/lib/email.ts` | Resend.com email API | If `EMAIL_PROVIDER=resend`. Get from resend.com |
+| `SENDGRID_API_KEY` | `src/lib/email.ts` | SendGrid API key | If `EMAIL_PROVIDER=sendgrid`. Alternative to Resend. |
+| `EMAIL_FROM` | `src/lib/email.ts` | Sender email address | e.g., `noreply@yourdomain.com` |
+| `EMAIL_FROM_NAME` | `src/lib/email.ts` | Sender display name | e.g., `Agent Trust Protocol` (default: `ATP`) |
+| `ADMIN_EMAIL` | `src/lib/email.ts` | Admin notification address | Your email for alerts |
 
-### Private Backend Services (optional, for ATP service integration)
+### SMTP-only (if using SMTP email provider)
 
-Set these if you have ATP services running behind a private network or on Railway:
-
-| Key | Example |
+| Key | Purpose |
 |-----|---------|
-| `ATP_IDENTITY_URL` | `http://identity-service:3001` or Railway private URL |
-| `ATP_CREDENTIALS_URL` | `http://credentials-service:3002` or Railway private URL |
-| `ATP_PERMISSIONS_URL` | `http://permissions-service:3003` or Railway private URL |
-| `ATP_AUDIT_URL` | `http://audit-service:3005` or Railway private URL |
+| `SMTP_HOST` | SMTP server hostname |
+| `SMTP_PORT` | SMTP port (usually 587 or 465) |
+| `SMTP_USER` | SMTP username |
+| `SMTP_PASSWORD` | SMTP password |
+| `SMTP_SECURE` | `true` for TLS, `false` for unencrypted |
 
-## Setup Steps
+### Optional (connects to ATP backend services)
 
-### 1. Generate `BETTER_AUTH_SECRET`
+Public URLs (sent to browser) — set if you have Railway services:
+- `NEXT_PUBLIC_ATP_IDENTITY_URL` — DID registry service
+- `NEXT_PUBLIC_ATP_PERMISSION_URL` — RBAC service
+- `NEXT_PUBLIC_ATP_AUDIT_URL` — Audit trail service
+- `NEXT_PUBLIC_APP_URL` — Your app URL (same as `BETTER_AUTH_URL`)
 
-Run once, on your local machine:
-
-```bash
-openssl rand -base64 32
-```
-
-Copy the output and paste as `BETTER_AUTH_SECRET` in Vercel.
-
-### 2. Set up PostgreSQL database
-
-Options:
-- **Vercel Postgres** (recommended) — built-in, serverless
-  - Create a Vercel Postgres database in your Project Settings
-  - Copy the connection string as `DATABASE_URL`
-- **Railway** — fast, simple deployment
-  - Create a PostgreSQL instance at https://railway.app
-  - Copy the connection string as `DATABASE_URL`
-- **Neon** — serverless PostgreSQL
-  - Create a project at https://neon.tech
-  - Copy the connection string as `DATABASE_URL`
-
-### 3. Set up email (optional)
-
-**Resend** (recommended):
-1. Sign up at https://resend.com
-2. Create an API key at https://resend.com/api-keys
-3. Set `RESEND_API_KEY` in Vercel
-4. Verify your domain in Resend (or use `onboarding@resend.dev` for testing)
-
-**Alternatives:**
-- **SendGrid** — set `SENDGRID_API_KEY`
-- **SMTP** — configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`
-
-### 4. Connect ATP backend services (optional)
-
-If you're running ATP services (identity, permission, audit), point to them:
-
-**Public URLs** (accessible from browser):
-- `NEXT_PUBLIC_ATP_IDENTITY_URL`
-- `NEXT_PUBLIC_ATP_PERMISSION_URL`
-- `NEXT_PUBLIC_ATP_AUDIT_URL`
-
-**Private URLs** (backend only):
+Private URLs (backend only) — set if services are behind a private network:
 - `ATP_IDENTITY_URL`
 - `ATP_CREDENTIALS_URL`
 - `ATP_PERMISSIONS_URL`
 - `ATP_AUDIT_URL`
 
-See `packages/<service>/README.md` for deployment instructions.
+### Workflow engine (optional, only if running workflows in Vercel)
+
+Not typically used on Vercel (workflows run in backend services):
+- `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD`
+- `WORKFLOW_API_PORT`, `CORS_ORIGIN`, `API_KEY_REQUIRED`, `API_KEY`
+- All `SCHEDULER_*`, `EVENTS_*`, `LOG_*` vars
+
+See `src/workflow-engine/config/WorkflowConfig.ts` if needed.
+
+## Setup Steps (in order)
+
+### 1. Generate `BETTER_AUTH_SECRET`
+
+One-time, on your local machine:
+
+```bash
+openssl rand -base64 32
+```
+
+Save this value. You'll paste it as `BETTER_AUTH_SECRET` in Vercel Settings → Environment Variables.
+
+### 2. Set up PostgreSQL database
+
+**Choose one:**
+
+- **Vercel Postgres** (recommended — built-in, simplest)
+  1. In Vercel dashboard, go to your `atp-core` project
+  2. Settings → Storage → Create Database → Postgres
+  3. Copy the connection string
+  4. Set as `DATABASE_URL` in Environment Variables
+
+- **Neon** (serverless PostgreSQL, free tier)
+  1. Sign up at https://neon.tech
+  2. Create a project
+  3. Copy the connection string
+  4. Set as `DATABASE_URL` in Vercel
+
+- **Railway** (used for backend services anyway)
+  1. Create a PostgreSQL instance at https://railway.app
+  2. Copy the private connection URL
+  3. Set as `DATABASE_URL` in Vercel
+
+### 3. Set up email
+
+**Resend** (recommended — simplest, free tier):
+1. Sign up at https://resend.com
+2. Verify your domain (or use `onboarding@resend.dev` for testing)
+3. Get API key from https://resend.com/api-keys
+4. In Vercel Environment Variables, set:
+   - `EMAIL_PROVIDER`: `resend`
+   - `RESEND_API_KEY`: `re_xxxxxxxxxxxxx`
+   - `EMAIL_FROM`: `noreply@yourdomain.com`
+   - `EMAIL_FROM_NAME`: `Agent Trust Protocol`
+   - `ADMIN_EMAIL`: Your email for alerts
+
+**SendGrid** (alternative):
+1. Sign up at https://sendgrid.com
+2. Get API key from Settings
+3. In Vercel, set:
+   - `EMAIL_PROVIDER`: `sendgrid`
+   - `SENDGRID_API_KEY`: Your API key
+   - `EMAIL_FROM`, `EMAIL_FROM_NAME`, `ADMIN_EMAIL` (same as above)
+
+**SMTP** (alternative — Gmail, custom server):
+1. Get SMTP credentials from your email provider
+2. In Vercel, set:
+   - `EMAIL_PROVIDER`: `smtp`
+   - `SMTP_HOST`: e.g., `smtp.gmail.com`
+   - `SMTP_PORT`: `587` or `465`
+   - `SMTP_USER`: Your email
+   - `SMTP_PASSWORD`: App password (not your real password)
+   - `SMTP_SECURE`: `true` for TLS
+   - `EMAIL_FROM`, `EMAIL_FROM_NAME`, `ADMIN_EMAIL`
+
+### 4. Set required auth URLs
+
+In Vercel Environment Variables:
+- `BETTER_AUTH_URL`: Your Vercel domain (e.g., `https://atp-core.vercel.app` or your custom domain)
+- (optional) `NEXT_PUBLIC_APP_URL`: Same as `BETTER_AUTH_URL`
+
+### 5. (Optional) Connect ATP backend services
+
+If you have Railway services (identity, permission, audit) running, point to them:
+
+In Vercel Environment Variables:
+- `NEXT_PUBLIC_ATP_IDENTITY_URL`: e.g., `https://identity.railway.app`
+- `NEXT_PUBLIC_ATP_PERMISSION_URL`: e.g., `https://permission.railway.app`
+- `NEXT_PUBLIC_ATP_AUDIT_URL`: e.g., `https://audit.railway.app`
+
+Private backend URLs (backend only):
+- `ATP_IDENTITY_URL`, `ATP_CREDENTIALS_URL`, `ATP_PERMISSIONS_URL`, `ATP_AUDIT_URL`
+
+See `packages/<service>/README.md` for Railway deployment instructions.
 
 ## Monorepo Structure
 
