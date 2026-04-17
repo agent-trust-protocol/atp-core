@@ -41,7 +41,8 @@ const state = {
   agentName: '',
   environment: 'dev',
   profileId: 'safe-default',
-  submitting: false
+  submitting: false,
+  scaffold: null
 };
 
 const el = {
@@ -50,9 +51,18 @@ const el = {
   error: document.getElementById('error'),
   btnBack: document.getElementById('btn-back'),
   btnNext: document.getElementById('btn-next'),
+  btnStart: document.getElementById('btn-start'),
+  btnClose: document.getElementById('btn-close'),
+  welcome: document.getElementById('welcome'),
   wizard: document.getElementById('wizard'),
   done: document.getElementById('done'),
-  summary: document.getElementById('summary')
+  summary: document.getElementById('summary'),
+  runCmd: document.getElementById('run-cmd'),
+  starterBlock: document.getElementById('starter-block'),
+  snippetBlock: document.getElementById('snippet-block'),
+  starterSnippet: document.getElementById('starter-snippet'),
+  cardTitle: document.getElementById('card-title'),
+  cardSubtitle: document.getElementById('card-subtitle')
 };
 
 function filteredProfiles() {
@@ -71,7 +81,7 @@ function setError(msg) {
 }
 
 function renderProgress() {
-  const labels = ['Runtime', 'Agent', 'Profile', 'Confirm'];
+  const labels = ['Runtime', 'Agent', 'Profile', 'Review'];
   el.progress.innerHTML = labels
     .map((label, i) => {
       let cls = 'progress-step';
@@ -85,8 +95,8 @@ function renderProgress() {
 function renderStep0() {
   return `
     <div class="step">
-      <h2>Choose Runtime</h2>
-      <p class="lead">Select the agent runtime your agent will run on.</p>
+      <h2>Choose runtime</h2>
+      <p class="lead">Select the framework your agent will run on.</p>
       <div class="grid">
         ${RUNTIMES.map(
           (r) => `
@@ -102,10 +112,10 @@ function renderStep0() {
 function renderStep1() {
   return `
     <div class="step">
-      <h2>Name Your Agent</h2>
+      <h2>Name your agent</h2>
       <p class="lead">Give your agent a human-readable name.</p>
       <div class="field">
-        <label for="agent-name">Agent Name</label>
+        <label for="agent-name">Agent name</label>
         <input type="text" id="agent-name" placeholder="e.g. FinanceBot" value="${escapeAttr(state.agentName)}" autocomplete="off" />
       </div>
       <div class="field">
@@ -127,8 +137,8 @@ function renderStep2() {
   }
   return `
     <div class="step">
-      <h2>Select Security Profile</h2>
-      <p class="lead">Choose an ATP security profile.</p>
+      <h2>Select security profile</h2>
+      <p class="lead">Profiles define the tools, network, and filesystem policies for your agent.</p>
       <div class="grid">
         ${list
           .map(
@@ -148,8 +158,11 @@ function renderStep3() {
   const prof = PROFILES.find((p) => p.id === state.profileId);
   return `
     <div class="step">
-      <h2>Confirm</h2>
-      <p class="lead">Review selections before onboarding.</p>
+      <h2>Review</h2>
+      <p class="lead">
+        We'll mint a DID and quantum-safe keys for your agent on submit.
+        <span class="badge badge-success">Quantum-safe</span>
+      </p>
       <div class="grid">
         <div class="choice" style="cursor: default;">
           <strong>Runtime</strong>
@@ -184,7 +197,7 @@ function render() {
   const renderers = [renderStep0, renderStep1, renderStep2, renderStep3];
   el.stepContent.innerHTML = renderers[state.step]();
   el.btnBack.disabled = state.step === 0;
-  el.btnNext.textContent = state.step === 3 ? 'Onboard Agent' : 'Next';
+  el.btnNext.textContent = state.step === 3 ? 'Onboard agent' : 'Next';
   el.btnNext.disabled = !canNext();
   bindStepEvents();
 }
@@ -257,9 +270,31 @@ async function submit() {
   }
 }
 
+function humanizeAgentName(name) {
+  return String(name)
+    .trim()
+    .replace(/[^a-zA-Z0-9]+/g, '')
+    .replace(/^(.)/, (c) => c.toUpperCase()) || 'MyBot';
+}
+
+function starterSnippet(agentName) {
+  const displayName = humanizeAgentName(agentName || state.agentName || 'MyBot');
+  return [
+    `import { Agent } from 'atp-sdk';`,
+    ``,
+    `const agent = await Agent.quickstart('${displayName}');`,
+    `console.log('DID:', agent.getDID());`,
+    `console.log('Quantum-safe:', agent.isQuantumSafe());`
+  ].join('\n');
+}
+
 function showDone(data) {
+  el.welcome.hidden = true;
   el.wizard.hidden = true;
   el.done.hidden = false;
+  el.cardTitle.textContent = 'All set';
+  el.cardSubtitle.textContent = 'Your agent is registered with ATP.';
+
   const rows = [
     ['Agent ID', data.agentId || data.id || '—'],
     ['DID', data.did || '—'],
@@ -268,7 +303,65 @@ function showDone(data) {
     ['Environment', state.environment]
   ];
   el.summary.innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${escapeHtml(String(v))}</dd>`).join('');
+
+  if (state.scaffold && state.scaffold.scaffolded) {
+    el.runCmd.textContent = `cd ${state.scaffold.projectName}\nnpm start`;
+    el.starterBlock.hidden = false;
+    el.snippetBlock.hidden = true;
+  } else {
+    el.starterBlock.hidden = true;
+    el.snippetBlock.hidden = false;
+    el.starterSnippet.textContent = starterSnippet(data.name || state.agentName);
+  }
 }
+
+function startWizard() {
+  el.welcome.hidden = true;
+  el.wizard.hidden = false;
+  render();
+}
+
+async function loadContext() {
+  try {
+    const res = await fetch('/api/context');
+    if (!res.ok) return;
+    const data = await res.json();
+    state.scaffold = data;
+    if (data && data.scaffolded && data.projectName && !state.agentName) {
+      state.agentName = humanizeAgentName(data.projectName);
+    }
+  } catch {
+    // non-fatal: work in standalone mode
+  }
+}
+
+function bindCopyButtons() {
+  document.querySelectorAll('.btn-copy').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const targetId = btn.getAttribute('data-copy-target');
+      if (!targetId) return;
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      const text = target.textContent || '';
+      try {
+        await navigator.clipboard.writeText(text);
+        const original = btn.textContent;
+        btn.textContent = 'Copied ✓';
+        setTimeout(() => {
+          btn.textContent = original;
+        }, 1500);
+      } catch {
+        // clipboard may be blocked; leave state unchanged
+      }
+    });
+  });
+}
+
+el.btnStart.addEventListener('click', startWizard);
+
+el.btnClose.addEventListener('click', () => {
+  window.close();
+});
 
 el.btnBack.addEventListener('click', () => {
   if (state.step > 0) {
@@ -288,4 +381,5 @@ el.btnNext.addEventListener('click', () => {
   }
 });
 
-render();
+bindCopyButtons();
+loadContext();

@@ -332,3 +332,89 @@ input[type='text'] {
   margin-left: 0.35rem;
   vertical-align: middle;
 }
+
+.badge-success {
+  background: rgba(74, 222, 128, 0.15);
+  color: var(--success);
+}
+
+.welcome-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 1.5rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.welcome-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 0.9rem;
+}
+
+.welcome-list .bullet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.nav-single {
+  justify-content: flex-end;
+}
+
+.next-block {
+  margin-top: 1.25rem;
+  text-align: left;
+}
+
+.next-block h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.codeblock {
+  margin: 0 0 0.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.35);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  color: var(--text);
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.btn-copy {
+  font-size: 0.75rem;
+  padding: 0.4rem 0.75rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.actions .btn {
+  text-decoration: none;
+}

@@ -4,7 +4,8 @@
   "description": "Create Agent Trust Protocol agents",
   "type": "module",
   "bin": {
-    "create-atp-agent": "./dist/index.js"
+    "create-atp-agent": "./dist/index.js",
+    "atp-onboard-agent": "./dist/onboard.js"
   },
   "scripts": {
     "build": "tsc",

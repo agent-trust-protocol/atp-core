@@ -18,12 +18,14 @@ program
   .option('--dashboard-only', 'Only serve the embedded onboarding UI on port 3456 (no scaffold)')
   .option('--no-dashboard', 'After scaffolding, do not start the embedded onboarding UI')
   .option('--no-open', 'Do not launch the system browser for the onboarding UI')
+  .option('--skip-install', 'Skip npm install after scaffolding')
   .argument('[project-name]', 'project directory')
   .action(async function (this: Command, projectName?: string) {
     const opts = this.opts<{
       dashboardOnly?: boolean;
       noDashboard?: boolean;
       noOpen?: boolean;
+      skipInstall?: boolean;
     }>();
 
     const openBrowser =
@@ -43,6 +45,7 @@ program
         name: 'name',
         message: 'Project name:',
         default: projectName || 'my-atp-agent',
+        when: () => !projectName,
         validate: (input: string) =>
           /^[a-z0-9-_]+$/.test(input) || 'Use lowercase letters, numbers, hyphens, and underscores only'
       },
@@ -52,30 +55,19 @@ program
         message: 'Language:',
         choices: ['TypeScript', 'JavaScript'],
         default: 'TypeScript'
-      },
-      {
-        type: 'list',
-        name: 'profile',
-        message: 'Security profile:',
-        choices: [
-          { name: 'safe-default (recommended)', value: 'safe-default' },
-          { name: 'dev-mode (all tools)', value: 'dev-mode' },
-          { name: 'enterprise-locked', value: 'enterprise-locked' }
-        ],
-        default: 'safe-default'
-      },
-      {
-        type: 'confirm',
-        name: 'install',
-        message: 'Install dependencies now?',
-        default: true
       }
     ]);
 
-    const targetDir = path.resolve(process.cwd(), answers.name as string);
+    const finalName = (answers.name as string | undefined) ?? projectName ?? 'my-atp-agent';
+    if (!/^[a-z0-9-_]+$/.test(finalName)) {
+      console.log(chalk.red(`\n✗ Invalid project name: ${finalName}`));
+      process.exit(1);
+    }
+
+    const targetDir = path.resolve(process.cwd(), finalName);
 
     if (fs.existsSync(targetDir)) {
-      console.log(chalk.red(`\n✗ Directory ${answers.name} already exists`));
+      console.log(chalk.red(`\n✗ Directory ${finalName} already exists`));
       process.exit(1);
     }
 
@@ -84,7 +76,7 @@ program
 
     const pkgPath = path.join(targetDir, 'package.json');
     const pkg = (await fs.readJson(pkgPath)) as Record<string, unknown>;
-    pkg.name = answers.name;
+    pkg.name = finalName;
 
     const lang = answers.lang as string;
     if (lang === 'JavaScript') {
@@ -104,38 +96,51 @@ program
 
     await fs.writeJson(pkgPath, pkg, { spaces: 2 });
 
+    // .atp.json is written later by the dashboard onboarding step once the
+    // user picks a security profile. Placeholder lets the agent run offline.
     await fs.writeJson(
       path.join(targetDir, '.atp.json'),
       {
-        profile: answers.profile,
+        profile: 'safe-default',
+        pending: true,
         created: new Date().toISOString()
       },
       { spaces: 2 }
     );
 
-    console.log(chalk.green(`\n✓ Created ${answers.name}`));
+    console.log(chalk.green(`\n✓ Created ${finalName}`));
 
-    if (answers.install) {
+    if (!opts.skipInstall) {
       console.log(chalk.gray('\nInstalling dependencies...'));
       execSync('npm install', { cwd: targetDir, stdio: 'inherit' });
     }
 
-    console.log(chalk.blue('\n🚀 Next steps:'));
-    console.log(`  cd ${answers.name}`);
-    if (!answers.install) console.log('  npm install');
-    console.log('  npm start\n');
-
-    console.log(chalk.gray('Your agent is quantum-safe and ready.'));
-    console.log(chalk.gray(`Profile: ${answers.profile}`));
-
-    if (!opts.noDashboard) {
-      console.log(
-        openBrowser
-          ? chalk.blue('\nOpening local onboarding dashboard…')
-          : chalk.blue('\nStarting local onboarding dashboard (browser launch disabled)…')
-      );
-      await startOnboardingDashboard({ openBrowser });
+    if (opts.noDashboard) {
+      console.log(chalk.blue('\n🚀 Next steps:'));
+      console.log(`  cd ${finalName}`);
+      if (opts.skipInstall) console.log('  npm install');
+      console.log('  npm start\n');
+      console.log(chalk.gray('Tip: run `npx atp-onboard-agent` to pick a security profile later.'));
+      return;
     }
+
+    const agentFile = lang === 'JavaScript' ? 'agent.mjs' : 'agent.ts';
+    console.log(
+      openBrowser
+        ? chalk.blue('\n✨ Launching onboarding dashboard…')
+        : chalk.blue('\n✨ Starting onboarding dashboard (browser launch disabled)…')
+    );
+    console.log(chalk.gray(`Finish setup in your browser, then: cd ${finalName} && npm start\n`));
+
+    await startOnboardingDashboard({
+      openBrowser,
+      agentContext: {
+        projectName: finalName,
+        projectDir: targetDir,
+        language: lang === 'JavaScript' ? 'javascript' : 'typescript',
+        agentFile
+      }
+    });
   });
 
 program.parse();

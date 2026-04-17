@@ -49,10 +49,18 @@ function openBrowser(url: string): void {
   }
 }
 
+export interface AgentContext {
+  projectName: string;
+  projectDir: string;
+  language: 'typescript' | 'javascript';
+  agentFile: string;
+}
+
 async function handleOnboardPost(
   req: http.IncomingMessage,
   res: http.ServerResponse,
-  stateDir: string
+  stateDir: string,
+  agentContext: AgentContext | null
 ): Promise<void> {
   const chunks: Buffer[] = [];
   for await (const chunk of req) {
@@ -88,6 +96,7 @@ async function handleOnboardPost(
     runtime,
     environment,
     profileId,
+    quantumSafe: true,
     createdAt: new Date().toISOString()
   };
 
@@ -102,13 +111,58 @@ async function handleOnboardPost(
     // optional persistence
   }
 
+  // If the dashboard was launched by the scaffolder, write the chosen profile
+  // into the project's .atp.json so the generated agent picks it up on start.
+  if (agentContext) {
+    try {
+      await writeFile(
+        path.join(agentContext.projectDir, '.atp.json'),
+        JSON.stringify(
+          {
+            profile: profileId,
+            runtime,
+            environment,
+            agentId,
+            did,
+            created: payload.createdAt
+          },
+          null,
+          2
+        ),
+        'utf8'
+      );
+    } catch {
+      // non-fatal
+    }
+  }
+
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(payload));
+}
+
+function handleContextGet(
+  res: http.ServerResponse,
+  agentContext: AgentContext | null
+): void {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  if (!agentContext) {
+    res.end(JSON.stringify({ scaffolded: false }));
+    return;
+  }
+  res.end(
+    JSON.stringify({
+      scaffolded: true,
+      projectName: agentContext.projectName,
+      language: agentContext.language,
+      agentFile: agentContext.agentFile
+    })
+  );
 }
 
 export interface StartDashboardOptions {
   port?: number;
   openBrowser?: boolean;
+  agentContext?: AgentContext;
 }
 
 /**
@@ -118,6 +172,7 @@ export interface StartDashboardOptions {
 export function startOnboardingDashboard(options: StartDashboardOptions = {}): Promise<void> {
   const dashboardRoot = getDashboardRoot();
   const stateDir = path.join(process.cwd(), '.create-atp-agent');
+  const agentContext = options.agentContext ?? null;
 
   if (!existsSync(dashboardRoot)) {
     console.error(chalk.red(`Dashboard assets missing at ${dashboardRoot}`));
@@ -132,7 +187,12 @@ export function startOnboardingDashboard(options: StartDashboardOptions = {}): P
         const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
 
         if (req.method === 'POST' && url.pathname === '/api/agents/onboard') {
-          await handleOnboardPost(req, res, stateDir);
+          await handleOnboardPost(req, res, stateDir, agentContext);
+          return;
+        }
+
+        if (req.method === 'GET' && url.pathname === '/api/context') {
+          handleContextGet(res, agentContext);
           return;
         }
 
@@ -190,7 +250,14 @@ export function startOnboardingDashboard(options: StartDashboardOptions = {}): P
         const url = `http://127.0.0.1:${actualPort}/`;
 
         console.log(chalk.green(`\n✓ Onboarding dashboard: ${url}`));
-        console.log(chalk.gray('  Press Ctrl+C to stop the server.\n'));
+        if (agentContext) {
+          console.log(
+            chalk.gray(`  Next: finish setup in your browser, then run \`cd ${agentContext.projectName} && npm start\`.`)
+          );
+        } else {
+          console.log(chalk.gray('  Press Ctrl+C to stop the server.'));
+        }
+        console.log('');
 
         if (open) {
           openBrowser(url);

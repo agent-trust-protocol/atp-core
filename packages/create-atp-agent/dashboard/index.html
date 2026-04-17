@@ -13,15 +13,25 @@
           <div class="logo-wrap">
             <img src="/atp-logo.svg" width="64" height="64" alt="Agent Trust Protocol logo" />
           </div>
-          <h1>Onboard Agent with ATP</h1>
-          <p class="subtitle">
-            Register your agent with Agent Trust Protocol and select a security profile. This UI runs locally from
-            <code>create-atp-agent</code>; onboarding requests use a mock API on this same port.
+          <h1 id="card-title">Your ATP agent is ready to secure</h1>
+          <p class="subtitle" id="card-subtitle">
+            Finish setup here to register your agent and assign a security profile.
           </p>
         </header>
 
         <div class="card-body">
-          <div id="wizard">
+          <div id="welcome">
+            <ul class="welcome-list">
+              <li><span class="bullet">1</span> Pick a runtime and name your agent</li>
+              <li><span class="bullet">2</span> Choose a security profile</li>
+              <li><span class="bullet">3</span> Get a DID and quantum-safe keys</li>
+            </ul>
+            <div class="nav nav-single">
+              <button type="button" class="btn primary" id="btn-start">Start setup →</button>
+            </div>
+          </div>
+
+          <div id="wizard" hidden>
             <div class="progress" id="progress"></div>
             <div id="step-content"></div>
             <p id="error" class="error" hidden></p>
@@ -33,10 +43,30 @@
 
           <div id="done" hidden>
             <div class="success-icon" aria-hidden="true">✓</div>
-            <h2>Agent Onboarded</h2>
-            <p class="subtitle">Your agent has been registered (mock) and is ready to continue in your project.</p>
+            <h2>Agent onboarded</h2>
+            <p class="subtitle">
+              Your agent has a DID and quantum-safe keys.
+              <span class="badge badge-success" id="quantum-badge">Quantum-safe</span>
+            </p>
+
             <dl class="summary" id="summary"></dl>
-            <p class="hint">Use <code>npx create-atp-agent</code> to scaffold a project, then run <code>npm start</code> in that folder.</p>
+
+            <div class="next-block" id="starter-block">
+              <h3>Next: run your agent</h3>
+              <pre class="codeblock" id="run-cmd"></pre>
+              <button type="button" class="btn secondary btn-copy" data-copy-target="run-cmd">Copy command</button>
+            </div>
+
+            <div class="next-block" id="snippet-block" hidden>
+              <h3>Or use the SDK directly</h3>
+              <pre class="codeblock" id="starter-snippet"></pre>
+              <button type="button" class="btn secondary btn-copy" data-copy-target="starter-snippet">Copy snippet</button>
+            </div>
+
+            <div class="actions">
+              <a class="btn primary" href="https://agenttrustprotocol.com/docs" target="_blank" rel="noopener">Open docs</a>
+              <button type="button" class="btn secondary" id="btn-close">Done</button>
+            </div>
           </div>
         </div>
       </div>
