@@ -9,7 +9,9 @@ import chalk from 'chalk';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const DEFAULT_PORT = 3456;
-const MAX_PORT_TRIES = 20;
+const MAX_PORT_TRIES = 10;
+
+export type DashboardMode = 'create' | 'stamp';
 
 export function getDashboardRoot(): string {
   return path.join(__dirname, '../dashboard');
@@ -75,14 +77,17 @@ async function handleOnboardPost(
     return;
   }
 
-  const runtime = body.runtime;
   const name = body.name;
   const profileId = body.profileId;
+  const runtime = body.runtime ?? 'custom';
   const environment = body.environment ?? 'dev';
+  const capabilities = Array.isArray(body.capabilities)
+    ? (body.capabilities as string[])
+    : ['tools', 'messaging'];
 
-  if (!runtime || !name || !profileId) {
+  if (!name || !profileId) {
     res.writeHead(400, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Missing required fields: runtime, name, profileId' }));
+    res.end(JSON.stringify({ error: 'Missing required fields: name, profileId' }));
     return;
   }
 
@@ -96,6 +101,7 @@ async function handleOnboardPost(
     runtime,
     environment,
     profileId,
+    capabilities,
     quantumSafe: true,
     createdAt: new Date().toISOString()
   };
@@ -111,20 +117,18 @@ async function handleOnboardPost(
     // optional persistence
   }
 
-  // If the dashboard was launched by the scaffolder, write the chosen profile
-  // into the project's .atp.json so the generated agent picks it up on start.
+  // If the dashboard was launched by the scaffolder, write a minimal .atp.json
+  // into the project so the generated agent picks it up on start.
   if (agentContext) {
     try {
       await writeFile(
         path.join(agentContext.projectDir, '.atp.json'),
         JSON.stringify(
           {
-            profile: profileId,
-            runtime,
-            environment,
-            agentId,
             did,
-            created: payload.createdAt
+            profile: profileId,
+            quantumSafe: true,
+            capabilities
           },
           null,
           2
@@ -142,16 +146,18 @@ async function handleOnboardPost(
 
 function handleContextGet(
   res: http.ServerResponse,
-  agentContext: AgentContext | null
+  agentContext: AgentContext | null,
+  mode: DashboardMode
 ): void {
   res.writeHead(200, { 'Content-Type': 'application/json' });
   if (!agentContext) {
-    res.end(JSON.stringify({ scaffolded: false }));
+    res.end(JSON.stringify({ scaffolded: false, mode }));
     return;
   }
   res.end(
     JSON.stringify({
       scaffolded: true,
+      mode,
       projectName: agentContext.projectName,
       language: agentContext.language,
       agentFile: agentContext.agentFile
@@ -163,6 +169,8 @@ export interface StartDashboardOptions {
   port?: number;
   openBrowser?: boolean;
   agentContext?: AgentContext;
+  mode?: DashboardMode;
+  logLines?: string[];
 }
 
 /**
@@ -173,6 +181,7 @@ export function startOnboardingDashboard(options: StartDashboardOptions = {}): P
   const dashboardRoot = getDashboardRoot();
   const stateDir = path.join(process.cwd(), '.create-atp-agent');
   const agentContext = options.agentContext ?? null;
+  const mode: DashboardMode = options.mode ?? 'create';
 
   if (!existsSync(dashboardRoot)) {
     console.error(chalk.red(`Dashboard assets missing at ${dashboardRoot}`));
@@ -192,7 +201,7 @@ export function startOnboardingDashboard(options: StartDashboardOptions = {}): P
         }
 
         if (req.method === 'GET' && url.pathname === '/api/context') {
-          handleContextGet(res, agentContext);
+          handleContextGet(res, agentContext, mode);
           return;
         }
 
@@ -234,40 +243,50 @@ export function startOnboardingDashboard(options: StartDashboardOptions = {}): P
       }
     });
 
+    let announced = false;
+    const onListening = () => {
+      if (announced) return;
+      announced = true;
+
+      const address = server.address();
+      const actualPort =
+        typeof address === 'object' && address && 'port' in address ? address.port : DEFAULT_PORT;
+      const url = `http://127.0.0.1:${actualPort}`;
+
+      console.log(chalk.green('✓ Launching embedded onboarding dashboard'));
+      console.log(chalk.green(`✓ Opening ${url}`));
+
+      const lines = options.logLines ?? [
+        '✓ Dashboard ready — complete setup in your browser',
+        '✓ To skip dashboard: npm start'
+      ];
+      for (const line of lines) {
+        console.log(chalk.green(line));
+      }
+
+      if (open) {
+        openBrowser(url + '/');
+      }
+
+      server.on('close', () => resolve());
+    };
+
     const tryListen = (port: number, triesLeft: number) => {
-      server.once('error', (err: NodeJS.ErrnoException) => {
+      const onError = (err: NodeJS.ErrnoException) => {
         if (err.code === 'EADDRINUSE' && triesLeft > 0) {
           tryListen(port + 1, triesLeft - 1);
         } else {
           reject(err);
         }
-      });
-
+      };
+      server.once('error', onError);
       server.listen(port, '127.0.0.1', () => {
-        const address = server.address();
-        const actualPort =
-          typeof address === 'object' && address && 'port' in address ? address.port : port;
-        const url = `http://127.0.0.1:${actualPort}/`;
-
-        console.log(chalk.green(`\n✓ Onboarding dashboard: ${url}`));
-        if (agentContext) {
-          console.log(
-            chalk.gray(`  Next: finish setup in your browser, then run \`cd ${agentContext.projectName} && npm start\`.`)
-          );
-        } else {
-          console.log(chalk.gray('  Press Ctrl+C to stop the server.'));
-        }
-        console.log('');
-
-        if (open) {
-          openBrowser(url);
-        }
-
-        server.on('close', () => resolve());
+        server.removeListener('error', onError);
+        onListening();
       });
     };
 
-    tryListen(options.port ?? DEFAULT_PORT, MAX_PORT_TRIES);
+    tryListen(options.port ?? DEFAULT_PORT, MAX_PORT_TRIES - 1);
   });
 }
 

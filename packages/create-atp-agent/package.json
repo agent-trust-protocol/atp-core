@@ -5,7 +5,8 @@
   "type": "module",
   "bin": {
     "create-atp-agent": "./dist/index.js",
-    "atp-onboard-agent": "./dist/onboard.js"
+    "atp-onboard-agent": "./dist/onboard.js",
+    "atp-stamp-agent": "./dist/stamp.js"
   },
   "scripts": {
     "build": "tsc",
