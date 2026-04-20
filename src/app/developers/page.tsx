@@ -1047,7 +1047,11 @@ console.log('Standalone:', agent.isStandalone());`, 'basic')}
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
                       <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0 mt-0.5" />
-                      <span>367 tests passing</span>
+                      <span>
+                        <a href="https://github.com/agent-trust-protocol/atp-core/actions" target="_blank" rel="noopener noreferrer" className="hover:text-foreground hover:underline transition-colors">
+                          Test suite green on CI
+                        </a>
+                      </span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0 mt-0.5" />

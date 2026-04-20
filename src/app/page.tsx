@@ -55,24 +55,25 @@ export default function HomePage() {
             <Badge className="bg-[hsl(var(--atp-primary))]/10 dark:bg-[hsl(var(--atp-primary))]/20 text-[hsl(var(--atp-primary))] dark:text-blue-300 border-[hsl(var(--atp-primary))]/20 dark:border-blue-400/30 px-4 py-2 text-sm font-medium backdrop-blur-sm"><Globe size={14} className="mr-2" />Enterprise Ready</Badge>
             <Badge className="bg-atp-electric-cyan/10 dark:bg-atp-electric-cyan/20 text-atp-electric-cyan dark:text-cyan-200 border-atp-electric-cyan/20 dark:border-cyan-300/30 px-4 py-2 text-sm font-medium backdrop-blur-sm"><Award size={14} className="mr-2" />Production Ready</Badge>
           </div>
-          {/* CTA Buttons - Horizontal scroll on tablet/desktop when needed */}
-          <div className="w-full overflow-x-auto pb-2 animate-fade-in-up">
-            <div className="flex flex-col sm:flex-row items-center sm:justify-center gap-3 min-w-max sm:min-w-0 px-4 sm:px-0">
-              <Button asChild size="lg" className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto h-12 px-5 text-sm font-semibold whitespace-nowrap">
-                <Link href="/signup"><Zap className="h-4 w-4 mr-2" />Start Free Trial</Link>
-              </Button>
-              <Button asChild size="lg" className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto h-12 px-5 text-sm font-semibold whitespace-nowrap">
-                <Link href="/cloud"><Building className="h-4 w-4 mr-2" />Request Cloud Access</Link>
-              </Button>
-              <Button asChild size="lg" className="bg-gradient-to-r from-[hsl(var(--atp-quantum))] to-[hsl(var(--atp-primary))] text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto h-12 px-5 text-sm font-semibold whitespace-nowrap">
-                <Link href="/dashboard"><Activity className="h-4 w-4 mr-2" />Try Live Demo</Link>
+          {/* Primary CTA + secondary links */}
+          <div className="w-full animate-fade-in-up">
+            <div className="flex flex-col sm:flex-row items-center sm:justify-center gap-3 px-4 sm:px-0">
+              <Button asChild size="lg" className="bg-gradient-to-r from-[hsl(var(--atp-quantum))] to-[hsl(var(--atp-primary))] text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 w-full sm:w-auto h-12 px-6 text-base font-semibold whitespace-nowrap">
+                <Link href="/developers"><Code2 className="h-4 w-4 mr-2" />Get Started — npm install atp-sdk</Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="border-2 border-atp-electric-cyan/30 hover:bg-atp-electric-cyan/10 hover:border-atp-electric-cyan/50 hover:scale-105 transition-all duration-300 w-full sm:w-auto h-12 px-5 text-sm font-semibold whitespace-nowrap">
-                <Link href="/login"><Lock className="h-4 w-4 mr-2" />Customer Login</Link>
+                <Link href="/demos"><Activity className="h-4 w-4 mr-2" />Try Live Demos</Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="border-2 border-primary/30 hover:bg-primary/10 hover:border-primary/50 hover:scale-105 transition-all duration-300 w-full sm:w-auto h-12 px-5 text-sm font-semibold whitespace-nowrap">
-                <Link href="/developers"><Code2 className="h-4 w-4 mr-2" />For Developers</Link>
+                <a href="https://github.com/agent-trust-protocol/atp-core" target="_blank" rel="noopener noreferrer"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0-2-1.5-3-1.5-3-1.5-.3 1.15-.3 2.35 0 3.5-1.05 1.08-1 3.5-1 3.5 0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>View on GitHub</a>
               </Button>
+            </div>
+            <div className="flex items-center justify-center gap-4 mt-4 text-sm text-muted-foreground">
+              <Link href="/signup" className="hover:text-foreground transition-colors">Start free trial</Link>
+              <span>•</span>
+              <Link href="/cloud" className="hover:text-foreground transition-colors">Request cloud access</Link>
+              <span>•</span>
+              <Link href="/login" className="hover:text-foreground transition-colors">Customer login</Link>
             </div>
           </div>
 
@@ -167,12 +168,12 @@ export default function HomePage() {
                 </div>
                 <CardTitle className="font-display text-xl mb-2">Monitoring Dashboard</CardTitle>
                 <CardDescription className="text-foreground/70">
-                  Interactive monitoring UI with demo capabilities (Backend in development)
+                  Real-time metrics, trust scores, and audit streams for deployed agents
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-foreground/60 mb-4 leading-relaxed">
-                  Professional monitoring interface ready for integration. Full real-time monitoring coming soon.
+                  SDK-level metrics available today. Hosted dashboard ships with ATP 2.0 (Q2 2026).
                 </p>
                 <Button asChild variant="outline" size="sm" className="glass border-purple-500/30 hover:bg-purple-500/10">
                   <Link href="/monitoring">
@@ -270,6 +271,30 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             <QuantumSafeSignatureDemo />
             <TrustLevelManagementDemo />
+          </div>
+        </div>
+
+        {/* ATP 2.0 Roadmap Teaser */}
+        <div className="mt-12 lg:mt-16 relative overflow-hidden rounded-2xl border border-atp-electric-cyan/30 bg-gradient-to-br from-[hsl(var(--atp-surface))]/60 via-background/40 to-[hsl(var(--atp-surface))]/60 backdrop-blur-sm p-6 sm:p-10">
+          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-atp-electric-cyan/10 blur-3xl pointer-events-none" />
+          <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div className="space-y-3 max-w-2xl">
+              <Badge className="bg-atp-electric-cyan/15 text-atp-electric-cyan border-atp-electric-cyan/30 px-3 py-1 text-xs font-semibold">
+                <Sparkles size={12} className="mr-1.5" />Coming Q2 2026
+              </Badge>
+              <h2 className="font-display text-2xl sm:text-3xl font-light text-foreground">
+                ATP 2.0 — <span className="atp-gradient-text font-semibold">Enterprise Platform</span>
+              </h2>
+              <p className="text-foreground/70 leading-relaxed">
+                Hosted agent registry, visual agent inspector, managed cloud dashboards, and tiered enterprise controls. The open-source SDK stays free forever — 2.0 adds optional managed infrastructure for teams running ATP at scale.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 w-full lg:w-auto">
+              <Button asChild variant="outline" size="sm" className="border-atp-electric-cyan/40 hover:bg-atp-electric-cyan/10 whitespace-nowrap">
+                <Link href="/cloud">Get early access<ArrowRight size={14} className="ml-1" /></Link>
+              </Button>
+              <span className="text-xs text-muted-foreground text-center lg:text-right">SDK 1.x remains fully supported</span>
+            </div>
           </div>
         </div>
 
