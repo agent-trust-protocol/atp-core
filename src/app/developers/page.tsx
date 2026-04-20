@@ -50,6 +50,7 @@ import {
 } from '@/components/ui/accordion';
 import { CodePlayground } from '@/components/atp/code-playground';
 import { AnimatedCounter } from '@/components/atp/animated-counter';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   HelpCircle,
   Youtube,
@@ -645,6 +646,18 @@ console.log('Standalone:', agent.isStandalone());`, 'basic')}
 
         {/* Live Code Playground */}
         <div className="mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 className="font-display text-2xl font-semibold">Live Code Playground</h2>
+              <p className="text-sm text-muted-foreground">Run ATP snippets in-browser or fork the quickstart on Stackblitz.</p>
+            </div>
+            <Button asChild variant="outline" size="sm" className="border-atp-electric-cyan/40 hover:bg-atp-electric-cyan/10 whitespace-nowrap">
+              <a href="https://stackblitz.com/fork/github/agent-trust-protocol/atp-core/tree/main/packages/sdk/examples" target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Open in Stackblitz
+              </a>
+            </Button>
+          </div>
           <CodePlayground />
         </div>
 
@@ -666,7 +679,7 @@ console.log('Standalone:', agent.isStandalone());`, 'basic')}
                   <Star className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-foreground">
                     {communityStats.isLoading ? (
-                      <span className="animate-pulse">...</span>
+                      <Skeleton className="h-8 w-16 mx-auto" />
                     ) : (
                       <AnimatedCounter
                         value={communityStats.githubStars}
@@ -680,7 +693,7 @@ console.log('Standalone:', agent.isStandalone());`, 'basic')}
                   <Download className="h-8 w-8 text-green-400 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-foreground">
                     {communityStats.isLoading ? (
-                      <span className="animate-pulse">...</span>
+                      <Skeleton className="h-8 w-16 mx-auto" />
                     ) : (
                       <AnimatedCounter
                         value={communityStats.npmDownloads}
@@ -694,7 +707,7 @@ console.log('Standalone:', agent.isStandalone());`, 'basic')}
                   <Users className="h-8 w-8 text-blue-400 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-foreground">
                     {communityStats.isLoading ? (
-                      <span className="animate-pulse">...</span>
+                      <Skeleton className="h-8 w-16 mx-auto" />
                     ) : (
                       <AnimatedCounter
                         value={communityStats.contributors}
@@ -708,7 +721,7 @@ console.log('Standalone:', agent.isStandalone());`, 'basic')}
                   <TrendingUp className="h-8 w-8 text-purple-400 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-foreground">
                     {communityStats.isLoading ? (
-                      <span className="animate-pulse">...</span>
+                      <Skeleton className="h-8 w-16 mx-auto" />
                     ) : (
                       <>
                         +<AnimatedCounter
