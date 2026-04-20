@@ -9,6 +9,8 @@ const publicRoutes = [
   '/api/invites/validate',
   '/api/webhooks',
   '/api/auth', // Better Auth endpoints
+  '/api/npm/stats', // Community stats for developers page
+  '/api/github/stats', // Community stats for developers page
   '/auth/callback', // Magic link callback
   '/verify-email', // Email verification
   '/reset-password', // Password reset
