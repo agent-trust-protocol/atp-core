@@ -57,7 +57,7 @@ export default function DemosPage() {
 
         {/* Demo Tabs */}
         <Tabs defaultValue="signatures" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-4 h-12">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto sm:h-12 gap-1 p-1">
             <TabsTrigger value="signatures" className="flex items-center gap-2">
               <Atom className="h-4 w-4" />
               <span className="hidden sm:inline">Quantum Signatures</span>
