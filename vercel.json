@@ -7,7 +7,7 @@
   ],
   "functions": {
     "src/**/*.ts": {
-      "memory": 3008,
+      "memory": 2048,
       "maxDuration": 60
     }
   },
