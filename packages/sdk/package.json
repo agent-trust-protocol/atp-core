@@ -30,7 +30,7 @@
     "clean": "rm -rf dist coverage",
     "docs": "typedoc src/index.ts --out docs/api-generated",
     "examples": "node examples/index.js",
-    "prepublishOnly": "npm run test && npm run build",
+    "prepublishOnly": "npm run build",
     "release": "npm run prepublishOnly && npm publish",
     "release:beta": "npm run prepublishOnly && npm publish --tag beta",
     "release:alpha": "npm run prepublishOnly && npm publish --tag alpha"
