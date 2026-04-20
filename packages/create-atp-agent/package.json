@@ -1,6 +1,6 @@
 {
   "name": "create-atp-agent",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Create Agent Trust Protocol agents",
   "type": "module",
   "bin": {
@@ -13,7 +13,11 @@
     "dev": "tsc --watch",
     "prepublishOnly": "npm run build"
   },
-  "files": ["dist", "template", "dashboard"],
+  "files": [
+    "dist",
+    "template",
+    "dashboard"
+  ],
   "dependencies": {
     "chalk": "^5.3.0",
     "commander": "^12.0.0",
