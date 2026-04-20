@@ -2,5 +2,16 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "installCommand": "npm ci",
-  "regions": ["iad1"]
+  "regions": ["iad1"],
+  "functions": {
+    "src/**/*.ts": {
+      "memory": 3008,
+      "maxDuration": 60
+    }
+  },
+  "env": {
+    "BETTER_AUTH_URL": "https://your-domain.vercel.app",
+    "NEXT_PUBLIC_APP_URL": "https://your-domain.vercel.app",
+    "NEXT_PUBLIC_APP_DOMAIN": "https://your-domain.vercel.app"
+  }
 }

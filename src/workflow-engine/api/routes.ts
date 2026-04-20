@@ -25,7 +25,7 @@ const createWorkflowSchema = z.object({
   description: z.string().optional(),
   nodes: z.array(z.any()).default([]),
   edges: z.array(z.any()).default([]),
-  variables: z.record(z.any()).default({}),
+  variables: z.record(z.string(), z.any()).default({}),
   settings: z.object({
     maxExecutionTime: z.number().optional(),
     retryPolicy: z.object({
@@ -49,7 +49,7 @@ const createWorkflowSchema = z.object({
 });
 
 const executeWorkflowSchema = z.object({
-  initialData: z.record(z.any()).optional(),
+  initialData: z.record(z.string(), z.any()).optional(),
   context: z.object({
     user: z.object({
       id: z.string(),
@@ -75,7 +75,7 @@ const validate = (schema: z.ZodSchema) => (req: express.Request, res: express.Re
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         error: 'Validation error',
-        details: error.errors
+        details: error.issues
       });
     }
     next(error);

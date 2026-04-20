@@ -9,36 +9,8 @@
   <body>
     <div class="page">
       <div class="card">
-        <header class="card-header">
-          <div class="logo-wrap">
-            <img src="/atp-logo.svg" width="64" height="64" alt="Agent Trust Protocol logo" />
-          </div>
-          <h1>Onboard Agent with ATP</h1>
-          <p class="subtitle">
-            Register your agent with Agent Trust Protocol and select a security profile. This UI runs locally from
-            <code>create-atp-agent</code>; onboarding requests use a mock API on this same port.
-          </p>
-        </header>
-
-        <div class="card-body">
-          <div id="wizard">
-            <div class="progress" id="progress"></div>
-            <div id="step-content"></div>
-            <p id="error" class="error" hidden></p>
-            <div class="nav">
-              <button type="button" class="btn secondary" id="btn-back">Back</button>
-              <button type="button" class="btn primary" id="btn-next">Next</button>
-            </div>
-          </div>
-
-          <div id="done" hidden>
-            <div class="success-icon" aria-hidden="true">✓</div>
-            <h2>Agent Onboarded</h2>
-            <p class="subtitle">Your agent has been registered (mock) and is ready to continue in your project.</p>
-            <dl class="summary" id="summary"></dl>
-            <p class="hint">Use <code>npx create-atp-agent</code> to scaffold a project, then run <code>npm start</code> in that folder.</p>
-          </div>
-        </div>
+        <header class="card-header" id="app-header"></header>
+        <div class="card-body" id="app-body"></div>
       </div>
     </div>
     <script type="module" src="/onboard.js"></script>
