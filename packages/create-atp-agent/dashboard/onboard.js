@@ -569,9 +569,8 @@ function router(hash) {
     'stamp-complete': renderStampComplete,
     'stamp-success': renderStampSuccess
   };
-  const render = screens[route];
-  if (render) {
-    render();
+  if (Object.prototype.hasOwnProperty.call(screens, route)) {
+    screens[route]();
   } else {
     navigate(state.mode === 'stamp' ? 'stamp-welcome' : 'welcome');
   }

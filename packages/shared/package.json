@@ -23,7 +23,7 @@
     "ioredis": "^5.7.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.11.0",
-    "zod": "^3.25.76"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/jest": "^29.0.0",
