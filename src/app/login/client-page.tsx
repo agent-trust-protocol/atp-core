@@ -9,11 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Link from 'next/link';
 import { signInWithMagicLink } from '@/lib/auth-client';
+import { sanitizeReturnTo } from '@/lib/auth-utils';
 import { Mail, CheckCircle } from 'lucide-react';
 
 function LoginForm() {
   const searchParams = useSearchParams();
-  const returnTo = searchParams?.get('returnTo') || '/portal';
+  const returnTo = sanitizeReturnTo(searchParams?.get('returnTo'));
 
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');

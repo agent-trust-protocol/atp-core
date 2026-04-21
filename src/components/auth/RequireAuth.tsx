@@ -80,10 +80,10 @@ export function RequireAuth({ children, tier = 'startup', feature }: RequireAuth
             </Button>
             <Button
               variant="outline"
-              onClick={() => router.push('/signup')}
+              onClick={() => router.push('/request-access')}
               className="w-full"
             >
-              Create Account
+              Request Access
             </Button>
             <Button
               variant="ghost"

@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { sanitizeReturnTo } from '@/lib/auth-utils';
 
 export default function AuthCallbackPage() {
   return (
@@ -57,7 +58,7 @@ function AuthCallbackContent() {
               setStatus('success');
               setMessage('Authentication successful! Redirecting...');
 
-              const returnTo = searchParams?.get('returnTo') || '/portal';
+              const returnTo = sanitizeReturnTo(searchParams?.get('returnTo'));
               setTimeout(() => {
                 router.push(returnTo);
               }, 1000);
@@ -142,10 +143,8 @@ function AuthCallbackContent() {
               </div>
 
               <div className="space-y-2 pt-4">
-                <a href="/login" className="block">
-                  <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90">
-                    Request New Magic Link
-                  </button>
+                <a href="/login" className="block w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 text-center">
+                  Request New Magic Link
                 </a>
               </div>
             </div>
