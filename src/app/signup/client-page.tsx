@@ -164,7 +164,7 @@ function SignupForm() {
               We sent a sign-in link to <strong>{email}</strong>
             </p>
             <p className="text-sm text-muted-foreground">
-              Click the link in your email to create your account and start your 14-day trial.
+              Click the link in your email to activate your account.
             </p>
             <div className="pt-4">
               <Button
@@ -188,9 +188,9 @@ function SignupForm() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 px-4 py-8">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold">Start Your 14-Day Trial</CardTitle>
+          <CardTitle className="text-3xl font-bold">Create Your Account</CardTitle>
           <CardDescription>
-            No credit card required. Full enterprise features included.
+            You&apos;ve been invited to join Agent Trust Protocol.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -236,7 +236,7 @@ function SignupForm() {
             {/* Trial Features */}
             <Alert className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
               <AlertDescription>
-                <strong>Your 14-day trial includes:</strong>
+                <strong>Your account includes:</strong>
                 <ul className="mt-2 space-y-1 text-sm">
                   <li>✓ 100 quantum-safe AI agents</li>
                   <li>✓ 10,000 API requests</li>
@@ -249,7 +249,7 @@ function SignupForm() {
 
             <Button type="submit" className="w-full" disabled={loading || !agreeToTerms}>
               <Mail className="w-4 h-4 mr-2" />
-              {loading ? 'Sending...' : 'Start Free Trial'}
+              {loading ? 'Sending...' : 'Create Account'}
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">

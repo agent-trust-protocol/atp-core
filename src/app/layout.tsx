@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Navbar } from '@/components/ui/navbar';
-import { Footer } from '@/components/ui/footer';
+import { SiteChrome } from '@/components/ui/site-chrome';
 import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 import '@/styles/atp-theme.css';
@@ -77,11 +76,9 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased" style={fontStyles} suppressHydrationWarning>
         <ThemeProvider defaultTheme="light" storageKey="atp-ui-theme">
-          <Navbar />
-          <main className="relative">
+          <SiteChrome>
             {children}
-          </main>
-          <Footer />
+          </SiteChrome>
         </ThemeProvider>
       </body>
     </html>

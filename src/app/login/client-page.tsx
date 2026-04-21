@@ -73,8 +73,8 @@ function LoginForm() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Enterprise Portal</CardTitle>
-          <CardDescription>Sign in to manage your ATP subscription</CardDescription>
+          <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
+          <CardDescription>Enter your email to receive a secure sign-in link</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Magic Link Login */}
