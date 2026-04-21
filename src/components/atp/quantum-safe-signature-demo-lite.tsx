@@ -46,8 +46,6 @@ export function QuantumSafeSignatureDemoLite() {
   const [message, setMessage] = useState('Hello, ATP World! This message demonstrates quantum-safe cryptography.');
   const [isGenerating, setIsGenerating] = useState(false);
   const [signature, setSignature] = useState<SignatureResult | null>(null);
-  const [copied, setCopied] = useState(false);
-
   const generateSignature = async () => {
     setIsGenerating(true);
     try {
@@ -82,8 +80,6 @@ export function QuantumSafeSignatureDemoLite() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
