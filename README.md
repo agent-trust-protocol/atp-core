@@ -10,17 +10,20 @@
 
 **Build secure AI agents in 1 line of code.** The world's first quantum-safe security protocol for AI agents with zero-knowledge proof authentication.
 
+> 📌 Image guidance: any featured screenshot or illustration should include the ATP shield logo for consistent branding.
+
 ```bash
 npm install atp-sdk
 ```
 
 ```typescript
 import { Agent } from 'atp-sdk';
-await Agent.quickstart('MyBot');
+const agent = await Agent.quickstart('MyBot');
+console.log('Standalone:', agent.isStandalone());
 // ⚡ MyBot ready!
 //   DID:          did:atp:a1b2c3...
 //   Quantum-safe: yes
-//   Mode:         standalone (local)
+//   Standalone:   true
 ```
 
 **That's it!** Your AI agent now has:
@@ -32,9 +35,23 @@ await Agent.quickstart('MyBot');
 
 ---
 
+## 📦 Package Status
+
+| Package | Version | Status | Install |
+|---------|---------|--------|---------|
+| `atp-sdk` | ![npm](https://img.shields.io/npm/v/atp-sdk) | ✅ **Production** | `npm install atp-sdk` |
+| `@atpdevelopment/openclaw-atp` | ![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp) | ✅ **Production** | `npm install @atpdevelopment/openclaw-atp` |
+| `atp-core` | v1.0.0 | ⚠️ **Legacy** — Superseded by `atp-sdk` | — |
+| Services (`@atp/*`) | 0.1.0 | 🔄 **Development** | Monorepo only |
+
+**Use `atp-sdk`** — the only production-ready package for application development.  
+See [VERSIONING.md](./VERSIONING.md) for full policy.
+
+---
+
 ## 🎮 Try It Now
 
-Explore ATP features interactively in the **[ATP Playground →](https://www.agenttrustprotocol.com/playground)**
+Follow the GitHub docs and examples below to get started with ATP, or use the hosted website and dashboard when available.
 
 - 🤖 Create quantum-safe agents
 - 📊 See trust scoring in action
@@ -43,11 +60,47 @@ Explore ATP features interactively in the **[ATP Playground →](https://www.age
 - 📜 Explore the policy engine
 - 🔗 Verify blockchain audit trails
 
-No installation required — runs entirely in your browser.
-
 ---
 
 ## 🚀 Quick Start (60 Seconds)
+
+### New Developers: Start with Scaffolding
+
+**Interactive CLI (ESM-first, Node 18+):**
+
+```bash
+npx create-atp-agent my-agent
+```
+
+This creates a project folder with:
+- `"type": "module"` and `atp-sdk` in `package.json`
+- TypeScript or JavaScript starter (`agent.ts` or `agent.mjs`) with top-level `await`
+- `.atp.json` with your chosen security profile
+- After install, the CLI opens the **embedded onboarding UI** at `http://127.0.0.1:3456` (next free port if busy). Use `--no-dashboard` to skip, or `--dashboard-only` for the UI without scaffolding.
+
+Then:
+
+```bash
+cd my-agent
+npm install   # skipped if you chose install during prompts
+npm start
+```
+
+For the full **web** onboarding wizard (production ATP site), use [agenttrustprotocol.com](https://agenttrustprotocol.com) and `/onboard/agent` when logged into the app.
+
+### Experienced Developers: Add to Existing Project
+
+**If you already have a project, just install the SDK:**
+
+```bash
+npm install atp-sdk
+```
+
+Then use it:
+```typescript
+import { Agent } from 'atp-sdk';
+const agent = await Agent.quickstart('MyBot');
+```
 
 ### Zero Install (Nothing on your machine? No problem.)
 
@@ -59,48 +112,6 @@ curl -fsSL https://agenttrustprotocol.com/install.sh | bash
 **Windows (PowerShell as Admin):**
 ```powershell
 irm https://agenttrustprotocol.com/install.ps1 | iex
-```
-
-This auto-installs Node.js if needed, then scaffolds your agent with an onboarding dashboard.
-
-### Already Have Node.js? One Command:
-
-```bash
-npx create-atp-agent
-```
-
-This scaffolds your agent project **and** launches an embedded onboarding dashboard in your browser at `http://localhost:3456` - a step-by-step wizard to configure your runtime, security profile, and agent identity. No separate server needed.
-
-Your agent works immediately in **standalone mode** - no backend services, no timeouts, no configuration. Quantum-safe DID is generated locally.
-
-### Or Install the SDK Directly
-
-```bash
-npm install atp-sdk
-```
-
-```typescript
-import { Agent } from 'atp-sdk';
-await Agent.quickstart('MyBot');
-// Auto-prints DID, quantum-safe status, and connection mode
-```
-
-### Full Features (With ATP Services)
-
-When you're ready for identity registration, trust scoring, and verifiable credentials:
-
-```bash
-# Start ATP services
-docker-compose up -d
-```
-
-```typescript
-const agent = await Agent.create('MyBot');
-// Automatically connects to ATP services when available
-// isStandalone() returns false when connected
-
-await agent.send('did:atp:other', 'Hello!');
-console.log(await agent.getTrustScore('did:atp:other'));
 ```
 
 ---
@@ -228,17 +239,21 @@ console.log(decision); // "allow" | "deny" | "require_approval"
 Register agents via the embedded dashboard, CLI, or web wizard:
 
 ```bash
-# Scaffold + auto-launch onboarding dashboard in browser
-npx create-atp-agent
+# Scaffold a new ESM-first agent project (interactive CLI).
+# After scaffolding, the CLI starts a local onboarding UI at http://127.0.0.1:3456 by default.
+npx create-atp-agent my-agent
+
+# Embedded onboarding UI only (no new project folder)
+npx create-atp-agent --dashboard-only
 
 # Interactive CLI onboarding (for existing agents)
 npx atp-onboard-agent
 
-# Or visit the web wizard
-# https://your-atp-instance.com/onboard/agent
+# Or visit the web wizard on your ATP site, for example:
+# /onboard/agent
 ```
 
-`npx create-atp-agent` launches a self-contained onboarding dashboard at `http://localhost:3456` - no separate server needed. The 4-step wizard guides you through runtime selection, agent naming, security profile, and confirmation.
+`create-atp-agent` ships a small static wizard plus a mock `POST /api/agents/onboard` on the same port (for local demos). The full Next.js wizard at `/onboard/agent` is separate and can be wired to real ATP services in production.
 
 ---
 
@@ -287,10 +302,35 @@ pnpm add atp-sdk
 
 - **[Quick Start Guide](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/getting-started.md)** - 5-minute setup
 - **[API Reference](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/docs/api/README.md)** - Complete API docs
+- **[VERSIONING.md](./VERSIONING.md)** - Package status and versioning policy
 - **[OpenClaw Integration](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/openclaw-integration.md)** - Secure multi-agent workflows
 - **[Examples](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/examples)** - Working code examples
 - **[Multi-Protocol Support](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/multi-protocol.md)** - MCP, Swarm, ADK, A2A
 - **[Troubleshooting](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/troubleshooting.md)** - Common issues
+
+---
+
+## 🚀 Deployment
+
+### Vercel (Next.js Frontend)
+
+Deploy the ATP dashboard to Vercel with a single click:
+
+- **[Vercel Deployment Guide](./VERCEL_DEPLOYMENT.md)** - Full setup instructions (env vars, database, email, services)
+- **Auto-deploy:** Push to `main` → production | Push to `develop` → preview
+- **Quick start:** 
+  1. Connect this repo to [vercel.com/new](https://vercel.com/new)
+  2. Set environment variables from [.env.example](.env.example)
+  3. Click "Deploy"
+
+### Backend Services (Railway, Docker, Kubernetes)
+
+Each service in `packages/` has its own deployment guide:
+
+- **[packages/identity-service](./packages/identity-service/README.md)** - DID + agent identity
+- **[packages/permission-service](./packages/permission-service/README.md)** - RBAC + policies
+- **[packages/audit-logger](./packages/audit-logger/README.md)** - Blockchain audit
+- Other services: See individual `packages/*/README.md`
 
 ---
 

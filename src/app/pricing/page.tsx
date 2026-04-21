@@ -53,6 +53,33 @@ export default function PricingPage() {
               </Badge>
             </div>
 
+            {/* TL;DR — two clear paths */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto mb-10 animate-fade-in-up">
+              <div className="rounded-xl border border-green-200 dark:border-green-500/30 bg-green-50/60 dark:bg-green-900/20 p-5 text-left">
+                <div className="flex items-center gap-2 mb-2">
+                  <Github className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <span className="text-sm font-semibold text-green-700 dark:text-green-300">Open Source — free forever</span>
+                </div>
+                <p className="text-sm text-foreground/70 mb-3">Full SDK, all crypto, policies, audit, and profiles. Self-host, MIT-style community support.</p>
+                <Button asChild size="sm" variant="outline" className="border-green-500/40 hover:bg-green-500/10">
+                  <a href="https://github.com/agent-trust-protocol/atp-core" target="_blank" rel="noopener noreferrer">
+                    npm install atp-sdk<ArrowRight size={14} className="ml-1" />
+                  </a>
+                </Button>
+              </div>
+              <div className="rounded-xl border border-blue-200 dark:border-blue-500/30 bg-blue-50/60 dark:bg-blue-900/20 p-5 text-left">
+                <div className="flex items-center gap-2 mb-2">
+                  <Building className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">Enterprise — contact sales</span>
+                </div>
+                <p className="text-sm text-foreground/70 mb-3">Managed cloud, SSO, SOC 2, priority SLAs, and dedicated support. Custom pricing based on scale.</p>
+                <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <Link href="/contact">Talk to sales<ArrowRight size={14} className="ml-1" /></Link>
+                </Button>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mb-4">Or compare detailed tiers below.</p>
+
             {/* Billing Toggle */}
             <PricingToggle />
           </div>

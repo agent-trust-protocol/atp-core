@@ -347,10 +347,13 @@ test_crew_security(crew, atp_client)
 The fastest way to get started with an OpenClaw agent is:
 
 ```bash
-npx create-atp-agent
+npx create-atp-agent my-openclaw-agent
+cd my-openclaw-agent
+npm install
+npm start
 ```
 
-This scaffolds an agent project with an embedded onboarding dashboard at `http://localhost:3456`. Select "OpenClaw" as your runtime and "openclaw-sandbox" as your security profile. Your agent works immediately in standalone mode - no backend services required.
+The CLI scaffolds an **ESM** project (Node 18+), then opens an embedded onboarding UI at **`http://127.0.0.1:3456`** by default (`--no-dashboard` to skip). In the wizard, choose **OpenClaw** as the runtime and **`openclaw-sandbox`** (or your profile) for security. Agents run in **standalone mode** without backend services until you connect ATP services.
 
 ## 🔐 Security Best Practices
 

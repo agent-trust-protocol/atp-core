@@ -1,7 +1,7 @@
 {
   "name": "atp-core",
   "version": "1.0.0",
-  "description": "Minimal Agent Trust Protocol implementation",
+  "description": "[DEPRECATED] Superseded by atp-sdk. See README for migration guide.",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {

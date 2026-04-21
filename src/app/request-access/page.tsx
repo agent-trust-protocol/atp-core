@@ -97,9 +97,7 @@ export default function RequestAccessPage() {
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex justify-center mb-4">
-            <div className="relative w-32 h-20 atp-quantum-glow rounded-xl bg-gradient-to-br from-primary/5 to-secondary/5 dark:from-primary/15 dark:to-secondary/15 flex items-center justify-center border border-primary/20 dark:border-cyan-400/30">
-              <BrandLogo variant="lockup" size={200} className="animate-in zoom-in-50 duration-1000" alt="Agent Trust Protocol™ Official Logo" />
-            </div>
+            <BrandLogo variant="lockup" size={200} className="animate-in zoom-in-50 duration-1000" alt="Agent Trust Protocol™ Official Logo" />
           </div>
           <div className="flex items-center justify-center gap-2 mb-2">
             <Shield className="h-5 w-5 text-primary" />

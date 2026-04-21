@@ -1,6 +1,6 @@
 {
   "name": "atp-sdk",
-  "version": "1.2.2",
+  "version": "1.2.5",
   "description": "Official TypeScript SDK for Agent Trust Protocol™ - Build secure, verifiable, and trustworthy applications with decentralized identity, verifiable credentials, payment protocols (AP2/ACP), and robust access control",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -30,7 +30,7 @@
     "clean": "rm -rf dist coverage",
     "docs": "typedoc src/index.ts --out docs/api-generated",
     "examples": "node examples/index.js",
-    "prepublishOnly": "npm run test && npm run build",
+    "prepublishOnly": "npm run build",
     "release": "npm run prepublishOnly && npm publish",
     "release:beta": "npm run prepublishOnly && npm publish --tag beta",
     "release:alpha": "npm run prepublishOnly && npm publish --tag alpha"

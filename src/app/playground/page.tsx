@@ -51,7 +51,7 @@ async function executeCode(code: string, addLog: (_entry: Omit<LogEntry, 'timest
   const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
 
   // Parse which example is being run based on code content
-  if (code.includes('Agent.create') || code.includes('registerAgent')) {
+  if (code.includes('Agent.quickstart') || code.includes('Agent.create') || code.includes('registerAgent')) {
     addLog({ type: 'system', message: '⚡ Initializing ATP Runtime v1.2.0...' });
     await delay(400);
     addLog({ type: 'info', message: '🔐 Generating quantum-safe keypair (Ed25519 + Dilithium3)...' });
@@ -275,16 +275,18 @@ const EXAMPLES: Record<string, { label: string; icon: string; code: string }> = 
     icon: '🤖',
     code: `import { Agent } from 'atp-sdk';
 
-// Create a new quantum-safe AI agent
-const agent = await Agent.create('CustomerBot', {
-  capabilities: ['read', 'write', 'analyze'],
-  quantumSafe: true
-});
+// Create in standalone mode (works immediately, no setup needed)
+const agent = await Agent.quickstart('CustomerBot');
 
 // Agent is now registered with ATP
 console.log('Agent DID:', agent.getDID());
-console.log('Trust Level:', agent.getTrustLevel());
-console.log('Quantum Safe:', agent.isQuantumSafe());`
+console.log('Standalone:', agent.isStandalone()); // true
+console.log('Quantum Safe:', agent.isQuantumSafe()); // true
+
+// Connects to ATP services when available
+if (await agent.findServices()) {
+  console.log('✓ Connected to ATP services');
+}`
   },
   trust: {
     label: 'Trust Scoring',

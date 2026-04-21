@@ -16,11 +16,15 @@ ATP provides universal quantum-safe security for all AI agent protocols (MCP, Sw
 
 ### Option 1: Scaffold with Onboarding Dashboard
 
+Use the [`create-atp-agent`](https://www.npmjs.com/package/create-atp-agent) CLI (ESM-first template, Node 18+):
+
 ```bash
-npx create-atp-agent
+npx create-atp-agent my-agent
 ```
 
-Scaffolds your project and opens an embedded onboarding dashboard at `http://localhost:3456` with a step-by-step wizard for runtime, security profile, and identity configuration.
+This creates `my-agent/` with `atp-sdk`, starter agent code, and `.atp.json` for the profile you pick. After scaffolding, the CLI starts an embedded onboarding UI at **`http://127.0.0.1:3456`** (or the next free port) and opens your browser. Flags: `--no-dashboard`, `--dashboard-only`, `--no-open` (or `CREATE_ATP_AGENT_NO_OPEN=1`). The local UI uses a **mock** onboard API for demos; wire real ATP services in your own app.
+
+For the hosted marketing site and full product UI, see **[agenttrustprotocol.com](https://agenttrustprotocol.com)** (including the web wizard at `/onboard/agent` in this repo’s Next.js app).
 
 ### Option 2: Install the SDK Directly
 
@@ -30,16 +34,20 @@ npm install atp-sdk
 
 ```typescript
 import { Agent } from 'atp-sdk';
-await Agent.quickstart('MyBot');
+const agent = await Agent.quickstart('MyBot');
+console.log('Standalone:', agent.isStandalone());
 // ⚡ MyBot ready!
 //   DID:          did:atp:a1b2c3...
 //   Quantum-safe: yes
-//   Mode:         standalone (local)
+//   Standalone:   true
 ```
 
 One line. Auto-prints DID, quantum-safe status, and connection mode. Need the agent reference? Use `const agent = await Agent.quickstart('MyBot')`. Need silent creation for library use? Use `Agent.create('MyBot')` instead.
 
 **That's it!** Your agent now has:
+
+> 📌 Image guidance: any screenshots, badges, or marketing assets should feature the ATP shield logo for consistent branding.
+
 - ✅ Quantum-safe cryptography (hybrid Ed25519 + ML-DSA)
 - ✅ Decentralized Identity (DID)
 - ✅ Cryptographic signatures
@@ -1093,7 +1101,8 @@ This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENS
 - [x] **v1.1.0** - Payment Protocols (AP2 & ACP) Integration
 - [x] **v1.2.0** - Zero-Knowledge Proof Authentication (Agent-to-Agent)
 - [x] **v1.2.1** - Security Profiles & Onboarding (profile-based action gating, CLI/web onboarding wizard)
-- [x] **v1.2.2** - Standalone Mode & Embedded Dashboard (offline-first agents, `npx create-atp-agent` with browser-based onboarding)
+- [x] **v1.2.2** - Standalone Mode & Embedded Dashboard (offline-first agents, `npx create-atp-agent <project>` with browser-based local onboarding UI)
+- [x] **v1.2.4** - Documentation: npm README aligned with `create-atp-agent` (ESM, flags, mock onboard UI vs [agenttrustprotocol.com](https://agenttrustprotocol.com) web wizard)
 - [ ] **v1.3.0** - WebAssembly support for browser environments
 - [ ] **v1.4.0** - GraphQL API support
 - [ ] **v2.0.0** - ATP Protocol v2 compatibility

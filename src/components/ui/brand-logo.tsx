@@ -8,6 +8,8 @@ type BrandLogoProps = {
   size?: number
   className?: string
   alt?: string
+  /** Decorative gradient plate behind the logo (off by default; matches production hero treatment). */
+  showPlate?: boolean
 }
 
 /**
@@ -19,8 +21,16 @@ type BrandLogoProps = {
  * - lockup: `/brand/atp-lockup.png` (full wordmark lockup)
  *
  * If a file is missing, this component falls back to `/atp-logo.svg`.
+ *
+ * The gradient “plate” behind large logos is opt-in via `showPlate` (default `false`).
  */
-export function BrandLogo({ variant = 'mark', size = 32, className = '', alt }: BrandLogoProps) {
+export function BrandLogo({
+  variant = 'mark',
+  size = 32,
+  className = '',
+  alt,
+  showPlate = false
+}: BrandLogoProps) {
   const [src, setSrc] = useState<string>(
     variant === 'lockup' ? '/brand/atp-lockup.png' : '/brand/atp-shield-mark.png'
   );
@@ -62,13 +72,12 @@ export function BrandLogo({ variant = 'mark', size = 32, className = '', alt }: 
     ? 'brightness-110 contrast-110 drop-shadow-2xl'
     : 'brightness-100 contrast-100 drop-shadow-lg';
 
-  // Only apply gradient background to larger logos (size > 40)
-  const hasBackground = size > 40;
+  const hasPlate = showPlate;
 
   return (
     <div className={'relative inline-flex items-center justify-center group'}>
-      {/* Modern gradient background - only for larger logos */}
-      {hasBackground && (
+      {/* Optional decorative plate (opt-in only) */}
+      {hasPlate && (
         <>
           <div className={`absolute inset-0 rounded-xl bg-gradient-to-br transition-all duration-300 ${
             isDarkMode
@@ -90,7 +99,7 @@ export function BrandLogo({ variant = 'mark', size = 32, className = '', alt }: 
         alt={effectiveAlt}
         width={size}
         height={size}
-        className={`relative z-10 object-contain transition-all duration-300 ${darkModeClasses} ${className} ${hasBackground ? 'p-1.5' : ''}`}
+        className={`relative z-10 object-contain transition-all duration-300 ${darkModeClasses} ${className} ${hasPlate ? 'p-1.5' : ''}`}
         priority
         unoptimized
         onError={() => setSrc('/atp-logo.svg')}

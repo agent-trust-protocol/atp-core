@@ -372,47 +372,38 @@ pnpm add @atp/openclaw-atp atp-sdk`}
               <Card className="glass border-0">
                 <CardHeader>
                   <CardTitle className="font-display">Basic Integration</CardTitle>
-                  <CardDescription>Register agents and secure tools in 3 steps</CardDescription>
+                  <CardDescription>Register agents and secure tools in 1 line + config</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="bg-black/60 rounded-lg p-4 font-mono text-xs overflow-x-auto">
                     <pre className="text-blue-300">
 {`import { OpenClawATPClient } from '@atp/openclaw-atp';
-import { OpenClaw } from 'openclaw';
 
-// 1. Initialize ATP client
+// 1-line setup: initialize ATP client with OpenClaw
 const atpClient = new OpenClawATPClient({
-  atpServiceUrl: 'http://localhost:3000',
   profile: 'strictDev',
-  enableMonitoring: true
+  quantumSafe: true
 });
 
-await atpClient.initialize();
-
-// 2. Register agent
-const { agent, registration } = await atpClient.registerAgent(
-  motleyAgent,
-  {
-    name: 'trader-agent',
-    capabilities: ['trading', 'analysis'],
-    trustLevel: 'high'
-  }
-);
-
-console.log('Agent DID:', registration.did);
-console.log('Trust score:', registration.trustScore);
-
-// 3. Validate crew
-const crew = new OpenClaw();
-crew.add_agent(agent);
-
-const validation = await atpClient.validateCrew(crew);
-if (!validation.isValid) {
-  throw new Error('Validation failed');
+// Register your crew agents
+const agents = crew.getAllAgents();
+for (const motleyAgent of agents) {
+  const registration = await atpClient.registerAgent(motleyAgent);
+  console.log('✅ Registered:', registration.did);
 }
 
-// Run secured workflow
-const result = await crew.run('Execute trading strategy');`}
+// Validate crew graph for security issues
+const validation = await atpClient.validateCrew(crew);
+
+// Enable tool-level security + audit logging
+await atpClient.enableToolSecurity(crew, {
+  auditLogging: true,
+  rateLimit: { maxCallsPerMinute: 100 }
+});
+
+// Execute with ATP protection
+const result = await crew.execute('Analyze market data');
+console.log('Result:', result);`}
                     </pre>
                   </div>
                 </CardContent>

@@ -147,15 +147,11 @@ export default function ExamplesPage() {
                         <h3 className="font-medium">Register Your Agent</h3>
                       </div>
                       <div className="bg-card/50 border border-border/50 rounded-lg p-4 font-mono text-xs">
-                        <div className="text-muted-foreground mb-2">{'// Register an AI agent'}</div>
-                        <div className="text-foreground">const agent = await atp.agents.create({'{'}
-                          <br />{'  '}name: 'CustomerServiceBot',
-                          <br />{'  '}description: 'Handles customer inquiries',
-                          <br />{'  '}capabilities: ['read', 'write', 'analyze']
-                          <br />{'}'})
-                        </div>
+                        <div className="text-muted-foreground mb-2">{'// Create quantum-safe agent in 1 line'}</div>
+                        <div className="text-foreground">const agent = await Agent.quickstart('CustomerServiceBot')</div>
                         <div className="text-muted-foreground mt-3 mb-2">{'// Agent is now quantum-safe!'}</div>
-                        <div className="text-foreground">console.log(`Agent ID: ${'{'}agent.id{'}'}`)</div>
+                        <div className="text-foreground">console.log(`DID: ${'{'}agent.getDID(){'}'}`)</div>
+                        <div className="text-foreground">console.log(`Standalone: ${'{'}agent.isStandalone(){'}'}`)</div>
                       </div>
                     </div>
 

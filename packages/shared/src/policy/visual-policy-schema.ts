@@ -78,7 +78,7 @@ export const VisualPolicyBaseConditionSchema = z.object({
   id: z.string().uuid(),
   type: z.string(),
   description: z.string().optional(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.string(), z.any()).optional()
 });
 
 /**
@@ -116,7 +116,7 @@ export const VisualPolicyVerifiableCredentialConditionSchema = VisualPolicyBaseC
     credentialType: z.string().optional(), // e.g., "com.atp.security.certified"
     issuer: z.string().optional(), // DID of credential issuer
     schemaId: z.string().optional(), // Credential schema identifier
-    claims: z.record(z.any()).optional(), // Specific claims to match
+    claims: z.record(z.string(), z.any()).optional(), // Specific claims to match
     expirationCheck: z.boolean().default(true) // Check if credential is expired
   })
 });
@@ -230,7 +230,7 @@ export const VisualPolicyBaseActionSchema = z.object({
   id: z.string().uuid(),
   type: VisualPolicyActionEnum,
   description: z.string().optional(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.string(), z.any()).optional()
 });
 
 /**
@@ -382,7 +382,7 @@ export const ATPVisualPolicySchema = z.object({
       trustLevel: VisualPolicyTrustLevelEnum,
       credentials: z.array(z.any()),
       tool: z.string(),
-      context: z.record(z.any()).optional()
+      context: z.record(z.string(), z.any()).optional()
     }),
     expectedAction: VisualPolicyActionEnum,
     description: z.string().optional()
@@ -393,7 +393,7 @@ export const ATPVisualPolicySchema = z.object({
     timestamp: z.string().datetime(),
     action: z.enum(['created', 'updated', 'enabled', 'disabled', 'deployed']),
     actor: z.string(), // DID of actor
-    changes: z.record(z.any()).optional(),
+    changes: z.record(z.string(), z.any()).optional(),
     reason: z.string().optional()
   })).default([])
 });

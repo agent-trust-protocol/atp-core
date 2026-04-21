@@ -114,7 +114,7 @@ export const AuditEventSchema = z.object({
   type: z.enum(['DID_CREATED', 'DID_RESOLVED', 'VC_ISSUED', 'VC_VERIFIED', 'PERMISSION_GRANTED', 'PERMISSION_REVOKED', 'RPC_INVOKED']),
   actor: z.string(),
   target: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
   timestamp: z.string(),
   signature: z.string().optional()
 });

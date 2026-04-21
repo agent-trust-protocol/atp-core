@@ -1,124 +1,129 @@
 # create-atp-agent
 
-**Bootstrap a quantum-safe AI agent in under 60 seconds** with an embedded onboarding dashboard.
+Scaffold a new [Agent Trust Protocol](https://agenttrustprotocol.com) agent with an **ESM-first** template (`"type": "module"`), including a top-level `await` quickstart that runs on Node 18+.
 
-[![npm version](https://badge.fury.io/js/create-atp-agent.svg)](https://www.npmjs.com/package/create-atp-agent)
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+The CLI is designed as a single zero-friction flow:
 
-## Zero Install (Node.js auto-detected)
+1. `npx create-atp-agent my-agent` — scaffold + install
+2. The onboarding dashboard launches automatically at `http://127.0.0.1:3456`
+3. Pick a runtime, name your agent, and select a security profile in the browser
+4. The dashboard writes the chosen profile into the project's `.atp.json`
+5. `cd my-agent && npm start`
 
-Don't have Node.js? No problem — the installer handles everything:
+Use `--no-dashboard` to skip the browser launch, or `--dashboard-only` to run the UI without scaffolding a project.
 
-**Mac / Linux:**
-```bash
-curl -fsSL https://agenttrustprotocol.com/install.sh | bash
-```
-
-**Windows (PowerShell as Admin):**
-```powershell
-irm https://agenttrustprotocol.com/install.ps1 | iex
-```
-
-**Already have Node.js?**
-```bash
-npx create-atp-agent
-```
-
-That's it. This will:
-
-1. Ask for your agent name
-2. Scaffold a ready-to-run project (`agent.ts`, `package.json`, `README.md`)
-3. Launch an **embedded onboarding dashboard** in your browser at `http://localhost:3456`
-4. Generate a quantum-safe DID locally (no backend services required)
-
-## Embedded Onboarding Dashboard
-
-After scaffolding, a local web server starts automatically and opens a step-by-step onboarding wizard in your browser:
-
-- **Step 1: Runtime** - Select your agent runtime (OpenClaw, MCP, LangChain, ADK, or custom)
-- **Step 2: Agent Name** - Pre-filled from your CLI input
-- **Step 3: Security Profile** - Choose from 4 built-in profiles (`safe-default`, `dev-mode`, `enterprise-locked`, `openclaw-sandbox`)
-- **Step 4: Confirm** - Review your configuration and complete registration
-
-The dashboard uses a dark-mode UI matching the ATP web application design. No external dependencies needed - runs entirely on Node.js built-ins.
-
-## What Gets Created
-
-```
-my-agent/
-  |-- agent.ts         <- your agent (runs offline!)
-  |-- package.json
-  |-- README.md
-```
-
-## Standalone Mode (Offline-First)
-
-The generated agent works immediately without any backend services:
-
-```typescript
-import { Agent } from 'atp-sdk';
-
-// One line — creates agent and prints status automatically
-await Agent.quickstart('MyAgent');
-// ⚡ MyAgent ready!
-//   DID:          did:atp:a1b2c3...
-//   Quantum-safe: yes
-//   Mode:         standalone (local)
-```
-
-When ATP services aren't running, `Agent.create()` automatically falls back to **standalone mode**:
-- DID is generated locally from the cryptographic keypair
-- All quantum-safe crypto works offline
-- No 30-second timeout, no crash, no errors
-
-When you're ready for full features (trust scoring, verifiable credentials, identity registration), start the ATP services with `docker-compose up -d`.
-
-## Security Profiles
-
-Each profile defines what your agent can and cannot do:
-
-| Profile | Shell | Filesystem | Network | Best For |
-| --- | --- | --- | --- | --- |
-| `safe-default` | Blocked | Read-only | Internal only | Most agents |
-| `dev-mode` | Allowed | Read + Write | All domains | Local development |
-| `enterprise-locked` | Blocked | Approved paths | Internal corp | Production |
-| `openclaw-sandbox` | Allowlist only | Sandbox paths | Internal + partners | OpenClaw agents |
-
-## CLI Commands
+## Usage
 
 ```bash
-# Scaffold a new agent (interactive)
-npx create-atp-agent
+# Full flow: scaffold + install + dashboard
+npx create-atp-agent my-agent
 
-# Alternative alias
-npx atp-init
-
-# Onboard an existing agent via CLI wizard
+# Dashboard only — pick a profile for an existing project
 npx atp-onboard-agent
+
+# Scaffold only — no dashboard, no install
+npx create-atp-agent my-agent --no-dashboard --skip-install
 ```
 
-## Requirements
+### Flags (`create-atp-agent`)
 
-- Node.js 18+
-- npm 7+
+| Flag | Purpose |
+| --- | --- |
+| `--dashboard-only` | Serve only the local onboarding UI (no scaffold). |
+| `--no-dashboard` | After scaffold, do not start the onboarding server. |
+| `--no-open` | Start the server but do not launch the system browser. |
+| `--skip-install` | Skip `npm install` after scaffolding. |
 
-## Next Steps After Setup
+Set `CREATE_ATP_AGENT_NO_OPEN=1` for the same effect as `--no-open` (useful in CI or SSH sessions).
+
+### Flags (`atp-onboard-agent`)
+
+| Flag | Purpose |
+| --- | --- |
+| `--no-open` | Start the server but do not launch the system browser. |
+| `-p, --port <port>` | Port to serve on (default `3456`). |
+
+## Flow
+
+```
+Terminal                              Browser
+────────                              ───────
+npx create-atp-agent my-agent
+  ├─ prompt: project name (if omitted)
+  ├─ prompt: language (TS/JS)
+  ├─ copy template/
+  ├─ npm install
+  └─ launch dashboard ─────────────►  Welcome → Runtime → Agent → Profile → Review
+                                      └─ POST /api/agents/onboard
+                                         └─ writes .atp.json into my-agent/
+                                      └─ Success: cd my-agent && npm start
+```
+
+The browser success screen shows the DID, quantum-safe status, and a copy-paste `cd <project> && npm start` command. For users who launched via `atp-onboard-agent` (no scaffolded project), the success screen shows an SDK starter snippet instead.
+
+## Test before production
+
+From this repo:
 
 ```bash
-cd my-agent
+cd packages/create-atp-agent
 npm install
-npm start
+npm run build
 ```
 
-Then:
-- Visit the onboarding dashboard at `http://localhost:3456` to configure your security profile
-- Run `docker-compose up -d` from the atp-core repo for full network features
-- Read the [ATP SDK docs](https://github.com/agent-trust-protocol/atp-core/tree/main/docs)
+**1. Dashboard only (smoke test, no browser)**
 
-## License
+```bash
+CREATE_ATP_AGENT_NO_OPEN=1 node dist/onboard.js
+# or equivalently
+CREATE_ATP_AGENT_NO_OPEN=1 node dist/index.js --dashboard-only
+```
 
-Apache-2.0
+In another terminal:
 
----
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:3456/
+curl -s http://127.0.0.1:3456/api/context
+curl -s -X POST http://127.0.0.1:3456/api/agents/onboard \
+  -H "Content-Type: application/json" \
+  -d '{"runtime":"mcp","name":"SmokeBot","environment":"dev","profileId":"safe-default"}'
+```
 
-**Agent Trust Protocol** - The security layer for AI agents. Built by [Sovr INC](https://agenttrustprotocol.com).
+Expect `200` for both. Stop the server with Ctrl+C.
+
+**2. End-to-end CLI (interactive)**
+
+```bash
+npm link
+cd "$(mktemp -d)"
+create-atp-agent e2e-test-agent
+```
+
+Confirm a project folder is created, dependencies install, and the browser opens to the Welcome screen. After finishing the wizard, `e2e-test-agent/.atp.json` should contain the selected profile, runtime, DID, and agent ID.
+
+**3. Published package (pre-release)**
+
+```bash
+npm pack
+npm install -g ./create-atp-agent-*.tgz
+atp-onboard-agent --no-open
+```
+
+Verify the dashboard loads and onboarding completes.
+
+## Development
+
+```bash
+cd packages/create-atp-agent
+npm install
+npm run build
+npm link
+create-atp-agent test-bot
+```
+
+The CLI copies `template/` into the target directory, adjusts `package.json` for TypeScript vs JavaScript, writes a placeholder `.atp.json`, and serves `dashboard/` for the embedded wizard. When the wizard completes, the mock `POST /api/agents/onboard` handler updates `.atp.json` in the scaffolded project with the selected profile.
+
+## Related
+
+- **[atp-sdk](https://www.npmjs.com/package/atp-sdk)** — runtime dependency added to generated projects
+- **[Agent Trust Protocol site](https://agenttrustprotocol.com)** — product and docs; production onboarding may use the full Next.js flow (`/onboard/agent`), while this CLI ships a **local** wizard with a mock `POST /api/agents/onboard` for quick demos

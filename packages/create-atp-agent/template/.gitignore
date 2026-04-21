@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.create-atp-agent/
+.env
+.env.*
+*.log
+.DS_Store

@@ -538,12 +538,12 @@ Rate limiting information is included in response metadata:
 
 **Installation:**
 ```bash
-npm install @atp/sdk
+npm install atp-sdk
 ```
 
 **Basic Usage:**
 ```typescript
-import { ATPClient } from '@atp/sdk';
+import { ATPClient } from 'atp-sdk';
 
 const client = new ATPClient({
   serverUrl: 'ws://localhost:3008',

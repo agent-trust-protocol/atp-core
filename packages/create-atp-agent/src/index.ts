@@ -1,137 +1,96 @@
 #!/usr/bin/env node
-/**
- * ATP - create-atp-agent
- * Bootstrap a quantum-safe AI agent in under 60 seconds
- *
- * Usage: npx create-atp-agent
- *        npx atp-init
- */
+import { execSync } from 'child_process';
+import chalk from 'chalk';
+import { Command } from 'commander';
+import fs from 'fs-extra';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { startOnboardingDashboard } from './serve-dashboard.js';
 
-import { mkdirSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
-import * as readline from 'readline';
-import { startDashboard } from './dashboard';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const VERSION = '1.1.0';
-const CYAN  = '\x1b[36m';
-const GREEN = '\x1b[32m';
-const YELLOW = '\x1b[33m';
-const BOLD  = '\x1b[1m';
-const DIM   = '\x1b[2m';
-const RESET = '\x1b[0m';
+const program = new Command();
 
-function banner(): void {
-  console.log(`\n${CYAN}${BOLD} ATP - Agent Trust Protocol${RESET}`);
-  console.log(` ${DIM}The world's first quantum-safe AI agent protocol${RESET}\n`);
-}
+program
+  .name('create-atp-agent')
+  .description('Create a new Agent Trust Protocol agent')
+  .option('--dashboard-only', 'Only serve the embedded onboarding UI on port 3456 (no scaffold)')
+  .option('--no-dashboard', 'After scaffolding, do not start the embedded onboarding UI')
+  .option('--no-open', 'Do not launch the system browser for the onboarding UI')
+  .option('--skip-install', 'Skip npm install after scaffolding')
+  .argument('[project-name]', 'project directory', 'my-atp-agent')
+  .action(async function (this: Command, projectName: string) {
+    const opts = this.opts<{
+      dashboardOnly?: boolean;
+      noDashboard?: boolean;
+      noOpen?: boolean;
+      skipInstall?: boolean;
+    }>();
 
-function ok(msg: string): void {
-  console.log(` ${GREEN}\u2713${RESET} ${msg}`);
-}
+    const openBrowser =
+      !opts.noOpen && process.env.CREATE_ATP_AGENT_NO_OPEN !== '1';
 
-function hint(msg: string): void {
-  console.log(` ${YELLOW}\u2192${RESET} ${msg}`);
-}
+    if (opts.dashboardOnly) {
+      await startOnboardingDashboard({ openBrowser });
+      return;
+    }
 
-async function ask(q: string, fallback = ''): Promise<string> {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-  return new Promise(resolve => {
-    rl.question(` ${q} `, ans => {
-      rl.close();
-      resolve(ans.trim() || fallback);
+    const finalName = projectName;
+    if (!/^[a-z0-9-_]+$/.test(finalName)) {
+      console.log(chalk.red(`✗ Invalid project name: ${finalName}`));
+      process.exit(1);
+    }
+
+    const targetDir = path.resolve(process.cwd(), finalName);
+
+    if (fs.existsSync(targetDir)) {
+      console.log(chalk.red(`✗ Directory ${finalName} already exists`));
+      process.exit(1);
+    }
+
+    const templateDir = path.join(__dirname, '../template');
+    await fs.copy(templateDir, targetDir);
+
+    const pkgPath = path.join(targetDir, 'package.json');
+    const pkg = (await fs.readJson(pkgPath)) as Record<string, unknown>;
+    pkg.name = finalName;
+
+    // TypeScript only — JavaScript variant removed.
+    await fs.remove(path.join(targetDir, 'agent.mjs'));
+    pkg.scripts = {
+      start: 'tsx agent.ts',
+      dev: 'tsx watch agent.ts',
+      build: 'tsc'
+    };
+
+    await fs.writeJson(pkgPath, pkg, { spaces: 2 });
+
+    console.log(chalk.green('✓ ATP Agent project scaffolded'));
+
+    if (!opts.skipInstall) {
+      execSync('npm install', { cwd: targetDir, stdio: 'ignore' });
+      console.log(chalk.green('✓ Dependencies installed'));
+    }
+
+    if (opts.noDashboard) {
+      console.log(chalk.green('✓ To skip dashboard: npm start'));
+      return;
+    }
+
+    await startOnboardingDashboard({
+      openBrowser,
+      mode: 'create',
+      agentContext: {
+        projectName: finalName,
+        projectDir: targetDir,
+        language: 'typescript',
+        agentFile: 'agent.ts'
+      },
+      logLines: [
+        '✓ Dashboard ready — complete setup in your browser',
+        '✓ To skip dashboard: npm start'
+      ]
     });
   });
-}
 
-async function main(): Promise<void> {
-  banner();
-
-  const name = await ask('? Agent name: \u203a', 'MyAgent');
-  const dir  = name.toLowerCase().replace(/\s+/g, '-');
-
-  if (existsSync(dir)) {
-    console.error(`\n Error: directory "${dir}" already exists.\n`);
-    process.exit(1);
-  }
-
-  console.log();
-  mkdirSync(dir, { recursive: true });
-
-  // package.json
-  const pkg = {
-    name: dir,
-    version: '0.1.0',
-    type: 'module',
-    scripts: {
-      start: 'tsx agent.ts',
-      dev: 'tsx --watch agent.ts'
-    },
-    dependencies: {
-      'atp-sdk': `^${VERSION}`
-    },
-    devDependencies: {
-      tsx: '^4.0.0',
-      typescript: '^5.0.0'
-    }
-  };
-  writeFileSync(join(dir, 'package.json'), JSON.stringify(pkg, null, 2) + '\n');
-
-  // agent.ts
-  const agentCode = `import { Agent } from 'atp-sdk';
-
-// One line: create a quantum-safe agent with auto-logged status
-await Agent.quickstart('${name}');
-`;
-  writeFileSync(join(dir, 'agent.ts'), agentCode);
-
-  // README.md
-  const readme = `# ${name}
-
-Quantum-safe AI agent built with [Agent Trust Protocol](https://agenttrustprotocol.com).
-
-## Start
-
-\`\`\`bash
-npm install
-npm start
-\`\`\`
-
-## Full ATP network features
-
-\`\`\`bash
-# From the atp-core repo root:
-docker-compose up -d
-\`\`\`
-
-## Docs
-
-- [Quick Start](https://github.com/agent-trust-protocol/atp-core/blob/main/QUICK_START.md)
-- [API Reference](https://github.com/agent-trust-protocol/atp-core/tree/main/docs)
-- [Examples](https://github.com/agent-trust-protocol/atp-core/tree/main/examples)
-- [Discord](https://discord.gg/agenttrustprotocol)
-`;
-  writeFileSync(join(dir, 'README.md'), readme);
-
-  ok(`Agent directory created: ${BOLD}${dir}/${RESET}`);
-  ok(`Quantum-safe keypair ready (ML-DSA + Ed25519)`);
-  ok(`DID: ${DIM}did:atp:zb2r... (generated at first run)${RESET}`);
-
-  console.log(`\n ${BOLD}Created: ${dir}/${RESET}`);
-  console.log(' \u251C\u2500\u2500 agent.ts         \u2190 your agent');
-  console.log(' \u251C\u2500\u2500 package.json');
-  console.log(' \u2514\u2500\u2500 README.md\n');
-
-  hint(`cd ${dir} && npm install && npm start`);
-  hint('Docs: https://github.com/agent-trust-protocol/atp-core/tree/main/docs\n');
-
-  // Launch the embedded onboarding dashboard and auto-open browser
-  startDashboard(name, dir);
-}
-
-main().catch(err => {
-  console.error(err.message);
-  process.exit(1);
-});
+program.parse();

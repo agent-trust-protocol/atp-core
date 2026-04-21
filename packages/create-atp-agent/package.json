@@ -1,40 +1,36 @@
 {
   "name": "create-atp-agent",
-  "version": "1.2.0",
-  "description": "Bootstrap a quantum-safe ATP agent in seconds",
-  "main": "dist/index.js",
+  "version": "1.3.0",
+  "description": "Create Agent Trust Protocol agents",
+  "type": "module",
   "bin": {
     "create-atp-agent": "./dist/index.js",
-    "atp-init": "./dist/index.js",
-    "atp-onboard-agent": "./dist/onboard.js"
+    "atp-onboard-agent": "./dist/onboard.js",
+    "atp-stamp-agent": "./dist/stamp.js"
   },
-  "files": [
-    "dist/"
-  ],
   "scripts": {
     "build": "tsc",
-    "dev": "tsx src/index.ts",
+    "dev": "tsc --watch",
     "prepublishOnly": "npm run build"
   },
-  "keywords": [
-    "atp",
-    "agent-trust-protocol",
-    "quantum-safe",
-    "ai-agent",
-    "did",
-    "scaffolder"
+  "files": [
+    "dist",
+    "template",
+    "dashboard"
   ],
-  "author": {
-    "name": "Sovr INC",
-    "url": "https://agenttrustprotocol.com"
-  },
-  "license": "Apache-2.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/agent-trust-protocol/atp-core.git",
-    "directory": "packages/create-atp-agent"
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "fs-extra": "^11.2.0",
+    "inquirer": "^9.2.0"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "@types/fs-extra": "^11.0.0",
+    "@types/inquirer": "^9.0.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
