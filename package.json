@@ -12,6 +12,7 @@
     "dev": "next dev",
     "dev:turbo": "next dev --turbo",
     "build": "next build",
+    "db:migrate-auth": "psql $DATABASE_URL -f scripts/db/better-auth-schema.sql",
     "start": "next start",
     "lint": "next lint --max-warnings 99999",
     "lint:fix": "next lint --fix --max-warnings 99999",
