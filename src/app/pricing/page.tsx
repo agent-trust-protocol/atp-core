@@ -490,8 +490,8 @@ export default function PricingPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    ATP Cloud launches Q2 2025. Join our waitlist to get early access and
-                    participate in the beta program.
+                    ATP Cloud launches Q2 2026. Request early access today to join the
+                    beta program and shape the platform.
                   </p>
                 </CardContent>
               </Card>
