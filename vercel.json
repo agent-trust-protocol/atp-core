@@ -5,12 +5,6 @@
   "regions": [
     "iad1"
   ],
-  "functions": {
-    "src/**/*.ts": {
-      "memory": 2048,
-      "maxDuration": 60
-    }
-  },
   "env": {
     "BETTER_AUTH_URL": "https://your-domain.vercel.app",
     "NEXT_PUBLIC_APP_URL": "https://your-domain.vercel.app",
