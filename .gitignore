@@ -208,9 +208,12 @@ atp-ip-protection-deploy.tar.gz
 *.tar.gz
 .npmrc
 
+# Local dev artifacts (user-specific, not part of the project)
+quicksort.js
+npm-publish.sh
+release-v*.sh
+
 # User-created agent profiles (local only)
-# These are user profiles created when testing/developing agents locally
-# They should NOT be committed to the codebase
 *-agent-bot/
 *-agent/
 # First-party CLI package name ends with -agent; keep it tracked

@@ -27,7 +27,7 @@ import { QuantumShieldIcon, TrustNetworkIcon, PolicyFlowIcon } from '@/component
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { QuantumSafeSignatureDemo } from '@/components/atp/quantum-safe-signature-demo';
+import { QuantumSafeSignatureDemoLite } from '@/components/atp/quantum-safe-signature-demo-lite';
 import { TrustLevelManagementDemo } from '@/components/atp/trust-level-management-demo';
 import { QuickAccess } from '@/components/ui/quick-access';
 
@@ -69,16 +69,16 @@ export default function HomePage() {
               </Button>
             </div>
             <div className="flex items-center justify-center gap-4 mt-4 text-sm text-muted-foreground">
-              <Link href="/signup" className="hover:text-foreground transition-colors">Start free trial</Link>
+              <Link href="/developers" className="hover:text-foreground transition-colors">Self-host for free</Link>
               <span>•</span>
-              <Link href="/cloud" className="hover:text-foreground transition-colors">Request cloud access</Link>
+              <Link href="/cloud" className="hover:text-foreground transition-colors">Cloud early access</Link>
               <span>•</span>
               <Link href="/login" className="hover:text-foreground transition-colors">Customer login</Link>
             </div>
           </div>
 
           <div className="mt-8 p-6 bg-gradient-to-r from-[hsl(var(--atp-surface))]/50 to-[hsl(var(--atp-surface))]/80 rounded-2xl border border-border/50 backdrop-blur-sm animate-fade-in-up">
-            <p className="text-base text-muted-foreground text-center">🎉 <strong className="text-foreground">100% Open Source</strong> • Apache 2.0 License • <a href="https://github.com/agent-trust-protocol/core" className="text-atp-electric-cyan hover:text-atp-electric-cyan/80 hover:underline" target="_blank" rel="noopener noreferrer">Free Forever</a> • <Link href="/developers" className="text-atp-electric-cyan hover:text-atp-electric-cyan/80 hover:underline">Developer Portal</Link> • <Link href="/integrations/openclaw" className="text-atp-electric-cyan hover:text-atp-electric-cyan/80 hover:underline">OpenClaw Integration</Link> • Enterprise Support Available</p>
+            <p className="text-base text-muted-foreground text-center"><Sparkles size={16} className="inline mr-1 text-atp-electric-cyan" /><strong className="text-foreground">100% Open Source</strong> • Apache 2.0 License • <a href="https://github.com/agent-trust-protocol/core" className="text-atp-electric-cyan hover:text-atp-electric-cyan/80 hover:underline" target="_blank" rel="noopener noreferrer">Free Forever</a> • <Link href="/developers" className="text-atp-electric-cyan hover:text-atp-electric-cyan/80 hover:underline">Developer Portal</Link> • <Link href="/integrations/openclaw" className="text-atp-electric-cyan hover:text-atp-electric-cyan/80 hover:underline">OpenClaw Integration</Link> • Enterprise Support Available</p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm">
               <a href="https://github.com/agent-trust-protocol/core" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-git-branch">
@@ -116,7 +116,10 @@ export default function HomePage() {
                     <QuantumShieldIcon size={24} gradient className="text-white animate-in zoom-in-50 duration-500" />
                   </div>
                 </div>
-                <CardTitle className="font-display text-xl mb-2">Quantum-Safe Security</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="font-display text-xl mb-2">Quantum-Safe Security</CardTitle>
+                  <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 text-[10px] px-2 py-0.5">Open Source</Badge>
+                </div>
                 <CardDescription className="text-foreground/70">
                   Ed25519 + Dilithium hybrid cryptography for post-quantum security
                 </CardDescription>
@@ -142,7 +145,10 @@ export default function HomePage() {
                     <TrustNetworkIcon size={24} gradient className="text-white animate-pulse" />
                   </div>
                 </div>
-                <CardTitle className="font-display text-xl mb-2">Trust Level Management</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="font-display text-xl mb-2">Trust Level Management</CardTitle>
+                  <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 text-[10px] px-2 py-0.5">Open Source</Badge>
+                </div>
                 <CardDescription className="text-foreground/70">
                   Dynamic trust evaluation and agent capability management
                 </CardDescription>
@@ -166,7 +172,10 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl opacity-90" />
                   <TrendingUp className="relative z-10 text-white" size={24} />
                 </div>
-                <CardTitle className="font-display text-xl mb-2">Monitoring Dashboard</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="font-display text-xl mb-2">Monitoring Dashboard</CardTitle>
+                  <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 text-[10px] px-2 py-0.5">ATP Cloud</Badge>
+                </div>
                 <CardDescription className="text-foreground/70">
                   Real-time metrics, trust scores, and audit streams for deployed agents
                 </CardDescription>
@@ -192,7 +201,10 @@ export default function HomePage() {
                     <PolicyFlowIcon size={24} gradient className="text-white" />
                   </div>
                 </div>
-                <CardTitle className="font-display text-xl mb-2">Visual Policy Editor</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="font-display text-xl mb-2">Visual Policy Editor</CardTitle>
+                  <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 text-[10px] px-2 py-0.5">Open Source</Badge>
+                </div>
                 <CardDescription className="text-foreground/70">
                   Drag-and-drop policy creation with no-code interface
                 </CardDescription>
@@ -216,7 +228,10 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl opacity-90" />
                   <Building className="relative z-10 text-white" size={24} />
                 </div>
-                <CardTitle className="font-display text-xl">Enterprise Features</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="font-display text-xl">Enterprise Features</CardTitle>
+                  <Badge className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20 text-[10px] px-2 py-0.5">Enterprise</Badge>
+                </div>
                 <CardDescription className="text-foreground/70">
                   Multi-tenant architecture with compliance and audit logging
                 </CardDescription>
@@ -240,7 +255,10 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 to-red-500 rounded-xl opacity-90" />
                   <Zap className="relative z-10 text-white icon-glow" size={24} />
                 </div>
-                <CardTitle className="font-display text-xl">High Performance</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="font-display text-xl">High Performance</CardTitle>
+                  <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 text-[10px] px-2 py-0.5">Open Source</Badge>
+                </div>
                 <CardDescription className="text-foreground/70">
                   Optimized for high-throughput AI agent interactions
                 </CardDescription>
@@ -259,17 +277,55 @@ export default function HomePage() {
             </Card>
         </div>
 
+        {/* Open Core Model Explainer */}
+        <div className="mb-12 lg:mb-16">
+          <div className="text-center mb-8">
+            <h2 className="font-display text-3xl lg:text-4xl font-light mb-4 atp-gradient-text">Open Core Model</h2>
+            <p className="text-foreground/70 max-w-2xl mx-auto leading-relaxed">
+              The full SDK is Apache 2.0 — free forever. Cloud adds managed infrastructure when you need it.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            <div className="rounded-xl border border-green-200 dark:border-green-500/30 bg-green-50/60 dark:bg-green-900/10 p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                <span className="text-lg font-semibold text-green-700 dark:text-green-300">Open Source Core</span>
+              </div>
+              <ul className="space-y-2 text-sm text-foreground/70 mb-4">
+                <li className="flex items-start gap-2"><CheckCircle size={14} className="text-green-500 mt-0.5 shrink-0" />Full SDK — all crypto, policies, profiles</li>
+                <li className="flex items-start gap-2"><CheckCircle size={14} className="text-green-500 mt-0.5 shrink-0" />Quantum-safe DID identity</li>
+                <li className="flex items-start gap-2"><CheckCircle size={14} className="text-green-500 mt-0.5 shrink-0" />Trust scoring and audit logger</li>
+                <li className="flex items-start gap-2"><CheckCircle size={14} className="text-green-500 mt-0.5 shrink-0" />Self-host, no usage limits</li>
+              </ul>
+              <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 text-xs">Apache 2.0 — Free Forever</Badge>
+            </div>
+            <div className="rounded-xl border border-blue-200 dark:border-blue-500/30 bg-blue-50/60 dark:bg-blue-900/10 p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Building className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <span className="text-lg font-semibold text-blue-700 dark:text-blue-300">ATP Cloud</span>
+              </div>
+              <ul className="space-y-2 text-sm text-foreground/70 mb-4">
+                <li className="flex items-start gap-2"><CheckCircle size={14} className="text-blue-500 mt-0.5 shrink-0" />Managed agent registry and dashboards</li>
+                <li className="flex items-start gap-2"><CheckCircle size={14} className="text-blue-500 mt-0.5 shrink-0" />99.9% uptime SLA</li>
+                <li className="flex items-start gap-2"><CheckCircle size={14} className="text-blue-500 mt-0.5 shrink-0" />SSO, SOC 2 compliance reports</li>
+                <li className="flex items-start gap-2"><CheckCircle size={14} className="text-blue-500 mt-0.5 shrink-0" />24/7 dedicated support</li>
+              </ul>
+              <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 text-xs">Coming Q2 2026</Badge>
+            </div>
+          </div>
+        </div>
+
         {/* Demo Section */}
         <div className="space-y-8">
           <div className="text-center mb-8">
             <h2 className="font-display text-3xl lg:text-4xl font-light mb-4 atp-gradient-text">Interactive Demos</h2>
             <p className="text-foreground/70 max-w-2xl mx-auto leading-relaxed">
-              Experience ATP's quantum-safe capabilities with these interactive demonstrations
+              Experience ATP's quantum-safe capabilities — no login required
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-            <QuantumSafeSignatureDemo />
+            <QuantumSafeSignatureDemoLite />
             <TrustLevelManagementDemo />
           </div>
         </div>
@@ -292,6 +348,9 @@ export default function HomePage() {
             <div className="flex flex-col gap-2 w-full lg:w-auto">
               <Button asChild variant="outline" size="sm" className="border-atp-electric-cyan/40 hover:bg-atp-electric-cyan/10 whitespace-nowrap">
                 <Link href="/cloud">Get early access<ArrowRight size={14} className="ml-1" /></Link>
+              </Button>
+              <Button asChild variant="outline" size="sm" className="border-foreground/20 hover:bg-foreground/5 whitespace-nowrap">
+                <a href="/whitepaper/atp-whitepaper.pdf" target="_blank" rel="noopener noreferrer"><FileText size={14} className="mr-1" />Read the Whitepaper</a>
               </Button>
               <span className="text-xs text-muted-foreground text-center lg:text-right">SDK 1.x remains fully supported</span>
             </div>
