@@ -300,6 +300,7 @@ pnpm add atp-sdk
 
 ## 📖 Documentation
 
+- **[📄 White Paper v2.0](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/WHITEPAPER-v2.0.md)** — ATP architecture, trust model, compliance, and roadmap
 - **[Quick Start Guide](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/getting-started.md)** - 5-minute setup
 - **[API Reference](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/docs/api/README.md)** - Complete API docs
 - **[VERSIONING.md](./VERSIONING.md)** - Package status and versioning policy
@@ -417,4 +418,4 @@ Found a security issue? Email [llewis@agenttrustprotocol.com](mailto:llewis@agen
 
 Agent Trust Protocol™ — The original agent trust protocol, securing AI agents since March 2025. Protecting AI agents from today's threats and tomorrow's quantum computers.
 
-[Website](https://agenttrustprotocol.com) • [Documentation](https://agenttrustprotocol.com/docs) • [GitHub](https://github.com/agent-trust-protocol/atp-core)
+[Website](https://agenttrustprotocol.com) • [Documentation](https://agenttrustprotocol.com/docs) • [GitHub](https://github.com/agent-trust-protocol/atp-core) • [White Paper](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/WHITEPAPER-v2.0.md)
