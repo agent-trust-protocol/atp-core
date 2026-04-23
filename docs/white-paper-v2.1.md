@@ -355,9 +355,9 @@ const agent = await Agent.quickstart('MyBot');
 
 ---
 
-## About Sovr INC
+## About Sovr Inc
 
-Sovr INC is the company behind Agent Trust Protocol™. Sovr builds open-source infrastructure for the AI agent ecosystem, focused on security, trust, and compliance. ATP is Sovr's flagship open-source project, first released in **March 2025** and now in active production use.
+Sovr Inc is the company behind Agent Trust Protocol™. Sovr builds open-source infrastructure for the AI agent ecosystem, focused on security, trust, and compliance. ATP is Sovr's flagship open-source project, first released in **March 2025** and now in active production use.
 
 **Agent Trust Protocol™ is a trademark of Sovr INC. All rights reserved.**
 
