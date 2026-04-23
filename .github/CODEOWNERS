@@ -1,0 +1,21 @@
+# CODEOWNERS — Agent Trust Protocol™
+# Requires review from @InnovationLarry before any changes can be merged
+# into main for the paths listed below.
+#
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repo
+*                           @InnovationLarry
+
+# Whitepaper and all docs — Larry must approve any change
+docs/                        @InnovationLarry
+docs/white-paper-v2.1.pdf   @InnovationLarry
+docs/white-paper-v2.1.md    @InnovationLarry
+
+# README and core config
+README.md                   @InnovationLarry
+VERSIONING.md               @InnovationLarry
+LICENSE                     @InnovationLarry
+
+# GitHub Actions and workflows
+.github/                     @InnovationLarry
