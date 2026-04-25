@@ -624,7 +624,7 @@ export function EnterpriseDashboard() {
             <CardContent>
               <div className="text-center py-8 text-muted-foreground">
                 <BarChart3 className="h-12 w-12 mx-auto mb-4" />
-                <p>Advanced analytics dashboard coming soon...</p>
+                <p>Select an agent and time range above to view analytics.</p>
               </div>
             </CardContent>
           </Card>
