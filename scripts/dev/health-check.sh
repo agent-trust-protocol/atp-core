@@ -38,7 +38,7 @@ chk "No mock-*.js in root"             "ls mock-*.js 2>/dev/null"
 chk "No quantum-safe-*.js in root"     "ls quantum-safe-*.js 2>/dev/null"
 chk "No debug-*.js in root"            "ls debug-*.js 2>/dev/null"
 chk "No deploy scripts in root"        "ls deploy*.sh public-launch.sh push-to-github*.sh 2>/dev/null"
-chk "test/mocks/ directory exists"     "ls -d test/mocks/ 2>/dev/null" false
+chk "scripts/tests/legacy/mocks/ exists" "ls -d scripts/tests/legacy/mocks/ 2>/dev/null" false
 chk "src/quantum/ directory exists"    "ls -d src/quantum/ 2>/dev/null" false
 chk "scripts/deploy/ exists"           "ls -d scripts/deploy/ 2>/dev/null" false
 
