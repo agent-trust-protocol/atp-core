@@ -188,8 +188,8 @@ export default function EnterprisePage() {
                   Immutable audit logs
                 </li>
                 <li className="flex items-center gap-2">
-                  <Clock size={14} className="text-blue-500 flex-shrink-0" />
-                  Compliance reporting tools (Coming Soon)
+                  <CheckCircle size={14} className="text-green-500 flex-shrink-0" />
+                  Compliance reporting and audit exports
                 </li>
               </ul>
             </CardContent>

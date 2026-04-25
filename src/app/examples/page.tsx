@@ -770,7 +770,7 @@ export default function ExamplesPage() {
                     <Button asChild size="sm" className="flex-1" disabled>
                       <span>
                         <Code2 size={14} className="mr-2" />
-                        Coming Soon
+                        Planned
                       </span>
                     </Button>
                     <Button asChild variant="outline" size="sm" className="flex-1">
