@@ -73,7 +73,7 @@ export function RequireAuth({ children, tier = 'startup', feature }: RequireAuth
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <Button
-              onClick={() => router.push(`/login?returnTo=${encodeURIComponent(window.location.pathname)}&feature=${feature || 'premium'}&tier=${tier}`)}
+              onClick={() => router.push(`/login?returnTo=${encodeURIComponent(window.location.pathname)}&feature=${feature ?? 'premium'}&tier=${tier}`)}
               className="w-full"
             >
               Sign In
