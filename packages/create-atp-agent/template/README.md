@@ -5,9 +5,8 @@ Scaffolded with [create-atp-agent](https://www.npmjs.com/package/create-atp-agen
 ## Quick start
 
 ```bash
-npx create-atp-agent my-agent
+npx create-atp-agent my-agent   # scaffolds + runs npm install automatically
 cd my-agent
-npm install
 npm start
 ```
 
