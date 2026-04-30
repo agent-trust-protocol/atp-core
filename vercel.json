@@ -1,0 +1,5 @@
+{
+  "installCommand": "echo 'No Vercel deployment from atp-core — website lives at agent-trust-protocol/atp-website'",
+  "buildCommand": "echo 'No build'",
+  "outputDirectory": "."
+}
