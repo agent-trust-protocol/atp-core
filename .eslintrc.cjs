@@ -2,12 +2,11 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 2020,
-    sourceType: 'module',
-    project: './tsconfig.json'
+    sourceType: 'module'
   },
   extends: [
     'eslint:recommended',
-    'next/core-web-vitals'
+    'plugin:@typescript-eslint/recommended'
   ],
   plugins: ['@typescript-eslint'],
   root: true,
@@ -17,43 +16,29 @@ module.exports = {
     jest: true
   },
   rules: {
-    // TypeScript specific rules
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-non-null-assertion': 'warn',
-    '@typescript-eslint/prefer-nullish-coalescing': 'warn',
-    '@typescript-eslint/prefer-optional-chain': 'warn',
-    
-    // General rules
-    'no-undef': 'off', // TypeScript handles this better
+    '@typescript-eslint/no-require-imports': 'off',
+
+    'no-undef': 'off',
     'no-console': 'off',
     'no-debugger': 'error',
     'prefer-const': 'error',
     'no-var': 'error',
-    'object-shorthand': 'error',
-    'prefer-template': 'error',
-    'prefer-destructuring': ['warn', { object: true, array: false }],
-    
-    // Disable base no-unused-vars in favor of @typescript-eslint version
     'no-unused-vars': 'off',
-    // React rules
-    'react/no-unescaped-entities': 'off',
-    'react/jsx-no-comment-textnodes': 'warn',
     'no-case-declarations': 'warn',
 
-    // Security rules
     'no-eval': 'error',
     'no-implied-eval': 'error',
     'no-new-func': 'error',
     'no-script-url': 'error',
-    
-    // Style rules
+
     'comma-dangle': ['error', 'never'],
     'quotes': ['error', 'single', { avoidEscape: true, allowTemplateLiterals: true }],
     'semi': ['error', 'always'],
-    // Disable indent rule - causes stack overflow on complex TSX files
     'indent': 'off',
     'max-len': 'off',
     'no-trailing-spaces': 'error',
@@ -61,16 +46,10 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['*.test.ts', '*.spec.ts'],
+      files: ['*.test.ts', '*.spec.ts', '**/__tests__/**/*.ts'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off'
-      }
-    },
-    {
-      files: ['packages/*/src/**/*.ts'],
-      parserOptions: {
-        project: ['packages/*/tsconfig.json']
       }
     }
   ],
