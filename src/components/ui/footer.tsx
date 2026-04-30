@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { Separator } from './separator';
 import { Badge } from './badge';
-import Image from 'next/image';
 import { BrandLogo } from '@/components/ui/brand-logo';
 
 export function Footer() {

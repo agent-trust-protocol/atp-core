@@ -11,10 +11,7 @@ import {
   CheckCircle,
   Globe,
   Lock,
-  Building,
-  Mail,
-  Phone,
-  User
+  Building
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,7 +25,7 @@ interface CloudAccessGateProps {
   tier?: string
 }
 
-export function CloudAccessGate({ feature = 'cloud-platform', tier = 'startup' }: CloudAccessGateProps) {
+export function CloudAccessGate({ feature: _feature = 'cloud-platform', tier: _tier = 'startup' }: CloudAccessGateProps) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -58,7 +55,7 @@ export function CloudAccessGate({ feature = 'cloud-platform', tier = 'startup' }
         setIsSubmitted(true);
       } else {
         const data = await response.json();
-        setError(data.error || 'Failed to submit request. Please try again.');
+        setError(data.error ?? 'Failed to submit request. Please try again.');
       }
     } catch (err) {
       console.error('Cloud access request error:', err);
