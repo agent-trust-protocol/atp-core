@@ -6,13 +6,13 @@
  */
 
 // Export all schema types and validators
-export * from './visual-policy-schema.js';
+export * from './visual-policy-schema';
 
 // Export policy utilities
-export * from './policy-utils.js';
+export * from './policy-utils';
 
 // Export policy evaluation engine
-export * from './policy-evaluator.js';
+export * from './policy-evaluator';
 
 // Export policy storage service
-export * from './visual-policy-storage.js';
+export * from './visual-policy-storage';

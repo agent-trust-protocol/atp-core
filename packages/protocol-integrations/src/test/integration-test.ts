@@ -420,7 +420,7 @@ export class ProtocolIntegrationTest {
 }
 
 // Run tests if this file is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (require.main === module) {
   const testSuite = new ProtocolIntegrationTest();
   testSuite.runAllTests().then(results => {
     const success = results.summary.failed === 0;

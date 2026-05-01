@@ -3,8 +3,8 @@
  * Enterprise-grade clustering with load balancing, failover, and service discovery
  */
 
-export {
-  ClusterManager,
+export { ClusterManager } from './cluster-manager';
+export type {
   NodeRole,
   NodeStatus,
   ClusterTopology,
@@ -24,8 +24,8 @@ export {
   ClusterMetrics
 } from './cluster-manager';
 
-export {
-  ServiceDiscoveryManager,
+export { ServiceDiscoveryManager } from './service-discovery';
+export type {
   ServiceInstance,
   ServiceHealth,
   ServiceHealthCheck,

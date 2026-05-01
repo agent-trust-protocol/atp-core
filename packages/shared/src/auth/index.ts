@@ -3,8 +3,8 @@
  * Complete enterprise-grade security suite for ATP
  */
 
-export {
-  EnterpriseAuthenticationService,
+export { EnterpriseAuthenticationService } from './enterprise-sso';
+export type {
   SAMLConfiguration,
   SAMLNameIdFormat,
   SAMLAttributeMapping,
@@ -25,8 +25,8 @@ export {
   EnterpriseAuthProvider
 } from './enterprise-sso';
 
-export {
-  EnterpriseRBACService,
+export { EnterpriseRBACService } from './enterprise-rbac';
+export type {
   Role,
   Permission,
   PermissionCondition,
@@ -41,8 +41,8 @@ export {
   ResourceHierarchy
 } from './enterprise-rbac';
 
-export {
-  EnterpriseAuthMiddleware,
+export { EnterpriseAuthMiddleware } from './enterprise-middleware';
+export type {
   AuthenticatedRequest,
   MiddlewareConfig,
   AuthorizationOptions

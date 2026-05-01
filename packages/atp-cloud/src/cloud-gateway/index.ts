@@ -256,7 +256,7 @@ export class CloudGateway {
 }
 
 // Start the service if this file is run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (require.main === module) {
   const gateway = new CloudGateway();
   gateway.start(parseInt(process.env.PORT || '3010'));
 }

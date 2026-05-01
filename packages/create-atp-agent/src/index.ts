@@ -4,10 +4,7 @@ import chalk from 'chalk';
 import { Command } from 'commander';
 import fs from 'fs-extra';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import { startOnboardingDashboard } from './serve-dashboard.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import { startOnboardingDashboard } from './serve-dashboard';
 
 const program = new Command();
 

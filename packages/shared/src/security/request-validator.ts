@@ -82,7 +82,7 @@ export class RequestValidator {
         rules: z.array(z.object({
           id: z.string(),
           name: z.string().min(1).max(255),
-          condition: z.record(z.unknown()),
+          condition: z.record(z.string(), z.unknown()),
           action: z.object({
             id: z.string(),
             type: z.enum(['allow', 'deny', 'throttle', 'require_approval'])
@@ -105,7 +105,7 @@ export class RequestValidator {
         tool: z.object({
           name: z.string().min(1).max(255),
           version: z.string().optional(),
-          parameters: z.record(z.unknown()).optional()
+          parameters: z.record(z.string(), z.unknown()).optional()
         }),
         organizationId: z.string().uuid().optional(),
         timestamp: this.TimestampSchema.optional()
@@ -121,7 +121,7 @@ export class RequestValidator {
       resource: z.string().min(1).max(255),
       permission: z.enum(['read', 'write', 'execute', 'admin']),
       duration: z.number().int().min(60).max(86400 * 365).optional(), // 1 minute to 1 year
-      conditions: z.record(z.unknown()).optional()
+      conditions: z.record(z.string(), z.unknown()).optional()
     });
 
     return this.validateAndSanitize(data, schema);
@@ -133,7 +133,7 @@ export class RequestValidator {
       action: z.string().min(1).max(255),
       resource: z.string().min(1).max(255),
       actor: this.DIDSchema.optional(),
-      metadata: z.record(z.unknown()).optional()
+      metadata: z.record(z.string(), z.unknown()).optional()
     });
 
     return this.validateAndSanitize(data, schema);

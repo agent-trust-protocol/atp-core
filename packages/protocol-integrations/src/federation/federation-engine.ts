@@ -19,7 +19,7 @@ import {
 } from './types';
 
 // Re-export types for other modules to use
-export {
+export type {
   UniversalMessage,
   SupportedProtocol,
   UniversalMessageType,

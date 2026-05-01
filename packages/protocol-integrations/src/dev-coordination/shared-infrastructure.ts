@@ -35,19 +35,19 @@ export interface SystemMetrics {
 }
 
 export class SharedInfrastructure extends EventEmitter {
-  private workspaceManager: WorkspaceManager;
-  private agentCoordinator: AgentCoordinator;
-  private messagingSystem: InterAgentMessagingSystem;
-  private protocolRegistry: ProtocolRegistry;
-  private config: CoordinationConfig;
-  private startTime: number;
-  private metrics: SystemMetrics;
+  private workspaceManager!: WorkspaceManager;
+  private agentCoordinator!: AgentCoordinator;
+  private messagingSystem!: InterAgentMessagingSystem;
+  private protocolRegistry!: ProtocolRegistry;
+  private config!: CoordinationConfig;
+  private startTime!: number;
+  private metrics!: SystemMetrics;
   private metricsHistory: SystemMetrics[] = [];
   private isRunning: boolean = false;
 
   constructor(config: Partial<CoordinationConfig> = {}) {
     super();
-    
+
     this.config = {
       enableHealthChecking: true,
       healthCheckInterval: 30000,
@@ -98,17 +98,17 @@ export class SharedInfrastructure extends EventEmitter {
 
   private setupEventHandlers(): void {
     // Workspace Manager events
-    this.workspaceManager.on?.('resource-conflict', this.handleResourceConflict.bind(this));
-    
+    (this.workspaceManager as any).on?.('resource-conflict', this.handleResourceConflict.bind(this));
+
     // Agent Coordinator events
     this.agentCoordinator.on('conflict-detected', this.handleConflictDetection.bind(this));
     this.agentCoordinator.on('agent-started', this.handleAgentStarted.bind(this));
     this.agentCoordinator.on('agent-stopped', this.handleAgentStopped.bind(this));
-    
+
     // Messaging System events
     this.messagingSystem.on('message-sent', this.handleMessageSent.bind(this));
     this.messagingSystem.on('message-response', this.handleMessageResponse.bind(this));
-    
+
     // Protocol Registry events - if it extends EventEmitter
     // this.protocolRegistry.on?.('protocol-registered', this.handleProtocolRegistered.bind(this));
   }
@@ -120,21 +120,21 @@ export class SharedInfrastructure extends EventEmitter {
 
     try {
       console.log('Starting ATP Protocol Integration Development Coordination...');
-      
+
       // Start metrics collection if enabled
       if (this.config.enableMetrics) {
         this.startMetricsCollection();
       }
-      
+
       this.isRunning = true;
       console.log('Development coordination infrastructure started successfully');
-      
+
       // Emit startup event
       this.emit('infrastructure-started', {
         timestamp: Date.now(),
         config: this.config
       });
-      
+
     } catch (error) {
       console.error('Failed to start coordination infrastructure:', error);
       throw error;
@@ -148,19 +148,19 @@ export class SharedInfrastructure extends EventEmitter {
 
     try {
       console.log('Stopping ATP Protocol Integration Development Coordination...');
-      
+
       // Clean up components
       this.protocolRegistry.cleanup();
-      
+
       this.isRunning = false;
       console.log('Development coordination infrastructure stopped');
-      
+
       // Emit shutdown event
       this.emit('infrastructure-stopped', {
         timestamp: Date.now(),
         uptime: Date.now() - this.startTime
       });
-      
+
     } catch (error) {
       console.error('Error during shutdown:', error);
       throw error;
@@ -187,22 +187,22 @@ export class SharedInfrastructure extends EventEmitter {
   // Agent lifecycle management
   async registerAgent(agentId: AgentSpecialization, capabilities?: any): Promise<void> {
     console.log(`Registering agent: ${agentId}`);
-    
+
     // Register with coordinator
     this.agentCoordinator.registerAgent(agentId);
-    
+
     // Set up default message handlers
     this.setupDefaultMessageHandlers(agentId);
-    
+
     console.log(`Agent ${agentId} registered successfully`);
   }
 
   async unregisterAgent(agentId: AgentSpecialization): Promise<void> {
     console.log(`Unregistering agent: ${agentId}`);
-    
+
     // Unregister from coordinator
     this.agentCoordinator.unregisterAgent(agentId);
-    
+
     console.log(`Agent ${agentId} unregistered successfully`);
   }
 
@@ -256,14 +256,14 @@ export class SharedInfrastructure extends EventEmitter {
   // Event handlers
   private handleResourceConflict(event: any): void {
     console.warn('Resource conflict detected:', event);
-    
+
     if (this.config.enableConflictDetection) {
       this.emit('conflict-detected', {
         type: 'resource-conflict',
         details: event,
         timestamp: Date.now()
       });
-      
+
       if (this.config.autoConflictResolution) {
         this.attemptConflictResolution(event);
       }
@@ -300,7 +300,7 @@ export class SharedInfrastructure extends EventEmitter {
   private attemptConflictResolution(conflict: any): void {
     // Basic conflict resolution strategies
     console.log('Attempting automatic conflict resolution for:', conflict);
-    
+
     // Implementation depends on conflict type
     switch (conflict.type) {
       case 'resource-conflict':
@@ -317,7 +317,7 @@ export class SharedInfrastructure extends EventEmitter {
   private resolveResourceConflict(conflict: any): void {
     // Simple resolution: notify all conflicting agents
     console.log('Resolving resource conflict:', conflict);
-    
+
     // This would typically involve more sophisticated logic
     this.emit('conflict-resolved', {
       type: 'resource-conflict',
@@ -329,10 +329,10 @@ export class SharedInfrastructure extends EventEmitter {
 
   private resolveIntegrationConflict(conflict: any): void {
     console.log('Resolving integration conflict:', conflict);
-    
+
     // This would involve coordination between agents
     this.emit('conflict-resolved', {
-      type: 'integration-conflict', 
+      type: 'integration-conflict',
       originalConflict: conflict,
       resolution: 'coordination-requested',
       timestamp: Date.now()
@@ -351,7 +351,7 @@ export class SharedInfrastructure extends EventEmitter {
     this.metrics.uptime = Date.now() - this.startTime;
     this.metrics.activeAgents = this.agentCoordinator.getCoordinationStatus().activeAgents.length;
     this.metrics.protocolsActive = this.protocolRegistry.getActiveProtocols().length;
-    
+
     // Reset counters that accumulate over time
     // (These would typically be calculated as rates)
   }
@@ -359,7 +359,7 @@ export class SharedInfrastructure extends EventEmitter {
   private collectMetricsSnapshot(): void {
     const snapshot = { ...this.metrics };
     this.metricsHistory.push(snapshot);
-    
+
     // Trim history based on retention policy
     const retentionLimit = this.config.metricsRetentionHours * 60; // minutes
     if (this.metricsHistory.length > retentionLimit) {

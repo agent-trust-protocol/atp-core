@@ -14,7 +14,7 @@ const makeEvent = (overrides: Partial<AuditEvent> = {}): AuditEvent => ({
   previousHash: '0'.repeat(64),
   blockNumber: 1,
   nonce: 'nonce-1',
-  ...overrides,
+  ...overrides
 });
 
 const makeRequest = (overrides: Partial<AuditEventRequest> = {}): AuditEventRequest => ({
@@ -22,7 +22,7 @@ const makeRequest = (overrides: Partial<AuditEventRequest> = {}): AuditEventRequ
   action: 'did:register',
   resource: 'did:atp:test',
   actor: 'did:atp:admin',
-  ...overrides,
+  ...overrides
 });
 
 const makeStorageMock = (lastEvent: AuditEvent | null = null) => {
@@ -42,14 +42,14 @@ const makeStorageMock = (lastEvent: AuditEvent | null = null) => {
     getLastEvent: jest.fn(async () => _lastEvent),
     verifyChain: jest.fn(async () => ({ valid: true })),
     close: jest.fn(),
-    _events: events,
+    _events: events
   };
 };
 
 const makeIPFSMock = () => ({
   storeEvent: jest.fn(async () => 'QmFakeIPFSHash'),
   retrieveEvent: jest.fn(async () => null),
-  isAvailable: jest.fn(async () => false),
+  isAvailable: jest.fn(async () => false)
 });
 
 // ─── tests ────────────────────────────────────────────────────────────────────
@@ -188,9 +188,8 @@ describe('AuditService', () => {
 
     it('returns valid: false when chain is broken', async () => {
       storage.verifyChain.mockResolvedValueOnce({
-        valid: false,
-        brokenAt: 'evt-broken',
-      });
+        valid: false
+      } as any);
 
       const result = await service.verifyIntegrity();
       expect(result.valid).toBe(false);
@@ -225,9 +224,9 @@ describe('AuditService', () => {
         events: [
           makeEvent({ source: 'svc-a', action: 'create' }),
           makeEvent({ source: 'svc-a', action: 'delete' }),
-          makeEvent({ source: 'svc-b', action: 'create' }),
+          makeEvent({ source: 'svc-b', action: 'create' })
         ],
-        total: 3,
+        total: 3
       });
 
       const stats = await service.getStats();

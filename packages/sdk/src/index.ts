@@ -34,8 +34,8 @@ export { GatewayClient } from './client/gateway.js';
 export { PaymentsClient } from './client/payments.js';
 
 // Multi-Protocol Support (NEW in v1.1.0)
+export type { Protocol } from './protocols/index.js';
 export {
-  Protocol,
   ProtocolDetector,
   BaseProtocolAdapter,
   MCPAdapter
