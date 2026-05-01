@@ -2,8 +2,10 @@
  * Workspace Manager - Coordinates agent-specific workspace boundaries
  */
 
-import { AgentSpecialization, AgentWorkspace, SharedResource, ConflictBoundary, SupportedProtocol } from './types';
-import { SupportedProtocol as FederationProtocol } from '../federation/types';
+import { AgentSpecialization, AgentWorkspace, SharedResource, ConflictBoundary } from './types';
+import { SupportedProtocol } from '../federation/types';
+
+const FederationProtocol = SupportedProtocol;
 
 export class WorkspaceManager {
   private workspaces: Map<AgentSpecialization, AgentWorkspace> = new Map();

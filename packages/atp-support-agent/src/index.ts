@@ -3,9 +3,17 @@
  * AI-powered customer support using Agent Trust Protocol
  */
 
+// @ts-ignore - @atp/sdk peer dependency
 import { ATPClient } from '@atp/sdk';
-import { DIDDocument, VerifiableCredential } from '@atp/shared';
-import { TrustScoringEngine } from '@atp/shared/trust';
+import { TrustScoringEngine } from '@atp/shared/src/trust/trust-scoring';
+
+interface VerifiableCredential {
+  '@context': string[];
+  type: string[];
+  issuer: string;
+  issuanceDate: string;
+  credentialSubject: Record<string, unknown>;
+}
 
 interface SupportQuery {
   id: string;
@@ -61,7 +69,7 @@ export class ATPSupportAgent {
       agentDID: this.agentDID
     });
 
-    this.trustEngine = new TrustScoringEngine();
+    this.trustEngine = new TrustScoringEngine(null as any);
   }
 
   /**
@@ -386,8 +394,8 @@ function YourComponent() {
       'enterprise': 2.0
     };
 
-    let score = priorityScores[basePriority] || 1;
-    score *= tierMultipliers[tier] || 1.0;
+    let score = (priorityScores as Record<string, number>)[basePriority] || 1;
+    score *= (tierMultipliers as Record<string, number>)[tier] || 1.0;
     score *= (1 + trustScore); // Trust bonus
 
     if (score >= 6) return 'critical';

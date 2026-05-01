@@ -61,7 +61,7 @@ app.post('/agents/register', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message
+      error: (error as Error).message
     });
   }
 });
@@ -78,7 +78,7 @@ app.delete('/agents/:agentId', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message
+      error: (error as Error).message
     });
   }
 });
@@ -123,7 +123,7 @@ app.get('/workspaces/:agentId', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message
+      error: (error as Error).message
     });
   }
 });
@@ -251,7 +251,7 @@ app.get('/workflow/agents/:agentId/startup-script', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message
+      error: (error as Error).message
     });
   }
 });
@@ -278,7 +278,7 @@ app.get('/workflow/dependencies/:agentId', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message
+      error: (error as Error).message
     });
   }
 });
@@ -294,7 +294,7 @@ app.post('/system/start', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message
+      error: (error as Error).message
     });
   }
 });
@@ -309,7 +309,7 @@ app.post('/system/stop', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message
+      error: (error as Error).message
     });
   }
 });

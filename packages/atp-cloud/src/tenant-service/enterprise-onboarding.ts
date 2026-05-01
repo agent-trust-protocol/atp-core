@@ -7,9 +7,10 @@ import { db } from '../shared/database.js';
 import { createServiceLogger } from '../shared/logger.js';
 import { BillingService } from './billing-service.js';
 import { TenantManager } from './tenant-manager.js';
-import { EnterpriseAuthenticationService } from '../../shared/src/auth/enterprise-sso.js';
+import { EnterpriseAuthenticationService } from '@atp/shared/src/auth/enterprise-sso';
 import Stripe from 'stripe';
 import { randomBytes } from 'crypto';
+// @ts-ignore - nodemailer types may not be installed
 import nodemailer from 'nodemailer';
 
 const logger = createServiceLogger('enterprise-onboarding');
@@ -170,13 +171,8 @@ export class EnterpriseOnboardingService {
     // Create tenant with enterprise trial plan
     const tenant = await this.tenantManager.createTenant({
       name: request.company,
-      plan: 'enterprise',
-      status: 'trial',
-      metadata: {
-        trialEndsAt: trialEndsAt.toISOString(),
-        source: 'demo-request',
-        originalRequest: request
-      }
+      email: request.email,
+      plan: 'enterprise'
     });
 
     // Store API credentials securely

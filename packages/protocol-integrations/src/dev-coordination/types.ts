@@ -245,6 +245,7 @@ export enum CoordinationEventType {
   PHASE_STARTED = 'phase-started',
   PHASE_COMPLETED = 'phase-completed',
   DELIVERABLE_READY = 'deliverable-ready',
+  DEPENDENCY_READY = 'dependency-ready',
   INTEGRATION_REQUEST = 'integration-request',
   CONFLICT_DETECTED = 'conflict-detected',
   SYNC_REQUIRED = 'sync-required',

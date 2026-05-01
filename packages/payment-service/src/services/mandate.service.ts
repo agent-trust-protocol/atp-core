@@ -173,7 +173,7 @@ export class MandateService {
     `, [mandateId]);
 
     console.log(`✅ Mandate revoked: ${mandateId}`);
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   /**

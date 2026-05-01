@@ -3,10 +3,7 @@ import { createReadStream, existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const DEFAULT_PORT = 3456;
 const MAX_PORT_TRIES = 10;

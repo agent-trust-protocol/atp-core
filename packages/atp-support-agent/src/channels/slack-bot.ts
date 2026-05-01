@@ -151,7 +151,7 @@ export class ATPSlackBot {
     this.app.event('app_mention', async ({ event, say }) => {
       const query = {
         id: `slack-mention-${Date.now()}`,
-        customerId: event.user,
+        customerId: event.user ?? 'unknown',
         channel: 'slack' as const,
         query: event.text.replace(/<@[^>]+>/g, '').trim(),
         context: {
@@ -160,7 +160,7 @@ export class ATPSlackBot {
         },
         timestamp: new Date(),
         priority: 'medium' as const,
-        customerTier: await this.getCustomerTier(event.user)
+        customerTier: await this.getCustomerTier(event.user ?? 'unknown')
       };
 
       const response = await this.supportAgent.processQuery(query);

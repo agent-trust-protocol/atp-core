@@ -8,7 +8,7 @@ import { EventEmitter } from 'events';
 import { EnterpriseAuthenticationService, EnterpriseUser, SSOSession } from './enterprise-sso';
 import { EnterpriseRBACService, AccessContext, AccessDecision } from './enterprise-rbac';
 
-export interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest extends Omit<Request, 'user'> {
   user?: EnterpriseUser;
   ssoSession?: SSOSession;
   accessDecision?: AccessDecision;

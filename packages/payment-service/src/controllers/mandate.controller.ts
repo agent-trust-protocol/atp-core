@@ -177,8 +177,8 @@ router.post('/payments/execute', async (req, res) => {
     res.status(paymentResult.success ? 200 : 400).json({
       success: paymentResult.success,
       data: {
-        transactionId,
         ...paymentResult,
+        transactionId,
         billingAddress,
         metadata
       }

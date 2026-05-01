@@ -358,7 +358,7 @@ export class AnalyticsService {
 }
 
 // Start the service if this file is run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (require.main === module) {
   const analyticsService = new AnalyticsService();
   analyticsService.start(parseInt(process.env.PORT || '3012'));
 }

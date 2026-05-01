@@ -3,8 +3,8 @@
  * Complete compliance management system for SOC2, HIPAA, GDPR, and other standards
  */
 
-export {
-  EnterpriseComplianceService,
+export { EnterpriseComplianceService, ComplianceUtils } from './compliance-framework';
+export type {
   ComplianceFramework,
   ComplianceStatus,
   DataClassification,
@@ -15,12 +15,11 @@ export {
   PrivacyImpactAssessment,
   ComplianceAudit,
   AuditFinding,
-  ComplianceMetrics,
-  ComplianceUtils
+  ComplianceMetrics
 } from './compliance-framework';
 
-export {
-  ComplianceMonitoringService,
+export { ComplianceMonitoringService } from './compliance-monitoring';
+export type {
   ComplianceEvent,
   ComplianceEventType,
   ComplianceAlert,

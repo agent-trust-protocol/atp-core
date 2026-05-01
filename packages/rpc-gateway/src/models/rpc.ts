@@ -1,5 +1,22 @@
 import { z } from 'zod';
-import { RPCRequestSchema, RPCResponseSchema } from '@atp/shared';
+
+const RPCRequestSchema = z.object({
+  jsonrpc: z.literal('2.0'),
+  method: z.string(),
+  params: z.any().optional(),
+  id: z.union([z.string(), z.number()])
+});
+
+const RPCResponseSchema = z.object({
+  jsonrpc: z.literal('2.0'),
+  result: z.any().optional(),
+  error: z.object({
+    code: z.number(),
+    message: z.string(),
+    data: z.any().optional()
+  }).optional(),
+  id: z.union([z.string(), z.number()])
+});
 
 export const WebSocketMessageSchema = z.object({
   type: z.enum(['rpc', 'auth', 'subscribe', 'unsubscribe', 'notification']),

@@ -107,7 +107,7 @@ export class NonceService {
   private stopCleanup(): void {
     if (this.cleanupTimer) {
       clearInterval(this.cleanupTimer);
-      this.cleanupTimer = null;
+      this.cleanupTimer = undefined;
     }
   }
 

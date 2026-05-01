@@ -35,13 +35,13 @@ export interface SystemMetrics {
 }
 
 export class SharedInfrastructure extends EventEmitter {
-  private workspaceManager: WorkspaceManager;
-  private agentCoordinator: AgentCoordinator;
-  private messagingSystem: InterAgentMessagingSystem;
-  private protocolRegistry: ProtocolRegistry;
-  private config: CoordinationConfig;
-  private startTime: number;
-  private metrics: SystemMetrics;
+  private workspaceManager!: WorkspaceManager;
+  private agentCoordinator!: AgentCoordinator;
+  private messagingSystem!: InterAgentMessagingSystem;
+  private protocolRegistry!: ProtocolRegistry;
+  private config!: CoordinationConfig;
+  private startTime!: number;
+  private metrics!: SystemMetrics;
   private metricsHistory: SystemMetrics[] = [];
   private isRunning: boolean = false;
 
@@ -98,7 +98,7 @@ export class SharedInfrastructure extends EventEmitter {
 
   private setupEventHandlers(): void {
     // Workspace Manager events
-    this.workspaceManager.on?.('resource-conflict', this.handleResourceConflict.bind(this));
+    (this.workspaceManager as any).on?.('resource-conflict', this.handleResourceConflict.bind(this));
 
     // Agent Coordinator events
     this.agentCoordinator.on('conflict-detected', this.handleConflictDetection.bind(this));

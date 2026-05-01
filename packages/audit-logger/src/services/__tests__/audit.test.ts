@@ -188,9 +188,8 @@ describe('AuditService', () => {
 
     it('returns valid: false when chain is broken', async () => {
       storage.verifyChain.mockResolvedValueOnce({
-        valid: false,
-        brokenAt: 'evt-broken'
-      });
+        valid: false
+      } as any);
 
       const result = await service.verifyIntegrity();
       expect(result.valid).toBe(false);

@@ -75,7 +75,7 @@ export class InterAgentMessagingSystem extends EventEmitter {
     const typeHandlers = agentHandlers.get(handler.messageType) || [];
 
     typeHandlers.push(handler);
-    typeHandlers.sort((a, b) => b.priority - a.priority); // Higher priority first
+    typeHandlers.sort((a: MessageHandler, b: MessageHandler) => b.priority - a.priority); // Higher priority first
 
     agentHandlers.set(handler.messageType, typeHandlers);
     this.messageHandlers.set(agentId, agentHandlers);
@@ -170,7 +170,7 @@ export class InterAgentMessagingSystem extends EventEmitter {
       }
     } catch (error) {
       console.error(`Error processing message ${message.messageId}:`, error);
-      return this.createErrorResponse(message, `Handler error: ${error.message}`);
+      return this.createErrorResponse(message, `Handler error: ${(error as Error).message}`);
     }
   }
 
