@@ -1,6 +1,6 @@
 /**
  * ATP Tool Wrapper
- * 
+ *
  * Security wrapper for OpenClaw tools that intercepts all calls
  * and applies ATP authentication, authorization, and audit logging
  */
@@ -17,7 +17,7 @@ import type {
 
 /**
  * ATP Tool Wrapper Class
- * 
+ *
  * Wraps any tool to add ATP security checks before execution
  */
 export class ATPToolWrapper {
@@ -61,7 +61,7 @@ export class ATPToolWrapper {
       if (!decision.allowed) {
         // Log blocked attempt
         await this.logBlockedCall(context, decision);
-        
+
         // Update trust score (negative impact)
         await this.updateTrustScore(agentContext, -0.01, 'blocked-tool-call');
 
@@ -157,7 +157,7 @@ export class ATPToolWrapper {
     // 2. Check trust level
     const trustCheck = this.checkTrustLevel(context);
     decision.trustCheckPassed = trustCheck.passed;
-    
+
     if (!trustCheck.passed) {
       return {
         ...decision,
@@ -169,7 +169,7 @@ export class ATPToolWrapper {
     // 3. Check permissions
     const permissionCheck = await this.checkPermissions(context);
     decision.permissionCheckPassed = permissionCheck.allowed;
-    
+
     if (!permissionCheck.allowed) {
       return {
         ...decision,
@@ -214,7 +214,7 @@ export class ATPToolWrapper {
    */
   private async verifyAuthentication(context: ToolCallContext): Promise<boolean> {
     const { agentContext } = context;
-    
+
     if (!agentContext.atp?.did) {
       return false;
     }
@@ -252,22 +252,22 @@ export class ATPToolWrapper {
         profileId: context.agentContext.atp.policyProfileId,
         state: context.agentContext.state,
         actionType: this.config.actionType,
-        metadata: context.arguments,
+        metadata: context.arguments
       });
 
-      if (profileDecision === "deny") {
+      if (profileDecision === 'deny') {
         return {
           allowed: false,
           reason: `Profile denied ${this.config.actionType} action`,
-          policy: context.agentContext.atp.policyProfileId,
+          policy: context.agentContext.atp.policyProfileId
         };
       }
 
-      if (profileDecision === "require_approval") {
+      if (profileDecision === 'require_approval') {
         return {
           allowed: false,
           reason: `Action requires approval: ${this.config.actionType}`,
-          policy: context.agentContext.atp.policyProfileId,
+          policy: context.agentContext.atp.policyProfileId
         };
       }
     }
@@ -317,7 +317,7 @@ export class ATPToolWrapper {
         windowDuration
       };
       this.rateLimitState.set(key, state);
-      
+
       return { allowed: true, callsRemaining: maxCalls - 1 };
     }
 

@@ -1,6 +1,6 @@
 /**
  * ATP Task Validator
- * 
+ *
  * Validates that agents have sufficient permissions and trust to execute tasks
  */
 
@@ -86,7 +86,7 @@ export class ATPTaskValidator {
       });
 
       result.permissionCheck.passed = permissionCheck.allowed;
-      
+
       if (!permissionCheck.allowed) {
         result.allowed = false;
         result.errors.push(`Permission denied: ${permissionCheck.reason || 'Unknown reason'}`);
@@ -100,10 +100,10 @@ export class ATPTaskValidator {
     // 4. Check data classification vs agent capabilities
     const dataClassificationLevels = ['public', 'internal', 'confidential', 'pii', 'financial'];
     const taskLevel = dataClassificationLevels.indexOf(taskMetadata.dataClassification);
-    
-    const hasCapability = agentMeta.capabilities.some(cap => 
-      cap.includes(taskMetadata.dataClassification) || 
-      cap.includes('admin') || 
+
+    const hasCapability = agentMeta.capabilities.some(cap =>
+      cap.includes(taskMetadata.dataClassification) ||
+      cap.includes('admin') ||
       cap.includes('all-access')
     );
 
@@ -119,7 +119,7 @@ export class ATPTaskValidator {
         try {
           const context = { agentMeta, taskMetadata, taskName, inputs };
           const validatorPassed = await validator(context);
-          
+
           if (!validatorPassed) {
             result.allowed = false;
             result.errors.push('Custom validator failed');

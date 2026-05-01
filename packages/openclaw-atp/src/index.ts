@@ -1,6 +1,6 @@
 /**
  * ATP OpenClaw Integration - Main Entry Point
- * 
+ *
  * Provides quantum-safe security layer for OpenClaw AI agents
  */
 

@@ -142,13 +142,13 @@ Learn more: https://github.com/agent-trust-protocol/atp-core/tree/main/docs/trus
 
   async processQuery(query: SupportQuery): Promise<SupportResponse> {
     const lowerQuery = query.query.toLowerCase();
-    
+
     // Check for integration queries
     if (lowerQuery.includes('integrate') || lowerQuery.includes('integration')) {
       let language = 'node';
       if (lowerQuery.includes('python')) language = 'python';
       if (lowerQuery.includes('react')) language = 'react';
-      
+
       return {
         queryId: query.id,
         response: `Here's how to integrate ATP with ${language}:`,
@@ -266,7 +266,7 @@ app.post('/api/slack/events', async (req, res) => {
     };
 
     const response = await agent.processQuery(query);
-    
+
     // In production, post response back to Slack
     console.log('Slack response:', response);
   }

@@ -126,7 +126,7 @@ export abstract class PenTestModule {
     error?: string;
   }> {
     const startTime = Date.now();
-    
+
     try {
       const response = await fetch(url, {
         method: options.method || 'GET',
@@ -190,7 +190,7 @@ export class AuthenticationTests extends PenTestModule {
   private async testBruteForceProtection(target: string): Promise<PenTestResult> {
     const startTime = Date.now();
     const testName = 'Brute Force Protection';
-    
+
     const attempts = 10;
     let blockedAfter = -1;
     let lastResponse: any;
@@ -319,7 +319,7 @@ export class AuthenticationTests extends PenTestModule {
 
     const response2 = await this.makeRequest(`${target}/api/auth/login`, {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'Cookie': sessionId1 ? `session=${sessionId1}` : ''
       },
@@ -430,7 +430,7 @@ export class AuthenticationTests extends PenTestModule {
     for (const bypass of bypasses) {
       const response = await this.makeRequest(`${target}/api/auth/login`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           ...(bypass.headers || {})
         },
@@ -521,7 +521,7 @@ export class AuthorizationTests extends PenTestModule {
 
     for (const endpoint of adminEndpoints) {
       const response = await this.makeRequest(`${target}${endpoint}`);
-      
+
       // If we get data instead of 401/403, it might be accessible
       if (response.status === 200) {
         accessible.push(endpoint);
@@ -572,7 +572,7 @@ export class AuthorizationTests extends PenTestModule {
 
     for (const resource of resources) {
       const response = await this.makeRequest(`${target}${resource}`);
-      
+
       if (response.status === 200 && response.body.length > 10) {
         accessible.push(resource);
       }
@@ -673,7 +673,7 @@ export class AuthorizationTests extends PenTestModule {
 
     for (const payload of payloads) {
       const response = await this.makeRequest(`${target}/api/files/${payload}`);
-      
+
       if (response.body.includes('root:') || response.body.includes('[fonts]')) {
         vulnerable.push(payload);
       }
@@ -718,7 +718,7 @@ export class PenetrationTestingFramework extends EventEmitter {
 
   constructor() {
     super();
-    
+
     // Register default modules
     this.registerModule(new AuthenticationTests());
     this.registerModule(new AuthorizationTests());
@@ -749,7 +749,7 @@ export class PenetrationTestingFramework extends EventEmitter {
     console.log(`Starting penetration tests against ${target}`);
 
     // Determine which modules to run
-    const modulesToRun = options.modules 
+    const modulesToRun = options.modules
       ? options.modules.map(name => this.modules.get(name)).filter(Boolean) as PenTestModule[]
       : Array.from(this.modules.values());
 
@@ -795,7 +795,7 @@ export class PenetrationTestingFramework extends EventEmitter {
 
     // Save report
     this.reports.push(report);
-    
+
     // Save to file
     await this.saveReport(report);
 
@@ -828,7 +828,7 @@ export class PenetrationTestingFramework extends EventEmitter {
     for (const result of results) {
       bySeverity[result.severity]++;
       byCategory[result.category] = (byCategory[result.category] || 0) + 1;
-      
+
       switch (result.status) {
         case 'pass':
           passed++;
@@ -918,7 +918,7 @@ export class PenetrationTestingFramework extends EventEmitter {
         outputDir,
         `pentest-${report.timestamp.toISOString().split('T')[0]}.json`
       );
-      
+
       await fs.mkdir(outputDir, { recursive: true });
       await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
     } catch (error) {

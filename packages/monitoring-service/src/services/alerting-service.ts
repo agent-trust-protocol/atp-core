@@ -154,7 +154,7 @@ export class AlertingService {
 
   private async createAlert(rule: AlertRule, value: number, serviceName: string, metrics: SystemMetrics): Promise<void> {
     // Check if we already have a recent alert for this rule and service
-    const recentAlert = this.alerts.find(alert => 
+    const recentAlert = this.alerts.find(alert =>
       alert.service === serviceName &&
       alert.details.ruleId === rule.id &&
       !alert.resolved &&

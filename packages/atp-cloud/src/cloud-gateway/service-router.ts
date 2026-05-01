@@ -38,7 +38,7 @@ export class ServiceRouter {
     // Initialize each service with its replicas
     Object.entries(cloudConfig.services).forEach(([serviceName, serviceConfig]) => {
       const endpoints: ServiceEndpoint[] = [];
-      
+
       for (let i = 0; i < serviceConfig.replicas; i++) {
         endpoints.push({
           url: serviceConfig.url,
@@ -85,7 +85,7 @@ export class ServiceRouter {
     this.currentReplicas.set(serviceName, nextIndex);
 
     const selectedEndpoint = healthyEndpoints[nextIndex];
-    
+
     logger.debug('Service endpoint selected', {
       service: serviceName,
       endpoint: `${selectedEndpoint.url}:${selectedEndpoint.port}`,
@@ -161,11 +161,11 @@ export class ServiceRouter {
    */
   private async checkEndpointHealth(serviceName: string, endpoint: ServiceEndpoint): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      
+
       const response = await fetch(`${endpoint.url.replace(/:\d+$/, '')}:${endpoint.port}/health`, {
         method: 'GET',
         signal: controller.signal,
@@ -173,7 +173,7 @@ export class ServiceRouter {
           'User-Agent': 'ATP-Cloud-HealthCheck/1.0'
         }
       });
-      
+
       clearTimeout(timeoutId);
 
       const endTime = Date.now();
@@ -258,7 +258,7 @@ export class ServiceRouter {
       if (endpoint) {
         endpoint.healthy = false;
         endpoint.lastCheck = new Date();
-        
+
         logger.warn('Endpoint manually marked unhealthy', {
           service: serviceName,
           endpoint: endpointUrl

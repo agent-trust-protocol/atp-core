@@ -94,7 +94,7 @@ Common Integration Issues:
 
       // Use Ollama for complex queries
       const aiResponse = await this.queryOllama(query);
-      
+
       return {
         queryId: query.id,
         response: aiResponse.response,
@@ -106,7 +106,7 @@ Common Integration Issues:
       };
     } catch (error) {
       console.error('Error processing query with Ollama:', error);
-      
+
       // Fallback to basic responses
       return this.getFallbackResponse(query);
     }
@@ -118,7 +118,7 @@ Common Integration Issues:
   private async queryOllama(query: SupportQuery): Promise<{ response: string }> {
     const context = this.knowledgeBase.get('atp_context');
     const commonIssues = this.knowledgeBase.get('common_issues');
-    
+
     const prompt = `You are a support agent for the Agent Trust Protocol. Answer this question: "${query.query}"`;
 
     try {
@@ -151,7 +151,7 @@ Common Integration Issues:
    */
   private async checkSimpleQueries(query: SupportQuery): Promise<SupportResponse | null> {
     const lowerQuery = query.query.toLowerCase();
-    
+
     // Security queries always escalate
     if (lowerQuery.includes('security') || lowerQuery.includes('breach') || lowerQuery.includes('hack')) {
       return {
@@ -191,7 +191,7 @@ All systems are running normally. Check https://status.atp.dev for real-time upd
    */
   private extractDocLinks(response: string): string[] {
     const links: string[] = [];
-    
+
     if (response.toLowerCase().includes('integration')) {
       links.push('https://github.com/agent-trust-protocol/atp-core/tree/main/docs/quickstart');
     }
@@ -204,7 +204,7 @@ All systems are running normally. Check https://status.atp.dev for real-time upd
     if (response.toLowerCase().includes('api')) {
       links.push('https://github.com/agent-trust-protocol/atp-core/tree/main/docs/api-reference');
     }
-    
+
     return links;
   }
 
@@ -217,13 +217,13 @@ All systems are running normally. Check https://status.atp.dev for real-time upd
     if (codeBlockMatch) {
       return codeBlockMatch[0];
     }
-    
+
     // Look for simple code snippets
     const codeMatch = response.match(/`[^`]+`/);
     if (codeMatch) {
       return codeMatch[0];
     }
-    
+
     return undefined;
   }
 
@@ -233,22 +233,22 @@ All systems are running normally. Check https://status.atp.dev for real-time upd
   private checkEscalationNeeded(query: SupportQuery, aiResponse: { response: string }): boolean {
     const lowerQuery = query.query.toLowerCase();
     const lowerResponse = aiResponse.response.toLowerCase();
-    
+
     // Always escalate security issues
     if (lowerQuery.includes('security') || lowerQuery.includes('breach')) {
       return true;
     }
-    
+
     // Escalate if AI suggests it
     if (lowerResponse.includes('escalate') || lowerResponse.includes('human support')) {
       return true;
     }
-    
+
     // Escalate complex enterprise issues
     if (query.tier === 'enterprise' && (lowerQuery.includes('custom') || lowerQuery.includes('contract'))) {
       return true;
     }
-    
+
     return false;
   }
 
@@ -306,11 +306,11 @@ app.post('/api/support/query', async (req, res) => {
     };
 
     console.log(`🤖 Processing query: "${query.query.substring(0, 50)}..."`);
-    
+
     const response = await agent.processQuery(query);
-    
+
     console.log(`✅ Response generated (AI: ${response.aiEnhanced})`);
-    
+
     res.json(response);
   } catch (error) {
     console.error('Error processing query:', error);
@@ -333,7 +333,7 @@ app.get('/api/test/ollama', async (req, res) => {
       },
       { timeout: 60000 }
     );
-    
+
     res.json({
       status: 'success',
       model: process.env.OLLAMA_MODEL,

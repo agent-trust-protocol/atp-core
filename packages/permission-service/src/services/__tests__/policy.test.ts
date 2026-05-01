@@ -7,7 +7,7 @@ const makeGrant = (overrides: Partial<PermissionGrant> = {}): PermissionGrant =>
   grantee: 'did:atp:grantee',
   scopes: ['read'],
   createdAt: Date.now(),
-  ...overrides,
+  ...overrides
 });
 
 const makeContext = (overrides: Partial<PolicyContext> = {}): PolicyContext => ({
@@ -16,7 +16,7 @@ const makeContext = (overrides: Partial<PolicyContext> = {}): PolicyContext => (
   resource: 'did:atp:resource1',
   grant: makeGrant(),
   context: {},
-  ...overrides,
+  ...overrides
 });
 
 describe('PolicyEngine', () => {
@@ -34,7 +34,7 @@ describe('PolicyEngine', () => {
         condition: 'true',
         effect: 'allow',
         priority: 100,
-        active: true,
+        active: true
       });
 
       const result = await engine.evaluate(makeContext());
@@ -48,7 +48,7 @@ describe('PolicyEngine', () => {
         condition: 'true',
         effect: 'allow',
         priority: 100,
-        active: false,
+        active: false
       });
 
       const result = await engine.evaluate(makeContext());
@@ -63,7 +63,7 @@ describe('PolicyEngine', () => {
         condition: 'true',
         effect: 'allow',
         priority: 100,
-        active: true,
+        active: true
       });
 
       engine.removeRule('rule-temp');
@@ -87,7 +87,7 @@ describe('PolicyEngine', () => {
         condition: 'true',
         effect: 'allow',
         priority: 10,
-        active: true,
+        active: true
       });
       engine.addRule({
         id: 'high-priority-deny',
@@ -95,7 +95,7 @@ describe('PolicyEngine', () => {
         condition: 'true',
         effect: 'deny',
         priority: 100,
-        active: true,
+        active: true
       });
 
       const result = await engine.evaluate(makeContext());
@@ -110,7 +110,7 @@ describe('PolicyEngine', () => {
         condition: 'subject == "did:atp:agent1"',
         effect: 'allow',
         priority: 100,
-        active: true,
+        active: true
       });
 
       const result = await engine.evaluate(makeContext({ subject: 'did:atp:agent1' }));
@@ -124,7 +124,7 @@ describe('PolicyEngine', () => {
         condition: 'subject == "did:atp:other"',
         effect: 'allow',
         priority: 100,
-        active: true,
+        active: true
       });
 
       const result = await engine.evaluate(makeContext({ subject: 'did:atp:agent1' }));
@@ -138,7 +138,7 @@ describe('PolicyEngine', () => {
         condition: '!@#$%^&*()',
         effect: 'allow',
         priority: 100,
-        active: true,
+        active: true
       });
 
       // Should not throw, should fall through to default deny
@@ -153,7 +153,7 @@ describe('PolicyEngine', () => {
         condition: 'true',
         effect: 'deny',
         priority: 100,
-        active: true,
+        active: true
       });
 
       const result = await engine.evaluate(makeContext());

@@ -16,11 +16,11 @@ export class CredentialService {
 
     const credentialId = `urn:uuid:${randomUUID()}`;
     const now = new Date().toISOString();
-    
+
     const credential: VerifiableCredential = {
       '@context': [
         'https://www.w3.org/2018/credentials/v1',
-        'https://w3id.org/security/suites/ed25519-2020/v1',
+        'https://w3id.org/security/suites/ed25519-2020/v1'
       ],
       id: credentialId,
       type: ['VerifiableCredential', schema.name],
@@ -29,26 +29,26 @@ export class CredentialService {
       expirationDate: request.expirationDate,
       credentialSubject: {
         id: request.subject,
-        ...request.claims,
-      },
+        ...request.claims
+      }
     };
 
     const proof = await this.signCredential(credential, request.issuerDid, request.issuerPrivateKey);
     credential.proof = proof;
 
     await this.storage.storeCredential(credential);
-    
+
     return credential;
   }
 
   async verifyCredential(request: CredentialVerificationRequest): Promise<VerificationResult> {
     const { credential } = request;
-    
+
     const checks = {
       signature: false,
       expiration: false,
       revocation: false,
-      schema: false,
+      schema: false
     };
 
     try {
@@ -62,13 +62,13 @@ export class CredentialService {
       return {
         valid,
         checks,
-        error: valid ? undefined : 'Credential verification failed',
+        error: valid ? undefined : 'Credential verification failed'
       };
     } catch (error) {
       return {
         valid: false,
         checks,
-        error: error instanceof Error ? error.message : 'Unknown verification error',
+        error: error instanceof Error ? error.message : 'Unknown verification error'
       };
     }
   }
@@ -102,13 +102,13 @@ export class CredentialService {
   private async signCredential(credential: VerifiableCredential, issuerDid: string, privateKey: string): Promise<Proof> {
     const canonicalized = this.canonicalizeCredential(credential);
     const signature = await CryptoUtils.sign(canonicalized, privateKey);
-    
+
     return {
       type: 'Ed25519Signature2020',
       created: new Date().toISOString(),
       verificationMethod: `${issuerDid}#key-1`,
       proofPurpose: 'assertionMethod',
-      proofValue: signature,
+      proofValue: signature
     };
   }
 
@@ -119,10 +119,10 @@ export class CredentialService {
 
     const { proof, ...credentialWithoutProof } = credential;
     const canonicalized = this.canonicalizeCredential(credentialWithoutProof);
-    
+
     const issuer = typeof credential.issuer === 'string' ? credential.issuer : credential.issuer.id;
     const publicKey = await this.getPublicKeyForDID(issuer);
-    
+
     if (!publicKey) {
       return false;
     }
@@ -134,7 +134,7 @@ export class CredentialService {
     if (!credential.expirationDate) {
       return true;
     }
-    
+
     return new Date(credential.expirationDate) > new Date();
   }
 
@@ -165,12 +165,12 @@ export class CredentialService {
       if (property.required && !(key in claims)) {
         throw new Error(`Required property ${key} missing`);
       }
-      
+
       if (key in claims && !this.validatePropertyType(claims[key], property.type)) {
         throw new Error(`Property ${key} has invalid type`);
       }
     }
-    
+
     return true;
   }
 

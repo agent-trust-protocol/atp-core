@@ -1,6 +1,6 @@
 /**
  * Visual Policy Storage Service Tests
- * 
+ *
  * Comprehensive test suite for the Visual Policy Storage Service
  * Tests CRUD operations, multi-tenancy, version control, audit logging,
  * and performance metrics.
@@ -29,16 +29,16 @@ const mockDbConfig = {
 // Mock database client
 class MockDatabaseClient {
   private data: Map<string, any[]> = new Map();
-  
+
   async query(sql: string, params: any[] = []): Promise<{ rows: any[] }> {
     // Mock implementation for testing
     // In real tests, you would use a test database or more sophisticated mocking
-    
+
     if (sql.includes('create_visual_policy')) {
       const policyId = params[0];
       return { rows: [{ create_visual_policy: policyId }] };
     }
-    
+
     if (sql.includes('SELECT policy_document')) {
       // Mock policy retrieval
       const policyId = params[0];
@@ -53,15 +53,15 @@ class MockDatabaseClient {
       }
       return { rows: [] };
     }
-    
+
     if (sql.includes('COUNT(*)')) {
       return { rows: [{ total: 5, count: 2 }] };
     }
-    
+
     if (sql.includes('deploy_visual_policy')) {
       return { rows: [{ deploy_visual_policy: 'deploy_123456' }] };
     }
-    
+
     if (sql.includes('visual_policy_deployments')) {
       return {
         rows: [{
@@ -77,7 +77,7 @@ class MockDatabaseClient {
         }]
       };
     }
-    
+
     if (sql.includes('visual_policy_metrics')) {
       return {
         rows: [{
@@ -94,7 +94,7 @@ class MockDatabaseClient {
         }]
       };
     }
-    
+
     if (sql.includes('visual_policy_audit_log')) {
       return {
         rows: [{
@@ -111,7 +111,7 @@ class MockDatabaseClient {
         }]
       };
     }
-    
+
     if (sql.includes('visual_policy_org_settings')) {
       const orgId = params[0];
       if (orgId === 'org_test') {
@@ -132,7 +132,7 @@ class MockDatabaseClient {
       }
       return { rows: [] }; // Return empty for non-existent organizations
     }
-    
+
     // Default empty response
     return { rows: [] };
   }
@@ -141,7 +141,7 @@ class MockDatabaseClient {
 describe('Visual Policy Storage Service', () => {
   let storageService: VisualPolicyStorageService;
   let mockDb: MockDatabaseClient;
-  
+
   beforeEach(() => {
     mockDb = new MockDatabaseClient();
     storageService = new VisualPolicyStorageService(mockDbConfig);
@@ -157,18 +157,18 @@ describe('Visual Policy Storage Service', () => {
     describe('createPolicy', () => {
       it('should create a new policy successfully', async () => {
         const policy = createAllowAllPolicyTemplate('org_test', 'did:atp:creator');
-        
+
         const policyId = await storageService.createPolicy(policy, 'did:atp:creator');
-        
+
         expect(policyId).toBe(policy.id);
       });
 
       it('should validate policy before creation', async () => {
         const invalidPolicy = {
-          name: 'Invalid Policy',
+          name: 'Invalid Policy'
           // Missing required fields
         } as any;
-        
+
         await expect(
           storageService.createPolicy(invalidPolicy, 'did:atp:creator')
         ).rejects.toThrow();
@@ -178,20 +178,20 @@ describe('Visual Policy Storage Service', () => {
     describe('getPolicy', () => {
       it('should retrieve an existing policy', async () => {
         const policy = await storageService.getPolicy('test-policy-1');
-        
+
         expect(policy).toBeTruthy();
         expect(policy?.name).toBe('Allow All Access');
       });
 
       it('should return null for non-existent policy', async () => {
         const policy = await storageService.getPolicy('non-existent');
-        
+
         expect(policy).toBeNull();
       });
 
       it('should filter by organization ID', async () => {
         const policy = await storageService.getPolicy('test-policy-1', 'org_test');
-        
+
         expect(policy).toBeTruthy();
       });
     });
@@ -202,7 +202,7 @@ describe('Visual Policy Storage Service', () => {
           name: 'Updated Policy Name',
           description: 'Updated description'
         };
-        
+
         await expect(
           storageService.updatePolicy('test-policy-1', updates, 'did:atp:updater')
         ).resolves.not.toThrow();
@@ -210,7 +210,7 @@ describe('Visual Policy Storage Service', () => {
 
       it('should throw error for non-existent policy', async () => {
         const updates = { name: 'Updated Name' };
-        
+
         await expect(
           storageService.updatePolicy('non-existent', updates, 'did:atp:updater')
         ).rejects.toThrow('Policy not found');
@@ -233,9 +233,9 @@ describe('Visual Policy Storage Service', () => {
           limit: 10,
           offset: 0
         };
-        
+
         const result = await storageService.searchPolicies(filters);
-        
+
         expect(result).toHaveProperty('policies');
         expect(result).toHaveProperty('total');
         expect(result.total).toBe(5);
@@ -245,9 +245,9 @@ describe('Visual Policy Storage Service', () => {
         const filters: PolicySearchFilters = {
           organizationId: 'non-existent-org'
         };
-        
+
         const result = await storageService.searchPolicies(filters);
-        
+
         expect(result.policies).toHaveLength(0);
         expect(result.total).toBe(5); // Mock returns 5
       });
@@ -277,7 +277,7 @@ describe('Visual Policy Storage Service', () => {
           'production',
           ['gateway-1', 'gateway-2']
         );
-        
+
         expect(deploymentId).toBe('deploy_123456');
       });
 
@@ -287,7 +287,7 @@ describe('Visual Policy Storage Service', () => {
           'did:atp:deployer',
           'staging'
         );
-        
+
         expect(deploymentId).toBe('deploy_123456');
       });
     });
@@ -295,7 +295,7 @@ describe('Visual Policy Storage Service', () => {
     describe('getDeploymentHistory', () => {
       it('should retrieve deployment history', async () => {
         const history = await storageService.getDeploymentHistory('test-policy-1');
-        
+
         expect(history).toHaveLength(1);
         expect(history[0].deploymentId).toBe('deploy_123456');
         expect(history[0].environment).toBe('production');
@@ -314,7 +314,7 @@ describe('Visual Policy Storage Service', () => {
 
       it('should record different action types', async () => {
         const actions: Array<'allow' | 'deny' | 'throttle' | 'error'> = ['allow', 'deny', 'throttle', 'error'];
-        
+
         for (const action of actions) {
           await expect(
             storageService.recordEvaluation('test-policy-1', action, 1.0)
@@ -327,9 +327,9 @@ describe('Visual Policy Storage Service', () => {
       it('should retrieve policy metrics for date range', async () => {
         const startDate = new Date('2025-01-01');
         const endDate = new Date('2025-01-31');
-        
+
         const metrics = await storageService.getPolicyMetrics('test-policy-1', startDate, endDate);
-        
+
         expect(metrics).toHaveLength(1);
         expect(metrics[0].policyId).toBe('test-policy-1');
         expect(metrics[0].evaluationsCount).toBe(100);
@@ -352,7 +352,7 @@ describe('Visual Policy Storage Service', () => {
           ipAddress: '192.168.1.100',
           userAgent: 'ATP-Client/1.0'
         };
-        
+
         await expect(
           storageService.logAuditEvent(event)
         ).resolves.not.toThrow();
@@ -362,7 +362,7 @@ describe('Visual Policy Storage Service', () => {
     describe('getAuditTrail', () => {
       it('should retrieve audit trail for a policy', async () => {
         const auditTrail = await storageService.getAuditTrail('test-policy-1');
-        
+
         expect(auditTrail).toHaveLength(1);
         expect(auditTrail[0].policyId).toBe('test-policy-1');
         expect(auditTrail[0].action).toBe('created');
@@ -371,7 +371,7 @@ describe('Visual Policy Storage Service', () => {
 
       it('should support pagination', async () => {
         const auditTrail = await storageService.getAuditTrail('test-policy-1', 50, 10);
-        
+
         expect(auditTrail).toHaveLength(1);
       });
     });
@@ -381,7 +381,7 @@ describe('Visual Policy Storage Service', () => {
     describe('getOrganizationSettings', () => {
       it('should retrieve organization settings', async () => {
         const settings = await storageService.getOrganizationSettings('org_test');
-        
+
         expect(settings).toBeTruthy();
         expect(settings?.organizationId).toBe('org_test');
         expect(settings?.maxPoliciesPerOrg).toBe(100);
@@ -390,7 +390,7 @@ describe('Visual Policy Storage Service', () => {
 
       it('should return null for non-existent organization', async () => {
         const settings = await storageService.getOrganizationSettings('non-existent');
-        
+
         expect(settings).toBeNull();
       });
     });
@@ -409,7 +409,7 @@ describe('Visual Policy Storage Service', () => {
           auditRetentionDays: 730,
           enableDetailedLogging: true
         };
-        
+
         await expect(
           storageService.updateOrganizationSettings(settings)
         ).resolves.not.toThrow();
@@ -425,7 +425,7 @@ describe('Visual Policy Storage Service', () => {
           'org_test',
           'did:atp:creator'
         );
-        
+
         expect(policyId).toBeTruthy();
       });
 
@@ -435,7 +435,7 @@ describe('Visual Policy Storage Service', () => {
           'org_test',
           'did:atp:creator'
         );
-        
+
         expect(policyId).toBeTruthy();
       });
 
@@ -444,14 +444,14 @@ describe('Visual Policy Storage Service', () => {
           name: 'Custom Security Policy',
           description: 'Customized security policy for testing'
         };
-        
+
         const policyId = await storageService.createFromTemplate(
           'security',
           'org_test',
           'did:atp:creator',
           customizations
         );
-        
+
         expect(policyId).toBeTruthy();
       });
 
@@ -475,9 +475,9 @@ describe('Visual Policy Storage Service', () => {
           throw new Error('Database connection failed');
         }
       };
-      
+
       (storageService as any).db = errorDb;
-      
+
       await expect(
         storageService.getPolicy('test-policy-1')
       ).rejects.toThrow('Database connection failed');
@@ -489,7 +489,7 @@ describe('Visual Policy Storage Service', () => {
         name: '',
         rules: []
       } as any;
-      
+
       await expect(
         storageService.createPolicy(invalidPolicy, 'did:atp:creator')
       ).rejects.toThrow();
@@ -499,7 +499,7 @@ describe('Visual Policy Storage Service', () => {
   describe('Performance and Scalability', () => {
     it('should handle large policy documents', async () => {
       const largePolicy = createAllowAllPolicyTemplate('org_test', 'did:atp:creator');
-      
+
       // Add many rules to simulate large policy
       for (let i = 0; i < 100; i++) {
         largePolicy.rules.push({
@@ -509,7 +509,7 @@ describe('Visual Policy Storage Service', () => {
           priority: i
         });
       }
-      
+
       await expect(
         storageService.createPolicy(largePolicy, 'did:atp:creator')
       ).resolves.not.toThrow();
@@ -517,15 +517,15 @@ describe('Visual Policy Storage Service', () => {
 
     it('should handle concurrent operations', async () => {
       const promises = [];
-      
+
       for (let i = 0; i < 10; i++) {
         promises.push(
           storageService.getPolicy('test-policy-1')
         );
       }
-      
+
       const results = await Promise.all(promises);
-      
+
       expect(results).toHaveLength(10);
       results.forEach(result => {
         expect(result?.name).toBe('Allow All Access');

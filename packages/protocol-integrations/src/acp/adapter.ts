@@ -227,7 +227,7 @@ export class ACPAdapter extends EventEmitter {
 
   private createEnvelope(message: ACPMessage): ACPEnvelope {
     const senderAgent = this.agents.get(message.sender);
-    const receiverAgents = Array.isArray(message.receiver) 
+    const receiverAgents = Array.isArray(message.receiver)
       ? message.receiver.map(r => this.agents.get(r)).filter(Boolean) as ACPAgent[]
       : [this.agents.get(message.receiver)].filter(Boolean) as ACPAgent[];
 

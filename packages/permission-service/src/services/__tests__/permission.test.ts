@@ -18,7 +18,7 @@ const makeStorageMock = () => {
     }),
     storePolicyRule: jest.fn(async (rule: PolicyRule) => { rules.set(rule.id, rule); }),
     removePolicyRule: jest.fn(async (id: string) => { rules.delete(id); }),
-    listPolicyRules: jest.fn(async () => Array.from(rules.values())),
+    listPolicyRules: jest.fn(async () => Array.from(rules.values()))
   };
 };
 
@@ -39,7 +39,7 @@ describe('PermissionService', () => {
         grantor: 'did:atp:grantor',
         grantee: 'did:atp:grantee',
         scopes: ['read'],
-        resource: 'did:atp:resource1',
+        resource: 'did:atp:resource1'
       };
 
       const result = await service.grantPermission(req);
@@ -54,7 +54,7 @@ describe('PermissionService', () => {
       const req: PermissionRequest = {
         grantor: 'did:atp:alice',
         grantee: 'did:atp:bob',
-        scopes: ['write'],
+        scopes: ['write']
       };
 
       await service.grantPermission(req);
@@ -70,7 +70,7 @@ describe('PermissionService', () => {
     it('returns allowed: false when no grants exist', async () => {
       const check: PermissionCheck = {
         subject: 'did:atp:unknown',
-        action: 'read',
+        action: 'read'
       };
 
       const result = await service.checkPermission(check);
@@ -83,7 +83,7 @@ describe('PermissionService', () => {
         grantor: 'did:atp:owner',
         grantee: 'did:atp:agent',
         scopes: ['read'],
-        resource: 'did:atp:doc1',
+        resource: 'did:atp:doc1'
       });
 
       // Load rules so policy engine can evaluate
@@ -96,13 +96,13 @@ describe('PermissionService', () => {
         condition: 'true',
         effect: 'allow',
         priority: 100,
-        active: true,
+        active: true
       });
 
       const check: PermissionCheck = {
         subject: 'did:atp:agent',
         action: 'read',
-        resource: 'did:atp:doc1',
+        resource: 'did:atp:doc1'
       };
 
       const result = await service.checkPermission(check);
@@ -113,7 +113,7 @@ describe('PermissionService', () => {
       await service.grantPermission({
         grantor: 'did:atp:root',
         grantee: 'did:atp:admin-agent',
-        scopes: ['admin'],
+        scopes: ['admin']
       });
 
       await service.addPolicyRule({
@@ -122,12 +122,12 @@ describe('PermissionService', () => {
         condition: 'true',
         effect: 'allow',
         priority: 100,
-        active: true,
+        active: true
       });
 
       const check: PermissionCheck = {
         subject: 'did:atp:admin-agent',
-        action: 'write',
+        action: 'write'
       };
 
       const result = await service.checkPermission(check);
@@ -142,13 +142,13 @@ describe('PermissionService', () => {
         grantee: 'did:atp:agent',
         scopes: ['read'],
         createdAt: Date.now() - 10000,
-        expiresAt: pastTimestamp,
+        expiresAt: pastTimestamp
       };
       storage.getGrantsForSubject.mockResolvedValueOnce([expiredGrant]);
 
       const result = await service.checkPermission({
         subject: 'did:atp:agent',
-        action: 'read',
+        action: 'read'
       });
 
       expect(result.allowed).toBe(false);
@@ -161,13 +161,13 @@ describe('PermissionService', () => {
         grantee: 'did:atp:agent',
         scopes: ['read'],
         createdAt: Date.now() - 10000,
-        revokedAt: Date.now() - 5000,
+        revokedAt: Date.now() - 5000
       };
       storage.getGrantsForSubject.mockResolvedValueOnce([revokedGrant]);
 
       const result = await service.checkPermission({
         subject: 'did:atp:agent',
-        action: 'read',
+        action: 'read'
       });
 
       expect(result.allowed).toBe(false);
@@ -181,7 +181,7 @@ describe('PermissionService', () => {
         grantor: 'did:atp:grantor',
         grantee: 'did:atp:grantee',
         scopes: ['read'],
-        createdAt: Date.now(),
+        createdAt: Date.now()
       };
       storage.getGrant.mockResolvedValueOnce(grant);
 
@@ -198,7 +198,7 @@ describe('PermissionService', () => {
         grantor: 'did:atp:grantor',
         grantee: 'did:atp:grantee',
         scopes: ['read'],
-        createdAt: Date.now(),
+        createdAt: Date.now()
       };
       storage.getGrant.mockResolvedValueOnce(grant);
 
@@ -213,7 +213,7 @@ describe('PermissionService', () => {
         grantor: 'did:atp:grantor',
         grantee: 'did:atp:grantee',
         scopes: ['read'],
-        createdAt: Date.now(),
+        createdAt: Date.now()
       };
       storage.getGrant.mockResolvedValueOnce(grant);
 
@@ -238,7 +238,7 @@ describe('PermissionService', () => {
         grantor: 'did:atp:owner',
         grantee: 'did:atp:subject',
         scopes: grantedScopes,
-        createdAt: Date.now(),
+        createdAt: Date.now()
       };
       storage.getGrantsForSubject.mockResolvedValueOnce([grant]);
 
@@ -248,7 +248,7 @@ describe('PermissionService', () => {
         condition: 'true',
         effect: 'allow',
         priority: 100,
-        active: true,
+        active: true
       });
 
       return service.checkPermission({ subject: 'did:atp:subject', action });

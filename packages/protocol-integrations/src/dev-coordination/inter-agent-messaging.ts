@@ -4,7 +4,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { 
+import {
   AgentSpecialization,
   InterAgentMessageType,
   CommunicationProtocol,
@@ -73,10 +73,10 @@ export class InterAgentMessagingSystem extends EventEmitter {
   registerHandler(agentId: AgentSpecialization, handler: MessageHandler): void {
     const agentHandlers = this.messageHandlers.get(agentId) || new Map();
     const typeHandlers = agentHandlers.get(handler.messageType) || [];
-    
+
     typeHandlers.push(handler);
     typeHandlers.sort((a, b) => b.priority - a.priority); // Higher priority first
-    
+
     agentHandlers.set(handler.messageType, typeHandlers);
     this.messageHandlers.set(agentId, agentHandlers);
   }
@@ -137,7 +137,7 @@ export class InterAgentMessagingSystem extends EventEmitter {
 
     // Process message immediately if handlers are available
     const response = await this.processMessage(message);
-    
+
     if (response) {
       this.responseMap.set(message.messageId, response);
       this.emit('message-response', response);
@@ -159,10 +159,10 @@ export class InterAgentMessagingSystem extends EventEmitter {
 
     // Process with highest priority handler
     const handler = typeHandlers[0];
-    
+
     try {
       const response = await handler.handler(message);
-      
+
       if (response) {
         return response;
       } else if (message.requiresResponse) {
@@ -251,8 +251,8 @@ export class InterAgentMessagingSystem extends EventEmitter {
     targetAgents?: AgentSpecialization[]
   ): Promise<void> {
     const targets = targetAgents || Object.values(AgentSpecialization).filter(a => a !== sourceAgent);
-    
-    const promises = targets.map(targetAgent => 
+
+    const promises = targets.map(targetAgent =>
       this.sendMessage(
         sourceAgent,
         targetAgent,
@@ -271,8 +271,8 @@ export class InterAgentMessagingSystem extends EventEmitter {
     targetAgents?: AgentSpecialization[]
   ): Promise<void> {
     const targets = targetAgents || Object.values(AgentSpecialization).filter(a => a !== sourceAgent);
-    
-    const promises = targets.map(targetAgent => 
+
+    const promises = targets.map(targetAgent =>
       this.sendMessage(
         sourceAgent,
         targetAgent,
@@ -305,8 +305,8 @@ export class InterAgentMessagingSystem extends EventEmitter {
     targetAgents?: AgentSpecialization[]
   ): Promise<MessageResponse[]> {
     const targets = targetAgents || [AgentSpecialization.ANP_AGENT]; // Default to ANP agent for coordination
-    
-    const promises = targets.map(targetAgent => 
+
+    const promises = targets.map(targetAgent =>
       this.sendMessage(
         sourceAgent,
         targetAgent,

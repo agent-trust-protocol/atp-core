@@ -14,23 +14,23 @@ export class WebSocketService {
     private rpcService: RPCService,
     private authService: AuthService
   ) {
-    this.wss = new WebSocketServer({ 
+    this.wss = new WebSocketServer({
       port: parseInt(process.env.WS_PORT || '8081'),
       path: '/rpc'
     });
-    
+
     this.wss.on('connection', this.handleConnection.bind(this));
     this.startCleanupInterval();
   }
 
   private handleConnection(ws: WebSocket, req: IncomingMessage): void {
     const clientId = this.generateClientId();
-    
+
     const client: ConnectedClient = {
       id: clientId,
       authenticated: false,
       subscriptions: new Map(),
-      lastSeen: Date.now(),
+      lastSeen: Date.now()
     };
 
     this.clients.set(clientId, client);
@@ -43,7 +43,7 @@ export class WebSocketService {
     console.log(`Client ${clientId} connected`);
     this.sendMessage(clientId, {
       type: 'notification',
-      payload: { event: 'connected', clientId },
+      payload: { event: 'connected', clientId }
     });
   }
 
@@ -55,7 +55,7 @@ export class WebSocketService {
 
     try {
       const message: WebSocketMessage = JSON.parse(data.toString());
-      
+
       switch (message.type) {
         case 'auth':
           await this.handleAuth(clientId, message.payload);
@@ -83,27 +83,27 @@ export class WebSocketService {
 
     try {
       const isValid = await this.authService.verifyAuth(authData);
-      
+
       if (isValid) {
         client.authenticated = true;
         client.did = authData.did;
-        
+
         this.sendMessage(clientId, {
           type: 'notification',
-          payload: { event: 'authenticated', success: true },
+          payload: { event: 'authenticated', success: true }
         });
-        
+
         console.log(`Client ${clientId} authenticated as ${authData.did}`);
       } else {
         this.sendMessage(clientId, {
           type: 'notification',
-          payload: { event: 'authenticated', success: false, error: 'Invalid credentials' },
+          payload: { event: 'authenticated', success: false, error: 'Invalid credentials' }
         });
       }
     } catch (error) {
       this.sendMessage(clientId, {
         type: 'notification',
-        payload: { event: 'authenticated', success: false, error: 'Authentication failed' },
+        payload: { event: 'authenticated', success: false, error: 'Authentication failed' }
       });
     }
   }
@@ -116,8 +116,8 @@ export class WebSocketService {
         payload: {
           jsonrpc: '2.0',
           error: { code: -32600, message: 'Not authenticated' },
-          id: rpcRequest.id,
-        },
+          id: rpcRequest.id
+        }
       });
       return;
     }
@@ -126,20 +126,20 @@ export class WebSocketService {
       const response = await this.rpcService.handleRequest(rpcRequest, client.did!);
       this.sendMessage(clientId, {
         type: 'rpc',
-        payload: response,
+        payload: response
       });
     } catch (error) {
       this.sendMessage(clientId, {
         type: 'rpc',
         payload: {
           jsonrpc: '2.0',
-          error: { 
-            code: -32603, 
+          error: {
+            code: -32603,
             message: 'Internal error',
             data: error instanceof Error ? error.message : 'Unknown error'
           },
-          id: rpcRequest.id,
-        },
+          id: rpcRequest.id
+        }
       });
     }
   }
@@ -152,12 +152,12 @@ export class WebSocketService {
     }
 
     client.subscriptions.set(subscription.id, subscription);
-    
+
     this.sendMessage(clientId, {
       type: 'notification',
-      payload: { event: 'subscribed', subscriptionId: subscription.id },
+      payload: { event: 'subscribed', subscriptionId: subscription.id }
     });
-    
+
     console.log(`Client ${clientId} subscribed to ${subscription.event}`);
   }
 
@@ -166,10 +166,10 @@ export class WebSocketService {
     if (!client) return;
 
     client.subscriptions.delete(subscriptionId);
-    
+
     this.sendMessage(clientId, {
       type: 'notification',
-      payload: { event: 'unsubscribed', subscriptionId },
+      payload: { event: 'unsubscribed', subscriptionId }
     });
   }
 
@@ -193,14 +193,14 @@ export class WebSocketService {
   private sendError(clientId: string, error: string): void {
     this.sendMessage(clientId, {
       type: 'notification',
-      payload: { event: 'error', error },
+      payload: { event: 'error', error }
     });
   }
 
   public broadcast(event: string, data: any): void {
     const message: WebSocketMessage = {
       type: 'notification',
-      payload: { event, data, timestamp: Date.now() },
+      payload: { event, data, timestamp: Date.now() }
     };
 
     for (const [clientId, client] of this.clients.entries()) {

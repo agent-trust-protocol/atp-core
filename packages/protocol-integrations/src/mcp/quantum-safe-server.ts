@@ -8,14 +8,14 @@ import {
   ATPMCPTool,
   ATPMCPServerConfig,
   MCPAuthContext,
-  MCPErrorCode,
+  MCPErrorCode
 } from '../types/mcp.js';
 import { TrustLevel, TrustLevelManager, CryptoAgilityManager, defaultPQCConfig, PQCAlgorithm } from '@atp/shared';
 
 /**
  * ATP™ Quantum-Safe MCP Server
  * World's First Quantum-Safe AI Agent Protocol Implementation
- * 
+ *
  * Features:
  * - Hybrid Ed25519 + Dilithium cryptography
  * - Trust-based tool access control
@@ -37,13 +37,13 @@ export class QuantumSafeMCPServer {
     this.app = express();
     this.server = http.createServer(this.app);
     this.wss = new WebSocket.Server({ server: this.server });
-    
+
     // Initialize quantum-safe cryptography
     this.cryptoManager = new CryptoAgilityManager({
       ...defaultPQCConfig,
       hybridMode: true, // Enable hybrid mode for maximum security
       signatureAlgorithm: PQCAlgorithm.CRYSTALS_DILITHIUM,
-      kemAlgorithm: PQCAlgorithm.CRYSTALS_KYBER,
+      kemAlgorithm: PQCAlgorithm.CRYSTALS_KYBER
     });
 
     this.setupExpress();
@@ -66,11 +66,11 @@ export class QuantumSafeMCPServer {
           quantumSafe: true,
           cryptoAlgorithm: 'Ed25519 + Dilithium Hybrid',
           trustLevels: ['public', 'basic', 'verified', 'premium'],
-          auditEnabled: true,
+          auditEnabled: true
         },
         tools: this.tools.size,
         clients: this.clients.size,
-        activeSessions: this.sessionKeys.size,
+        activeSessions: this.sessionKeys.size
       });
     });
 
@@ -78,40 +78,40 @@ export class QuantumSafeMCPServer {
     this.app.post('/tools/register', async (req, res) => {
       try {
         const tool = req.body as ATPMCPTool;
-        
+
         // Verify tool registration signature (quantum-safe)
         if (tool.signature) {
           const isValid = await this.verifyToolSignature(tool);
           if (!isValid) {
             return res.status(401).json({
               success: false,
-              error: 'Invalid tool signature - quantum-safe verification failed',
+              error: 'Invalid tool signature - quantum-safe verification failed'
             });
           }
         }
 
         this.registerTool(tool);
-        
+
         // Notify all clients about tool list change
         this.broadcast({
           jsonrpc: '2.0',
           method: 'tools/list_changed',
           params: {
             quantumSafe: true,
-            timestamp: new Date().toISOString(),
-          },
+            timestamp: new Date().toISOString()
+          }
         });
 
-        res.json({ 
-          success: true, 
+        res.json({
+          success: true,
           message: 'Tool registered successfully with quantum-safe verification',
           toolId: tool.name,
-          securityLevel: 'quantum-safe',
+          securityLevel: 'quantum-safe'
         });
       } catch (error) {
         res.status(400).json({
           success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: error instanceof Error ? error.message : 'Unknown error'
         });
       }
     });
@@ -120,19 +120,19 @@ export class QuantumSafeMCPServer {
     this.app.post('/crypto/key-exchange', async (req, res) => {
       try {
         const { clientPublicKey, sessionId } = req.body;
-        
+
         // Generate server key pair for this session
         const provider = await this.cryptoManager.getCurrentProvider();
         const serverKeyPair = await provider.generateKeyPair();
-        
+
         // Perform key encapsulation (quantum-safe)
         const { ciphertext, sharedSecret } = await provider.encapsulate(clientPublicKey);
-        
+
         // Store session key
         this.sessionKeys.set(sessionId, {
           publicKey: serverKeyPair.publicKey,
           privateKey: serverKeyPair.privateKey,
-          created: Date.now(),
+          created: Date.now()
         });
 
         res.json({
@@ -140,12 +140,12 @@ export class QuantumSafeMCPServer {
           serverPublicKey: serverKeyPair.publicKey,
           ciphertext,
           algorithm: 'Hybrid Ed25519 + Dilithium + Kyber',
-          quantumSafe: true,
+          quantumSafe: true
         });
       } catch (error) {
         res.status(500).json({
           success: false,
-          error: error instanceof Error ? error.message : 'Key exchange failed',
+          error: error instanceof Error ? error.message : 'Key exchange failed'
         });
       }
     });
@@ -157,7 +157,7 @@ export class QuantumSafeMCPServer {
 
       // Extract ATP™ authentication headers
       const authContext = this.extractAuthContext(request.headers);
-      
+
       if (!authContext) {
         ws.close(1008, 'Quantum-safe authentication required');
         return;
@@ -169,13 +169,13 @@ export class QuantumSafeMCPServer {
       this.logQuantumSafeAuditEvent(authContext, 'mcp-client-connected', {
         userAgent: request.headers['user-agent'],
         ip: request.socket.remoteAddress,
-        quantumSafe: true,
+        quantumSafe: true
       });
 
       ws.on('message', async (data: WebSocket.Data) => {
         try {
           const message = JSON.parse(data.toString());
-          
+
           // Verify message signature if present (quantum-safe)
           if (message.signature) {
             const isValid = await this.verifyMessageSignature(message, authContext);
@@ -195,7 +195,7 @@ export class QuantumSafeMCPServer {
       ws.on('close', () => {
         console.log('🔐 Quantum-safe MCP client disconnected');
         this.logQuantumSafeAuditEvent(authContext, 'mcp-client-disconnected', {
-          sessionDuration: Date.now() - (authContext as any).connectedAt,
+          sessionDuration: Date.now() - (authContext as any).connectedAt
         });
         this.clients.delete(ws);
       });
@@ -203,7 +203,7 @@ export class QuantumSafeMCPServer {
       ws.on('error', (error) => {
         console.error('Quantum-safe MCP WebSocket error:', error);
         this.logQuantumSafeAuditEvent(authContext, 'mcp-client-error', {
-          error: error.message,
+          error: error.message
         });
         this.clients.delete(ws);
       });
@@ -232,22 +232,22 @@ export class QuantumSafeMCPServer {
       authMethod: authMethod as any,
       sessionId,
       quantumSafe: !!quantumSafeSignature,
-      connectedAt: Date.now(),
+      connectedAt: Date.now()
     } as MCPAuthContext & { quantumSafe: boolean; connectedAt: number };
   }
 
   private getCapabilitiesForTrustLevel(trustLevel: string): string[] {
     const level = trustLevel as TrustLevel;
     const capabilities = ['read-public'];
-    
+
     if (TrustLevelManager.hasCapability(level, 'basic-operations')) {
       capabilities.push('basic-operations', 'quantum-safe-tools');
     }
-    
+
     if (TrustLevelManager.hasCapability(level, 'advanced-operations')) {
       capabilities.push('advanced-operations', 'sensitive-data-access');
     }
-    
+
     return capabilities;
   }
 
@@ -305,7 +305,7 @@ export class QuantumSafeMCPServer {
       clientInfo: params.clientInfo,
       capabilities: params.capabilities,
       protocolVersion: params.protocolVersion,
-      quantumSafe: true,
+      quantumSafe: true
     });
 
     return {
@@ -315,14 +315,14 @@ export class QuantumSafeMCPServer {
         resources: { subscribe: false, listChanged: false },
         prompts: { listChanged: false },
         logging: { level: 'info' },
-        quantumSafe: { enabled: true, algorithms: ['Ed25519', 'Dilithium', 'Kyber'] },
+        quantumSafe: { enabled: true, algorithms: ['Ed25519', 'Dilithium', 'Kyber'] }
       },
       serverInfo: {
         name: this.config.name + ' (Quantum-Safe)',
         version: this.config.version,
         description: this.config.description + ' - World\'s First Quantum-Safe MCP Server',
         protocol: 'Agent Trust Protocol™',
-        security: 'Quantum-Safe Hybrid Cryptography',
+        security: 'Quantum-Safe Hybrid Cryptography'
       },
       atpInfo: {
         serverDID: this.config.atpConfig.serverDID,
@@ -332,9 +332,9 @@ export class QuantumSafeMCPServer {
         cryptoAlgorithms: {
           signature: 'Ed25519 + Dilithium Hybrid',
           keyExchange: 'X25519 + Kyber Hybrid',
-          encryption: 'AES-256-GCM + Post-Quantum',
-        },
-      },
+          encryption: 'AES-256-GCM + Post-Quantum'
+        }
+      }
     };
   }
 
@@ -362,7 +362,7 @@ export class QuantumSafeMCPServer {
       totalTools: this.tools.size,
       availableTools: availableTools.length,
       filteredTools: availableTools.map(t => t.name),
-      quantumSafeFiltering: true,
+      quantumSafeFiltering: true
     });
 
     return {
@@ -377,20 +377,20 @@ export class QuantumSafeMCPServer {
           auditRequired: tool.auditRequired,
           rateLimits: tool.rateLimits,
           quantumSafe: true,
-          securityLevel: 'post-quantum',
-        },
+          securityLevel: 'post-quantum'
+        }
       })),
       security: {
         quantumSafe: true,
         totalSecureTools: availableTools.length,
-        cryptographicProtection: 'Hybrid Post-Quantum',
-      },
+        cryptographicProtection: 'Hybrid Post-Quantum'
+      }
     };
   }
 
   private async handleQuantumSafeToolCall(params: any, authContext: MCPAuthContext): Promise<any> {
     const { name, arguments: args, atpContext } = params;
-    
+
     const tool = this.tools.get(name);
     if (!tool) {
       throw new Error(`Quantum-safe tool ${name} not found`);
@@ -405,7 +405,7 @@ export class QuantumSafeMCPServer {
       arguments: args,
       requestId: atpContext?.requestId,
       quantumSafeExecution: true,
-      securityLevel: 'post-quantum',
+      securityLevel: 'post-quantum'
     });
 
     const startTime = Date.now();
@@ -420,7 +420,7 @@ export class QuantumSafeMCPServer {
         duration: Date.now() - startTime,
         requestId: atpContext?.requestId,
         resultSize: JSON.stringify(result).length,
-        quantumSafeExecution: true,
+        quantumSafeExecution: true
       });
 
       return {
@@ -429,8 +429,8 @@ export class QuantumSafeMCPServer {
           quantumSafe: true,
           executionProtected: true,
           auditLogged: true,
-          cryptographicIntegrity: 'verified',
-        },
+          cryptographicIntegrity: 'verified'
+        }
       };
     } catch (error) {
       // Log failed execution
@@ -439,7 +439,7 @@ export class QuantumSafeMCPServer {
         duration: Date.now() - startTime,
         requestId: atpContext?.requestId,
         error: error instanceof Error ? error.message : String(error),
-        quantumSafeExecution: true,
+        quantumSafeExecution: true
       });
 
       throw error;
@@ -448,14 +448,14 @@ export class QuantumSafeMCPServer {
 
   private async handleCryptoNegotiation(params: any, authContext: MCPAuthContext): Promise<any> {
     const { supportedAlgorithms, preferredMode } = params;
-    
+
     // Negotiate best quantum-safe algorithms
     const negotiatedConfig = await this.cryptoManager.negotiateAlgorithms(supportedAlgorithms);
-    
+
     await this.logQuantumSafeAuditEvent(authContext, 'crypto-negotiation', {
       clientAlgorithms: supportedAlgorithms,
       negotiatedConfig,
-      quantumSafe: true,
+      quantumSafe: true
     });
 
     return {
@@ -463,8 +463,8 @@ export class QuantumSafeMCPServer {
       serverCapabilities: {
         quantumSafe: true,
         hybridMode: true,
-        supportedAlgorithms: ['Ed25519', 'Dilithium', 'Kyber', 'SPHINCS+'],
-      },
+        supportedAlgorithms: ['Ed25519', 'Dilithium', 'Kyber', 'SPHINCS+']
+      }
     };
   }
 
@@ -473,7 +473,7 @@ export class QuantumSafeMCPServer {
     if (tool.trustLevelRequired) {
       const userLevel = auth.trustLevel as TrustLevel;
       const requiredLevel = tool.trustLevelRequired as TrustLevel;
-      
+
       if (!TrustLevelManager.isAuthorized(userLevel, requiredLevel)) {
         throw new Error(`Insufficient trust level for quantum-safe execution. Required: ${requiredLevel}, Current: ${userLevel}`);
       }
@@ -481,10 +481,10 @@ export class QuantumSafeMCPServer {
 
     // Enhanced quantum-safe capability checks
     if (tool.capabilities && tool.capabilities.length > 0) {
-      const hasRequiredCapabilities = tool.capabilities.every(cap => 
+      const hasRequiredCapabilities = tool.capabilities.every(cap =>
         auth.capabilities.includes(cap)
       );
-      
+
       if (!hasRequiredCapabilities) {
         const missing = tool.capabilities.filter(cap => !auth.capabilities.includes(cap));
         throw new Error(`Missing required quantum-safe capabilities: ${missing.join(', ')}`);
@@ -503,7 +503,7 @@ export class QuantumSafeMCPServer {
   private async executeQuantumSafeTool(tool: ATPMCPTool, args: any, authContext: MCPAuthContext): Promise<any> {
     // Enhanced tool execution with quantum-safe protection
     const executionId = `qsafe-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // Sign execution parameters for integrity
     const provider = await this.cryptoManager.getCurrentProvider();
     const executionData = JSON.stringify({ tool: tool.name, args, timestamp: Date.now() });
@@ -522,8 +522,8 @@ export class QuantumSafeMCPServer {
         quantumSafe: true,
         executionSignature,
         integrityVerified: true,
-        auditTrail: 'immutable',
-      },
+        auditTrail: 'immutable'
+      }
     };
 
     return result;
@@ -558,7 +558,7 @@ export class QuantumSafeMCPServer {
     setInterval(() => {
       const now = Date.now();
       const oneHour = 60 * 60 * 1000;
-      
+
       for (const [sessionId, keyData] of this.sessionKeys.entries()) {
         if (now - keyData.created > oneHour) {
           this.sessionKeys.delete(sessionId);
@@ -573,7 +573,7 @@ export class QuantumSafeMCPServer {
     const response: MCPResponse = {
       jsonrpc: '2.0',
       result,
-      id,
+      id
     };
     ws.send(JSON.stringify(response));
   }
@@ -582,7 +582,7 @@ export class QuantumSafeMCPServer {
     const response: MCPResponse = {
       jsonrpc: '2.0',
       error: { code, message, data },
-      id: id || 0,
+      id: id || 0
     };
     ws.send(JSON.stringify(response));
   }
@@ -605,7 +605,7 @@ export class QuantumSafeMCPServer {
       await fetch('http://localhost:3005/audit/log', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           source: 'quantum-safe-mcp-server',
@@ -618,9 +618,9 @@ export class QuantumSafeMCPServer {
             sessionId: authContext.sessionId,
             quantumSafe: true,
             securityLevel: 'post-quantum',
-            ...details,
-          },
-        }),
+            ...details
+          }
+        })
       });
     } catch (error) {
       console.warn('Failed to log quantum-safe MCP audit event:', error);
@@ -633,9 +633,9 @@ export class QuantumSafeMCPServer {
       ...tool,
       quantumSafe: true,
       securityLevel: 'post-quantum',
-      registeredAt: new Date().toISOString(),
+      registeredAt: new Date().toISOString()
     };
-    
+
     this.tools.set(tool.name, quantumSafeTool);
     console.log(`🔐 Registered quantum-safe ATP™ MCP tool: ${tool.name} (Trust Level: ${tool.trustLevelRequired || 'None'})`);
   }

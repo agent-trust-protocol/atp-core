@@ -8,25 +8,25 @@ export class AuditController {
   async logEvent(req: Request, res: Response): Promise<void> {
     try {
       const request: AuditEventRequest = req.body;
-      
+
       if (!request.source || !request.action || !request.resource) {
         res.status(400).json({
           success: false,
-          error: 'Missing required fields: source, action, resource',
+          error: 'Missing required fields: source, action, resource'
         });
         return;
       }
 
       const event = await this.auditService.logEvent(request);
-      
+
       res.status(201).json({
         success: true,
-        event,
+        event
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -35,23 +35,23 @@ export class AuditController {
     try {
       const { id } = req.params;
       const event = await this.auditService.getEvent(id);
-      
+
       if (!event) {
         res.status(404).json({
           success: false,
-          error: 'Event not found',
+          error: 'Event not found'
         });
         return;
       }
 
       res.json({
         success: true,
-        event,
+        event
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -66,21 +66,21 @@ export class AuditController {
         startTime: req.query.startTime as string,
         endTime: req.query.endTime as string,
         limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-        offset: req.query.offset ? parseInt(req.query.offset as string) : undefined,
+        offset: req.query.offset ? parseInt(req.query.offset as string) : undefined
       };
 
       const result = await this.auditService.queryEvents(query);
-      
+
       res.json({
         success: true,
         events: result.events,
         total: result.total,
-        query,
+        query
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -88,15 +88,15 @@ export class AuditController {
   async verifyIntegrity(req: Request, res: Response): Promise<void> {
     try {
       const result = await this.auditService.verifyIntegrity();
-      
+
       res.json({
         success: true,
-        integrity: result,
+        integrity: result
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -104,15 +104,15 @@ export class AuditController {
   async getStats(req: Request, res: Response): Promise<void> {
     try {
       const stats = await this.auditService.getStats();
-      
+
       res.json({
         success: true,
-        stats,
+        stats
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -121,11 +121,11 @@ export class AuditController {
     try {
       const { hash } = req.params;
       const event = await this.auditService.getEventFromIPFS(hash);
-      
+
       if (!event) {
         res.status(404).json({
           success: false,
-          error: 'Event not found in IPFS',
+          error: 'Event not found in IPFS'
         });
         return;
       }
@@ -133,12 +133,12 @@ export class AuditController {
       res.json({
         success: true,
         event,
-        source: 'ipfs',
+        source: 'ipfs'
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }

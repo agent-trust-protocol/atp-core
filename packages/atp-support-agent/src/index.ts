@@ -60,7 +60,7 @@ export class ATPSupportAgent {
       endpoint: config.atpEndpoint,
       agentDID: this.agentDID
     });
-    
+
     this.trustEngine = new TrustScoringEngine();
   }
 
@@ -70,16 +70,16 @@ export class ATPSupportAgent {
   async initialize(): Promise<void> {
     // Register agent identity with ATP
     await this.registerAgentIdentity();
-    
+
     // Load knowledge base
     await this.loadKnowledgeBase();
-    
+
     // Initialize channel integrations
     await this.initializeChannels();
-    
+
     // Start monitoring
     this.startHealthMonitoring();
-    
+
     console.log('ATP Support Agent initialized successfully');
     console.log(`Agent DID: ${this.agentDID}`);
     console.log(`Trust Score: ${this.agentTrustScore}`);
@@ -97,7 +97,7 @@ export class ATPSupportAgent {
 
     // Classify query intent
     const intent = await this.classifyIntent(query);
-    
+
     // Verify customer identity if DID provided
     let customerTrustScore = 0.5; // Default
     if (query.customerDID) {
@@ -113,41 +113,41 @@ export class ATPSupportAgent {
 
     // Process based on intent
     let response: SupportResponse;
-    
+
     switch (intent.category) {
       case 'documentation':
         response = await this.handleDocumentationQuery(query, intent);
         break;
-      
+
       case 'integration':
         response = await this.handleIntegrationQuery(query, intent);
         break;
-      
+
       case 'billing':
         response = await this.handleBillingQuery(query, intent);
         break;
-      
+
       case 'debugging':
         response = await this.handleDebuggingQuery(query, intent);
         break;
-      
+
       case 'security':
         response = await this.handleSecurityQuery(query, intent);
         break;
-      
+
       default:
         response = await this.handleGeneralQuery(query, intent);
     }
 
     // Log interaction for audit
     await this.logInteraction(query, response);
-    
+
     // Cache response
     this.queryCache.set(this.generateQueryHash(query), response);
-    
+
     // Update agent trust score based on feedback
     await this.updateAgentTrustScore(response);
-    
+
     return response;
   }
 
@@ -160,10 +160,10 @@ export class ATPSupportAgent {
   ): Promise<SupportResponse> {
     // Search knowledge base
     const relevantDocs = await this.searchKnowledgeBase(query.query);
-    
+
     // Generate response
     const response = this.generateDocumentationResponse(relevantDocs);
-    
+
     return {
       queryId: query.id,
       response: response.text,
@@ -184,13 +184,13 @@ export class ATPSupportAgent {
   ): Promise<SupportResponse> {
     // Identify integration type
     const integrationType = this.identifyIntegrationType(query.query);
-    
+
     // Generate integration code
     const codeExample = this.generateIntegrationCode(integrationType);
-    
+
     // Check for common issues
     const commonIssues = this.checkCommonIntegrationIssues(integrationType);
-    
+
     return {
       queryId: query.id,
       response: `Here's how to integrate ATP with ${integrationType}:`,
@@ -224,7 +224,7 @@ export class ATPSupportAgent {
 
     // Handle general billing queries
     const billingInfo = await this.getBillingInformation(query.customerId);
-    
+
     return {
       queryId: query.id,
       response: this.formatBillingResponse(billingInfo),
@@ -244,10 +244,10 @@ export class ATPSupportAgent {
   ): Promise<SupportResponse> {
     // Analyze error message or code
     const analysis = await this.analyzeDebugContext(query);
-    
+
     // Check known issues
     const knownIssue = await this.checkKnownIssues(analysis.errorSignature);
-    
+
     if (knownIssue) {
       return {
         queryId: query.id,
@@ -263,7 +263,7 @@ export class ATPSupportAgent {
 
     // Generate debugging steps
     const debugSteps = this.generateDebuggingSteps(analysis);
-    
+
     return {
       queryId: query.id,
       response: 'Let me help you debug this issue:',

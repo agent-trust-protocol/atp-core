@@ -211,7 +211,7 @@ export function startOnboardingDashboard(options: StartDashboardOptions = {}): P
           return;
         }
 
-        let pathname = url.pathname === '/' ? '/index.html' : url.pathname;
+        const pathname = url.pathname === '/' ? '/index.html' : url.pathname;
         const resolved = safeResolveUnder(dashboardRoot, pathname);
         if (!resolved) {
           res.writeHead(403);
@@ -219,7 +219,7 @@ export function startOnboardingDashboard(options: StartDashboardOptions = {}): P
           return;
         }
 
-        let filePath = resolved;
+        const filePath = resolved;
         if (!existsSync(filePath)) {
           res.writeHead(404);
           res.end('Not found');

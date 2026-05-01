@@ -133,7 +133,7 @@ class SafeEvaluator {
     const numMatch = this.expr.slice(this.pos).match(/^-?\d+(\.\d+)?/);
     if (numMatch) { this.pos += numMatch[0].length; return parseFloat(numMatch[0]); }
     // Keyword or identifier chain
-    const idMatch = this.expr.slice(this.pos).match(/^[a-zA-Z_$][a-zA-Z0-9_$.]*/);;
+    const idMatch = this.expr.slice(this.pos).match(/^[a-zA-Z_$][a-zA-Z0-9_$.]*/);
     if (idMatch) {
       this.pos += idMatch[0].length;
       const token = idMatch[0];
@@ -189,7 +189,7 @@ export class PolicyEngine {
         if (result === true) {
           return {
             allowed: rule.effect === 'allow',
-            reason: `Policy rule '${rule.name}' ${rule.effect}ed access`,
+            reason: `Policy rule '${rule.name}' ${rule.effect}ed access`
           };
         }
       } catch (error) {
@@ -199,7 +199,7 @@ export class PolicyEngine {
 
     return {
       allowed: false,
-      reason: 'No applicable policy rules found - default deny',
+      reason: 'No applicable policy rules found - default deny'
     };
   }
 
@@ -225,10 +225,10 @@ export class PolicyEngine {
         scopes: context.grant.scopes,
         resource: context.grant.resource,
         createdAt: context.grant.createdAt,
-        expiresAt: context.grant.expiresAt,
+        expiresAt: context.grant.expiresAt
       } as unknown as CtxValue,
       context: (context.context || {}) as CtxValue,
-      now: Date.now(),
+      now: Date.now()
     };
   }
 
@@ -240,7 +240,7 @@ export class PolicyEngine {
         condition: '!context.grant.expiresAt || context.grant.expiresAt > context.now',
         effect: 'allow',
         priority: 1000,
-        active: true,
+        active: true
       },
       {
         id: 'admin-override',
@@ -248,7 +248,7 @@ export class PolicyEngine {
         condition: 'context.grant.scopes.includes("admin")',
         effect: 'allow',
         priority: 900,
-        active: true,
+        active: true
       },
       {
         id: 'self-access',
@@ -256,8 +256,8 @@ export class PolicyEngine {
         condition: 'context.subject === context.resource',
         effect: 'allow',
         priority: 800,
-        active: true,
-      },
+        active: true
+      }
     ];
   }
 }

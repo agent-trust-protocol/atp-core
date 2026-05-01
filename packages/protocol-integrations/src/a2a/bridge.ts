@@ -6,7 +6,7 @@ import {
   A2AAgentProfile,
   A2ACommunicationRequest,
   A2AHandshakeRequest,
-  A2AErrorCode,
+  A2AErrorCode
 } from '../types/a2a.js';
 import { TrustLevel } from '@atp/shared';
 
@@ -19,7 +19,7 @@ export class A2ABridge {
     this.app = express();
     this.discoveryService = new A2ADiscoveryService();
     this.communicationService = new A2ACommunicationService();
-    
+
     this.setupRoutes();
     this.setupEventHandlers();
   }
@@ -36,7 +36,7 @@ export class A2ABridge {
       } catch (error) {
         res.status(500).json({
           error: A2AErrorCode.DISCOVERY_SERVICE_UNAVAILABLE,
-          message: error instanceof Error ? error.message : 'Discovery failed',
+          message: error instanceof Error ? error.message : 'Discovery failed'
         });
       }
     });
@@ -46,16 +46,16 @@ export class A2ABridge {
         const profile: A2AAgentProfile = req.body;
         await this.discoveryService.registerAgent(profile);
         this.communicationService.registerAgentProfile(profile);
-        
+
         res.json({
           success: true,
           message: 'Agent registered successfully',
-          did: profile.did,
+          did: profile.did
         });
       } catch (error) {
         res.status(400).json({
           success: false,
-          error: error instanceof Error ? error.message : 'Registration failed',
+          error: error instanceof Error ? error.message : 'Registration failed'
         });
       }
     });
@@ -64,15 +64,15 @@ export class A2ABridge {
       try {
         const { did } = req.params;
         await this.discoveryService.unregisterAgent(did);
-        
+
         res.json({
           success: true,
-          message: 'Agent unregistered successfully',
+          message: 'Agent unregistered successfully'
         });
       } catch (error) {
         res.status(400).json({
           success: false,
-          error: error instanceof Error ? error.message : 'Unregistration failed',
+          error: error instanceof Error ? error.message : 'Unregistration failed'
         });
       }
     });
@@ -81,18 +81,18 @@ export class A2ABridge {
       try {
         const { did } = req.params;
         const profile = await this.discoveryService.getAgentProfile(did);
-        
+
         if (!profile) {
           return res.status(404).json({
             error: A2AErrorCode.NO_AGENTS_FOUND,
-            message: 'Agent not found',
+            message: 'Agent not found'
           });
         }
-        
+
         res.json(profile);
       } catch (error) {
         res.status(500).json({
-          error: error instanceof Error ? error.message : 'Failed to get agent profile',
+          error: error instanceof Error ? error.message : 'Failed to get agent profile'
         });
       }
     });
@@ -106,7 +106,7 @@ export class A2ABridge {
       } catch (error) {
         res.status(500).json({
           error: A2AErrorCode.HANDSHAKE_FAILED,
-          message: error instanceof Error ? error.message : 'Handshake failed',
+          message: error instanceof Error ? error.message : 'Handshake failed'
         });
       }
     });
@@ -119,7 +119,7 @@ export class A2ABridge {
       } catch (error) {
         res.status(500).json({
           error: A2AErrorCode.MESSAGE_DELIVERY_FAILED,
-          message: error instanceof Error ? error.message : 'Message delivery failed',
+          message: error instanceof Error ? error.message : 'Message delivery failed'
         });
       }
     });
@@ -131,12 +131,12 @@ export class A2ABridge {
         res.json({
           success: true,
           messages,
-          count: messages.length,
+          count: messages.length
         });
       } catch (error) {
         res.status(500).json({
           success: false,
-          error: error instanceof Error ? error.message : 'Failed to retrieve messages',
+          error: error instanceof Error ? error.message : 'Failed to retrieve messages'
         });
       }
     });
@@ -148,12 +148,12 @@ export class A2ABridge {
         res.json({
           success: true,
           sessions,
-          count: sessions.length,
+          count: sessions.length
         });
       } catch (error) {
         res.status(500).json({
           success: false,
-          error: error instanceof Error ? error.message : 'Failed to get sessions',
+          error: error instanceof Error ? error.message : 'Failed to get sessions'
         });
       }
     });
@@ -162,16 +162,16 @@ export class A2ABridge {
       try {
         const { sessionId } = req.params;
         const { initiator, reason } = req.body;
-        
+
         await this.communicationService.terminateSession(sessionId, initiator, reason);
         res.json({
           success: true,
-          message: 'Session terminated successfully',
+          message: 'Session terminated successfully'
         });
       } catch (error) {
         res.status(400).json({
           success: false,
-          error: error instanceof Error ? error.message : 'Failed to terminate session',
+          error: error instanceof Error ? error.message : 'Failed to terminate session'
         });
       }
     });
@@ -190,7 +190,7 @@ export class A2ABridge {
     this.app.get('/a2a/health', (req, res) => {
       const discoveryStats = this.discoveryService.getStats();
       const communicationStats = this.communicationService.getStats();
-      
+
       res.json({
         status: 'healthy',
         service: 'a2a-bridge',
@@ -199,9 +199,9 @@ export class A2ABridge {
         integration: 'Agent-to-Agent (A2A)',
         stats: {
           discovery: discoveryStats,
-          communication: communicationStats,
+          communication: communicationStats
         },
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       });
     });
   }
@@ -247,19 +247,19 @@ export class A2ABridge {
     const discoveryRequest: A2ADiscoveryRequest = {
       query: {
         capabilities: ['weather-current'],
-        trustLevel: TrustLevel.BASIC,
+        trustLevel: TrustLevel.BASIC
       },
       filters: {
         minTrustLevel: TrustLevel.BASIC,
         verifiedOnly: true,
-        activeOnly: true,
+        activeOnly: true
       },
       requester: {
         did: 'did:atp:z6MktestRequesterDID123',
         trustLevel: TrustLevel.VERIFIED,
         purpose: 'Weather information lookup',
-        sessionId: 'test-session-123',
-      },
+        sessionId: 'test-session-123'
+      }
     };
 
     const discoveryResponse = await this.discoveryService.discoverAgents(discoveryRequest);
@@ -269,7 +269,7 @@ export class A2ABridge {
       return {
         discovery: discoveryResponse,
         handshake: null,
-        communication: null,
+        communication: null
       };
     }
 
@@ -285,15 +285,15 @@ export class A2ABridge {
           version: '1.0.0',
           endpoints: {
             discovery: 'http://localhost:3008/discovery',
-            communication: 'http://localhost:3008/communicate',
+            communication: 'http://localhost:3008/communicate'
           },
           capabilities: [
             {
               name: 'weather-query',
               description: 'Query weather information',
               version: '1.0.0',
-              trustLevelRequired: TrustLevel.BASIC,
-            },
+              trustLevelRequired: TrustLevel.BASIC
+            }
           ],
           atpProfile: {
             trustLevel: TrustLevel.VERIFIED,
@@ -303,26 +303,26 @@ export class A2ABridge {
             reputation: {
               score: 88,
               interactions: 250,
-              successRate: 0.96,
-            },
-          },
+              successRate: 0.96
+            }
+          }
         },
-        intendedPurpose: 'Request weather information',
+        intendedPurpose: 'Request weather information'
       },
       target: {
         did: targetAgent.did,
-        expectedCapabilities: ['weather-current'],
+        expectedCapabilities: ['weather-current']
       },
       security: {
         proposedProtocols: ['https', 'wss'],
         encryptionRequired: true,
-        mutualAuthentication: true,
+        mutualAuthentication: true
       },
       sessionParameters: {
         timeout: 300,
         maxMessages: 50,
-        auditLevel: 'standard',
-      },
+        auditLevel: 'standard'
+      }
     };
 
     const handshakeResponse = await this.communicationService.initiateHandshake(handshakeRequest);
@@ -332,7 +332,7 @@ export class A2ABridge {
       return {
         discovery: discoveryResponse,
         handshake: handshakeResponse,
-        communication: null,
+        communication: null
       };
     }
 
@@ -345,20 +345,20 @@ export class A2ABridge {
         task: 'get-weather',
         parameters: {
           location: 'San Francisco, CA',
-          units: 'celsius',
-        },
+          units: 'celsius'
+        }
       },
       metadata: {
         messageId: 'test-message-123',
         timestamp: new Date().toISOString(),
-        priority: 'normal',
+        priority: 'normal'
       },
       atpSecurity: {
         encrypted: true,
         signed: true,
         trustVerified: true,
-        auditRequired: true,
-      },
+        auditRequired: true
+      }
     };
 
     const messageResponse = await this.communicationService.sendMessage(messageRequest);
@@ -367,7 +367,7 @@ export class A2ABridge {
     return {
       discovery: discoveryResponse,
       handshake: handshakeResponse,
-      communication: messageResponse,
+      communication: messageResponse
     };
   }
 }

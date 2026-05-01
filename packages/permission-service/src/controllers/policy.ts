@@ -15,7 +15,7 @@ export class PolicyController {
       const body = req.body as { document: ATPVisualPolicy; name?: string; description?: string } & { organizationId?: string; createdBy?: string };
       const doc = validateATPPolicy(body.document);
       const id = await this.storage.createPolicy({ ...doc, name: body.name || doc.name, description: body.description || doc.description }, body.createdBy || 'system');
-      
+
       // Invalidate related cache entries
       if (this.performance && this.cache) {
         await this.performance.invalidatePattern(`policy:*:${body.organizationId || 'default'}`);
@@ -25,7 +25,7 @@ export class PolicyController {
       if (this.performance) {
         await this.performance.recordRequest('create_policy', Date.now() - startTime);
       }
-      
+
       res.status(201).json({ id });
     } catch (e: any) {
       if (this.performance) {
@@ -55,11 +55,11 @@ export class PolicyController {
       }
 
       if (!policy) return res.status(404).json({ error: 'Not found' });
-      
+
       if (this.performance) {
         await this.performance.recordRequest('get_policy', Date.now() - startTime);
       }
-      
+
       res.json(policy);
     } catch (e: any) {
       if (this.performance) {
@@ -75,7 +75,7 @@ export class PolicyController {
         organizationId: (req.query.organizationId as string) || undefined,
         status: (req.query.status as any) || undefined,
         limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
-        offset: req.query.offset ? parseInt(req.query.offset as string) : 0,
+        offset: req.query.offset ? parseInt(req.query.offset as string) : 0
       });
       res.json({ total, policies });
     } catch (e: any) {

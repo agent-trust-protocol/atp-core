@@ -9,15 +9,15 @@ export class PermissionController {
     try {
       const request: PermissionRequest = req.body;
       const result = await this.permissionService.grantPermission(request);
-      
+
       res.status(201).json({
         success: true,
-        data: result,
+        data: result
       });
     } catch (error) {
       res.status(400).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -26,15 +26,15 @@ export class PermissionController {
     try {
       const check: PermissionCheck = req.body;
       const result = await this.permissionService.checkPermission(check);
-      
+
       res.json({
         success: true,
-        data: result,
+        data: result
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -43,15 +43,15 @@ export class PermissionController {
     try {
       const { token } = req.body;
       const result = await this.permissionService.validateToken(token);
-      
+
       res.json({
         success: true,
-        data: result,
+        data: result
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -60,15 +60,15 @@ export class PermissionController {
     try {
       const { did } = req.params;
       const permissions = await this.permissionService.listPermissions(did);
-      
+
       res.json({
         success: true,
-        data: permissions,
+        data: permissions
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -77,17 +77,17 @@ export class PermissionController {
     try {
       const { grantId } = req.params;
       const { revoker } = req.body;
-      
+
       await this.permissionService.revokePermission(grantId, revoker);
-      
+
       res.json({
         success: true,
-        message: 'Permission revoked successfully',
+        message: 'Permission revoked successfully'
       });
     } catch (error) {
       res.status(400).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -96,15 +96,15 @@ export class PermissionController {
     try {
       const rule: PolicyRule = req.body;
       await this.permissionService.addPolicyRule(rule);
-      
+
       res.status(201).json({
         success: true,
-        message: 'Policy rule added successfully',
+        message: 'Policy rule added successfully'
       });
     } catch (error) {
       res.status(400).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -113,15 +113,15 @@ export class PermissionController {
     try {
       const { ruleId } = req.params;
       await this.permissionService.removePolicyRule(ruleId);
-      
+
       res.json({
         success: true,
-        message: 'Policy rule removed successfully',
+        message: 'Policy rule removed successfully'
       });
     } catch (error) {
       res.status(400).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -129,15 +129,15 @@ export class PermissionController {
   async listPolicyRules(req: Request, res: Response): Promise<void> {
     try {
       const rules = await this.permissionService.listPolicyRules();
-      
+
       res.json({
         success: true,
-        data: rules,
+        data: rules
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }

@@ -21,7 +21,7 @@ export class StorageService extends BaseStorage {
         document = EXCLUDED.document,
         updated_at = EXCLUDED.updated_at
     `;
-    
+
     await this.db.query(query, [
       document.id,
       this.safeJsonStringify(document),
@@ -33,11 +33,11 @@ export class StorageService extends BaseStorage {
   async getDIDDocument(did: string): Promise<DIDDocument | null> {
     const query = 'SELECT document FROM atp_identity.did_documents WHERE did = $1';
     const result = await this.db.query(query, [did]);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
-    
+
     // PostgreSQL JSONB returns objects directly, not JSON strings
     const document = result.rows[0].document;
     return typeof document === 'string' ? this.safeJsonParse<DIDDocument>(document) : document as DIDDocument;
@@ -52,7 +52,7 @@ export class StorageService extends BaseStorage {
         public_key = EXCLUDED.public_key,
         updated_at = EXCLUDED.updated_at
     `;
-    
+
     await this.db.query(agentQuery, [
       keyPair.did,
       keyPair.publicKey,
@@ -66,17 +66,17 @@ export class StorageService extends BaseStorage {
       SET metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb
       WHERE did = $1
     `;
-    
+
     // Encrypt private key before storage
     const encryptedPrivateKey = encryptionService.encrypt(keyPair.privateKey);
-    
+
     const privateKeyMetadata = {
       privateKey: encryptedPrivateKey,
       keyRotated: keyPair.rotated || null,
       encrypted: true,
       encryptionVersion: 'v1'
     };
-    
+
     await this.db.query(metadataQuery, [
       keyPair.did,
       this.safeJsonStringify(privateKeyMetadata)
@@ -89,14 +89,14 @@ export class StorageService extends BaseStorage {
       FROM atp_identity.agents WHERE did = $1
     `;
     const result = await this.db.query(query, [did]);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
-    
+
     const row = result.rows[0];
     const metadata = this.safeJsonParse<any>(row.metadata) || {};
-    
+
     // Decrypt private key if it was encrypted
     let privateKey = '';
     if (metadata.encrypted && metadata.privateKey) {
@@ -116,46 +116,46 @@ export class StorageService extends BaseStorage {
         throw new Error('Private key not found and not encrypted');
       }
     }
-    
+
     return {
       did: row.did,
       publicKey: row.public_key,
       privateKey,
       created: row.created_at,
-      rotated: metadata.keyRotated,
+      rotated: metadata.keyRotated
     };
   }
 
   async rotateKey(did: string): Promise<{ publicKey: string; privateKey: string }> {
     const keyPair = await CryptoUtils.generateKeyPair();
     const now = new Date().toISOString();
-    
+
     // Update public key in agents table
     const updateAgentQuery = `
       UPDATE atp_identity.agents 
       SET public_key = $1, updated_at = $2
       WHERE did = $3
     `;
-    
+
     await this.db.query(updateAgentQuery, [keyPair.publicKey, now, did]);
-    
+
     // Update private key in metadata
     const updateMetadataQuery = `
       UPDATE atp_identity.agents 
       SET metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb
       WHERE did = $1
     `;
-    
+
     const privateKeyMetadata = {
       privateKey: keyPair.privateKey,
       keyRotated: now
     };
-    
+
     await this.db.query(updateMetadataQuery, [
       did,
       this.safeJsonStringify(privateKeyMetadata)
     ]);
-    
+
     return keyPair;
   }
 
@@ -173,7 +173,7 @@ export class StorageService extends BaseStorage {
     try {
       // Encrypt the plaintext private key
       const encryptedPrivateKey = encryptionService.encrypt(plaintextPrivateKey);
-      
+
       // Update metadata with encrypted key
       const encryptedMetadata = {
         privateKey: encryptedPrivateKey,

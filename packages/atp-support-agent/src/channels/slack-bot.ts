@@ -22,7 +22,7 @@ export class ATPSlackBot {
       token: config.token,
       signingSecret: config.signingSecret,
       appToken: config.appToken,
-      socketMode: true,
+      socketMode: true
     });
 
     this.supportAgent = new ATPSupportAgent(config.supportAgentConfig);
@@ -59,9 +59,9 @@ export class ATPSlackBot {
         customerId: command.user_id,
         channel: 'slack' as const,
         query: command.text,
-        context: { 
+        context: {
           channel: command.channel_id,
-          team: command.team_id 
+          team: command.team_id
         },
         timestamp: new Date(),
         priority: 'medium' as const,
@@ -69,7 +69,7 @@ export class ATPSlackBot {
       };
 
       const response = await this.supportAgent.processQuery(query);
-      
+
       await respond({
         response_type: 'in_channel',
         blocks: this.formatResponse(response)
@@ -79,9 +79,9 @@ export class ATPSlackBot {
     // /atp-status command
     this.app.command('/atp-status', async ({ ack, respond }) => {
       await ack();
-      
+
       const status = await this.getSystemStatus();
-      
+
       await respond({
         blocks: [
           {
@@ -102,14 +102,14 @@ export class ATPSlackBot {
     // /atp-escalate command
     this.app.command('/atp-escalate', async ({ command, ack, respond }) => {
       await ack();
-      
+
       // Create high-priority ticket
       const ticketId = await this.createEscalationTicket({
         userId: command.user_id,
         issue: command.text,
         channel: command.channel_id
       });
-      
+
       await respond({
         text: `🎫 Escalation ticket created: #${ticketId}\n` +
               `A human support engineer will contact you within 4 hours.`
@@ -124,15 +124,15 @@ export class ATPSlackBot {
     // Handle direct messages
     this.app.message(async ({ message, say }) => {
       if (message.subtype) return; // Ignore bot messages
-      
+
       const query = {
         id: `slack-dm-${Date.now()}`,
         customerId: message.user,
         channel: 'slack' as const,
         query: message.text || '',
-        context: { 
+        context: {
           thread_ts: message.thread_ts,
-          channel: message.channel 
+          channel: message.channel
         },
         timestamp: new Date(),
         priority: 'medium' as const,
@@ -140,7 +140,7 @@ export class ATPSlackBot {
       };
 
       const response = await this.supportAgent.processQuery(query);
-      
+
       await say({
         blocks: this.formatResponse(response),
         thread_ts: message.ts // Reply in thread
@@ -154,9 +154,9 @@ export class ATPSlackBot {
         customerId: event.user,
         channel: 'slack' as const,
         query: event.text.replace(/<@[^>]+>/g, '').trim(),
-        context: { 
+        context: {
           channel: event.channel,
-          thread_ts: event.thread_ts 
+          thread_ts: event.thread_ts
         },
         timestamp: new Date(),
         priority: 'medium' as const,
@@ -164,7 +164,7 @@ export class ATPSlackBot {
       };
 
       const response = await this.supportAgent.processQuery(query);
-      
+
       await say({
         blocks: this.formatResponse(response),
         thread_ts: event.ts
@@ -207,7 +207,7 @@ export class ATPSlackBot {
         text: {
           type: 'mrkdwn',
           text: '*📚 Relevant Documentation:*\n' +
-                response.documentationLinks.map((link: string) => 
+                response.documentationLinks.map((link: string) =>
                   `• <https://github.com/agent-trust-protocol/atp-core/tree/main/docs${link}|${link}>`
                 ).join('\n')
         }
@@ -221,7 +221,7 @@ export class ATPSlackBot {
         text: {
           type: 'mrkdwn',
           text: '*💡 Suggested Actions:*\n' +
-                response.suggestedActions.map((action: string) => 
+                response.suggestedActions.map((action: string) =>
                   `• ${action}`
                 ).join('\n')
         }

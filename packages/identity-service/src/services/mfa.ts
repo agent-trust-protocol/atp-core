@@ -44,7 +44,7 @@ export class IdentityMFAService {
    */
   async setupMFA(request: MFASetupRequest): Promise<MFASecretKey | null> {
     const client = await this.db.connect();
-    
+
     try {
       // Check if DID exists and is verified
       const didResult = await client.query(
@@ -69,7 +69,7 @@ export class IdentityMFAService {
       if (request.method === 'totp') {
         // Generate TOTP secret
         const secretKey = this.mfaService.generateSecretKey(request.accountName, request.did);
-        
+
         // Store MFA configuration (secret will be confirmed later)
         await client.query(`
           INSERT INTO atp_identity.mfa_configs (
@@ -122,7 +122,7 @@ export class IdentityMFAService {
    */
   async confirmMFASetup(did: string, verificationToken: string): Promise<boolean> {
     const client = await this.db.connect();
-    
+
     try {
       await client.query('BEGIN');
 
@@ -137,7 +137,7 @@ export class IdentityMFAService {
       }
 
       const mfaConfig = mfaResult.rows[0];
-      
+
       if (mfaConfig.method === 'totp') {
         const secret = this.decryptSecret(mfaConfig.secret_encrypted);
         const isValid = this.mfaService.validateMFASetup(secret, verificationToken);
@@ -181,7 +181,7 @@ export class IdentityMFAService {
    */
   async verifyMFA(request: MFAVerificationRequest): Promise<MFAVerificationResult> {
     const client = await this.db.connect();
-    
+
     try {
       // Get active MFA configuration
       const mfaResult = await client.query(`
@@ -206,7 +206,7 @@ export class IdentityMFAService {
         // Verify backup code
         const backupCodes = JSON.parse(mfaConfig.backup_codes_encrypted);
         result = this.mfaService.verifyBackupCode(request.backupCode, backupCodes);
-        
+
         if (result.valid) {
           // Remove used backup code
           const updatedCodes = backupCodes.filter((code: string) => {
@@ -257,7 +257,7 @@ export class IdentityMFAService {
    */
   async getMFAStatus(did: string): Promise<MFAStatus> {
     const client = await this.db.connect();
-    
+
     try {
       const result = await client.query(`
         SELECT method, backup_codes_encrypted, last_used_at, created_at
@@ -309,11 +309,11 @@ export class IdentityMFAService {
    */
   async disableMFA(did: string, verificationToken: string): Promise<boolean> {
     const client = await this.db.connect();
-    
+
     try {
       // First verify current MFA
       const verifyResult = await this.verifyMFA({ did, token: verificationToken });
-      
+
       if (!verifyResult.valid) {
         return false;
       }
@@ -355,13 +355,13 @@ export class IdentityMFAService {
    */
   async regenerateBackupCodes(did: string, verificationToken: string): Promise<string[] | null> {
     const verifyResult = await this.verifyMFA({ did, token: verificationToken });
-    
+
     if (!verifyResult.valid) {
       return null;
     }
 
     const client = await this.db.connect();
-    
+
     try {
       const newSecretKey = this.mfaService.generateSecretKey('backup-regen', did);
       const encryptedCodes = this.mfaService.encryptBackupCodes(newSecretKey.backupCodes);
@@ -386,7 +386,7 @@ export class IdentityMFAService {
     // This would integrate with the audit logger service
     // For now, we'll log to the database
     const client = await this.db.connect();
-    
+
     try {
       await client.query(`
         INSERT INTO atp_identity.mfa_audit_log (

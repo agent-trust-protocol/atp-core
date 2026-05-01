@@ -8,7 +8,7 @@ describe('CryptoUtils', () => {
   describe('generateKeyPair', () => {
     it('should generate a valid Ed25519 key pair', async () => {
       const keyPair = await CryptoUtils.generateKeyPair(false);
-      
+
       expect(keyPair).toHaveProperty('publicKey');
       expect(keyPair).toHaveProperty('privateKey');
       expect(keyPair).toHaveProperty('quantumSafe');
@@ -21,7 +21,7 @@ describe('CryptoUtils', () => {
 
     it('should generate a valid hybrid quantum-safe key pair', async () => {
       const keyPair = await CryptoUtils.generateKeyPair(true);
-      
+
       expect(keyPair).toHaveProperty('publicKey');
       expect(keyPair).toHaveProperty('privateKey');
       expect(keyPair).toHaveProperty('quantumSafe');
@@ -45,7 +45,7 @@ describe('CryptoUtils', () => {
     it('should generate different key pairs on each call', async () => {
       const keyPair1 = await CryptoUtils.generateKeyPair(false);
       const keyPair2 = await CryptoUtils.generateKeyPair(false);
-      
+
       expect(keyPair1.publicKey).not.toBe(keyPair2.publicKey);
       expect(keyPair1.privateKey).not.toBe(keyPair2.privateKey);
     });
@@ -53,7 +53,7 @@ describe('CryptoUtils', () => {
 
   describe('signData and verifySignature', () => {
     let keyPair: { publicKey: string; privateKey: string };
-    
+
     beforeAll(async () => {
       keyPair = await CryptoUtils.generateKeyPair();
     });
@@ -61,10 +61,10 @@ describe('CryptoUtils', () => {
     it('should sign and verify string data', async () => {
       const data = 'Hello, ATP!';
       const signature = await CryptoUtils.signData(data, keyPair.privateKey);
-      
+
       expect(typeof signature).toBe('string');
       expect(signature).toMatch(/^[0-9a-fA-F]+$/);
-      
+
       const isValid = await CryptoUtils.verifySignature(data, signature, keyPair.publicKey);
       expect(isValid).toBe(true);
     });
@@ -72,7 +72,7 @@ describe('CryptoUtils', () => {
     it('should sign and verify Buffer data', async () => {
       const data = Buffer.from('Hello, ATP!', 'utf8');
       const signature = await CryptoUtils.signData(data, keyPair.privateKey);
-      
+
       const isValid = await CryptoUtils.verifySignature(data, signature, keyPair.publicKey);
       expect(isValid).toBe(true);
     });
@@ -81,7 +81,7 @@ describe('CryptoUtils', () => {
       const data = 'Hello, ATP!';
       const signature = await CryptoUtils.signData(data, keyPair.privateKey);
       const wrongSignature = signature.replace('0', '1');
-      
+
       const isValid = await CryptoUtils.verifySignature(data, wrongSignature, keyPair.publicKey);
       expect(isValid).toBe(false);
     });
@@ -90,7 +90,7 @@ describe('CryptoUtils', () => {
       const otherKeyPair = await CryptoUtils.generateKeyPair();
       const data = 'Hello, ATP!';
       const signature = await CryptoUtils.signData(data, keyPair.privateKey);
-      
+
       const isValid = await CryptoUtils.verifySignature(data, signature, otherKeyPair.publicKey);
       expect(isValid).toBe(false);
     });
@@ -98,7 +98,7 @@ describe('CryptoUtils', () => {
     it('should fail verification with modified data', async () => {
       const data = 'Hello, ATP!';
       const signature = await CryptoUtils.signData(data, keyPair.privateKey);
-      
+
       const isValid = await CryptoUtils.verifySignature('Modified data', signature, keyPair.publicKey);
       expect(isValid).toBe(false);
     });
@@ -109,7 +109,7 @@ describe('CryptoUtils', () => {
       const data = 'Hello, ATP!';
       const hash1 = CryptoUtils.hash(data);
       const hash2 = CryptoUtils.hash(data);
-      
+
       expect(hash1).toBe(hash2);
       expect(typeof hash1).toBe('string');
       expect(hash1).toMatch(/^[0-9a-fA-F]{64}$/); // SHA-256 produces 64 char hex
@@ -118,7 +118,7 @@ describe('CryptoUtils', () => {
     it('should hash Buffer data', () => {
       const data = Buffer.from('Hello, ATP!', 'utf8');
       const hash = CryptoUtils.hash(data);
-      
+
       expect(typeof hash).toBe('string');
       expect(hash).toMatch(/^[0-9a-fA-F]{64}$/);
     });
@@ -126,7 +126,7 @@ describe('CryptoUtils', () => {
     it('should produce different hashes for different data', () => {
       const hash1 = CryptoUtils.hash('data1');
       const hash2 = CryptoUtils.hash('data2');
-      
+
       expect(hash1).not.toBe(hash2);
     });
   });
@@ -134,7 +134,7 @@ describe('CryptoUtils', () => {
   describe('randomBytes', () => {
     it('should generate random bytes of specified length', () => {
       const bytes = CryptoUtils.randomBytes(32);
-      
+
       expect(Buffer.isBuffer(bytes)).toBe(true);
       expect(bytes.length).toBe(32);
     });
@@ -142,7 +142,7 @@ describe('CryptoUtils', () => {
     it('should generate different random bytes on each call', () => {
       const bytes1 = CryptoUtils.randomBytes(16);
       const bytes2 = CryptoUtils.randomBytes(16);
-      
+
       expect(bytes1.equals(bytes2)).toBe(false);
     });
   });
@@ -150,14 +150,14 @@ describe('CryptoUtils', () => {
   describe('randomString', () => {
     it('should generate random hex string of default length', () => {
       const str = CryptoUtils.randomString();
-      
+
       expect(typeof str).toBe('string');
       expect(str).toMatch(/^[0-9a-fA-F]{32}$/); // Default length 32
     });
 
     it('should generate random hex string of specified length', () => {
       const str = CryptoUtils.randomString(16);
-      
+
       expect(typeof str).toBe('string');
       expect(str).toMatch(/^[0-9a-fA-F]{16}$/);
       expect(str.length).toBe(16);
@@ -166,7 +166,7 @@ describe('CryptoUtils', () => {
     it('should generate different strings on each call', () => {
       const str1 = CryptoUtils.randomString(16);
       const str2 = CryptoUtils.randomString(16);
-      
+
       expect(str1).not.toBe(str2);
     });
   });
@@ -176,7 +176,7 @@ describe('CryptoUtils', () => {
       const password = 'mypassword';
       const salt = 'mysalt';
       const key = CryptoUtils.deriveKey(password, salt);
-      
+
       expect(typeof key).toBe('string');
       expect(key).toMatch(/^[0-9a-fA-F]{64}$/);
     });
@@ -186,7 +186,7 @@ describe('CryptoUtils', () => {
       const salt = 'mysalt';
       const key1 = CryptoUtils.deriveKey(password, salt);
       const key2 = CryptoUtils.deriveKey(password, salt);
-      
+
       expect(key1).toBe(key2);
     });
 
@@ -194,7 +194,7 @@ describe('CryptoUtils', () => {
       const password = 'mypassword';
       const key1 = CryptoUtils.deriveKey(password, 'salt1');
       const key2 = CryptoUtils.deriveKey(password, 'salt2');
-      
+
       expect(key1).not.toBe(key2);
     });
   });
@@ -203,7 +203,7 @@ describe('CryptoUtils', () => {
     it('should create fingerprint from public key', () => {
       const publicKey = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
       const fingerprint = CryptoUtils.createKeyFingerprint(publicKey);
-      
+
       expect(typeof fingerprint).toBe('string');
       expect(fingerprint).toMatch(/^[0-9a-fA-F]{16}$/);
       expect(fingerprint.length).toBe(16);
@@ -213,7 +213,7 @@ describe('CryptoUtils', () => {
       const publicKey = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
       const fingerprint1 = CryptoUtils.createKeyFingerprint(publicKey);
       const fingerprint2 = CryptoUtils.createKeyFingerprint(publicKey);
-      
+
       expect(fingerprint1).toBe(fingerprint2);
     });
   });
@@ -237,21 +237,21 @@ describe('CryptoUtils', () => {
     it('should return true for equal strings', () => {
       const str1 = 'hello';
       const str2 = 'hello';
-      
+
       expect(CryptoUtils.constantTimeEqual(str1, str2)).toBe(true);
     });
 
     it('should return false for different strings', () => {
       const str1 = 'hello';
       const str2 = 'world';
-      
+
       expect(CryptoUtils.constantTimeEqual(str1, str2)).toBe(false);
     });
 
     it('should return false for strings of different lengths', () => {
       const str1 = 'hello';
       const str2 = 'hello world';
-      
+
       expect(CryptoUtils.constantTimeEqual(str1, str2)).toBe(false);
     });
 

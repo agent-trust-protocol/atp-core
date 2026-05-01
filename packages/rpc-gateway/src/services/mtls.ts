@@ -43,7 +43,7 @@ export class MTLSService {
       cert: this.config.cert,
       key: this.config.key,
       requestCert: this.config.requestCert,
-      rejectUnauthorized: this.config.rejectUnauthorized,
+      rejectUnauthorized: this.config.rejectUnauthorized
     };
 
     return https.createServer(tlsOptions, app);
@@ -51,7 +51,7 @@ export class MTLSService {
 
   extractClientCertificate(req: IncomingMessage): ClientCertificate | null {
     const socket = req.socket as TLSSocket;
-    
+
     if (!socket.authorized && this.config.rejectUnauthorized) {
       console.warn('Client certificate not authorized:', socket.authorizationError);
       return null;
@@ -72,7 +72,7 @@ export class MTLSService {
       valid_to: cert.valid_to,
       fingerprint: cert.fingerprint,
       fingerprint256: cert.fingerprint256 ?? undefined,
-      did: did || undefined,
+      did: did || undefined
     };
   }
 
@@ -80,7 +80,7 @@ export class MTLSService {
     try {
       // Enhanced certificate validation with DID-CA integration
       const validationResult = await this.performEnhancedCertificateValidation(certificate);
-      
+
       // Update certificate with validation results
       certificate.verified = validationResult.valid;
       certificate.trustLevel = validationResult.trustLevel;
@@ -123,7 +123,7 @@ export class MTLSService {
         certificate.did!,
         certificate.fingerprint256!
       );
-      
+
       if (!isValidBinding) {
         return { valid: false, error: 'DID-certificate binding verification failed' };
       }
@@ -149,13 +149,13 @@ export class MTLSService {
     try {
       // Get DID certificates from CA
       const didCertificates = await this.didCA.getCertificateByDID(certificate.did!);
-      
+
       if (!didCertificates || didCertificates.length === 0) {
         return { valid: false, error: 'No DID certificates found' };
       }
 
       // Find matching certificate by fingerprint or public key
-      const matchingCert = didCertificates.find(cert => 
+      const matchingCert = didCertificates.find(cert =>
         cert.fingerprint === certificate.fingerprint256 ||
         this.certificateMatchesPublicKey(certificate, cert.publicKey)
       );
@@ -166,11 +166,11 @@ export class MTLSService {
 
       // Verify the DID certificate through CA
       const verification = await this.didCA.verifyCertificate(matchingCert);
-      
+
       if (!verification.valid) {
-        return { 
-          valid: false, 
-          error: verification.reason || 'DID certificate verification failed' 
+        return {
+          valid: false,
+          error: verification.reason || 'DID certificate verification failed'
         };
       }
 
@@ -180,9 +180,9 @@ export class MTLSService {
         didCertificate: matchingCert
       };
     } catch (error) {
-      return { 
-        valid: false, 
-        error: `DID certificate validation error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+      return {
+        valid: false,
+        error: `DID certificate validation error: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   }
@@ -196,7 +196,7 @@ export class MTLSService {
         return false;
       }
       const keyHash = require('crypto').createHash('sha256').update(publicKey).digest('hex');
-      
+
       // For now, we'll rely on fingerprint matching as the primary method
       return certFingerprint.toLowerCase().includes(keyHash.slice(0, 16).toLowerCase());
     } catch (error) {
@@ -235,7 +235,7 @@ export class MTLSService {
       if (!response.ok) {
         return null;
       }
-      
+
       const result = await response.json() as any;
       return result.success ? result.data : null;
     } catch (error) {
@@ -252,7 +252,7 @@ export class MTLSService {
       }
 
       // Look for service with type 'TLSCertificate' that matches fingerprint
-      const tlsServices = didDocument.service?.filter((s: any) => 
+      const tlsServices = didDocument.service?.filter((s: any) =>
         s.type === 'TLSCertificate' || s.type === 'X509Certificate'
       );
 
@@ -317,7 +317,7 @@ export class MTLSService {
   async revokeDIDCertificate(certificateId: string, reason: string, revokerDID: string): Promise<void> {
     try {
       await this.didCA.revokeCertificate(certificateId, reason, revokerDID);
-      
+
       // Log the revocation event
       await this.logCertificateEvent('certificate-revoked', {
         certificateId,
@@ -360,15 +360,15 @@ export class MTLSService {
       await fetch('http://localhost:3005/audit/log', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           source: 'mtls-service',
           action,
           resource: 'certificate-management',
           actor: 'rpc-gateway',
-          details,
-        }),
+          details
+        })
       });
     } catch (error) {
       console.warn('Failed to log certificate event:', error);
@@ -378,13 +378,13 @@ export class MTLSService {
   static loadTLSConfig(configPath: string): MTLSConfig {
     try {
       const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-      
+
       return {
         ca: config.ca.map((caPath: string) => fs.readFileSync(caPath, 'utf8')),
         cert: fs.readFileSync(config.cert, 'utf8'),
         key: fs.readFileSync(config.key, 'utf8'),
         requestCert: config.requestCert ?? true,
-        rejectUnauthorized: config.rejectUnauthorized ?? false,
+        rejectUnauthorized: config.rejectUnauthorized ?? false
       };
     } catch (error) {
       console.error('Failed to load TLS configuration:', error);

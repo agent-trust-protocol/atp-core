@@ -22,7 +22,7 @@ export class StorageService extends BaseStorage {
         expires_at = EXCLUDED.expires_at,
         status = EXCLUDED.status
     `;
-    
+
     // Map the grant to the PostgreSQL schema structure
     await this.db.query(query, [
       grant.grantee,
@@ -41,11 +41,11 @@ export class StorageService extends BaseStorage {
       FROM atp_permissions.grants WHERE id = $1
     `;
     const result = await this.db.query(query, [grantId]);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
-    
+
     return this.rowToGrant(result.rows[0]);
   }
 
@@ -56,7 +56,7 @@ export class StorageService extends BaseStorage {
       ORDER BY granted_at DESC
     `;
     const result = await this.db.query(query, [subject]);
-    
+
     return result.rows.map((row: any) => this.rowToGrant(row));
   }
 
@@ -67,7 +67,7 @@ export class StorageService extends BaseStorage {
       ORDER BY granted_at DESC
     `;
     const result = await this.db.query(query, [grantor]);
-    
+
     return result.rows.map((row: any) => this.rowToGrant(row));
   }
 
@@ -89,14 +89,14 @@ export class StorageService extends BaseStorage {
         policy_document = EXCLUDED.policy_document,
         updated_at = NOW()
     `;
-    
+
     const policyDocument = {
       condition: rule.condition,
       effect: rule.effect,
       priority: rule.priority,
       active: rule.active
     };
-    
+
     await this.db.query(query, [
       rule.id,
       rule.name,
@@ -120,7 +120,7 @@ export class StorageService extends BaseStorage {
       ORDER BY created_at DESC
     `;
     const result = await this.db.query(query);
-    
+
     return result.rows.map((row: any) => {
       // PostgreSQL JSONB returns objects, not strings
       const policyDoc = row.policy_document || {};
@@ -130,7 +130,7 @@ export class StorageService extends BaseStorage {
         condition: policyDoc.condition || '',
         effect: policyDoc.effect || 'deny',
         priority: policyDoc.priority || 0,
-        active: row.status === 'active',
+        active: row.status === 'active'
       };
     });
   }
@@ -145,7 +145,7 @@ export class StorageService extends BaseStorage {
       conditions: undefined, // Not stored in current schema
       expiresAt: row.expires_at ? new Date(row.expires_at).getTime() : undefined,
       createdAt: new Date(row.granted_at).getTime(),
-      revokedAt: row.status === 'revoked' ? Date.now() : undefined,
+      revokedAt: row.status === 'revoked' ? Date.now() : undefined
     };
   }
 }

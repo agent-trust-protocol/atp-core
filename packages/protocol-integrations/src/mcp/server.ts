@@ -8,7 +8,7 @@ import {
   ATPMCPTool,
   ATPMCPServerConfig,
   MCPAuthContext,
-  MCPErrorCode,
+  MCPErrorCode
 } from '../types/mcp.js';
 import { TrustLevel, TrustLevelManager } from '@atp/shared';
 
@@ -42,7 +42,7 @@ export class ATPMCPServer {
         protocol: 'Agent Trust Protocol™',
         mcp: 'Model Context Protocol',
         tools: this.tools.size,
-        clients: this.clients.size,
+        clients: this.clients.size
       });
     });
 
@@ -57,31 +57,31 @@ export class ATPMCPServer {
           console.error('MCP_TOOLS_API_KEY not configured');
           return res.status(500).json({
             success: false,
-            error: 'Server configuration error',
+            error: 'Server configuration error'
           });
         }
 
         if (!authHeader || authHeader.replace('Bearer ', '') !== apiKey) {
           return res.status(401).json({
             success: false,
-            error: 'Unauthorized - Valid API key required',
+            error: 'Unauthorized - Valid API key required'
           });
         }
 
         const tool = req.body as ATPMCPTool;
         this.registerTool(tool);
-        
+
         // Notify all clients about tool list change
         this.broadcast({
           jsonrpc: '2.0',
-          method: 'tools/list_changed',
+          method: 'tools/list_changed'
         });
 
         res.json({ success: true, message: 'Tool registered successfully' });
       } catch (error) {
         res.status(400).json({
           success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: error instanceof Error ? error.message : 'Unknown error'
         });
       }
     });
@@ -93,7 +93,7 @@ export class ATPMCPServer {
 
       // Extract ATP™ authentication headers
       const authContext = this.extractAuthContext(request.headers);
-      
+
       if (!authContext) {
         ws.close(1008, 'Authentication required');
         return;
@@ -142,7 +142,7 @@ export class ATPMCPServer {
       capabilities: this.getCapabilitiesForTrustLevel(trustLevel),
       authenticated: true,
       authMethod: authMethod as any,
-      sessionId,
+      sessionId
     };
   }
 
@@ -150,8 +150,8 @@ export class ATPMCPServer {
     // TODO: Get capabilities from ATP™ identity service
     // For now, return default capabilities based on trust level
     const level = trustLevel as TrustLevel;
-    return TrustLevelManager.hasCapability(level, 'basic-operations') 
-      ? ['basic-operations', 'read-public'] 
+    return TrustLevelManager.hasCapability(level, 'basic-operations')
+      ? ['basic-operations', 'read-public']
       : ['read-public'];
   }
 
@@ -206,7 +206,7 @@ export class ATPMCPServer {
     await this.logAuditEvent(authContext, 'mcp-client-initialized', {
       clientInfo: params.clientInfo,
       capabilities: params.capabilities,
-      protocolVersion: params.protocolVersion,
+      protocolVersion: params.protocolVersion
     });
 
     return {
@@ -215,19 +215,19 @@ export class ATPMCPServer {
         tools: { listChanged: true },
         resources: { subscribe: false, listChanged: false },
         prompts: { listChanged: false },
-        logging: { level: 'info' },
+        logging: { level: 'info' }
       },
       serverInfo: {
         name: this.config.name,
         version: this.config.version,
         description: this.config.description,
-        protocol: 'Agent Trust Protocol™',
+        protocol: 'Agent Trust Protocol™'
       },
       atpInfo: {
         serverDID: this.config.atpConfig.serverDID,
         supportedAuthMethods: this.config.atpConfig.supportedAuthMethods,
-        trustLevelRequired: this.config.atpConfig.trustLevel,
-      },
+        trustLevelRequired: this.config.atpConfig.trustLevel
+      }
     };
   }
 
@@ -254,7 +254,7 @@ export class ATPMCPServer {
     await this.logAuditEvent(authContext, 'mcp-tools-listed', {
       totalTools: this.tools.size,
       availableTools: availableTools.length,
-      filteredTools: availableTools.map(t => t.name),
+      filteredTools: availableTools.map(t => t.name)
     });
 
     return {
@@ -267,15 +267,15 @@ export class ATPMCPServer {
           trustLevelRequired: tool.trustLevelRequired,
           capabilities: tool.capabilities,
           auditRequired: tool.auditRequired,
-          rateLimits: tool.rateLimits,
-        },
-      })),
+          rateLimits: tool.rateLimits
+        }
+      }))
     };
   }
 
   private async handleToolCall(params: any, authContext: MCPAuthContext): Promise<any> {
     const { name, arguments: args, atpContext } = params;
-    
+
     const tool = this.tools.get(name);
     if (!tool) {
       throw new Error(`Tool ${name} not found`);
@@ -288,7 +288,7 @@ export class ATPMCPServer {
     await this.logAuditEvent(authContext, 'mcp-tool-execution-start', {
       toolName: name,
       arguments: args,
-      requestId: atpContext?.requestId,
+      requestId: atpContext?.requestId
     });
 
     const startTime = Date.now();
@@ -303,7 +303,7 @@ export class ATPMCPServer {
         toolName: name,
         duration: Date.now() - startTime,
         requestId: atpContext?.requestId,
-        resultSize: JSON.stringify(result).length,
+        resultSize: JSON.stringify(result).length
       });
 
       return result;
@@ -313,7 +313,7 @@ export class ATPMCPServer {
         toolName: name,
         duration: Date.now() - startTime,
         requestId: atpContext?.requestId,
-        error: error instanceof Error ? error.message : String(error),
+        error: error instanceof Error ? error.message : String(error)
       });
 
       throw error;
@@ -325,7 +325,7 @@ export class ATPMCPServer {
     if (tool.trustLevelRequired) {
       const userLevel = auth.trustLevel as TrustLevel;
       const requiredLevel = tool.trustLevelRequired as TrustLevel;
-      
+
       if (!TrustLevelManager.isAuthorized(userLevel, requiredLevel)) {
         throw new Error(`Insufficient trust level. Required: ${requiredLevel}, Current: ${userLevel}`);
       }
@@ -333,10 +333,10 @@ export class ATPMCPServer {
 
     // Check capability requirements
     if (tool.capabilities && tool.capabilities.length > 0) {
-      const hasRequiredCapabilities = tool.capabilities.every(cap => 
+      const hasRequiredCapabilities = tool.capabilities.every(cap =>
         auth.capabilities.includes(cap)
       );
-      
+
       if (!hasRequiredCapabilities) {
         const missing = tool.capabilities.filter(cap => !auth.capabilities.includes(cap));
         throw new Error(`Missing required capabilities: ${missing.join(', ')}`);
@@ -347,7 +347,7 @@ export class ATPMCPServer {
   private async executeTool(tool: ATPMCPTool, args: any, authContext: MCPAuthContext): Promise<any> {
     // This is where the actual tool execution would happen
     // Implementation depends on the specific tool type
-    
+
     // For demo purposes, return a mock response
     return {
       success: true,
@@ -355,7 +355,7 @@ export class ATPMCPServer {
       timestamp: new Date().toISOString(),
       executedBy: authContext.clientDID,
       trustLevel: authContext.trustLevel,
-      arguments: args,
+      arguments: args
     };
   }
 
@@ -363,7 +363,7 @@ export class ATPMCPServer {
     const response: MCPResponse = {
       jsonrpc: '2.0',
       result,
-      id,
+      id
     };
     ws.send(JSON.stringify(response));
   }
@@ -372,7 +372,7 @@ export class ATPMCPServer {
     const response: MCPResponse = {
       jsonrpc: '2.0',
       error: { code, message, data },
-      id: id || 0,
+      id: id || 0
     };
     ws.send(JSON.stringify(response));
   }
@@ -395,7 +395,7 @@ export class ATPMCPServer {
       await fetch('http://localhost:3005/audit/log', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           source: 'mcp-server',
@@ -406,9 +406,9 @@ export class ATPMCPServer {
             trustLevel: authContext.trustLevel,
             authMethod: authContext.authMethod,
             sessionId: authContext.sessionId,
-            ...details,
-          },
-        }),
+            ...details
+          }
+        })
       });
     } catch (error) {
       console.warn('Failed to log MCP audit event:', error);

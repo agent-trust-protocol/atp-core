@@ -26,7 +26,7 @@ export class AuthService {
   async authenticateRequest(req: IncomingMessage, authHeader?: string): Promise<AuthContext> {
     const context: AuthContext = {
       authenticated: false,
-      authMethod: 'none',
+      authMethod: 'none'
     };
 
     // Try mTLS authentication first
@@ -81,7 +81,7 @@ export class AuthService {
 
       // Create challenge message
       const challenge = `${authData.did}:${authData.timestamp}`;
-      
+
       // Verify signature against DID document
       const didDocument = await this.resolveDID(authData.did);
       if (!didDocument) {
@@ -133,7 +133,7 @@ export class AuthService {
       if (!response.ok) {
         return null;
       }
-      
+
       const result = await response.json() as any;
       return (result as any).success ? (result as any).data : null;
     } catch (error) {
@@ -175,13 +175,13 @@ export class AuthService {
       // Import crypto setup
       const { initializeCrypto } = await import('@atp/shared');
       initializeCrypto();
-      
+
       const crypto = await import('@noble/ed25519');
-      
+
       const messageBytes = Buffer.from(message, 'utf8');
       const signatureBytes = Buffer.from(signatureHex, 'hex');
       const publicKeyBytes = Buffer.from(publicKeyHex, 'hex');
-      
+
       return await crypto.verify(signatureBytes, messageBytes, publicKeyBytes);
     } catch (error) {
       console.error('Signature verification failed:', error);
@@ -193,7 +193,7 @@ export class AuthService {
     const alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
     let num = BigInt(0);
     let multi = BigInt(1);
-    
+
     for (let i = str.length - 1; i >= 0; i--) {
       const char = str[i];
       const charIndex = alphabet.indexOf(char);
@@ -203,19 +203,19 @@ export class AuthService {
       num += BigInt(charIndex) * multi;
       multi *= 58n;
     }
-    
+
     // Convert to bytes
     const bytes: number[] = [];
     while (num > 0) {
       bytes.unshift(Number(num % 256n));
       num = num / 256n;
     }
-    
+
     // Add leading zeros
     for (let i = 0; i < str.length && str[i] === '1'; i++) {
       bytes.unshift(0);
     }
-    
+
     return new Uint8Array(bytes);
   }
 
@@ -236,7 +236,7 @@ export class AuthService {
       const trustLevels = ['untrusted', 'basic', 'verified', 'premium', 'enterprise'];
       const currentLevel = trustLevels.indexOf(context.trustLevel);
       const requiredLevel = trustLevels.indexOf(minimumTrustLevel);
-      
+
       if (currentLevel < requiredLevel) {
         return false;
       }

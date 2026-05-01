@@ -56,7 +56,7 @@ export class ReportGenerator {
    */
   public async generateTenantReport(tenantId: string, config: ReportConfig): Promise<Report> {
     const startTime = Date.now();
-    
+
     try {
       logger.info('Generating tenant report', { tenantId, type: config.type });
 
@@ -137,7 +137,7 @@ export class ReportGenerator {
    */
   public async generateAdminReport(config: ReportConfig): Promise<Report> {
     const startTime = Date.now();
-    
+
     try {
       logger.info('Generating admin report', { type: config.type });
 
@@ -244,7 +244,7 @@ export class ReportGenerator {
 
   private async generateUsageReport(tenantId: string, config: ReportConfig): Promise<any> {
     const { start, end } = config.period;
-    
+
     // Get usage history with daily granularity
     const usageHistory = await this.analyticsEngine.getUsageHistory(
       tenantId,
@@ -279,7 +279,7 @@ export class ReportGenerator {
 
   private async generatePerformanceReport(tenantId: string, config: ReportConfig): Promise<any> {
     const period = this.formatPeriodForAPI(config.period.start, config.period.end);
-    
+
     const performanceMetrics = await this.analyticsEngine.getPerformanceMetrics(tenantId, period);
     const errorAnalytics = await this.analyticsEngine.getErrorAnalytics(tenantId, period);
 
@@ -311,7 +311,7 @@ export class ReportGenerator {
     // Calculate usage costs
     const { start, end } = config.period;
     const usageHistory = await this.analyticsEngine.getUsageHistory(tenantId, start, end, 'daily');
-    
+
     const totalRequests = usageHistory.reduce((sum, day) => sum + day.requests, 0);
     const totalBandwidth = usageHistory.reduce((sum, day) => sum + day.bandwidth, 0);
 
@@ -514,7 +514,7 @@ export class ReportGenerator {
   private formatPeriodForAPI(start: Date, end: Date): string {
     const diffMs = end.getTime() - start.getTime();
     const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays <= 1) return '24h';
     if (diffDays <= 7) return '7d';
     if (diffDays <= 30) return '30d';
@@ -543,7 +543,7 @@ export class ReportGenerator {
 
   private generateSecurityRecommendations(securityEvents: any[], errorAnalytics: any): string[] {
     const recommendations: string[] = [];
-    
+
     // Check for high 401/403 rates
     const authErrors = securityEvents.filter(e => [401, 403].includes(e._id.statusCode));
     if (authErrors.length > 0) {

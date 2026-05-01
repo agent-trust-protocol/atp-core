@@ -158,7 +158,7 @@ describe('Quantum-Safe Sign/Verify Roundtrip', () => {
     const messages = [
       'short',
       'a'.repeat(1000), // 1KB message
-      JSON.stringify({ agent: 'did:atp:abc', action: 'execute', resource: '/api/data' }),
+      JSON.stringify({ agent: 'did:atp:abc', action: 'execute', resource: '/api/data' })
     ];
     for (const msg of messages) {
       const sig = await CryptoUtils.signData(msg, kp.privateKey, true);

@@ -120,7 +120,7 @@ export abstract class UniversalAdapter extends EventEmitter {
       } catch (error) {
         this.connectionStatus.retryCount++;
         this.connectionStatus.lastError = error instanceof Error ? error.message : String(error);
-        
+
         // Exponential backoff
         const nextDelay = Math.min(delay * Math.pow(2, this.connectionStatus.retryCount), 60000);
         this.startReconnection(nextDelay);
@@ -160,7 +160,7 @@ export abstract class UniversalAdapter extends EventEmitter {
     if (latency !== undefined) {
       const currentAvg = this.connectionStatus.metrics.averageLatency;
       const totalMessages = this.connectionStatus.metrics.messagesSent + this.connectionStatus.metrics.messagesReceived;
-      this.connectionStatus.metrics.averageLatency = 
+      this.connectionStatus.metrics.averageLatency =
         (currentAvg * (totalMessages - 1) + latency) / totalMessages;
     }
   }
@@ -187,7 +187,7 @@ export abstract class UniversalAdapter extends EventEmitter {
     this.connectionStatus.lastConnected = Date.now();
     this.connectionStatus.lastError = undefined;
     this.stopReconnection();
-    
+
     this.emit('connected', {
       protocol: this.config.protocol,
       timestamp: Date.now()
@@ -199,11 +199,11 @@ export abstract class UniversalAdapter extends EventEmitter {
    */
   protected onDisconnected(error?: Error): void {
     this.connectionStatus.connected = false;
-    
+
     if (error) {
       this.connectionStatus.lastError = error.message;
       this.updateMetrics('error');
-      
+
       this.emit('error', {
         protocol: this.config.protocol,
         error: error.message,
@@ -228,7 +228,7 @@ export abstract class UniversalAdapter extends EventEmitter {
    */
   protected onMessageReceived(message: UniversalMessage): void {
     this.updateMetrics('received');
-    
+
     this.emit('messageReceived', {
       protocol: this.config.protocol,
       message,
@@ -241,7 +241,7 @@ export abstract class UniversalAdapter extends EventEmitter {
    */
   protected onMessageSent(messageId: string, latency?: number): void {
     this.updateMetrics('sent', latency);
-    
+
     this.emit('messageSent', {
       protocol: this.config.protocol,
       messageId,
@@ -255,7 +255,7 @@ export abstract class UniversalAdapter extends EventEmitter {
    */
   async cleanup(): Promise<void> {
     this.stopReconnection();
-    
+
     // Clear all timeouts
     for (const timeout of this.retryTimeouts.values()) {
       clearTimeout(timeout);
@@ -297,7 +297,7 @@ export class MockAdapter extends UniversalAdapter {
     }
 
     const messageId = `mock-${Date.now()}-${Math.random().toString(36).substring(2)}`;
-    
+
     // Simulate async sending
     setTimeout(() => {
       this.onMessageSent(messageId, Math.random() * 100);

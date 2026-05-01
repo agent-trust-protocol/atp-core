@@ -8,12 +8,12 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { createServer } from 'http';
 import { AGPAdapter } from './adapter';
 import { AGPSecurityWrapper } from './security-wrapper';
-import { 
-  AGPGatewayConfig, 
-  AGPMessage, 
-  AGPAgent, 
+import {
+  AGPGatewayConfig,
+  AGPMessage,
+  AGPAgent,
   AGPMessageType,
-  SecuredAGPMessage 
+  SecuredAGPMessage
 } from './types';
 
 export class AGPGateway extends EventEmitter {
@@ -291,7 +291,7 @@ export class AGPGateway extends EventEmitter {
 
         // Verify the message
         const verification = await this.security.verifyMessage(securedMessage);
-        
+
         if (!verification.isValid) {
           ws.send(JSON.stringify({
             messageType: AGPMessageType.ERROR,
@@ -310,7 +310,7 @@ export class AGPGateway extends EventEmitter {
 
         // Process the verified message
         await this.adapter.processIncomingMessage(securedMessage);
-        
+
         // Route to intended recipients
         await this.routeMessage(securedMessage);
 
@@ -341,8 +341,8 @@ export class AGPGateway extends EventEmitter {
   }
 
   private async routeMessage(securedMessage: SecuredAGPMessage): Promise<void> {
-    const targets = Array.isArray(securedMessage.targetAgent) 
-      ? securedMessage.targetAgent 
+    const targets = Array.isArray(securedMessage.targetAgent)
+      ? securedMessage.targetAgent
       : [securedMessage.targetAgent];
 
     for (const targetAgent of targets) {
@@ -363,7 +363,7 @@ export class AGPGateway extends EventEmitter {
     setInterval(() => {
       const status = this.getStatus();
       this.emit('metricsUpdate', status);
-      
+
       // Optional: Send metrics to external monitoring system
       // this.sendMetricsToMonitoring(status);
     }, 30000); // Collect metrics every 30 seconds

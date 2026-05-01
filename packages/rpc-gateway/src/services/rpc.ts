@@ -9,28 +9,28 @@ export class RPCService {
       name: 'identity',
       endpoint: 'http://localhost:3001',
       methods: ['identity.register', 'identity.resolve', 'identity.rotateKeys'],
-      description: 'Identity management service',
+      description: 'Identity management service'
     });
 
     this.registerService({
       name: 'vc',
       endpoint: 'http://localhost:3002',
       methods: ['vc.issue', 'vc.verify', 'vc.revoke'],
-      description: 'Verifiable Credentials service',
+      description: 'Verifiable Credentials service'
     });
 
     this.registerService({
       name: 'permission',
       endpoint: 'http://localhost:3003',
       methods: ['perm.grant', 'perm.check', 'perm.revoke'],
-      description: 'Permission management service',
+      description: 'Permission management service'
     });
 
     this.registerService({
       name: 'audit',
       endpoint: 'http://localhost:3004',
       methods: ['audit.log', 'audit.query', 'audit.verify'],
-      description: 'Audit Logger service',
+      description: 'Audit Logger service'
     });
   }
 
@@ -40,7 +40,7 @@ export class RPCService {
       endpoint: config.endpoint,
       methods: new Set(config.methods),
       healthy: true,
-      lastHealthCheck: Date.now(),
+      lastHealthCheck: Date.now()
     };
 
     this.services.set(config.name, service);
@@ -50,7 +50,7 @@ export class RPCService {
   public async handleRequest(request: RPCRequest, clientDid: string): Promise<RPCResponse> {
     const [serviceName, methodName] = request.method.split('.', 2);
     const startTime = Date.now();
-    
+
     // Log the RPC request to audit service
     await this.logAuditEvent({
       source: 'rpc-gateway',
@@ -61,21 +61,21 @@ export class RPCService {
         requestId: request.id,
         method: request.method,
         params: request.params,
-        timestamp: startTime,
-      },
+        timestamp: startTime
+      }
     });
-    
+
     if (!serviceName || !methodName) {
       const errorResponse = {
         jsonrpc: '2.0' as const,
         error: {
           code: -32601,
           message: 'Method not found',
-          data: `Invalid method format: ${request.method}`,
+          data: `Invalid method format: ${request.method}`
         },
-        id: request.id,
+        id: request.id
       };
-      
+
       await this.logAuditEvent({
         source: 'rpc-gateway',
         action: 'rpc-error',
@@ -84,10 +84,10 @@ export class RPCService {
         details: {
           requestId: request.id,
           error: errorResponse.error,
-          duration: Date.now() - startTime,
-        },
+          duration: Date.now() - startTime
+        }
       });
-      
+
       return errorResponse;
     }
 
@@ -98,11 +98,11 @@ export class RPCService {
         error: {
           code: -32601,
           message: 'Service not found',
-          data: `Unknown service: ${serviceName}`,
+          data: `Unknown service: ${serviceName}`
         },
-        id: request.id,
+        id: request.id
       };
-      
+
       await this.logAuditEvent({
         source: 'rpc-gateway',
         action: 'rpc-error',
@@ -111,10 +111,10 @@ export class RPCService {
         details: {
           requestId: request.id,
           error: errorResponse.error,
-          duration: Date.now() - startTime,
-        },
+          duration: Date.now() - startTime
+        }
       });
-      
+
       return errorResponse;
     }
 
@@ -124,11 +124,11 @@ export class RPCService {
         error: {
           code: -32601,
           message: 'Method not found',
-          data: `Method ${request.method} not available in service ${serviceName}`,
+          data: `Method ${request.method} not available in service ${serviceName}`
         },
-        id: request.id,
+        id: request.id
       };
-      
+
       await this.logAuditEvent({
         source: 'rpc-gateway',
         action: 'rpc-error',
@@ -137,16 +137,16 @@ export class RPCService {
         details: {
           requestId: request.id,
           error: errorResponse.error,
-          duration: Date.now() - startTime,
-        },
+          duration: Date.now() - startTime
+        }
       });
-      
+
       return errorResponse;
     }
 
     try {
       const response = await this.proxyRequest(service, request, clientDid);
-      
+
       // Log successful response
       await this.logAuditEvent({
         source: 'rpc-gateway',
@@ -157,10 +157,10 @@ export class RPCService {
           requestId: request.id,
           success: !response.error,
           duration: Date.now() - startTime,
-          responseSize: JSON.stringify(response).length,
-        },
+          responseSize: JSON.stringify(response).length
+        }
       });
-      
+
       return response;
     } catch (error) {
       const errorResponse = {
@@ -168,11 +168,11 @@ export class RPCService {
         error: {
           code: -32603,
           message: 'Internal error',
-          data: error instanceof Error ? error.message : 'Unknown error',
+          data: error instanceof Error ? error.message : 'Unknown error'
         },
-        id: request.id,
+        id: request.id
       };
-      
+
       await this.logAuditEvent({
         source: 'rpc-gateway',
         action: 'rpc-error',
@@ -182,51 +182,51 @@ export class RPCService {
           requestId: request.id,
           error: errorResponse.error,
           duration: Date.now() - startTime,
-          exception: error instanceof Error ? error.message : String(error),
-        },
+          exception: error instanceof Error ? error.message : String(error)
+        }
       });
-      
+
       return errorResponse;
     }
   }
 
   private async proxyRequest(service: ServiceProxy, request: RPCRequest, clientDid: string): Promise<RPCResponse> {
     const [serviceName, methodName] = request.method.split('.', 2);
-    
+
     // Map RPC methods to HTTP endpoints
     const httpMethod = this.getHttpMethod(methodName);
     const endpoint = this.getServiceEndpoint(serviceName, methodName);
-    
+
     const url = `${service.endpoint}${endpoint}`;
-    
+
     try {
       const response = await fetch(url, {
         method: httpMethod,
         headers: {
           'Content-Type': 'application/json',
-          'X-Client-DID': clientDid,
+          'X-Client-DID': clientDid
         },
-        body: httpMethod !== 'GET' ? JSON.stringify(request.params || {}) : undefined,
+        body: httpMethod !== 'GET' ? JSON.stringify(request.params || {}) : undefined
       } as RequestInit);
 
       const data = await response.json() as any;
-      
+
       if (!response.ok) {
         return {
           jsonrpc: '2.0',
           error: {
             code: response.status === 404 ? -32601 : -32603,
             message: (data as any).error || 'Service error',
-            data: data,
+            data: data
           },
-          id: request.id,
+          id: request.id
         };
       }
 
       return {
         jsonrpc: '2.0',
         result: data,
-        id: request.id,
+        id: request.id
       };
     } catch (error) {
       service.healthy = false;
@@ -244,7 +244,7 @@ export class RPCService {
       'resolve': 'GET',
       'list': 'GET',
       'revoke': 'DELETE',
-      'rotateKeys': 'POST',
+      'rotateKeys': 'POST'
     };
 
     return methodMap[methodName] || 'POST';
@@ -256,26 +256,26 @@ export class RPCService {
         'register': '/identity/register',
         'resolve': '/identity', // Will append DID as param
         'rotateKeys': '/identity', // Will append DID and action
-        'list': '/identity',
+        'list': '/identity'
       },
       'vc': {
         'issue': '/vc/issue',
         'verify': '/vc/verify',
         'revoke': '/vc/revoke',
-        'schemas': '/vc/schemas',
+        'schemas': '/vc/schemas'
       },
       'permission': {
         'grant': '/perm/grant',
         'check': '/perm/check',
         'revoke': '/perm/revoke',
-        'list': '/perm/list',
+        'list': '/perm/list'
       },
       'audit': {
         'log': '/audit/log',
         'query': '/audit/events',
         'verify': '/audit/integrity',
-        'stats': '/audit/stats',
-      },
+        'stats': '/audit/stats'
+      }
     };
 
     return endpointMap[serviceName]?.[methodName] || `/${serviceName}/${methodName}`;
@@ -285,12 +285,12 @@ export class RPCService {
     for (const [name, service] of this.services.entries()) {
       try {
         const response = await fetch(`${service.endpoint}/health`, {
-          method: 'GET',
+          method: 'GET'
         });
-        
+
         service.healthy = response.ok;
         service.lastHealthCheck = Date.now();
-        
+
         if (!response.ok) {
           console.warn(`Service ${name} health check failed`);
         }
@@ -304,14 +304,14 @@ export class RPCService {
 
   public getServiceStatus(): Record<string, { healthy: boolean; lastCheck: number }> {
     const status: Record<string, { healthy: boolean; lastCheck: number }> = {};
-    
+
     for (const [name, service] of this.services.entries()) {
       status[name] = {
         healthy: service.healthy,
-        lastCheck: service.lastHealthCheck,
+        lastCheck: service.lastHealthCheck
       };
     }
-    
+
     return status;
   }
 
@@ -337,9 +337,9 @@ export class RPCService {
       await fetch(`${auditService.endpoint}/audit/log`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(event),
+        body: JSON.stringify(event)
       });
     } catch (error) {
       console.warn('Failed to log audit event:', error);

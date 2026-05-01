@@ -1,6 +1,6 @@
 /**
  * Lunary → ATP Exporter
- * 
+ *
  * Streams observability metrics from Lunary into ATP trust engine
  */
 
@@ -10,16 +10,16 @@ import type { LunaryMetrics } from './types.js';
 export interface LunaryExporterConfig {
   /** Lunary API key */
   apiKey?: string;
-  
+
   /** Lunary API endpoint */
   endpoint?: string;
-  
+
   /** Export interval (ms) */
   interval?: number;
-  
+
   /** Agent DID mapping */
   agentMapping?: Record<string, string>;
-  
+
   /** Enable automatic trust updates */
   autoUpdateTrust?: boolean;
 }
@@ -50,7 +50,7 @@ export class ATPLunaryExporter {
     }
 
     console.log(`🔄 Starting Lunary → ATP export (interval: ${this.config.interval}ms)`);
-    
+
     // Run immediately
     this.export().catch(console.error);
 
@@ -113,7 +113,7 @@ export class ATPLunaryExporter {
   private async processMetric(metric: LunaryMetrics): Promise<void> {
     // Map Lunary agent to ATP DID
     const agentDid = this.config.agentMapping?.[metric.agent];
-    
+
     if (!agentDid) {
       console.warn(`No ATP DID mapping for Lunary agent: ${metric.agent}`);
       return;
@@ -154,7 +154,7 @@ export class ATPLunaryExporter {
 
     // Calculate trust delta based on error rate
     const errorRate = metric.requests > 0 ? metric.errors / metric.requests : 0;
-    
+
     if (errorRate > 0.3) {
       trustDelta -= 0.02;
       reasons.push(`High error rate: ${(errorRate * 100).toFixed(1)}%`);

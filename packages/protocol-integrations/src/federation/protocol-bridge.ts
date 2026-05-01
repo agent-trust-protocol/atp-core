@@ -107,7 +107,7 @@ export class ProtocolBridge extends EventEmitter {
    * Find appropriate transformation rule for message type
    */
   private findTransformationRule(messageType: string): TransformationRule | null {
-    return this.config.transformationRules.find(rule => 
+    return this.config.transformationRules.find(rule =>
       rule.sourceMessageType === messageType
     ) || null;
   }
@@ -145,7 +145,7 @@ export class ProtocolBridge extends EventEmitter {
   removeTransformationRule(ruleId: string): boolean {
     const index = this.config.transformationRules.findIndex(rule => rule.id === ruleId);
     if (index === -1) return false;
-    
+
     this.config.transformationRules.splice(index, 1);
     return true;
   }

@@ -9,15 +9,15 @@ export class CredentialController {
     try {
       const request: CredentialIssuanceRequest = req.body;
       const credential = await this.credentialService.issueCredential(request);
-      
+
       res.status(201).json({
         success: true,
-        data: credential,
+        data: credential
       });
     } catch (error) {
       res.status(400).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -26,15 +26,15 @@ export class CredentialController {
     try {
       const request: CredentialVerificationRequest = req.body;
       const result = await this.credentialService.verifyCredential(request);
-      
+
       res.json({
         success: true,
-        data: result,
+        data: result
       });
     } catch (error) {
       res.status(400).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -43,17 +43,17 @@ export class CredentialController {
     try {
       const { credentialId } = req.params;
       const { issuerDid } = req.body;
-      
+
       await this.credentialService.revokeCredential(credentialId, issuerDid);
-      
+
       res.json({
         success: true,
-        message: 'Credential revoked successfully',
+        message: 'Credential revoked successfully'
       });
     } catch (error) {
       res.status(400).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -62,15 +62,15 @@ export class CredentialController {
     try {
       const schema: CredentialSchema = req.body;
       await this.credentialService.registerSchema(schema);
-      
+
       res.status(201).json({
         success: true,
-        message: 'Schema registered successfully',
+        message: 'Schema registered successfully'
       });
     } catch (error) {
       res.status(400).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -79,23 +79,23 @@ export class CredentialController {
     try {
       const { schemaId } = req.params;
       const schema = await this.credentialService.getSchema(schemaId);
-      
+
       if (!schema) {
         res.status(404).json({
           success: false,
-          error: 'Schema not found',
+          error: 'Schema not found'
         });
         return;
       }
 
       res.json({
         success: true,
-        data: schema,
+        data: schema
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -103,15 +103,15 @@ export class CredentialController {
   async listSchemas(req: Request, res: Response): Promise<void> {
     try {
       const schemas = await this.credentialService.listSchemas();
-      
+
       res.json({
         success: true,
-        data: schemas,
+        data: schemas
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }

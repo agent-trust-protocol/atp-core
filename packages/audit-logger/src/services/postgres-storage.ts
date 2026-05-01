@@ -10,7 +10,7 @@ export class PostgresAuditStorageService implements IAuditStorageService {
       connectionString: connectionString || process.env.DATABASE_URL,
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      connectionTimeoutMillis: 2000
     });
   }
 
@@ -18,7 +18,7 @@ export class PostgresAuditStorageService implements IAuditStorageService {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
-      
+
       const result = await client.query(`
         SELECT atp_audit.add_event($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       `, [
@@ -52,7 +52,7 @@ export class PostgresAuditStorageService implements IAuditStorageService {
         'SELECT * FROM atp_audit.events WHERE event_id = $1',
         [id]
       );
-      
+
       if (result.rows.length === 0) {
         return null;
       }
@@ -141,7 +141,7 @@ export class PostgresAuditStorageService implements IAuditStorageService {
       const result = await client.query(
         'SELECT * FROM atp_audit.events ORDER BY timestamp DESC LIMIT 1'
       );
-      
+
       if (result.rows.length === 0) {
         return null;
       }
@@ -186,7 +186,7 @@ export class PostgresAuditStorageService implements IAuditStorageService {
       hash: row.hash,
       previousHash: row.previous_hash,
       ipfsHash: row.ipfs_hash,
-      signature: row.signature,
+      signature: row.signature
     };
   }
 

@@ -168,7 +168,7 @@ export class TenantManager {
 
     try {
       await database.collection('tenants').insertOne(validatedTenant);
-      
+
       logger.info('Tenant created successfully', {
         tenantId,
         name: request.name,

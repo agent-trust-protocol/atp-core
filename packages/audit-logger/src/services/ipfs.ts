@@ -25,7 +25,7 @@ export class IPFSService {
       this.json = json(this.helia);
       this.strings = strings(this.helia);
       this.initialized = true;
-      
+
       console.log('IPFS service initialized with Helia HTTP');
     } catch (error) {
       console.warn('Failed to initialize IPFS service:', error);
@@ -36,7 +36,7 @@ export class IPFSService {
   async storeEvent(event: AuditEvent): Promise<string> {
     try {
       await this.initialize();
-      
+
       if (!this.initialized) {
         console.log('IPFS storage skipped (not available)');
         return '';
@@ -45,7 +45,7 @@ export class IPFSService {
       // Store the audit event as JSON
       const cid = await this.json.add(event);
       console.log('Audit event stored to IPFS:', cid.toString());
-      
+
       return cid.toString();
     } catch (error) {
       console.warn('IPFS storage failed, continuing without IPFS:', error);
@@ -56,7 +56,7 @@ export class IPFSService {
   async retrieveEvent(hash: string): Promise<AuditEvent | null> {
     try {
       await this.initialize();
-      
+
       if (!this.initialized || !hash) {
         console.log('IPFS retrieval skipped (not available or no hash)');
         return null;
@@ -65,7 +65,7 @@ export class IPFSService {
       // Retrieve the audit event from IPFS
       const event = await this.json.get(hash);
       console.log('Audit event retrieved from IPFS:', hash);
-      
+
       return event as AuditEvent;
     } catch (error) {
       console.warn('IPFS retrieval failed:', error);
@@ -76,7 +76,7 @@ export class IPFSService {
   async pin(hash: string): Promise<void> {
     try {
       await this.initialize();
-      
+
       if (!this.initialized || !hash) {
         console.log('IPFS pinning skipped (not available or no hash)');
         return;
@@ -102,7 +102,7 @@ export class IPFSService {
   async storeString(data: string): Promise<string> {
     try {
       await this.initialize();
-      
+
       if (!this.initialized) {
         console.log('IPFS string storage skipped (not available)');
         return '';
@@ -110,7 +110,7 @@ export class IPFSService {
 
       const cid = await this.strings.add(data);
       console.log('String stored to IPFS:', cid.toString());
-      
+
       return cid.toString();
     } catch (error) {
       console.warn('IPFS string storage failed:', error);
@@ -121,7 +121,7 @@ export class IPFSService {
   async retrieveString(hash: string): Promise<string | null> {
     try {
       await this.initialize();
-      
+
       if (!this.initialized || !hash) {
         console.log('IPFS string retrieval skipped (not available or no hash)');
         return null;
@@ -129,7 +129,7 @@ export class IPFSService {
 
       const data = await this.strings.get(hash);
       console.log('String retrieved from IPFS:', hash);
-      
+
       return data;
     } catch (error) {
       console.warn('IPFS string retrieval failed:', error);

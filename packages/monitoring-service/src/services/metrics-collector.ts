@@ -8,31 +8,31 @@ import os from 'os';
 
 export class MetricsCollector {
   private services: Array<{ name: string; url: string; expectedPath?: string }>;
-  
+
   constructor() {
     this.services = [
-      { 
-        name: 'Identity Service', 
+      {
+        name: 'Identity Service',
         url: process.env.ATP_IDENTITY_URL || 'http://localhost:3001',
         expectedPath: '/health'
       },
-      { 
-        name: 'Credential Service', 
+      {
+        name: 'Credential Service',
         url: process.env.ATP_CREDENTIALS_URL || 'http://localhost:3002',
         expectedPath: '/health'
       },
-      { 
-        name: 'Permission Service', 
+      {
+        name: 'Permission Service',
         url: process.env.ATP_PERMISSIONS_URL || 'http://localhost:3003',
         expectedPath: '/health'
       },
-      { 
-        name: 'RPC Gateway', 
+      {
+        name: 'RPC Gateway',
         url: process.env.ATP_GATEWAY_URL || 'http://localhost:3000',
         expectedPath: '/health'
       },
-      { 
-        name: 'Audit Logger', 
+      {
+        name: 'Audit Logger',
         url: process.env.ATP_AUDIT_URL || 'http://localhost:3006',
         expectedPath: '/audit/stats'
       }
@@ -41,16 +41,16 @@ export class MetricsCollector {
 
   async collectMetrics(): Promise<SystemMetrics> {
     const timestamp = new Date().toISOString();
-    
+
     // Collect service health
     const services = await this.checkServiceHealth();
-    
+
     // Collect performance metrics
     const performance = await this.collectPerformanceMetrics();
-    
+
     // Collect security metrics
     const security = await this.collectSecurityMetrics();
-    
+
     // Collect business metrics
     const business = await this.collectBusinessMetrics();
 
@@ -66,19 +66,19 @@ export class MetricsCollector {
   private async checkServiceHealth(): Promise<ServiceHealth[]> {
     const healthChecks = this.services.map(async (service) => {
       const startTime = Date.now();
-      
+
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000);
-        
+
         const response = await fetch(service.url + (service.expectedPath || '/health'), {
           signal: controller.signal,
           headers: { 'User-Agent': 'ATP-Monitoring-Service/1.0' }
         });
-        
+
         clearTimeout(timeoutId);
         const responseTime = Date.now() - startTime;
-        
+
         return {
           name: service.name,
           status: response.ok ? 'online' as const : 'degraded' as const,
@@ -107,7 +107,7 @@ export class MetricsCollector {
     // Get system performance metrics
     const memUsage = process.memoryUsage();
     const cpuUsage = await this.getCPUUsage();
-    
+
     // Try to get metrics from audit service (which has actual data)
     let auditStats: any = {};
     try {
@@ -125,7 +125,7 @@ export class MetricsCollector {
     // Calculate real metrics where possible, simulate where needed
     const activeConnections = Object.keys(auditStats.eventsBySource || {}).length || 0;
     const signaturesGenerated = auditStats.totalEvents || 0;
-    
+
     return {
       activeConnections: Math.max(activeConnections, Math.floor(Math.random() * 10 + 35)), // At least actual connections
       signaturesGenerated: Math.max(signaturesGenerated, Math.floor(Math.random() * 50 + 1200)), // At least actual signatures
@@ -207,7 +207,7 @@ export class MetricsCollector {
     return new Promise((resolve) => {
       const startUsage = process.cpuUsage();
       const startTime = Date.now();
-      
+
       setTimeout(() => {
         const currentUsage = process.cpuUsage(startUsage);
         const cpuPercent = (currentUsage.user + currentUsage.system) / ((Date.now() - startTime) * 1000);
@@ -226,7 +226,7 @@ export class MetricsCollector {
       const response = await fetch(`${service.url}/metrics`, {
         headers: { 'User-Agent': 'ATP-Monitoring-Service/1.0' }
       });
-      
+
       if (response.ok) {
         return await response.json();
       }

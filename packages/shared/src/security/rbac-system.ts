@@ -15,7 +15,7 @@ export enum Permission {
   POLICY_DELETE = 'policy:delete',
   POLICY_EVALUATE = 'policy:evaluate',
   POLICY_PUBLISH = 'policy:publish',
-  
+
   // Workflow Management
   WORKFLOW_VIEW = 'workflow:view',
   WORKFLOW_CREATE = 'workflow:create',
@@ -23,32 +23,32 @@ export enum Permission {
   WORKFLOW_DELETE = 'workflow:delete',
   WORKFLOW_EXECUTE = 'workflow:execute',
   WORKFLOW_MONITOR = 'workflow:monitor',
-  
+
   // Agent Management
   AGENT_VIEW = 'agent:view',
   AGENT_CREATE = 'agent:create',
   AGENT_EDIT = 'agent:edit',
   AGENT_DELETE = 'agent:delete',
   AGENT_TRUST_MANAGE = 'agent:trust_manage',
-  
+
   // Analytics & Monitoring
   ANALYTICS_VIEW = 'analytics:view',
   ANALYTICS_EXPORT = 'analytics:export',
   MONITORING_VIEW = 'monitoring:view',
   MONITORING_ALERTS = 'monitoring:alerts',
-  
+
   // Organization Management
   ORG_VIEW = 'org:view',
   ORG_EDIT = 'org:edit',
   ORG_MEMBERS_MANAGE = 'org:members_manage',
   ORG_ROLES_MANAGE = 'org:roles_manage',
   ORG_BILLING = 'org:billing',
-  
+
   // System Administration
   SYSTEM_ADMIN = 'system:admin',
   SYSTEM_AUDIT = 'system:audit',
   SYSTEM_CONFIG = 'system:config',
-  
+
   // API Access
   API_READ = 'api:read',
   API_WRITE = 'api:write',
@@ -75,7 +75,7 @@ export const SystemRoles: Record<string, Role> = {
     isSystem: true,
     priority: 1000
   },
-  
+
   ORG_ADMIN: {
     id: 'org_admin',
     name: 'Organization Administrator',
@@ -91,7 +91,7 @@ export const SystemRoles: Record<string, Role> = {
     isSystem: true,
     priority: 900
   },
-  
+
   DEVELOPER: {
     id: 'developer',
     name: 'Developer',
@@ -106,7 +106,7 @@ export const SystemRoles: Record<string, Role> = {
     isSystem: true,
     priority: 700
   },
-  
+
   ANALYST: {
     id: 'analyst',
     name: 'Analyst',
@@ -122,7 +122,7 @@ export const SystemRoles: Record<string, Role> = {
     isSystem: true,
     priority: 500
   },
-  
+
   OPERATOR: {
     id: 'operator',
     name: 'Operator',
@@ -137,7 +137,7 @@ export const SystemRoles: Record<string, Role> = {
     isSystem: true,
     priority: 400
   },
-  
+
   VIEWER: {
     id: 'viewer',
     name: 'Viewer',
@@ -154,7 +154,7 @@ export const SystemRoles: Record<string, Role> = {
     isSystem: true,
     priority: 200
   },
-  
+
   GUEST: {
     id: 'guest',
     name: 'Guest',
@@ -247,7 +247,7 @@ export class RBACManager {
     // Prefix role ID with organization ID for scoping
     role.id = `${organizationId}:${role.id}`;
     role.isSystem = false;
-    
+
     this.roles.set(role.id, role);
   }
 
@@ -273,7 +273,7 @@ export class RBACManager {
     };
 
     const userRolesList = this.userRoles.get(userId) || [];
-    
+
     // Check for duplicate assignments
     const existingIndex = userRolesList.findIndex(
       ur => ur.roleId === roleId && ur.organizationId === organizationId
@@ -287,7 +287,7 @@ export class RBACManager {
     }
 
     this.userRoles.set(userId, userRolesList);
-    
+
     // Clear cache for this user
     this.clearUserCache(userId);
   }
@@ -314,7 +314,7 @@ export class RBACManager {
 
     // Get user's roles for the organization
     const userRoles = this.getUserRolesForOrg(userId, context.organizationId);
-    
+
     // Check if any role grants the permission
     let hasPermissionFromRole = false;
     let highestPriority = 0;
@@ -348,8 +348,8 @@ export class RBACManager {
     }
 
     // Check ACL entries
-    let aclResult = await this.checkACL(userId, permission, context);
-    
+    const aclResult = await this.checkACL(userId, permission, context);
+
     // Combine results (ACL can override role permissions)
     const finalResult = aclResult !== null ? aclResult : hasPermissionFromRole;
 
@@ -420,13 +420,13 @@ export class RBACManager {
     const entries = this.acl.get(key) || [];
     entries.push(entry);
     this.acl.set(key, entries);
-    
+
     // Clear relevant caches
     this.clearCache();
   }
 
   // Private helper methods
-  
+
   private getUserRolesForOrg(userId: string, organizationId: string): UserRole[] {
     const allUserRoles = this.userRoles.get(userId) || [];
     return allUserRoles.filter(ur => ur.organizationId === organizationId);
@@ -474,7 +474,7 @@ export class RBACManager {
     // Deny takes precedence
     if (deny) return false;
     if (grant) return true;
-    
+
     return null;
   }
 
@@ -525,7 +525,7 @@ export function requirePermission(permission: Permission | Permission[]) {
     }
 
     const permissions = Array.isArray(permission) ? permission : [permission];
-    
+
     for (const perm of permissions) {
       const hasPermission = await rbacManager.hasPermission(userId, perm, {
         organizationId,
@@ -535,7 +535,7 @@ export function requirePermission(permission: Permission | Permission[]) {
       });
 
       if (!hasPermission) {
-        return res.status(403).json({ 
+        return res.status(403).json({
           error: 'Forbidden',
           message: `Missing required permission: ${perm}`
         });

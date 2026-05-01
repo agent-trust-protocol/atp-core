@@ -29,7 +29,7 @@ export class ACPServer extends EventEmitter {
     this.config = config;
     this.adapter = new ACPAdapter();
     this.security = new ACPSecurityWrapper(config.security);
-    
+
     this.setupEventHandlers();
   }
 
@@ -81,7 +81,7 @@ export class ACPServer extends EventEmitter {
    */
   async registerAgent(agent: ACPAgent, ws?: WebSocket): Promise<void> {
     await this.adapter.registerAgent(agent);
-    
+
     if (ws) {
       this.connections.set(agent.aid, ws);
       ws.on('close', () => {
@@ -203,10 +203,10 @@ export class ACPServer extends EventEmitter {
 
       if (data.type === 'message') {
         const securedMessage = data.message;
-        
+
         // Verify the message
         const verification = await this.security.verifyMessage(securedMessage);
-        
+
         if (!verification.isValid) {
           ws.send(JSON.stringify({
             type: 'error',
@@ -218,7 +218,7 @@ export class ACPServer extends EventEmitter {
 
         // Process the verified message
         await this.adapter.receiveMessage(securedMessage);
-        
+
         // Route to intended recipients
         await this.routeSecuredMessage(securedMessage);
 
@@ -236,8 +236,8 @@ export class ACPServer extends EventEmitter {
   }
 
   private async routeSecuredMessage(securedMessage: any): Promise<void> {
-    const receivers = Array.isArray(securedMessage.receiver) 
-      ? securedMessage.receiver 
+    const receivers = Array.isArray(securedMessage.receiver)
+      ? securedMessage.receiver
       : [securedMessage.receiver];
 
     for (const receiverId of receivers) {

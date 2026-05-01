@@ -10,14 +10,14 @@ export class PolicyEvaluationController {
 
   evaluate = async (req: Request, res: Response) => {
     try {
-      const { policyId, context } = req.body as { 
-        policyId: string; 
+      const { policyId, context } = req.body as {
+        policyId: string;
         context: PolicyEvaluationContext;
       };
 
       if (!policyId || !context) {
-        return res.status(400).json({ 
-          error: 'Missing required fields: policyId and context' 
+        return res.status(400).json({
+          error: 'Missing required fields: policyId and context'
         });
       }
 
@@ -39,9 +39,9 @@ export class PolicyEvaluationController {
 
       res.json(result);
     } catch (error: any) {
-      res.status(500).json({ 
-        error: 'Evaluation failed', 
-        details: error.message 
+      res.status(500).json({
+        error: 'Evaluation failed',
+        details: error.message
       });
     }
   };
@@ -51,8 +51,8 @@ export class PolicyEvaluationController {
       const { policyDocument, context } = req.body;
 
       if (!policyDocument || !context) {
-        return res.status(400).json({ 
-          error: 'Missing required fields: policyDocument and context' 
+        return res.status(400).json({
+          error: 'Missing required fields: policyDocument and context'
         });
       }
 
@@ -65,9 +65,9 @@ export class PolicyEvaluationController {
         timestamp: new Date().toISOString()
       });
     } catch (error: any) {
-      res.status(500).json({ 
-        error: 'Simulation failed', 
-        details: error.message 
+      res.status(500).json({
+        error: 'Simulation failed',
+        details: error.message
       });
     }
   };

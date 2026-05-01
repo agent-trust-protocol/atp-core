@@ -19,7 +19,7 @@ const dbConfig: DatabaseConfig = {
   ssl: config.NODE_ENV === 'production',
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 2000
 };
 
 // Redis Cache configuration
@@ -29,7 +29,7 @@ const cacheConfig = {
   password: config.REDIS_PASSWORD,
   db: config.REDIS_DB,
   keyPrefix: 'atp:permission',
-  ttl: config.CACHE_TTL,
+  ttl: config.CACHE_TTL
 };
 
 const cache = createCache(cacheConfig);
@@ -68,14 +68,14 @@ app.post('/policies/simulate', (req, res) => evaluationController.simulate(req, 
 app.get('/health', async (req, res) => {
   try {
     const dbHealth = await storage.healthCheck();
-    res.json({ 
-      status: dbHealth.healthy ? 'healthy' : 'unhealthy', 
+    res.json({
+      status: dbHealth.healthy ? 'healthy' : 'unhealthy',
       service: 'permission-service',
       database: dbHealth
     });
   } catch (error) {
-    res.status(500).json({ 
-      status: 'unhealthy', 
+    res.status(500).json({
+      status: 'unhealthy',
       service: 'permission-service',
       error: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -88,11 +88,11 @@ async function startServer() {
     await storage.initialize();
     await visualPolicyStorage.initialize();
     console.log('Database connection established');
-    
+
     // Initialize with default policy rules
     await permissionService.loadPolicyRules();
     console.log('Policy rules loaded');
-    
+
     app.listen(config.PORT, () => {
       console.log(`Permission Service running on port ${config.PORT}`);
     });

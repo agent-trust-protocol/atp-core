@@ -48,17 +48,17 @@ export class RedisRateLimitStore implements RateLimitStore {
   async increment(key: string): Promise<RateLimitInfo> {
     const multi = this.redis.multi();
     const ttl = Math.ceil(this.windowMs / 1000);
-    
+
     multi.incr(key);
     multi.expire(key, ttl);
-    
+
     const results = await multi.exec();
     const count = results?.[0]?.[1] as number || 0;
-    
+
     // Check if blocked
     const blockedKey = `${key}:blocked`;
     const isBlocked = await this.redis.exists(blockedKey);
-    
+
     return {
       count,
       resetTime: new Date(Date.now() + this.windowMs),
@@ -99,7 +99,7 @@ export class MemoryRateLimitStore implements RateLimitStore {
   constructor(windowMs: number, maxRequests: number) {
     this.windowMs = windowMs;
     this.maxRequests = maxRequests;
-    
+
     // Clean up expired entries periodically
     setInterval(() => this.cleanup(), 60000);
   }
@@ -107,12 +107,12 @@ export class MemoryRateLimitStore implements RateLimitStore {
   async increment(key: string): Promise<RateLimitInfo> {
     const now = Date.now();
     const entry = this.requests.get(key);
-    
+
     if (!entry || entry.resetTime < now) {
       // New window
       const resetTime = now + this.windowMs;
       this.requests.set(key, { count: 1, resetTime });
-      
+
       return {
         count: 1,
         resetTime: new Date(resetTime),
@@ -120,10 +120,10 @@ export class MemoryRateLimitStore implements RateLimitStore {
         remainingRequests: this.maxRequests - 1
       };
     }
-    
+
     // Increment existing
     entry.count++;
-    
+
     return {
       count: entry.count,
       resetTime: new Date(entry.resetTime),
@@ -154,25 +154,25 @@ export class MemoryRateLimitStore implements RateLimitStore {
   private isBlockedSync(key: string): boolean {
     const blockedUntil = this.blocked.get(key);
     if (!blockedUntil) return false;
-    
+
     if (blockedUntil < Date.now()) {
       this.blocked.delete(key);
       return false;
     }
-    
+
     return true;
   }
 
   private cleanup(): void {
     const now = Date.now();
-    
+
     // Clean up expired request windows
     for (const [key, entry] of this.requests.entries()) {
       if (entry.resetTime < now) {
         this.requests.delete(key);
       }
     }
-    
+
     // Clean up expired blocks
     for (const [key, blockedUntil] of this.blocked.entries()) {
       if (blockedUntil < now) {
@@ -254,7 +254,7 @@ export class RateLimiter {
     return async (req: any, res: any, next: any) => {
       try {
         const key = this.getKey(req);
-        
+
         // Check if already blocked
         if (await this.store.isBlocked(key)) {
           return this.handleRateLimitExceeded(req, res, {
@@ -264,41 +264,41 @@ export class RateLimiter {
             remainingRequests: 0
           });
         }
-        
+
         // Increment counter
         const info = await this.store.increment(key);
-        
+
         // Add rate limit headers
         res.setHeader('X-RateLimit-Limit', this.config.maxRequests);
         res.setHeader('X-RateLimit-Remaining', info.remainingRequests);
         res.setHeader('X-RateLimit-Reset', info.resetTime.toISOString());
-        
+
         // Check if limit exceeded
         if (info.count > this.config.maxRequests) {
           // Block for progressive duration based on violations
           const blockDuration = this.calculateBlockDuration(info.count);
           await this.store.block(key, blockDuration);
-          
+
           return this.handleRateLimitExceeded(req, res, info);
         }
-        
+
         // Track response for conditional counting
         if (this.config.skipSuccessfulRequests || this.config.skipFailedRequests) {
           const originalSend = res.send;
           const rateLimiter = this; // Capture 'this' for use in closure
           res.send = function(data: any) {
             const statusCode = res.statusCode;
-            
+
             // Decrement if should skip
             if ((rateLimiter.config.skipSuccessfulRequests && statusCode < 400) ||
                 (rateLimiter.config.skipFailedRequests && statusCode >= 400)) {
               rateLimiter.store.decrement(key);
             }
-            
+
             return originalSend.call(res, data);
           };
         }
-        
+
         next();
       } catch (error) {
         console.error('Rate limiter error:', error);
@@ -311,11 +311,11 @@ export class RateLimiter {
     if (this.config.keyGenerator) {
       return this.config.keyGenerator(req);
     }
-    
+
     // Default: IP + route
     const ip = req.ip || req.connection?.remoteAddress || 'unknown';
     const route = req.route?.path || req.path || 'unknown';
-    
+
     return crypto
       .createHash('sha256')
       .update(`${ip}:${route}`)
@@ -333,7 +333,7 @@ export class RateLimiter {
     if (this.config.handler) {
       return this.config.handler(req, res);
     }
-    
+
     // Default handler
     res.status(429).json({
       error: 'Too Many Requests',

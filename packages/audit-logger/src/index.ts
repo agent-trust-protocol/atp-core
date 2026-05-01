@@ -18,7 +18,7 @@ const dbConfig: DatabaseConfig = {
   ssl: config.NODE_ENV === 'production',
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 2000
 };
 
 const storage = new AuditStorageService(dbConfig);
@@ -37,16 +37,16 @@ app.get('/audit/ipfs/:hash', (req, res) => auditController.getEventFromIPFS(req,
 app.get('/health', async (req, res) => {
   try {
     const dbHealth = await storage.healthCheck();
-    res.json({ 
-      status: dbHealth.healthy ? 'healthy' : 'unhealthy', 
+    res.json({
+      status: dbHealth.healthy ? 'healthy' : 'unhealthy',
       service: 'audit-logger',
       version: '0.1.0',
       protocol: 'Agent Trust Protocol™',
       database: dbHealth
     });
   } catch (error) {
-    res.status(500).json({ 
-      status: 'unhealthy', 
+    res.status(500).json({
+      status: 'unhealthy',
       service: 'audit-logger',
       error: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -58,7 +58,7 @@ async function startServer() {
   try {
     await storage.initialize();
     console.log('Database connection established');
-    
+
     app.listen(config.PORT, () => {
       console.log(`Audit Logger Service running on port ${config.PORT}`);
       console.log('Agent Trust Protocol™ - Audit Logger Service v0.1.0');

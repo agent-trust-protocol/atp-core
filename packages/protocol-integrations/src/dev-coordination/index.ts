@@ -1,9 +1,9 @@
 /**
  * ATP Protocol Integration Development Coordination Framework
- * 
+ *
  * This module provides shared development infrastructure for coordinating
  * 4 specialist agents working in parallel on protocol integrations:
- * 
+ *
  * - MCP-Agent: Anthropic MCP protocol integration with security wrapper
  * - A2A-Agent: Google A2A protocol with trust bridge implementation
  * - Enterprise-Agent: IBM ACP/Cisco AGP enterprise compatibility bridges

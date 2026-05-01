@@ -14,10 +14,10 @@ export interface ServiceHealth {
 
 export interface SystemMetrics {
   timestamp: string;
-  
+
   // Core Services
   services: ServiceHealth[];
-  
+
   // Performance Metrics
   performance: {
     activeConnections: number;
@@ -28,7 +28,7 @@ export interface SystemMetrics {
     memoryUsage: number;
     cpuUsage: number;
   };
-  
+
   // Security Metrics
   security: {
     trustTransactions: number;
@@ -36,7 +36,7 @@ export interface SystemMetrics {
     compromisedAgents: number;
     quantumThreats: number;
   };
-  
+
   // Business Metrics
   business: {
     registeredAgents: number;

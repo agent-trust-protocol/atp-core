@@ -1,7 +1,7 @@
 /**
  * ATP Cloud Gateway
  * Multi-tenant cloud gateway for Agent Trust Protocol services
- * 
+ *
  * ⚠️  INTERNAL TESTING ONLY - NOT FOR PRODUCTION USE
  */
 
@@ -40,9 +40,9 @@ export class CloudGateway {
           defaultSrc: ["'self'"],
           scriptSrc: ["'self'", "'unsafe-inline'"],
           styleSrc: ["'self'", "'unsafe-inline'"],
-          imgSrc: ["'self'", "data:", "https:"],
-        },
-      },
+          imgSrc: ["'self'", 'data:', 'https:']
+        }
+      }
     }));
 
     // CORS
@@ -88,7 +88,7 @@ export class CloudGateway {
         status: 'INTERNAL TESTING ONLY',
         endpoints: {
           identity: '/api/v1/identity/*',
-          credentials: '/api/v1/credentials/*', 
+          credentials: '/api/v1/credentials/*',
           permissions: '/api/v1/permissions/*',
           audit: '/api/v1/audit/*',
           monitoring: '/api/v1/monitoring/*'

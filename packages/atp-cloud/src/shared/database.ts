@@ -33,7 +33,7 @@ export class DatabaseManager {
       this.mongodb = new MongoClient(cloudConfig.database.mongodb.url);
       await this.mongodb.connect();
       this.db = this.mongodb.db(cloudConfig.database.mongodb.database);
-      
+
       logger.info('Connected to MongoDB', {
         database: cloudConfig.database.mongodb.database
       });
@@ -62,7 +62,7 @@ export class DatabaseManager {
       });
 
       await this.redis.connect();
-      
+
       logger.info('Connected to Redis', {
         keyPrefix: cloudConfig.database.redis.keyPrefix
       });

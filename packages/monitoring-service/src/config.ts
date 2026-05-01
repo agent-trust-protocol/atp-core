@@ -10,7 +10,7 @@ const envSchema = z.object({
   ATP_AUDIT_URL: z.string().url().optional(),
   ATP_GATEWAY_URL: z.string().url().optional(),
   // Webhook for alert notifications (optional)
-  ATP_ALERT_WEBHOOK_URL: z.string().url().optional(),
+  ATP_ALERT_WEBHOOK_URL: z.string().url().optional()
 });
 
 function loadConfig() {

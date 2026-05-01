@@ -8,7 +8,7 @@ import {
   ATPMCPServerConfig,
   MCPAuthContext,
   MCPToolContext,
-  MCPErrorCode,
+  MCPErrorCode
 } from '../types/mcp.js';
 import { TrustLevel, TrustLevelManager } from '@atp/shared';
 
@@ -26,15 +26,15 @@ export class ATPMCPAdapter extends EventEmitter {
 
   async connect(url: string, authContext: MCPAuthContext): Promise<void> {
     this.authContext = authContext;
-    
+
     return new Promise((resolve, reject) => {
       this.ws = new WebSocket(url, {
         headers: {
           'X-ATP-DID': authContext.clientDID,
           'X-ATP-Trust-Level': authContext.trustLevel,
           'X-ATP-Auth-Method': authContext.authMethod,
-          'X-ATP-Session-ID': authContext.sessionId,
-        },
+          'X-ATP-Session-ID': authContext.sessionId
+        }
       });
 
       this.ws.on('open', () => {
@@ -67,19 +67,19 @@ export class ATPMCPAdapter extends EventEmitter {
         tools: { listChanged: true },
         resources: { subscribe: true, listChanged: true },
         prompts: { listChanged: true },
-        logging: { level: 'info' },
+        logging: { level: 'info' }
       },
       clientInfo: {
         name: 'ATP™ MCP Adapter',
         version: '0.1.0',
-        protocol: 'Agent Trust Protocol™',
+        protocol: 'Agent Trust Protocol™'
       },
       atpInfo: {
         clientDID: this.authContext?.clientDID,
         trustLevel: this.authContext?.trustLevel,
         capabilities: this.authContext?.capabilities,
-        auditRequired: true,
-      },
+        auditRequired: true
+      }
     });
 
     // Request tool list with ATP™ security context
@@ -89,10 +89,10 @@ export class ATPMCPAdapter extends EventEmitter {
   async refreshTools(): Promise<void> {
     try {
       const response = await this.sendRequest('tools/list', {});
-      
+
       if (response.result?.tools) {
         this.tools.clear();
-        
+
         for (const tool of response.result.tools) {
           // Enhance standard MCP tools with ATP™ security metadata
           const atpTool: ATPMCPTool = {
@@ -103,12 +103,12 @@ export class ATPMCPAdapter extends EventEmitter {
             trustLevelRequired: tool.atpConfig?.trustLevelRequired || TrustLevel.BASIC,
             capabilities: tool.atpConfig?.capabilities || ['basic-operations'],
             auditRequired: tool.atpConfig?.auditRequired ?? true,
-            rateLimits: tool.atpConfig?.rateLimits,
+            rateLimits: tool.atpConfig?.rateLimits
           };
-          
+
           this.tools.set(tool.name, atpTool);
         }
-        
+
         console.log(`Loaded ${this.tools.size} ATP™ enhanced MCP tools`);
         this.emit('toolsUpdated', Array.from(this.tools.values()));
       }
@@ -136,14 +136,14 @@ export class ATPMCPAdapter extends EventEmitter {
       tool,
       requestId,
       startTime: Date.now(),
-      auditRequired: tool.auditRequired,
+      auditRequired: tool.auditRequired
     };
 
     // Log tool execution start
     if (context.auditRequired) {
       await this.logAuditEvent(context, 'tool-execution-start', {
         toolName,
-        arguments: arguments_,
+        arguments: arguments_
       });
     }
 
@@ -155,15 +155,15 @@ export class ATPMCPAdapter extends EventEmitter {
           requestId,
           clientDID: this.authContext.clientDID,
           trustLevel: this.authContext.trustLevel,
-          auditRequired: tool.auditRequired,
-        },
+          auditRequired: tool.auditRequired
+        }
       });
 
       // Log successful execution
       if (context.auditRequired) {
         await this.logAuditEvent(context, 'tool-execution-success', {
           duration: Date.now() - context.startTime,
-          resultSize: JSON.stringify(response.result).length,
+          resultSize: JSON.stringify(response.result).length
         });
       }
 
@@ -173,7 +173,7 @@ export class ATPMCPAdapter extends EventEmitter {
       if (context.auditRequired) {
         await this.logAuditEvent(context, 'tool-execution-error', {
           duration: Date.now() - context.startTime,
-          error: error instanceof Error ? error.message : String(error),
+          error: error instanceof Error ? error.message : String(error)
         });
       }
       throw error;
@@ -185,7 +185,7 @@ export class ATPMCPAdapter extends EventEmitter {
     if (tool.trustLevelRequired) {
       const userLevel = auth.trustLevel as TrustLevel;
       const requiredLevel = tool.trustLevelRequired as TrustLevel;
-      
+
       if (!TrustLevelManager.isAuthorized(userLevel, requiredLevel)) {
         throw new Error(`Insufficient trust level. Required: ${requiredLevel}, Current: ${userLevel}`);
       }
@@ -193,10 +193,10 @@ export class ATPMCPAdapter extends EventEmitter {
 
     // Check capability requirements
     if (tool.capabilities && tool.capabilities.length > 0) {
-      const hasRequiredCapabilities = tool.capabilities.every(cap => 
+      const hasRequiredCapabilities = tool.capabilities.every(cap =>
         auth.capabilities.includes(cap)
       );
-      
+
       if (!hasRequiredCapabilities) {
         const missing = tool.capabilities.filter(cap => !auth.capabilities.includes(cap));
         throw new Error(`Missing required capabilities: ${missing.join(', ')}`);
@@ -222,7 +222,7 @@ export class ATPMCPAdapter extends EventEmitter {
         jsonrpc: '2.0',
         method,
         params,
-        id,
+        id
       };
 
       const timeout = setTimeout(() => {
@@ -235,7 +235,7 @@ export class ATPMCPAdapter extends EventEmitter {
           if (response.id === id) {
             clearTimeout(timeout);
             this.ws?.removeListener('message', responseHandler);
-            
+
             if (response.error) {
               reject(new Error(`MCP Error ${response.error.code}: ${response.error.message}`));
             } else {
@@ -255,12 +255,12 @@ export class ATPMCPAdapter extends EventEmitter {
   private handleMessage(message: string): void {
     try {
       const data = JSON.parse(message);
-      
+
       // Handle notifications
       if (!data.id && data.method) {
         this.handleNotification(data as MCPNotification);
       }
-      
+
       // Responses are handled by sendRequest
     } catch (error) {
       console.error('Failed to parse MCP message:', error);
@@ -293,7 +293,7 @@ export class ATPMCPAdapter extends EventEmitter {
       await fetch('http://localhost:3005/audit/log', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           source: 'mcp-adapter',
@@ -305,9 +305,9 @@ export class ATPMCPAdapter extends EventEmitter {
             toolName: context.tool.name,
             trustLevel: context.auth.trustLevel,
             authMethod: context.auth.authMethod,
-            ...details,
-          },
-        }),
+            ...details
+          }
+        })
       });
     } catch (error) {
       console.warn('Failed to log MCP audit event:', error);

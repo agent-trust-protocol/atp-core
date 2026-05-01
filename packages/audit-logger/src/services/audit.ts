@@ -45,7 +45,7 @@ export class AuditService {
       details: request.details,
       previousHash,
       nonce: randomUUID(), // Add nonce for additional entropy
-      blockNumber: (lastEvent?.blockNumber || 0) + 1,
+      blockNumber: (lastEvent?.blockNumber || 0) + 1
     };
 
     // Generate cryptographic hash for integrity (SHA-256)
@@ -76,7 +76,7 @@ export class AuditService {
       signature,
       blockNumber: eventData.blockNumber,
       nonce: eventData.nonce,
-      encrypted,
+      encrypted
     };
 
     // Store in IPFS for immutability (gracefully skipped when IPFS is unavailable)
@@ -153,7 +153,7 @@ export class AuditService {
       return {
         __encrypted: true,
         __algorithm: 'aes-256-gcm',
-        __data: encrypted,
+        __data: encrypted
       };
     } catch (error) {
       console.warn('Failed to encrypt sensitive audit data:', error);
@@ -202,7 +202,7 @@ export class AuditService {
           details: event.details,
           previousHash: event.previousHash,
           nonce: event.nonce,
-          blockNumber: event.blockNumber,
+          blockNumber: event.blockNumber
         });
 
         if (event.hash !== expectedHash) {
@@ -254,7 +254,7 @@ export class AuditService {
       eventsBySource,
       eventsByAction,
       chainIntegrity,
-      ipfsAvailable,
+      ipfsAvailable
     };
   }
 }

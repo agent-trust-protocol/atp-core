@@ -214,12 +214,12 @@ export {
   SAFE_DEFAULT_PROFILE,
   DEV_MODE_PROFILE,
   ENTERPRISE_LOCKED_PROFILE,
-  OPENCLAW_SANDBOX_PROFILE,
+  OPENCLAW_SANDBOX_PROFILE
 } from './profiles/index.js';
 
 export type {
   AtpSecurityProfile,
-  RuntimeTarget,
+  RuntimeTarget
 } from './profiles/index.js';
 
 // Version information

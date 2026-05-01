@@ -3,12 +3,12 @@ import { A2ABridge } from '../a2a/bridge.js';
 import { TrustLevel } from '@atp/shared';
 import {
   MCPAuthContext,
-  ATPMCPServerConfig,
+  ATPMCPServerConfig
 } from '../types/mcp.js';
 import {
   A2ADiscoveryRequest,
   A2AHandshakeRequest,
-  A2ACommunicationRequest,
+  A2ACommunicationRequest
 } from '../types/a2a.js';
 
 /**
@@ -17,7 +17,7 @@ import {
  */
 export class ProtocolIntegrationTest {
   private a2aBridge: A2ABridge;
-  
+
   constructor() {
     this.a2aBridge = new A2ABridge();
   }
@@ -34,7 +34,7 @@ export class ProtocolIntegrationTest {
   }> {
     console.log('🚀 Starting ATP™ Protocol Integration Tests...\n');
     const startTime = Date.now();
-    
+
     let totalTests = 0;
     let passed = 0;
     let failed = 0;
@@ -46,7 +46,7 @@ export class ProtocolIntegrationTest {
     passed += mcpResults.passed;
     failed += mcpResults.failed;
 
-    // Test A2A Integration  
+    // Test A2A Integration
     console.log('🤝 Testing A2A (Agent-to-Agent) Integration...');
     const a2aResults = await this.testA2AIntegration();
     totalTests += a2aResults.totalTests;
@@ -66,7 +66,7 @@ export class ProtocolIntegrationTest {
     return {
       mcp: mcpResults,
       a2a: a2aResults,
-      summary,
+      summary
     };
   }
 
@@ -90,16 +90,16 @@ export class ProtocolIntegrationTest {
           supportedAuthMethods: ['did-signature', 'did-jwt'],
           rateLimits: {
             globalRequestsPerMinute: 100,
-            perClientRequestsPerMinute: 20,
-          },
-        },
+            perClientRequestsPerMinute: 20
+          }
+        }
       };
-      
+
       // Validate configuration
       if (!config.name || !config.atpConfig.serverDID) {
         throw new Error('Invalid MCP configuration');
       }
-      
+
       return { config, valid: true };
     });
 
@@ -111,7 +111,7 @@ export class ProtocolIntegrationTest {
         capabilities: ['basic-operations', 'credential-operations'],
         authenticated: true,
         authMethod: 'did-jwt',
-        sessionId: 'test-session-mcp-123',
+        sessionId: 'test-session-mcp-123'
       };
 
       // Validate authentication context
@@ -128,18 +128,18 @@ export class ProtocolIntegrationTest {
         {
           toolTrustLevel: TrustLevel.BASIC,
           userTrustLevel: TrustLevel.VERIFIED,
-          shouldPass: true,
+          shouldPass: true
         },
         {
           toolTrustLevel: TrustLevel.PREMIUM,
           userTrustLevel: TrustLevel.BASIC,
-          shouldPass: false,
+          shouldPass: false
         },
         {
           toolTrustLevel: TrustLevel.VERIFIED,
           userTrustLevel: TrustLevel.VERIFIED,
-          shouldPass: true,
-        },
+          shouldPass: true
+        }
       ];
 
       const results = testCases.map(testCase => {
@@ -149,7 +149,7 @@ export class ProtocolIntegrationTest {
         return {
           ...testCase,
           actualResult,
-          correct: actualResult === testCase.shouldPass,
+          correct: actualResult === testCase.shouldPass
         };
       });
 
@@ -165,7 +165,7 @@ export class ProtocolIntegrationTest {
     await this.runTest(tests, 'Rate Limiting Logic', async () => {
       const rateLimits = {
         requestsPerMinute: 5,
-        requestsPerHour: 50,
+        requestsPerHour: 50
       };
 
       // Simulate rate limiting check
@@ -183,12 +183,12 @@ export class ProtocolIntegrationTest {
     const failed = tests.filter(t => !t.passed).length;
 
     console.log(`   MCP Tests: ${passed}/${tests.length} passed`);
-    
+
     return {
       totalTests: tests.length,
       passed,
       failed,
-      tests,
+      tests
     };
   }
 
@@ -205,18 +205,18 @@ export class ProtocolIntegrationTest {
       const discoveryRequest: A2ADiscoveryRequest = {
         query: {
           capabilities: ['weather-current'],
-          trustLevel: TrustLevel.BASIC,
+          trustLevel: TrustLevel.BASIC
         },
         filters: {
           minTrustLevel: TrustLevel.BASIC,
-          verifiedOnly: true,
+          verifiedOnly: true
         },
         requester: {
           did: 'did:atp:z6MktestRequesterDID789',
           trustLevel: TrustLevel.VERIFIED,
           purpose: 'Integration testing',
-          sessionId: 'test-discovery-123',
-        },
+          sessionId: 'test-discovery-123'
+        }
       };
 
       // Simulate discovery (this would normally call the actual service)
@@ -226,15 +226,15 @@ export class ProtocolIntegrationTest {
             did: 'did:atp:z6MkweatherAgentDID123',
             name: 'WeatherBot',
             capabilities: ['weather-current', 'weather-forecast'],
-            trustLevel: TrustLevel.VERIFIED,
-          },
+            trustLevel: TrustLevel.VERIFIED
+          }
         ],
         pagination: {
           offset: 0,
           limit: 50,
           total: 1,
-          hasMore: false,
-        },
+          hasMore: false
+        }
       };
 
       if (mockResponse.agents.length === 0) {
@@ -250,18 +250,18 @@ export class ProtocolIntegrationTest {
         {
           agent1: TrustLevel.VERIFIED,
           agent2: TrustLevel.VERIFIED,
-          compatible: true,
+          compatible: true
         },
         {
           agent1: TrustLevel.BASIC,
           agent2: TrustLevel.PREMIUM,
-          compatible: true,
+          compatible: true
         },
         {
           agent1: TrustLevel.UNTRUSTED,
           agent2: TrustLevel.VERIFIED,
-          compatible: false,
-        },
+          compatible: false
+        }
       ];
 
       const results = testCases.map(testCase => {
@@ -269,11 +269,11 @@ export class ProtocolIntegrationTest {
         const agent1Valid = this.getTrustLevelValue(testCase.agent1) >= this.getTrustLevelValue(minLevel);
         const agent2Valid = this.getTrustLevelValue(testCase.agent2) >= this.getTrustLevelValue(minLevel);
         const actualCompatible = agent1Valid && agent2Valid;
-        
+
         return {
           ...testCase,
           actualCompatible,
-          correct: actualCompatible === testCase.compatible,
+          correct: actualCompatible === testCase.compatible
         };
       });
 
@@ -291,10 +291,10 @@ export class ProtocolIntegrationTest {
         sessionId: 'test-session-a2a-456',
         participants: {
           initiator: 'did:atp:z6MktestInitiatorDID',
-          responder: 'did:atp:z6MktestResponderDID',
+          responder: 'did:atp:z6MktestResponderDID'
         },
         status: 'active',
-        startTime: new Date().toISOString(),
+        startTime: new Date().toISOString()
       };
 
       // Validate session data
@@ -315,7 +315,7 @@ export class ProtocolIntegrationTest {
         session: sessionData,
         messageCount,
         maxMessages,
-        withinLimit,
+        withinLimit
       };
     });
 
@@ -327,19 +327,19 @@ export class ProtocolIntegrationTest {
         messageType: 'task-request',
         content: {
           task: 'test-task',
-          data: 'encrypted-test-data',
+          data: 'encrypted-test-data'
         },
         metadata: {
           messageId: 'test-message-789',
           timestamp: new Date().toISOString(),
-          priority: 'normal',
+          priority: 'normal'
         },
         atpSecurity: {
           encrypted: true,
           signed: true,
           trustVerified: true,
-          auditRequired: true,
-        },
+          auditRequired: true
+        }
       };
 
       // Validate security requirements
@@ -350,7 +350,7 @@ export class ProtocolIntegrationTest {
 
       return {
         message: messageRequest,
-        securityValid: true,
+        securityValid: true
       };
     });
 
@@ -360,7 +360,7 @@ export class ProtocolIntegrationTest {
       const interaction = {
         discovery: { agents: 1, duration: 50 },
         handshake: { accepted: true, sessionId: 'test-session' },
-        communication: { messagesSent: 3, errors: 0 },
+        communication: { messagesSent: 3, errors: 0 }
       };
 
       if (!interaction.handshake.accepted) {
@@ -378,12 +378,12 @@ export class ProtocolIntegrationTest {
     const failed = tests.filter(t => !t.passed).length;
 
     console.log(`   A2A Tests: ${passed}/${tests.length} passed`);
-    
+
     return {
       totalTests: tests.length,
       passed,
       failed,
-      tests,
+      tests
     };
   }
 
@@ -393,7 +393,7 @@ export class ProtocolIntegrationTest {
     testFn: () => Promise<any>
   ): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       await testFn();
       const duration = Date.now() - startTime;
@@ -413,7 +413,7 @@ export class ProtocolIntegrationTest {
       TrustLevel.BASIC,
       TrustLevel.VERIFIED,
       TrustLevel.PREMIUM,
-      TrustLevel.ENTERPRISE,
+      TrustLevel.ENTERPRISE
     ];
     return levels.indexOf(level);
   }

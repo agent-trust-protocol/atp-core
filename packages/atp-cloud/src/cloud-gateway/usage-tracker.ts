@@ -71,7 +71,7 @@ export class UsageTracker {
    */
   private queueEvent(event: UsageEvent): void {
     this.eventQueue.push(event);
-    
+
     if (this.eventQueue.length >= this.BATCH_SIZE) {
       this.flushEvents();
     }
@@ -105,14 +105,14 @@ export class UsageTracker {
     try {
       // Insert usage events
       await database.collection('usage_events').insertMany(events);
-      
+
       // Update tenant usage counters
       await this.updateTenantUsage(events);
 
       logger.debug('Usage events flushed', { count: events.length });
     } catch (error) {
       logger.error('Failed to flush usage events', { error, eventCount: events.length });
-      
+
       // Re-queue events on failure (with limit to prevent memory issues)
       if (this.eventQueue.length < 1000) {
         this.eventQueue.unshift(...events);
@@ -143,7 +143,7 @@ export class UsageTracker {
 
       current.requests += 1;
       current.bandwidth += event.requestSize + event.responseSize;
-      
+
       // Storage calculation would depend on the service and operation
       if (event.eventType === 'agent_created') {
         current.storage += 1000; // Estimated storage per agent
@@ -213,7 +213,7 @@ export class UsageTracker {
     ];
 
     const [analytics] = await database.collection('usage_events').aggregate(pipeline).toArray();
-    
+
     if (!analytics) {
       return {
         totalRequests: 0,
@@ -266,7 +266,7 @@ export class UsageTracker {
       clearInterval(this.flushInterval);
       this.flushInterval = null;
     }
-    
+
     // Flush any remaining events
     this.flushEvents();
   }

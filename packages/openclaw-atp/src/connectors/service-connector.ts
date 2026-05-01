@@ -1,6 +1,6 @@
 /**
  * ATP Service Connector
- * 
+ *
  * Secure connector for external services with ATP protection
  */
 
@@ -30,7 +30,7 @@ export class ATPServiceConnector {
   ): Promise<any> {
     // Check allow-list
     if (this.config.allowList) {
-      const allowed = this.config.allowList.some(pattern => 
+      const allowed = this.config.allowList.some(pattern =>
         this.matchPattern(path, pattern)
       );
 
@@ -56,7 +56,7 @@ export class ATPServiceConnector {
 
     // Make request
     const url = `${this.config.url}${path}`;
-    
+
     // Log request
     await this.atpClient.audit.log({
       eventType: 'external-service-request',

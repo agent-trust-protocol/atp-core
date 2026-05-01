@@ -143,12 +143,12 @@ export class ATPClient {
     state?: string;
     actionType: string;
     metadata?: Record<string, unknown>;
-  }): "allow" | "deny" | "require_approval" {
+  }): 'allow' | 'deny' | 'require_approval' {
     const profile = params.profileId
       ? BUILTIN_PROFILES[params.profileId]
       : this.profile;
 
-    if (!profile) return "allow";
+    if (!profile) return 'allow';
 
     const { controls, state_policies } = profile;
     const { actionType, state } = params;
@@ -156,21 +156,21 @@ export class ATPClient {
     // Basic control-level check
     const control = (controls as Record<string, any>)[actionType];
     if (control && control.allowed === false) {
-      return control.require_approval ? "require_approval" : "deny";
+      return control.require_approval ? 'require_approval' : 'deny';
     }
 
     // State-based overrides
     if (state && state_policies?.[state]) {
       const policy = state_policies[state];
       if (policy.restricted_tools?.includes(actionType)) {
-        return "deny";
+        return 'deny';
       }
       if (policy.require_approval_for?.includes(actionType)) {
-        return "require_approval";
+        return 'require_approval';
       }
     }
 
-    return "allow";
+    return 'allow';
   }
 
   /**

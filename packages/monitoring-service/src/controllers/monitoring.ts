@@ -26,13 +26,13 @@ export class MonitoringController {
   async getCurrentMetrics(req: Request, res: Response) {
     try {
       const metrics = await this.metricsCollector.collectMetrics();
-      
+
       // Store metrics for historical tracking
       await this.metricsStorage.storeMetrics(metrics);
-      
+
       // Check for alerts
       await this.alertingService.checkMetrics(metrics);
-      
+
       res.json({
         success: true,
         data: metrics,
@@ -61,7 +61,7 @@ export class MonitoringController {
       };
 
       const history = await this.metricsStorage.getMetricsHistory(query);
-      
+
       res.json({
         success: true,
         data: history,
@@ -84,7 +84,7 @@ export class MonitoringController {
   async getServiceHealth(req: Request, res: Response) {
     try {
       const metrics = await this.metricsCollector.collectMetrics();
-      
+
       res.json({
         success: true,
         data: {
@@ -140,7 +140,7 @@ export class MonitoringController {
     try {
       const { id } = req.params;
       const alert = await this.alertingService.resolveAlert(id);
-      
+
       if (!alert) {
         return res.status(404).json({
           success: false,
@@ -170,10 +170,10 @@ export class MonitoringController {
     try {
       const metrics = await this.metricsCollector.collectMetrics();
       const recentAlerts = await this.alertingService.getAlerts({ limit: 5 });
-      
+
       // Calculate uptime percentages
       const avgUptime = metrics.services.reduce((sum, service) => sum + service.uptime, 0) / metrics.services.length;
-      
+
       // Calculate trends (simplified - in production would compare with historical data)
       const trends = {
         activeAgents: '+12%', // Would be calculated from historical data
@@ -218,7 +218,7 @@ export class MonitoringController {
     try {
       const uptime = process.uptime();
       const memUsage = process.memoryUsage();
-      
+
       res.json({
         success: true,
         service: 'ATP™ Monitoring Service',

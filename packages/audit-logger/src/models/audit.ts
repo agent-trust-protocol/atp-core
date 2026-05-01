@@ -15,7 +15,7 @@ export const AuditEventSchema = z.object({
   // Enhanced security fields
   blockNumber: z.number().optional(),
   nonce: z.string().optional(),
-  encrypted: z.boolean().optional(),
+  encrypted: z.boolean().optional()
 });
 
 export const AuditQuerySchema = z.object({
@@ -26,7 +26,7 @@ export const AuditQuerySchema = z.object({
   startTime: z.string().optional(),
   endTime: z.string().optional(),
   limit: z.number().optional(),
-  offset: z.number().optional(),
+  offset: z.number().optional()
 });
 
 export type AuditEvent = z.infer<typeof AuditEventSchema>;

@@ -1,6 +1,6 @@
 /**
  * ATP Secret Manager
- * 
+ *
  * Manages short-lived, scoped credentials for external services
  */
 

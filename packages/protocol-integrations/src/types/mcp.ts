@@ -7,7 +7,7 @@ export const MCPRequestSchema = z.object({
   jsonrpc: z.literal('2.0'),
   method: z.string(),
   params: z.record(z.any()).optional(),
-  id: z.union([z.string(), z.number()]),
+  id: z.union([z.string(), z.number()])
 });
 
 export const MCPResponseSchema = z.object({
@@ -16,15 +16,15 @@ export const MCPResponseSchema = z.object({
   error: z.object({
     code: z.number(),
     message: z.string(),
-    data: z.any().optional(),
+    data: z.any().optional()
   }).optional(),
-  id: z.union([z.string(), z.number()]),
+  id: z.union([z.string(), z.number()])
 });
 
 export const MCPNotificationSchema = z.object({
   jsonrpc: z.literal('2.0'),
   method: z.string(),
-  params: z.record(z.any()).optional(),
+  params: z.record(z.any()).optional()
 });
 
 // ATP™ Enhanced MCP Tool Definition
@@ -39,10 +39,10 @@ export const ATPMCPToolSchema = z.object({
   auditRequired: z.boolean().default(true),
   rateLimits: z.object({
     requestsPerMinute: z.number().optional(),
-    requestsPerHour: z.number().optional(),
+    requestsPerHour: z.number().optional()
   }).optional(),
   // Quantum-safe signature for tool verification
-  signature: z.string().optional(),
+  signature: z.string().optional()
 });
 
 // ATP™ Enhanced MCP Resource Definition
@@ -55,8 +55,8 @@ export const ATPMCPResourceSchema = z.object({
   accessControl: z.object({
     trustLevelRequired: z.string().optional(),
     capabilities: z.array(z.string()).optional(),
-    ownerDID: z.string().optional(),
-  }).optional(),
+    ownerDID: z.string().optional()
+  }).optional()
 });
 
 // ATP™ Enhanced MCP Server Configuration
@@ -66,18 +66,18 @@ export const ATPMCPServerConfigSchema = z.object({
   description: z.string().optional(),
   capabilities: z.object({
     tools: z.object({
-      listChanged: z.boolean().optional(),
+      listChanged: z.boolean().optional()
     }).optional(),
     resources: z.object({
       subscribe: z.boolean().optional(),
-      listChanged: z.boolean().optional(),
+      listChanged: z.boolean().optional()
     }).optional(),
     prompts: z.object({
-      listChanged: z.boolean().optional(),
+      listChanged: z.boolean().optional()
     }).optional(),
     logging: z.object({
-      level: z.enum(['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency']).optional(),
-    }).optional(),
+      level: z.enum(['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency']).optional()
+    }).optional()
   }).optional(),
   // ATP™ Security Extensions
   atpConfig: z.object({
@@ -87,9 +87,9 @@ export const ATPMCPServerConfigSchema = z.object({
     auditEndpoint: z.string().optional(),
     rateLimits: z.object({
       globalRequestsPerMinute: z.number().optional(),
-      perClientRequestsPerMinute: z.number().optional(),
-    }).optional(),
-  }),
+      perClientRequestsPerMinute: z.number().optional()
+    }).optional()
+  })
 });
 
 export type MCPRequest = z.infer<typeof MCPRequestSchema>;
@@ -126,7 +126,7 @@ export enum MCPErrorCode {
   METHOD_NOT_FOUND = -32601,
   INVALID_PARAMS = -32602,
   INTERNAL_ERROR = -32603,
-  
+
   // ATP™ Extended Error Codes
   AUTHENTICATION_REQUIRED = -32001,
   INSUFFICIENT_TRUST_LEVEL = -32002,

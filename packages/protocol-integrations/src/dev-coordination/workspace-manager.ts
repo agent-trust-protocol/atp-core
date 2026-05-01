@@ -34,7 +34,7 @@ export class WorkspaceManager {
       communicationPatterns: []
     };
 
-    // A2A-Agent Workspace  
+    // A2A-Agent Workspace
     const a2aWorkspace: AgentWorkspace = {
       agentId: AgentSpecialization.A2A_AGENT,
       name: 'Google A2A Integration Agent',
@@ -56,7 +56,7 @@ export class WorkspaceManager {
     // Enterprise-Agent Workspace
     const enterpriseWorkspace: AgentWorkspace = {
       agentId: AgentSpecialization.ENTERPRISE_AGENT,
-      name: 'Enterprise Protocol Integration Agent', 
+      name: 'Enterprise Protocol Integration Agent',
       description: 'Manages IBM ACP/Cisco AGP enterprise compatibility bridges',
       protocols: [FederationProtocol.ACP, FederationProtocol.AGP, FederationProtocol.ATP],
       workspaceDirectory: 'src/enterprise-agent',
@@ -167,7 +167,7 @@ export class WorkspaceManager {
   validateWorkspaceAccess(agentId: AgentSpecialization, resourceId: string, operation: 'read' | 'write'): boolean {
     const workspace = this.workspaces.get(agentId);
     const resource = this.sharedResources.get(resourceId);
-    
+
     if (!workspace || !resource) {
       return false;
     }

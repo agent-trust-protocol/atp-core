@@ -5,20 +5,20 @@ export const VerificationMethodSchema = z.object({
   type: z.string(),
   controller: z.string(),
   publicKeyMultibase: z.string().optional(),
-  publicKeyJwk: z.record(z.any()).optional(),
+  publicKeyJwk: z.record(z.any()).optional()
 });
 
 export const ServiceSchema = z.object({
   id: z.string(),
   type: z.string(),
-  serviceEndpoint: z.string(),
+  serviceEndpoint: z.string()
 });
 
 export const MetadataSchema = z.object({
   protocol: z.string(),
   version: z.string(),
   trustLevel: z.string(),
-  additionalInfo: z.record(z.any()).optional(),
+  additionalInfo: z.record(z.any()).optional()
 });
 
 export const DIDDocumentSchema = z.object({
@@ -33,7 +33,7 @@ export const DIDDocumentSchema = z.object({
   service: z.array(ServiceSchema).default([]),
   created: z.string(),
   updated: z.string(),
-  metadata: MetadataSchema.optional(),
+  metadata: MetadataSchema.optional()
 });
 
 export const KeyPairSchema = z.object({
@@ -41,7 +41,7 @@ export const KeyPairSchema = z.object({
   publicKey: z.string(),
   privateKey: z.string(),
   created: z.string(),
-  rotated: z.string().optional(),
+  rotated: z.string().optional()
 });
 
 export type VerificationMethod = z.infer<typeof VerificationMethodSchema>;

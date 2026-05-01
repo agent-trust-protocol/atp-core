@@ -1,6 +1,6 @@
 /**
  * ATP Monitor
- * 
+ *
  * Monitor agent behavior and security events
  */
 
@@ -23,12 +23,12 @@ export class ATPMonitor {
     // Query ATP identity service for all agents
     // This is a simplified implementation
     const scores: Record<string, number> = {};
-    
+
     // In real implementation, would query identity service
     // for (const agent of agents) {
     //   scores[agent.did] = agent.trustScore;
     // }
-    
+
     return scores;
   }
 
@@ -62,9 +62,9 @@ export class ATPMonitor {
     }
 
     const events = await this.atpClient.audit.query(query);
-    
+
     const usage: Record<string, number> = {};
-    
+
     for (const event of events.events || []) {
       const toolName = event.metadata?.toolName;
       if (toolName) {
@@ -199,7 +199,7 @@ export class ATPMonitor {
       if (eventType.includes('success')) {
         successfulActions++;
         totalActions++;
-        
+
         if (event.metadata?.executionTime) {
           totalExecutionTime += event.metadata.executionTime;
         }
@@ -246,7 +246,7 @@ export class ATPMonitor {
    */
   private parseTimeString(timeStr: string): Date {
     const match = timeStr.match(/^(\d+)([hdw])$/);
-    
+
     if (!match) {
       throw new Error(`Invalid time string: ${timeStr}`);
     }

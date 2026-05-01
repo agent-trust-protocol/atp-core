@@ -9,9 +9,9 @@ export class IdentityService {
   async registerDID(request: DIDRegistrationRequest = {}): Promise<DIDRegistrationResponse> {
     // Determine if quantum-safe keys should be generated
     const useQuantumSafe = request.quantumSafe ?? true; // Default to quantum-safe
-    
+
     let keyPair: QuantumSafeKeyPair;
-    
+
     if (request.publicKey) {
       // Use provided public key (classical mode)
       keyPair = {
@@ -25,37 +25,37 @@ export class IdentityService {
       // Generate new quantum-safe keys
       keyPair = await CryptoUtils.generateQuantumSafeKeyPair(useQuantumSafe);
     }
-    
+
     const did = CryptoUtils.generateQuantumSafeDID(keyPair);
     const now = new Date().toISOString();
-    
+
     const verificationMethodId = `${did}#key-1`;
     const pqcVerificationMethodId = `${did}#pqc-key-1`;
-    
+
     // Create verification methods based on key type
     const verificationMethods = [];
-    
+
     // Classical Ed25519 verification method (for backward compatibility)
     verificationMethods.push({
       id: verificationMethodId,
       type: 'Ed25519VerificationKey2020',
       controller: did,
-      publicKeyMultibase: CryptoUtils.encodeMultibase(Buffer.from(keyPair.publicKey, 'hex')),
+      publicKeyMultibase: CryptoUtils.encodeMultibase(Buffer.from(keyPair.publicKey, 'hex'))
     });
-    
+
     // Add quantum-safe verification method if available
     if (keyPair.isQuantumSafe && keyPair.pqcPublicKey) {
       verificationMethods.push({
         id: pqcVerificationMethodId,
         type: 'DilithiumVerificationKey2023',
         controller: did,
-        publicKeyMultibase: CryptoUtils.encodeMultibase(Buffer.from(keyPair.pqcPublicKey, 'hex')),
+        publicKeyMultibase: CryptoUtils.encodeMultibase(Buffer.from(keyPair.pqcPublicKey, 'hex'))
       });
     }
-    
+
     const document: DIDDocument = {
       '@context': [
-        'https://www.w3.org/ns/did/v1', 
+        'https://www.w3.org/ns/did/v1',
         'https://w3id.org/security/suites/ed25519-2020/v1',
         ...(keyPair.isQuantumSafe ? ['https://w3id.org/security/suites/dilithium-2023/v1'] : [])
       ],
@@ -92,21 +92,21 @@ export class IdentityService {
           algorithm: keyPair.algorithm,
           isQuantumSafe: keyPair.isQuantumSafe,
           hybridMode: keyPair.hybridMode,
-          supportedAlgorithms: keyPair.isQuantumSafe 
+          supportedAlgorithms: keyPair.isQuantumSafe
             ? [PQCAlgorithm.ED25519, PQCAlgorithm.CRYSTALS_DILITHIUM]
             : [PQCAlgorithm.ED25519]
-        },
-      },
+        }
+      }
     };
 
     await this.storage.storeDIDDocument(document);
-    
+
     if (!request.publicKey) {
       await this.storage.storeKeyPair({
         did,
         publicKey: keyPair.publicKey,
         privateKey: keyPair.privateKey,
-        created: now,
+        created: now
       });
     }
 
@@ -118,7 +118,7 @@ export class IdentityService {
       pqcPrivateKey: request.publicKey ? undefined : keyPair.pqcPrivateKey,
       algorithm: keyPair.algorithm,
       isQuantumSafe: keyPair.isQuantumSafe,
-      hybridMode: keyPair.hybridMode,
+      hybridMode: keyPair.hybridMode
     };
   }
 
@@ -142,7 +142,7 @@ export class IdentityService {
         `${resolverUrl}/1.0/identifiers/${encodeURIComponent(did)}`,
         {
           headers: { Accept: 'application/json' },
-          signal: AbortSignal.timeout(5000),
+          signal: AbortSignal.timeout(5000)
         }
       );
       if (!response.ok) return null;
@@ -167,18 +167,18 @@ export class IdentityService {
 
     const newKeyPair = await this.storage.rotateKey(did);
     const now = new Date().toISOString();
-    
+
     const verificationMethodId = `${did}#key-1`;
-    
+
     const updatedDocument: DIDDocument = {
       ...existingDoc,
       verificationMethod: [{
         id: verificationMethodId,
         type: 'Ed25519VerificationKey2020',
         controller: did,
-        publicKeyMultibase: CryptoUtils.encodeMultibase(Buffer.from(newKeyPair.publicKey, 'hex')),
+        publicKeyMultibase: CryptoUtils.encodeMultibase(Buffer.from(newKeyPair.publicKey, 'hex'))
       }],
-      updated: now,
+      updated: now
     };
 
     await this.storage.storeDIDDocument(updatedDocument);
@@ -194,7 +194,7 @@ export class IdentityService {
     const updatedDocument: DIDDocument = {
       ...existingDoc,
       service: [...existingDoc.service, service],
-      updated: new Date().toISOString(),
+      updated: new Date().toISOString()
     };
 
     await this.storage.storeDIDDocument(updatedDocument);
@@ -221,16 +221,16 @@ export class IdentityService {
       metadata: {
         ...(existingDoc.metadata || {
           protocol: 'Agent Trust Protocol™',
-          version: '1.0.0',
+          version: '1.0.0'
         }),
         trustLevel: trustLevel as TrustLevel,
         additionalInfo: {
           ...existingDoc.metadata?.additionalInfo,
           lastTrustLevelUpdate: new Date().toISOString(),
-          previousTrustLevel: existingDoc.metadata?.trustLevel,
-        },
+          previousTrustLevel: existingDoc.metadata?.trustLevel
+        }
       },
-      updated: new Date().toISOString(),
+      updated: new Date().toISOString()
     };
 
     await this.storage.storeDIDDocument(updatedDocument);
@@ -250,7 +250,7 @@ export class IdentityService {
 
     const currentLevel = document.metadata.trustLevel as TrustLevel;
     const nextLevel = TrustLevelManager.getNextLevel(currentLevel);
-    const upgradeRequirements = nextLevel 
+    const upgradeRequirements = nextLevel
       ? TrustLevelManager.getUpgradeRequirements(currentLevel, nextLevel)
       : [];
 
@@ -258,7 +258,7 @@ export class IdentityService {
       currentLevel,
       capabilities: TrustLevelManager.hasCapability(currentLevel, 'read-public') ? ['read-public'] : [],
       nextLevel,
-      upgradeRequirements,
+      upgradeRequirements
     };
   }
 }

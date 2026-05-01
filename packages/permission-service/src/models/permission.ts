@@ -18,7 +18,7 @@ export const CapabilityTokenSchema = z.object({
   conditions: z.record(z.any()).optional(),
   issuedAt: z.number(),
   expiresAt: z.number(),
-  notBefore: z.number().optional(),
+  notBefore: z.number().optional()
 });
 
 export const PermissionGrantSchema = z.object({
@@ -30,7 +30,7 @@ export const PermissionGrantSchema = z.object({
   conditions: z.record(z.any()).optional(),
   expiresAt: z.number().optional(),
   createdAt: z.number(),
-  revokedAt: z.number().optional(),
+  revokedAt: z.number().optional()
 });
 
 export const PermissionRequestSchema = z.object({
@@ -40,14 +40,14 @@ export const PermissionRequestSchema = z.object({
   resource: z.string().optional(),
   conditions: z.record(z.any()).optional(),
   expiresAt: z.number().optional(),
-  justification: z.string().optional(),
+  justification: z.string().optional()
 });
 
 export const PermissionCheckSchema = z.object({
   subject: z.string(),
   action: ScopeSchema,
   resource: z.string().optional(),
-  context: z.record(z.any()).optional(),
+  context: z.record(z.any()).optional()
 });
 
 export const PolicyRuleSchema = z.object({
@@ -56,7 +56,7 @@ export const PolicyRuleSchema = z.object({
   condition: z.string(), // JavaScript expression
   effect: z.enum(['allow', 'deny']),
   priority: z.number(),
-  active: z.boolean(),
+  active: z.boolean()
 });
 
 export type Scope = z.infer<typeof ScopeSchema>;

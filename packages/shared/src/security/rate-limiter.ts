@@ -40,7 +40,7 @@ function checkFallback(key: string, maxRequests: number, windowMs: number, now: 
       allowed: true,
       totalHits: 1,
       remainingRequests: maxRequests - 1,
-      resetTime: now + windowMs,
+      resetTime: now + windowMs
     };
   }
 
@@ -50,7 +50,7 @@ function checkFallback(key: string, maxRequests: number, windowMs: number, now: 
     allowed,
     totalHits: entry.count,
     remainingRequests: Math.max(0, maxRequests - entry.count),
-    resetTime: entry.resetAt,
+    resetTime: entry.resetAt
   };
 }
 
@@ -81,7 +81,7 @@ export class RateLimiter {
           allowed: true,
           totalHits: 1,
           remainingRequests: this.config.maxRequests - 1,
-          resetTime: now + this.config.windowMs,
+          resetTime: now + this.config.windowMs
         };
       }
 
@@ -91,7 +91,7 @@ export class RateLimiter {
           allowed: false,
           totalHits: currentCount,
           remainingRequests: 0,
-          resetTime: lastReset + this.config.windowMs,
+          resetTime: lastReset + this.config.windowMs
         };
       }
 
@@ -102,7 +102,7 @@ export class RateLimiter {
         allowed: true,
         totalHits: newCount,
         remainingRequests: Math.max(0, this.config.maxRequests - newCount),
-        resetTime: lastReset + this.config.windowMs,
+        resetTime: lastReset + this.config.windowMs
       };
 
     } catch (error) {

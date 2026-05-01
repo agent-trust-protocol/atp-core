@@ -45,7 +45,7 @@ export class CryptoUtils {
       // Legacy mode: Ed25519 only
       const publicKeyHex = Buffer.from(ed25519PublicKey).toString('hex');
       const privateKeyHex = Buffer.from(ed25519PrivateKey).toString('hex');
-      
+
       // Validate hex string lengths (32 bytes = 64 hex characters)
       if (publicKeyHex.length !== 64) {
         throw new Error(`Invalid public key hex length: expected 64 characters, got ${publicKeyHex.length}`);
@@ -53,7 +53,7 @@ export class CryptoUtils {
       if (privateKeyHex.length !== 64) {
         throw new Error(`Invalid private key hex length: expected 64 characters, got ${privateKeyHex.length}`);
       }
-      
+
       return {
         publicKey: publicKeyHex,
         privateKey: privateKeyHex,
@@ -64,7 +64,7 @@ export class CryptoUtils {
     // Generate ML-DSA key pair (post-quantum)
     const seed = cryptoRandomBytes(32);
     const mlDsaKeyPair = ml_dsa65.keygen(seed);
-    
+
     // Combine keys: Ed25519 public (32) + ML-DSA public (1952) = 1984 bytes
     // Format: [ed25519_public(32)][ml_dsa_public(1952)]
     const combinedPublic = new Uint8Array(32 + mlDsaKeyPair.publicKey.length);
@@ -99,7 +99,7 @@ export class CryptoUtils {
 
     if (!isHybridKey || privateKeyBuffer.length <= 64) {
       // Ed25519-only signature (32 bytes key, or not hybrid mode)
-      const ed25519PrivateKey = privateKeyBuffer.length <= 64 
+      const ed25519PrivateKey = privateKeyBuffer.length <= 64
         ? privateKeyBuffer.slice(0, 32)
         : privateKeyBuffer.slice(0, 32);
       const signature = await ed25519.sign(dataBuffer, ed25519PrivateKey);
@@ -148,10 +148,10 @@ export class CryptoUtils {
 
       if (!isHybridSig || !isHybridKey || publicKeyBuffer.length <= 64) {
         // Ed25519-only verification
-        const ed25519PublicKey = publicKeyBuffer.length <= 64 
+        const ed25519PublicKey = publicKeyBuffer.length <= 64
           ? publicKeyBuffer.slice(0, 32)
           : publicKeyBuffer.slice(0, 32);
-        const ed25519Sig = signatureBuffer.length <= 100 
+        const ed25519Sig = signatureBuffer.length <= 100
           ? signatureBuffer.slice(0, 64)
           : signatureBuffer.slice(0, 64);
         return await ed25519.verify(ed25519Sig, dataBuffer, ed25519PublicKey);

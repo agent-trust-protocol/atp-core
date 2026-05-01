@@ -17,7 +17,7 @@ const makeStorageMock = () => {
       return { publicKey: 'new-public-key-hex', privateKey: 'new-private-key-hex' };
     }),
     _docs: docs,
-    _keys: keys,
+    _keys: keys
   };
 };
 
@@ -61,7 +61,7 @@ describe('IdentityService', () => {
     it('uses provided public key (classical mode) and skips key generation', async () => {
       const response = await service.registerDID({
         publicKey: 'aabbccdd1122334455667788',
-        quantumSafe: false,
+        quantumSafe: false
       });
 
       // When publicKey is provided, privateKey should not be returned

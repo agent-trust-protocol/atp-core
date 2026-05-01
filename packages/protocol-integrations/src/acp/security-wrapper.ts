@@ -107,7 +107,7 @@ export class ACPSecurityWrapper extends EventEmitter {
       }
 
       // Check if agent is trusted
-      if (this.config.trustedAgents.length > 0 && 
+      if (this.config.trustedAgents.length > 0 &&
           !this.config.trustedAgents.includes(securedMessage.sender)) {
         return { isValid: false, reason: 'Agent not in trusted list' };
       }
@@ -272,8 +272,8 @@ export class ACPSecurityWrapper extends EventEmitter {
   }
 
   private async verifyQuantumSafeSignature(
-    messageHash: string, 
-    signature: string, 
+    messageHash: string,
+    signature: string,
     publicKey: string
   ): Promise<boolean> {
     // In real implementation, use actual quantum-safe verification

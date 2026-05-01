@@ -16,7 +16,7 @@ export class MetricsStorage {
 
   private async initializeDatabase() {
     const run = promisify(this.db.run.bind(this.db));
-    
+
     try {
       // Create metrics table
       await run(`
@@ -62,7 +62,7 @@ export class MetricsStorage {
       // Calculate time range
       const now = new Date();
       let startTime: Date;
-      
+
       switch (query.timeRange) {
         case 'hour':
           startTime = new Date(now.getTime() - 60 * 60 * 1000);
@@ -103,12 +103,12 @@ export class MetricsStorage {
 
   async getLatestMetrics(): Promise<SystemMetrics | null> {
     const get = promisify(this.db.get.bind(this.db));
-    
+
     try {
       const row = await get(
         'SELECT data FROM metrics ORDER BY timestamp DESC LIMIT 1'
       ) as any;
-      
+
       return row ? JSON.parse(row.data) : null;
     } catch (error) {
       console.error('Failed to get latest metrics:', error);
@@ -120,7 +120,7 @@ export class MetricsStorage {
     return new Promise((resolve) => {
       // Keep only last 30 days of data
       const cutoffDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      
+
       this.db.run(
         'DELETE FROM metrics WHERE timestamp < ?',
         [cutoffDate.toISOString()],

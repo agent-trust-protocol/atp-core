@@ -22,7 +22,7 @@ const TOOL_TO_ACTION_TYPE: Record<string, string> = {
   fs: 'filesystem',
   http: 'network',
   messaging: 'messaging',
-  credentials: 'credentials',
+  credentials: 'credentials'
 };
 
 /**
@@ -117,7 +117,7 @@ export async function enforceAtpPoliciesForClawSession(
       const decision = (atpClient as any).evaluateActionWithProfile({
         profileId,
         state,
-        actionType,
+        actionType
       });
       if (decision === 'deny') {
         forbiddenTools.push(tool);

@@ -38,17 +38,17 @@ app.get('/health', (req, res) => {
 app.post('/agents/register', async (req, res) => {
   try {
     const { agentId, capabilities } = req.body;
-    
+
     if (!Object.values(AgentSpecialization).includes(agentId)) {
       return res.status(400).json({
         success: false,
         error: `Invalid agent ID: ${agentId}. Must be one of: ${Object.values(AgentSpecialization).join(', ')}`
       });
     }
-    
+
     await coordination.registerAgent(agentId, capabilities);
     const workspace = await coordination.initializeAgentWorkspace(agentId);
-    
+
     res.json({
       success: true,
       data: {
@@ -70,7 +70,7 @@ app.delete('/agents/:agentId', async (req, res) => {
   try {
     const agentId = req.params.agentId as AgentSpecialization;
     await coordination.unregisterAgent(agentId);
-    
+
     res.json({
       success: true,
       message: `Agent ${agentId} unregistered successfully`
@@ -87,7 +87,7 @@ app.delete('/agents/:agentId', async (req, res) => {
 app.get('/workspaces', (req, res) => {
   const workspaceManager = coordination.getWorkspaceManager();
   const workspaces = workspaceManager.getAllWorkspaces();
-  
+
   res.json({
     success: true,
     data: workspaces.map(ws => ({
@@ -108,14 +108,14 @@ app.get('/workspaces/:agentId', (req, res) => {
     const agentId = req.params.agentId as AgentSpecialization;
     const workspaceManager = coordination.getWorkspaceManager();
     const workspace = workspaceManager.getWorkspace(agentId);
-    
+
     if (!workspace) {
       return res.status(404).json({
         success: false,
         error: `Workspace not found for agent: ${agentId}`
       });
     }
-    
+
     res.json({
       success: true,
       data: workspace
@@ -132,7 +132,7 @@ app.get('/workspaces/:agentId', (req, res) => {
 app.get('/protocols', (req, res) => {
   const protocolRegistry = coordination.getProtocolRegistry();
   const status = protocolRegistry.getRegistryStatus();
-  
+
   res.json({
     success: true,
     data: status
@@ -142,7 +142,7 @@ app.get('/protocols', (req, res) => {
 app.get('/protocols/bridges', (req, res) => {
   const protocolRegistry = coordination.getProtocolRegistry();
   const bridges = protocolRegistry.getAllBridgeConfigurations();
-  
+
   res.json({
     success: true,
     data: bridges.map(bridge => ({
@@ -161,7 +161,7 @@ app.get('/protocols/bridges', (req, res) => {
 app.get('/coordination/status', (req, res) => {
   const coordinator = coordination.getAgentCoordinator();
   const status = coordinator.getCoordinationStatus();
-  
+
   res.json({
     success: true,
     data: status
@@ -171,7 +171,7 @@ app.get('/coordination/status', (req, res) => {
 app.get('/coordination/plan', (req, res) => {
   const coordinator = coordination.getAgentCoordinator();
   const plan = coordinator.getDevelopmentPlan();
-  
+
   res.json({
     success: true,
     data: plan
@@ -182,7 +182,7 @@ app.get('/coordination/events', (req, res) => {
   const limit = parseInt(req.query.limit as string) || 50;
   const coordinator = coordination.getAgentCoordinator();
   const events = coordinator.getEventHistory(limit);
-  
+
   res.json({
     success: true,
     data: events
@@ -192,7 +192,7 @@ app.get('/coordination/events', (req, res) => {
 app.get('/messaging/status', (req, res) => {
   const messaging = coordination.getMessagingSystem();
   const status = messaging.getSystemStatus();
-  
+
   res.json({
     success: true,
     data: status
@@ -202,7 +202,7 @@ app.get('/messaging/status', (req, res) => {
 app.get('/messaging/stats', (req, res) => {
   const messaging = coordination.getMessagingSystem();
   const stats = messaging.getCommunicationStats();
-  
+
   res.json({
     success: true,
     data: stats
@@ -213,7 +213,7 @@ app.get('/messaging/history', (req, res) => {
   const limit = parseInt(req.query.limit as string) || 50;
   const messaging = coordination.getMessagingSystem();
   const history = messaging.getMessageHistory(limit);
-  
+
   res.json({
     success: true,
     data: history
@@ -223,7 +223,7 @@ app.get('/messaging/history', (req, res) => {
 // System metrics routes
 app.get('/metrics', (req, res) => {
   const metrics = coordination.getMetrics();
-  
+
   res.json({
     success: true,
     data: metrics
@@ -233,7 +233,7 @@ app.get('/metrics', (req, res) => {
 app.get('/metrics/history', (req, res) => {
   const hours = parseInt(req.query.hours as string) || 1;
   const history = coordination.getMetricsHistory(hours);
-  
+
   res.json({
     success: true,
     data: history
@@ -245,7 +245,7 @@ app.get('/workflow/agents/:agentId/startup-script', (req, res) => {
   try {
     const agentId = req.params.agentId as AgentSpecialization;
     const script = coordination.generateAgentStartupScript(agentId);
-    
+
     res.setHeader('Content-Type', 'text/plain');
     res.send(script);
   } catch (error) {
@@ -262,7 +262,7 @@ app.get('/workflow/dependencies/:agentId', (req, res) => {
     const workspaceManager = coordination.getWorkspaceManager();
     const dependencies = workspaceManager.getAgentDependencies(agentId);
     const dependents = workspaceManager.getDependentAgents(agentId);
-    
+
     res.json({
       success: true,
       data: {
@@ -329,10 +329,10 @@ async function startServer() {
   try {
     console.log('ATP Protocol Integration Development Coordination');
     console.log('=================================================');
-    
+
     // Start coordination infrastructure
     await coordination.start();
-    
+
     // Start HTTP server
     app.listen(port, () => {
       console.log(`\n🚀 Coordination Server running on port ${port}`);
@@ -352,7 +352,7 @@ async function startServer() {
         console.log(`   • ${agent}: ${workspace?.name || 'Unknown'}`);
       });
     });
-    
+
   } catch (error) {
     console.error('Failed to start coordination server:', error);
     process.exit(1);

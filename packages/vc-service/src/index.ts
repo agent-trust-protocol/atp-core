@@ -17,7 +17,7 @@ const dbConfig: DatabaseConfig = {
   ssl: config.NODE_ENV === 'production',
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 2000
 };
 
 const storage = new StorageService(dbConfig);
@@ -34,14 +34,14 @@ app.get('/vc/schemas', (req, res) => credentialController.listSchemas(req, res))
 app.get('/health', async (req, res) => {
   try {
     const dbHealth = await storage.healthCheck();
-    res.json({ 
-      status: dbHealth.healthy ? 'healthy' : 'unhealthy', 
+    res.json({
+      status: dbHealth.healthy ? 'healthy' : 'unhealthy',
       service: 'vc-service',
       database: dbHealth
     });
   } catch (error) {
-    res.status(500).json({ 
-      status: 'unhealthy', 
+    res.status(500).json({
+      status: 'unhealthy',
       service: 'vc-service',
       error: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -53,7 +53,7 @@ async function startServer() {
   try {
     await storage.initialize();
     console.log('Database connection established');
-    
+
     app.listen(config.PORT, () => {
       console.log(`VC Service running on port ${config.PORT}`);
     });

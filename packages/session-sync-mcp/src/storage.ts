@@ -1,6 +1,6 @@
 /**
  * Session Sync MCP - SQLite Storage Layer
- * 
+ *
  * Persistent storage for cross-agent session synchronization.
  * Stores sessions, messages, context, and decisions.
  */
@@ -58,7 +58,7 @@ export class SessionStorage {
     // Default to ~/.session-sync-mcp/sessions.db
     const defaultDir = join(homedir(), '.session-sync-mcp');
     this.dbPath = customPath || join(defaultDir, 'sessions.db');
-    
+
     // Ensure directory exists
     const dir = dirname(this.dbPath);
     if (!existsSync(dir)) {
@@ -227,18 +227,18 @@ export class SessionStorage {
       message.metadata || null,
       now
     );
-    
+
     // Update session's updated_at
     this.db.prepare('UPDATE sessions SET updated_at = ?, last_agent = ? WHERE id = ?')
       .run(now, message.agent, message.sessionId);
-    
+
     return { ...message, id: Number(result.lastInsertRowid), timestamp: now };
   }
 
   getMessages(sessionId: string, options?: { limit?: number; offset?: number }): Message[] {
     let query = 'SELECT * FROM messages WHERE session_id = ? ORDER BY timestamp DESC';
     const params: any[] = [sessionId];
-    
+
     if (options?.limit) {
       query += ' LIMIT ?';
       params.push(options.limit);
@@ -299,7 +299,7 @@ export class SessionStorage {
   getDecisions(sessionId: string, status?: string): Decision[] {
     let query = 'SELECT * FROM decisions WHERE session_id = ?';
     const params: any[] = [sessionId];
-    
+
     if (status) {
       query += ' AND status = ?';
       params.push(status);
@@ -314,11 +314,11 @@ export class SessionStorage {
   // Search across all content
   search(query: string, sessionId?: string): { messages: Message[]; context: Context[]; decisions: Decision[] } {
     const searchTerm = `%${query}%`;
-    
+
     let messageQuery = 'SELECT * FROM messages WHERE content LIKE ?';
     let contextQuery = 'SELECT * FROM context WHERE value LIKE ? OR key LIKE ?';
     let decisionQuery = 'SELECT * FROM decisions WHERE description LIKE ? OR rationale LIKE ?';
-    
+
     const messageParams: any[] = [searchTerm];
     const contextParams: any[] = [searchTerm, searchTerm];
     const decisionParams: any[] = [searchTerm, searchTerm];
@@ -349,7 +349,7 @@ export class SessionStorage {
       updatedAt: row.updated_at,
       lastAgent: row.last_agent,
       summary: row.summary,
-      tags: row.tags,
+      tags: row.tags
     };
   }
 
@@ -361,7 +361,7 @@ export class SessionStorage {
       role: row.role,
       content: row.content,
       timestamp: row.timestamp,
-      metadata: row.metadata,
+      metadata: row.metadata
     };
   }
 
@@ -372,7 +372,7 @@ export class SessionStorage {
       key: row.key,
       value: row.value,
       agent: row.agent,
-      timestamp: row.timestamp,
+      timestamp: row.timestamp
     };
   }
 
@@ -384,7 +384,7 @@ export class SessionStorage {
       rationale: row.rationale,
       agent: row.agent,
       timestamp: row.timestamp,
-      status: row.status,
+      status: row.status
     };
   }
 

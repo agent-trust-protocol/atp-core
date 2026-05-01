@@ -5,14 +5,14 @@
 
 import { EventEmitter } from 'events';
 import { createHash, randomBytes } from 'crypto';
-import { 
-  AGPMessage, 
-  AGPAgent, 
-  AGPRoute, 
-  AGPMessageType, 
-  AGPPriority, 
+import {
+  AGPMessage,
+  AGPAgent,
+  AGPRoute,
+  AGPMessageType,
+  AGPPriority,
   AGPAgentStatus,
-  SecuredAGPMessage 
+  SecuredAGPMessage
 } from './types';
 import { QuantumSafeSignature } from '@atp/shared';
 
@@ -67,10 +67,10 @@ export class AGPAdapter extends EventEmitter {
     if (agent) {
       agent.status = AGPAgentStatus.INACTIVE;
       this.agents.delete(agentId);
-      
+
       // Clean up agent's message queue
       this.messageQueue.delete(agentId);
-      
+
       this.emit('agentDeregistered', agentId);
     }
   }
@@ -88,10 +88,10 @@ export class AGPAdapter extends EventEmitter {
       this.validateMessage(message);
 
       // Check if target agents exist
-      const targets = Array.isArray(message.targetAgent) 
-        ? message.targetAgent 
+      const targets = Array.isArray(message.targetAgent)
+        ? message.targetAgent
         : [message.targetAgent];
-      
+
       for (const target of targets) {
         const targetAgent = this.agents.get(target);
         if (!targetAgent || targetAgent.status !== AGPAgentStatus.ACTIVE) {
@@ -220,7 +220,7 @@ export class AGPAdapter extends EventEmitter {
   } {
     const activeAgents = Array.from(this.agents.values())
       .filter(agent => agent.status === AGPAgentStatus.ACTIVE).length;
-    
+
     const queuedMessages = Array.from(this.messageQueue.values())
       .reduce((total, queue) => total + queue.length, 0);
 
@@ -234,18 +234,18 @@ export class AGPAdapter extends EventEmitter {
   }
 
   private async routeMessage(securedMessage: SecuredAGPMessage): Promise<void> {
-    const targets = Array.isArray(securedMessage.targetAgent) 
-      ? securedMessage.targetAgent 
+    const targets = Array.isArray(securedMessage.targetAgent)
+      ? securedMessage.targetAgent
       : [securedMessage.targetAgent];
 
     for (const target of targets) {
       // Find matching route
       const route = this.findRoute(securedMessage.sourceAgent, target);
-      
+
       if (route) {
         // Apply route filters
         const filteredMessage = await this.applyFilters(securedMessage, route.filters);
-        
+
         // Queue message for delivery
         this.queueMessage(target, filteredMessage);
       } else {
@@ -257,7 +257,7 @@ export class AGPAdapter extends EventEmitter {
 
   private findRoute(source: string, target: string): AGPRoute | undefined {
     for (const route of this.routes.values()) {
-      if (this.matchesPattern(source, route.sourcePattern) && 
+      if (this.matchesPattern(source, route.sourcePattern) &&
           this.matchesPattern(target, route.targetPattern)) {
         return route;
       }
@@ -271,11 +271,11 @@ export class AGPAdapter extends EventEmitter {
   }
 
   private async applyFilters(message: SecuredAGPMessage, filters: any[]): Promise<SecuredAGPMessage> {
-    let processedMessage = { ...message };
-    
+    const processedMessage = { ...message };
+
     // Sort filters by order
     const sortedFilters = filters.sort((a, b) => a.order - b.order);
-    
+
     for (const filter of sortedFilters) {
       switch (filter.filterType) {
         case 'RATE_LIMIT':
@@ -295,7 +295,7 @@ export class AGPAdapter extends EventEmitter {
           break;
       }
     }
-    
+
     return processedMessage;
   }
 
@@ -304,7 +304,7 @@ export class AGPAdapter extends EventEmitter {
       this.messageQueue.set(targetAgent, []);
     }
     this.messageQueue.get(targetAgent)!.push(message);
-    
+
     // Emit message for immediate delivery if agent is connected
     this.emit('messageQueued', { targetAgent, message });
   }
@@ -314,7 +314,7 @@ export class AGPAdapter extends EventEmitter {
     if (agent) {
       agent.lastHeartbeat = Date.now();
       agent.status = AGPAgentStatus.ACTIVE;
-      
+
       // Send heartbeat response
       const response: AGPMessage = {
         messageId: this.generateMessageId(),
@@ -326,7 +326,7 @@ export class AGPAdapter extends EventEmitter {
         timestamp: Date.now(),
         correlationId: message.messageId
       };
-      
+
       this.emit('heartbeatResponse', response);
     }
   }
@@ -410,7 +410,7 @@ export class AGPAdapter extends EventEmitter {
       for (const [agentId, agent] of this.agents) {
         const timeSinceHeartbeat = now - (agent.lastHeartbeat || 0);
         const heartbeatTimeout = agent.heartbeatInterval * 3; // 3x interval as timeout
-        
+
         if (timeSinceHeartbeat > heartbeatTimeout) {
           agent.status = AGPAgentStatus.INACTIVE;
           this.emit('agentTimeout', agentId);

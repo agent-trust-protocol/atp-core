@@ -128,7 +128,7 @@ export const authenticateApiKey = async (
 ): Promise<void> => {
   try {
     const apiKey = req.header('x-api-key') || req.header('authorization')?.replace('Bearer ', '');
-    
+
     if (!apiKey) {
       res.status(401).json({
         error: 'API key required',
@@ -139,7 +139,7 @@ export const authenticateApiKey = async (
 
     const authService = AuthService.getInstance();
     const authData = await authService.validateApiKey(apiKey);
-    
+
     req.tenant = {
       id: authData.tenant.id,
       name: authData.tenant.name,
@@ -154,7 +154,7 @@ export const authenticateApiKey = async (
     next();
   } catch (error: any) {
     logger.error('Authentication failed', { error: error.message });
-    
+
     if (error instanceof TenantError) {
       res.status(error.statusCode).json({
         error: error.message,
@@ -179,7 +179,7 @@ export const authenticateToken = (
 ): void => {
   try {
     const token = req.header('authorization')?.replace('Bearer ', '');
-    
+
     if (!token) {
       res.status(401).json({
         error: 'Token required',
@@ -190,7 +190,7 @@ export const authenticateToken = (
 
     const authService = AuthService.getInstance();
     const payload = authService.verifyToken(token);
-    
+
     (req as any).user = payload;
     next();
   } catch (error: any) {

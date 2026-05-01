@@ -1,6 +1,6 @@
 /**
  * ATP Graph Validator
- * 
+ *
  * Validates OpenClaw agent graphs against ATP policies
  */
 
@@ -58,7 +58,7 @@ export class ATPGraphValidator {
     // 1. Validate nodes (agents)
     for (const node of nodes) {
       const nodeValidation = await this.validateNode(node);
-      
+
       if (!nodeValidation.valid) {
         result.isValid = false;
         result.errors.push({
@@ -68,11 +68,11 @@ export class ATPGraphValidator {
           severity: 'error'
         });
       }
-      
+
       if (nodeValidation.warnings) {
         result.warnings.push(...nodeValidation.warnings);
       }
-      
+
       if (nodeValidation.valid) {
         result.validatedAgents.push(node.name);
       }
@@ -81,13 +81,13 @@ export class ATPGraphValidator {
     // 2. Validate edges (agent connections)
     for (const edge of edges) {
       const edgeValidation = await this.validateEdge(edge, nodes);
-      
+
       result.validatedEdges.push({
         from: edge.from,
         to: edge.to,
         allowed: edgeValidation.allowed
       });
-      
+
       if (!edgeValidation.allowed) {
         result.isValid = false;
         result.errors.push({
@@ -98,7 +98,7 @@ export class ATPGraphValidator {
           severity: 'error'
         });
       }
-      
+
       if (edgeValidation.policy) {
         if (!result.appliedPolicies.includes(edgeValidation.policy)) {
           result.appliedPolicies.push(edgeValidation.policy);
@@ -108,18 +108,18 @@ export class ATPGraphValidator {
 
     // 3. Validate workflow constraints
     const workflowValidation = this.validateWorkflowConstraints(nodes, edges);
-    
+
     if (!workflowValidation.valid) {
       result.isValid = false;
       result.errors.push(...workflowValidation.errors);
     }
-    
+
     result.warnings.push(...workflowValidation.warnings);
 
     // 4. Check for cycles if not allowed
     if (!this.workflowConstraints.allowCycles) {
       const cycleCheck = this.detectCycles(edges);
-      
+
       if (cycleCheck.hasCycles) {
         result.isValid = false;
         result.errors.push({
@@ -133,7 +133,7 @@ export class ATPGraphValidator {
     // 5. Check chain depth
     if (this.workflowConstraints.maxChainDepth) {
       const depthCheck = this.calculateMaxDepth(edges);
-      
+
       if (depthCheck.maxDepth > this.workflowConstraints.maxChainDepth) {
         result.isValid = false;
         result.errors.push({
@@ -147,7 +147,7 @@ export class ATPGraphValidator {
     // 6. Check fan-out
     if (this.workflowConstraints.maxFanOut) {
       const fanOutCheck = this.calculateFanOut(edges);
-      
+
       for (const [agent, fanOut] of Object.entries(fanOutCheck)) {
         if (fanOut > this.workflowConstraints.maxFanOut) {
           result.warnings.push(
@@ -211,8 +211,8 @@ export class ATPGraphValidator {
     // Check inter-agent policy
     const policyKey = `${edge.from}→${edge.to}`;
     const roleKey = `${fromNode.role}→${toNode.role}`;
-    
-    let policy = this.interAgentPolicies.get(policyKey) || this.interAgentPolicies.get(roleKey);
+
+    const policy = this.interAgentPolicies.get(policyKey) || this.interAgentPolicies.get(roleKey);
 
     if (policy) {
       if (!policy.allowed) {
@@ -286,7 +286,7 @@ export class ATPGraphValidator {
 
     // Check minimum workflow trust
     if (this.workflowConstraints.minWorkflowTrust) {
-      const lowTrustAgents = nodes.filter(n => 
+      const lowTrustAgents = nodes.filter(n =>
         n.trustScore && n.trustScore < (this.workflowConstraints.minWorkflowTrust || 0)
       );
 
@@ -325,7 +325,7 @@ export class ATPGraphValidator {
       path.push(node);
 
       const neighbors = adjacency.get(node) || [];
-      
+
       for (const neighbor of neighbors) {
         if (!visited.has(neighbor)) {
           if (dfs(neighbor, [...path])) return true;
@@ -355,7 +355,7 @@ export class ATPGraphValidator {
    */
   private calculateMaxDepth(edges: GraphEdge[]): { maxDepth: number; longestPath: string[] } {
     const adjacency = new Map<string, string[]>();
-    
+
     for (const edge of edges) {
       if (!adjacency.has(edge.from)) adjacency.set(edge.from, []);
       adjacency.get(edge.from)!.push(edge.to);
@@ -371,7 +371,7 @@ export class ATPGraphValidator {
       }
 
       const neighbors = adjacency.get(node) || [];
-      
+
       for (const neighbor of neighbors) {
         dfs(neighbor, depth + 1, [...path, neighbor]);
       }
@@ -442,9 +442,9 @@ export async function validateCrewWithAtp(
 
   // Extract edges (agent-to-agent connections)
   const edges: GraphEdge[] = [];
-  
+
   // In OpenClaw, edges are implicit through tool usage
   // This would need to be extracted from the actual crew structure
-  
+
   return await validator.validateGraph(nodes, edges);
 }

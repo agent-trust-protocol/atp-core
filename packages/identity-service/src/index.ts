@@ -35,7 +35,7 @@ const dbConfig: DatabaseConfig = {
   ssl: config.NODE_ENV === 'production',
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 2000
 };
 
 const storage = new StorageService(dbConfig);
@@ -48,7 +48,7 @@ const pool = new Pool({
   ssl: dbConfig.ssl,
   max: dbConfig.max,
   idleTimeoutMillis: dbConfig.idleTimeoutMillis,
-  connectionTimeoutMillis: dbConfig.connectionTimeoutMillis,
+  connectionTimeoutMillis: dbConfig.connectionTimeoutMillis
 });
 
 const mfaController = new MFAController(pool);
@@ -62,7 +62,7 @@ app.post('/identity/:did/rotate-keys', (req, res) => identityController.rotateKe
 app.post('/identity/:did/trust-level', (req, res) => identityController.updateTrustLevel(req, res));
 app.put('/identity/:did/trust-level', (req, res) => identityController.updateTrustLevel(req, res)); // PUT alternative
 app.get('/identity/:did/trust-info', (req, res) => identityController.getTrustLevelInfo(req, res));
-// GET /identity - List all identities  
+// GET /identity - List all identities
 app.get('/identity', (req, res) => identityController.list(req, res));
 app.post('/identity', (req, res) => identityController.register(req, res)); // Alternative POST endpoint
 
@@ -77,14 +77,14 @@ app.post('/mfa/backup-codes/regenerate', (req, res) => mfaController.regenerateB
 app.get('/health', async (req, res) => {
   try {
     const dbHealth = await storage.healthCheck();
-    res.json({ 
-      status: dbHealth.healthy ? 'healthy' : 'unhealthy', 
+    res.json({
+      status: dbHealth.healthy ? 'healthy' : 'unhealthy',
       service: 'identity-service',
       database: dbHealth
     });
   } catch (error) {
-    res.status(500).json({ 
-      status: 'unhealthy', 
+    res.status(500).json({
+      status: 'unhealthy',
       service: 'identity-service',
       error: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -96,7 +96,7 @@ async function startServer() {
   try {
     await storage.initialize();
     console.log('Database connection established');
-    
+
     app.listen(config.PORT, () => {
       console.log(`Identity Service running on port ${config.PORT}`);
     });

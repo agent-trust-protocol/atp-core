@@ -1,7 +1,7 @@
 /**
  * ATP Cloud Analytics Service
  * Usage analytics and insights for tenants and admins
- * 
+ *
  * ⚠️  INTERNAL TESTING ONLY - NOT FOR PRODUCTION USE
  */
 
@@ -81,7 +81,7 @@ export class AnalyticsService {
 
   private setupTenantAnalyticsRoutes(): void {
     const router = express.Router();
-    
+
     // Apply API key authentication to all tenant routes
     router.use(authenticateApiKey);
 
@@ -188,7 +188,7 @@ export class AnalyticsService {
 
   private setupAdminAnalyticsRoutes(): void {
     const router = express.Router();
-    
+
     // Apply admin token authentication
     router.use(authenticateToken);
 
@@ -255,7 +255,7 @@ export class AnalyticsService {
         const metric = (req.query.metric as string) || 'requests';
         const limit = parseInt(req.query.limit as string) || 10;
         const period = (req.query.period as string) || '30d';
-        
+
         const topTenants = await this.analyticsEngine.getTopTenants(metric, limit, period);
         res.json(topTenants);
       } catch (error: any) {

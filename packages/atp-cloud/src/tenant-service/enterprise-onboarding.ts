@@ -162,7 +162,7 @@ export class EnterpriseOnboardingService {
     // Generate secure API credentials
     const apiKey = `atp_trial_${randomBytes(16).toString('hex')}`;
     const apiSecret = randomBytes(32).toString('base64');
-    
+
     // Calculate trial end date (14 days)
     const trialEndsAt = new Date();
     trialEndsAt.setDate(trialEndsAt.getDate() + 14);

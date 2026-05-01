@@ -36,11 +36,11 @@ const wsService = new WebSocketService(rpcService, authService);
 // Enhanced authentication middleware
 app.use('/secure/*', async (req, res, next) => {
   const authContext = await authService.authenticateRequest(req, req.headers.authorization);
-  
+
   if (!authContext.authenticated) {
     return res.status(401).json({
       success: false,
-      error: 'Authentication required',
+      error: 'Authentication required'
     });
   }
 
@@ -52,13 +52,13 @@ app.use('/secure/*', async (req, res, next) => {
 // HTTP API endpoints
 app.get('/health', async (req, res) => {
   const startTime = Date.now();
-  
+
   try {
     const serviceStatus = rpcService.getServiceStatus();
     const healthStatus = metricsService.getHealthStatus();
-    
-    const response = { 
-      status: 'healthy', 
+
+    const response = {
+      status: 'healthy',
       service: 'rpc-gateway',
       version: '0.1.0',
       protocol: 'Agent Trust Protocol™',
@@ -67,7 +67,7 @@ app.get('/health', async (req, res) => {
       timestamp: Date.now(),
       system: healthStatus.system
     };
-    
+
     metricsService.recordResponseTime('/health', Date.now() - startTime);
     res.json(response);
   } catch (error) {
@@ -95,7 +95,7 @@ app.get('/services', (req, res) => {
   const serviceStatus = rpcService.getServiceStatus();
   res.json({
     success: true,
-    data: serviceStatus,
+    data: serviceStatus
   });
 });
 
@@ -106,19 +106,19 @@ app.post('/auth/challenge', async (req, res) => {
     if (!did) {
       return res.status(400).json({
         success: false,
-        error: 'DID is required',
+        error: 'DID is required'
       });
     }
 
     const challenge = await authService.createAuthChallenge(did);
     res.json({
       success: true,
-      challenge,
+      challenge
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -129,7 +129,7 @@ app.post('/auth/response', async (req, res) => {
     if (!challenge || !response || !signature || !did) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields',
+        error: 'Missing required fields'
       });
     }
 
@@ -137,18 +137,18 @@ app.post('/auth/response', async (req, res) => {
     if (!isValid) {
       return res.status(401).json({
         success: false,
-        error: 'Authentication failed',
+        error: 'Authentication failed'
       });
     }
 
     res.json({
       success: true,
-      message: 'Authentication successful',
+      message: 'Authentication successful'
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -163,8 +163,8 @@ app.get('/secure/status', (req, res) => {
       did: authContext.did,
       trustLevel: authContext.trustLevel,
       authMethod: authContext.authMethod,
-      capabilities: authContext.capabilities,
-    },
+      capabilities: authContext.capabilities
+    }
   });
 });
 
@@ -174,7 +174,7 @@ app.post('/secure/certificates/issue', async (req, res) => {
     if (!mtlsService) {
       return res.status(503).json({
         success: false,
-        error: 'Certificate service not available',
+        error: 'Certificate service not available'
       });
     }
 
@@ -185,20 +185,20 @@ app.post('/secure/certificates/issue', async (req, res) => {
     if (!authContext.capabilities.includes('issue-certificates')) {
       return res.status(403).json({
         success: false,
-        error: 'Insufficient permissions to issue certificates',
+        error: 'Insufficient permissions to issue certificates'
       });
     }
 
     const certificate = await mtlsService.issueDIDCertificate(did, publicKey, trustLevel);
-    
+
     res.json({
       success: true,
-      certificate,
+      certificate
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Certificate issuance failed',
+      error: error instanceof Error ? error.message : 'Certificate issuance failed'
     });
   }
 });
@@ -208,7 +208,7 @@ app.post('/secure/certificates/revoke', async (req, res) => {
     if (!mtlsService) {
       return res.status(503).json({
         success: false,
-        error: 'Certificate service not available',
+        error: 'Certificate service not available'
       });
     }
 
@@ -219,20 +219,20 @@ app.post('/secure/certificates/revoke', async (req, res) => {
     if (!authContext.capabilities.includes('revoke-certificates')) {
       return res.status(403).json({
         success: false,
-        error: 'Insufficient permissions to revoke certificates',
+        error: 'Insufficient permissions to revoke certificates'
       });
     }
 
     await mtlsService.revokeDIDCertificate(certificateId, reason, authContext.did);
-    
+
     res.json({
       success: true,
-      message: 'Certificate revoked successfully',
+      message: 'Certificate revoked successfully'
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Certificate revocation failed',
+      error: error instanceof Error ? error.message : 'Certificate revocation failed'
     });
   }
 });
@@ -242,19 +242,19 @@ app.get('/secure/certificates/stats', (req, res) => {
     if (!mtlsService) {
       return res.status(503).json({
         success: false,
-        error: 'Certificate service not available',
+        error: 'Certificate service not available'
       });
     }
 
     const stats = mtlsService.getDIDCAStats();
     res.json({
       success: true,
-      stats,
+      stats
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to get certificate stats',
+      error: error instanceof Error ? error.message : 'Failed to get certificate stats'
     });
   }
 });
@@ -264,19 +264,19 @@ app.get('/certificates/ca', (req, res) => {
     if (!mtlsService) {
       return res.status(503).json({
         success: false,
-        error: 'Certificate service not available',
+        error: 'Certificate service not available'
       });
     }
 
     const caCert = mtlsService.getDIDCACertificate();
     res.json({
       success: true,
-      certificate: caCert,
+      certificate: caCert
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to get CA certificate',
+      error: error instanceof Error ? error.message : 'Failed to get CA certificate'
     });
   }
 });
@@ -286,19 +286,19 @@ app.get('/certificates/crl', (req, res) => {
     if (!mtlsService) {
       return res.status(503).json({
         success: false,
-        error: 'Certificate service not available',
+        error: 'Certificate service not available'
       });
     }
 
     const crl = mtlsService.getRevocationList();
     res.json({
       success: true,
-      revocationList: crl,
+      revocationList: crl
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to get revocation list',
+      error: error instanceof Error ? error.message : 'Failed to get revocation list'
     });
   }
 });

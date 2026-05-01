@@ -60,7 +60,7 @@ export class ProtocolFederationEngine extends EventEmitter {
   registerAdapter(adapter: ProtocolAdapter): void {
     this.adapters.set(adapter.protocolType, adapter);
     this.initializeProtocolMetrics(adapter.protocolType);
-    
+
     this.emit('adapterRegistered', {
       protocol: adapter.protocolType,
       version: adapter.version,
@@ -105,7 +105,7 @@ export class ProtocolFederationEngine extends EventEmitter {
     if (bridge) {
       this.bridges.delete(bridgeId);
       this.metrics.activeBridges--;
-      
+
       this.emitEvent({
         eventType: FederationEventType.BRIDGE_DISCONNECTED,
         bridgeId,
@@ -134,7 +134,7 @@ export class ProtocolFederationEngine extends EventEmitter {
   ): Promise<string> {
     try {
       const messageId = this.generateMessageId();
-      
+
       // Create universal message
       const universalMessage: UniversalMessage = {
         messageId,
@@ -288,7 +288,7 @@ export class ProtocolFederationEngine extends EventEmitter {
         eventType: FederationEventType.MESSAGE_TRANSFORMED,
         messageId: message.messageId,
         bridgeId,
-        details: { 
+        details: {
           sourceProtocol: message.sourceProtocol,
           targetProtocol: message.targetProtocol,
           transformations: bridge.transformationRules.length
@@ -346,7 +346,7 @@ export class ProtocolFederationEngine extends EventEmitter {
    * Apply transformation rules from bridge configuration
    */
   private async applyTransformations(
-    message: UniversalMessage, 
+    message: UniversalMessage,
     bridge: BridgeConfiguration
   ): Promise<UniversalMessage> {
     let transformedMessage = { ...message };
@@ -359,7 +359,7 @@ export class ProtocolFederationEngine extends EventEmitter {
 
       // Apply transformation
       transformedMessage = this.applyTransformationRule(transformedMessage, rule);
-      
+
       // Track transformation in headers
       transformedMessage.federationHeaders.transformationChain.push(rule.ruleId);
     }
@@ -373,7 +373,7 @@ export class ProtocolFederationEngine extends EventEmitter {
   private applyTransformationRule(message: UniversalMessage, rule: any): UniversalMessage {
     // Simplified transformation - in practice would use JSONPath or custom functions
     const transformed = { ...message };
-    
+
     // Update message type if specified
     if (rule.targetMessageType && rule.targetMessageType !== rule.sourceMessageType) {
       transformed.messageType = rule.targetMessageType;
@@ -388,7 +388,7 @@ export class ProtocolFederationEngine extends EventEmitter {
   private evaluateConditions(conditions: any[], message: UniversalMessage): boolean {
     for (const condition of conditions) {
       const fieldValue = this.getFieldValue(message, condition.field);
-      
+
       switch (condition.operator) {
         case 'eq':
           if (fieldValue !== condition.value) return false;
@@ -424,13 +424,13 @@ export class ProtocolFederationEngine extends EventEmitter {
     }
 
     // Check allowed sources
-    if (policy.allowedSources.length > 0 && 
+    if (policy.allowedSources.length > 0 &&
         !policy.allowedSources.includes(message.sourceAgent)) {
       return false;
     }
 
     // Check allowed targets
-    if (policy.allowedTargets.length > 0 && 
+    if (policy.allowedTargets.length > 0 &&
         !policy.allowedTargets.includes(message.targetAgent)) {
       return false;
     }
@@ -468,11 +468,11 @@ export class ProtocolFederationEngine extends EventEmitter {
    */
   private updateRoutingTable(bridge: BridgeConfiguration): void {
     const routeKey = `${bridge.sourceProtocol}->${bridge.targetProtocol}`;
-    
+
     if (!this.routingTable.has(routeKey)) {
       this.routingTable.set(routeKey, []);
     }
-    
+
     this.routingTable.get(routeKey)!.push(bridge.bridgeId);
   }
 
@@ -481,13 +481,13 @@ export class ProtocolFederationEngine extends EventEmitter {
    */
   private updateMetrics(message: UniversalMessage): void {
     this.metrics.totalMessages++;
-    
+
     // Update protocol metrics
-    this.metrics.messagesByProtocol[message.sourceProtocol] = 
+    this.metrics.messagesByProtocol[message.sourceProtocol] =
       (this.metrics.messagesByProtocol[message.sourceProtocol] || 0) + 1;
-    
+
     // Update message type metrics
-    this.metrics.messagesByType[message.messageType] = 
+    this.metrics.messagesByType[message.messageType] =
       (this.metrics.messagesByType[message.messageType] || 0) + 1;
 
     // Calculate throughput (messages per second over last minute)
@@ -525,7 +525,7 @@ export class ProtocolFederationEngine extends EventEmitter {
 
   private initializeEngine(): void {
     this.startTime = Date.now() / 1000;
-    
+
     // Initialize protocol metrics for all supported protocols
     Object.values(SupportedProtocol).forEach(protocol => {
       this.initializeProtocolMetrics(protocol);

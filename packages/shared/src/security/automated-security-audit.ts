@@ -140,10 +140,10 @@ export class SecurityAuditRules {
       name: 'Overly Permissive Roles',
       check: async (context: any): Promise<AuditFinding | null> => {
         const roles = context.roles || [];
-        const overlyPermissive = roles.filter((role: any) => 
+        const overlyPermissive = roles.filter((role: any) =>
           role.permissions?.length > 20 && !role.isSystem
         );
-        
+
         if (overlyPermissive.length > 0) {
           return {
             id: crypto.randomUUID(),
@@ -165,10 +165,10 @@ export class SecurityAuditRules {
       name: 'Missing RBAC Implementation',
       check: async (context: any): Promise<AuditFinding | null> => {
         const endpoints = context.endpoints || [];
-        const unprotected = endpoints.filter((ep: any) => 
+        const unprotected = endpoints.filter((ep: any) =>
           !ep.authentication && !ep.public && ep.method !== 'GET'
         );
-        
+
         if (unprotected.length > 0) {
           return {
             id: crypto.randomUUID(),
@@ -201,7 +201,7 @@ export class SecurityAuditRules {
           /secret["\s:=]+["']?[^"'\s]+/gi,
           /token["\s:=]+["']?[^"'\s]+/gi
         ];
-        
+
         const matches: string[] = [];
         for (const log of (context.logs || [])) {
           for (const pattern of logPatterns) {
@@ -210,7 +210,7 @@ export class SecurityAuditRules {
             }
           }
         }
-        
+
         if (matches.length > 0) {
           return {
             id: crypto.randomUUID(),
@@ -232,10 +232,10 @@ export class SecurityAuditRules {
       id: 'data-002',
       name: 'Unencrypted Sensitive Data',
       check: async (context: any): Promise<AuditFinding | null> => {
-        const unencrypted = context.database?.tables?.filter((table: any) => 
+        const unencrypted = context.database?.tables?.filter((table: any) =>
           table.sensitive && !table.encrypted
         ) || [];
-        
+
         if (unencrypted.length > 0) {
           return {
             id: crypto.randomUUID(),
@@ -288,14 +288,14 @@ export class SecurityAuditRules {
           'root/root',
           'test/test'
         ];
-        
-        const found = context.users?.filter((user: any) => 
+
+        const found = context.users?.filter((user: any) =>
           defaultCreds.some(cred => {
             const [username, password] = cred.split('/');
             return user.username === username && user.hasDefaultPassword;
           })
         ) || [];
-        
+
         if (found.length > 0) {
           return {
             id: crypto.randomUUID(),
@@ -410,7 +410,7 @@ export class SecurityAuditSystem extends EventEmitter {
         if (finding) {
           findings.push(finding);
           this.findings.set(finding.id, finding);
-          
+
           // Emit high severity findings immediately
           if (this.getSeverityLevel(finding.severity) >= this.getSeverityLevel(this.config.severityThreshold)) {
             this.emit('finding', finding);
@@ -545,7 +545,7 @@ export class SecurityAuditSystem extends EventEmitter {
         this.config.outputPath,
         `audit-${report.timestamp.toISOString().split('T')[0]}.json`
       );
-      
+
       await fs.mkdir(this.config.outputPath, { recursive: true });
       await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
     } catch (error) {
@@ -591,15 +591,15 @@ export class SecurityAuditSystem extends EventEmitter {
    */
   getFindings(filter?: { severity?: AuditSeverity; category?: AuditCategory }): AuditFinding[] {
     let findings = Array.from(this.findings.values());
-    
+
     if (filter?.severity) {
       findings = findings.filter(f => f.severity === filter.severity);
     }
-    
+
     if (filter?.category) {
       findings = findings.filter(f => f.category === filter.category);
     }
-    
+
     return findings;
   }
 

@@ -1,6 +1,6 @@
 /**
  * ATP OpenClaw Agent Wrapper
- * 
+ *
  * Base class for OpenClaw agents with ATP identity and security
  */
 
@@ -11,29 +11,29 @@ import { registerAgentWithAtp, updateAgentTrust } from './registration.js';
 export interface AtpOpenClawAgentConfig {
   /** Agent name */
   name: string;
-  
+
   /** Agent role */
   role: string;
-  
+
   /** ATP client */
   atpClient: ATPClient;
-  
+
   /** Base agent configuration (for LangChain/CrewAI agents) */
   baseConfig?: any;
-  
+
   /** Initial trust level */
   trustLevel?: string;
-  
+
   /** Policy profile */
   policyProfile?: string;
-  
+
   /** Enable auto trust updates */
   autoUpdateTrust?: boolean;
 }
 
 /**
  * ATP-enhanced OpenClaw Agent
- * 
+ *
  * Wraps any OpenClaw agent (LangChain, CrewAI, etc.) with ATP identity and security
  */
 export class AtpOpenClawAgent {
@@ -41,7 +41,7 @@ export class AtpOpenClawAgent {
   public readonly role: string;
   public readonly atpClient: ATPClient;
   public agentMeta?: AgentMetadata;
-  
+
   private baseConfig: any;
   private autoUpdateTrust: boolean;
   private taskHistory: Array<{ success: boolean; timestamp: Date }> = [];
@@ -188,7 +188,7 @@ export class AtpOpenClawAgent {
     // Increase trust for high success rate
     if (successRate >= 0.9) return 0.01;
     if (successRate >= 0.8) return 0.005;
-    
+
     // Decrease trust for low success rate
     if (successRate <= 0.5) return -0.02;
     if (successRate <= 0.7) return -0.01;
@@ -201,7 +201,7 @@ export class AtpOpenClawAgent {
    */
   private shouldUpdateTrust(): boolean {
     if (!this.agentMeta) return false;
-    
+
     const timeSinceLastUpdate = Date.now() - this.agentMeta.lastTrustUpdate.getTime();
     const minUpdateInterval = 60 * 1000; // 1 minute
 

@@ -16,7 +16,7 @@ export class PermissionService {
   async grantPermission(request: PermissionRequest): Promise<PermissionResult> {
     const grantId = randomUUID();
     const now = Date.now();
-    
+
     const grant: PermissionGrant = {
       id: grantId,
       grantor: request.grantor,
@@ -25,7 +25,7 @@ export class PermissionService {
       resource: request.resource,
       conditions: request.conditions,
       expiresAt: request.expiresAt,
-      createdAt: now,
+      createdAt: now
     };
 
     await this.storage.storeGrant(grant);
@@ -39,20 +39,20 @@ export class PermissionService {
       resource: request.resource,
       conditions: request.conditions,
       issuedAt: now,
-      expiresAt: request.expiresAt || (now + (24 * 60 * 60 * 1000)), // 24 hours default
+      expiresAt: request.expiresAt || (now + (24 * 60 * 60 * 1000)) // 24 hours default
     });
 
     return {
       allowed: true,
       token,
-      expiresAt: request.expiresAt,
+      expiresAt: request.expiresAt
     };
   }
 
   async checkPermission(check: PermissionCheck): Promise<PermissionResult> {
     const grants = await this.storage.getGrantsForSubject(check.subject);
-    const activeGrants = grants.filter(g => 
-      !g.revokedAt && 
+    const activeGrants = grants.filter(g =>
+      !g.revokedAt &&
       (!g.expiresAt || g.expiresAt > Date.now())
     );
 
@@ -67,13 +67,13 @@ export class PermissionService {
           action: check.action,
           resource: check.resource,
           grant,
-          context: check.context,
+          context: check.context
         });
 
         if (policyCheck.allowed) {
           return {
             allowed: true,
-            reason: `Permission granted via grant ${grant.id}`,
+            reason: `Permission granted via grant ${grant.id}`
           };
         }
       }
@@ -81,7 +81,7 @@ export class PermissionService {
 
     return {
       allowed: false,
-      reason: 'No matching permission found',
+      reason: 'No matching permission found'
     };
   }
 

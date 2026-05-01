@@ -1,9 +1,9 @@
 /**
  * Version Management System for ATP SDK
- * 
+ *
  * Tracks protocol versions, agent versions, and determines when SDK version
  * needs to be updated based on breaking changes in protocols or agents.
- * 
+ *
  * ATP serves as the ecosystem security layer for all AI agents.
  */
 
@@ -311,14 +311,14 @@ export class VersionManager {
       breaking: a.breakingChanges
     }));
 
-    const breakingCount = protocols.filter(p => p.breaking).length + 
+    const breakingCount = protocols.filter(p => p.breaking).length +
                          agents.filter(a => a.breaking).length;
 
     return {
       sdkVersion: '1.1.0',
       protocols,
       agents,
-      summary: breakingCount > 0 
+      summary: breakingCount > 0
         ? `⚠️ ${breakingCount} breaking change(s) detected - SDK version update recommended`
         : '✅ All versions compatible - no breaking changes'
     };

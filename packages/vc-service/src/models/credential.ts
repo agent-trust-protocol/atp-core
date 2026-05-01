@@ -6,7 +6,7 @@ export const CredentialStatusSchema = z.object({
   id: z.string(),
   type: z.string(),
   statusListIndex: z.string().optional(),
-  statusListCredential: z.string().optional(),
+  statusListCredential: z.string().optional()
 });
 
 export const ProofSchema = z.object({
@@ -14,7 +14,7 @@ export const ProofSchema = z.object({
   created: z.string(),
   verificationMethod: z.string(),
   proofPurpose: z.string(),
-  proofValue: z.string(),
+  proofValue: z.string()
 });
 
 export const VerifiableCredentialSchema = z.object({
@@ -23,13 +23,13 @@ export const VerifiableCredentialSchema = z.object({
   type: z.array(z.string()),
   issuer: z.union([z.string(), z.object({
     id: z.string(),
-    name: z.string().optional(),
+    name: z.string().optional()
   })]),
   issuanceDate: z.string(),
   expirationDate: z.string().optional(),
   credentialSubject: CredentialSubjectSchema,
   credentialStatus: CredentialStatusSchema.optional(),
-  proof: ProofSchema.optional(),
+  proof: ProofSchema.optional()
 });
 
 export const CredentialSchemaDefinition = z.object({
@@ -40,9 +40,9 @@ export const CredentialSchemaDefinition = z.object({
   properties: z.record(z.object({
     type: z.string(),
     description: z.string(),
-    required: z.boolean().optional(),
+    required: z.boolean().optional()
   })),
-  required: z.array(z.string()).optional(),
+  required: z.array(z.string()).optional()
 });
 
 export const CredentialIssuanceRequest = z.object({
@@ -51,13 +51,13 @@ export const CredentialIssuanceRequest = z.object({
   claims: z.record(z.any()),
   expirationDate: z.string().optional(),
   issuerDid: z.string(),
-  issuerPrivateKey: z.string(),
+  issuerPrivateKey: z.string()
 });
 
 export const CredentialVerificationRequest = z.object({
   credential: VerifiableCredentialSchema,
   challenge: z.string().optional(),
-  domain: z.string().optional(),
+  domain: z.string().optional()
 });
 
 export type CredentialSubject = z.infer<typeof CredentialSubjectSchema>;

@@ -1,6 +1,6 @@
 /**
  * Simple 3-line ATP Agent Example
- * 
+ *
  * This demonstrates the simplified API for creating quantum-safe AI agents
  */
 

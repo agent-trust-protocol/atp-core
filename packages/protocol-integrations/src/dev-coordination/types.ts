@@ -7,7 +7,7 @@ import { SupportedProtocol, UniversalMessage } from '../federation/types';
 // Agent Specialization Types
 export enum AgentSpecialization {
   MCP_AGENT = 'mcp-agent',
-  A2A_AGENT = 'a2a-agent', 
+  A2A_AGENT = 'a2a-agent',
   ENTERPRISE_AGENT = 'enterprise-agent',
   ANP_AGENT = 'anp-agent'
 }

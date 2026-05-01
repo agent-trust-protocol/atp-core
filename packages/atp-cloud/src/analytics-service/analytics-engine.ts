@@ -48,13 +48,13 @@ export class AnalyticsEngine {
     try {
       // Get current hour metrics
       const currentMetrics = await this.getUsageMetricsForPeriod(tenantId, hourAgo, now);
-      
+
       // Get previous hour metrics for comparison
       const previousHourStart = new Date(hourAgo.getTime() - 60 * 60 * 1000);
       const previousMetrics = await this.getUsageMetricsForPeriod(tenantId, previousHourStart, hourAgo);
 
       // Calculate changes
-      const requestsChange = previousMetrics.requests.total > 0 
+      const requestsChange = previousMetrics.requests.total > 0
         ? ((currentMetrics.requests.total - previousMetrics.requests.total) / previousMetrics.requests.total) * 100
         : 0;
 
@@ -229,7 +229,7 @@ export class AnalyticsEngine {
       ];
 
       const [latencyResult] = await database.collection('usage_events').aggregate(latencyPipeline).toArray();
-      
+
       let p50 = 0, p95 = 0, p99 = 0;
       if (latencyResult && latencyResult.values.length > 0) {
         const sorted = latencyResult.values.sort((a: number, b: number) => a - b);
@@ -559,11 +559,11 @@ export class AnalyticsEngine {
             }
           }
         ]).toArray(),
-        
+
         database.collection('usage_events').distinct('tenantId', {
           timestamp: { $gte: dayAgo, $lte: now }
         }),
-        
+
         database.collection('usage_events').aggregate([
           {
             $match: { timestamp: { $gte: dayAgo, $lte: now } }
@@ -647,7 +647,7 @@ export class AnalyticsEngine {
     ];
 
     const [result] = await database.collection('usage_events').aggregate(pipeline).toArray();
-    
+
     if (!result) {
       return {
         requests: { total: 0, change: 0, perService: {} },
@@ -857,12 +857,12 @@ export class AnalyticsEngine {
     if (!database) return;
 
     const cutoffDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000); // 90 days ago
-    
+
     try {
       const result = await database.collection('usage_events').deleteMany({
         timestamp: { $lt: cutoffDate }
       });
-      
+
       logger.info('Old usage events cleaned up', { deletedCount: result.deletedCount });
     } catch (error) {
       logger.error('Failed to cleanup old events', { error });

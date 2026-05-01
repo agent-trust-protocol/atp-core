@@ -21,10 +21,10 @@ export class StorageService extends BaseStorage {
         proof = EXCLUDED.proof,
         expires_at = EXCLUDED.expires_at
     `;
-    
+
     const issuer = typeof credential.issuer === 'string' ? credential.issuer : credential.issuer.id;
     const type = credential.type.find(t => t !== 'VerifiableCredential') || 'VerifiableCredential';
-    
+
     await this.db.query(query, [
       credential.id,
       issuer,
@@ -40,11 +40,11 @@ export class StorageService extends BaseStorage {
   async getCredential(credentialId: string): Promise<VerifiableCredential | null> {
     const query = 'SELECT credential_data FROM atp_credentials.credentials WHERE credential_id = $1';
     const result = await this.db.query(query, [credentialId]);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
-    
+
     // PostgreSQL JSONB returns objects, not strings
     return result.rows[0].credential_data as VerifiableCredential;
   }
@@ -54,7 +54,7 @@ export class StorageService extends BaseStorage {
       // Update credential status
       const updateQuery = 'UPDATE atp_credentials.credentials SET status = $1 WHERE credential_id = $2';
       await client.query(updateQuery, ['revoked', credentialId]);
-      
+
       // Note: Revocation list is handled by the status field in the main table
       // No separate revocation_list table in the PostgreSQL schema
     });
@@ -63,7 +63,7 @@ export class StorageService extends BaseStorage {
   async isCredentialRevoked(credentialId: string): Promise<boolean> {
     const query = 'SELECT status FROM atp_credentials.credentials WHERE credential_id = $1';
     const result = await this.db.query(query, [credentialId]);
-    
+
     return result.rows.length > 0 && result.rows[0].status === 'revoked';
   }
 
@@ -76,7 +76,7 @@ export class StorageService extends BaseStorage {
         schema_version = EXCLUDED.schema_version,
         schema_definition = EXCLUDED.schema_definition
     `;
-    
+
     await this.db.query(query, [
       schema.id,
       schema.name,
@@ -89,11 +89,11 @@ export class StorageService extends BaseStorage {
   async getSchema(schemaId: string): Promise<CredentialSchema | null> {
     const query = 'SELECT schema_definition FROM atp_credentials.schemas WHERE schema_id = $1';
     const result = await this.db.query(query, [schemaId]);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
-    
+
     // PostgreSQL JSONB returns objects, not strings
     return result.rows[0].schema_definition as CredentialSchema;
   }
@@ -101,11 +101,11 @@ export class StorageService extends BaseStorage {
   async getSchemaByName(name: string): Promise<CredentialSchema | null> {
     const query = 'SELECT schema_definition FROM atp_credentials.schemas WHERE schema_name = $1';
     const result = await this.db.query(query, [name]);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
-    
+
     // PostgreSQL JSONB returns objects, not strings
     return result.rows[0].schema_definition as CredentialSchema;
   }
@@ -113,7 +113,7 @@ export class StorageService extends BaseStorage {
   async listSchemas(): Promise<CredentialSchema[]> {
     const query = 'SELECT schema_definition FROM atp_credentials.schemas ORDER BY created_at DESC';
     const result = await this.db.query(query);
-    
+
     // PostgreSQL JSONB returns objects, not strings
     return result.rows.map((row: any) => row.schema_definition as CredentialSchema);
   }

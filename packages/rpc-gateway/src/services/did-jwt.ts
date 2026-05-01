@@ -22,13 +22,13 @@ export class DIDJWTService {
     expiresIn: string = '1h'
   ): Promise<string> {
     const privateKeyBytes = Buffer.from(privateKeyHex, 'hex');
-    
+
     // Create a JWT with Ed25519 algorithm
     const jwt = await new SignJWT(payload)
       .setProtectedHeader({
         alg: 'EdDSA',
         typ: 'JWT',
-        kid: `${did}#key-1`,
+        kid: `${did}#key-1`
       })
       .setIssuedAt()
       .setIssuer(did)
@@ -45,7 +45,7 @@ export class DIDJWTService {
       // Decode the JWT header to get the kid
       const [headerBase64] = jwt.split('.');
       const header = JSON.parse(Buffer.from(headerBase64, 'base64url').toString());
-      
+
       if (!header.kid) {
         console.warn('JWT missing kid in header');
         return null;
@@ -53,7 +53,7 @@ export class DIDJWTService {
 
       // Extract DID from kid
       const did = header.kid.split('#')[0];
-      
+
       // Resolve DID to get public key
       const didDocument = await this.resolveDID(did);
       if (!didDocument) {
@@ -72,7 +72,7 @@ export class DIDJWTService {
       // Verify the JWT
       const { payload } = await jwtVerify(jwt, publicKeyBytes, {
         issuer: did,
-        audience: 'atp-gateway',
+        audience: 'atp-gateway'
       });
 
       return payload as DIDJWTPayload;
@@ -88,7 +88,7 @@ export class DIDJWTService {
       did,
       nonce,
       timestamp: Date.now(),
-      challenge: 'atp-auth-challenge',
+      challenge: 'atp-auth-challenge'
     };
 
     return Buffer.from(JSON.stringify(challenge)).toString('base64url');
@@ -103,7 +103,7 @@ export class DIDJWTService {
     try {
       // Decode challenge
       const challengeData = JSON.parse(Buffer.from(challenge, 'base64url').toString());
-      
+
       // Verify timestamp (within 5 minutes)
       const now = Date.now();
       if (Math.abs(now - challengeData.timestamp) > 5 * 60 * 1000) {
@@ -149,7 +149,7 @@ export class DIDJWTService {
       if (!response.ok) {
         return null;
       }
-      
+
       const result = await response.json() as any;
       return result.success ? result.data : null;
     } catch (error) {
@@ -190,7 +190,7 @@ export class DIDJWTService {
     const alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
     let num = BigInt(0);
     let multi = BigInt(1);
-    
+
     for (let i = str.length - 1; i >= 0; i--) {
       const char = str[i];
       const charIndex = alphabet.indexOf(char);
@@ -200,19 +200,19 @@ export class DIDJWTService {
       num += BigInt(charIndex) * multi;
       multi *= 58n;
     }
-    
+
     // Convert to bytes
     const bytes: number[] = [];
     while (num > 0) {
       bytes.unshift(Number(num % 256n));
       num = num / 256n;
     }
-    
+
     // Add leading zeros
     for (let i = 0; i < str.length && str[i] === '1'; i++) {
       bytes.unshift(0);
     }
-    
+
     return new Uint8Array(bytes);
   }
 

@@ -120,7 +120,7 @@ export class AGPSecurityWrapper extends EventEmitter {
       }
 
       // Check if agent is in trusted list
-      if (this.config.trustedAgents.length > 0 && 
+      if (this.config.trustedAgents.length > 0 &&
           !this.config.trustedAgents.includes(securedMessage.sourceAgent)) {
         return { isValid: false, reason: 'Agent not in trusted list' };
       }
@@ -368,12 +368,12 @@ export class AGPSecurityWrapper extends EventEmitter {
   private isValidSession(sessionId: string): boolean {
     const session = this.sessions.get(sessionId);
     if (!session) return false;
-    
+
     if (!session.isActive || Date.now() > session.expiresAt) {
       this.sessions.delete(sessionId);
       return false;
     }
-    
+
     return true;
   }
 

@@ -1,6 +1,6 @@
 /**
  * OpenClaw ATP Integration - Main Client
- * 
+ *
  * Simplified client for OpenClaw + ATP integration
  */
 
@@ -16,23 +16,23 @@ import type { InterAgentPolicy, WorkflowConstraints } from './graph/types.js';
 export interface OpenClawIntegrationConfig {
   /** ATP client instance */
   atpClient: ATPClient;
-  
+
   /** Default tool security config */
   defaultToolSecurity?: ToolSecurityConfig;
-  
+
   /** Inter-agent policies */
   interAgentPolicies?: InterAgentPolicy[];
-  
+
   /** Workflow constraints */
   workflowConstraints?: WorkflowConstraints;
-  
+
   /** Enable monitoring */
   enableMonitoring?: boolean;
 }
 
 /**
  * Simplified OpenClaw ATP Client
- * 
+ *
  * Provides high-level API for integrating ATP with OpenClaw
  */
 export class OpenClawATPClient {

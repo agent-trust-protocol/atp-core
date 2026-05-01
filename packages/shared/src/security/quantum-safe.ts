@@ -49,7 +49,7 @@ export class QuantumSafeSignature {
     const keyPair = ml_dsa65.keygen(seed);
     return {
       privateKey: Buffer.from(keyPair.secretKey).toString('hex'),
-      publicKey: Buffer.from(keyPair.publicKey).toString('hex'),
+      publicKey: Buffer.from(keyPair.publicKey).toString('hex')
     };
   }
 }

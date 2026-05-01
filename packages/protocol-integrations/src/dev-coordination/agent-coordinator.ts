@@ -3,9 +3,9 @@
  */
 
 import { EventEmitter } from 'events';
-import { 
-  AgentSpecialization, 
-  CoordinationEvent, 
+import {
+  AgentSpecialization,
+  CoordinationEvent,
   CoordinationEventType,
   ProgressTracker,
   DevelopmentPhase,
@@ -48,7 +48,7 @@ export class AgentCoordinator extends EventEmitter {
         },
         {
           deliverableId: 'a2a-types',
-          name: 'A2A Type Definitions', 
+          name: 'A2A Type Definitions',
           type: 'type-definitions' as any,
           owner: AgentSpecialization.A2A_AGENT,
           dependencies: [],
@@ -114,7 +114,7 @@ export class AgentCoordinator extends EventEmitter {
           integrationPoints: []
         },
         {
-          deliverableId: 'agp-bridge', 
+          deliverableId: 'agp-bridge',
           name: 'AGP Enterprise Bridge',
           type: 'bridge-implementation' as any,
           owner: AgentSpecialization.ENTERPRISE_AGENT,
@@ -206,7 +206,7 @@ export class AgentCoordinator extends EventEmitter {
 
   registerAgent(agentId: AgentSpecialization): void {
     this.activeAgents.add(agentId);
-    
+
     const progressTracker: ProgressTracker = {
       trackerId: `${agentId}-tracker`,
       agentId,
@@ -221,9 +221,9 @@ export class AgentCoordinator extends EventEmitter {
       },
       lastUpdate: Date.now()
     };
-    
+
     this.progressTrackers.set(agentId, progressTracker);
-    
+
     this.emitCoordinationEvent({
       eventType: CoordinationEventType.AGENT_STARTED,
       sourceAgent: agentId,
@@ -234,7 +234,7 @@ export class AgentCoordinator extends EventEmitter {
   unregisterAgent(agentId: AgentSpecialization): void {
     this.activeAgents.delete(agentId);
     this.progressTrackers.delete(agentId);
-    
+
     this.emitCoordinationEvent({
       eventType: CoordinationEventType.AGENT_STOPPED,
       sourceAgent: agentId,
@@ -245,12 +245,12 @@ export class AgentCoordinator extends EventEmitter {
   requestResource(agentId: AgentSpecialization, resourceId: string, operation: 'read' | 'write'): boolean {
     // Validate access permissions
     const hasAccess = this.workspaceManager.validateWorkspaceAccess(agentId, resourceId, operation);
-    
+
     if (!hasAccess) {
       this.emitCoordinationEvent({
         eventType: CoordinationEventType.CONFLICT_DETECTED,
         sourceAgent: agentId,
-        payload: { 
+        payload: {
           type: 'access-denied',
           resourceId,
           operation,
@@ -278,7 +278,7 @@ export class AgentCoordinator extends EventEmitter {
 
     for (const otherAgentId of this.activeAgents) {
       if (otherAgentId === agentId) continue;
-      
+
       const otherWorkspace = this.workspaceManager.getWorkspace(otherAgentId);
       if (otherWorkspace?.sharedResources.some(r => r.resourceId === resourceId)) {
         this.sendInterAgentMessage({
@@ -307,7 +307,7 @@ export class AgentCoordinator extends EventEmitter {
 
     tracker.completedDeliverables.push(deliverableId);
     tracker.lastUpdate = Date.now();
-    
+
     this.emitCoordinationEvent({
       eventType: CoordinationEventType.DELIVERABLE_READY,
       sourceAgent: agentId,
@@ -328,7 +328,7 @@ export class AgentCoordinator extends EventEmitter {
             eventType: CoordinationEventType.DEPENDENCY_READY,
             sourceAgent: AgentSpecialization.ANP_AGENT, // Coordinator
             targetAgent: deliverable.owner,
-            payload: { 
+            payload: {
               deliverableId: deliverable.deliverableId,
               readyDependency: completedDeliverable
             }

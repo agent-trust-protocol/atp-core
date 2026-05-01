@@ -1,8 +1,8 @@
 /**
  * ATP Cloud - Multi-tenant Agent Trust Protocol Cloud Platform
- * 
+ *
  * ⚠️  INTERNAL TESTING ONLY - NOT FOR PRODUCTION USE
- * 
+ *
  * This is the main entry point for the ATP Cloud platform.
  * It orchestrates the multi-tenant cloud services for Agent Trust Protocol.
  */

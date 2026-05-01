@@ -80,7 +80,7 @@ export class ConfigManager {
 
     // Validate configuration
     this.config = CloudConfigSchema.parse(config);
-    
+
     // Security check for production
     if (this.config.environment === 'production') {
       if (this.config.auth.jwtSecret === 'your-jwt-secret-here') {

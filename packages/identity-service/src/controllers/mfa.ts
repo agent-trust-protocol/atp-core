@@ -39,7 +39,7 @@ export class MFAController {
   async setupMFA(req: Request, res: Response): Promise<void> {
     try {
       const validation = MFASetupRequestSchema.safeParse(req.body);
-      
+
       if (!validation.success) {
         res.status(400).json({
           success: false,
@@ -60,7 +60,7 @@ export class MFAController {
       }
 
       const result = await this.mfaService.setupMFA(validation.data);
-      
+
       if (!result) {
         res.status(400).json({
           success: false,
@@ -100,7 +100,7 @@ export class MFAController {
   async confirmMFA(req: Request, res: Response): Promise<void> {
     try {
       const validation = MFAConfirmRequestSchema.safeParse(req.body);
-      
+
       if (!validation.success) {
         res.status(400).json({
           success: false,
@@ -156,7 +156,7 @@ export class MFAController {
   async verifyMFA(req: Request, res: Response): Promise<void> {
     try {
       const validation = MFAVerificationRequestSchema.safeParse(req.body);
-      
+
       if (!validation.success) {
         res.status(400).json({
           success: false,
@@ -189,7 +189,7 @@ export class MFAController {
   async getMFAStatus(req: Request, res: Response): Promise<void> {
     try {
       const did = req.params.did;
-      
+
       if (!did) {
         res.status(400).json({
           success: false,
@@ -229,7 +229,7 @@ export class MFAController {
   async disableMFA(req: Request, res: Response): Promise<void> {
     try {
       const validation = MFAConfirmRequestSchema.safeParse(req.body);
-      
+
       if (!validation.success) {
         res.status(400).json({
           success: false,
@@ -280,7 +280,7 @@ export class MFAController {
   async regenerateBackupCodes(req: Request, res: Response): Promise<void> {
     try {
       const validation = MFAConfirmRequestSchema.safeParse(req.body);
-      
+
       if (!validation.success) {
         res.status(400).json({
           success: false,

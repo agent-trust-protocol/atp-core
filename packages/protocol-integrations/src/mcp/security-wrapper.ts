@@ -49,14 +49,14 @@ export class MCPSecurityWrapper extends EventEmitter {
   private db: DatabaseManager;
   private trustEngine: TrustScoringEngine;
   private rateLimitMap = new Map<string, number[]>();
-  
+
   constructor(config: MCPSecurityConfig, db: DatabaseManager) {
     super();
     this.config = config;
     this.db = db;
     this.trustEngine = new TrustScoringEngine(db);
   }
-  
+
   /**
    * Wrap an existing MCP server with ATP security
    */
@@ -64,21 +64,21 @@ export class MCPSecurityWrapper extends EventEmitter {
     return async (request: SecuredMCPRequest): Promise<SecuredMCPResponse> => {
       const startTime = Date.now();
       let auditEventId = '';
-      
+
       try {
         // Step 1: Authentication & Authorization
         if (this.config.enforceAuthentication) {
           await this.verifyAuthentication(request);
         }
-        
+
         // Step 2: Trust Level Verification
         const trustScore = await this.verifyTrustLevel(request);
-        
+
         // Step 3: Rate Limiting
         if (this.config.rateLimitEnabled) {
           await this.checkRateLimit(request);
         }
-        
+
         // Step 4: Audit Logging (Pre-execution)
         if (this.config.requireAuditLogging) {
           auditEventId = await this.logAuditEvent('mcp-request', {
@@ -87,10 +87,10 @@ export class MCPSecurityWrapper extends EventEmitter {
             params: this.sanitizeParams(request.params)
           });
         }
-        
+
         // Step 5: Execute original handler
         const result = await originalHandler(request);
-        
+
         // Step 6: Audit Logging (Post-execution)
         if (this.config.requireAuditLogging && auditEventId) {
           await this.updateAuditEvent(auditEventId, {
@@ -99,7 +99,7 @@ export class MCPSecurityWrapper extends EventEmitter {
             resultSize: JSON.stringify(result).length
           });
         }
-        
+
         return {
           id: request.id,
           result,
@@ -109,7 +109,7 @@ export class MCPSecurityWrapper extends EventEmitter {
             executionTime: Date.now() - startTime
           }
         };
-        
+
       } catch (error) {
         // Audit failed execution
         if (this.config.requireAuditLogging && auditEventId) {
@@ -119,7 +119,7 @@ export class MCPSecurityWrapper extends EventEmitter {
             executionTime: Date.now() - startTime
           });
         }
-        
+
         return {
           id: request.id,
           error: {
@@ -136,7 +136,7 @@ export class MCPSecurityWrapper extends EventEmitter {
       }
     };
   }
-  
+
   /**
    * Verify ATP authentication headers
    */
@@ -144,36 +144,36 @@ export class MCPSecurityWrapper extends EventEmitter {
     if (!request.atpHeaders) {
       throw new Error('ATP authentication headers required');
     }
-    
+
     const { clientDID, signature, timestamp } = request.atpHeaders;
-    
+
     // Check timestamp (prevent replay attacks)
     const now = Date.now();
     if (Math.abs(now - timestamp) > 300000) { // 5 minutes
       throw new Error('Request timestamp too old or too far in future');
     }
-    
+
     // Verify DID exists in identity service
     const identity = await this.db.query(
       'SELECT verified, public_key FROM identities WHERE did = $1',
       [clientDID]
     );
-    
+
     if (identity.rows.length === 0) {
       throw new Error(`Unknown client DID: ${clientDID}`);
     }
-    
+
     if (!identity.rows[0].verified) {
       throw new Error(`Unverified client DID: ${clientDID}`);
     }
-    
+
     // Verify signature (simplified - in production use proper crypto verification)
     const expectedSignature = this.createSignature(request, identity.rows[0].public_key);
     if (signature !== expectedSignature) {
       throw new Error('Invalid signature');
     }
   }
-  
+
   /**
    * Verify trust level for the requested operation
    */
@@ -181,21 +181,21 @@ export class MCPSecurityWrapper extends EventEmitter {
     if (!request.atpHeaders?.clientDID) {
       return 0; // Unknown trust
     }
-    
+
     const trustScore = await this.trustEngine.calculateTrustScore(request.atpHeaders.clientDID);
-    
+
     // Get required trust level for the method
     const requiredLevel = this.getRequiredTrustLevel(request.method);
-    
+
     if (trustScore.score < requiredLevel) {
       throw new Error(
         `Insufficient trust level. Required: ${requiredLevel}, Current: ${trustScore.score}`
       );
     }
-    
+
     return trustScore.score;
   }
-  
+
   /**
    * Check rate limits for the client
    */
@@ -203,24 +203,24 @@ export class MCPSecurityWrapper extends EventEmitter {
     const clientId = request.atpHeaders?.clientDID || 'anonymous';
     const now = Date.now();
     const minute = Math.floor(now / 60000);
-    
+
     if (!this.rateLimitMap.has(clientId)) {
       this.rateLimitMap.set(clientId, []);
     }
-    
+
     const requests = this.rateLimitMap.get(clientId)!;
-    
+
     // Remove old requests (older than 1 minute)
     const recentRequests = requests.filter(timestamp => timestamp > now - 60000);
-    
+
     if (recentRequests.length >= this.config.maxRequestsPerMinute) {
       throw new Error('Rate limit exceeded');
     }
-    
+
     recentRequests.push(now);
     this.rateLimitMap.set(clientId, recentRequests);
   }
-  
+
   /**
    * Log audit event
    */
@@ -229,7 +229,7 @@ export class MCPSecurityWrapper extends EventEmitter {
       .update(`${action}-${Date.now()}-${Math.random()}`)
       .digest('hex')
       .substring(0, 16);
-    
+
     await this.db.query(`
       INSERT INTO agent_interactions 
       (id, agent_did, interaction_type, success, details, created_at)
@@ -241,10 +241,10 @@ export class MCPSecurityWrapper extends EventEmitter {
       false, // Will be updated on completion
       JSON.stringify(details)
     ]);
-    
+
     return eventId;
   }
-  
+
   /**
    * Update audit event with completion details
    */
@@ -259,7 +259,7 @@ export class MCPSecurityWrapper extends EventEmitter {
       eventId
     ]);
   }
-  
+
   /**
    * Get required trust level for a method
    */
@@ -268,23 +268,23 @@ export class MCPSecurityWrapper extends EventEmitter {
       // Public methods
       'ping': 0,
       'initialize': 0.1,
-      
+
       // Basic methods
       'tools/list': 0.2,
       'resources/list': 0.2,
       'prompts/list': 0.2,
-      
+
       // Tool execution (varies by tool)
       'tools/call': 0.4,
-      
+
       // Administrative methods
       'notifications/initialized': 0.8,
-      'logging/setLevel': 0.9,
+      'logging/setLevel': 0.9
     };
-    
+
     return trustRequirements[method] || 0.4; // Default to verified level
   }
-  
+
   /**
    * Create signature for request verification
    */
@@ -295,27 +295,27 @@ export class MCPSecurityWrapper extends EventEmitter {
       params: request.params,
       timestamp: request.atpHeaders?.timestamp
     });
-    
+
     return createHash('sha256')
       .update(payload + publicKey)
       .digest('hex');
   }
-  
+
   /**
    * Sanitize parameters for audit logging
    */
   private sanitizeParams(params: any): any {
     if (!params) return params;
-    
+
     // Remove sensitive data
     const sanitized = { ...params };
-    
+
     // List of fields to redact
     const sensitiveFields = ['password', 'secret', 'token', 'key', 'credential'];
-    
+
     function redactObject(obj: any): any {
       if (typeof obj !== 'object' || obj === null) return obj;
-      
+
       const result: any = {};
       for (const [key, value] of Object.entries(obj)) {
         if (sensitiveFields.some(field => key.toLowerCase().includes(field))) {
@@ -328,7 +328,7 @@ export class MCPSecurityWrapper extends EventEmitter {
       }
       return result;
     }
-    
+
     return redactObject(sanitized);
   }
 }

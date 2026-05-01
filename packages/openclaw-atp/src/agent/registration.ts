@@ -1,6 +1,6 @@
 /**
  * ATP Agent Registration
- * 
+ *
  * Registers OpenClaw agents with ATP and assigns quantum-safe identities
  */
 
@@ -9,7 +9,7 @@ import type { AgentMetadata, AgentRegistrationOptions } from './types.js';
 
 /**
  * Register a OpenClaw agent with ATP
- * 
+ *
  * @param client - ATP client instance
  * @param options - Registration options
  * @returns Agent metadata with DID and keys
@@ -89,7 +89,7 @@ export async function registerAgentWithAtp(
   });
 
   console.log(`✅ Registered OpenClaw agent: ${name} (${registration.did})`);
-  
+
   return agentMeta;
 }
 

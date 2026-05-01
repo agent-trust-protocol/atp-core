@@ -10,7 +10,7 @@ export const A2AAgentCapabilitySchema = z.object({
   parameters: z.record(z.any()).optional(),
   // ATP™ Security Extensions
   trustLevelRequired: z.string().optional(),
-  permissions: z.array(z.string()).optional(),
+  permissions: z.array(z.string()).optional()
 });
 
 export const A2AAgentProfileSchema = z.object({
@@ -21,14 +21,14 @@ export const A2AAgentProfileSchema = z.object({
   endpoints: z.object({
     discovery: z.string(),
     communication: z.string(),
-    status: z.string().optional(),
+    status: z.string().optional()
   }),
   capabilities: z.array(A2AAgentCapabilitySchema),
   metadata: z.object({
     created: z.string(),
     updated: z.string(),
     owner: z.string().optional(),
-    tags: z.array(z.string()).optional(),
+    tags: z.array(z.string()).optional()
   }).optional(),
   // ATP™ Security Extensions
   atpProfile: z.object({
@@ -39,15 +39,15 @@ export const A2AAgentProfileSchema = z.object({
     reputation: z.object({
       score: z.number().min(0).max(100),
       interactions: z.number(),
-      successRate: z.number().min(0).max(1),
+      successRate: z.number().min(0).max(1)
     }).optional(),
     securityFeatures: z.object({
       encryption: z.boolean(),
       authentication: z.boolean(),
       auditLogging: z.boolean(),
-      rateLimiting: z.boolean(),
-    }).optional(),
-  }),
+      rateLimiting: z.boolean()
+    }).optional()
+  })
 });
 
 export const A2ADiscoveryRequestSchema = z.object({
@@ -56,25 +56,25 @@ export const A2ADiscoveryRequestSchema = z.object({
     tags: z.array(z.string()).optional(),
     trustLevel: z.string().optional(),
     location: z.string().optional(),
-    availability: z.string().optional(),
+    availability: z.string().optional()
   }).optional(),
   filters: z.object({
     minTrustLevel: z.string().optional(),
     maxResponseTime: z.number().optional(),
     verifiedOnly: z.boolean().optional(),
-    activeOnly: z.boolean().optional(),
+    activeOnly: z.boolean().optional()
   }).optional(),
   pagination: z.object({
     offset: z.number().default(0),
-    limit: z.number().default(50),
+    limit: z.number().default(50)
   }).optional(),
   // ATP™ Security Context
   requester: z.object({
     did: z.string(),
     trustLevel: z.string(),
     purpose: z.string(),
-    sessionId: z.string(),
-  }),
+    sessionId: z.string()
+  })
 });
 
 export const A2ADiscoveryResponseSchema = z.object({
@@ -83,14 +83,14 @@ export const A2ADiscoveryResponseSchema = z.object({
     offset: z.number(),
     limit: z.number(),
     total: z.number(),
-    hasMore: z.boolean(),
+    hasMore: z.boolean()
   }),
   query: A2ADiscoveryRequestSchema.shape.query.optional(),
   metadata: z.object({
     searchTime: z.number(),
     timestamp: z.string(),
-    source: z.string(),
-  }),
+    source: z.string()
+  })
 });
 
 export const A2ACommunicationRequestSchema = z.object({
@@ -103,15 +103,15 @@ export const A2ACommunicationRequestSchema = z.object({
     timestamp: z.string(),
     priority: z.enum(['low', 'normal', 'high', 'urgent']).default('normal'),
     expiresAt: z.string().optional(),
-    replyTo: z.string().optional(),
+    replyTo: z.string().optional()
   }),
   // ATP™ Security Extensions
   atpSecurity: z.object({
     encrypted: z.boolean(),
     signed: z.boolean(),
     trustVerified: z.boolean(),
-    auditRequired: z.boolean().default(true),
-  }),
+    auditRequired: z.boolean().default(true)
+  })
 });
 
 export const A2ACommunicationResponseSchema = z.object({
@@ -122,30 +122,30 @@ export const A2ACommunicationResponseSchema = z.object({
   error: z.object({
     code: z.string(),
     message: z.string(),
-    details: z.record(z.any()).optional(),
-  }).optional(),
+    details: z.record(z.any()).optional()
+  }).optional()
 });
 
 export const A2AHandshakeRequestSchema = z.object({
   initiator: z.object({
     did: z.string(),
     profile: A2AAgentProfileSchema,
-    intendedPurpose: z.string(),
+    intendedPurpose: z.string()
   }),
   target: z.object({
     did: z.string(),
-    expectedCapabilities: z.array(z.string()),
+    expectedCapabilities: z.array(z.string())
   }),
   security: z.object({
     proposedProtocols: z.array(z.string()),
     encryptionRequired: z.boolean(),
-    mutualAuthentication: z.boolean(),
+    mutualAuthentication: z.boolean()
   }),
   sessionParameters: z.object({
     timeout: z.number().default(300), // 5 minutes
     maxMessages: z.number().default(1000),
-    auditLevel: z.enum(['minimal', 'standard', 'detailed']).default('standard'),
-  }),
+    auditLevel: z.enum(['minimal', 'standard', 'detailed']).default('standard')
+  })
 });
 
 export const A2AHandshakeResponseSchema = z.object({
@@ -153,7 +153,7 @@ export const A2AHandshakeResponseSchema = z.object({
   sessionId: z.string().optional(),
   responder: z.object({
     did: z.string(),
-    profile: A2AAgentProfileSchema,
+    profile: A2AAgentProfileSchema
   }).optional(),
   agreedProtocols: z.array(z.string()).optional(),
   sessionParameters: z.object({
@@ -162,14 +162,14 @@ export const A2AHandshakeResponseSchema = z.object({
     auditLevel: z.string(),
     endpoints: z.object({
       communication: z.string(),
-      status: z.string(),
-    }),
+      status: z.string()
+    })
   }).optional(),
   rejection: z.object({
     reason: z.string(),
     code: z.string(),
-    suggestedAlternatives: z.array(z.string()).optional(),
-  }).optional(),
+    suggestedAlternatives: z.array(z.string()).optional()
+  }).optional()
 });
 
 export type A2AAgentCapability = z.infer<typeof A2AAgentCapabilitySchema>;
@@ -214,19 +214,19 @@ export enum A2AErrorCode {
   DISCOVERY_SERVICE_UNAVAILABLE = 'A2A_1001',
   INVALID_DISCOVERY_QUERY = 'A2A_1002',
   NO_AGENTS_FOUND = 'A2A_1003',
-  
+
   // Communication Errors
   AGENT_UNREACHABLE = 'A2A_2001',
   HANDSHAKE_FAILED = 'A2A_2002',
   MESSAGE_DELIVERY_FAILED = 'A2A_2003',
   SESSION_EXPIRED = 'A2A_2004',
-  
+
   // Security Errors
   AUTHENTICATION_FAILED = 'A2A_3001',
   AUTHORIZATION_DENIED = 'A2A_3002',
   TRUST_VERIFICATION_FAILED = 'A2A_3003',
   ENCRYPTION_ERROR = 'A2A_3004',
-  
+
   // ATP™ Specific Errors
   INSUFFICIENT_TRUST_LEVEL = 'ATP_4001',
   CAPABILITY_NOT_AVAILABLE = 'ATP_4002',

@@ -1,6 +1,6 @@
 /**
  * Visual Trust Policy Schema Tests
- * 
+ *
  * Comprehensive test suite for the ATP Visual Policy JSON Schema
  * Tests all condition types, action types, logical operators, and validation
  */
@@ -14,11 +14,11 @@ import {
   validatePolicyCondition,
   validatePolicyAction,
   validatePartialPolicy,
-  
+
   // Policy templates
   createAllowAllPolicyTemplate,
   createSecurityPolicyTemplate,
-  
+
   // Types
   ATPVisualPolicy,
   VisualPolicyRule,
@@ -26,7 +26,7 @@ import {
   VisualPolicyActionType,
   VisualPolicyLogicalExpression,
   VisualPolicyTrustLevel,
-  
+
   // Schemas
   ATPVisualPolicySchema,
   VisualPolicyRuleSchema,
@@ -41,7 +41,7 @@ describe('Visual Policy Schema - Core Types', () => {
       const validTrustLevels: VisualPolicyTrustLevel[] = [
         'UNKNOWN', 'BASIC', 'VERIFIED', 'TRUSTED', 'PRIVILEGED'
       ];
-      
+
       validTrustLevels.forEach(level => {
         expect(() => {
           const condition: VisualPolicyCondition = {
@@ -66,7 +66,7 @@ describe('Visual Policy Schema - Core Types', () => {
         { id: randomUUID(), type: 'alert', channels: ['email'], recipients: ['test@example.com'] },
         { id: randomUUID(), type: 'require_approval', approvers: ['did:atp:admin'] }
       ];
-      
+
       actions.forEach(action => {
         expect(() => {
           validatePolicyAction(action as VisualPolicyActionType);
@@ -85,7 +85,7 @@ describe('Visual Policy Schema - Conditions', () => {
         operator: 'equals',
         value: 'did:atp:123456789abcdef'
       };
-      
+
       expect(() => validatePolicyCondition(condition)).not.toThrow();
     });
 
@@ -96,7 +96,7 @@ describe('Visual Policy Schema - Conditions', () => {
         operator: 'in_list',
         value: ['did:atp:123', 'did:atp:456', 'did:atp:789']
       };
-      
+
       expect(() => validatePolicyCondition(condition)).not.toThrow();
     });
   });
@@ -109,7 +109,7 @@ describe('Visual Policy Schema - Conditions', () => {
         operator: 'greater_than_or_equal',
         value: 'VERIFIED'
       };
-      
+
       expect(() => validatePolicyCondition(condition)).not.toThrow();
     });
 
@@ -120,7 +120,7 @@ describe('Visual Policy Schema - Conditions', () => {
         operator: 'greater_than',
         value: 3
       };
-      
+
       expect(() => validatePolicyCondition(condition)).not.toThrow();
     });
 
@@ -131,7 +131,7 @@ describe('Visual Policy Schema - Conditions', () => {
         operator: 'in_list',
         value: ['VERIFIED', 'TRUSTED', 'PRIVILEGED']
       };
-      
+
       expect(() => validatePolicyCondition(condition)).not.toThrow();
     });
   });
@@ -153,7 +153,7 @@ describe('Visual Policy Schema - Conditions', () => {
           expirationCheck: true
         }
       };
-      
+
       expect(() => validatePolicyCondition(condition)).not.toThrow();
     });
 
@@ -167,7 +167,7 @@ describe('Visual Policy Schema - Conditions', () => {
           expirationCheck: true
         }
       };
-      
+
       expect(() => validatePolicyCondition(condition)).not.toThrow();
     });
   });
@@ -180,7 +180,7 @@ describe('Visual Policy Schema - Conditions', () => {
         operator: 'equals',
         value: 'database_query'
       };
-      
+
       expect(() => validatePolicyCondition(condition)).not.toThrow();
     });
 
@@ -197,7 +197,7 @@ describe('Visual Policy Schema - Conditions', () => {
           sensitivity: 'confidential'
         }
       };
-      
+
       expect(() => validatePolicyCondition(condition)).not.toThrow();
     });
   });
@@ -215,7 +215,7 @@ describe('Visual Policy Schema - Conditions', () => {
           timezone: 'America/New_York'
         }
       };
-      
+
       expect(() => validatePolicyCondition(condition)).not.toThrow();
     });
   });
@@ -238,7 +238,7 @@ describe('Visual Policy Schema - Conditions', () => {
           riskScore: 15
         }
       };
-      
+
       expect(() => validatePolicyCondition(condition)).not.toThrow();
     });
   });
@@ -255,7 +255,7 @@ describe('Visual Policy Schema - Conditions', () => {
           tier: 'premium'
         }
       };
-      
+
       expect(() => validatePolicyCondition(condition)).not.toThrow();
     });
   });
@@ -281,7 +281,7 @@ describe('Visual Policy Schema - Logical Expressions', () => {
         }
       ]
     };
-    
+
     expect(() => VisualPolicyLogicalExpressionSchema.parse(expression)).not.toThrow();
   });
 
@@ -318,7 +318,7 @@ describe('Visual Policy Schema - Logical Expressions', () => {
         }
       ]
     };
-    
+
     expect(() => VisualPolicyLogicalExpressionSchema.parse(expression)).not.toThrow();
   });
 });
@@ -335,7 +335,7 @@ describe('Visual Policy Schema - Actions', () => {
           requireMFA: true
         }
       };
-      
+
       expect(() => validatePolicyAction(action)).not.toThrow();
     });
 
@@ -344,7 +344,7 @@ describe('Visual Policy Schema - Actions', () => {
         id: randomUUID(),
         type: 'allow'
       };
-      
+
       expect(() => validatePolicyAction(action)).not.toThrow();
     });
   });
@@ -357,7 +357,7 @@ describe('Visual Policy Schema - Actions', () => {
         reason: 'Insufficient trust level',
         notifyAdmin: true
       };
-      
+
       expect(() => validatePolicyAction(action)).not.toThrow();
     });
   });
@@ -374,7 +374,7 @@ describe('Visual Policy Schema - Actions', () => {
           burstLimit: 5
         }
       };
-      
+
       expect(() => validatePolicyAction(action)).not.toThrow();
     });
   });
@@ -389,7 +389,7 @@ describe('Visual Policy Schema - Actions', () => {
         recipients: ['admin@company.com', '#security-alerts'],
         message: 'Suspicious access attempt detected'
       };
-      
+
       expect(() => validatePolicyAction(action)).not.toThrow();
     });
   });
@@ -403,7 +403,7 @@ describe('Visual Policy Schema - Actions', () => {
         timeout: 3600,
         autoApproveAfter: 7200
       };
-      
+
       expect(() => validatePolicyAction(action)).not.toThrow();
     });
   });
@@ -455,16 +455,16 @@ describe('Visual Policy Schema - Complete Policy', () => {
         reason: 'Test policy creation'
       }]
     };
-    
+
     expect(() => validateATPPolicy(policy)).not.toThrow();
   });
 
   it('should reject invalid policy', () => {
     const invalidPolicy = {
-      name: 'Invalid Policy',
+      name: 'Invalid Policy'
       // Missing required fields
     };
-    
+
     expect(() => validateATPPolicy(invalidPolicy)).toThrow();
   });
 });
@@ -473,7 +473,7 @@ describe('Visual Policy Schema - Templates', () => {
   describe('Allow All Template', () => {
     it('should create valid allow all policy', () => {
       const policy = createAllowAllPolicyTemplate('org_test', 'did:atp:creator');
-      
+
       expect(() => validateATPPolicy(policy)).not.toThrow();
       expect(policy.name).toBe('Allow All Access');
       expect(policy.rules).toHaveLength(1);
@@ -484,7 +484,7 @@ describe('Visual Policy Schema - Templates', () => {
   describe('Security Template', () => {
     it('should create valid security policy', () => {
       const policy = createSecurityPolicyTemplate('org_test', 'did:atp:creator');
-      
+
       expect(() => validateATPPolicy(policy)).not.toThrow();
       expect(policy.name).toBe('Security Policy');
       expect(policy.category).toBe('security');
@@ -499,7 +499,7 @@ describe('Visual Policy Schema - Validation Utilities', () => {
       name: 'Partial Policy',
       enabled: false
     };
-    
+
     expect(() => validatePartialPolicy(partialPolicy)).not.toThrow();
   });
 
@@ -526,7 +526,7 @@ describe('Visual Policy Schema - Validation Utilities', () => {
       createdBy: 'did:atp:creator',
       version: '1.0.0'
     };
-    
+
     expect(() => validatePolicyRule(rule)).not.toThrow();
   });
 });
@@ -539,7 +539,7 @@ describe('Visual Policy Schema - Error Cases', () => {
       operator: 'equals',
       value: 'INVALID_LEVEL'
     };
-    
+
     expect(() => validatePolicyCondition(condition)).toThrow();
   });
 
@@ -548,7 +548,7 @@ describe('Visual Policy Schema - Error Cases', () => {
       id: randomUUID(),
       type: 'invalid_action'
     };
-    
+
     expect(() => validatePolicyAction(action)).toThrow();
   });
 
@@ -562,7 +562,7 @@ describe('Visual Policy Schema - Error Cases', () => {
       updatedAt: new Date().toISOString(),
       rules: [] // Empty rules array should be rejected
     };
-    
+
     expect(() => validateATPPolicy(policy)).toThrow();
   });
 
@@ -573,7 +573,7 @@ describe('Visual Policy Schema - Error Cases', () => {
       operator: 'equals',
       value: 'BASIC'
     };
-    
+
     expect(() => validatePolicyCondition(condition)).toThrow();
   });
 });

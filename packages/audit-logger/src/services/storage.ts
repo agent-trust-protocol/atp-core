@@ -41,7 +41,7 @@ export class AuditStorageService extends BaseStorage implements IAuditStorageSer
       FROM atp_audit.events WHERE event_id = $1
     `;
     const result = await this.db.query(query, [id]);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
@@ -118,7 +118,7 @@ export class AuditStorageService extends BaseStorage implements IAuditStorageSer
   async getLastEvent(): Promise<AuditEvent | null> {
     const query = 'SELECT * FROM atp_audit.events ORDER BY timestamp DESC LIMIT 1';
     const result = await this.db.query(query);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
@@ -154,7 +154,7 @@ export class AuditStorageService extends BaseStorage implements IAuditStorageSer
       hash: row.hash,
       previousHash: row.previous_hash,
       ipfsHash: row.ipfs_hash,
-      signature: row.signature,
+      signature: row.signature
     };
   }
 }

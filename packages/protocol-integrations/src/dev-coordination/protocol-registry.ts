@@ -2,7 +2,7 @@
  * Protocol Registry - Manages protocol adapters and bridge configurations
  */
 
-import { 
+import {
   SupportedProtocol,
   ProtocolAdapter,
   BridgeConfiguration,
@@ -92,7 +92,7 @@ export class ProtocolRegistry {
       }
     };
 
-    // A2A to ATP Bridge  
+    // A2A to ATP Bridge
     const a2aToAtpBridge: BridgeConfiguration = {
       bridgeId: 'a2a-atp-bridge',
       name: 'A2A to ATP Bridge',
@@ -257,8 +257,8 @@ export class ProtocolRegistry {
   }
 
   registerProtocolAdapter(
-    protocol: SupportedProtocol, 
-    adapter: ProtocolAdapter, 
+    protocol: SupportedProtocol,
+    adapter: ProtocolAdapter,
     owner: AgentSpecialization,
     metadata: Record<string, any> = {}
   ): void {
@@ -346,14 +346,14 @@ export class ProtocolRegistry {
 
   validateProtocolDependencies(protocol: SupportedProtocol): boolean {
     const dependencies = this.getProtocolDependencies(protocol);
-    
+
     for (const dependency of dependencies) {
       const registration = this.protocolAdapters.get(dependency);
       if (!registration || registration.status !== ProtocolStatus.ACTIVE) {
         return false;
       }
     }
-    
+
     return true;
   }
 
@@ -368,16 +368,16 @@ export class ProtocolRegistry {
       try {
         // Get endpoint info to check if adapter is responsive
         const endpointInfo = registration.adapter.getEndpointInfo();
-        
+
         // Update status based on availability
         if (endpointInfo && this.validateProtocolDependencies(protocol)) {
           registration.status = ProtocolStatus.ACTIVE;
         } else {
           registration.status = ProtocolStatus.INACTIVE;
         }
-        
+
         registration.lastHealthCheck = Date.now();
-        
+
       } catch (error) {
         console.error(`Health check failed for protocol ${protocol}:`, error);
         registration.status = ProtocolStatus.ERROR;

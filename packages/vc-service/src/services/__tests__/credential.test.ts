@@ -3,7 +3,7 @@ import {
   VerifiableCredential,
   CredentialSchema,
   CredentialIssuanceRequest,
-  CredentialVerificationRequest,
+  CredentialVerificationRequest
 } from '../../models/credential.js';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -20,9 +20,9 @@ const makeSchema = (overrides: Partial<CredentialSchema> = {}): CredentialSchema
     name: { type: 'string', description: 'Full name', required: true },
     department: { type: 'string', description: 'Department', required: false },
     employeeId: { type: 'string', description: 'Employee ID', required: true },
-    yearsOfService: { type: 'number', description: 'Years at company', required: false },
+    yearsOfService: { type: 'number', description: 'Years at company', required: false }
   },
-  ...overrides,
+  ...overrides
 });
 
 const makeIssuanceRequest = (
@@ -35,9 +35,9 @@ const makeIssuanceRequest = (
   claims: {
     name: 'Alice Smith',
     employeeId: 'EMP-001',
-    department: 'Engineering',
+    department: 'Engineering'
   },
-  ...overrides,
+  ...overrides
 });
 
 const makeStorageMock = () => {
@@ -62,7 +62,7 @@ const makeStorageMock = () => {
     listSchemas: jest.fn(async () => Array.from(schemas.values())),
     _credentials: credentials,
     _schemas: schemas,
-    _revoked: revoked,
+    _revoked: revoked
   };
 };
 
@@ -130,7 +130,7 @@ describe('CredentialService', () => {
       await expect(
         service.issueCredential(
           makeIssuanceRequest({
-            claims: { name: 'Alice', employeeId: 123 as any }, // employeeId should be string
+            claims: { name: 'Alice', employeeId: 123 as any } // employeeId should be string
           })
         )
       ).rejects.toThrow(/invalid type/i);
@@ -203,9 +203,9 @@ describe('CredentialService', () => {
         created: new Date().toISOString(),
         verificationMethod: `${ISSUER_DID}#key-1`,
         proofPurpose: 'assertionMethod',
-        proofValue: 'fakesig',
+        proofValue: 'fakesig'
       },
-      ...overrides,
+      ...overrides
     });
 
     it('returns valid: false when proof is missing', async () => {
@@ -241,8 +241,8 @@ describe('CredentialService', () => {
       const cred = makeVerifiableCredential({
         credentialStatus: {
           id: 'https://example.com/status/1',
-          type: 'RevocationList2020Status',
-        },
+          type: 'RevocationList2020Status'
+        }
       });
       storage.isCredentialRevoked.mockResolvedValueOnce(true);
 
@@ -274,7 +274,7 @@ describe('CredentialService', () => {
         type: ['VerifiableCredential'],
         issuer: ISSUER_DID,
         issuanceDate: new Date().toISOString(),
-        credentialSubject: { id: SUBJECT_DID },
+        credentialSubject: { id: SUBJECT_DID }
       };
       storage.getCredential.mockResolvedValueOnce(cred);
 
@@ -290,7 +290,7 @@ describe('CredentialService', () => {
         type: ['VerifiableCredential'],
         issuer: ISSUER_DID,
         issuanceDate: new Date().toISOString(),
-        credentialSubject: { id: SUBJECT_DID },
+        credentialSubject: { id: SUBJECT_DID }
       };
       storage.getCredential.mockResolvedValueOnce(cred);
 
@@ -308,7 +308,7 @@ describe('CredentialService', () => {
         type: ['VerifiableCredential'],
         issuer: { id: ISSUER_DID, name: 'ATP Issuer' },
         issuanceDate: new Date().toISOString(),
-        credentialSubject: { id: SUBJECT_DID },
+        credentialSubject: { id: SUBJECT_DID }
       };
       storage.getCredential.mockResolvedValueOnce(cred);
 
@@ -329,8 +329,8 @@ describe('CredentialService', () => {
             count: { type: 'number', description: 'Count', required: false },
             active: { type: 'boolean', description: 'Active', required: false },
             tags: { type: 'array', description: 'Tags', required: false },
-            meta: { type: 'object', description: 'Meta', required: false },
-          },
+            meta: { type: 'object', description: 'Meta', required: false }
+          }
         })
       );
     });
@@ -344,8 +344,8 @@ describe('CredentialService', () => {
               count: 42,
               active: true,
               tags: ['a', 'b'],
-              meta: { key: 'value' },
-            },
+              meta: { key: 'value' }
+            }
           })
         )
       ).resolves.toBeDefined();

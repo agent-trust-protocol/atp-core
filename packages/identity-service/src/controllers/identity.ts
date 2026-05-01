@@ -9,15 +9,15 @@ export class IdentityController {
     try {
       const request: DIDRegistrationRequest = req.body;
       const result = await this.identityService.registerDID(request);
-      
+
       res.status(201).json({
         success: true,
-        data: result,
+        data: result
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -26,23 +26,23 @@ export class IdentityController {
     try {
       const { did } = req.params;
       const document = await this.identityService.resolveDID(did);
-      
+
       if (!document) {
         res.status(404).json({
           success: false,
-          error: 'DID not found',
+          error: 'DID not found'
         });
         return;
       }
 
       res.json({
         success: true,
-        data: document,
+        data: document
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -51,11 +51,11 @@ export class IdentityController {
     try {
       const { did } = req.params;
       const document = await this.identityService.resolveDID(did);
-      
+
       if (!document) {
         res.status(404).json({
           success: false,
-          error: 'DID not found',
+          error: 'DID not found'
         });
         return;
       }
@@ -64,7 +64,7 @@ export class IdentityController {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -73,23 +73,23 @@ export class IdentityController {
     try {
       const { did } = req.params;
       const document = await this.identityService.rotateKeys(did);
-      
+
       if (!document) {
         res.status(404).json({
           success: false,
-          error: 'DID not found',
+          error: 'DID not found'
         });
         return;
       }
 
       res.json({
         success: true,
-        data: document,
+        data: document
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -97,15 +97,15 @@ export class IdentityController {
   async list(req: Request, res: Response): Promise<void> {
     try {
       const dids = await this.identityService.listDIDs();
-      
+
       res.json({
         success: true,
-        data: dids,
+        data: dids
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -114,33 +114,33 @@ export class IdentityController {
     try {
       const { did } = req.params;
       const { trustLevel } = req.body;
-      
+
       if (!trustLevel) {
         res.status(400).json({
           success: false,
-          error: 'Trust level is required',
+          error: 'Trust level is required'
         });
         return;
       }
-      
+
       const document = await this.identityService.updateTrustLevel(did, trustLevel);
-      
+
       if (!document) {
         res.status(404).json({
           success: false,
-          error: 'DID not found',
+          error: 'DID not found'
         });
         return;
       }
 
       res.json({
         success: true,
-        data: document,
+        data: document
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -149,23 +149,23 @@ export class IdentityController {
     try {
       const { did } = req.params;
       const trustInfo = await this.identityService.getTrustLevelInfo(did);
-      
+
       if (!trustInfo) {
         res.status(404).json({
           success: false,
-          error: 'DID not found or trust level not set',
+          error: 'DID not found or trust level not set'
         });
         return;
       }
 
       res.json({
         success: true,
-        data: trustInfo,
+        data: trustInfo
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }

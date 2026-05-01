@@ -1,6 +1,6 @@
 /**
  * ATP Policy Profilesfor OpenClaw
- * 
+ *
  * Pre-configured security profiles for common use cases
  */
 

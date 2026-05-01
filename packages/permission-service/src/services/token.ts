@@ -9,9 +9,9 @@ export class TokenService {
     const payload: any = {
       ...capability,
       iat: Math.floor(capability.issuedAt / 1000),
-      exp: Math.floor(capability.expiresAt / 1000),
+      exp: Math.floor(capability.expiresAt / 1000)
     };
-    
+
     if (capability.notBefore) {
       payload.nbf = Math.floor(capability.notBefore / 1000);
     }
@@ -20,14 +20,14 @@ export class TokenService {
       algorithm: 'HS256',
       issuer: capability.issuer,
       subject: capability.subject,
-      audience: capability.audience,
+      audience: capability.audience
     });
   }
 
   async validateCapabilityToken(token: string): Promise<TokenValidationResult> {
     try {
       const decoded = jwt.verify(token, this.secretKey) as any;
-      
+
       const capability: CapabilityToken = {
         id: decoded.id,
         issuer: decoded.iss,
@@ -38,17 +38,17 @@ export class TokenService {
         conditions: decoded.conditions,
         issuedAt: decoded.iat * 1000,
         expiresAt: decoded.exp * 1000,
-        notBefore: decoded.nbf ? decoded.nbf * 1000 : undefined,
+        notBefore: decoded.nbf ? decoded.nbf * 1000 : undefined
       };
 
       return {
         valid: true,
-        payload: capability,
+        payload: capability
       };
     } catch (error) {
       return {
         valid: false,
-        error: error instanceof Error ? error.message : 'Invalid token',
+        error: error instanceof Error ? error.message : 'Invalid token'
       };
     }
   }
@@ -63,7 +63,7 @@ export class TokenService {
       ...validation.payload,
       id: randomUUID(),
       issuedAt: Date.now(),
-      expiresAt: newExpiresAt,
+      expiresAt: newExpiresAt
     };
 
     return await this.createCapabilityToken(refreshed);

@@ -10,10 +10,10 @@ import { ATPPolicyProfile } from '../policy/profile.js';
 export interface CrewValidationOptions {
   /** Policy profile to use */
   policyProfile?: 'strict-dev' | 'production-finance' | 'pii-workflow' | 'research-workflow';
-  
+
   /** Custom policies */
   customPolicies?: any[];
-  
+
   /** Custom constraints */
   customConstraints?: any;
 }
@@ -28,7 +28,7 @@ export async function validateCrewWithAtp(
 ): Promise<GraphValidationResult> {
   // Get policy profile
   let profile;
-  
+
   switch (options.policyProfile) {
     case 'strict-dev':
       profile = ATPPolicyProfile.strictDev();
@@ -85,12 +85,12 @@ function extractCrewGraph(crew: any): { nodes: any[]; edges: any[] } {
   if (crew.tasks) {
     for (const task of crew.tasks) {
       const fromAgent = task.agent?.name || task.agent;
-      
+
       // If task has dependencies, create edges
       if (task.dependencies) {
         for (const dep of task.dependencies) {
           const toAgent = dep.agent?.name || dep.agent;
-          
+
           edges.push({
             from: fromAgent,
             to: toAgent,

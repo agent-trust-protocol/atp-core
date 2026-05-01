@@ -6,7 +6,7 @@
  * and how those actions are logged and scored.
  */
 
-export type RuntimeTarget = "openclaw" | "mcp" | "langchain" | "custom";
+export type RuntimeTarget = 'openclaw' | 'mcp' | 'langchain' | 'custom';
 
 export interface AtpSecurityProfile {
   id: string;
@@ -27,7 +27,7 @@ export interface AtpSecurityProfile {
     };
     filesystem?: {
       allowed: boolean;
-      modes: ("read" | "write")[];
+      modes: ('read' | 'write')[];
       allowed_paths?: string[];
       blocked_paths?: string[];
     };

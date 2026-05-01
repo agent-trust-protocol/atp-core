@@ -10,11 +10,11 @@ export interface QuantumSafeKeyPair {
   // Classical keys (for backward compatibility)
   publicKey: string;
   privateKey: string;
-  
+
   // Quantum-safe keys (optional for hybrid mode)
   pqcPublicKey?: string;
   pqcPrivateKey?: string;
-  
+
   // Algorithm information
   algorithm: PQCAlgorithm;
   isQuantumSafe: boolean;
@@ -23,14 +23,14 @@ export interface QuantumSafeKeyPair {
 
 export class CryptoUtils {
   private static cryptoManager = new CryptoAgilityManager(defaultPQCConfig);
-  
+
   // Enhanced quantum-safe key pair generation
   static async generateQuantumSafeKeyPair(quantumSafe: boolean = true): Promise<QuantumSafeKeyPair> {
     if (quantumSafe) {
       // Generate hybrid Ed25519 + Dilithium keys
       const provider = await this.cryptoManager.getCurrentProvider();
       const keyPair = await provider.generateKeyPair();
-      
+
       return {
         // For now, extract Ed25519 keys from hybrid (implementation needed)
         publicKey: Buffer.from(keyPair.publicKey.keyData.slice(0, 32)).toString('hex'),
@@ -53,15 +53,15 @@ export class CryptoUtils {
       };
     }
   }
-  
+
   // Backward compatible method
   static async generateKeyPair(): Promise<{ publicKey: string; privateKey: string }> {
     const privateKeyBytes = ed25519.utils.randomPrivateKey();
     const publicKeyBytes = await ed25519.getPublicKey(privateKeyBytes);
-    
+
     return {
       privateKey: Buffer.from(privateKeyBytes).toString('hex'),
-      publicKey: Buffer.from(publicKeyBytes).toString('hex'),
+      publicKey: Buffer.from(publicKeyBytes).toString('hex')
     };
   }
 
@@ -82,14 +82,14 @@ export class CryptoUtils {
       return false;
     }
   }
-  
+
   // Quantum-safe signing with hybrid algorithms
   static async signQuantumSafe(
-    message: string, 
+    message: string,
     keyPair: QuantumSafeKeyPair
   ): Promise<{ signature: string; isQuantumSafe: boolean }> {
     const messageBytes = Buffer.from(message, 'utf8');
-    
+
     if (keyPair.isQuantumSafe && keyPair.pqcPrivateKey) {
       // Use quantum-safe hybrid signing
       const provider = await this.cryptoManager.getCurrentProvider();
@@ -100,7 +100,7 @@ export class CryptoUtils {
         usages: ['sign'],
         keyData: Buffer.from(keyPair.pqcPrivateKey, 'hex')
       };
-      
+
       const signature = await provider.sign(messageBytes, privateKey);
       return {
         signature: Buffer.from(signature).toString('hex'),
@@ -115,16 +115,16 @@ export class CryptoUtils {
       };
     }
   }
-  
+
   // Quantum-safe verification
   static async verifyQuantumSafe(
-    message: string, 
-    signatureHex: string, 
+    message: string,
+    signatureHex: string,
     keyPair: QuantumSafeKeyPair
   ): Promise<boolean> {
     const messageBytes = Buffer.from(message, 'utf8');
     const signatureBytes = Buffer.from(signatureHex, 'hex');
-    
+
     if (keyPair.isQuantumSafe && keyPair.pqcPublicKey) {
       try {
         const provider = await this.cryptoManager.getCurrentProvider();
@@ -135,7 +135,7 @@ export class CryptoUtils {
           usages: ['verify'],
           keyData: Buffer.from(keyPair.pqcPublicKey, 'hex')
         };
-        
+
         return await provider.verify(messageBytes, signatureBytes, publicKey);
       } catch {
         // Fall back to classical verification
@@ -152,7 +152,7 @@ export class CryptoUtils {
     const multibase = this.encodeMultibase(publicKeyBytes);
     return `did:atp:${multibase}`;
   }
-  
+
   // Enhanced DID generation for quantum-safe keys
   static generateQuantumSafeDID(keyPair: QuantumSafeKeyPair): string {
     // Use the classical public key for backward compatibility
@@ -170,17 +170,17 @@ export class CryptoUtils {
     const alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
     let result = '';
     let num = BigInt('0x' + buffer.toString('hex'));
-    
+
     while (num > 0) {
       const remainder = num % 58n;
       num = num / 58n;
       result = alphabet[Number(remainder)] + result;
     }
-    
+
     for (let i = 0; i < buffer.length && buffer[i] === 0; i++) {
       result = '1' + result;
     }
-    
+
     return result;
   }
 

@@ -104,11 +104,11 @@ export class DIDCertificateAuthority {
       extensions: {
         basicConstraints: {
           isCA: true,
-          pathLength: 3,
+          pathLength: 3
         },
         keyUsage: ['digitalSignature', 'keyCertSign', 'cRLSign'],
-        subjectAltName: [`URI:${this.caDID}`],
-      },
+        subjectAltName: [`URI:${this.caDID}`]
+      }
     };
 
     const fingerprint = ATPEncryptionService.hash(JSON.stringify(caCertData));
@@ -120,7 +120,7 @@ export class DIDCertificateAuthority {
     this.caCertificate = {
       ...caCertData,
       fingerprint,
-      signature,
+      signature
     };
 
     // Initialize empty revocation list
@@ -131,7 +131,7 @@ export class DIDCertificateAuthority {
       signature: await ATPEncryptionService.sign(
         JSON.stringify({ issuerDID: this.caDID, revokedCertificates: [] }),
         this.caPrivateKey
-      ),
+      )
     };
 
     this.isInitialized = true;
@@ -140,7 +140,7 @@ export class DIDCertificateAuthority {
 
   async issueCertificate(request: CertificateRequest): Promise<DIDCertificate> {
     await this.ensureInitialized();
-    
+
     // Verify the certificate request
     await this.verifyCertificateRequest(request);
 
@@ -165,8 +165,8 @@ export class DIDCertificateAuthority {
       extensions: {
         subjectAltName: [`URI:${request.subjectDID}`],
         keyUsage: request.keyUsage,
-        extendedKeyUsage: this.getExtendedKeyUsage(request.requestedTrustLevel),
-      },
+        extendedKeyUsage: this.getExtendedKeyUsage(request.requestedTrustLevel)
+      }
     };
 
     const fingerprint = ATPEncryptionService.hash(JSON.stringify(certificateData));
@@ -178,7 +178,7 @@ export class DIDCertificateAuthority {
     const certificate: DIDCertificate = {
       ...certificateData,
       fingerprint,
-      signature,
+      signature
     };
 
     // Store certificate
@@ -189,7 +189,7 @@ export class DIDCertificateAuthority {
       certificateId: certificate.certificateId,
       subjectDID: request.subjectDID,
       trustLevel: request.requestedTrustLevel,
-      validityPeriod: request.validityPeriod,
+      validityPeriod: request.validityPeriod
     });
 
     console.log(`Issued certificate ${certificate.certificateId} for ${request.subjectDID}`);
@@ -219,14 +219,14 @@ export class DIDCertificateAuthority {
       this.revocationList.revokedCertificates.push({
         certificateId,
         revocationDate: new Date().toISOString(),
-        reason,
+        reason
       });
 
       // Update revocation list signature
       this.revocationList.signature = await ATPEncryptionService.sign(
         JSON.stringify({
           issuerDID: this.revocationList.issuerDID,
-          revokedCertificates: this.revocationList.revokedCertificates,
+          revokedCertificates: this.revocationList.revokedCertificates
         }),
         this.caPrivateKey
       );
@@ -236,7 +236,7 @@ export class DIDCertificateAuthority {
     await this.logCertificateEvent('certificate-revoked', {
       certificateId,
       reason,
-      revokerDID,
+      revokerDID
     });
 
     console.log(`Revoked certificate ${certificateId}: ${reason}`);
@@ -284,7 +284,7 @@ export class DIDCertificateAuthority {
       validFrom: certificate.validFrom,
       validUntil: certificate.validUntil,
       status: certificate.status,
-      extensions: certificate.extensions,
+      extensions: certificate.extensions
     };
 
     const isValidSignature = await ATPEncryptionService.verify(
@@ -308,7 +308,7 @@ export class DIDCertificateAuthority {
 
     return {
       valid: true,
-      trustLevel: certificate.trustLevel,
+      trustLevel: certificate.trustLevel
     };
   }
 
@@ -352,7 +352,7 @@ export class DIDCertificateAuthority {
       'digitalSignature',
       'keyEncipherment',
       'keyAgreement',
-      'dataEncipherment',
+      'dataEncipherment'
     ];
 
     if (!request.keyUsage.every(usage => validKeyUsages.includes(usage))) {
@@ -390,15 +390,15 @@ export class DIDCertificateAuthority {
       await fetch('http://localhost:3005/audit/log', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           source: 'did-certificate-authority',
           action,
           resource: 'certificate-management',
           actor: this.caDID,
-          details,
-        }),
+          details
+        })
       });
     } catch (error) {
       console.warn('Failed to log certificate event:', error);
@@ -414,13 +414,13 @@ export class DIDCertificateAuthority {
     certificatesByTrustLevel: Record<string, number>;
   } {
     const certificates = Array.from(this.certificates.values());
-    
+
     const stats = {
       totalCertificates: certificates.length,
       activeCertificates: 0,
       revokedCertificates: 0,
       expiredCertificates: 0,
-      certificatesByTrustLevel: {} as Record<string, number>,
+      certificatesByTrustLevel: {} as Record<string, number>
     };
 
     for (const cert of certificates) {
@@ -437,7 +437,7 @@ export class DIDCertificateAuthority {
       }
 
       const level = cert.trustLevel;
-      stats.certificatesByTrustLevel[level] = 
+      stats.certificatesByTrustLevel[level] =
         (stats.certificatesByTrustLevel[level] || 0) + 1;
     }
 

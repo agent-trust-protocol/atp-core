@@ -6,7 +6,7 @@ import {
   A2AHandshakeResponse,
   A2ASession,
   A2AErrorCode,
-  A2AAgentProfile,
+  A2AAgentProfile
 } from '../types/a2a.js';
 import { TrustLevel, TrustLevelManager } from '@atp/shared';
 import { randomUUID } from 'crypto';
@@ -23,54 +23,54 @@ export class A2ACommunicationService extends EventEmitter {
 
   async initiateHandshake(request: A2AHandshakeRequest): Promise<A2AHandshakeResponse> {
     const startTime = Date.now();
-    
+
     // Log handshake initiation
     await this.logAuditEvent(request.initiator.did, 'a2a-handshake-initiated', {
       target: request.target.did,
       purpose: request.initiator.intendedPurpose,
-      securityRequirements: request.security,
+      securityRequirements: request.security
     });
 
     // Validate initiator profile
     await this.validateAgentProfile(request.initiator.profile);
-    
+
     // Check if target agent exists and is available
     const targetProfile = this.agentProfiles.get(request.target.did);
     if (!targetProfile) {
       await this.logAuditEvent(request.initiator.did, 'a2a-handshake-failed', {
         target: request.target.did,
         reason: 'Target agent not found',
-        duration: Date.now() - startTime,
+        duration: Date.now() - startTime
       });
-      
+
       return {
         accepted: false,
         rejection: {
           reason: 'Target agent not found or not available',
           code: A2AErrorCode.AGENT_UNREACHABLE,
-          suggestedAlternatives: await this.findSimilarAgents(request.target.expectedCapabilities),
-        },
+          suggestedAlternatives: await this.findSimilarAgents(request.target.expectedCapabilities)
+        }
       };
     }
 
     // Validate trust levels are compatible
     const initiatorTrustLevel = request.initiator.profile.atpProfile.trustLevel as TrustLevel;
     const targetTrustLevel = targetProfile.atpProfile.trustLevel as TrustLevel;
-    
+
     if (!this.areTrustLevelsCompatible(initiatorTrustLevel, targetTrustLevel)) {
       await this.logAuditEvent(request.initiator.did, 'a2a-handshake-failed', {
         target: request.target.did,
         reason: 'Incompatible trust levels',
         initiatorLevel: initiatorTrustLevel,
-        targetLevel: targetTrustLevel,
+        targetLevel: targetTrustLevel
       });
-      
+
       return {
         accepted: false,
         rejection: {
           reason: 'Trust levels incompatible',
-          code: A2AErrorCode.TRUST_VERIFICATION_FAILED,
-        },
+          code: A2AErrorCode.TRUST_VERIFICATION_FAILED
+        }
       };
     }
 
@@ -83,13 +83,13 @@ export class A2ACommunicationService extends EventEmitter {
       const missing = request.target.expectedCapabilities.filter(cap =>
         !targetProfile.capabilities.some(agentCap => agentCap.name === cap)
       );
-      
+
       return {
         accepted: false,
         rejection: {
           reason: `Target agent missing required capabilities: ${missing.join(', ')}`,
-          code: A2AErrorCode.CAPABILITY_NOT_AVAILABLE,
-        },
+          code: A2AErrorCode.CAPABILITY_NOT_AVAILABLE
+        }
       };
     }
 
@@ -99,19 +99,19 @@ export class A2ACommunicationService extends EventEmitter {
       sessionId,
       participants: {
         initiator: request.initiator.did,
-        responder: request.target.did,
+        responder: request.target.did
       },
       status: 'active',
       security: {
         protocols: request.security.proposedProtocols,
         encrypted: request.security.encryptionRequired,
-        authenticated: request.security.mutualAuthentication,
+        authenticated: request.security.mutualAuthentication
       },
       metrics: {
         startTime: new Date().toISOString(),
         lastActivity: new Date().toISOString(),
         messageCount: 0,
-        errorCount: 0,
+        errorCount: 0
       },
       auditTrail: [{
         timestamp: new Date().toISOString(),
@@ -119,9 +119,9 @@ export class A2ACommunicationService extends EventEmitter {
         actor: request.initiator.did,
         details: {
           purpose: request.initiator.intendedPurpose,
-          security: request.security,
-        },
-      }],
+          security: request.security
+        }
+      }]
     };
 
     this.sessions.set(sessionId, session);
@@ -131,7 +131,7 @@ export class A2ACommunicationService extends EventEmitter {
     await this.logAuditEvent(request.initiator.did, 'a2a-handshake-success', {
       target: request.target.did,
       sessionId,
-      duration: Date.now() - startTime,
+      duration: Date.now() - startTime
     });
 
     return {
@@ -139,7 +139,7 @@ export class A2ACommunicationService extends EventEmitter {
       sessionId,
       responder: {
         did: targetProfile.did,
-        profile: targetProfile,
+        profile: targetProfile
       },
       agreedProtocols: request.security.proposedProtocols,
       sessionParameters: {
@@ -148,15 +148,15 @@ export class A2ACommunicationService extends EventEmitter {
         auditLevel: request.sessionParameters.auditLevel,
         endpoints: {
           communication: targetProfile.endpoints.communication,
-          status: targetProfile.endpoints.status || '',
-        },
-      },
+          status: targetProfile.endpoints.status || ''
+        }
+      }
     };
   }
 
   async sendMessage(request: A2ACommunicationRequest): Promise<A2ACommunicationResponse> {
     const startTime = Date.now();
-    
+
     // Validate session exists for participants
     const session = this.findSessionByParticipants(request.from, request.to);
     if (!session) {
@@ -166,8 +166,8 @@ export class A2ACommunicationService extends EventEmitter {
         timestamp: new Date().toISOString(),
         error: {
           code: A2AErrorCode.SESSION_EXPIRED,
-          message: 'No active session found between participants',
-        },
+          message: 'No active session found between participants'
+        }
       };
     }
 
@@ -179,8 +179,8 @@ export class A2ACommunicationService extends EventEmitter {
         timestamp: new Date().toISOString(),
         error: {
           code: A2AErrorCode.SESSION_EXPIRED,
-          message: `Session status is ${session.status}`,
-        },
+          message: `Session status is ${session.status}`
+        }
       };
     }
 
@@ -194,8 +194,8 @@ export class A2ACommunicationService extends EventEmitter {
           timestamp: new Date().toISOString(),
           error: {
             code: A2AErrorCode.MESSAGE_DELIVERY_FAILED,
-            message: 'Message has expired',
-          },
+            message: 'Message has expired'
+          }
         };
       }
     }
@@ -214,8 +214,8 @@ export class A2ACommunicationService extends EventEmitter {
         messageType: request.messageType,
         priority: request.metadata.priority,
         encrypted: request.atpSecurity.encrypted,
-        signed: request.atpSecurity.signed,
-      },
+        signed: request.atpSecurity.signed
+      }
     });
 
     // Queue message for delivery (in real implementation, this would send to the target agent)
@@ -232,7 +232,7 @@ export class A2ACommunicationService extends EventEmitter {
         messageId: request.metadata.messageId,
         sessionId: session.sessionId,
         priority: request.metadata.priority,
-        duration: Date.now() - startTime,
+        duration: Date.now() - startTime
       });
     }
 
@@ -242,7 +242,7 @@ export class A2ACommunicationService extends EventEmitter {
       from: request.from,
       to: request.to,
       messageType: request.messageType,
-      messageId: request.metadata.messageId,
+      messageId: request.metadata.messageId
     });
 
     return {
@@ -252,20 +252,20 @@ export class A2ACommunicationService extends EventEmitter {
       response: {
         sessionId: session.sessionId,
         deliveryStatus: 'queued',
-        estimatedDelivery: new Date(Date.now() + 1000).toISOString(),
-      },
+        estimatedDelivery: new Date(Date.now() + 1000).toISOString()
+      }
     };
   }
 
   async receiveMessages(agentDID: string): Promise<A2ACommunicationRequest[]> {
     const messages = this.messageQueue.get(agentDID) || [];
     this.messageQueue.set(agentDID, []); // Clear the queue
-    
+
     // Log message retrieval
     if (messages.length > 0) {
       await this.logAuditEvent(agentDID, 'a2a-messages-received', {
         messageCount: messages.length,
-        messageIds: messages.map(m => m.metadata.messageId),
+        messageIds: messages.map(m => m.metadata.messageId)
       });
     }
 
@@ -292,8 +292,8 @@ export class A2ACommunicationService extends EventEmitter {
       details: {
         reason: reason || 'Manual termination',
         finalMessageCount: session.metrics.messageCount,
-        sessionDuration: Date.now() - new Date(session.metrics.startTime).getTime(),
-      },
+        sessionDuration: Date.now() - new Date(session.metrics.startTime).getTime()
+      }
     });
 
     // Log session termination
@@ -302,14 +302,14 @@ export class A2ACommunicationService extends EventEmitter {
       reason: reason || 'Manual termination',
       messageCount: session.metrics.messageCount,
       errorCount: session.metrics.errorCount,
-      duration: Date.now() - new Date(session.metrics.startTime).getTime(),
+      duration: Date.now() - new Date(session.metrics.startTime).getTime()
     });
 
     // Emit event
     this.emit('sessionTerminated', {
       sessionId,
       initiator,
-      reason,
+      reason
     });
 
     console.log(`A2A Session ${sessionId} terminated by ${initiator}`);
@@ -341,23 +341,23 @@ export class A2ACommunicationService extends EventEmitter {
   private areTrustLevelsCompatible(level1: TrustLevel, level2: TrustLevel): boolean {
     // Both agents should have at least basic trust level for communication
     const minLevel = TrustLevel.BASIC;
-    return TrustLevelManager.isAuthorized(level1, minLevel) && 
+    return TrustLevelManager.isAuthorized(level1, minLevel) &&
            TrustLevelManager.isAuthorized(level2, minLevel);
   }
 
   private async findSimilarAgents(requiredCapabilities: string[]): Promise<string[]> {
     const suggestions: string[] = [];
-    
+
     for (const [did, profile] of this.agentProfiles.entries()) {
       const matchingCaps = requiredCapabilities.filter(reqCap =>
         profile.capabilities.some(agentCap => agentCap.name === reqCap)
       );
-      
+
       if (matchingCaps.length > 0) {
         suggestions.push(`${profile.name} (${did}) - has ${matchingCaps.length}/${requiredCapabilities.length} capabilities`);
       }
     }
-    
+
     return suggestions.slice(0, 3); // Return top 3 suggestions
   }
 
@@ -366,12 +366,12 @@ export class A2ACommunicationService extends EventEmitter {
     if (!profile.did.startsWith('did:')) {
       throw new Error('Invalid DID format');
     }
-    
+
     // Validate trust level
     if (!TrustLevelManager.validateTrustLevel(profile.atpProfile.trustLevel)) {
       throw new Error(`Invalid trust level: ${profile.atpProfile.trustLevel}`);
     }
-    
+
     // TODO: Additional validation against ATP™ identity service
   }
 
@@ -380,11 +380,11 @@ export class A2ACommunicationService extends EventEmitter {
     setInterval(() => {
       const now = Date.now();
       const sessionsToCleanup: string[] = [];
-      
+
       for (const [sessionId, session] of this.sessions.entries()) {
         const lastActivityTime = new Date(session.metrics.lastActivity).getTime();
         const fiveMinutesAgo = now - (5 * 60 * 1000);
-        
+
         // Clean up sessions inactive for more than 5 minutes
         if (lastActivityTime < fiveMinutesAgo && session.status === 'active') {
           session.status = 'terminated';
@@ -394,13 +394,13 @@ export class A2ACommunicationService extends EventEmitter {
             actor: 'system',
             details: {
               reason: 'Inactivity timeout',
-              lastActivity: session.metrics.lastActivity,
-            },
+              lastActivity: session.metrics.lastActivity
+            }
           });
           sessionsToCleanup.push(sessionId);
         }
       }
-      
+
       if (sessionsToCleanup.length > 0) {
         console.log(`Cleaned up ${sessionsToCleanup.length} inactive A2A sessions`);
       }
@@ -416,15 +416,15 @@ export class A2ACommunicationService extends EventEmitter {
       await fetch('http://localhost:3005/audit/log', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           source: 'a2a-communication',
           action,
           resource: 'agent-communication',
           actor,
-          details,
-        }),
+          details
+        })
       });
     } catch (error) {
       console.warn('Failed to log A2A audit event:', error);
@@ -441,33 +441,33 @@ export class A2ACommunicationService extends EventEmitter {
   } {
     const sessions = Array.from(this.sessions.values());
     const now = Date.now();
-    
+
     const sessionsByStatus: Record<string, number> = {};
     let totalMessages = 0;
     let totalDuration = 0;
     let completedSessions = 0;
-    
+
     for (const session of sessions) {
       sessionsByStatus[session.status] = (sessionsByStatus[session.status] || 0) + 1;
       totalMessages += session.metrics.messageCount;
-      
+
       if (session.status === 'terminated') {
         const startTime = new Date(session.metrics.startTime).getTime();
         const endTime = session.auditTrail
           .filter(entry => entry.action === 'session-terminated')
           .map(entry => new Date(entry.timestamp).getTime())[0] || now;
-        
+
         totalDuration += endTime - startTime;
         completedSessions++;
       }
     }
-    
+
     return {
       totalSessions: sessions.length,
       activeSessions: sessionsByStatus['active'] || 0,
       totalMessages,
       sessionsByStatus,
-      averageSessionDuration: completedSessions > 0 ? totalDuration / completedSessions : 0,
+      averageSessionDuration: completedSessions > 0 ? totalDuration / completedSessions : 0
     };
   }
 }

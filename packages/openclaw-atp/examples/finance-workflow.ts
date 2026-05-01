@@ -1,6 +1,6 @@
 /**
  * Comprehensive Example: Finance Trading Workflow with ATP Security
- * 
+ *
  * Demonstrates:
  * - Agent registration with ATP identities
  * - Tool security wrappers
@@ -39,7 +39,7 @@ async function main() {
 
   // 2. Register Agents with ATP
   console.log('📝 Registering agents...');
-  
+
   const researcherMeta = await registerAgentWithAtp(atp, {
     name: 'market-researcher',
     role: 'researcher',
@@ -89,7 +89,7 @@ async function main() {
 
   // 4. Wrap Tools with ATP Security
   console.log('🔒 Securing tools with ATP...');
-  
+
   const secureMarketData = secureTools([marketDataTool], atp, {
     minTrustScore: 0.8,
     auditRequired: true,
@@ -107,7 +107,7 @@ async function main() {
     minTrustScore: 0.9,
     auditRequired: true
   })[0];
-  
+
   console.log('   ✓ 3 tools secured\n');
 
   // 5. Create ATP-Protected Tasks

@@ -1,6 +1,6 @@
 /**
  * ATP Configuration Profiles
- * 
+ *
  * Ready-to-use ATP integration configurations
  */
 

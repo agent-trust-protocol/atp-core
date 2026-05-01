@@ -1,6 +1,6 @@
 /**
  * ATP Task Decorator
- * 
+ *
  * Decorator for OpenClaw tasks that adds ATP security metadata and validation
  */
 
@@ -8,7 +8,7 @@ import type { TaskSecurityMetadata } from './types.js';
 
 /**
  * Decorator to protect a task with ATP security
- * 
+ *
  * @example
  * ```typescript
  * @atpProtectedTask({
@@ -51,10 +51,10 @@ export function atpProtectedTask(securityConfig: Partial<TaskSecurityMetadata>) 
       console.log(`   Required Trust: ${metadata.requiredTrust}`);
       console.log(`   Policy: ${metadata.policy}`);
       console.log(`   Classification: ${metadata.dataClassification}`);
-      
+
       // The actual validation will be done by ATPTaskValidator
       // This decorator just marks the task with metadata
-      
+
       return await originalMethod.apply(this, args);
     };
 

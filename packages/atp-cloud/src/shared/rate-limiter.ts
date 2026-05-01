@@ -43,7 +43,7 @@ export class RateLimiterService {
     });
 
     this.rateLimiters.set(tenantId, rateLimiter);
-    
+
     logger.debug('Rate limiter initialized for tenant', {
       tenantId,
       requests,
@@ -56,7 +56,7 @@ export class RateLimiterService {
    */
   public async checkRateLimit(tenantId: string, key?: string): Promise<void> {
     let rateLimiter = this.rateLimiters.get(tenantId);
-    
+
     if (!rateLimiter) {
       // Get tenant's rate limit configuration
       const database = db.getDB();

@@ -247,7 +247,7 @@ export class BillingService {
     try {
       // Update tenant plan and limits
       const newLimits = this.getPlanLimits(newPlan);
-      
+
       await database.collection('tenants').updateOne(
         { id: tenantId },
         {
@@ -367,7 +367,7 @@ export class BillingService {
       };
 
       await database.collection('billing_events').insertOne(billingEvent);
-      
+
       logger.info('Payment processed', {
         tenantId: tenant.id,
         amount: invoice.amount_paid / 100,
@@ -466,7 +466,7 @@ export class BillingService {
       professional: { maxAgents: 100, maxRequests: 250000, maxStorage: 50000, maxBandwidth: 250000 },
       enterprise: { maxAgents: 1000, maxRequests: 2500000, maxStorage: 500000, maxBandwidth: 2500000 }
     };
-    
+
     return limits[plan];
   }
 
@@ -474,10 +474,10 @@ export class BillingService {
     const prices = {
       free: 0,
       starter: 250, // $3,000/year
-      professional: 1500, // $18,000/year  
+      professional: 1500, // $18,000/year
       enterprise: 4167 // $50,000/year minimum
     };
-    
+
     return prices[plan];
   }
 
@@ -489,7 +489,7 @@ export class BillingService {
       professional: 'price_professional_monthly',
       enterprise: 'price_enterprise_monthly'
     };
-    
+
     return priceIds[plan];
   }
 
@@ -507,7 +507,7 @@ export class BillingService {
     dueDate.setDate(1); // First of next month
 
     const items = [];
-    
+
     if (usage.cost.basePlan > 0) {
       items.push({
         description: 'Base plan',

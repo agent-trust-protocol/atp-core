@@ -6,7 +6,7 @@ const envSchema = z.object({
   HTTPS_PORT: z.coerce.number().int().positive().default(3443),
   WS_PORT: z.coerce.number().int().positive().default(8081),
   // Optional: path to TLS config file; when present, mTLS is enabled
-  TLS_CONFIG_PATH: z.string().optional(),
+  TLS_CONFIG_PATH: z.string().optional()
 });
 
 function loadConfig() {
