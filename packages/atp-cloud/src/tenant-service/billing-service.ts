@@ -7,7 +7,7 @@ import Stripe from 'stripe';
 import { db } from '../shared/database.js';
 import { config } from '../shared/config.js';
 import { createServiceLogger } from '../shared/logger.js';
-import { Tenant, TenantPlan, BillingEvent, TenantError } from '../types/index.js';
+import { TenantPlan, BillingEvent, TenantError } from '../types/index.js';
 
 const logger = createServiceLogger('billing-service');
 

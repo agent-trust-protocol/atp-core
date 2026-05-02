@@ -291,7 +291,7 @@ export class SecurityAuditRules {
         
         const found = context.users?.filter((user: any) => 
           defaultCreds.some(cred => {
-            const [username, password] = cred.split('/');
+            const [username, _password] = cred.split('/');
             return user.username === username && user.hasDefaultPassword;
           })
         ) || [];

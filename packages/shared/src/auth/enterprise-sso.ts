@@ -4,7 +4,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { createHash, randomBytes } from 'crypto';
+import { randomBytes } from 'crypto';
 import { XMLParser, XMLBuilder } from 'fast-xml-parser';
 
 export interface SAMLConfiguration {
@@ -269,7 +269,7 @@ export class EnterpriseAuthenticationService extends EventEmitter {
    */
   async processSAMLResponse(
     samlResponse: string,
-    relayState?: string
+    _relayState?: string
   ): Promise<{ user: EnterpriseUser; sessionId: string }> {
     try {
       // Decode and parse SAML response
@@ -347,7 +347,7 @@ export class EnterpriseAuthenticationService extends EventEmitter {
   async processOIDCCallback(
     providerId: string,
     code: string,
-    state?: string
+    _state?: string
   ): Promise<{ user: EnterpriseUser; sessionId: string }> {
     const provider = this.providers.get(providerId);
     if (!provider || provider.type !== 'oidc') {
@@ -788,7 +788,7 @@ export class EnterpriseAuthenticationService extends EventEmitter {
     return attribute?.values;
   }
 
-  private async exchangeOIDCCode(config: OIDCConfiguration, code: string): Promise<any> {
+  private async exchangeOIDCCode(_config: OIDCConfiguration, _code: string): Promise<any> {
     // Simplified implementation - in practice would make HTTP requests to token endpoint
     return {
       access_token: 'mock_access_token',
@@ -797,7 +797,7 @@ export class EnterpriseAuthenticationService extends EventEmitter {
     };
   }
 
-  private async decodeOIDCIdToken(idToken: string): Promise<any> {
+  private async decodeOIDCIdToken(_idToken: string): Promise<any> {
     // Simplified implementation - in practice would decode and validate JWT
     return {
       sub: 'user123',
@@ -827,7 +827,7 @@ export class EnterpriseAuthenticationService extends EventEmitter {
     return user;
   }
 
-  private async performLDAPAuth(config: LDAPConfiguration, username: string, password: string): Promise<any> {
+  private async performLDAPAuth(config: LDAPConfiguration, username: string, _password: string): Promise<any> {
     // Simplified implementation - in practice would use ldapjs or similar
     return {
       dn: `cn=${username},${config.searchBase}`,

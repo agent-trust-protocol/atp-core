@@ -4,7 +4,6 @@
  */
 
 import { SystemMetrics, ServiceHealth } from '../types/metrics.js';
-import os from 'os';
 
 export class MetricsCollector {
   private services: Array<{ name: string; url: string; expectedPath?: string }>;
@@ -88,7 +87,7 @@ export class MetricsCollector {
           version: response.headers.get('x-atp-version') || '1.0.0',
           url: service.url
         };
-      } catch (error) {
+      } catch {
         return {
           name: service.name,
           status: 'offline' as const,
@@ -188,7 +187,7 @@ export class MetricsCollector {
         auditEvents = auditData?.totalEvents || 0;
         // Estimate credentials issued from audit events
         credentialsIssued = Object.values(auditData?.eventsByAction || {})
-          .filter((count, index, arr) => Object.keys(auditData?.eventsByAction || {})[index]?.includes('credential'))
+          .filter((count, index, _arr) => Object.keys(auditData?.eventsByAction || {})[index]?.includes('credential'))
           .reduce((sum: number, count) => sum + (count as number), 0);
       }
     } catch (error) {

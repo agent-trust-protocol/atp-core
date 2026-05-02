@@ -2,11 +2,10 @@
  * Protocol Registry - Manages protocol adapters and bridge configurations
  */
 
-import { 
+import {
   SupportedProtocol,
   ProtocolAdapter,
   BridgeConfiguration,
-  EndpointInfo
 } from '../federation/types';
 import { AgentSpecialization } from './types';
 

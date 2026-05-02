@@ -118,7 +118,7 @@ export class CloudGateway {
     });
 
     // Error handler
-    this.app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    this.app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
       logger.error('Unhandled error', { error: err.message, stack: err.stack });
       res.status(500).json({
         error: 'Internal server error',

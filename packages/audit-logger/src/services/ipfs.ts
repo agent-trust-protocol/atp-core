@@ -94,7 +94,7 @@ export class IPFSService {
     try {
       await this.initialize();
       return this.initialized;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

@@ -81,7 +81,7 @@ export class AGPAdapter extends EventEmitter {
   async sendMessage(
     message: AGPMessage,
     senderDID: string,
-    senderPrivateKey: string
+    _senderPrivateKey: string
   ): Promise<void> {
     try {
       // Validate message
@@ -271,7 +271,7 @@ export class AGPAdapter extends EventEmitter {
   }
 
   private async applyFilters(message: SecuredAGPMessage, filters: any[]): Promise<SecuredAGPMessage> {
-    let processedMessage = { ...message };
+    const processedMessage = { ...message };
     
     // Sort filters by order
     const sortedFilters = filters.sort((a, b) => a.order - b.order);

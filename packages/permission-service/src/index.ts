@@ -3,7 +3,7 @@ import cors from 'cors';
 import { StorageService } from './services/storage.js';
 import { PermissionService } from './services/permission.js';
 import { PermissionController } from './controllers/permission.js';
-import { DatabaseConfig, VisualPolicyStorageService, PolicyEvaluator, RedisCache, createCache, PerformanceOptimizer, createPerformanceOptimizer } from '@atp/shared';
+import { DatabaseConfig, VisualPolicyStorageService, createCache, createPerformanceOptimizer } from '@atp/shared';
 import { PolicyController } from './controllers/policy.js';
 import { PolicyEvaluationController } from './controllers/evaluation.js';
 import { config } from './config.js';

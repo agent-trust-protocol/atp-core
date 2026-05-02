@@ -306,7 +306,7 @@ export class MockAdapter extends UniversalAdapter {
     return messageId;
   }
 
-  async subscribe(messageTypes?: UniversalMessageType[]): Promise<void> {
+  async subscribe(_messageTypes?: UniversalMessageType[]): Promise<void> {
     // Mock subscription
   }
 

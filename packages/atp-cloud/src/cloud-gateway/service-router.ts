@@ -3,7 +3,6 @@
  * Intelligent routing and load balancing for ATP services
  */
 
-import { Request } from 'express';
 import { config } from '../shared/config.js';
 import { createServiceLogger } from '../shared/logger.js';
 import { AuthenticatedRequest } from '../shared/auth.js';
@@ -64,7 +63,7 @@ export class ServiceRouter {
   /**
    * Get the best available endpoint for a service
    */
-  public getServiceEndpoint(serviceName: string, req?: AuthenticatedRequest): ServiceEndpoint | null {
+  public getServiceEndpoint(serviceName: string, _req?: AuthenticatedRequest): ServiceEndpoint | null {
     const endpoints = this.serviceEndpoints.get(serviceName);
     if (!endpoints || endpoints.length === 0) {
       logger.error('Service not found', { service: serviceName });

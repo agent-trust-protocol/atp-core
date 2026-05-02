@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
-const RPCRequestSchema = z.object({
+export const RPCRequestSchema = z.object({
   jsonrpc: z.literal('2.0'),
   method: z.string(),
   params: z.any().optional(),
   id: z.union([z.string(), z.number()])
 });
 
-const RPCResponseSchema = z.object({
+export const RPCResponseSchema = z.object({
   jsonrpc: z.literal('2.0'),
   result: z.any().optional(),
   error: z.object({

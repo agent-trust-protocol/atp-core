@@ -22,7 +22,7 @@ import type { ATPClient } from 'atp-sdk';
 function createMockAtpClient(): ATPClient {
   return {
     identity: {
-      registerAgent: async (opts: Record<string, unknown>) => ({
+      registerAgent: async (_opts: Record<string, unknown>) => ({
         did: `did:atp:claw-${Date.now()}`,
         publicKey: 'mock-pub-key',
         privateKey: 'mock-priv-key-encrypted',

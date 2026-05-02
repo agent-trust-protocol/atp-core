@@ -105,7 +105,7 @@ export class PerformanceOptimizer {
     await this.cache.set(`${key}:avg_time`, newAvg, 3600);
   }
 
-  async recordError(key: string, error: unknown): Promise<void> {
+  async recordError(key: string, _error: unknown): Promise<void> {
     const errorKey = `${this.metricsPrefix}:error:${key}`;
     await this.cache.incr(errorKey, 3600);
   }
@@ -121,7 +121,7 @@ export class PerformanceOptimizer {
   }
 
   async getMetrics(endpoint?: string): Promise<PerformanceMetrics> {
-    const prefix = endpoint ? `${this.metricsPrefix}:request:${endpoint}` : `${this.metricsPrefix}:request:*`;
+    const _prefix = endpoint ? `${this.metricsPrefix}:request:${endpoint}` : `${this.metricsPrefix}:request:*`;
 
     if (endpoint) {
       const [requestCount, averageResponseTime, errorCount, cacheHits, cacheMisses] = await Promise.all([

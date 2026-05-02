@@ -166,7 +166,7 @@ export class AuthenticationTests extends PenTestModule {
   category = TestCategory.AUTHENTICATION;
   description = 'Tests authentication mechanisms for common vulnerabilities';
 
-  async run(target: string, context: any): Promise<PenTestResult[]> {
+  async run(target: string, _context: any): Promise<PenTestResult[]> {
     const results: PenTestResult[] = [];
 
     // Test 1: Brute Force Protection
@@ -486,7 +486,7 @@ export class AuthorizationTests extends PenTestModule {
   category = TestCategory.AUTHORIZATION;
   description = 'Tests authorization mechanisms for privilege escalation and access control bypasses';
 
-  async run(target: string, context: any): Promise<PenTestResult[]> {
+  async run(target: string, _context: any): Promise<PenTestResult[]> {
     const results: PenTestResult[] = [];
 
     // Test 1: Privilege Escalation

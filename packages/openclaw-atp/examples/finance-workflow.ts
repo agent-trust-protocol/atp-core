@@ -75,14 +75,14 @@ async function main() {
 
   const tradeExecutionTool = {
     name: 'execute_trade',
-    execute: async (symbol: string, quantity: number, price: number) => {
+    execute: async (_symbol: string, _quantity: number, _price: number) => {
       return { orderId: 'ORD-12345', status: 'executed' };
     }
   };
 
   const complianceCheckTool = {
     name: 'compliance_check',
-    execute: async (tradeDetails: any) => {
+    execute: async (_tradeDetails: any) => {
       return { compliant: true, score: 0.98 };
     }
   };
@@ -113,7 +113,7 @@ async function main() {
   // 5. Create ATP-Protected Tasks
   console.log('📋 Creating ATP-protected tasks...');
 
-  const researchTask = {
+  const _researchTask = {
     name: 'Market Research',
     agent: 'market-researcher',
     description: 'Analyze market conditions for AAPL',
@@ -125,7 +125,7 @@ async function main() {
     })
   };
 
-  const tradeTask = {
+  const _tradeTask = {
     name: 'Execute Trade',
     agent: 'trader',
     description: 'Execute $2M trade in AAPL',
@@ -139,7 +139,7 @@ async function main() {
     })
   };
 
-  const reviewTask = {
+  const _reviewTask = {
     name: 'Compliance Review',
     agent: 'compliance-reviewer',
     description: 'Review trade for regulatory compliance',

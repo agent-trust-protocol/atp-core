@@ -113,7 +113,7 @@ export class ATPSupportAgent {
     }
 
     // Adjust priority based on trust and tier
-    const adjustedPriority = this.calculatePriority(
+    const _adjustedPriority = this.calculatePriority(
       query.priority,
       query.customerTier,
       customerTrustScore
@@ -164,7 +164,7 @@ export class ATPSupportAgent {
    */
   private async handleDocumentationQuery(
     query: SupportQuery,
-    intent: any
+    _intent: any
   ): Promise<SupportResponse> {
     // Search knowledge base
     const relevantDocs = await this.searchKnowledgeBase(query.query);
@@ -188,7 +188,7 @@ export class ATPSupportAgent {
    */
   private async handleIntegrationQuery(
     query: SupportQuery,
-    intent: any
+    _intent: any
   ): Promise<SupportResponse> {
     // Identify integration type
     const integrationType = this.identifyIntegrationType(query.query);
@@ -248,7 +248,7 @@ export class ATPSupportAgent {
    */
   private async handleDebuggingQuery(
     query: SupportQuery,
-    intent: any
+    _intent: any
   ): Promise<SupportResponse> {
     // Analyze error message or code
     const analysis = await this.analyzeDebugContext(query);
@@ -288,7 +288,7 @@ export class ATPSupportAgent {
    */
   private async handleSecurityQuery(
     query: SupportQuery,
-    intent: any
+    _intent: any
   ): Promise<SupportResponse> {
     // Security queries always get high priority
     return {
@@ -443,12 +443,12 @@ function YourComponent() {
     // Monitor agent health and performance
   }
 
-  private async classifyIntent(query: SupportQuery): Promise<any> {
+  private async classifyIntent(_query: SupportQuery): Promise<any> {
     // Use NLP to classify query intent
     return { category: 'general' };
   }
 
-  private async verifyCustomerIdentity(did: string): Promise<number> {
+  private async verifyCustomerIdentity(_did: string): Promise<number> {
     // Verify customer DID and return trust score
     return 0.8;
   }
@@ -458,57 +458,57 @@ function YourComponent() {
     return `${query.customerId}-${query.query}`;
   }
 
-  private isCacheValid(response: SupportResponse): boolean {
+  private isCacheValid(_response: SupportResponse): boolean {
     // Check if cached response is still valid
     return true;
   }
 
-  private async searchKnowledgeBase(query: string): Promise<KnowledgeSource[]> {
+  private async searchKnowledgeBase(_query: string): Promise<KnowledgeSource[]> {
     // Search knowledge base
     return [];
   }
 
-  private generateDocumentationResponse(docs: KnowledgeSource[]): any {
+  private generateDocumentationResponse(_docs: KnowledgeSource[]): any {
     // Generate response from documentation
     return { text: '', confidence: 0.9, links: [], examples: [] };
   }
 
-  private identifyIntegrationType(query: string): string {
+  private identifyIntegrationType(_query: string): string {
     // Identify integration type from query
     return 'node';
   }
 
-  private checkCommonIntegrationIssues(type: string): string[] {
+  private checkCommonIntegrationIssues(_type: string): string[] {
     // Return common issues for integration type
     return [];
   }
 
-  private async getBillingInformation(customerId: string): Promise<any> {
+  private async getBillingInformation(_customerId: string): Promise<any> {
     // Get billing information
     return {};
   }
 
-  private formatBillingResponse(info: any): string {
+  private formatBillingResponse(_info: any): string {
     // Format billing response
     return '';
   }
 
-  private async analyzeDebugContext(query: SupportQuery): Promise<any> {
+  private async analyzeDebugContext(_query: SupportQuery): Promise<any> {
     // Analyze debugging context
     return { errorSignature: '', complexity: 0.5 };
   }
 
-  private async checkKnownIssues(signature: string): Promise<any> {
+  private async checkKnownIssues(_signature: string): Promise<any> {
     // Check for known issues
     return null;
   }
 
-  private generateDebuggingSteps(analysis: any): string[] {
+  private generateDebuggingSteps(_analysis: any): string[] {
     // Generate debugging steps
     return [];
   }
 
-  private async handleGeneralQuery(query: SupportQuery, intent: any): Promise<SupportResponse> {
+  private async handleGeneralQuery(query: SupportQuery, _intent: any): Promise<SupportResponse> {
     // Handle general queries
     return {
       queryId: query.id,
@@ -519,11 +519,11 @@ function YourComponent() {
     };
   }
 
-  private async logInteraction(query: SupportQuery, response: SupportResponse): Promise<void> {
+  private async logInteraction(_query: SupportQuery, _response: SupportResponse): Promise<void> {
     // Log for audit trail
   }
 
-  private async updateAgentTrustScore(response: SupportResponse): Promise<void> {
+  private async updateAgentTrustScore(_response: SupportResponse): Promise<void> {
     // Update trust score based on feedback
   }
 }

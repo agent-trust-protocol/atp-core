@@ -212,7 +212,7 @@ export class ATPGraphValidator {
     const policyKey = `${edge.from}→${edge.to}`;
     const roleKey = `${fromNode.role}→${toNode.role}`;
     
-    let policy = this.interAgentPolicies.get(policyKey) || this.interAgentPolicies.get(roleKey);
+    const policy = this.interAgentPolicies.get(policyKey) || this.interAgentPolicies.get(roleKey);
 
     if (policy) {
       if (!policy.allowed) {
@@ -279,7 +279,7 @@ export class ATPGraphValidator {
    */
   private validateWorkflowConstraints(
     nodes: GraphNode[],
-    edges: GraphEdge[]
+    _edges: GraphEdge[]
   ): { valid: boolean; errors: any[]; warnings: string[] } {
     const errors: any[] = [];
     const warnings: string[] = [];

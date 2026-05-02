@@ -58,7 +58,7 @@ export class MetricsStorage {
   }
 
   async getMetricsHistory(query: MetricsQuery): Promise<SystemMetrics[]> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       // Calculate time range
       const now = new Date();
       let startTime: Date;

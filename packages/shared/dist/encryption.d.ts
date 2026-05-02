@@ -1,3 +1,5 @@
+/// <reference types="node" />
+/// <reference types="node" />
 export interface EncryptedData {
     data: string;
     iv: string;

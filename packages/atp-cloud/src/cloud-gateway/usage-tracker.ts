@@ -3,7 +3,7 @@
  * Tracks API usage for billing and analytics
  */
 
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { db } from '../shared/database.js';
 import { createServiceLogger } from '../shared/logger.js';
 import { AuthenticatedRequest } from '../shared/auth.js';

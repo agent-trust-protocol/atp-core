@@ -1,6 +1,5 @@
 import { randomBytes, createHmac, timingSafeEqual } from 'crypto';
 import { base32 } from '@scure/base';
-import { ATPEncryptionService } from '../encryption.js';
 
 export interface MFASecretKey {
   secret: string;
@@ -140,7 +139,7 @@ export class ATPMFAService {
             method: 'backup'
           };
         }
-      } catch (error) {
+      } catch {
         // Invalid encrypted backup code, continue to next
         continue;
       }
@@ -186,7 +185,7 @@ export class ATPMFAService {
         valid: isValid,
         method: 'hardware'
       };
-    } catch (error) {
+    } catch {
       return { valid: false };
     }
   }

@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import https from 'https';
 import { WebSocketService } from './services/websocket.js';
 import { RPCService } from './services/rpc.js';
 import { AuthService } from './services/auth.js';
@@ -30,7 +29,7 @@ if (config.TLS_CONFIG_PATH) {
 const metricsService = new ATPMetricsService('rpc-gateway');
 const rpcService = new RPCService();
 const authService = new AuthService(mtlsService);
-const didJWTService = new DIDJWTService();
+const _didJWTService = new DIDJWTService();
 const wsService = new WebSocketService(rpcService, authService);
 
 // Enhanced authentication middleware

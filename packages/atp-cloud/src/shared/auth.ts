@@ -101,7 +101,7 @@ export class AuthService {
     const cloudConfig = config.getConfig();
     try {
       return jwt.verify(token, cloudConfig.auth.jwtSecret);
-    } catch (error) {
+    } catch {
       throw new Error('Invalid or expired token');
     }
   }

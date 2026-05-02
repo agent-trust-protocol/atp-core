@@ -1,4 +1,3 @@
-import { ATPMCPAdapter } from '../mcp/adapter.js';
 import { A2ABridge } from '../a2a/bridge.js';
 import { TrustLevel } from '@atp/shared';
 import {
@@ -7,7 +6,6 @@ import {
 } from '../types/mcp.js';
 import {
   A2ADiscoveryRequest,
-  A2AHandshakeRequest,
   A2ACommunicationRequest,
 } from '../types/a2a.js';
 

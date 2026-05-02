@@ -7,10 +7,7 @@ import { EventEmitter } from 'events';
 import { createHash } from 'crypto';
 import {
   ComplianceFramework,
-  ComplianceStatus,
   DataClassification,
-  ComplianceRequirement,
-  AuditFinding
 } from './compliance-framework';
 
 export interface ComplianceEvent {
@@ -792,12 +789,12 @@ export class ComplianceMonitoringService extends EventEmitter {
     ].includes(event.type);
   }
 
-  private checkAccessControls(userId: string, accessControls: string[]): boolean {
+  private checkAccessControls(_userId: string, _accessControls: string[]): boolean {
     // Simplified implementation - would integrate with actual RBAC system
     return true;
   }
 
-  private generateTrends(events: ComplianceEvent[], timeRange?: { from: number; to: number }): Array<{ date: string; events: number; violations: number }> {
+  private generateTrends(events: ComplianceEvent[], _timeRange?: { from: number; to: number }): Array<{ date: string; events: number; violations: number }> {
     const trends: Array<{ date: string; events: number; violations: number }> = [];
     const now = Date.now();
     const days = 30;
@@ -857,7 +854,7 @@ export class ComplianceMonitoringService extends EventEmitter {
     }
   }
 
-  private updateMetricValue(metric: ComplianceMetric): void {
+  private updateMetricValue(_metric: ComplianceMetric): void {
     // Implementation would depend on metric type
     // This is a placeholder
   }

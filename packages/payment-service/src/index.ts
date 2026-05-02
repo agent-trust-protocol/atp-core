@@ -51,7 +51,7 @@ app.use((req, res) => {
 });
 
 // Error handling
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('[ERROR]', err.stack);
   res.status(err.statusCode || 500).json({
     error: err.name || 'Internal Server Error',

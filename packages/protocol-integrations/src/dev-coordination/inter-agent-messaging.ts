@@ -7,8 +7,6 @@ import { EventEmitter } from 'events';
 import {
   AgentSpecialization,
   InterAgentMessageType,
-  CommunicationProtocol,
-  ReliabilityLevel,
   SecurityLevel,
   EventPriority
 } from './types';

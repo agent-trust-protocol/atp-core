@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { VisualPolicyStorageService, ATPVisualPolicy, validateATPPolicy, RedisCache, PerformanceOptimizer } from '@atp/shared';
-import type { DatabaseConfig } from '@atp/shared';
 
 export class PolicyController {
   constructor(

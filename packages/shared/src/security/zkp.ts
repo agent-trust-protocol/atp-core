@@ -1,6 +1,5 @@
 import { randomBytes, createHash } from 'crypto';
 import { sha256 } from '@noble/hashes/sha2.js';
-import { ed25519 } from '@noble/curves/ed25519';
 
 export interface ZKProof {
   proof: string;
@@ -479,8 +478,8 @@ export class ATPZKProofService {
 
   private createNonMembershipProof(
     secret: string,
-    membershipSet: string[],
-    merkleRoot: Uint8Array
+    _membershipSet: string[],
+    _merkleRoot: Uint8Array
   ): ZKProof {
     // Simplified non-membership proof
     const secretHash = sha256(Buffer.from(secret));

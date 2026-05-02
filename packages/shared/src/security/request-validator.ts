@@ -206,7 +206,7 @@ export class RequestValidator {
 }
 
 // Middleware helper for Express
-export function createValidationMiddleware<T>(
+export function createValidationMiddleware<_T>(
   validator: (data: unknown) => ValidationResult
 ) {
   return (req: any, res: any, next: any) => {

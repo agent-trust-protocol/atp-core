@@ -8,7 +8,6 @@ import {
   ATPMCPServerConfig,
   MCPAuthContext,
   MCPToolContext,
-  MCPErrorCode,
 } from '../types/mcp.js';
 import { TrustLevel, TrustLevelManager } from '@atp/shared';
 
@@ -242,7 +241,7 @@ export class ATPMCPAdapter extends EventEmitter {
               resolve(response);
             }
           }
-        } catch (error) {
+        } catch {
           // Not our response, ignore
         }
       };

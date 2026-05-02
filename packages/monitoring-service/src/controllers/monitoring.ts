@@ -232,7 +232,7 @@ export class MonitoringController {
         timestamp: new Date().toISOString(),
         version: '1.0.0'
       });
-    } catch (error) {
+    } catch {
       res.status(500).json({
         success: false,
         service: 'ATP™ Monitoring Service',

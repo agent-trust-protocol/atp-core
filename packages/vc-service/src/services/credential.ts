@@ -195,7 +195,7 @@ export class CredentialService {
     return JSON.stringify(credential, Object.keys(credential).sort());
   }
 
-  private async getPublicKeyForDID(did: string): Promise<string | null> {
+  private async getPublicKeyForDID(_did: string): Promise<string | null> {
     return ''; // This would integrate with the Identity Service
   }
 }

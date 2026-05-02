@@ -70,7 +70,7 @@ export class AnalyticsService {
     this.setupAdminAnalyticsRoutes();
 
     // Error handler
-    this.app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    this.app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
       logger.error('Analytics service error', { error: err.message, stack: err.stack });
       res.status(500).json({
         error: 'Internal server error',

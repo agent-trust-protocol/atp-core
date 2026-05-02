@@ -631,7 +631,7 @@ export class ATPSecurityTestingFramework {
 
   // Penetration test implementations
 
-  private async testSQLInjection(config: PenetrationTestConfig): Promise<SecurityTestResult> {
+  private async testSQLInjection(_config: PenetrationTestConfig): Promise<SecurityTestResult> {
     const startTime = Date.now();
 
     // This would perform actual SQL injection tests against the endpoint
@@ -646,7 +646,7 @@ export class ATPSecurityTestingFramework {
     };
   }
 
-  private async testXSS(config: PenetrationTestConfig): Promise<SecurityTestResult> {
+  private async testXSS(_config: PenetrationTestConfig): Promise<SecurityTestResult> {
     const startTime = Date.now();
 
     return {
@@ -659,7 +659,7 @@ export class ATPSecurityTestingFramework {
     };
   }
 
-  private async testAuthenticationBypass(config: PenetrationTestConfig): Promise<SecurityTestResult> {
+  private async testAuthenticationBypass(_config: PenetrationTestConfig): Promise<SecurityTestResult> {
     const startTime = Date.now();
 
     return {
@@ -672,7 +672,7 @@ export class ATPSecurityTestingFramework {
     };
   }
 
-  private async testRateLimiting(config: PenetrationTestConfig): Promise<SecurityTestResult> {
+  private async testRateLimiting(_config: PenetrationTestConfig): Promise<SecurityTestResult> {
     const startTime = Date.now();
 
     return {
@@ -685,7 +685,7 @@ export class ATPSecurityTestingFramework {
     };
   }
 
-  private async testCSRF(config: PenetrationTestConfig): Promise<SecurityTestResult> {
+  private async testCSRF(_config: PenetrationTestConfig): Promise<SecurityTestResult> {
     const startTime = Date.now();
 
     return {
@@ -698,7 +698,7 @@ export class ATPSecurityTestingFramework {
     };
   }
 
-  private async testJWTSecurity(config: PenetrationTestConfig): Promise<SecurityTestResult> {
+  private async testJWTSecurity(_config: PenetrationTestConfig): Promise<SecurityTestResult> {
     const startTime = Date.now();
 
     return {

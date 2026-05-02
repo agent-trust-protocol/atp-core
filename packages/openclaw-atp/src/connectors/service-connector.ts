@@ -40,7 +40,7 @@ export class ATPServiceConnector {
     }
 
     // Get scoped credential
-    const credential = await this.secretManager.getCredential(
+    const _credential = await this.secretManager.getCredential(
       agentDid,
       this.config.name,
       {

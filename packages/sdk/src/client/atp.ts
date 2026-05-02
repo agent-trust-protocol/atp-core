@@ -111,7 +111,7 @@ export class ATPClient {
       results.gateway = healthChecks[4].status === 'fulfilled' && healthChecks[4].value;
 
       results.overall = Object.values(results).slice(0, 5).every(status => status);
-    } catch (error) {
+    } catch {
       // All results remain false
     }
 

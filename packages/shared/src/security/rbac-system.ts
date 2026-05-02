@@ -3,7 +3,6 @@
  * Enterprise-grade authorization system for ATP
  */
 
-import { z } from 'zod';
 import crypto from 'crypto';
 
 // Permission definitions
@@ -348,7 +347,7 @@ export class RBACManager {
     }
 
     // Check ACL entries
-    let aclResult = await this.checkACL(userId, permission, context);
+    const aclResult = await this.checkACL(userId, permission, context);
     
     // Combine results (ACL can override role permissions)
     const finalResult = aclResult !== null ? aclResult : hasPermissionFromRole;

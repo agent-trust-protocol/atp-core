@@ -126,7 +126,7 @@ export class QuantumSafeMCPServer {
         const serverKeyPair = await provider.generateKeyPair();
         
         // Perform key encapsulation (quantum-safe)
-        const { ciphertext, sharedSecret } = await provider.encapsulate(clientPublicKey);
+        const { ciphertext, sharedSecret: _sharedSecret } = await provider.encapsulate(clientPublicKey);
         
         // Store session key
         this.sessionKeys.set(sessionId, {
@@ -447,7 +447,7 @@ export class QuantumSafeMCPServer {
   }
 
   private async handleCryptoNegotiation(params: any, authContext: MCPAuthContext): Promise<any> {
-    const { supportedAlgorithms, preferredMode } = params;
+    const { supportedAlgorithms, preferredMode: _preferredMode } = params;
     
     // Negotiate best quantum-safe algorithms
     const negotiatedConfig = await this.cryptoManager.negotiateAlgorithms(supportedAlgorithms);
@@ -505,7 +505,7 @@ export class QuantumSafeMCPServer {
     const executionId = `qsafe-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     // Sign execution parameters for integrity
-    const provider = await this.cryptoManager.getCurrentProvider();
+    const _provider = await this.cryptoManager.getCurrentProvider();
     const executionData = JSON.stringify({ tool: tool.name, args, timestamp: Date.now() });
     const executionSignature = await this.signExecutionData(executionData);
 
@@ -541,13 +541,13 @@ export class QuantumSafeMCPServer {
     }
   }
 
-  private async verifyToolSignature(tool: ATPMCPTool): Promise<boolean> {
+  private async verifyToolSignature(_tool: ATPMCPTool): Promise<boolean> {
     // TODO: Implement quantum-safe tool signature verification
     // For now, return true (in production, verify against tool registry)
     return true;
   }
 
-  private async verifyMessageSignature(message: any, authContext: MCPAuthContext): Promise<boolean> {
+  private async verifyMessageSignature(_message: any, _authContext: MCPAuthContext): Promise<boolean> {
     // TODO: Implement quantum-safe message signature verification
     // For now, return true (in production, verify with client's public key)
     return true;

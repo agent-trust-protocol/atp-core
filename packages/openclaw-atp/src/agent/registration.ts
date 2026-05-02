@@ -136,7 +136,7 @@ async function ensurePolicyProfile(
 ): Promise<void> {
   try {
     await client.permissions.getPolicy(profileId);
-  } catch (error) {
+  } catch {
     // Profile doesn't exist, create it
     await client.permissions.createPolicy({
       id: profileId,

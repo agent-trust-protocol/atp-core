@@ -1,4 +1,4 @@
-import { randomBytes, createHash, scrypt } from 'crypto';
+import { randomBytes, scrypt } from 'crypto';
 import { promisify } from 'util';
 import { ATPEncryptionService } from '../encryption.js';
 
@@ -366,7 +366,7 @@ export class ATPKeyManager {
     if (!policy) return;
 
     const keys = this.getKeysForPurpose(purpose);
-    const activeKeys = keys.filter(k => k.metadata.status === 'active');
+    const _activeKeys = keys.filter(k => k.metadata.status === 'active');
     const deprecatedKeys = keys.filter(k => k.metadata.status === 'deprecated');
 
     // Keep only the specified number of deprecated keys

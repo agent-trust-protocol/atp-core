@@ -1,4 +1,4 @@
-import { PermissionGrant, PermissionRequest, PermissionCheck, PermissionResult, CapabilityToken, TokenValidationResult, PolicyRule, Scope } from '../models/permission.js';
+import { PermissionGrant, PermissionRequest, PermissionCheck, PermissionResult, TokenValidationResult, PolicyRule, Scope } from '../models/permission.js';
 import { TokenService } from './token.js';
 import { StorageService } from './storage.js';
 import { PolicyEngine } from './policy.js';

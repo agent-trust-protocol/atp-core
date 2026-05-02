@@ -81,7 +81,7 @@ export class AGPGateway extends EventEmitter {
    */
   async stop(): Promise<void> {
     // Close all connections
-    for (const [agentId, ws] of this.connections) {
+    for (const [_agentId, ws] of this.connections) {
       ws.close();
     }
     this.connections.clear();

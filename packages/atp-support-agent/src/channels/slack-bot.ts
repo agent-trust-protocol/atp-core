@@ -293,7 +293,7 @@ export class ATPSlackBot {
   /**
    * Get customer tier from Slack user ID
    */
-  private async getCustomerTier(userId: string): Promise<any> {
+  private async getCustomerTier(_userId: string): Promise<any> {
     // In production, look up from database
     // For now, return default
     return 'free';
@@ -314,7 +314,7 @@ export class ATPSlackBot {
   /**
    * Create escalation ticket
    */
-  private async createEscalationTicket(data: any): Promise<string> {
+  private async createEscalationTicket(_data: any): Promise<string> {
     // Create ticket in Zendesk/Intercom
     return `ATP-${Date.now()}`;
   }

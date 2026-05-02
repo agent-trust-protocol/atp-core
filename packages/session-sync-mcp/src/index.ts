@@ -22,10 +22,9 @@ import {
   ListResourcesRequestSchema,
   ReadResourceRequestSchema,
   Tool,
-  TextContent,
 } from '@modelcontextprotocol/sdk/types.js';
 import { randomUUID } from 'crypto';
-import { SessionStorage, Session, Message, Context, Decision } from './storage.js';
+import { SessionStorage, Session } from './storage.js';
 
 // Initialize storage
 const storage = new SessionStorage();
@@ -250,7 +249,7 @@ const tools: Tool[] = [
 ];
 
 // Current session management
-let currentSessionId: string | null = null;
+let _currentSessionId: string | null = null;
 
 function getOrCreateSession(): Session {
   // Try to get existing session for this project
@@ -271,7 +270,7 @@ function getOrCreateSession(): Session {
     console.error(`[session-sync] Resumed session: ${session.id}`);
   }
   
-  currentSessionId = session.id;
+  _currentSessionId = session.id;
   return session;
 }
 
@@ -369,7 +368,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           };
         }
 
-        currentSessionId = session.id;
+        _currentSessionId = session.id;
         
         // Get all context
         const context = storage.getContext(session.id);

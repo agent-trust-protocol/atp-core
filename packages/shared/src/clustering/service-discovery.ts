@@ -4,7 +4,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { createHash, randomBytes } from 'crypto';
+import { randomBytes } from 'crypto';
 
 export interface ServiceInstance {
   id: string;
@@ -727,7 +727,7 @@ export class ServiceDiscoveryManager extends EventEmitter {
   }
 
   private async performHealthChecks(): Promise<void> {
-    for (const [serviceName, instanceMap] of this.services) {
+    for (const [_serviceName, instanceMap] of this.services) {
       for (const instance of instanceMap.values()) {
         await this.performInstanceHealthCheck(instance);
       }
@@ -804,17 +804,17 @@ export class ServiceDiscoveryManager extends EventEmitter {
     }
   }
 
-  private async executeHttpHealthCheck(check: ServiceHealthCheck): Promise<boolean> {
+  private async executeHttpHealthCheck(_check: ServiceHealthCheck): Promise<boolean> {
     // Simplified HTTP health check implementation
     return true; // Would make actual HTTP request
   }
 
-  private async executeTcpHealthCheck(check: ServiceHealthCheck): Promise<boolean> {
+  private async executeTcpHealthCheck(_check: ServiceHealthCheck): Promise<boolean> {
     // Simplified TCP health check implementation
     return true; // Would test TCP connection
   }
 
-  private async executeScriptHealthCheck(check: ServiceHealthCheck): Promise<boolean> {
+  private async executeScriptHealthCheck(_check: ServiceHealthCheck): Promise<boolean> {
     // Simplified script health check implementation
     return true; // Would execute script
   }

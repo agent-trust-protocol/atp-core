@@ -191,7 +191,7 @@ export class AlertingService {
     console.log(`🚨 ALERT: ${alert.level.toUpperCase()} - ${alert.message}`);
   }
 
-  private getAlertLevel(rule: AlertRule, value: number): 'info' | 'warning' | 'error' | 'critical' {
+  private getAlertLevel(rule: AlertRule, _value: number): 'info' | 'warning' | 'error' | 'critical' {
     if (rule.id === 'compromised-agent' || rule.id === 'service-down') {
       return 'critical';
     }

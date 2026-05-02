@@ -1,4 +1,4 @@
-import { Pool, PoolClient } from 'pg';
+import { Pool } from 'pg';
 import { AuditEvent, AuditQuery } from '../models/audit.js';
 import { IAuditStorageService } from '../interfaces/storage.js';
 
@@ -19,7 +19,7 @@ export class PostgresAuditStorageService implements IAuditStorageService {
     try {
       await client.query('BEGIN');
       
-      const result = await client.query(`
+      const _result = await client.query(`
         SELECT atp_audit.add_event($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       `, [
         event.source,

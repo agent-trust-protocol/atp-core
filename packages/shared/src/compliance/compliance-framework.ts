@@ -748,7 +748,7 @@ export class ComplianceUtils {
   /**
    * Validate data classification
    */
-  static validateDataClassification(data: any, expectedClassification: DataClassification): boolean {
+  static validateDataClassification(_data: any, _expectedClassification: DataClassification): boolean {
     // Implementation would depend on data structure and classification rules
     return true;
   }

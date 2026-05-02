@@ -4,7 +4,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { UniversalMessage, SupportedProtocol } from './federation-engine.js';
+import { SupportedProtocol } from './federation-engine.js';
 
 export interface ProtocolBridgeConfig {
   sourceProtocol: SupportedProtocol;

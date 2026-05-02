@@ -13,13 +13,10 @@ import { BaseStorage } from '../database/base-storage.js';
 import type { DatabaseConfig } from '../database/types.js';
 import {
   ATPVisualPolicy,
-  VisualPolicyRule,
   validateATPPolicy,
-  validatePolicyRule,
   createAllowAllPolicyTemplate,
   createSecurityPolicyTemplate
 } from './visual-policy-schema.js';
-import { randomUUID } from 'crypto';
 
 // ============================================================================
 // INTERFACES AND TYPES
@@ -121,7 +118,7 @@ export class VisualPolicyStorageService extends BaseStorage {
       SELECT atp_permissions.create_visual_policy($1, $2, $3, $4, $5, $6, $7, $8)
     `;
 
-    const result = await this.db.query(query, [
+    const _result = await this.db.query(query, [
       validatedPolicy.id,
       validatedPolicy.name,
       validatedPolicy.description || null,

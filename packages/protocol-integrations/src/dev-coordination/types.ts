@@ -2,7 +2,7 @@
  * Development Coordination Types
  */
 
-import { SupportedProtocol, UniversalMessage } from '../federation/types';
+import { SupportedProtocol } from '../federation/types';
 
 // Agent Specialization Types
 export enum AgentSpecialization {

@@ -81,8 +81,8 @@ export class ATPSecretManager {
    */
   private async requestCredential(
     agentDid: string,
-    serviceName: string,
-    scope: CredentialScope
+    _serviceName: string,
+    _scope: CredentialScope
   ): Promise<string> {
     // In real implementation, call ATP credential service
     // For now, return a mock token

@@ -3,7 +3,6 @@ import fs from 'fs';
 import { TLSSocket } from 'tls';
 import { IncomingMessage } from 'http';
 import { DIDCertificateAuthority, DIDCertificate } from './did-ca.js';
-import { ATPEncryptionService } from '@atp/shared';
 
 export interface MTLSConfig {
   ca: string[];

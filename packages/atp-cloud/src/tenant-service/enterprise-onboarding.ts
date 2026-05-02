@@ -454,7 +454,7 @@ export class EnterpriseOnboardingService {
   private async notifySalesTeam(request: DemoRequest): Promise<void> {
     if (process.env.SLACK_WEBHOOK_URL) {
       // Send to Slack
-      const message = {
+      const _message = {
         text: `New Enterprise Demo Request`,
         blocks: [
           {
@@ -505,17 +505,17 @@ export class EnterpriseOnboardingService {
     });
   }
 
-  private async sendConversionEmail(email: string, details: any): Promise<void> {
+  private async sendConversionEmail(email: string, _details: any): Promise<void> {
     // Send production credentials and onboarding info
     logger.info('Conversion email sent', { email });
   }
 
-  private async sendTeamInviteEmail(email: string, details: any): Promise<void> {
+  private async sendTeamInviteEmail(email: string, _details: any): Promise<void> {
     // Send team invitation
     logger.info('Team invite sent', { email });
   }
 
-  private async scheduleFollowUp(tenantId: string, request: DemoRequest): Promise<void> {
+  private async scheduleFollowUp(tenantId: string, _request: DemoRequest): Promise<void> {
     // Schedule automated follow-ups
     logger.info('Follow-up scheduled', { tenantId });
   }
@@ -530,7 +530,7 @@ export class EnterpriseOnboardingService {
     logger.info('Enterprise features configured', { tenantId, features });
   }
 
-  private async createAdminUser(tenantId: string, email: string, name: string): Promise<void> {
+  private async createAdminUser(tenantId: string, email: string, _name: string): Promise<void> {
     // Create initial admin user for the tenant
     logger.info('Admin user created', { tenantId, email });
   }

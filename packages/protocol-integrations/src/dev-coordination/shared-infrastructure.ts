@@ -185,7 +185,7 @@ export class SharedInfrastructure extends EventEmitter {
   }
 
   // Agent lifecycle management
-  async registerAgent(agentId: AgentSpecialization, capabilities?: any): Promise<void> {
+  async registerAgent(agentId: AgentSpecialization, _capabilities?: any): Promise<void> {
     console.log(`Registering agent: ${agentId}`);
 
     // Register with coordinator
@@ -285,7 +285,7 @@ export class SharedInfrastructure extends EventEmitter {
     this.updateMetrics();
   }
 
-  private handleMessageSent(message: any): void {
+  private handleMessageSent(_message: any): void {
     // Update message throughput metrics
     this.metrics.messagesThroughput++;
   }

@@ -72,7 +72,7 @@ export class MCPSecurityWrapper extends EventEmitter {
         }
         
         // Step 2: Trust Level Verification
-        const trustScore = await this.verifyTrustLevel(request);
+        const _trustScore = await this.verifyTrustLevel(request);
         
         // Step 3: Rate Limiting
         if (this.config.rateLimitEnabled) {
@@ -202,7 +202,7 @@ export class MCPSecurityWrapper extends EventEmitter {
   private async checkRateLimit(request: SecuredMCPRequest): Promise<void> {
     const clientId = request.atpHeaders?.clientDID || 'anonymous';
     const now = Date.now();
-    const minute = Math.floor(now / 60000);
+    const _minute = Math.floor(now / 60000);
     
     if (!this.rateLimitMap.has(clientId)) {
       this.rateLimitMap.set(clientId, []);

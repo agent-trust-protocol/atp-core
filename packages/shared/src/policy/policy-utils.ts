@@ -13,7 +13,6 @@ import {
   VisualPolicyActionType,
   VisualPolicyLogicalExpression,
   VisualPolicyTrustLevel,
-  VisualPolicyAction
 } from './visual-policy-schema.js';
 
 // ============================================================================
@@ -468,7 +467,7 @@ export function mergePolicies(
   let priorityOffset = 0;
 
   // Combine rules from all policies, adjusting priorities to avoid conflicts
-  policies.forEach((policy, index) => {
+  policies.forEach((policy, _index) => {
     const adjustedRules = policy.rules.map(rule => ({
       ...rule,
       id: randomUUID(),

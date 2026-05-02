@@ -29,7 +29,7 @@ interface SupportResponse {
   aiEnhanced: boolean;
 }
 
-interface OllamaResponse {
+interface _OllamaResponse {
   model: string;
   response: string;
   done: boolean;
@@ -116,8 +116,8 @@ Common Integration Issues:
    * Query Ollama with context
    */
   private async queryOllama(query: SupportQuery): Promise<{ response: string }> {
-    const context = this.knowledgeBase.get('atp_context');
-    const commonIssues = this.knowledgeBase.get('common_issues');
+    const _context = this.knowledgeBase.get('atp_context');
+    const _commonIssues = this.knowledgeBase.get('common_issues');
     
     const prompt = `You are a support agent for the Agent Trust Protocol. Answer this question: "${query.query}"`;
 

@@ -43,7 +43,7 @@ export class AnalyticsEngine {
 
     const now = new Date();
     const hourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-    const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const _dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
     try {
       // Get current hour metrics
@@ -833,7 +833,7 @@ export class AnalyticsEngine {
     return {};
   }
 
-  public async getRevenueAnalytics(period: string): Promise<any> {
+  public async getRevenueAnalytics(_period: string): Promise<any> {
     // Implementation for revenue analytics
     return {};
   }
@@ -843,7 +843,7 @@ export class AnalyticsEngine {
     return {};
   }
 
-  public async getTopTenants(metric: string, limit: number, period: string): Promise<any[]> {
+  public async getTopTenants(_metric: string, _limit: number, _period: string): Promise<any[]> {
     // Implementation for top tenants
     return [];
   }

@@ -541,7 +541,7 @@ export class ReportGenerator {
     return pricing[plan as keyof typeof pricing] || pricing.free;
   }
 
-  private generateSecurityRecommendations(securityEvents: any[], errorAnalytics: any): string[] {
+  private generateSecurityRecommendations(securityEvents: any[], _errorAnalytics: any): string[] {
     const recommendations: string[] = [];
     
     // Check for high 401/403 rates

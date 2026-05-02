@@ -4,7 +4,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { createHash, randomBytes } from 'crypto';
+import { randomBytes } from 'crypto';
 
 export enum NodeRole {
   PRIMARY = 'primary',
@@ -624,12 +624,12 @@ export class ClusterManager extends EventEmitter {
     }
   }
 
-  private async httpHealthCheck(node: ClusterNode, check: HealthCheck): Promise<boolean> {
+  private async httpHealthCheck(_node: ClusterNode, _check: HealthCheck): Promise<boolean> {
     // Simplified HTTP health check
     return true; // Would make actual HTTP request
   }
 
-  private async tcpHealthCheck(node: ClusterNode, check: HealthCheck): Promise<boolean> {
+  private async tcpHealthCheck(_node: ClusterNode, _check: HealthCheck): Promise<boolean> {
     // Simplified TCP health check
     return true; // Would test TCP connection
   }
@@ -942,11 +942,11 @@ class LoadBalancer {
     }
   }
 
-  addNode(node: ClusterNode): void {
+  addNode(_node: ClusterNode): void {
     // Add node to load balancer
   }
 
-  removeNode(nodeId: string): void {
+  removeNode(_nodeId: string): void {
     // Remove node from load balancer
   }
 
@@ -965,7 +965,7 @@ class LoadBalancer {
     return nodes[0];
   }
 
-  private ipHash(nodes: ClusterNode[], request: any): ClusterNode {
+  private ipHash(nodes: ClusterNode[], _request: any): ClusterNode {
     // Would hash request IP to consistent node
     return nodes[0];
   }

@@ -2,7 +2,6 @@ import {
   A2AAgentProfile,
   A2ADiscoveryRequest,
   A2ADiscoveryResponse,
-  A2AErrorCode,
 } from '../types/a2a.js';
 import { TrustLevel, TrustLevelManager } from '@atp/shared';
 

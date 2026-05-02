@@ -366,7 +366,7 @@ export class EnterpriseAuthMiddleware extends EventEmitter {
             message: 'Session refreshed',
             expiresAt: req.ssoSession.expiresAt
           });
-        } catch (error) {
+        } catch {
           res.status(500).json({
             error: 'Session Refresh Error',
             message: 'Failed to refresh session'
@@ -385,7 +385,7 @@ export class EnterpriseAuthMiddleware extends EventEmitter {
           res.clearCookie(this.config.sessionCookieName!);
 
           res.json({ message: 'Logged out successfully' });
-        } catch (error) {
+        } catch {
           res.status(500).json({
             error: 'Logout Error',
             message: 'Failed to logout'

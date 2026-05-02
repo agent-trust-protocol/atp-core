@@ -4,7 +4,6 @@
  */
 
 import { nanoid } from 'nanoid';
-import bcrypt from 'bcrypt';
 import { db } from '../shared/database.js';
 import { auth } from '../shared/auth.js';
 import { createServiceLogger } from '../shared/logger.js';

@@ -67,7 +67,7 @@ export class ACPServer extends EventEmitter {
     }
 
     // Close all WebSocket connections
-    for (const [agentId, ws] of this.connections) {
+    for (const [_agentId, ws] of this.connections) {
       ws.close();
     }
     this.connections.clear();

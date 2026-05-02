@@ -1,6 +1,6 @@
 import { WebSocketServer, WebSocket, RawData } from 'ws';
 import { IncomingMessage } from 'http';
-import { ConnectedClient, WebSocketMessage, AuthMessage, RPCRequest, RPCResponse, Subscription } from '../models/rpc.js';
+import { ConnectedClient, WebSocketMessage, AuthMessage, RPCRequest, Subscription } from '../models/rpc.js';
 import { RPCService } from './rpc.js';
 import { AuthService } from './auth.js';
 import { randomUUID } from 'crypto';
@@ -23,7 +23,7 @@ export class WebSocketService {
     this.startCleanupInterval();
   }
 
-  private handleConnection(ws: WebSocket, req: IncomingMessage): void {
+  private handleConnection(ws: WebSocket, _req: IncomingMessage): void {
     const clientId = this.generateClientId();
     
     const client: ConnectedClient = {
@@ -72,7 +72,7 @@ export class WebSocketService {
         default:
           this.sendError(clientId, 'Unknown message type');
       }
-    } catch (error) {
+    } catch {
       this.sendError(clientId, 'Invalid message format');
     }
   }
@@ -100,7 +100,7 @@ export class WebSocketService {
           payload: { event: 'authenticated', success: false, error: 'Invalid credentials' },
         });
       }
-    } catch (error) {
+    } catch {
       this.sendMessage(clientId, {
         type: 'notification',
         payload: { event: 'authenticated', success: false, error: 'Authentication failed' },

@@ -7,7 +7,6 @@ import express from 'express';
 import cors from 'cors';
 import { SharedInfrastructure } from './shared-infrastructure';
 import { AgentSpecialization } from './types';
-import { SupportedProtocol } from '../federation/types';
 
 const app = express();
 const port = process.env.COORD_PORT || 3009;
@@ -315,7 +314,7 @@ app.post('/system/stop', async (req, res) => {
 });
 
 // Error handling middleware
-app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((error: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('API Error:', error);
   res.status(500).json({
     success: false,

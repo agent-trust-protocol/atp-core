@@ -4,7 +4,6 @@
  */
 
 import { EventEmitter } from 'events';
-import { createHash } from 'crypto';
 import {
   UniversalMessage,
   SupportedProtocol,

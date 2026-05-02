@@ -221,7 +221,7 @@ export class HybridCryptoProvider implements ICryptoProvider {
   private splitHybridSignature(signature: Uint8Array): { classicalSig: Uint8Array; pqcSig: Uint8Array } {
     const view = new DataView(signature.buffer);
     const classicalLen = view.getUint16(0);
-    const pqcLen = view.getUint16(2);
+    const _pqcLen = view.getUint16(2);
 
     return {
       classicalSig: signature.slice(4, 4 + classicalLen),
@@ -283,7 +283,7 @@ export class CryptoAgilityManager {
 
     if (this.currentConfig.hybridMode) {
       const classicalSig = this.providers.get(PQCAlgorithm.ED25519)!;
-      const classicalKem = this.providers.get(PQCAlgorithm.X25519)!;
+      const _classicalKem = this.providers.get(PQCAlgorithm.X25519)!;
 
       return new HybridCryptoProvider(
         this.currentConfig,
@@ -445,11 +445,11 @@ class DilithiumProvider implements ICryptoProvider {
     }
   }
 
-  async encapsulate(publicKey: ATPCryptoKey): Promise<{ ciphertext: Uint8Array; sharedSecret: Uint8Array }> {
+  async encapsulate(_publicKey: ATPCryptoKey): Promise<{ ciphertext: Uint8Array; sharedSecret: Uint8Array }> {
     throw new Error('Not applicable for signature algorithms');
   }
 
-  async decapsulate(ciphertext: Uint8Array, privateKey: ATPCryptoKey): Promise<Uint8Array> {
+  async decapsulate(_ciphertext: Uint8Array, _privateKey: ATPCryptoKey): Promise<Uint8Array> {
     throw new Error('Not applicable for signature algorithms');
   }
 
@@ -481,11 +481,11 @@ class KyberProvider implements ICryptoProvider {
     };
   }
 
-  async sign(message: Uint8Array, privateKey: ATPCryptoKey): Promise<Uint8Array> {
+  async sign(_message: Uint8Array, _privateKey: ATPCryptoKey): Promise<Uint8Array> {
     throw new Error('Not applicable for KEM algorithms');
   }
 
-  async verify(message: Uint8Array, signature: Uint8Array, publicKey: ATPCryptoKey): Promise<boolean> {
+  async verify(_message: Uint8Array, _signature: Uint8Array, _publicKey: ATPCryptoKey): Promise<boolean> {
     throw new Error('Not applicable for KEM algorithms');
   }
 

@@ -17,7 +17,7 @@ export class EncryptionService {
   constructor() {
     // Get encryption key from environment or generate for development
     const key = process.env.ATP_ENCRYPTION_KEY;
-    const iv = process.env.ATP_ENCRYPTION_IV;
+    const _iv = process.env.ATP_ENCRYPTION_IV;
 
     if (!key && process.env.NODE_ENV === 'production') {
       throw new Error('ATP_ENCRYPTION_KEY must be set in production environment');

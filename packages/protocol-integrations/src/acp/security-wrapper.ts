@@ -177,7 +177,7 @@ export class ACPSecurityWrapper extends EventEmitter {
 
     // Check conversation patterns
     const performatives = messages.map(m => m.performative);
-    const uniquePerformatives = new Set(performatives);
+    const _uniquePerformatives = new Set(performatives);
 
     // Detect rapid-fire messaging
     const timeDeltas = [];

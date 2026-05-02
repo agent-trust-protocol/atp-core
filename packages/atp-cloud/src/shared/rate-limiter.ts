@@ -4,7 +4,7 @@
  */
 
 import { RateLimiterRedis } from 'rate-limiter-flexible';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { db } from './database.js';
 import { config } from './config.js';
 import { logger } from './logger.js';
