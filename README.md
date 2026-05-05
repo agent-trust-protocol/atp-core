@@ -8,9 +8,71 @@
 [![Quantum Safe](https://img.shields.io/badge/Security-Quantum%20Safe-blueviolet)](https://github.com/agent-trust-protocol/atp-core)
 [![Est. March 2025](https://img.shields.io/badge/Est.-March%202025-green)](https://github.com/agent-trust-protocol/atp-core)
 
-**Build secure AI agents in 1 line of code.** The world's first quantum-safe security protocol for AI agents with zero-knowledge proof authentication.
+**Add quantum-safe identity, policy controls, and audit trails to your AI agents** — without rebuilding your existing setup.
 
 > 📌 Image guidance: any featured screenshot or illustration should include the ATP shield logo for consistent branding.
+
+ATP gives every agent a cryptographic identity (DID), a trust score, and a policy layer that decides what it can and cannot do at runtime. One SDK, any framework.
+
+---
+
+## 🗺️ Choose your setup path
+
+Not sure where to start? Pick the option that fits you:
+
+| | Path | What you get |
+|---|---|---|
+| 🚀 | **[Create a new ATP project](#-new-project-guided-setup)** | A scaffolded, ready-to-run agent project with ATP built in |
+| 🔌 | **[Connect an existing project](#-existing-project-add-atp-to-your-codebase)** | The ATP SDK added to your current codebase in minutes |
+| 🖥️ | **[Open the guided local dashboard](#%EF%B8%8F-guided-local-dashboard)** | A local UI that walks you through setup without any commands |
+
+---
+
+## 🚀 New project — guided setup
+
+The fastest way to start. Creates a project folder, installs `atp-sdk`, and opens a local dashboard to finish configuration.
+
+**Requirements:** Node.js 18+ and npm.
+
+```bash
+npx create-atp-agent my-agent
+```
+
+This command:
+- Creates a `my-agent/` folder with `atp-sdk` and `"type": "module"` configured
+- Generates a TypeScript or JavaScript starter file with top-level `await`
+- Writes `.atp.json` with your chosen security profile
+- Opens the **local onboarding dashboard** at `http://127.0.0.1:3456`
+
+Then:
+
+```bash
+cd my-agent
+npm start
+```
+
+**Flags:**
+| Flag | Effect |
+|---|---|
+| `--typescript` | Generate TypeScript starter (default) |
+| `--profile <id>` | Set security profile: `safe-default`, `dev-mode`, `enterprise-locked`, `openclaw-sandbox` |
+| `--runtime <id>` | Target runtime: `openclaw`, `mcp`, `langchain`, `custom` |
+| `--no-dashboard` | Skip opening the local dashboard UI |
+| `--dashboard-only` | Open the local dashboard without scaffolding a project |
+
+**Troubleshooting — new project:**
+
+> **`top-level await` error** — Add `"type": "module"` to `package.json`, or rename your entry file to `.mjs`.
+>
+> **Port 3456 in use** — ATP picks the next available port automatically. Check the terminal output for the actual URL.
+>
+> **npm install fails** — Try `npm install --legacy-peer-deps`, or check your network and npm registry access.
+
+---
+
+## 🔌 Existing project — add ATP to your codebase
+
+Already have an agent? Add ATP in two steps:
 
 ```bash
 npm install atp-sdk
@@ -18,6 +80,7 @@ npm install atp-sdk
 
 ```typescript
 import { Agent } from 'atp-sdk';
+
 const agent = await Agent.quickstart('MyBot');
 console.log('Standalone:', agent.isStandalone());
 // ⚡ MyBot ready!
@@ -26,12 +89,31 @@ console.log('Standalone:', agent.isStandalone());
 //   Standalone:   true
 ```
 
-**That's it!** Your AI agent now has:
-
+Your agent now has:
 - ✅ **Quantum-safe cryptography** (hybrid Ed25519 + ML-DSA)
 - ✅ **Decentralized Identity** (DID)
 - ✅ **Cryptographic signatures** for every action
 - ✅ **Trust scoring** and verification
+
+**Troubleshooting — existing project:**
+
+> **CommonJS project** — Use `await import('atp-sdk')` inside an async IIFE, or add `"type": "module"` to `package.json`.
+>
+> **TypeScript errors** — Make sure `"module": "NodeNext"` or `"module": "ESNext"` is set in `tsconfig.json`.
+
+---
+
+## 🖥️ Guided local dashboard
+
+No commands needed. The local dashboard walks you through choosing a runtime, protection level, and configuration — then shows you the exact CLI equivalent so you know what ran.
+
+```bash
+npx create-atp-agent --dashboard-only
+```
+
+Opens at `http://127.0.0.1:3456`. No cloud account required.
+
+Alternatively, use the **web onboarding wizard** at `/onboard/agent` on your ATP site for a browser-based guided experience.
 
 ---
 
@@ -62,47 +144,9 @@ Follow the GitHub docs and examples below to get started with ATP, or use the ho
 
 ---
 
-## 🚀 Quick Start (60 Seconds)
+## ⚡ Zero Install
 
-### New Developers: Start with Scaffolding
-
-**Interactive CLI (ESM-first, Node 18+):**
-
-```bash
-npx create-atp-agent my-agent
-```
-
-This creates a project folder with:
-- `"type": "module"` and `atp-sdk` in `package.json`
-- TypeScript or JavaScript starter (`agent.ts` or `agent.mjs`) with top-level `await`
-- `.atp.json` with your chosen security profile
-- After install, the CLI opens the **embedded onboarding UI** at `http://127.0.0.1:3456` (next free port if busy). Use `--no-dashboard` to skip, or `--dashboard-only` for the UI without scaffolding.
-
-Then:
-
-```bash
-cd my-agent
-npm install   # skipped if you chose install during prompts
-npm start
-```
-
-For the full **web** onboarding wizard (production ATP site), use [agenttrustprotocol.com](https://agenttrustprotocol.com) and `/onboard/agent` when logged into the app.
-
-### Experienced Developers: Add to Existing Project
-
-**If you already have a project, just install the SDK:**
-
-```bash
-npm install atp-sdk
-```
-
-Then use it:
-```typescript
-import { Agent } from 'atp-sdk';
-const agent = await Agent.quickstart('MyBot');
-```
-
-### Zero Install (Nothing on your machine? No problem.)
+No Node.js yet? Install everything with one command:
 
 **Mac / Linux:**
 ```bash
@@ -236,24 +280,15 @@ console.log(decision); // "allow" | "deny" | "require_approval"
 
 ### Onboarding
 
-Register agents via the embedded dashboard, CLI, or web wizard:
+| Path | Command | Result |
+|---|---|---|
+| New project | `npx create-atp-agent my-agent` | Scaffolds project + opens local dashboard |
+| Existing project | `npm install atp-sdk` | Adds SDK to your current codebase |
+| Local dashboard only | `npx create-atp-agent --dashboard-only` | Opens guided UI at `http://127.0.0.1:3456` |
+| Existing agent (CLI) | `npx atp-onboard-agent` | Interactive terminal onboarding |
+| Web wizard | Visit `/onboard/agent` | Browser-based guided setup |
 
-```bash
-# Scaffold a new ESM-first agent project (interactive CLI).
-# After scaffolding, the CLI starts a local onboarding UI at http://127.0.0.1:3456 by default.
-npx create-atp-agent my-agent
-
-# Embedded onboarding UI only (no new project folder)
-npx create-atp-agent --dashboard-only
-
-# Interactive CLI onboarding (for existing agents)
-npx atp-onboard-agent
-
-# Or visit the web wizard on your ATP site, for example:
-# /onboard/agent
-```
-
-`create-atp-agent` ships a small static wizard plus a mock `POST /api/agents/onboard` on the same port (for local demos). The full Next.js wizard at `/onboard/agent` is separate and can be wired to real ATP services in production.
+`create-atp-agent` ships a local wizard plus a mock `POST /api/agents/onboard` for demos. The Next.js wizard at `/onboard/agent` can be wired to real ATP services in production.
 
 ---
 
