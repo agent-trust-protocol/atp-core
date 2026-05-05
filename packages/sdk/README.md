@@ -12,7 +12,7 @@ ATP provides universal quantum-safe security for all AI agent protocols (MCP, Sw
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![Quantum Safe](https://img.shields.io/badge/Security-Quantum%20Safe-blueviolet)](https://github.com/agent-trust-protocol/core)
 
-## ⚡ Get Started in 30 Seconds
+##  Get Started in 30 Seconds
 
 ### Option 1: Scaffold with Onboarding Dashboard
 
@@ -24,7 +24,7 @@ npx create-atp-agent my-agent
 
 This creates `my-agent/` with `atp-sdk`, starter agent code, and `.atp.json` for the profile you pick. After scaffolding, the CLI starts an embedded onboarding UI at **`http://127.0.0.1:3456`** (or the next free port) and opens your browser. Flags: `--no-dashboard`, `--dashboard-only`, `--no-open` (or `CREATE_ATP_AGENT_NO_OPEN=1`). The local UI uses a **mock** onboard API for demos; wire real ATP services in your own app.
 
-For the hosted marketing site and full product UI, see **[agenttrustprotocol.com](https://agenttrustprotocol.com)** (including the web wizard at `/onboard/agent` in this repo’s Next.js app).
+For the hosted marketing site and full product UI, see **[agenttrustprotocol.com](https://agenttrustprotocol.com)** (including the web wizard at `/onboard/agent` in this repos Next.js app).
 
 ### Option 2: Install the SDK Directly
 
@@ -36,7 +36,7 @@ npm install atp-sdk
 import { Agent } from 'atp-sdk';
 const agent = await Agent.quickstart('MyBot');
 console.log('Standalone:', agent.isStandalone());
-// ⚡ MyBot ready!
+//  MyBot ready!
 //   DID:          did:atp:a1b2c3...
 //   Quantum-safe: yes
 //   Standalone:   true
@@ -46,14 +46,14 @@ One line. Auto-prints DID, quantum-safe status, and connection mode. Need the ag
 
 **That's it!** Your agent now has:
 
-> 📌 Image guidance: any screenshots, badges, or marketing assets should feature the ATP shield logo for consistent branding.
+>  Image guidance: any screenshots, badges, or marketing assets should feature the ATP shield logo for consistent branding.
 
-- ✅ Quantum-safe cryptography (hybrid Ed25519 + ML-DSA)
-- ✅ Decentralized Identity (DID)
-- ✅ Cryptographic signatures
-- ✅ Trust scoring
+-  Quantum-safe cryptography (hybrid Ed25519 + ML-DSA)
+-  Decentralized Identity (DID)
+-  Cryptographic signatures
+-  Trust scoring
 
-## 🚀 Standalone Mode (Offline-First)
+##  Standalone Mode (Offline-First)
 
 `Agent.create()` works immediately without any backend services. When ATP services are unavailable, the agent automatically falls back to **standalone mode**:
 
@@ -84,11 +84,11 @@ docker-compose up -d
 
 Then agents will automatically connect on creation - no code changes needed.
 
-## 📖 Full SDK Documentation
+##  Full SDK Documentation
 
 For advanced usage, see the complete API documentation below...
 
-## 📖 Documentation
+##  Documentation
 
 - **[Complete Documentation](./docs/README.md)** - Comprehensive guides and API reference
 - **[API Reference](./docs/api/README.md)** - Detailed API documentation
@@ -100,7 +100,7 @@ For advanced usage, see the complete API documentation below...
 - **[Best Practices](./docs/guides/best-practices.md)** - Production-ready guidelines
 - **[Troubleshooting](./docs/guides/troubleshooting.md)** - Common issues and solutions
 
-## 🛡️ ATP: The Ecosystem Security Layer
+##  ATP: The Ecosystem Security Layer
 
 **Agent Trust Protocol (ATP) is the universal security layer for the AI agent ecosystem.** 
 
@@ -112,15 +112,15 @@ Unlike protocol-specific security solutions, ATP works across all agent protocol
 - **Any custom protocol** - ATP adapts to your needs
 
 ATP provides:
-- 🔐 **Universal Security**: One security layer for all protocols
-- ⚛️ **Quantum-Safe**: Future-proof cryptography (ML-DSA + Ed25519)
-- 🎯 **Trust Management**: Dynamic trust scoring across protocols
-- 📋 **Audit Trail**: Immutable logging for compliance
-- 🔑 **Identity**: Decentralized identity (DID) for all agents
+-  **Universal Security**: One security layer for all protocols
+-  **Quantum-Safe**: Future-proof cryptography (ML-DSA + Ed25519)
+-  **Trust Management**: Dynamic trust scoring across protocols
+-  **Audit Trail**: Immutable logging for compliance
+-  **Identity**: Decentralized identity (DID) for all agents
 
-## ✨ Features
+##  Features
 
-### 🌐 **Multi-Protocol Support** (NEW in v1.1!)
+###  **Multi-Protocol Support** (NEW in v1.1!)
 - **Universal Security Layer** - Works with MCP, Swarm, ADK, and A2A protocols
 - **Automatic Protocol Detection** - Identifies agent protocol automatically
 - **Unified Monitoring** - Monitor all agents through single interface
@@ -130,7 +130,7 @@ ATP provides:
 
 [Learn more about multi-protocol support →](./docs/MULTI-PROTOCOL-SUPPORT.md)
 
-### 🔐 **Zero-Knowledge Proof Authentication** (NEW in v1.2!)
+###  **Zero-Knowledge Proof Authentication** (NEW in v1.2!)
 - **Agent-to-Agent Authentication** - Cryptographic proofs without revealing secrets
 - **Behavior-Based Proofs** - Prove compliance history without exposing interaction details
 - **Trust Level Verification** - Prove minimum trust score without revealing exact value
@@ -179,7 +179,7 @@ const valid = await alice.verifyBehaviorProof(behaviorProof, {
 });
 ```
 
-### 💳 **Payment Protocols**
+###  **Payment Protocols**
 - **Google AP2 Integration** - Agent Payments Protocol with mandate-based authorization
 - **OpenAI ACP Support** - Agentic Commerce Protocol for ChatGPT commerce
 - Intent & Cart Mandates with cryptographic signatures
@@ -188,42 +188,42 @@ const valid = await alice.verifyBehaviorProof(behaviorProof, {
 - Complete audit trail for all transactions
 - Verifiable credentials for payment authorization
 
-### 🔐 **Identity Management**
+###  **Identity Management**
 - Generate and manage Decentralized Identifiers (DIDs)
 - Register and resolve identities on the ATP network
 - Multi-factor authentication (TOTP, SMS, Email)
 - Trust level management and verification
 - Cryptographic key rotation and recovery
 
-### 📜 **Verifiable Credentials**
+###  **Verifiable Credentials**
 - Create and manage credential schemas
 - Issue tamper-proof verifiable credentials
 - Generate and verify presentations
 - Credential lifecycle management (suspend, revoke, reactivate)
 - Zero-knowledge proof support
 
-### 🛡️ **Permissions & Access Control**
+###  **Permissions & Access Control**
 - Policy-based access control (PBAC)
 - Fine-grained permission management
 - Capability token delegation
 - Real-time access decision evaluation
 - Comprehensive audit trails
 
-### 📋 **Audit & Compliance**
+###  **Audit & Compliance**
 - Immutable audit logging
 - Blockchain anchoring for integrity
 - Advanced query and search capabilities
 - Compliance reporting and data export
 - Real-time monitoring and alerts
 
-### ⚡ **Real-time Features**
+###  **Real-time Features**
 - WebSocket event streaming
 - Live security monitoring
 - Service health monitoring
 - Connection management with auto-reconnection
 - Event filtering and processing
 
-## 🏗️ Architecture
+##  Architecture
 
 The ATP™ SDK provides a unified interface to multiple microservices:
 
@@ -253,7 +253,7 @@ The ATP™ SDK provides a unified interface to multiple microservices:
                └─────────────────┘ └─────────────────┘ └────────────────┘
 ```
 
-## 🎛️ Security Profiles
+##  Security Profiles
 
 ATP includes built-in security profiles that define what agents can and cannot do. Profiles are **runtime-agnostic** and work across OpenClaw, MCP, LangChain, and custom runtimes.
 
@@ -324,7 +324,7 @@ Or use the web wizard at `/onboard/agent`.
 
 ---
 
-## 🔧 Installation & Setup
+##  Installation & Setup
 
 ### Prerequisites
 
@@ -375,7 +375,7 @@ const config = {
 const client = new ATPClient(config);
 ```
 
-## 📚 Usage Examples
+##  Usage Examples
 
 ### Identity Management
 
@@ -810,7 +810,7 @@ const transactions = await client.payments.queryTransactions({
 console.log('Total transactions:', transactions.data.length);
 ```
 
-## 🛠️ Development
+##  Development
 
 ### Environment Setup
 
@@ -869,7 +869,7 @@ const credential: VerifiableCredential = await client.credentials.issue({
 });
 ```
 
-## 🧪 Testing
+##  Testing
 
 The SDK includes comprehensive tests and testing utilities:
 
@@ -920,7 +920,7 @@ describe('My Application', () => {
 });
 ```
 
-## 🚀 Production Deployment
+##  Production Deployment
 
 ### Security Checklist
 
@@ -964,7 +964,7 @@ const results = await Promise.allSettled(
 );
 ```
 
-## 📊 Monitoring
+##  Monitoring
 
 ### Health Checks
 
@@ -1043,7 +1043,7 @@ async function instrumentedOperation(operation) {
 }
 ```
 
-## 🤝 Contributing
+##  Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
@@ -1077,11 +1077,11 @@ To do a dry run without publishing (builds and packs only), use **Actions → Pu
 - Use conventional commit messages
 - Update documentation for API changes
 
-## 📄 License
+##  License
 
 This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+##  Support
 
 - **Documentation**: [https://docs.atp.protocol](https://docs.atp.protocol)
 - **GitHub Issues**: [Report bugs and request features](https://github.com/atp/sdk/issues)
@@ -1089,14 +1089,14 @@ This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENS
 - **Email**: support@atp.protocol
 - **Enterprise Support**: enterprise@atp.protocol
 
-## 🔗 Related Projects
+##  Related Projects
 
 - **[ATP™ Core Services](https://github.com/atp/core)** - Core ATP protocol implementation
 - **[ATP™ CLI](https://github.com/atp/cli)** - Command-line interface
 - **[ATP™ Examples](https://github.com/atp/examples)** - Real-world examples and demos
 - **[ATP™ Specification](https://github.com/atp/spec)** - Protocol specification
 
-## 📈 Roadmap
+##  Roadmap
 
 - [x] **v1.1.0** - Payment Protocols (AP2 & ACP) Integration
 - [x] **v1.2.0** - Zero-Knowledge Proof Authentication (Agent-to-Agent)
@@ -1107,7 +1107,7 @@ This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENS
 - [ ] **v1.4.0** - GraphQL API support
 - [ ] **v2.0.0** - ATP Protocol v2 compatibility
 
-## 🔗 Payment Protocol Partners
+##  Payment Protocol Partners
 
 The ATP SDK integrates with industry-leading payment platforms:
 
