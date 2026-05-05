@@ -604,7 +604,7 @@ export function WorkflowDesignerLayout({ children }: { children?: React.ReactNod
                       <div>
                         <Label>Value</Label>
                         <Input
-                          value={newVariable.value ?? ''}
+                          value={String(newVariable.value ?? '')}
                           onChange={(e) => setNewVariable({...newVariable, value: e.target.value})}
                           placeholder="Default value"
                         />

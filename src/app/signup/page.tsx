@@ -2,7 +2,7 @@ import TallyForm from '@/components/TallyForm';
 
 export const metadata = {
   title: 'Get Access | Agent Trust Protocol',
-  description: 'Request access to Agent Trust Protocol — the open-source security layer for AI agents.',
+  description: 'Request access to Agent Trust Protocol — the open-source security layer for AI agents.'
 };
 
 export default function SignupPage() {
