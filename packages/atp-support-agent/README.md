@@ -1,18 +1,18 @@
-# ATP Support Agent 🤖
+# ATP Support Agent 
 
 ## Overview
 The ATP Support Agent is an AI-powered customer support system built on the Agent Trust Protocol itself, demonstrating real-world ATP usage while providing enterprise-grade support capabilities.
 
 ## Key Features
 
-### 🎯 Core Capabilities
+###  Core Capabilities
 - **24/7 Automated Support** - Handles 80% of support queries automatically
 - **Multi-Channel Integration** - Slack, Discord, Email, Web Portal
 - **Intelligent Escalation** - Routes complex issues to human agents
 - **Trust-Based Prioritization** - Uses ATP trust scores for queue management
 - **Self-Learning** - Improves responses based on resolution feedback
 
-### 📊 Support Metrics
+###  Support Metrics
 - **<30 second initial response** for automated queries
 - **<4 hour SLA** for enterprise customers
 - **95% first-contact resolution** target

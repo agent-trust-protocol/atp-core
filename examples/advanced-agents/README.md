@@ -2,7 +2,7 @@
 
 This directory contains sophisticated examples demonstrating advanced agent-to-agent communication patterns, trust management, and integration with emerging protocols like MCP (Model Context Protocol).
 
-## 🏗️ Architecture Overview
+##  Architecture Overview
 
 The Agent Trust Protocol™ enables:
 - **Decentralized Identity**: DID-based agent authentication
@@ -11,7 +11,7 @@ The Agent Trust Protocol™ enables:
 - **Workflow Coordination**: Multi-agent task orchestration
 - **MCP Integration**: Bridge to Model Context Protocol for tool sharing
 
-## 🚀 Quick Start
+##  Quick Start
 
 ```bash
 # Build the examples
@@ -26,7 +26,7 @@ npm run demo:mcp             # MCP integration
 npm run demo:marketplace     # Agent marketplace preview
 ```
 
-## 📁 File Structure
+##  File Structure
 
 ```
 src/
@@ -37,7 +37,7 @@ src/
 └── demo.ts                    # Interactive demonstration
 ```
 
-## 🤖 Agent Types
+##  Agent Types
 
 ### BaseAgent
 Core functionality for all agents:
@@ -65,7 +65,7 @@ Orchestrates multi-agent workflows:
 - **Functions**: Agent registry, task distribution, dependency management
 - **Integration**: Central coordination point for complex workflows
 
-## 🔗 MCP Integration
+##  MCP Integration
 
 ### Current ATP + MCP Benefits
 - **DID Authentication**: Secure agent identity for MCP sessions
@@ -91,7 +91,7 @@ await agent.delegateMCPTool('data-analyzer', targetAgent, 3600000);
 3. **Economic Models**: Token-based tool access and incentives
 4. **Cross-Protocol**: Bridge ATP trust to other agent ecosystems
 
-## 🤝 Collaborative Scenarios
+##  Collaborative Scenarios
 
 ### Multi-Agent Data Pipeline
 ```
@@ -112,7 +112,7 @@ Data Collection → Security Scan → Analysis → Validation → Results
 - Load balancing across agent pool
 - Real-time health monitoring
 
-## 📊 Demo Scenarios
+##  Demo Scenarios
 
 ### 1. Collaborative Agents Network
 Demonstrates:
@@ -136,7 +136,7 @@ Future marketplace features:
 - Economic incentive mechanisms
 - Quality of service monitoring
 
-## 🔒 Security Features
+##  Security Features
 
 ### Trust Management
 - Verifiable credential validation
@@ -156,7 +156,7 @@ Future marketplace features:
 - Capability usage monitored
 - Compliance reporting available
 
-## 🌐 Real-World Applications
+##  Real-World Applications
 
 ### Enterprise AI Coordination
 - Federated ML model training
@@ -182,7 +182,7 @@ Future marketplace features:
 - Automated compliance checks
 - Real-time coordination
 
-## 🔧 Technical Details
+##  Technical Details
 
 ### Communication Protocol
 - JSON-RPC 2.0 over WebSocket
@@ -202,7 +202,7 @@ Future marketplace features:
 - Load balancing algorithms
 - Caching strategies
 
-## 🚧 Development Notes
+##  Development Notes
 
 ### Prerequisites
 - ATP services running (Identity, VC, Permission, RPC Gateway)
@@ -221,7 +221,7 @@ Future marketplace features:
 - Performance metrics collection
 - Security event logging
 
-## 🤔 Answering Your MCP Question
+##  Answering Your MCP Question
 
 **Regarding MCP Integration**: The Agent Trust Protocol™ is designed to be **highly complementary** to MCP:
 

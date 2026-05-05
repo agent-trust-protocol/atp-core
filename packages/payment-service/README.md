@@ -2,14 +2,14 @@
 
 Payment service implementing **Google AP2** (Agent Payments Protocol) and **OpenAI ACP** (Agentic Commerce Protocol).
 
-## ⚠️ MVP Mode
+##  MVP Mode
 
 This is an **MVP (Minimum Viable Product)** implementation:
-- ✅ All APIs functional
-- ✅ Database persistence
-- ✅ Mock payment processing
-- ❌ **NO REAL MONEY** is processed
-- ❌ No actual payment processor integrations
+-  All APIs functional
+-  Database persistence
+-  Mock payment processing
+-  **NO REAL MONEY** is processed
+-  No actual payment processor integrations
 
 Perfect for:
 - Testing the SDK
@@ -17,7 +17,7 @@ Perfect for:
 - Validating API design
 - Developer feedback
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - Node.js 18+
@@ -52,7 +52,7 @@ docker-compose up payment-service
 
 Service will be available at: `http://localhost:3009`
 
-## 📡 API Endpoints
+##  API Endpoints
 
 ### Health Check
 ```
@@ -142,7 +142,7 @@ POST /payments/policies
 GET /payments/transactions?agentDid=did:atp:agent456
 ```
 
-## 🗄️ Database Schema
+##  Database Schema
 
 Tables created by migration `004_payments.sql`:
 - `payment_mandates` - Intent & cart mandates
@@ -152,7 +152,7 @@ Tables created by migration `004_payments.sql`:
 - `acp_checkout_sessions` - ACP checkout sessions
 - `agent_spending` - Spending tracking
 
-## 🧪 Testing
+##  Testing
 
 ```bash
 # Example: Create intent mandate
@@ -167,7 +167,7 @@ curl -X POST http://localhost:3009/ap2/mandates/intent \
   }'
 ```
 
-## 📊 Mock Payment Behavior
+##  Mock Payment Behavior
 
 The mock processor simulates realistic payment scenarios:
 - **90% success rate** - Most payments succeed
@@ -175,7 +175,7 @@ The mock processor simulates realistic payment scenarios:
 - **300-1000ms delay** - Realistic network latency
 - **Transaction records** - All attempts logged to database
 
-## 🔄 Next Steps (Full Production)
+##  Next Steps (Full Production)
 
 To move from MVP to production:
 
@@ -199,13 +199,13 @@ To move from MVP to production:
    - Grafana dashboards
    - Alert system
 
-## 📚 Documentation
+##  Documentation
 
 - [Implementation Plan](../../PAYMENT_SERVICE_IMPLEMENTATION_PLAN.md)
 - [Gap Analysis](../../PAYMENT_SERVICE_GAP_ANALYSIS.md)
 - [Value Proposition](../../PAYMENT_PROTOCOLS_VALUE_PROPOSITION.md)
 
-## 🤝 Contributing
+##  Contributing
 
 This is MVP code. Contributions welcome for:
 - Bug fixes
@@ -213,6 +213,6 @@ This is MVP code. Contributions welcome for:
 - Documentation
 - Test coverage
 
-## 📄 License
+##  License
 
 Apache 2.0 - Same as ATP project

@@ -1,6 +1,6 @@
-# Agent Trust Protocol™ (ATP) SDK 🛡️
+# Agent Trust Protocol™ (ATP) SDK 
 
-*The original Agent Trust Protocol — securing AI agents since March 2025*
+*The original Agent Trust Protocol  securing AI agents since March 2025*
 
 [![npm version](https://badge.fury.io/js/atp-sdk.svg)](https://www.npmjs.com/package/atp-sdk)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -10,7 +10,7 @@
 
 **Build secure AI agents in 1 line of code.** The world's first quantum-safe security protocol for AI agents with zero-knowledge proof authentication.
 
-> 📌 Image guidance: any featured screenshot or illustration should include the ATP shield logo for consistent branding.
+>  Image guidance: any featured screenshot or illustration should include the ATP shield logo for consistent branding.
 
 ```bash
 npm install atp-sdk
@@ -20,7 +20,7 @@ npm install atp-sdk
 import { Agent } from 'atp-sdk';
 const agent = await Agent.quickstart('MyBot');
 console.log('Standalone:', agent.isStandalone());
-// ⚡ MyBot ready!
+//  MyBot ready!
 //   DID:          did:atp:a1b2c3...
 //   Quantum-safe: yes
 //   Standalone:   true
@@ -28,41 +28,41 @@ console.log('Standalone:', agent.isStandalone());
 
 **That's it!** Your AI agent now has:
 
-- ✅ **Quantum-safe cryptography** (hybrid Ed25519 + ML-DSA)
-- ✅ **Decentralized Identity** (DID)
-- ✅ **Cryptographic signatures** for every action
-- ✅ **Trust scoring** and verification
+-  **Quantum-safe cryptography** (hybrid Ed25519 + ML-DSA)
+-  **Decentralized Identity** (DID)
+-  **Cryptographic signatures** for every action
+-  **Trust scoring** and verification
 
 ---
 
-## 📦 Package Status
+##  Package Status
 
 | Package | Version | Status | Install |
 |---------|---------|--------|---------|
-| `atp-sdk` | ![npm](https://img.shields.io/npm/v/atp-sdk) | ✅ **Production** | `npm install atp-sdk` |
-| `@atpdevelopment/openclaw-atp` | ![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp) | ✅ **Production** | `npm install @atpdevelopment/openclaw-atp` |
-| `atp-core` | v1.0.0 | ⚠️ **Legacy** — Superseded by `atp-sdk` | — |
-| Services (`@atp/*`) | 0.1.0 | 🔄 **Development** | Monorepo only |
+| `atp-sdk` | ![npm](https://img.shields.io/npm/v/atp-sdk) |  **Production** | `npm install atp-sdk` |
+| `@atpdevelopment/openclaw-atp` | ![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp) |  **Production** | `npm install @atpdevelopment/openclaw-atp` |
+| `atp-core` | v1.0.0 |  **Legacy**  Superseded by `atp-sdk` |  |
+| Services (`@atp/*`) | 0.1.0 |  **Development** | Monorepo only |
 
-**Use `atp-sdk`** — the only production-ready package for application development.  
+**Use `atp-sdk`**  the only production-ready package for application development.  
 See [VERSIONING.md](./VERSIONING.md) for full policy.
 
 ---
 
-## 🎮 Try It Now
+##  Try It Now
 
 Follow the GitHub docs and examples below to get started with ATP, or use the hosted website and dashboard when available.
 
-- 🤖 Create quantum-safe agents
-- 📊 See trust scoring in action
-- 🔐 Test quantum-safe signatures
-- 🚀 Run OpenClaw multi-agent workflows
-- 📜 Explore the policy engine
-- 🔗 Verify blockchain audit trails
+-  Create quantum-safe agents
+-  See trust scoring in action
+-  Test quantum-safe signatures
+-  Run OpenClaw multi-agent workflows
+-  Explore the policy engine
+-  Verify blockchain audit trails
 
 ---
 
-## 🚀 Quick Start (60 Seconds)
+##  Quick Start (60 Seconds)
 
 ### New Developers: Start with Scaffolding
 
@@ -116,12 +116,12 @@ irm https://agenttrustprotocol.com/install.ps1 | iex
 
 ---
 
-## 🎯 What Makes ATP Different?
+##  What Makes ATP Different?
 
 | Feature | Traditional Security | **ATP (Quantum-Safe)** |
 | --- | --- | --- |
 | **Setup** | Complex infrastructure | 1 line of code |
-| **Quantum Safe** | ❌ Vulnerable | ✅ **Protected** |
+| **Quantum Safe** |  Vulnerable |  **Protected** |
 | **Identity** | Username/password | Cryptographic DID |
 | **Trust** | Manual verification | Dynamic scoring |
 | **Audit** | Basic logs | Cryptographic proof |
@@ -129,7 +129,7 @@ irm https://agenttrustprotocol.com/install.ps1 | iex
 
 ---
 
-## 📚 Examples
+##  Examples
 
 ### Basic Agent Communication
 
@@ -257,7 +257,7 @@ npx atp-onboard-agent
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ATP provides universal security across all AI agent protocols:
 
@@ -283,7 +283,7 @@ Your AI Agents (LangChain, OpenClaw, AutoGPT, MCP, Swarm, ADK, A2A)
 
 ---
 
-## 🔧 Installation
+##  Installation
 
 ```bash
 # npm
@@ -298,9 +298,9 @@ pnpm add atp-sdk
 
 ---
 
-## 📖 Documentation
+##  Documentation
 
-- **[📄 White Paper v2.1](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/white-paper-v2.1.md)** — ATP architecture, trust model, compliance, and roadmap
+- **[ White Paper v2.1](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/white-paper-v2.1.md)**  ATP architecture, trust model, compliance, and roadmap
 - **[Quick Start Guide](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/getting-started.md)** - 5-minute setup
 - **[API Reference](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/docs/api/README.md)** - Complete API docs
 - **[VERSIONING.md](./VERSIONING.md)** - Package status and versioning policy
@@ -311,7 +311,7 @@ pnpm add atp-sdk
 
 ---
 
-## 🚀 Deployment
+##  Deployment
 
 ### Vercel (Next.js Frontend)
 
@@ -335,7 +335,7 @@ Each service in `packages/` has its own deployment guide:
 
 ---
 
-## 🤖 Multi-Agent Systems with OpenClaw
+##  Multi-Agent Systems with OpenClaw
 
 ATP now provides first-class support for [OpenClaw](https://openclaw.ai) multi-agent frameworks via the [`@atpdevelopment/openclaw-atp`](https://www.npmjs.com/package/@atpdevelopment/openclaw-atp) package. Secure entire agent crews with quantum-safe cryptography:
 
@@ -362,18 +362,18 @@ const trader = await atpClient.registerAgent(tradingAgent, {
 
 // Validate agent graph before execution
 const validation = await atpClient.validateCrew(crew);
-// ✅ Graph validated: No cycles, trust levels satisfied, data flows secure
+//  Graph validated: No cycles, trust levels satisfied, data flows secure
 ```
 
 **Features:**
 
-- 🔐 **Quantum-safe agent identities** for every OpenClaw agent
-- 🛡️ **Tool-level security** with ATP permission checks on every call
-- 🎛️ **Security profiles** - Built-in profiles (safe-default, dev-mode, enterprise-locked, openclaw-sandbox) with `evaluateActionWithProfile`
-- 📊 **Graph validation** - Policy-based constraints on agent interactions
-- 🎯 **Trust-based access control** - Dynamic trust scores adjust permissions
-- 📈 **Observability integration** - Monitoring feeds into ATP trust engine
-- 🔑 **Secret management** - Short-lived, scoped credentials for external services
+-  **Quantum-safe agent identities** for every OpenClaw agent
+-  **Tool-level security** with ATP permission checks on every call
+-  **Security profiles** - Built-in profiles (safe-default, dev-mode, enterprise-locked, openclaw-sandbox) with `evaluateActionWithProfile`
+-  **Graph validation** - Policy-based constraints on agent interactions
+-  **Trust-based access control** - Dynamic trust scores adjust permissions
+-  **Observability integration** - Monitoring feeds into ATP trust engine
+-  **Secret management** - Short-lived, scoped credentials for external services
 
 [Read the full guide →](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/openclaw-integration.md)
 
@@ -388,7 +388,7 @@ const validation = await atpClient.validateCrew(crew);
 
 ---
 
-## 📊 Stats
+##  Stats
 
 [![GitHub stars](https://img.shields.io/github/stars/agent-trust-protocol/atp-core?style=social)](https://github.com/agent-trust-protocol/atp-core)
 [![npm downloads](https://img.shields.io/npm/dm/atp-sdk)](https://www.npmjs.com/package/atp-sdk)
@@ -396,19 +396,19 @@ const validation = await atpClient.validateCrew(crew);
 
 ---
 
-## 🚀 Ready to Build?
+##  Ready to Build?
 
 | | |
 | --- | --- |
-| 🧑‍💻 Developers<br>**Start coding in 30 seconds**<br>`npm install atp-sdk`<br>[View Quick Start →](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/getting-started.md) | 🏢 Enterprise<br>**Production-ready security**<br>• SOC2 compliance ready<br>• Enterprise support<br>• Custom deployment<br>[Contact Sales →](mailto:llewis@agenttrustprotocol.com) |
+|  Developers<br>**Start coding in 30 seconds**<br>`npm install atp-sdk`<br>[View Quick Start →](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/getting-started.md) |  Enterprise<br>**Production-ready security**<br> SOC2 compliance ready<br> Enterprise support<br> Custom deployment<br>[Contact Sales →](mailto:llewis@agenttrustprotocol.com) |
 
 ---
 
-## 📄 License
+##  License
 
 Licensed under [Apache 2.0](https://github.com/agent-trust-protocol/atp-core/blob/main/LICENSE) - free for commercial use.
 
-## 🛡️ Security
+##  Security
 
 Found a security issue? Email [llewis@agenttrustprotocol.com](mailto:llewis@agenttrustprotocol.com)
 
@@ -416,6 +416,6 @@ Found a security issue? Email [llewis@agenttrustprotocol.com](mailto:llewis@agen
 
 **Agent Trust Protocol™ (ATP)** is developed and operated by **Sovr INC**. It is not affiliated with zCloak Network's similarly named protocol or any Binance-hosted initiatives.
 
-Agent Trust Protocol™ — The original agent trust protocol, securing AI agents since March 2025. Protecting AI agents from today's threats and tomorrow's quantum computers.
+Agent Trust Protocol™  The original agent trust protocol, securing AI agents since March 2025. Protecting AI agents from today's threats and tomorrow's quantum computers.
 
-[Website](https://agenttrustprotocol.com) • [Documentation](https://agenttrustprotocol.com/docs) • [GitHub](https://github.com/agent-trust-protocol/atp-core) • [White Paper v2.1](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/white-paper-v2.1.md)
+[Website](https://agenttrustprotocol.com)  [Documentation](https://agenttrustprotocol.com/docs)  [GitHub](https://github.com/agent-trust-protocol/atp-core)  [White Paper v2.1](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/white-paper-v2.1.md)

@@ -1,6 +1,6 @@
-# ATP Core ⚠️ LEGACY
+# ATP Core  LEGACY
 
-> **⚠️ DEPRECATED:** This package is superseded by `atp-sdk`. Please use [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) for all new development.
+> ** DEPRECATED:** This package is superseded by `atp-sdk`. Please use [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) for all new development.
 >
 > **Migration:** See [Migration Guide](../packages/sdk/docs/MIGRATION.md)
 
@@ -8,22 +8,22 @@
 
 A minimal implementation of the Agent Trust Protocol with quantum-safe cryptography and MCP security wrapper.
 
-**Status:** ⚠️ Legacy (superseded by `atp-sdk`)
+**Status:**  Legacy (superseded by `atp-sdk`)
 
 ## Features
 
-🔐 **Quantum-Safe Security**
+ **Quantum-Safe Security**
 - Hybrid Ed25519 + Dilithium3 signatures
 - Post-quantum cryptographic resistance
 - Backward compatibility with classical signatures
 
-🛡️ **MCP Security Layer**
+ **MCP Security Layer**
 - First security wrapper for Model Context Protocol
 - Signature verification for all MCP tool requests
 - Trust scoring and audit logging
 - Enhanced responses with ATP metadata
 
-🌐 **Decentralized Identity**
+ **Decentralized Identity**
 - Self-sovereign DIDs with quantum-safe keys
 - Verifiable messaging between agents
 - SQLite storage for development
@@ -36,7 +36,7 @@ npm run build
 npm start
 ```
 
-## ⚡ Live Demo
+##  Live Demo
 
 Experience the world's first quantum-safe agent protocol:
 
@@ -45,12 +45,12 @@ npm run demo
 ```
 
 **Demo showcases:**
-- 🤖 Quantum-safe agent creation (Alice & Bob)
-- 🔐 Hybrid Ed25519 + Dilithium3 signatures
-- 📊 Dynamic trust scoring system
-- 🛡️ MCP security wrapper in action
-- ⚡ Performance comparison (Classical vs Quantum)
-- 🎯 Complete audit trail
+-  Quantum-safe agent creation (Alice & Bob)
+-  Hybrid Ed25519 + Dilithium3 signatures
+-  Dynamic trust scoring system
+-  MCP security wrapper in action
+-  Performance comparison (Classical vs Quantum)
+-  Complete audit trail
 
 ## API Endpoints
 
@@ -110,4 +110,4 @@ Edit `mcp-config.json` to add MCP tools:
 - **Audit Logging**: All MCP requests logged with metadata
 - **Rate Limiting**: Configurable per-agent limits
 
-**Total Code**: ~400 lines | **Status**: ⚠️ Legacy (use `atp-sdk`) | **Quantum-Safe**: ✅
+**Total Code**: ~400 lines | **Status**:  Legacy (use `atp-sdk`) | **Quantum-Safe**: 
