@@ -435,7 +435,7 @@ const validation = await atpClient.validateCrew(crew);
 
 | | |
 | --- | --- |
-| 🧑‍💻 Developers<br>**Start coding in 30 seconds**<br>`npm install atp-sdk`<br>[View Quick Start →](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/getting-started.md) | 🏢 Enterprise<br>**Production-ready security**<br>• SOC2 compliance ready<br>• Enterprise support<br>• Custom deployment<br>[Contact Sales →](mailto:llewis@agenttrustprotocol.com) |
+| 🧑‍💻 Developers<br>**Start coding in 30 seconds**<br>`npm install atp-sdk`<br>[View Quick Start →](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/getting-started.md) | 🏢 Enterprise<br>**Production-ready security**<br>• SOC2 compliance ready<br>• Enterprise support<br>• Custom deployment<br>[Contact Sales →](mailto:support@agenttrustprotocol.com) |
 
 ---
 
@@ -445,11 +445,11 @@ Licensed under [Apache 2.0](https://github.com/agent-trust-protocol/atp-core/blo
 
 ## 🛡️ Security
 
-Found a security issue? Email [llewis@agenttrustprotocol.com](mailto:llewis@agenttrustprotocol.com)
+Found a security issue? Email [security@agenttrustprotocol.com](mailto:security@agenttrustprotocol.com)
 
 ---
 
-**Agent Trust Protocol™ (ATP)** is developed and operated by **Sovr INC**. It is not affiliated with zCloak Network's similarly named protocol or any Binance-hosted initiatives.
+**Agent Trust Protocol™ (ATP)** is developed and operated by **Sovr Labs**. It is not affiliated with zCloak Network's similarly named protocol or any Binance-hosted initiatives.
 
 Agent Trust Protocol™ — The original agent trust protocol, securing AI agents since March 2025. Protecting AI agents from today's threats and tomorrow's quantum computers.
 
