@@ -1,7 +1,7 @@
 import { BaseStorage, DatabaseConfig } from '@atp/shared';
 import { DIDDocument, KeyPair } from '../models/did.js';
 import { CryptoUtils } from '../utils/crypto.js';
-import { encryptionService } from '@atp/shared/dist/security/encryption.js';
+import { encryptionService } from '@atp/shared';
 
 export class StorageService extends BaseStorage {
   constructor(config: DatabaseConfig) {

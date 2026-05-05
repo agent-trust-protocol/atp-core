@@ -2,7 +2,7 @@ import { AuthMessage } from '../models/rpc.js';
 import { DIDJWTService, DIDJWTPayload } from './did-jwt.js';
 import { MTLSService, ClientCertificate } from './mtls.js';
 import { IncomingMessage } from 'http';
-import { nonceService } from '@atp/shared/dist/security/nonce-service.js';
+import { nonceService } from '@atp/shared';
 
 export interface AuthContext {
   did?: string;
