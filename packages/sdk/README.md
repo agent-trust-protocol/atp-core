@@ -1,4 +1,4 @@
-# atp-sdk - Agent Trust Protocol SDK
+# atp-sdk — Agent Trust Protocol™ SDK
 
 > **The First Quantum-Safe AI Agent SDK with Zero-Knowledge Proof Authentication**
 
@@ -102,7 +102,7 @@ For advanced usage, see the complete API documentation below...
 
 ##  ATP: The Ecosystem Security Layer
 
-**Agent Trust Protocol (ATP) is the universal security layer for the AI agent ecosystem.** 
+**Agent Trust Protocol™ (ATP™) is the universal security layer for the AI agent ecosystem.** 
 
 Unlike protocol-specific security solutions, ATP works across all agent protocols:
 - **MCP** (Model Context Protocol) - Anthropic

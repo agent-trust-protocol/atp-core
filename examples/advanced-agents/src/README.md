@@ -1,6 +1,6 @@
 # Advanced Agent Communication Examples
 
-This directory contains working examples demonstrating sophisticated agent-to-agent communication using the Agent Trust Protocol.
+This directory contains working examples demonstrating sophisticated agent-to-agent communication using the Agent Trust Protocol™.
 
 ## Quick Demo
 
