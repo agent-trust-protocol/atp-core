@@ -392,7 +392,7 @@ Apache-2.0 - see [LICENSE](./LICENSE)
 
 Built on top of:
 - [OpenClaw](https://github.com/ShoggothAI/openclaw) - Multi-agent orchestration
-- [ATP SDK](https://github.com/agent-trust-protocol/sdk) - Agent Trust Protocol
+- [ATP™ SDK](https://github.com/agent-trust-protocol/sdk) - Agent Trust Protocol™
 - [LangChain](https://github.com/langchain-ai/langchain) - LLM framework
 
 ---

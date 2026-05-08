@@ -1,6 +1,6 @@
 # ATP Case Study: Comprehensive Agent Testing
 
-This case study demonstrates the full capabilities of the Agent Trust Protocol (ATP) through comprehensive testing of all agent types and their interactions.
+This case study demonstrates the full capabilities of the Agent Trust Protocol™ (ATP™) through comprehensive testing of all agent types and their interactions.
 
 ## Overview
 

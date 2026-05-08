@@ -1,8 +1,8 @@
-# ATP Cloud - Multi-tenant Agent Trust Protocol Platform
+# ATP™ Cloud — Multi-tenant Agent Trust Protocol™ Platform
 
 >  **INTERNAL TESTING ONLY** - This is a development version not intended for production use.
 
-ATP Cloud is a cloud-native, multi-tenant version of the Agent Trust Protocol services, designed to provide scalable identity, credentials, and permission management for multiple organizations.
+ATP™ Cloud is a cloud-native, multi-tenant version of the Agent Trust Protocol™ services, designed to provide scalable identity, credentials, and permission management for multiple organizations.
 
 ## Architecture Overview
 

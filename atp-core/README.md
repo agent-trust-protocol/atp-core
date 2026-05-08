@@ -6,7 +6,7 @@
 
 ---
 
-A minimal implementation of the Agent Trust Protocol with quantum-safe cryptography and MCP security wrapper.
+A minimal implementation of the Agent Trust Protocol™ with quantum-safe cryptography and MCP security wrapper.
 
 **Status:**  Legacy (superseded by `atp-sdk`)
 
