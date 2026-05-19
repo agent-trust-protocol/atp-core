@@ -846,61 +846,65 @@ export class Agent extends EventEmitter {
   }
 
   /**
-   * One-shot mutual authentication between two agents
-   * Both agents prove to each other simultaneously
+   * One-shot mutual authentication between two agents.
    *
-   * @example
-   * ```typescript
-   * // Mutual authentication with another agent
-   * const result = await agentA.mutualAuth(
-   *   agentB.getDID(),
-   *   // What I require from them
-   *   [{ type: ZKProofType.TRUST_LEVEL, params: { minTrustLevel: 0.5 } }],
-   *   // What they require from me
-   *   [{ type: ZKProofType.IDENTITY, params: {} }]
-   * );
+   * @experimental Not yet implemented. A real implementation requires a
+   * network exchange of challenges and responses between both agents — this
+   * SDK method runs only in the caller's process and therefore cannot
+   * complete the second half of the handshake on its own. Callers must use
+   * {@link requestAuth} / {@link respondToChallenge} / {@link verifyAuthResponse}
+   * directly and exchange the payloads over their transport of choice.
    *
-   * if (result.iVerified.verified && result.theyVerified.verified) {
-   *   console.log('Mutual trust established!');
-   * }
-   * ```
+   * By default this method throws to prevent callers from acting on a
+   * placeholder result. Pass `{ experimental: true }` to opt in to a
+   * partial flow that locally generates this agent's response to the
+   * peer's requirements but reports `verified: false` /
+   * `trustEstablished: false` for BOTH sides — the peer's verification
+   * must still be performed out-of-band before any trust is granted.
+   *
+   * @throws {Error} when `options.experimental` is not `true`.
    */
   async mutualAuth(
     targetDid: string,
     myRequirements: ZKPRequirement[],
-    theirRequirements: ZKPRequirement[]
+    theirRequirements: ZKPRequirement[],
+    options?: { experimental?: boolean }
   ): Promise<{ iVerified: ZKPAuthResult; theyVerified: ZKPAuthResult }> {
     if (!this.initialized || !this.did) {
       throw new Error('Agent not initialized');
     }
 
-    // Create challenge for the other agent (stored for later verification)
+    if (!options?.experimental) {
+      throw new Error(
+        'Agent.mutualAuth is not implemented. Use requestAuth(), respondToChallenge(), ' +
+          'and verifyAuthResponse() with a real network exchange. To run the partial ' +
+          'in-process flow for testing only, pass { experimental: true } — it returns ' +
+          'verified=false for both sides and MUST NOT be used to gate access.'
+      );
+    }
+
+    // Create challenge for the other agent (stored for later verification
+    // when their response arrives over the network).
     await this.requestAuth(targetDid, myRequirements);
 
-    // Create our response to their requirements (simulated challenge from them)
+    // Generate our response to their hypothetical challenge to exercise the
+    // local response/audit side effects. The result is intentionally not
+    // returned — callers wanting to transport a response over the wire must
+    // call respondToChallenge() directly so they own the payload.
     const challengeFromThem = createChallenge(targetDid, this.did, theirRequirements);
-    const myResponse = await this.respondToChallenge(challengeFromThem);
+    await this.respondToChallenge(challengeFromThem);
 
-    // In a real implementation, these would be exchanged over the network
-    // For now, we return placeholders for the mutual verification results
+    // Safe failure: report unverified for BOTH sides. Callers must finish
+    // the handshake out-of-band before granting trust.
+    const unverified: ZKPAuthResult = {
+      verified: false,
+      proverDid: targetDid,
+      verifiedProofs: [],
+      trustEstablished: false
+    };
     return {
-      iVerified: {
-        verified: false, // Will be verified when they respond
-        proverDid: targetDid,
-        verifiedProofs: [],
-        trustEstablished: false
-      },
-      theyVerified: {
-        // This would be their verification of our response
-        verified: true, // Optimistic for now
-        proverDid: this.did,
-        verifiedProofs: myResponse.proofs.map(p => ({
-          type: p.type,
-          verified: true,
-          timestamp: p.timestamp
-        })),
-        trustEstablished: true
-      }
+      iVerified: unverified,
+      theyVerified: { ...unverified, proverDid: this.did }
     };
   }
 

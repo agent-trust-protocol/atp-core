@@ -12,7 +12,7 @@
  * - Policy-based access control
  * - Blockchain-anchored audit trails
  *
- * @version 1.2.0
+ * @version 1.2.1
  * @author Agent Trust Protocol™ Team
  * @license Apache-2.0
  */
@@ -209,7 +209,8 @@ export type {
 } from './client/gateway.js';
 
 // Version information
-export const VERSION = '1.2.0';
+export { VERSION } from './version.js';
+import { VERSION } from './version.js';
 export const PROTOCOL_VERSION = '1.0';
 
 // Constants
@@ -226,7 +227,16 @@ export const ATP_CONSTANTS = {
 
 // Re-import for function implementations
 import { ATPClient } from './client/atp.js';
-import type { ATPConfig } from './types.js';
+import { Agent, type SimpleAgentOptions } from './simple-agent.js';
+import type {
+  ATPConfig,
+  ATPResponse,
+  DIDDocument,
+  TrustLevel,
+  ZKPAuthRequest,
+  ZKPAuthResult
+} from './types.js';
+import type { DIDRegistrationRequest } from './client/identity.js';
 
 // Helper functions for quick SDK setup
 export function createATPClient(config: ATPConfig): ATPClient {
@@ -256,6 +266,38 @@ export function createQuickConfig(baseUrl: string, options?: {
       gateway: process.env.ATP_GATEWAY_URL || `${baseUrl}:3000`
     }
   };
+}
+
+/**
+ * Compatibility wrappers around the existing class-based API. These exist so
+ * consumers can `import { createAgent, registerAgent, verifyAgent, getTrustLevel }
+ * from 'atp-sdk'` without touching `Agent` / `ATPClient` directly.
+ */
+
+export function createAgent(name: string, options?: SimpleAgentOptions): Promise<Agent> {
+  return Agent.create(name, options);
+}
+
+export function registerAgent(
+  client: ATPClient,
+  request: DIDRegistrationRequest
+): Promise<ATPResponse<{ did: string; document: DIDDocument }>> {
+  return client.identity.registerDID(request);
+}
+
+export function verifyAgent(
+  agent: Agent,
+  response: ZKPAuthRequest,
+  challengeId?: string
+): Promise<ZKPAuthResult> {
+  return agent.verifyAuthResponse(response, challengeId);
+}
+
+export function getTrustLevel(
+  client: ATPClient,
+  did: string
+): Promise<ATPResponse<TrustLevel>> {
+  return client.identity.getTrustLevel(did);
 }
 
 // SDK Metadata
