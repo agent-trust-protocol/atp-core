@@ -4,7 +4,7 @@
  */
 
 import Redis from 'ioredis';
-import { createHash } from 'crypto';
+import { createHash, randomBytes } from 'crypto';
 
 export interface NonceConfig {
   redisUrl?: string;
@@ -36,11 +36,11 @@ export class NonceService {
   }
 
   /**
-   * Generates a unique nonce for a request
+   * Generates a unique nonce for a request using a CSPRNG (128 bits of entropy).
    */
   generateNonce(): string {
     const timestamp = Date.now();
-    const random = Math.random().toString(36).substring(2, 15);
+    const random = randomBytes(16).toString('hex');
     return `${timestamp}-${random}`;
   }
 
@@ -50,11 +50,14 @@ export class NonceService {
    */
   async validateNonce(did: string, nonce: string, timestamp: number): Promise<boolean> {
     try {
-      // Check if timestamp is within acceptable window
+      // Check if timestamp is within acceptable window. A small negative skew
+      // (~2s) is tolerated to absorb clock drift, but future-dated nonces
+      // beyond that are rejected to prevent pre-creation attacks.
       const now = Date.now();
       const age = now - timestamp;
+      const clockSkewToleranceMs = 2000;
 
-      if (age > this.windowSizeMs || age < -this.windowSizeMs) {
+      if (age < -clockSkewToleranceMs || age > this.windowSizeMs) {
         console.warn(`Nonce timestamp outside window: ${age}ms`);
         return false;
       }

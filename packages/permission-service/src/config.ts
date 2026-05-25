@@ -5,7 +5,8 @@ const envSchema = z
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
     PORT: z.coerce.number().int().positive().default(3003),
     DATABASE_URL: z.string().min(1, 'DATABASE_URL must not be empty'),
-    JWT_SECRET: z.string().optional(),
+    JWT_SECRET: z.string().min(1, 'JWT_SECRET must not be empty'),
+    ALLOWED_ORIGINS: z.string().optional(),
     REDIS_HOST: z.string().default('localhost'),
     REDIS_PORT: z.coerce.number().int().positive().default(6379),
     REDIS_PASSWORD: z.string().optional(),
@@ -13,18 +14,18 @@ const envSchema = z
     CACHE_TTL: z.coerce.number().int().positive().default(300),
   })
   .superRefine((data, ctx) => {
-    if (data.NODE_ENV === 'production' && !data.JWT_SECRET) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['JWT_SECRET'],
-        message: 'JWT_SECRET is required in production (set a strong random string ≥32 chars)',
-      });
-    }
-    if (data.NODE_ENV === 'production' && data.JWT_SECRET && data.JWT_SECRET.length < 32) {
+    if (data.NODE_ENV === 'production' && data.JWT_SECRET.length < 32) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['JWT_SECRET'],
         message: 'JWT_SECRET must be at least 32 characters in production',
+      });
+    }
+    if (data.NODE_ENV === 'production' && !data.ALLOWED_ORIGINS) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['ALLOWED_ORIGINS'],
+        message: 'ALLOWED_ORIGINS (comma-separated) is required in production',
       });
     }
   });

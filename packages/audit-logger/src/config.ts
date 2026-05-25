@@ -7,6 +7,8 @@ const envSchema = z
     DATABASE_URL: z.string().min(1, 'DATABASE_URL must not be empty'),
     IPFS_URL: z.string().optional(),
     AUDIT_ENCRYPTION_KEY: z.string().optional(),
+    JWT_SECRET: z.string().min(1, 'JWT_SECRET must not be empty (required to authenticate writers/readers)'),
+    ALLOWED_ORIGINS: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.NODE_ENV === 'production' && !data.AUDIT_ENCRYPTION_KEY) {
@@ -21,6 +23,20 @@ const envSchema = z
         code: z.ZodIssueCode.custom,
         path: ['AUDIT_ENCRYPTION_KEY'],
         message: 'AUDIT_ENCRYPTION_KEY must be at least 32 characters in production',
+      });
+    }
+    if (data.NODE_ENV === 'production' && data.JWT_SECRET.length < 32) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['JWT_SECRET'],
+        message: 'JWT_SECRET must be at least 32 characters in production',
+      });
+    }
+    if (data.NODE_ENV === 'production' && !data.ALLOWED_ORIGINS) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['ALLOWED_ORIGINS'],
+        message: 'ALLOWED_ORIGINS (comma-separated) is required in production',
       });
     }
   });

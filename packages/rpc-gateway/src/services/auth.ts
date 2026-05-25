@@ -71,11 +71,15 @@ export class AuthService {
         return false;
       }
 
-      // Verify timestamp (reduced to 1 minute for better security)
+      // Verify timestamp window: tight ±10s window to bound the replay
+      // attempt surface even when nonce persistence is briefly unavailable.
+      // Future-dated timestamps beyond clock-skew tolerance are also rejected.
       const now = Date.now();
-      const timestampDiff = Math.abs(now - authData.timestamp);
-      if (timestampDiff > 60 * 1000) { // Reduced from 5 minutes to 1 minute
-        console.warn('Authentication timestamp too old');
+      const age = now - authData.timestamp;
+      const maxAgeMs = 10 * 1000;
+      const clockSkewToleranceMs = 2 * 1000;
+      if (age < -clockSkewToleranceMs || age > maxAgeMs) {
+        console.warn(`Authentication timestamp outside window: ${age}ms`);
         return false;
       }
 

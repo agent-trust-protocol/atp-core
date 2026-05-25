@@ -29,7 +29,7 @@
     "@atp/shared": "^0.1.0",
     "ws": "^8.13.0",
     "zod": "^3.21.0",
-    "axios": "^1.6.0",
+    "axios": "^1.7.4",
     "jsonrpc-lite": "^2.2.0"
   },
   "devDependencies": {

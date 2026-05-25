@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events';
+import { evaluateSafeExpression } from '@/lib/safe-expression';
 import {
   Workflow,
   WorkflowNode,
@@ -240,15 +241,20 @@ export class WorkflowEngine extends EventEmitter {
   private evaluateCondition(condition: any, data: any): boolean {
     if (!condition) return true;
 
+    // In-process registered conditions are trusted (set by code, not by API
+    // input). Conditions supplied by untrusted callers must use the
+    // `{ expression: string }` shape, which is evaluated in a sandbox.
     if (typeof condition === 'function') {
       return condition(data);
     }
 
-    if (typeof condition === 'object' && condition.expression) {
+    if (typeof condition === 'object' && typeof condition.expression === 'string') {
       try {
-        // eslint-disable-next-line no-new-func
-        return new Function('data', `return ${condition.expression}`)(data);
-      } catch {
+        return Boolean(evaluateSafeExpression(condition.expression, data));
+      } catch (err) {
+        // Fail-closed: a malformed or rejected expression must not silently
+        // succeed. Log so operators can spot attempted injections.
+        console.warn('[workflow] rejected unsafe condition expression', (err as Error).message);
         return false;
       }
     }

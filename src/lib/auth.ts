@@ -3,23 +3,23 @@ import { nextCookies } from 'better-auth/next-js';
 import { magicLink } from 'better-auth/plugins';
 import { Pool } from 'pg';
 
-// BETTER_AUTH_SECRET is required at runtime in production.
-// During `next build` the env is not available, so a placeholder is used for
-// the build phase only — it is never used to sign real sessions.
+// BETTER_AUTH_SECRET is required at runtime. During `next build` the env is
+// often not available, so a one-shot random placeholder is generated for the
+// build phase only — it is never used to sign real sessions because the
+// process exits before any request is served.
 const isNextBuild = process.env.NEXT_PHASE === 'phase-production-build';
 const secret = process.env.BETTER_AUTH_SECRET;
 
 if (!secret && !isNextBuild) {
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error(
-      '[auth] BETTER_AUTH_SECRET environment variable is not set. ' +
-      'Generate one with: openssl rand -base64 32'
-    );
-  }
-  console.warn('[auth] BETTER_AUTH_SECRET not set — using insecure dev fallback. Never use this in production.');
+  throw new Error(
+    '[auth] BETTER_AUTH_SECRET environment variable is not set. ' +
+    'Generate one with: openssl rand -base64 32'
+  );
 }
 
-const authSecret = secret ?? 'dev-only-secret-not-for-production';
+// Build-phase placeholder: cryptographically random per build so it cannot
+// accidentally collide across environments or be guessed from source.
+const authSecret = secret ?? require('crypto').randomBytes(32).toString('base64');
 
 // Must match NEXT_PUBLIC_BASE_URL used by the auth client (src/lib/auth-client.ts)
 const baseURL = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';

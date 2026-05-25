@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { PermissionService } from '../services/permission.js';
-import { PermissionRequest, PermissionCheck, PolicyRule } from '../models/permission.js';
+import { PermissionRequest, PermissionCheck, PolicyRule, PolicyRuleSchema } from '../models/permission.js';
 
 export class PermissionController {
   constructor(private permissionService: PermissionService) {}
@@ -94,9 +94,18 @@ export class PermissionController {
 
   async addPolicyRule(req: Request, res: Response): Promise<void> {
     try {
-      const rule: PolicyRule = req.body;
+      const parsed = PolicyRuleSchema.safeParse(req.body);
+      if (!parsed.success) {
+        res.status(400).json({
+          success: false,
+          error: 'invalid_policy_rule',
+          issues: parsed.error.issues.map(i => ({ path: i.path, message: i.message })),
+        });
+        return;
+      }
+      const rule: PolicyRule = parsed.data;
       await this.permissionService.addPolicyRule(rule);
-      
+
       res.status(201).json({
         success: true,
         message: 'Policy rule added successfully',

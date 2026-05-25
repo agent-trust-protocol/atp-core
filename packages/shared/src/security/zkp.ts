@@ -1,6 +1,32 @@
-import { randomBytes, createHash } from 'crypto';
+import { randomBytes, createHash, timingSafeEqual } from 'crypto';
 import { sha256 } from '@noble/hashes/sha2.js';
 import { ed25519 } from '@noble/curves/ed25519';
+
+/** Constant-time equality for two hex strings of equal length. */
+function timingSafeHexEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(Buffer.from(a, 'hex'), Buffer.from(b, 'hex'));
+}
+
+/** Domain-separated Merkle leaf/node hashes (defends against second-preimage attacks). */
+const MERKLE_LEAF_TAG = Uint8Array.of(0x00);
+const MERKLE_NODE_TAG = Uint8Array.of(0x01);
+const MERKLE_EMPTY_PLACEHOLDER = sha256(Buffer.from('ATP-merkle-empty', 'utf8'));
+
+function hashLeaf(payload: Uint8Array): Uint8Array {
+  const buf = new Uint8Array(MERKLE_LEAF_TAG.length + payload.length);
+  buf.set(MERKLE_LEAF_TAG);
+  buf.set(payload, MERKLE_LEAF_TAG.length);
+  return sha256(buf);
+}
+
+function hashNode(left: Uint8Array, right: Uint8Array): Uint8Array {
+  const buf = new Uint8Array(MERKLE_NODE_TAG.length + left.length + right.length);
+  buf.set(MERKLE_NODE_TAG);
+  buf.set(left, MERKLE_NODE_TAG.length);
+  buf.set(right, MERKLE_NODE_TAG.length + left.length);
+  return sha256(buf);
+}
 
 export interface ZKProof {
   proof: string;
@@ -39,14 +65,22 @@ export interface MembershipProof {
 export class ATPZKProofService {
 
   /**
-   * Generate a commitment to a secret value using Pedersen commitments
+   * Generate a commitment to a secret value.
+   *
+   * NOTE: This is a hash-based commitment with domain separation — binding
+   * via SHA-256 collision resistance, hiding under the random 256-bit
+   * blinding factor. It is NOT homomorphic; if homomorphic operations are
+   * needed (range/aggregation proofs), migrate callers to a real Pedersen
+   * commitment on Ed25519 (`C = value·G + blinding·H`) using `@noble/curves`.
+   * Tracked in docs/security/audit-2026-05.md (H2).
    */
   generateCommitment(value: bigint, blinding: bigint): string {
-    // Simplified Pedersen commitment: C = g^value * h^blinding
-    // In practice, this would use proper elliptic curve operations
     const hasher = createHash('sha256');
-    hasher.update(value.toString());
-    hasher.update(blinding.toString());
+    hasher.update('ATP-commit-v1');
+    hasher.update(Buffer.from([0x00]));
+    hasher.update(value.toString(16).padStart(64, '0'));
+    hasher.update(Buffer.from([0x01]));
+    hasher.update(blinding.toString(16).padStart(64, '0'));
     return hasher.digest('hex');
   }
 
@@ -89,8 +123,9 @@ export class ATPZKProofService {
         return false;
       }
 
-      // Verify response: g^s = R * pk^c
-      // Simplified verification - in practice would use proper curve operations
+      // Compare full 256-bit digests in constant time. The previous
+      // implementation truncated to 32 bits, which a birthday attacker could
+      // forge in ~2^16 attempts.
       const responseHash = createHash('sha256')
         .update(proof.response)
         .digest('hex');
@@ -101,7 +136,7 @@ export class ATPZKProofService {
         .update(proof.challenge)
         .digest('hex');
 
-      return responseHash.slice(0, 8) === expectedHash.slice(0, 8);
+      return timingSafeHexEqual(responseHash, expectedHash);
     } catch {
       return false;
     }
@@ -367,7 +402,10 @@ export class ATPZKProofService {
   private buildMerkleTree(leaves: Uint8Array[]): Uint8Array[][] {
     if (leaves.length === 0) return [];
 
-    const tree: Uint8Array[][] = [leaves];
+    // Domain-separate the leaves so an attacker cannot reinterpret an
+    // internal-node hash as a leaf hash (second-preimage hardening).
+    const hashedLeaves = leaves.map(leaf => hashLeaf(leaf));
+    const tree: Uint8Array[][] = [hashedLeaves];
 
     while (tree[tree.length - 1].length > 1) {
       const currentLevel = tree[tree.length - 1];
@@ -375,13 +413,11 @@ export class ATPZKProofService {
 
       for (let i = 0; i < currentLevel.length; i += 2) {
         const left = currentLevel[i];
-        const right = i + 1 < currentLevel.length ? currentLevel[i + 1] : left;
-
-        const combined = new Uint8Array(left.length + right.length);
-        combined.set(left);
-        combined.set(right, left.length);
-
-        nextLevel.push(sha256(combined));
+        // For odd-length levels, pair the orphan with a fixed empty-node
+        // placeholder rather than duplicating it — duplication allows a
+        // prover to swap subtrees without detection.
+        const right = i + 1 < currentLevel.length ? currentLevel[i + 1] : MERKLE_EMPTY_PLACEHOLDER;
+        nextLevel.push(hashNode(left, right));
       }
 
       tree.push(nextLevel);
@@ -414,30 +450,26 @@ export class ATPZKProofService {
     proof: string[],
     expectedRoot?: string
   ): boolean {
-    let currentHash = leafHash;
+    // The leaf must already be domain-separated to match the tree built by
+    // `buildMerkleTree` (which hashes leaves with the 0x00 tag before
+    // combining them with 0x01-tagged node hashes).
+    let currentHash = hashLeaf(leafHash);
     let currentIndex = leafIndex;
 
     for (const proofElement of proof) {
       const siblingHash = new Uint8Array(Buffer.from(proofElement));
       const isRightNode = currentIndex % 2 === 1;
-
-      if (isRightNode) {
-        const combined = new Uint8Array(siblingHash.length + currentHash.length);
-        combined.set(siblingHash);
-        combined.set(currentHash, siblingHash.length);
-        currentHash = sha256(combined);
-      } else {
-        const combined = new Uint8Array(currentHash.length + siblingHash.length);
-        combined.set(currentHash);
-        combined.set(siblingHash, currentHash.length);
-        currentHash = sha256(combined);
-      }
-
+      currentHash = isRightNode
+        ? hashNode(siblingHash, currentHash)
+        : hashNode(currentHash, siblingHash);
       currentIndex = Math.floor(currentIndex / 2);
     }
 
     if (expectedRoot) {
-      return currentHash.toString() === expectedRoot;
+      return timingSafeHexEqual(
+        Buffer.from(currentHash).toString('hex'),
+        expectedRoot.startsWith('0x') ? expectedRoot.slice(2) : expectedRoot
+      );
     }
 
     return true;

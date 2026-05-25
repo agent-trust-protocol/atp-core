@@ -56,8 +56,11 @@ export class ATPServiceConnector {
 
     // Make request
     const url = `${this.config.url}${path}`;
-    
-    // Log request
+
+    // Log request with redacted URL: drop the query string and never log
+    // credentials. The full URL frequently contains API keys, OAuth bearer
+    // tokens, or session identifiers — auditing those plaintext into a
+    // long-lived store leaks them well beyond their intended lifetime.
     await this.atpClient.audit.log({
       eventType: 'external-service-request',
       agentDid,
@@ -65,8 +68,8 @@ export class ATPServiceConnector {
       metadata: {
         service: this.config.name,
         method,
-        path,
-        url
+        path: redactPath(path),
+        url: redactUrl(url)
       }
     });
 
@@ -112,4 +115,29 @@ export class ATPServiceConnector {
       }
     }
   }
+}
+
+/**
+ * Strip query strings, fragments, and credentials from a URL so it is
+ * safe to write to an audit log. Returns `${origin}${pathname}` when the
+ * input parses as a URL, or a generic placeholder otherwise.
+ */
+export function redactUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    u.username = '';
+    u.password = '';
+    return `${u.origin}${u.pathname}`;
+  } catch {
+    return '[unparseable-url]';
+  }
+}
+
+/**
+ * Strip query strings from a path. Path-only audit fields should never
+ * carry query parameters.
+ */
+export function redactPath(path: string): string {
+  const q = path.indexOf('?');
+  return q === -1 ? path : path.slice(0, q);
 }
