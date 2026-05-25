@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+# Runs the same gate CI runs (lint + type-check) so a failing push is
+# stopped on the developer's machine instead of round-tripping through CI.
+# To bypass intentionally (rare — e.g. pushing a work-in-progress branch),
+# use `git push --no-verify`.
+
+set -e
+
+echo "[pre-push] npm run lint"
+npm run lint
+
+echo "[pre-push] npm run type-check"
+npm run type-check
+
+echo "[pre-push] OK"
