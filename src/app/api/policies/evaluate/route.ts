@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
+import { checkApiAuth } from '@/lib/api-auth';
 
 // Type definitions (standalone version)
 interface ATPVisualPolicy {
@@ -179,6 +180,13 @@ interface PolicyEvaluationResponse {
 
 export async function POST(request: NextRequest) {
   try {
+    // The policy evaluation engine is proprietary IP and rate-limited.
+    // Require an authenticated session before exposing it.
+    const authResult = await checkApiAuth(request);
+    if (!authResult.isAuthenticated) {
+      return authResult.error!;
+    }
+
     const body: PolicyEvaluationRequest = await request.json();
 
     // Validate request structure

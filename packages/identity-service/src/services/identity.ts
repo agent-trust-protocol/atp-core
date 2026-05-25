@@ -136,10 +136,29 @@ export class IdentityService {
   }
 
   private async resolveExternalDID(did: string): Promise<DIDDocument | null> {
-    const resolverUrl = process.env.DID_UNIVERSAL_RESOLVER_URL ?? 'https://dev.uniresolver.io';
+    const resolverUrl = process.env.DID_UNIVERSAL_RESOLVER_URL;
+    if (!resolverUrl) {
+      console.warn('[IdentityService] DID_UNIVERSAL_RESOLVER_URL not configured; refusing to resolve external DIDs');
+      return null;
+    }
+
+    let parsed: URL;
+    try {
+      parsed = new URL(resolverUrl);
+    } catch {
+      console.warn('[IdentityService] DID_UNIVERSAL_RESOLVER_URL is not a valid URL');
+      return null;
+    }
+    // Require HTTPS for any non-localhost resolver to prevent MITM-injected
+    // DID documents from being cached and trusted.
+    if (parsed.protocol !== 'https:' && parsed.hostname !== 'localhost' && parsed.hostname !== '127.0.0.1') {
+      console.warn('[IdentityService] external DID resolver must use HTTPS');
+      return null;
+    }
+
     try {
       const response = await fetch(
-        `${resolverUrl}/1.0/identifiers/${encodeURIComponent(did)}`,
+        `${resolverUrl.replace(/\/+$/, '')}/1.0/identifiers/${encodeURIComponent(did)}`,
         {
           headers: { Accept: 'application/json' },
           signal: AbortSignal.timeout(5000),
@@ -148,11 +167,26 @@ export class IdentityService {
       if (!response.ok) return null;
 
       const body = await response.json() as { didDocument?: DIDDocument };
-      if (!body.didDocument) return null;
+      const doc = body.didDocument;
+      if (!doc) return null;
 
-      // Cache the resolved document locally so subsequent lookups are fast
-      await this.storage.storeDIDDocument(body.didDocument);
-      return body.didDocument;
+      // Trust boundary: the resolver is external and may be malicious. At a
+      // minimum, require the returned document to identify itself as the
+      // DID we asked about. Until the resolver response is itself
+      // cryptographically verified (e.g. DNSSEC or blockchain anchor), tag
+      // the cached document as unverified so callers can decide whether to
+      // trust it for signature verification.
+      if (doc.id !== did) {
+        console.warn(`[IdentityService] resolver returned mismatched DID: expected ${did}, got ${doc.id}`);
+        return null;
+      }
+
+      const taggedDoc: DIDDocument & { _verification?: string } = {
+        ...doc,
+        _verification: 'unverified-external',
+      };
+      await this.storage.storeDIDDocument(taggedDoc);
+      return taggedDoc;
     } catch (error) {
       console.warn(`[IdentityService] External DID resolution failed for ${did}:`, (error as Error).message);
       return null;

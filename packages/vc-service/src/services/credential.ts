@@ -195,7 +195,55 @@ export class CredentialService {
     return JSON.stringify(credential, Object.keys(credential).sort());
   }
 
+  /**
+   * Look up the issuer's public key via the Identity Service. Returns null
+   * if the service is unreachable, the DID cannot be resolved, or no
+   * verification method is available — in which case `verifySignature`
+   * must fail closed (it already does at the call site).
+   */
   private async getPublicKeyForDID(did: string): Promise<string | null> {
-    return ''; // This would integrate with the Identity Service
+    const identityUrl = process.env.ATP_IDENTITY_URL;
+    const serviceToken = process.env.ATP_SERVICE_TOKEN;
+    if (!identityUrl || !serviceToken) {
+      console.warn('[vc-service] ATP_IDENTITY_URL/ATP_SERVICE_TOKEN not configured; refusing to verify credential signatures');
+      return null;
+    }
+
+    try {
+      const response = await fetch(
+        `${identityUrl}/identity/resolve/${encodeURIComponent(did)}`,
+        {
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${serviceToken}`,
+          },
+          signal: AbortSignal.timeout(5000),
+        }
+      );
+      if (!response.ok) return null;
+
+      const body = await response.json() as {
+        didDocument?: {
+          id?: string;
+          verificationMethod?: Array<{
+            id?: string;
+            publicKeyMultibase?: string;
+            publicKeyHex?: string;
+          }>;
+        };
+      };
+
+      // Defense in depth: reject responses whose DID does not match the
+      // one we asked about (prevents a malicious resolver from substituting
+      // its own keys).
+      if (!body.didDocument || body.didDocument.id !== did) return null;
+
+      const method = body.didDocument.verificationMethod?.[0];
+      if (!method) return null;
+      return method.publicKeyHex ?? method.publicKeyMultibase ?? null;
+    } catch (err) {
+      console.warn(`[vc-service] public key lookup failed for ${did}:`, (err as Error).message);
+      return null;
+    }
   }
 }

@@ -7,10 +7,18 @@ function isValidAdminToken(token: string | null): boolean {
   if (!token) return false;
   const adminSecret = process.env.ADMIN_API_SECRET;
   if (!adminSecret) {
-    console.error('ADMIN_API_SECRET not configured');
+    // Do not log the variable name in production to avoid telling an attacker
+    // which config knob to target. The startup check in src/lib/auth.ts and
+    // the runtime guard below already cover the misconfiguration path.
     return false;
   }
-  return token.replace('Bearer ', '') === adminSecret;
+  const provided = token.startsWith('Bearer ') ? token.slice(7) : token;
+  // Hash both sides so we can use constant-time comparison on equal-length
+  // buffers regardless of input length. This avoids leaking the secret's
+  // length through timing-side-channel observation.
+  const providedHash = crypto.createHash('sha256').update(provided).digest();
+  const expectedHash = crypto.createHash('sha256').update(adminSecret).digest();
+  return crypto.timingSafeEqual(providedHash, expectedHash);
 }
 
 export async function POST(request: NextRequest) {

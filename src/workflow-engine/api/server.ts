@@ -1,9 +1,29 @@
 import express from 'express';
 import cors from 'cors';
+import { timingSafeEqual } from 'crypto';
 import { dbConnection } from '../database/connection';
 import workflowRoutes from './routes';
 import { WorkflowScheduler } from '../services/WorkflowScheduler';
 import { WorkflowEventService } from '../services/WorkflowEventService';
+
+function parseAllowedOrigins(raw: string | undefined): string[] {
+  if (!raw) return [];
+  return raw.split(',').map(s => s.trim()).filter(Boolean);
+}
+
+function constantTimeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  // timingSafeEqual requires equal-length buffers; pad shorter to longer with
+  // zeros and OR the length-mismatch into the result so we still take
+  // constant time but always return false on length mismatch.
+  const len = Math.max(ab.length, bb.length);
+  const apad = Buffer.alloc(len);
+  const bpad = Buffer.alloc(len);
+  ab.copy(apad);
+  bb.copy(bpad);
+  return timingSafeEqual(apad, bpad) && ab.length === bb.length;
+}
 
 export class WorkflowApiServer {
   private app: express.Application;
@@ -21,12 +41,18 @@ export class WorkflowApiServer {
   }
 
   private setupMiddleware() {
-    // CORS configuration
+    // CORS configuration: refuse to start with the wildcard '*' in production,
+    // and never combine wildcards with credentialed requests.
+    const allowedOrigins = parseAllowedOrigins(process.env.CORS_ORIGIN);
+    const allowCredentials = process.env.CORS_ALLOW_CREDENTIALS === 'true';
+    if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) {
+      throw new Error('[workflow-api] CORS_ORIGIN must be set to an explicit allowlist in production');
+    }
     this.app.use(cors({
-      origin: process.env.CORS_ORIGIN || '*',
+      origin: allowedOrigins.length > 0 ? allowedOrigins : false,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
-      credentials: true
+      credentials: allowCredentials && allowedOrigins.length > 0,
     }));
 
     // Body parsing
@@ -54,16 +80,23 @@ export class WorkflowApiServer {
       next();
     });
 
-    // API key authentication (if enabled)
-    if (process.env.API_KEY_REQUIRED === 'true') {
-      this.app.use((req, res, next) => {
-        const apiKey = req.headers['x-api-key'];
-        const validApiKey = process.env.API_KEY;
-
-        if (!apiKey || apiKey !== validApiKey) {
+    // API key authentication is required by default. It can only be disabled
+    // explicitly in non-production environments by setting
+    // API_KEY_REQUIRED=false. Comparison uses timingSafeEqual to prevent
+    // timing-channel attacks on the key.
+    const apiKeyRequired = process.env.API_KEY_REQUIRED !== 'false'
+      || process.env.NODE_ENV === 'production';
+    if (apiKeyRequired) {
+      const validApiKey = process.env.API_KEY;
+      if (!validApiKey || validApiKey.length < 16) {
+        throw new Error('[workflow-api] API_KEY must be set (≥16 chars) when API_KEY_REQUIRED is not "false"');
+      }
+      this.app.use('/api', (req, res, next) => {
+        const provided = req.headers['x-api-key'];
+        const candidate = Array.isArray(provided) ? provided[0] : provided;
+        if (typeof candidate !== 'string' || !constantTimeEqual(candidate, validApiKey)) {
           return res.status(401).json({ error: 'Invalid or missing API key' });
         }
-
         next();
       });
     }

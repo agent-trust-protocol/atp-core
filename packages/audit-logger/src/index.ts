@@ -4,13 +4,17 @@ import { AuditStorageService } from './services/storage.js';
 import { IPFSService } from './services/ipfs.js';
 import { AuditService } from './services/audit.js';
 import { AuditController } from './controllers/audit.js';
-import { DatabaseConfig } from '@atp/shared';
+import { DatabaseConfig, requireServiceAuth, parseAllowedOrigins } from '@atp/shared';
 import { config } from './config.js';
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+const allowedOrigins = parseAllowedOrigins(config.ALLOWED_ORIGINS);
+app.use(cors({
+  origin: allowedOrigins.length > 0 ? allowedOrigins : false,
+  credentials: false,
+}));
+app.use(express.json({ limit: '512kb' }));
 
 // PostgreSQL configuration
 const dbConfig: DatabaseConfig = {
@@ -26,13 +30,20 @@ const ipfs = new IPFSService(config.IPFS_URL);
 const auditService = new AuditService(storage, ipfs);
 const auditController = new AuditController(auditService);
 
+// Auth gates: writers need `audit:write`, readers `audit:read`,
+// integrity verification requires `audit:admin`.
+const { JWT_SECRET: jwtSecret } = config;
+const writeAuth = requireServiceAuth({ jwtSecret, requiredScopes: ['audit:write'] });
+const readAuth = requireServiceAuth({ jwtSecret, requiredScopes: ['audit:read'] });
+const adminAuth = requireServiceAuth({ jwtSecret, requiredScopes: ['audit:admin'] });
+
 // Routes
-app.post('/audit/log', (req, res) => auditController.logEvent(req, res));
-app.get('/audit/event/:id', (req, res) => auditController.getEvent(req, res));
-app.get('/audit/events', (req, res) => auditController.queryEvents(req, res));
-app.get('/audit/integrity', (req, res) => auditController.verifyIntegrity(req, res));
-app.get('/audit/stats', (req, res) => auditController.getStats(req, res));
-app.get('/audit/ipfs/:hash', (req, res) => auditController.getEventFromIPFS(req, res));
+app.post('/audit/log', writeAuth, (req, res) => auditController.logEvent(req, res));
+app.get('/audit/event/:id', readAuth, (req, res) => auditController.getEvent(req, res));
+app.get('/audit/events', readAuth, (req, res) => auditController.queryEvents(req, res));
+app.get('/audit/integrity', adminAuth, (req, res) => auditController.verifyIntegrity(req, res));
+app.get('/audit/stats', readAuth, (req, res) => auditController.getStats(req, res));
+app.get('/audit/ipfs/:hash', readAuth, (req, res) => auditController.getEventFromIPFS(req, res));
 
 app.get('/health', async (req, res) => {
   try {

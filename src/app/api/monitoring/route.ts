@@ -143,8 +143,28 @@ async function handleWorkflowRequest(searchParams: URLSearchParams, request: Nex
   }
 }
 
+// Only these endpoint segments are allowed to be proxied to the upstream
+// monitoring service. Adding a new endpoint requires explicitly extending
+// this allowlist — never accept arbitrary user-supplied path components.
+const ALLOWED_MONITORING_ENDPOINTS = new Set([
+  'dashboard',
+  'metrics',
+  'alerts',
+  'health',
+  'status',
+]);
+
+// Forwarded query parameters are also limited so callers cannot smuggle
+// arbitrary backend filters or IDOR exploit primitives.
+const ALLOWED_MONITORING_QUERY_PARAMS = new Set(['range', 'limit', 'severity']);
+
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await checkApiAuth(request);
+    if (!authResult.isAuthenticated) {
+      return authResult.error!;
+    }
+
     const {searchParams} = request.nextUrl;
     const endpoint = searchParams.get('endpoint') ?? 'dashboard';
 
@@ -153,12 +173,19 @@ export async function GET(request: NextRequest) {
       return handleWorkflowRequest(searchParams, request);
     }
 
+    if (!ALLOWED_MONITORING_ENDPOINTS.has(endpoint)) {
+      return NextResponse.json(
+        { error: 'unknown_endpoint', message: `endpoint must be one of: ${[...ALLOWED_MONITORING_ENDPOINTS].join(', ')}` },
+        { status: 400 }
+      );
+    }
+
     let monitoringUrl = `${MONITORING_SERVICE_URL}/api/monitoring/${endpoint}`;
 
-    // Forward query parameters
+    // Forward only the whitelisted query parameters.
     const params = new URLSearchParams();
     searchParams.forEach((value, key) => {
-      if (key !== 'endpoint') {
+      if (key !== 'endpoint' && ALLOWED_MONITORING_QUERY_PARAMS.has(key)) {
         params.append(key, value);
       }
     });

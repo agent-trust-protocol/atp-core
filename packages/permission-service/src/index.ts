@@ -3,15 +3,19 @@ import cors from 'cors';
 import { StorageService } from './services/storage.js';
 import { PermissionService } from './services/permission.js';
 import { PermissionController } from './controllers/permission.js';
-import { DatabaseConfig, VisualPolicyStorageService, PolicyEvaluator, RedisCache, createCache, PerformanceOptimizer, createPerformanceOptimizer } from '@atp/shared';
+import { DatabaseConfig, VisualPolicyStorageService, PolicyEvaluator, RedisCache, createCache, PerformanceOptimizer, createPerformanceOptimizer, requireServiceAuth, parseAllowedOrigins } from '@atp/shared';
 import { PolicyController } from './controllers/policy.js';
 import { PolicyEvaluationController } from './controllers/evaluation.js';
 import { config } from './config.js';
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+const allowedOrigins = parseAllowedOrigins(config.ALLOWED_ORIGINS);
+app.use(cors({
+  origin: allowedOrigins.length > 0 ? allowedOrigins : false,
+  credentials: false,
+}));
+app.use(express.json({ limit: '256kb' }));
 
 // PostgreSQL configuration
 const dbConfig: DatabaseConfig = {
@@ -35,7 +39,7 @@ const cacheConfig = {
 const cache = createCache(cacheConfig);
 const performanceOptimizer = createPerformanceOptimizer(cache);
 
-const jwtSecret = config.JWT_SECRET || 'dev-only-secret-not-for-production';
+const { JWT_SECRET: jwtSecret } = config;
 
 const storage = new StorageService(dbConfig);
 const visualPolicyStorage = new VisualPolicyStorageService(dbConfig);
@@ -44,26 +48,32 @@ const permissionController = new PermissionController(permissionService);
 const policyController = new PolicyController(visualPolicyStorage, cache, performanceOptimizer);
 const evaluationController = new PolicyEvaluationController(visualPolicyStorage);
 
-app.post('/perm/grant', (req, res) => permissionController.grant(req, res));
-app.post('/perm/check', (req, res) => permissionController.check(req, res));
-app.post('/perm/validate', (req, res) => permissionController.validateToken(req, res));
-app.get('/perm/list/:did', (req, res) => permissionController.list(req, res));
-app.delete('/perm/revoke/:grantId', (req, res) => permissionController.revoke(req, res));
+// Auth gates. All mutating and listing routes require a valid service token.
+// Mutations additionally require the `perm:admin` scope.
+const readAuth = requireServiceAuth({ jwtSecret, requiredScopes: ['perm:read'] });
+const writeAuth = requireServiceAuth({ jwtSecret, requiredScopes: ['perm:admin'] });
+const evalAuth = requireServiceAuth({ jwtSecret, requiredScopes: ['perm:evaluate'] });
 
-app.post('/perm/policy/rules', (req, res) => permissionController.addPolicyRule(req, res));
-app.delete('/perm/policy/rules/:ruleId', (req, res) => permissionController.removePolicyRule(req, res));
-app.get('/perm/policy/rules', (req, res) => permissionController.listPolicyRules(req, res));
+app.post('/perm/grant', writeAuth, (req, res) => permissionController.grant(req, res));
+app.post('/perm/check', readAuth, (req, res) => permissionController.check(req, res));
+app.post('/perm/validate', readAuth, (req, res) => permissionController.validateToken(req, res));
+app.get('/perm/list/:did', readAuth, (req, res) => permissionController.list(req, res));
+app.delete('/perm/revoke/:grantId', writeAuth, (req, res) => permissionController.revoke(req, res));
+
+app.post('/perm/policy/rules', writeAuth, (req, res) => permissionController.addPolicyRule(req, res));
+app.delete('/perm/policy/rules/:ruleId', writeAuth, (req, res) => permissionController.removePolicyRule(req, res));
+app.get('/perm/policy/rules', readAuth, (req, res) => permissionController.listPolicyRules(req, res));
 
 // Visual Policy CRUD
-app.post('/policies', (req, res) => policyController.create(req, res));
-app.get('/policies', (req, res) => policyController.list(req, res));
-app.get('/policies/:id', (req, res) => policyController.get(req, res));
-app.put('/policies/:id', (req, res) => policyController.update(req, res));
-app.delete('/policies/:id', (req, res) => policyController.remove(req, res));
+app.post('/policies', writeAuth, (req, res) => policyController.create(req, res));
+app.get('/policies', readAuth, (req, res) => policyController.list(req, res));
+app.get('/policies/:id', readAuth, (req, res) => policyController.get(req, res));
+app.put('/policies/:id', writeAuth, (req, res) => policyController.update(req, res));
+app.delete('/policies/:id', writeAuth, (req, res) => policyController.remove(req, res));
 
 // Policy Evaluation endpoints
-app.post('/policies/evaluate', (req, res) => evaluationController.evaluate(req, res));
-app.post('/policies/simulate', (req, res) => evaluationController.simulate(req, res));
+app.post('/policies/evaluate', evalAuth, (req, res) => evaluationController.evaluate(req, res));
+app.post('/policies/simulate', evalAuth, (req, res) => evaluationController.simulate(req, res));
 
 app.get('/health', async (req, res) => {
   try {

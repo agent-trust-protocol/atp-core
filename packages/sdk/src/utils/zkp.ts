@@ -6,7 +6,12 @@
  * WITHOUT revealing sensitive data.
  */
 
-import { createHash, randomBytes } from 'crypto';
+import { createHash, randomBytes, timingSafeEqual } from 'crypto';
+
+function timingSafeHexEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(Buffer.from(a, 'hex'), Buffer.from(b, 'hex'));
+}
 import { sha256 } from '@noble/hashes/sha2.js';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils.js';
 import * as ed25519 from '@noble/ed25519';
@@ -560,7 +565,10 @@ export function verifyBehaviorProof(
     `behavior:${request.type}:${proof.merkleRoot}:${proof.interactionCount}`
   );
 
-  if (!proof.challenge.startsWith(expectedChallenge.slice(0, 32))) {
+  // Compare the full challenge in constant time. The previous prefix match
+  // (first 32 hex chars = 128 bits) was forgeable in O(2^64) — well below
+  // the 256-bit security claimed by the surrounding ZKP protocol.
+  if (!timingSafeHexEqual(proof.challenge, expectedChallenge)) {
     return false;
   }
 
