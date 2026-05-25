@@ -16,6 +16,21 @@ if (!globalThis.crypto.getRandomValues) {
   globalThis.crypto.getRandomValues = webcrypto.getRandomValues.bind(webcrypto);
 }
 
+// @noble/ed25519 needs etc.sha512Sync configured before any sync code path
+// (e.g. getExtendedPublicKey used by `sign`). Several packages depend on this
+// indirectly via different module resolutions; configure it on whichever
+// instance ends up loaded in the test process so we don't depend on import
+// ordering across packages.
+try {
+  const ed25519 = require('@noble/ed25519');
+  const { sha512 } = require('@noble/hashes/sha2.js');
+  if (ed25519.etc && !ed25519.etc.sha512Sync) {
+    ed25519.etc.sha512Sync = (...m) => sha512(ed25519.etc.concatBytes(...m));
+  }
+} catch (err) {
+  // @noble/ed25519 may not be installed in this workspace; that's fine.
+}
+
 // Global test timeout is configured in jest.config.cjs (testTimeout: 10000)
 
 // Store original console methods
