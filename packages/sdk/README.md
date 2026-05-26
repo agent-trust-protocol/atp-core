@@ -1103,8 +1103,9 @@ This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENS
 - [x] **v1.2.1** - Security Profiles & Onboarding (profile-based action gating, CLI/web onboarding wizard)
 - [x] **v1.2.2** - Standalone Mode & Embedded Dashboard (offline-first agents, `npx create-atp-agent <project>` with browser-based local onboarding UI)
 - [x] **v1.2.4** - Documentation: npm README aligned with `create-atp-agent` (ESM, flags, mock onboard UI vs [agenttrustprotocol.com](https://agenttrustprotocol.com) web wizard)
-- [ ] **v1.3.0** - WebAssembly support for browser environments
-- [ ] **v1.4.0** - GraphQL API support
+- [x] **v1.3.0** - Dashboard UX Upgrade: 3-path onboarding (new project / existing project / dashboard-only), preflight checks, live CLI preview, and inline error remediation
+- [ ] **v1.4.0** - WebAssembly support for browser environments
+- [ ] **v1.5.0** - GraphQL API support
 - [ ] **v2.0.0** - ATP Protocol v2 compatibility
 
 ##  Payment Protocol Partners

@@ -2,13 +2,21 @@
 
 Scaffold a new [Agent Trust Protocol](https://agenttrustprotocol.com) agent with an **ESM-first** template (`"type": "module"`), including a top-level `await` quickstart that runs on Node 18+.
 
-The CLI is designed as a single zero-friction flow:
+The CLI supports three onboarding paths. Choose the one that fits your situation:
+
+| Path | Command | When to use |
+|---|---|---|
+| **New project** | `npx create-atp-agent my-agent` | Starting fresh — scaffold + install + guided setup |
+| **Existing project** | `npx create-atp-agent --dashboard-only` | Already have a project; add ATP via `npm install atp-sdk` |
+| **Dashboard only** | `npx atp-onboard-agent` | Browse profiles and generate config without touching code |
+
+**New project flow:**
 
 1. `npx create-atp-agent my-agent` — scaffold + install
 2. The onboarding dashboard launches automatically at `http://127.0.0.1:3456`
-3. Pick a runtime, name your agent, and select a security profile in the browser
-4. The dashboard writes the chosen profile into the project's `.atp.json`
-5. `cd my-agent && npm start`
+3. The dashboard runs preflight checks (Node version, npm, port availability)
+4. Pick a runtime, protection level, and JS/TS format; preview the equivalent CLI command
+5. Confirm — the dashboard writes `.atp.json` and prints `cd my-agent && npm start`
 
 Use `--no-dashboard` to skip the browser launch, or `--dashboard-only` to run the UI without scaffolding a project.
 
