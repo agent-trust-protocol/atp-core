@@ -1,4 +1,4 @@
-# 🛡️ Agent Trust Protocol™ - Interactive Demo Environment
+#  Agent Trust Protocol™ - Interactive Demo Environment
 
 ## Overview
 
@@ -6,37 +6,37 @@ This interactive demo environment showcases the key features and capabilities of
 
 ## Demo Features
 
-### 🔐 Quantum-Safe Signatures
+###  Quantum-Safe Signatures
 - **Live signature generation** using hybrid Ed25519 + Dilithium cryptography
 - **Real-time verification** of quantum-safe signatures
 - **Interactive message signing** with immediate results
 - **Security visualization** showing post-quantum protection
 
-### 🛡️ Trust Level System
+###  Trust Level System
 - **Agent registration** with different trust levels (Basic, Verified, Enterprise)
 - **Dynamic trust evaluation** based on agent characteristics
 - **Real-time trust scoring** with behavioral analysis
 - **Trust level visualization** with security implications
 
-### 📊 Real-time Monitoring
+###  Real-time Monitoring
 - **Live system metrics** including connections, performance, and uptime
 - **Performance dashboards** with real-time updates
 - **System health indicators** showing operational status
 - **Metric refresh capabilities** for live demonstrations
 
-### 🔌 API Integration
+###  API Integration
 - **Interactive API testing** with multiple endpoints
 - **Live API responses** showing real ATP functionality
 - **Request/response visualization** for technical audiences
 - **Multiple endpoint examples** (health, agents, trust, signatures)
 
-### 🏢 Enterprise Features
+###  Enterprise Features
 - **Compliance dashboard** showing SOC 2, ISO 27001, NIST status
 - **Security feature checklist** highlighting enterprise capabilities
 - **Compliance report generation** with downloadable reports
 - **Enterprise-grade security visualization**
 
-### ⚡ Performance Benchmarks
+###  Performance Benchmarks
 - **Live performance testing** with configurable load levels
 - **Signature generation benchmarks** showing throughput
 - **Real-time performance metrics** with timing analysis
@@ -265,7 +265,7 @@ We welcome feedback on the demo experience:
 
 ---
 
-## 🛡️ Agent Trust Protocol™ Demo Environment
+##  Agent Trust Protocol™ Demo Environment
 
 **Showcasing the Future of Quantum-Safe AI Agent Security**
 

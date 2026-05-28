@@ -21,33 +21,23 @@ import {
   Mail,
   Terminal,
   Server,
-  Users,
   Settings,
-  ChevronRight,
-  ChevronDown,
   Variable,
   History,
-  Save,
-  FolderOpen,
-  Copy,
   Trash2,
-  Eye,
-  EyeOff,
   Lock,
-  Unlock,
   AlertTriangle,
   CheckCircle,
   XCircle,
   Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import {
   Accordion,
   AccordionContent,
@@ -66,14 +56,15 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from '@/components/ui/table';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { NodeCategory } from '@/workflow-engine/types/WorkflowTypes';
+
+type WorkflowVariableType = 'string' | 'number' | 'boolean' | 'object' | 'array';
 
 interface NodeTemplate {
   id: string
@@ -82,13 +73,13 @@ interface NodeTemplate {
   label: string
   description: string
   icon: React.ReactNode
-  config?: Record<string, any>
+  config?: Record<string, unknown>
 }
 
 interface WorkflowVariable {
   name: string
-  type: 'string' | 'number' | 'boolean' | 'object' | 'array'
-  value: any
+  type: WorkflowVariableType
+  value: string | number | boolean | object | unknown[]
   description?: string
   isSecret?: boolean
 }
@@ -387,7 +378,7 @@ export function WorkflowDesignerLayout({ children }: { children?: React.ReactNod
     { name: 'maxRetries', type: 'number', value: 3 },
     { name: 'environment', type: 'string', value: 'production' }
   ]);
-  const [executionHistory, setExecutionHistory] = useState<ExecutionHistoryItem[]>([
+  const [executionHistory] = useState<ExecutionHistoryItem[]>([
     {
       id: '1',
       workflowName: 'Trust Evaluation',
@@ -437,8 +428,8 @@ export function WorkflowDesignerLayout({ children }: { children?: React.ReactNod
     if (newVariable.name && newVariable.type) {
       setVariables([...variables, {
         name: newVariable.name,
-        type: newVariable.type as any,
-        value: newVariable.value || '',
+        type: newVariable.type,
+        value: newVariable.value ?? '',
         description: newVariable.description,
         isSecret: newVariable.isSecret
       }]);
@@ -478,7 +469,7 @@ export function WorkflowDesignerLayout({ children }: { children?: React.ReactNod
             </div>
             <Select
               value={selectedCategory}
-              onValueChange={(value) => setSelectedCategory(value as any)}
+              onValueChange={(value) => setSelectedCategory(value as NodeCategory | 'all')}
             >
               <SelectTrigger>
                 <SelectValue placeholder="All Categories" />
@@ -587,7 +578,7 @@ export function WorkflowDesignerLayout({ children }: { children?: React.ReactNod
                       <div>
                         <Label>Name</Label>
                         <Input
-                          value={newVariable.name || ''}
+                          value={newVariable.name ?? ''}
                           onChange={(e) => setNewVariable({...newVariable, name: e.target.value})}
                           placeholder="variableName"
                         />
@@ -596,7 +587,7 @@ export function WorkflowDesignerLayout({ children }: { children?: React.ReactNod
                         <Label>Type</Label>
                         <Select
                           value={newVariable.type}
-                          onValueChange={(value) => setNewVariable({...newVariable, type: value as any})}
+                          onValueChange={(value) => setNewVariable({...newVariable, type: value as WorkflowVariableType})}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select type" />
@@ -613,7 +604,7 @@ export function WorkflowDesignerLayout({ children }: { children?: React.ReactNod
                       <div>
                         <Label>Value</Label>
                         <Input
-                          value={newVariable.value || ''}
+                          value={String(newVariable.value ?? '')}
                           onChange={(e) => setNewVariable({...newVariable, value: e.target.value})}
                           placeholder="Default value"
                         />
@@ -621,14 +612,14 @@ export function WorkflowDesignerLayout({ children }: { children?: React.ReactNod
                       <div>
                         <Label>Description</Label>
                         <Textarea
-                          value={newVariable.description || ''}
+                          value={newVariable.description ?? ''}
                           onChange={(e) => setNewVariable({...newVariable, description: e.target.value})}
                           placeholder="Variable description"
                         />
                       </div>
                       <div className="flex items-center gap-2">
                         <Switch
-                          checked={newVariable.isSecret || false}
+                          checked={newVariable.isSecret ?? false}
                           onCheckedChange={(checked) => setNewVariable({...newVariable, isSecret: checked})}
                         />
                         <Label>Secret Variable</Label>
@@ -740,11 +731,3 @@ export function WorkflowDesignerLayout({ children }: { children?: React.ReactNod
     </div>
   );
 }
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';

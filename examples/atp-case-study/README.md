@@ -1,6 +1,6 @@
 # ATP Case Study: Comprehensive Agent Testing
 
-This case study demonstrates the full capabilities of the Agent Trust Protocol (ATP) through comprehensive testing of all agent types and their interactions.
+This case study demonstrates the full capabilities of the Agent Trust Protocol™ (ATP™) through comprehensive testing of all agent types and their interactions.
 
 ## Overview
 
@@ -131,27 +131,27 @@ Both test suites generate detailed reports including:
 ### Example Output
 
 ```
-📊 === ATP STANDALONE TEST REPORT ===
+ === ATP STANDALONE TEST REPORT ===
 ================================================================================
 
-📈 Test Results Summary:
+ Test Results Summary:
 
-✅ Distributed Data Analysis
-   • Agents Involved: 3
-   • Datasets Analyzed: 2
-   • Security Status: secure
+ Distributed Data Analysis
+    Agents Involved: 3
+    Datasets Analyzed: 2
+    Security Status: secure
 
-✅ Security Incident Response
-   • Threats Detected: 5
-   • Response Time: < 2 seconds
-   • Agents Coordinated: 3
+ Security Incident Response
+    Threats Detected: 5
+    Response Time: < 2 seconds
+    Agents Coordinated: 3
 
-✅ Cross-Agent Capability Sharing
-   • Requests Made: 2
-   • Granted: 2
-   • Capability Types: [security.scan, data.analysis]
+ Cross-Agent Capability Sharing
+    Requests Made: 2
+    Granted: 2
+    Capability Types: [security.scan, data.analysis]
 
-🏆 Overall Status: SUCCESS
+ Overall Status: SUCCESS
 ```
 
 ## Architecture Validation
@@ -178,7 +178,7 @@ Example:
 
 ```typescript
 async testNewScenario(): Promise<any> {
-  console.log('\n🎯 === New Test Scenario ===\n');
+  console.log('\n === New Test Scenario ===\n');
   
   // Your test logic here
   const agent = this.agents.get('data-1');
@@ -196,14 +196,14 @@ async testNewScenario(): Promise<any> {
 
 The case study demonstrates that ATP successfully:
 
-- ✅ Enables secure multi-agent collaboration
-- ✅ Provides robust identity and trust management
-- ✅ Supports complex workflow orchestration
-- ✅ Handles agent failures gracefully
-- ✅ Scales with multiple parallel operations
-- ✅ Enforces permission-based access control
-- ✅ Maintains comprehensive audit trails
-- ✅ Supports real-world use cases
+-  Enables secure multi-agent collaboration
+-  Provides robust identity and trust management
+-  Supports complex workflow orchestration
+-  Handles agent failures gracefully
+-  Scales with multiple parallel operations
+-  Enforces permission-based access control
+-  Maintains comprehensive audit trails
+-  Supports real-world use cases
 
 ## Next Steps
 

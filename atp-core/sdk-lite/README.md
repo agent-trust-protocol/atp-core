@@ -2,7 +2,7 @@
 
 **Ultra-lightweight SDK for the world's first quantum-safe AI agent protocol**
 
-## 🚀 3-Line Quick Start
+##  3-Line Quick Start
 
 ```typescript
 import { Agent } from '@atp/sdk-lite';
@@ -13,22 +13,22 @@ await alice.send(bob, 'Hello from the quantum future!');
 console.log('Trust Score:', await alice.getTrustScore(bob));
 ```
 
-## ✨ Features
+##  Features
 
-- 🔐 **Quantum-Safe**: Ed25519 + Dilithium3 hybrid signatures
-- 📦 **Ultra-Light**: < 10KB total size
-- 🚀 **Zero Dependencies**: Pure TypeScript/JavaScript
-- 🎯 **3-Line Integration**: Get started instantly
-- 🛡️ **MCP Security**: Built-in Model Context Protocol wrapper
-- 📱 **Universal**: Works in Node.js and browsers
+-  **Quantum-Safe**: Ed25519 + Dilithium3 hybrid signatures
+-  **Ultra-Light**: < 10KB total size
+-  **Zero Dependencies**: Pure TypeScript/JavaScript
+-  **3-Line Integration**: Get started instantly
+-  **MCP Security**: Built-in Model Context Protocol wrapper
+-  **Universal**: Works in Node.js and browsers
 
-## 📦 Installation
+##  Installation
 
 ```bash
 npm install @atp/sdk-lite
 ```
 
-## 🎯 Examples
+##  Examples
 
 ### Basic Agent Creation
 ```typescript
@@ -77,7 +77,7 @@ Agent.configure({
 });
 ```
 
-## 🔧 API Reference
+##  API Reference
 
 ### `Agent.create(name: string): Promise<Agent>`
 Creates a new quantum-safe agent with DID and hybrid keys.
@@ -97,14 +97,14 @@ Makes secure MCP tool request through ATP wrapper.
 - `agent.name: string` - Agent's friendly name
 - `agent.publicKeys` - Ed25519 and Dilithium public keys
 
-## 🌐 Environment Support
+##  Environment Support
 
 - **Node.js**: ≥18.0.0
 - **Browsers**: Modern browsers with fetch support
 - **TypeScript**: Full type definitions included
 - **ES Modules**: Pure ESM package
 
-## 🛡️ Security Features
+##  Security Features
 
 - **Hybrid Signatures**: Ed25519 (classical) + Dilithium3 (post-quantum)
 - **Trust Scoring**: Dynamic reputation system
@@ -112,14 +112,14 @@ Makes secure MCP tool request through ATP wrapper.
 - **Audit Trail**: Complete interaction logging
 - **Future-Proof**: Ready for quantum computers
 
-## 📊 Bundle Size
+##  Bundle Size
 
 - **Minified**: ~8KB
 - **Gzipped**: ~3KB
 - **Dependencies**: 0
 - **Tree-shakeable**: Yes
 
-## 🚀 Quick Examples
+##  Quick Examples
 
 ```typescript
 // One-liner agent creation and messaging
@@ -131,17 +131,17 @@ const [alice, bob] = await Promise.all([
 await alice.send(bob, 'Quantum-safe hello!');
 ```
 
-## 🔗 Related Packages
+##  Related Packages
 
 - `@atp/core` - Full ATP server implementation
 - `@atp/crypto` - Quantum-safe cryptography utilities
 - `@atp/mcp` - MCP security wrapper
 
-## 📄 License
+##  License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**🌟 World's First Quantum-Safe AI Agent Protocol**  
+** World's First Quantum-Safe AI Agent Protocol**  
 Ready for quantum computers. Available today.

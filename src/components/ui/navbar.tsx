@@ -66,7 +66,7 @@ export function Navbar() {
               <Link href="/login">Log In</Link>
             </Button>
             <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-md">
-              <Link href="/signup">Start Free Trial</Link>
+              <Link href="/developers">Get Started</Link>
             </Button>
           </div>
 
@@ -127,7 +127,7 @@ export function Navbar() {
                 <Link href="/login" onClick={() => setMobileOpen(false)}>Log In</Link>
               </Button>
               <Button asChild size="sm" className="w-full bg-primary text-primary-foreground">
-                <Link href="/signup" onClick={() => setMobileOpen(false)}>Start Free Trial</Link>
+                <Link href="/developers" onClick={() => setMobileOpen(false)}>Get Started</Link>
               </Button>
             </div>
           </div>

@@ -50,14 +50,27 @@ export const PermissionCheckSchema = z.object({
   context: z.record(z.any()).optional(),
 });
 
-export const PolicyRuleSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  condition: z.string(), // JavaScript expression
-  effect: z.enum(['allow', 'deny']),
-  priority: z.number(),
-  active: z.boolean(),
-});
+// Sandboxed expressions: only allow alphanumerics, whitespace, basic
+// operators, dots, brackets, and quotes. This is enforced at the schema
+// boundary so a downstream evaluator can never see, say, `require(` or
+// `process.env`. The actual evaluation is done by `evaluateSafeExpression`
+// from `@atp/shared` which adds its own AST-level checks.
+const SAFE_EXPRESSION_RE = /^[A-Za-z0-9_\s.\[\]'"+\-*/%<>=!&|()]*$/;
+
+export const PolicyRuleSchema = z
+  .object({
+    id: z.string().min(1).max(128),
+    name: z.string().min(1).max(256),
+    condition: z
+      .string()
+      .min(1)
+      .max(1024)
+      .regex(SAFE_EXPRESSION_RE, 'condition contains disallowed characters'),
+    effect: z.enum(['allow', 'deny']),
+    priority: z.number().int().min(0).max(10000),
+    active: z.boolean(),
+  })
+  .strict();
 
 export type Scope = z.infer<typeof ScopeSchema>;
 export type CapabilityToken = z.infer<typeof CapabilityTokenSchema>;

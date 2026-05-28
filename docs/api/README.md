@@ -1,4 +1,4 @@
-# Agent Trust Protocol - API Reference
+# Agent Trust Protocol™ — API Reference
 
 This document provides a comprehensive reference for all ATP services and their APIs.
 

@@ -71,6 +71,22 @@ export default function EnterprisePage() {
                 View Pricing
               </Link>
             </Button>
+            <Button asChild variant="outline" size="lg" className="border-2 border-foreground/20 hover:bg-foreground/5 hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
+              <a href="/whitepaper/atp-whitepaper.pdf" target="_blank" rel="noopener noreferrer">
+                <FileText className="h-5 w-5 mr-3" />
+                Download Whitepaper
+              </a>
+            </Button>
+          </div>
+
+          {/* Built on Open Source callout */}
+          <div className="mt-8 max-w-3xl mx-auto rounded-xl border border-green-200 dark:border-green-500/20 bg-green-50/60 dark:bg-green-900/10 p-5 animate-fade-in-up">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
+              <p className="text-sm text-foreground/80 leading-relaxed">
+                <strong className="text-foreground">Built on open source.</strong> ATP's core SDK is Apache 2.0 — free forever, self-hosted, no usage limits. Enterprise adds managed hosting, SOC 2 compliance reporting, SSO, and 24/7 dedicated support on top of the open source foundation.
+              </p>
+            </div>
           </div>
         </div>
 

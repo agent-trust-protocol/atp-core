@@ -77,15 +77,26 @@ export class ATPSecretManager {
   }
 
   /**
-   * Request credential from ATP (stub)
+   * Request a scoped credential from the ATP credential service.
+   *
+   * The mock-token path used to silently issue a predictable
+   * `atp-token-${did}-${timestamp}` string regardless of environment, which
+   * meant any caller that reached this branch in production would walk away
+   * with a forgeable bearer credential. We now fail-closed unless explicitly
+   * running under the test harness; the real wiring should be supplied by
+   * `ATPCredentialService` in production builds.
    */
   private async requestCredential(
     agentDid: string,
     serviceName: string,
     scope: CredentialScope
   ): Promise<string> {
-    // In real implementation, call ATP credential service
-    // For now, return a mock token
+    if (process.env.NODE_ENV !== 'test') {
+      throw new Error(
+        'SecretManager.requestCredential is not wired to the ATP credential service. ' +
+        'Refusing to issue a mock token in a non-test environment.'
+      );
+    }
     return `atp-token-${agentDid.slice(0, 8)}-${Date.now()}`;
   }
 }

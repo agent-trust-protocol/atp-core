@@ -356,7 +356,7 @@ ATP_DEBUG=true
 
 ## Support
 
-- 📚 Documentation: [https://docs.atp.protocol](https://docs.atp.protocol)
-- 🐛 Issues: [GitHub Issues](https://github.com/atp/sdk/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/atp/sdk/discussions)
-- 📧 Email: support@atp.protocol
+-  Documentation: [https://docs.atp.protocol](https://docs.atp.protocol)
+-  Issues: [GitHub Issues](https://github.com/atp/sdk/issues)
+-  Discussions: [GitHub Discussions](https://github.com/atp/sdk/discussions)
+-  Email: support@atp.protocol

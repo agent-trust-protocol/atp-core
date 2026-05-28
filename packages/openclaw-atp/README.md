@@ -1,4 +1,4 @@
-# 🔐 ATP OpenClaw Integration
+#  ATP OpenClaw Integration
 
 [![npm version](https://badge.fury.io/js/%40atpdevelopment%2Fopenclaw-atp.svg)](https://www.npmjs.com/package/@atpdevelopment/openclaw-atp)
 [![Publish to npm](https://github.com/agent-trust-protocol/atp-core/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/agent-trust-protocol/atp-core/actions/workflows/npm-publish.yml)
@@ -9,18 +9,18 @@
 
 This package provides seamless integration between the Agent Trust Protocol™ (ATP) and OpenClaw, enabling enterprise-grade security, trust scoring, and policy enforcement for multi-agent AI systems.
 
-## 🌟 Features
+##  Features
 
-- **🛡️ Agent Identity Management** - Quantum-safe DIDs for every OpenClaw agent
-- **🔒 Tool Security Wrapper** - ATP security checks on all tool calls
-- **📊 Trust-Based Access Control** - Dynamic trust scoring and policy enforcement
-- **📝 Task-Level Security** - Attach security metadata to tasks and knowledge graphs
-- **🌐 Graph Validation** - Policy-based validation of agent interaction graphs
-- **📡 Observability Integration** - Lunary metrics → ATP trust engine
-- **🔑 Secrets Management** - ATP-managed credentials for external services
-- **📦 Zero Configuration** - Works out of the box with OpenClaw
+- ** Agent Identity Management** - Quantum-safe DIDs for every OpenClaw agent
+- ** Tool Security Wrapper** - ATP security checks on all tool calls
+- ** Trust-Based Access Control** - Dynamic trust scoring and policy enforcement
+- ** Task-Level Security** - Attach security metadata to tasks and knowledge graphs
+- ** Graph Validation** - Policy-based validation of agent interaction graphs
+- ** Observability Integration** - Lunary metrics → ATP trust engine
+- ** Secrets Management** - ATP-managed credentials for external services
+- ** Zero Configuration** - Works out of the box with OpenClaw
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Installation
 
@@ -151,7 +151,7 @@ if not validation_result.is_valid:
 crew.run()
 ```
 
-## 📋 Security Profiles
+##  Security Profiles
 
 ATP includes built-in security profiles that control what agents can do. Profiles are enforced per-tool-call via `evaluateActionWithProfile`.
 
@@ -232,7 +232,7 @@ pii_profile = ATPConfigProfile.pii_workflow(
 )
 ```
 
-## 🔧 Integration Points
+##  Integration Points
 
 ### 1. Agent Registration
 
@@ -289,7 +289,7 @@ ATP-managed connectors for:
 - **File Systems**: Path restrictions, content scanning
 - **Secrets**: Short-lived, scoped credentials
 
-## 📊 Monitoring & Metrics
+##  Monitoring & Metrics
 
 ```python
 from openclaw_atp import ATPMonitor
@@ -309,7 +309,7 @@ stats = monitor.get_tool_usage_stats(agent_name="trader")
 events = monitor.get_security_events(severity="high")
 ```
 
-## 🧪 Testing
+##  Testing
 
 ```python
 # Test ATP integration
@@ -320,7 +320,7 @@ from openclaw_atp import test_crew_security
 test_crew_security(crew, atp_client)
 ```
 
-## 📚 API Reference
+##  API Reference
 
 ### Core Functions
 
@@ -342,7 +342,7 @@ test_crew_security(crew, atp_client)
 - `ATPMonitor` - Monitoring and metrics
 - `ATPLunaryExporter` - Lunary → ATP bridge
 
-## 🚀 Quick Agent Setup
+##  Quick Agent Setup
 
 The fastest way to get started with an OpenClaw agent is:
 
@@ -355,7 +355,7 @@ npm start
 
 The CLI scaffolds an **ESM** project (Node 18+), then opens an embedded onboarding UI at **`http://127.0.0.1:3456`** by default (`--no-dashboard` to skip). In the wizard, choose **OpenClaw** as the runtime and **`openclaw-sandbox`** (or your profile) for security. Agents run in **standalone mode** without backend services until you connect ATP services.
 
-## 🔐 Security Best Practices
+##  Security Best Practices
 
 1. **Always validate crew graphs** before production runs
 2. **Use strict profiles** for development and testing
@@ -365,14 +365,14 @@ The CLI scaffolds an **ESM** project (Node 18+), then opens an embedded onboardi
 6. **Monitor trust score changes** and investigate drops
 7. **Test policy violations** before deploying workflows
 
-## 🆘 Support
+##  Support
 
 - **Documentation**: https://github.com/agent-trust-protocol/atp-core/tree/main/docs/openclaw
 - **Issues**: https://github.com/agent-trust-protocol/core/issues
 - **Discord**: https://discord.gg/atp
 - **Email**: support@atp.protocol
 
-## 🚢 Releasing
+##  Releasing
 
 Publishing is automated via the [npm-publish workflow](https://github.com/agent-trust-protocol/atp-core/actions/workflows/npm-publish.yml). Both `atp-sdk` and `@atpdevelopment/openclaw-atp` are published together on every version tag.
 
@@ -384,17 +384,17 @@ git push origin v1.0.1
 
 The workflow builds, tests, and publishes automatically. For a dry run (no actual publish), use **Actions → Publish to npm → Run workflow** with `dry_run` enabled.
 
-## 📄 License
+##  License
 
 Apache-2.0 - see [LICENSE](./LICENSE)
 
-## 🙏 Credits
+##  Credits
 
 Built on top of:
 - [OpenClaw](https://github.com/ShoggothAI/openclaw) - Multi-agent orchestration
-- [ATP SDK](https://github.com/agent-trust-protocol/sdk) - Agent Trust Protocol
+- [ATP™ SDK](https://github.com/agent-trust-protocol/sdk) - Agent Trust Protocol™
 - [LangChain](https://github.com/langchain-ai/langchain) - LLM framework
 
 ---
 
-**Made with 🔐 by the Agent Trust Protocol™ Team**
+**Made with  by the Agent Trust Protocol™ Team**
