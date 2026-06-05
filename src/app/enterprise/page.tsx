@@ -65,12 +65,6 @@ export default function EnterprisePage() {
                 Request Demo
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="border-2 border-atp-electric-cyan/30 hover:bg-atp-electric-cyan/10 hover:border-atp-electric-cyan/50 hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
-              <Link href="/pricing">
-                <FileText className="h-5 w-5 mr-3" />
-                View Pricing
-              </Link>
-            </Button>
             <Button asChild variant="outline" size="lg" className="border-2 border-foreground/20 hover:bg-foreground/5 hover:scale-105 transition-all duration-300 w-full sm:w-auto h-14 px-8 text-lg font-semibold">
               <a href="/whitepaper/atp-whitepaper.pdf" target="_blank" rel="noopener noreferrer">
                 <FileText className="h-5 w-5 mr-3" />
@@ -478,12 +472,6 @@ export default function EnterprisePage() {
               <Link href="/enterprise/contact">
                 <Activity className="h-4 w-4 mr-2" />
                 Schedule Demo
-              </Link>
-            </Button>
-            <Button asChild size="lg" className="atp-gradient-secondary hover:scale-105 transition-all duration-300">
-              <Link href="/pricing">
-                <FileText className="h-4 w-4 mr-2" />
-                View Pricing
               </Link>
             </Button>
           </div>

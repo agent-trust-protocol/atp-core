@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
-import { Activity, FileText, Github, DollarSign, Code2, type LucideIcon } from 'lucide-react';
+import { Activity, FileText, Github, Code2, type LucideIcon } from 'lucide-react';
 
 interface QuickAccessItem {
   href: string
@@ -14,8 +14,7 @@ const items: QuickAccessItem[] = [
   { href: '/developers', label: 'Developers', icon: Code2 },
   { href: '/dashboard', label: 'Dashboard', icon: Activity },
   { href: '/policy-editor', label: 'Policy Editor', icon: FileText },
-  { href: 'https://github.com/agent-trust-protocol/atp-core', label: 'GitHub', icon: Github },
-  { href: '/pricing', label: 'Pricing', icon: DollarSign }
+  { href: 'https://github.com/agent-trust-protocol/atp-core', label: 'GitHub', icon: Github }
 ];
 
 export function QuickAccess() {
