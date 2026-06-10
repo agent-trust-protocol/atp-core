@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The did:atp DID Method Specification</title>
+  <meta name="description" content="Specification of the did:atp Decentralized Identifier method used by the Agent Trust Protocol (ATP).">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1a1a2e; max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem; }
+    h1 { font-size: 2rem; border-bottom: 3px solid #667eea; padding-bottom: .5rem; }
+    h2 { margin-top: 2.5rem; color: #2d2d5f; border-bottom: 1px solid #ddd; padding-bottom: .25rem; }
+    h3 { margin-top: 1.75rem; color: #3d3d6f; }
+    dt { font-weight: 600; }
+    dd { margin-bottom: .5rem; }
+    pre { background: #f4f4f8; border: 1px solid #ddd; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: .875rem; }
+    code { background: #f4f4f8; padding: .1rem .3rem; border-radius: 3px; font-size: .9em; }
+    pre code { background: none; padding: 0; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border: 1px solid #ccc; padding: .5rem .75rem; text-align: left; }
+    th { background: #eef; }
+    .status { background: #fff8e1; border: 1px solid #e0c060; border-radius: 6px; padding: .75rem 1rem; margin: 1rem 0; }
+    .rfc { font-variant: small-caps; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<h1>The <code>did:atp</code> DID Method Specification</h1>
+
+<dl>
+  <dt>Status</dt><dd>Finalized specification — v2 implementation baseline</dd>
+  <dt>Version</dt><dd>2.0</dd>
+  <dt>Date</dt><dd>June 2026</dd>
+  <dt>Authors</dt><dd>ATP Development Team (Sovr INC.)</dd>
+  <dt>Conforms to</dt><dd><a href="https://www.w3.org/TR/did-core/">W3C Decentralized Identifiers (DIDs) v1.0</a></dd>
+</dl>
+
+<div class="status">
+  This document is the normative reference for the <code>did:atp</code> v2 rebuild in
+  <code>packages/sdk</code>. It consolidates and supersedes the DID-method portions of the
+  legacy <code>docs/W3C_ATP_SPECIFICATION.md</code> (ATP Specification v1.0), which remains
+  in place unmodified for historical reference.
+</div>
+
+<h2 id="abstract">Abstract</h2>
+<p>
+  The <code>did:atp</code> method provides decentralized, cryptographically verifiable,
+  quantum-safe identities for AI agents participating in the Agent Trust Protocol (ATP).
+  It combines classical Ed25519 keys with post-quantum CRYSTALS-Dilithium keys in a hybrid
+  scheme, and binds agent identities to ATP trust scoring, verifiable credentials, and
+  audit infrastructure.
+</p>
+
+<h2 id="conformance">1. Conformance</h2>
+<p>
+  The key words <span class="rfc">must</span>, <span class="rfc">must not</span>,
+  <span class="rfc">required</span>, <span class="rfc">should</span>,
+  <span class="rfc">should not</span>, <span class="rfc">recommended</span>,
+  <span class="rfc">may</span>, and <span class="rfc">optional</span> in this document are
+  to be interpreted as described in RFC 2119.
+</p>
+
+<h2 id="syntax">2. Method Syntax</h2>
+<p>The method name is <code>atp</code>. A conforming DID has the form:</p>
+<pre><code>did:atp:&lt;network&gt;:&lt;unique-identifier&gt;</code></pre>
+<ul>
+  <li><code>&lt;network&gt;</code> — one of <code>mainnet</code>, <code>testnet</code>, or <code>devnet</code>. The network segment is <span class="rfc">required</span>; implementations <span class="rfc">must not</span> emit or accept two-segment <code>did:atp:&lt;id&gt;</code> identifiers.</li>
+  <li><code>&lt;unique-identifier&gt;</code> — the multibase (base58btc, <code>z</code>-prefixed) encoding of the agent's Ed25519 public key fingerprint.</li>
+</ul>
+<p>Example:</p>
+<pre><code>did:atp:mainnet:z6MkukG4UkfY7RDATt51tYQHJuQSd2XstDanvqSbJHQyxdvu</code></pre>
+
+<h2 id="document">3. DID Document Structure</h2>
+<p>A conforming <code>did:atp</code> DID document:</p>
+<ul>
+  <li><span class="rfc">must</span> include both <code>https://www.w3.org/ns/did/v1</code> and <code>https://atp.dev/ns/v1</code> in <code>@context</code>;</li>
+  <li><span class="rfc">must</span> contain an Ed25519 verification method of type <code>Ed25519VerificationKey2020</code>;</li>
+  <li><span class="rfc">must</span> contain a post-quantum verification method of type <code>DilithiumVerificationKey2024</code>;</li>
+  <li><span class="rfc">must</span> reference both keys in <code>authentication</code>;</li>
+  <li><span class="rfc">should</span> include an <code>ATPGateway</code> service endpoint.</li>
+</ul>
+
+<pre><code>{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://atp.dev/ns/v1"
+  ],
+  "id": "did:atp:mainnet:z6MkukG4UkfY7RDATt51tYQHJuQSd2XstDanvqSbJHQyxdvu",
+  "verificationMethod": [{
+    "id": "#key-1",
+    "type": "Ed25519VerificationKey2020",
+    "controller": "did:atp:mainnet:z6MkukG4UkfY7RDATt51tYQHJuQSd2XstDanvqSbJHQyxdvu",
+    "publicKeyMultibase": "z6MkukG4UkfY7RDATt51tYQHJuQSd2XstDanvqSbJHQyxdvu"
+  }, {
+    "id": "#key-2",
+    "type": "DilithiumVerificationKey2024",
+    "controller": "did:atp:mainnet:z6MkukG4UkfY7RDATt51tYQHJuQSd2XstDanvqSbJHQyxdvu",
+    "publicKeyMultibase": "z8FqT3Xz9Bc2YPqQfZvvKqVxGRSqwELBv3d6umccPsQKQvBNL"
+  }],
+  "authentication": ["#key-1", "#key-2"],
+  "assertionMethod": ["#key-1"],
+  "keyAgreement": ["#key-1"],
+  "service": [{
+    "id": "#atp-gateway",
+    "type": "ATPGateway",
+    "serviceEndpoint": "https://gateway.atp.example.com"
+  }]
+}</code></pre>
+
+<h2 id="operations">4. DID Operations</h2>
+
+<h3 id="create">4.1 Create (Register)</h3>
+<pre><code>POST /identity/register
+Content-Type: application/json
+
+{
+  "publicKey": "z6MkukG4UkfY7RDATt51tYQHJuQSd2XstDanvqSbJHQyxdvu",
+  "metadata": {
+    "name": "AI Assistant Bot",
+    "capabilities": ["text-generation", "data-analysis"]
+  }
+}</code></pre>
+
+<h3 id="resolve">4.2 Resolve</h3>
+<pre><code>GET /identity/resolve/{did}</code></pre>
+<p>Resolution <span class="rfc">must</span> return a W3C-conformant DID resolution result. Unknown DIDs <span class="rfc">must</span> produce error <code>DID_NOT_FOUND</code> (−32001).</p>
+
+<h3 id="update">4.3 Update</h3>
+<pre><code>PUT /identity/update/{did}
+Authorization: DID-JWT
+
+{
+  "verificationMethod": [...],
+  "service": [...]
+}</code></pre>
+<p>Updates <span class="rfc">must</span> be authenticated with a DID-JWT signed by a key currently authorized for <code>authentication</code> on the document.</p>
+
+<h3 id="deactivate">4.4 Deactivate</h3>
+<p>
+  Implementations <span class="rfc">must</span> support DID deactivation (supports the GDPR
+  right to be forgotten). A deactivated DID <span class="rfc">must</span> resolve with
+  <code>deactivated: true</code> document metadata and <span class="rfc">must not</span> be
+  reactivatable.
+</p>
+
+<h2 id="crypto">5. Cryptographic Requirements</h2>
+
+<h3 id="hybrid">5.1 Hybrid Signature Scheme</h3>
+<p>Implementations <span class="rfc">must</span> support hybrid signatures combining:</p>
+<ol>
+  <li><strong>Classical</strong>: Ed25519;</li>
+  <li><strong>Post-Quantum</strong>: CRYSTALS-Dilithium (Dilithium3 / ML-DSA-65).</li>
+</ol>
+
+<h3 id="sig-format">5.2 Signature Format</h3>
+<p>Proofs <span class="rfc">must</span> use the <code>HybridSignature2024</code> JSON structure:</p>
+<pre><code>{
+  "type": "HybridSignature2024",
+  "created": "2024-01-15T12:00:00Z",
+  "verificationMethod": "did:atp:mainnet:z6Mk...#key-1",
+  "proofPurpose": "authentication",
+  "classical": {
+    "algorithm": "Ed25519",
+    "signature": "base64url..."
+  },
+  "postQuantum": {
+    "algorithm": "Dilithium3",
+    "signature": "base64url..."
+  }
+}</code></pre>
+
+<h3 id="rotation">5.3 Key Rotation</h3>
+<p>
+  Agents <span class="rfc">must</span> support key rotation with a minimum grace period of
+  24 hours during which signatures by the previous key remain verifiable.
+</p>
+
+<h2 id="errors">6. Error Codes</h2>
+<p>Errors <span class="rfc">must</span> use JSON-RPC 2.0 error objects with these codes:</p>
+<table>
+  <tr><th>Code</th><th>Name</th><th>Description</th></tr>
+  <tr><td>−32001</td><td><code>DID_NOT_FOUND</code></td><td>DID does not exist</td></tr>
+  <tr><td>−32002</td><td><code>INVALID_SIGNATURE</code></td><td>Signature verification failed</td></tr>
+  <tr><td>−32003</td><td><code>INSUFFICIENT_TRUST</code></td><td>Trust level too low</td></tr>
+  <tr><td>−32004</td><td><code>CREDENTIAL_EXPIRED</code></td><td>Credential has expired</td></tr>
+  <tr><td>−32005</td><td><code>QUANTUM_SIG_REQUIRED</code></td><td>Post-quantum signature required</td></tr>
+</table>
+
+<h2 id="security">7. Security and Privacy Considerations</h2>
+<ul>
+  <li><strong>Identity spoofing</strong> is prevented by hybrid cryptographic signatures.</li>
+  <li><strong>Replay attacks</strong> are prevented via timestamps and nonces (see the shared nonce service).</li>
+  <li><strong>Quantum attacks</strong> are mitigated by the mandatory Dilithium component.</li>
+  <li>DIDs are pseudonymous by default; agents <span class="rfc">may</span> use pairwise DIDs, and zero-knowledge proofs <span class="rfc">should</span> be used for sensitive claims.</li>
+</ul>
+
+<h2 id="references">8. References</h2>
+<ol>
+  <li>W3C Decentralized Identifiers (DIDs) v1.0</li>
+  <li>W3C Verifiable Credentials Data Model v1.1</li>
+  <li>NIST Post-Quantum Cryptography Standards (FIPS 204, ML-DSA)</li>
+  <li>JSON-RPC 2.0 Specification</li>
+  <li>RFC 8032 — EdDSA and Ed25519</li>
+</ol>
+
+<hr>
+<p><small>Copyright © 2026 Agent Trust Protocol Contributors. Licensed under Apache 2.0.</small></p>
+
+</body>
+</html>

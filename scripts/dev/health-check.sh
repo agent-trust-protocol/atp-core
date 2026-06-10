@@ -68,8 +68,32 @@ chk "npx CLI exists (create-atp-agent)" \
 chk "adapters/ADAPTER.md spec exists"  "ls adapters/ADAPTER.md 2>/dev/null" false
 
 echo ""
+echo "-- packages/sdk build & test --"
+# did:atp v2 phase-0 baseline (2026-06-10, before any implementation changes):
+# 362 tests pass, 0 fail; 14/16 suites pass. 2 suites fail to run
+# (src/__tests__/utils/jwt.test.ts, src/__tests__/simple-agent.test.ts) due to
+# a pre-existing jose ESM parse error under Jest, so the test step (and this
+# script) exits nonzero until those suites are fixed in a later phase.
+SDK_STATUS=0
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+if (cd "$REPO_ROOT/packages/sdk" && npm run build); then
+  echo "  + packages/sdk build"; ((PASS++))
+else
+  echo "  x packages/sdk build"; ((FAIL++)); SDK_STATUS=1
+fi
+
+if (cd "$REPO_ROOT/packages/sdk" && npm test); then
+  echo "  + packages/sdk tests"; ((PASS++))
+else
+  echo "  x packages/sdk tests"; ((FAIL++)); SDK_STATUS=1
+fi
+
+echo ""
 echo "======================================="
 echo "  Passed: $PASS  |  Failed: $FAIL"
 [ $FAIL -eq 0 ] && echo "  + Repo is clean and enterprise-ready" \
                || echo "  x Fix the $FAIL items above before pushing"
 echo ""
+
+exit "$SDK_STATUS"
