@@ -1,131 +1,249 @@
+<!--
+  NOTE: docs/W3C_ATP_SPECIFICATION.md is the LEGACY ATP v1 document. It is
+  superseded, for the did:atp method, by docs/specs/did-atp/index.html (the
+  finalized did:wba-extension spec). Where the two conflict, index.html wins.
+-->
+
 # `did:atp` v2 — Implementation Gap Report
 
 **Date:** 2026-06-10
+**Branch:** `feat/did-atp-v2`
 **Scope:** `packages/sdk` (primary), `packages/identity-service` (where the SDK delegates)
-**Reference:** [`docs/specs/did-atp/index.html`](./index.html) — finalized `did:atp` method specification
+**Audited against:** [`docs/specs/did-atp/index.html`](./index.html) — the finalized `did:atp`
+method specification, defined as a **delta over `did:wba`** (`did:web` → `did:wba` → `did:atp`).
 
-This report records the audited gap between the current `did:atp` implementation and the
-finalized spec, **before** any v2 implementation work. No code changes accompany this report.
+This report records the gap between the current `did:atp` implementation and the **finalized**
+spec, before any v2 implementation work. No code is changed by this report.
+
+> **Important:** This supersedes the Phase-0 gap report, which was written against
+> `docs/W3C_ATP_SPECIFICATION.md` — the **legacy** v1 design we are rebuilding *away from*.
+> Requirements that exist *only* in that legacy document (the 24-hour key-rotation grace
+> period, the `-3200x` JSON-RPC error codes, the `HybridSignature2024` proof format, the
+> `https://atp.dev/ns/v1` `@context`) are **not** measured here as gaps. Anything from the
+> legacy doc that still looks valuable but is absent from the finalized spec is listed in
+> [Appendix A](#appendix-a-candidate-spec-additions-not-requirements) as a *candidate*, not a
+> requirement.
+
+---
+
+## The finalized target, in one paragraph
+
+A `did:atp` path-type identifier is `did:atp:<domain>[:<path>...]:e1_<fp>:pq1_<fp>` — a DNS
+host (and optional path), then **two** trailing fingerprint segments. `e1_` is the classical
+Ed25519 binding (byte-identical to `did:wba`); `pq1_` is a post-quantum ML-DSA-65 binding added
+by this spec. Each fingerprint is an **RFC 7638 JWK thumbprint** (43 base64url chars). The two
+keys are **separate** (no composite blob): Ed25519, plus ML-DSA-65 represented as an **RFC 9964
+`AKP` JWK** (`{"kty":"AKP","alg":"ML-DSA-65","pub":...}`). The DID Document carries **two
+independent proofs**: the classical `eddsa-jcs-2022` Data Integrity proof (from `did:wba`) and a
+separate ML-DSA-65 **RFC 9964 JWS** over the same document. Resolution is **`did:web`-style** —
+transform the DID to an HTTPS URL, fetch `did.json`, and verify **both** bindings; resolution
+MUST fail if either fails. Rotating *either* key changes the DID, since both fingerprints are
+part of the path.
 
 ---
 
 ## Summary Matrix
 
-| # | Spec requirement | `packages/sdk` | `packages/identity-service` | Severity |
-|---|---|---|---|---|
-| 1 | DID syntax `did:atp:<network>:<id>` | ✅ Correct | ❌ Omits network segment | **Critical** |
-| 2 | `@context` includes `https://atp.dev/ns/v1` | ❌ Missing | ❌ Missing | **Critical** |
-| 3 | `DilithiumVerificationKey2024` in DID document | ❌ Ed25519 only | ⚠️ Uses `DilithiumVerificationKey2023` | **Critical** |
-| 4 | `HybridSignature2024` JSON proof format | ❌ `Ed25519Signature2020` / binary concat | ❌ Binary/abstracted format | **Critical** |
-| 5 | `PUT /identity/update/{did}` with DID-JWT auth | ❌ Missing | ❌ Missing | Major |
-| 6 | DID deactivation | ❌ Missing | ❌ Missing | Major |
-| 7 | Key rotation 24h grace period | ❌ No grace logic | ❌ Old key replaced immediately | Major |
-| 8 | Default `ATPGateway` service endpoint | ❌ None | ❌ Defaults to `[]` | Major |
-| 9 | JSON-RPC 2.0 error codes (−32001…−32005) | ❌ HTTP/status-string codes | ❌ HTTP codes | Major |
+| # | Finalized requirement | Current `packages/sdk` / `identity-service` | Verdict |
+|---|---|---|---|
+| 1 | DID syntax `did:atp:<domain>[:path]:e1_<fp>:pq1_<fp>` | 3-segment `did:atp:<network>:<fingerprint>` (or `did:atp:<multibase>`) | ❌ Structural |
+| 2 | RFC 7638 JWK thumbprint fingerprints (43 b64url) | `SHA256(hex pubkey).slice(0,16)` truncated hex | ❌ Algorithm |
+| 3 | Two separate keypairs (Ed25519, ML-DSA-65) | Length-prefixed composite key/sig blob | ❌ Structural |
+| 4 | ML-DSA-65 pubkey as RFC 9964 `AKP` JWK | `DilithiumVerificationKey2023` + `publicKeyMultibase` | ❌ Representation |
+| 5 | Separate ML-DSA-65 RFC 9964 JWS proof | None (only internal binary hybrid sig) | ❌ Missing |
+| 6 | Classical `eddsa-jcs-2022` Data Integrity proof | `Ed25519Signature2020` over pretty-printed JSON | ❌ Type + canon. |
+| 7 | `did:web`-style HTTPS `did.json` resolution, dual-verify | In-memory store + universal-resolver JSON-RPC | ❌ Model |
+| 8 | Create/Resolve/Update/Deactivate; key rotation changes DID | Create/Resolve/partial Update; rotation keeps DID; no Deactivate | ⚠️ Partial |
+| 9 | ML-DSA-65 (FIPS 204): 1952-B key, 3309-B sig | `@noble/post-quantum` `ml_dsa65`; sizes ~match; labelled "Dilithium" | ⚠️ Naming |
+
+Legend: ❌ = does not meet spec; ⚠️ = partially present / mislabelled.
 
 ---
 
 ## Detailed Findings
 
-### 1. DID syntax — inconsistent between packages (Critical)
+### 1. Identifier syntax — wrong shape entirely (Structural)
 
-- `packages/sdk/src/utils/did.ts:25` generates `did:${method}:${network}:${fingerprint}`
-  (network defaults to `mainnet` at lines 19–20) — **spec-conformant**.
-- `packages/identity-service/src/utils/crypto.ts:153` generates `did:atp:${multibase}` with
-  **no network segment** — non-conformant, and incompatible with DIDs minted by the SDK.
-  Cross-package resolution of SDK-minted DIDs against the identity service is therefore broken
-  at the format level.
+The spec mandates a domain-anchored, two-fingerprint path identifier
+(`identifier-syntax` / ABNF in the spec). The code instead mints a network-anchored,
+single-fingerprint identifier:
 
-### 2. Missing ATP `@context` (Critical)
+- `packages/sdk/src/utils/did.ts:25` — `did:${method}:${network}:${fingerprint}`; network
+  defaults to `mainnet` (lines 19–20).
+- `packages/sdk/src/utils/did.ts:57` — parser regex `^did:([^:]+):([^:]+):([^#]+)...` expects
+  exactly method/network/identifier; it cannot represent a domain, path segments, or two
+  fingerprint segments.
+- `packages/identity-service/src/utils/crypto.ts:150-160` — `did:atp:${multibase}` (two
+  segments, no network *and* no domain).
 
-- SDK (`packages/sdk/src/utils/did.ts:27-39`): `@context` contains only
-  `https://www.w3.org/ns/did/v1`.
-- Identity service (`packages/identity-service/src/services/identity.ts:57-84`): adds the W3C
-  security-suite contexts but never `https://atp.dev/ns/v1`.
+**Gap:** No concept of `<domain>`, path segments, or separate `e1_` / `pq1_` segments. The
+generator and parser both need replacing. The SDK and identity-service also disagree with each
+other today (network vs. bare multibase).
 
-### 3. Post-quantum verification method (Critical)
+### 2. Fingerprints — not RFC 7638 thumbprints (Algorithm)
 
-- SDK documents carry only an `Ed25519VerificationKey2020` method; no Dilithium key at all.
-- Identity service emits `DilithiumVerificationKey2023` (`services/identity.ts:50`) when
-  quantum-safe mode is enabled; the spec requires `DilithiumVerificationKey2024`, and only
-  conditionally — the spec makes the PQ key mandatory.
+- `packages/sdk/src/utils/crypto.ts:215-219` — `createKeyFingerprint()` returns
+  `sha256(hexPublicKey).slice(0, 16)` — a 16-hex-char (8-byte) truncation of a hash over the
+  raw key hex.
+- `packages/identity-service/src/utils/crypto.ts:150-154` — same truncated-hash approach.
 
-### 4. Hybrid signature proof format (Critical)
+**Gap:** The spec requires an RFC 7638 JWK thumbprint — SHA-256 over the *canonical JWK* (sorted
+member names, no whitespace), base64url no-pad, 43 chars — computed for each of the two keys.
+Neither the canonical-JWK construction nor the 43-char base64url output exists.
 
-- `packages/sdk/src/utils/did.ts:182` signs DID documents with an `Ed25519Signature2020`
-  proof — no post-quantum component.
-- `packages/sdk/src/utils/crypto.ts:93-126` (`signData`) does produce hybrid
-  Ed25519 + ML-DSA signatures, but as a length-prefixed binary concatenation hex string
-  (`[ed_len][mldsa_len][ed_sig][mldsa_sig]`), not the spec's `HybridSignature2024` JSON
-  structure with `classical` / `postQuantum` members.
-- Identity service (`utils/crypto.ts:87-148`) routes hybrid signing through
-  `CryptoAgilityManager` with its own combined format; also not `HybridSignature2024`.
+### 3. Keys — composite blob instead of two independent keypairs (Structural)
 
-### 5. Update operation (Major)
+- `packages/sdk/src/utils/crypto.ts:16-24` — `HybridKeyPair` stores a combined
+  `publicKey`/`privateKey` alongside optional component fields.
+- `packages/sdk/src/utils/crypto.ts:68-77` — public key is the **length-prefixed concatenation**
+  Ed25519(32) ‖ ML-DSA(1952); private key similarly concatenated.
+- `packages/sdk/src/utils/crypto.ts:109-125` — `signData()` concatenates both signatures into
+  one length-prefixed blob.
 
-- SDK client (`packages/sdk/src/client/identity.ts`) exposes `registerDID` (POST
-  `/identity/register`, line 47), `resolveDID` (line 54), `getDIDDocument` (line 61), and
-  `rotateKeys` (lines 82–84), but **no** `PUT /identity/update/{did}`.
-- Identity service controller has no full-document update endpoint and no DID-JWT
-  authorization check for mutations.
+**Gap:** The spec treats the two keys as independent verification methods, each with its own
+fingerprint segment and its own proof. The composite blob (and its single combined fingerprint)
+is incompatible with the two-segment design and must be unbundled into separate Ed25519 and
+ML-DSA-65 keys.
 
-### 6. Deactivation (Major)
+### 4. ML-DSA-65 public key — not an RFC 9964 AKP JWK (Representation)
 
-No deactivation operation exists in the SDK client, identity service, or controller.
-Required by spec §4.4 and by the GDPR right-to-be-forgotten claim in the legacy spec §12.2.
+- `packages/identity-service/src/services/identity.ts:49-52` — PQ verification method is
+  `type: 'DilithiumVerificationKey2023'` with `publicKeyMultibase`.
+- `packages/sdk/src/utils/did.ts:97-103` — DID utils can *read* a `publicKeyJwk` but never
+  *emit* one; no `AKP` JWK is constructed anywhere.
 
-### 7. Key-rotation grace period (Major)
+**Gap:** The spec requires the ML-DSA-65 key as `{"kty":"AKP","alg":"ML-DSA-65","pub":"<b64url
+1952-byte key>"}` (RFC 9964), in a `JsonWebKey` verification method, whose RFC 7638 thumbprint
+equals the `pq1_` segment. Current output uses the wrong type and multibase encoding.
 
-`packages/identity-service/src/services/identity.ts:196-214` (`rotateKeys`) replaces the
-verification method in place; signatures by the previous key become unverifiable immediately.
-Spec §5.3 requires a minimum 24-hour grace period. No grace logic exists in either package.
+### 5. Post-quantum proof — no separate JWS (Missing)
 
-### 8. Service endpoints (Major)
+- `packages/sdk/src/utils/did.ts:169-190` — `signDIDDocument()` emits a single
+  `Ed25519Signature2020` proof.
+- `packages/sdk/src/utils/crypto.ts:109-125` — hybrid ML-DSA signing exists but only inside
+  `signData()`; it is never surfaced as a DID-Document proof.
 
-Neither implementation provisions a default `ATPGateway` service entry; identity-service
-defaults `service` to `[]` (`services/identity.ts:81`). Spec §3 says documents SHOULD include
-the gateway endpoint.
+**Gap:** The spec requires a **separate** ML-DSA-65 RFC 9964 JWS (JOSE) over the DID Document, in
+addition to the classical proof. No JWS/JOSE PQ proof is produced.
 
-### 9. Error codes (Major)
+### 6. Classical proof — wrong suite and canonicalization (Type + Canonicalization)
 
-- SDK (`packages/sdk/src/client/base.ts:134-158`, `packages/sdk/src/types.ts:335-369`) uses
-  string codes (`AUTHZ_ERROR`, `VALIDATION_ERROR`, `NOT_FOUND`, …) mapped from HTTP status.
-- Identity service returns HTTP 404 + `{ success: false, error: "DID not found" }`.
-- Nothing emits the spec's JSON-RPC codes: `DID_NOT_FOUND` (−32001), `INVALID_SIGNATURE`
-  (−32002), `INSUFFICIENT_TRUST` (−32003), `CREDENTIAL_EXPIRED` (−32004),
-  `QUANTUM_SIG_REQUIRED` (−32005).
+- `packages/sdk/src/utils/did.ts:182` — proof `type: 'Ed25519Signature2020'`.
+- `packages/sdk/src/utils/did.ts:175` — signs `JSON.stringify(document, null, 2)`
+  (pretty-printed, not canonical).
+- For comparison, `packages/vc-service/src/services/credential.ts:194-195` canonicalizes via
+  key-sorted `JSON.stringify`, which is still **not** JCS (RFC 8785).
+
+**Gap:** The spec (via `did:wba`) requires an `eddsa-jcs-2022` Data Integrity proof, i.e. JCS
+(RFC 8785) canonicalization. Current code uses `Ed25519Signature2020` over pretty-printed JSON.
+
+### 7. Resolution — wrong model (Model)
+
+- `packages/identity-service/src/services/identity.ts:125-136` — `resolveDID()` reads from
+  **in-memory storage** first.
+- `packages/identity-service/src/services/identity.ts:138-194` — external fallback hits a
+  **universal-resolver JSON-RPC** endpoint (`DID_UNIVERSAL_RESOLVER_URL` + `/1.0/identifiers/`).
+- SDK client `packages/sdk/src/client/identity.ts` resolves via ATP REST (`GET /identity/...`).
+
+**Gap:** The spec requires `did:web`-style resolution: transform the DID's domain/path to an
+HTTPS URL, fetch `did.json`, and verify **both** the classical and post-quantum bindings,
+failing if either fails. None of: the domain→URL transform, the `did.json` fetch, or the
+dual-binding verification exist.
+
+### 8. Operations — partial; rotation semantics wrong (Partial)
+
+- Create — present (`packages/identity-service/src/services/identity.ts:9-123`).
+- Resolve — present but wrong model (see #7).
+- Update — only partial (`addService()` at `:222-236`, `updateTrustLevel()` at `:242-272`); no
+  general DID-Document update aligned to `did:wba`.
+- Key rotation — `:196-220` replaces the verification method **in place**; the DID does **not**
+  change. The spec says rotating *either* key changes the DID (the fingerprint is part of the
+  path), so an in-place rotation that preserves the DID is semantically wrong.
+- Deactivate — **absent**.
+
+**Gap:** Bring operations into `did:wba` alignment; make key rotation produce a new DID; add
+Deactivate.
+
+### 9. ML-DSA-65 algorithm & sizes — right primitive, wrong labels (Naming)
+
+- `packages/sdk/src/utils/crypto.ts:4` — imports `ml_dsa65` from `@noble/post-quantum/ml-dsa`
+  (this is FIPS 204 ML-DSA-65 — the correct primitive).
+- `packages/sdk/src/__tests__/utils/crypto.test.ts:35-38` — asserts a 1952-byte public key and a
+  **3293**-byte signature; FIPS 204 ML-DSA-65 signatures are **3309** bytes. This discrepancy
+  should be re-checked against the installed `@noble/post-quantum` version during implementation.
+- `packages/identity-service/src/services/identity.ts:96` and the `DilithiumVerificationKey2023`
+  type label the primitive as "Dilithium" rather than "ML-DSA-65".
+
+**Gap:** The underlying primitive is acceptable, but every surface label (verification-method
+type, algorithm enum, JWK `alg`) must read `ML-DSA-65`, and the expected signature size
+(3293 vs. 3309) must be reconciled with FIPS 204.
 
 ---
 
 ## Test Coverage Gaps
 
-Existing coverage (all mocked crypto / mocked axios / in-memory storage):
+Existing DID-related tests (all exercise the *current* design, not the finalized spec):
 
-- `packages/sdk/src/__tests__/utils/did.test.ts` — generate/parse/validate DIDs, verification
-  methods, sign/verify document proofs (mocked `CryptoUtils`).
-- `packages/sdk/src/__tests__/client/identity.test.ts` — register/resolve/rotate/trust/MFA
-  client calls (mocked axios).
-- `packages/identity-service/src/services/__tests__/identity.test.ts` — register, resolve,
-  trust level, rotate, list.
+- `packages/sdk/src/__tests__/utils/did.test.ts` — generate/parse/validate/sign/verify DIDs
+  (mocked `CryptoUtils`).
+- `packages/sdk/src/__tests__/utils/crypto.test.ts` — Ed25519 + hybrid key/sign/verify and PQ
+  sizes.
+- `packages/sdk/src/__tests__/client/identity.test.ts` — REST identity-client calls (mocked
+  axios).
+- `packages/identity-service/src/services/__tests__/identity.test.ts` — register/resolve/
+  trust/rotate against in-memory storage.
 
-Missing tests (to be added during v2 implementation):
+Tests to add for v2 (against the finalized spec):
 
-- Hybrid `HybridSignature2024` sign/verify round-trips with real crypto
-- Mandatory Dilithium verification method in generated documents
-- DID update (PUT) and deactivation flows
-- Key-rotation grace-period behaviour
-- JSON-RPC error-code mapping
-- Cross-package DID format consistency (SDK ↔ identity-service)
+- Two-segment `did:atp:<domain>[:path]:e1_<fp>:pq1_<fp>` generation and parsing; round-trip and
+  rejection of network-style legacy DIDs.
+- RFC 7638 thumbprint computation for both Ed25519 and `AKP` ML-DSA-65 JWKs (43-char output).
+- `AKP` JWK construction and `pq1_` ↔ thumbprint equality.
+- `eddsa-jcs-2022` classical proof with JCS (RFC 8785) canonicalization.
+- Separate ML-DSA-65 RFC 9964 JWS proof; dual-proof verification.
+- Resolution: domain→HTTPS transform, `did.json` fetch, and failure when **either** binding
+  fails (incl. the forged-classical-signature defense-in-depth case from the spec's PoC).
+- Operations: Update and Deactivate; key rotation yields a new DID.
+
+How tests run (unchanged): `cd packages/sdk && npm test` (Jest; see `packages/sdk/jest.config.js`
+and `package.json` scripts `test` / `test:coverage`).
 
 ---
 
 ## Suggested Remediation Order (for subsequent phases)
 
-1. Unify DID syntax (fix identity-service network segment) — unblocks everything else.
-2. DID document structure: ATP `@context`, mandatory `DilithiumVerificationKey2024`, default
-   `ATPGateway` service.
-3. `HybridSignature2024` proof format in `packages/sdk` (reusing existing `CryptoUtils`
-   hybrid primitives — do not roll new crypto).
-4. Update + deactivate operations with DID-JWT auth.
-5. Key-rotation grace period.
-6. JSON-RPC error-code layer.
+1. **Identifier core** — new generator/parser for `did:atp:<domain>[:path]:e1_<fp>:pq1_<fp>`;
+   delete the network segment. Unblocks everything else.
+2. **Fingerprints** — RFC 7638 JWK-thumbprint helper, used for both segments.
+3. **Keys** — split the composite `HybridKeyPair` into independent Ed25519 and ML-DSA-65 keys;
+   emit the ML-DSA-65 key as an RFC 9964 `AKP` JWK verification method.
+4. **Proofs** — `eddsa-jcs-2022` (JCS) classical proof + a separate ML-DSA-65 RFC 9964 JWS
+   proof; reuse the existing `@noble` primitives (do **not** roll new crypto).
+5. **Resolution** — `did:web`-style `did.json` retrieval with mandatory dual-binding
+   verification.
+6. **Operations** — `did:wba`-aligned Update/Deactivate; rotation-changes-DID semantics.
+7. **Labels/sizes** — rename Dilithium→ML-DSA-65 throughout; reconcile the 3293 vs. 3309
+   signature-size expectation.
+
+---
+
+## Appendix A — Candidate spec additions (NOT requirements)
+
+These appear in the **legacy** `docs/W3C_ATP_SPECIFICATION.md` but are **absent** from the
+finalized spec. They are recorded here as ideas to raise with the spec authors, **not** as gaps
+to implement:
+
+- **24-hour key-rotation grace period** (legacy §6.3). The finalized spec makes rotation change
+  the DID, so an overlap window would need a different framing (e.g. a deprecation note on the
+  old DID Document) if desired at all.
+- **Structured error code registry** `-32001..-32005` (legacy Appendix B). The finalized spec is
+  resolution-centric (`did.json` over HTTPS) and does not define a JSON-RPC error surface;
+  HTTP/resolution-result semantics likely suffice, but a small documented error vocabulary could
+  aid interop.
+- **Explicit trust-score / verifiable-credential coupling** (legacy §7, §9). The finalized spec
+  is intentionally identity-only; ATP trust scoring lives outside the DID method. Worth a
+  cross-reference note rather than a method requirement.
+- **`ATPGateway` service-endpoint convention** (legacy §5.2). Not required by the finalized spec;
+  could be offered as an optional, documented service `type` for discovery.
+
+None of the above is treated as a v2 implementation requirement.
