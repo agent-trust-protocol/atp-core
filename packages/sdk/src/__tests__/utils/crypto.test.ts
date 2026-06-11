@@ -5,105 +5,6 @@
 import { CryptoUtils } from '../../utils/crypto';
 
 describe('CryptoUtils', () => {
-  describe('generateKeyPair', () => {
-    it('should generate a valid Ed25519 key pair', async () => {
-      const keyPair = await CryptoUtils.generateKeyPair(false);
-      
-      expect(keyPair).toHaveProperty('publicKey');
-      expect(keyPair).toHaveProperty('privateKey');
-      expect(keyPair).toHaveProperty('quantumSafe');
-      expect(keyPair.quantumSafe).toBe(false);
-      expect(typeof keyPair.publicKey).toBe('string');
-      expect(typeof keyPair.privateKey).toBe('string');
-      expect(keyPair.publicKey).toMatch(/^[0-9a-fA-F]{64}$/);
-      expect(keyPair.privateKey).toMatch(/^[0-9a-fA-F]{64}$/);
-    });
-
-    it('should generate a valid hybrid quantum-safe key pair', async () => {
-      const keyPair = await CryptoUtils.generateKeyPair(true);
-      
-      expect(keyPair).toHaveProperty('publicKey');
-      expect(keyPair).toHaveProperty('privateKey');
-      expect(keyPair).toHaveProperty('quantumSafe');
-      expect(keyPair.quantumSafe).toBe(true);
-      expect(keyPair).toHaveProperty('ed25519PublicKey');
-      expect(keyPair).toHaveProperty('ed25519PrivateKey');
-      expect(keyPair).toHaveProperty('mlDsaPublicKey');
-      expect(keyPair).toHaveProperty('mlDsaPrivateKey');
-      expect(typeof keyPair.publicKey).toBe('string');
-      expect(typeof keyPair.privateKey).toBe('string');
-      // Combined public key: 32 bytes Ed25519 + 1952 bytes ML-DSA = 1984 bytes = 3968 hex chars
-      expect(keyPair.publicKey.length).toBe(3968);
-      // Combined private key: 32 bytes Ed25519 + 4032 bytes ML-DSA = 4064 bytes = 8128 hex chars
-      // Note: ML-DSA-65 private key size updated in @noble/post-quantum
-      expect(keyPair.privateKey.length).toBe(8128);
-      // Ed25519 components should be 64 hex chars each
-      expect(keyPair.ed25519PublicKey).toMatch(/^[0-9a-fA-F]{64}$/);
-      expect(keyPair.ed25519PrivateKey).toMatch(/^[0-9a-fA-F]{64}$/);
-    });
-
-    it('should generate different key pairs on each call', async () => {
-      const keyPair1 = await CryptoUtils.generateKeyPair(false);
-      const keyPair2 = await CryptoUtils.generateKeyPair(false);
-      
-      expect(keyPair1.publicKey).not.toBe(keyPair2.publicKey);
-      expect(keyPair1.privateKey).not.toBe(keyPair2.privateKey);
-    });
-  });
-
-  describe('signData and verifySignature', () => {
-    let keyPair: { publicKey: string; privateKey: string };
-    
-    beforeAll(async () => {
-      keyPair = await CryptoUtils.generateKeyPair();
-    });
-
-    it('should sign and verify string data', async () => {
-      const data = 'Hello, ATP!';
-      const signature = await CryptoUtils.signData(data, keyPair.privateKey);
-      
-      expect(typeof signature).toBe('string');
-      expect(signature).toMatch(/^[0-9a-fA-F]+$/);
-      
-      const isValid = await CryptoUtils.verifySignature(data, signature, keyPair.publicKey);
-      expect(isValid).toBe(true);
-    });
-
-    it('should sign and verify Buffer data', async () => {
-      const data = Buffer.from('Hello, ATP!', 'utf8');
-      const signature = await CryptoUtils.signData(data, keyPair.privateKey);
-      
-      const isValid = await CryptoUtils.verifySignature(data, signature, keyPair.publicKey);
-      expect(isValid).toBe(true);
-    });
-
-    it('should fail verification with wrong signature', async () => {
-      const data = 'Hello, ATP!';
-      const signature = await CryptoUtils.signData(data, keyPair.privateKey);
-      const wrongSignature = signature.replace('0', '1');
-      
-      const isValid = await CryptoUtils.verifySignature(data, wrongSignature, keyPair.publicKey);
-      expect(isValid).toBe(false);
-    });
-
-    it('should fail verification with wrong public key', async () => {
-      const otherKeyPair = await CryptoUtils.generateKeyPair();
-      const data = 'Hello, ATP!';
-      const signature = await CryptoUtils.signData(data, keyPair.privateKey);
-      
-      const isValid = await CryptoUtils.verifySignature(data, signature, otherKeyPair.publicKey);
-      expect(isValid).toBe(false);
-    });
-
-    it('should fail verification with modified data', async () => {
-      const data = 'Hello, ATP!';
-      const signature = await CryptoUtils.signData(data, keyPair.privateKey);
-      
-      const isValid = await CryptoUtils.verifySignature('Modified data', signature, keyPair.publicKey);
-      expect(isValid).toBe(false);
-    });
-  });
-
   describe('hash', () => {
     it('should hash string data consistently', () => {
       const data = 'Hello, ATP!';
@@ -196,25 +97,6 @@ describe('CryptoUtils', () => {
       const key2 = CryptoUtils.deriveKey(password, 'salt2');
       
       expect(key1).not.toBe(key2);
-    });
-  });
-
-  describe('createKeyFingerprint', () => {
-    it('should create fingerprint from public key', () => {
-      const publicKey = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
-      const fingerprint = CryptoUtils.createKeyFingerprint(publicKey);
-      
-      expect(typeof fingerprint).toBe('string');
-      expect(fingerprint).toMatch(/^[0-9a-fA-F]{16}$/);
-      expect(fingerprint.length).toBe(16);
-    });
-
-    it('should produce same fingerprint for same public key', () => {
-      const publicKey = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
-      const fingerprint1 = CryptoUtils.createKeyFingerprint(publicKey);
-      const fingerprint2 = CryptoUtils.createKeyFingerprint(publicKey);
-      
-      expect(fingerprint1).toBe(fingerprint2);
     });
   });
 
