@@ -10,8 +10,8 @@ import { JWTUtils } from '../../utils/jwt';
 describe('JWTUtils', () => {
   // Sample JWT token for testing decode functions
   const samplePayload = {
-    iss: 'did:atp:mainnet:test',
-    sub: 'did:atp:mainnet:test',
+    iss: 'did:atp:example.com:agents:test:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+    sub: 'did:atp:example.com:agents:test:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
     aud: 'atp:services',
     exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
     iat: Math.floor(Date.now() / 1000),
@@ -41,7 +41,7 @@ describe('JWTUtils', () => {
       expect(result).not.toBeNull();
       expect(result!.header.alg).toBe('EdDSA');
       expect(result!.header.typ).toBe('JWT');
-      expect(result!.payload.iss).toBe('did:atp:mainnet:test');
+      expect(result!.payload.iss).toBe('did:atp:example.com:agents:test:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB');
       expect(result!.signature).toBe('mocksignature123');
     });
 
@@ -113,7 +113,7 @@ describe('JWTUtils', () => {
   describe('extractDID', () => {
     it('should extract DID from issuer claim', () => {
       const token = createMockJWT(samplePayload);
-      expect(JWTUtils.extractDID(token)).toBe('did:atp:mainnet:test');
+      expect(JWTUtils.extractDID(token)).toBe('did:atp:example.com:agents:test:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB');
     });
 
     it('should fall back to subject claim', () => {
@@ -121,7 +121,7 @@ describe('JWTUtils', () => {
       delete (payloadNoIss as any).iss;
       const token = createMockJWT(payloadNoIss);
 
-      expect(JWTUtils.extractDID(token)).toBe('did:atp:mainnet:test');
+      expect(JWTUtils.extractDID(token)).toBe('did:atp:example.com:agents:test:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB');
     });
 
     it('should return null for token without DID claims', () => {
@@ -177,8 +177,8 @@ describe('JWTUtils', () => {
   describe('Capability Token Structure', () => {
     it('should decode capability token with capabilities', () => {
       const capabilityPayload = {
-        iss: 'did:atp:mainnet:issuer',
-        sub: 'did:atp:mainnet:subject',
+        iss: 'did:atp:example.com:agents:issuer:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+        sub: 'did:atp:example.com:agents:subject:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
         capabilities: ['read', 'write', 'execute'],
         restrictions: { maxCalls: 100 },
         tokenType: 'capability',
@@ -196,13 +196,13 @@ describe('JWTUtils', () => {
   describe('Presentation Token Structure', () => {
     it('should decode presentation token with VP claim', () => {
       const presentationPayload = {
-        iss: 'did:atp:mainnet:holder',
-        aud: 'did:atp:mainnet:verifier',
+        iss: 'did:atp:example.com:agents:holder:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+        aud: 'did:atp:example.com:agents:verifier:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
         vp: {
           '@context': ['https://www.w3.org/2018/credentials/v1'],
           type: ['VerifiablePresentation'],
           verifiableCredential: ['cred-123', 'cred-456'],
-          holder: 'did:atp:mainnet:holder'
+          holder: 'did:atp:example.com:agents:holder:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'
         },
         challenge: 'random-challenge-123',
         tokenType: 'presentation',
@@ -220,8 +220,8 @@ describe('JWTUtils', () => {
   describe('Refresh Token Structure', () => {
     it('should decode refresh token with jti', () => {
       const refreshPayload = {
-        iss: 'did:atp:mainnet:user',
-        sub: 'did:atp:mainnet:user',
+        iss: 'did:atp:example.com:agents:user:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+        sub: 'did:atp:example.com:agents:user:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
         aud: 'atp:auth',
         tokenType: 'refresh',
         jti: 'unique-token-id-123',
@@ -240,10 +240,10 @@ describe('JWTUtils', () => {
   describe('Auth Token Structure', () => {
     it('should decode auth token with did, permissions, and trustLevel', () => {
       const authPayload = {
-        iss: 'did:atp:mainnet:agent',
-        sub: 'did:atp:mainnet:agent',
+        iss: 'did:atp:example.com:agents:agent:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+        sub: 'did:atp:example.com:agents:agent:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
         aud: 'atp:services',
-        did: 'did:atp:mainnet:agent',
+        did: 'did:atp:example.com:agents:agent:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
         permissions: ['identity:read', 'credentials:write'],
         trustLevel: 'TRUSTED',
         exp: Math.floor(Date.now() / 1000) + 3600
@@ -251,7 +251,7 @@ describe('JWTUtils', () => {
       const token = createMockJWT(authPayload);
       const decoded = JWTUtils.decodeJWT(token);
 
-      expect(decoded!.payload.did).toBe('did:atp:mainnet:agent');
+      expect(decoded!.payload.did).toBe('did:atp:example.com:agents:agent:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB');
       expect(decoded!.payload.permissions).toEqual(['identity:read', 'credentials:write']);
       expect(decoded!.payload.trustLevel).toBe('TRUSTED');
     });
@@ -273,7 +273,7 @@ describe('JWTUtils', () => {
 
     it('should handle token with null claims', () => {
       const payload = {
-        iss: 'did:atp:test',
+        iss: 'did:atp:example.com:agents:test:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
         customClaim: null,
         exp: Math.floor(Date.now() / 1000) + 3600
       };
@@ -286,7 +286,7 @@ describe('JWTUtils', () => {
 
     it('should handle token with nested objects', () => {
       const payload = {
-        iss: 'did:atp:test',
+        iss: 'did:atp:example.com:agents:test:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
         complex: {
           nested: {
             deep: {
@@ -305,7 +305,7 @@ describe('JWTUtils', () => {
 
     it('should handle token with array claims', () => {
       const payload = {
-        iss: 'did:atp:test',
+        iss: 'did:atp:example.com:agents:test:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
         scopes: ['read', 'write', 'admin'],
         resources: [
           { id: 'res-1', access: 'full' },
@@ -323,7 +323,7 @@ describe('JWTUtils', () => {
     it('should handle token expiring in the past', () => {
       // Token that expired 1 second ago
       const payload = {
-        iss: 'did:atp:test',
+        iss: 'did:atp:example.com:agents:test:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
         exp: Math.floor(Date.now() / 1000) - 1 // 1 second ago
       };
       const token = createMockJWT(payload);
@@ -335,7 +335,7 @@ describe('JWTUtils', () => {
     it('should handle very large expiration times', () => {
       const farFuture = Math.floor(Date.now() / 1000) + 315360000; // 10 years
       const payload = {
-        iss: 'did:atp:test',
+        iss: 'did:atp:example.com:agents:test:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
         exp: farFuture
       };
       const token = createMockJWT(payload);
@@ -347,15 +347,15 @@ describe('JWTUtils', () => {
 
   describe('Token Header Validation', () => {
     it('should correctly decode header with kid claim', () => {
-      const header = { alg: 'EdDSA', typ: 'JWT', kid: 'did:atp:test#key-1' };
-      const payload = { iss: 'did:atp:test', exp: Math.floor(Date.now() / 1000) + 3600 };
+      const header = { alg: 'EdDSA', typ: 'JWT', kid: 'did:atp:example.com:agents:test:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB#key-1' };
+      const payload = { iss: 'did:atp:example.com:agents:test:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB', exp: Math.floor(Date.now() / 1000) + 3600 };
 
       const headerB64 = Buffer.from(JSON.stringify(header)).toString('base64url');
       const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
       const token = `${headerB64}.${payloadB64}.signature`;
 
       const decoded = JWTUtils.decodeJWT(token);
-      expect(decoded!.header.kid).toBe('did:atp:test#key-1');
+      expect(decoded!.header.kid).toBe('did:atp:example.com:agents:test:e1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:pq1_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB#key-1');
     });
 
     it('should decode various algorithm types', () => {

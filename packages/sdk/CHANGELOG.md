@@ -5,6 +5,29 @@ All notable changes to the ATP™ SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-06-11
+
+### Changed (BREAKING)
+
+- **did:atp v2 identifier format**: `did:atp:<host>[:<path>…]:e1_…:pq1_…`
+  replaces v1 `did:atp:<network>:<fingerprint>`, aligning with the finalized
+  did:atp specification. No conversion from v1 exists — see
+  [MIGRATION.md](./MIGRATION.md).
+- **Split hybrid key pairs**: `HybridKeyPair` is now `{ ed25519, mlDsa65 }`
+  (independent key pairs) instead of a composite blob.
+- **ML-DSA-65 (FIPS 204)** replaces draft Dilithium naming throughout;
+  signatures are 3309 bytes.
+- **Fingerprints are RFC 7638 JWK SHA-256 thumbprints** (`e1_`/`pq1_` +
+  43 base64url chars), replacing the v1 truncated fingerprint.
+- **Key rotation changes the DID** (the DID binds the key thumbprints);
+  deactivation is supported via DID document metadata.
+
+### Added
+
+- `DidAtp`, `DidAtpDocument`, `DidAtpResolver` utilities; JCS canonicalization
+  (`jcsCanonicalize`); Data Integrity proofs with PQ proof support.
+- `MIGRATION.md` documenting the v1 → v2 break.
+
 ## [1.0.0] - 2024-06-28
 
 ### Added
