@@ -1,7 +1,7 @@
 {
   "name": "atp-sdk",
   "version": "1.2.0",
-  "description": "Official TypeScript SDK for Agent Trust Protocol\u2122 - Build secure, verifiable, and trustworthy applications with decentralized identity, verifiable credentials, payment protocols (AP2/ACP), and robust access control",
+  "description": "Official TypeScript SDK for Agent Trust Protocol™ - Build secure, verifiable, and trustworthy applications with decentralized identity, verifiable credentials, payment protocols (AP2/ACP), and robust access control",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -55,7 +55,7 @@
     "crypto-payments",
     "stablecoin-payments"
   ],
-  "author": "ATP\u2122 Development Team",
+  "author": "ATP™ Development Team",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -71,6 +71,7 @@
     "@noble/ed25519": "^2.0.0",
     "@noble/hashes": "^1.3.0",
     "@noble/post-quantum": "^0.6.1",
+    "@scure/base": "^1.1.0",
     "axios": "^1.6.0",
     "did-jwt": "^7.4.0",
     "did-resolver": "^4.1.0",
