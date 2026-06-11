@@ -48,6 +48,13 @@ export { CryptoUtils } from './utils/crypto.js';
 export { DidAtp } from './utils/did.js';
 export type { ParsedAtpDid, AtpDidType } from './utils/did.js';
 export { DidAtpDocument } from './utils/did-document.js';
+export {
+  DidAtpResolver,
+  DidResolutionError,
+  type DidResolutionErrorCode,
+  type DidResolutionResult,
+  type ResolveOptions
+} from './utils/resolver.js';
 export { jcsCanonicalize } from './utils/jcs.js';
 export type { AtpDidDocument, AtpPqProof, DataIntegrityProof } from './types.js';
 export { JWTUtils } from './utils/jwt.js';

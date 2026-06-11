@@ -781,7 +781,7 @@ export class Agent extends EventEmitter {
       didDoc = this.didDocument;
     } else {
       try {
-        const resolved = await this.client.identity.resolveDID(this.did);
+        const resolved = await this.client.identity.getRegistryRecord(this.did);
         didDoc = resolved.data?.document || this.createDefaultDIDDocument();
         this.didDocument = didDoc;
       } catch {
