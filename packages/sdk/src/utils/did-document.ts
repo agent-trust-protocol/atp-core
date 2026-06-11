@@ -116,6 +116,32 @@ export class DidAtpDocument {
   }
 
   /**
+   * Key rotation per "Method Operations / Update": because both binding-key
+   * fingerprints are path segments of the identifier, rotating either key
+   * yields a NEW DID — the old DID is never updated in place. This takes the
+   * old DID (for its domain and path) and a fresh hybrid keypair, and
+   * produces the new DID plus a freshly dual-signed did.json to serve in
+   * place of the old one. The old DID simply stops resolving once its
+   * did.json is replaced (or is removed entirely — see Deactivate in
+   * utils/resolver.ts).
+   */
+  static async rotate(
+    oldDid: string,
+    newKeyPair: HybridKeyPair,
+    options: { created?: string; service?: AtpDidDocument['service'] } = {}
+  ): Promise<{ previousDid: string; did: string; document: AtpDidDocument }> {
+    const parsed = DidAtp.parse(oldDid);
+    if (!parsed || parsed.type !== 'path') {
+      throw new Error(`Cannot rotate: "${oldDid}" is not a valid path-type did:atp identifier`);
+    }
+    const { did, document } = await this.create(parsed.domain, parsed.path, newKeyPair, options);
+    if (did === parsed.did) {
+      throw new Error('Rotation requires new key material: the new keypair produces the same DID');
+    }
+    return { previousDid: parsed.did, did, document };
+  }
+
+  /**
    * eddsa-jcs-2022 Data Integrity proof (VC-DI-EdDSA): sign
    * sha256(JCS(proof config)) || sha256(JCS(unsecured document)).
    */

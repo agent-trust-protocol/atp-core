@@ -349,7 +349,12 @@ export class PaymentsClient extends BaseClient {
 
   private async signMandate(mandate: any): Promise<string> {
     const payload = JSON.stringify(mandate);
-    return CryptoUtils.sign(payload, this.config.auth?.privateKey || '');
+    // The hybrid private key is hex of ed25519 secret || ml-dsa-65 secret;
+    // mandates are signed with the classical (Ed25519) half.
+    const secretHex = this.config.auth?.privateKey || '';
+    const ed25519Secret = new Uint8Array(Buffer.from(secretHex, 'hex')).slice(0, 32);
+    const signature = await CryptoUtils.signEd25519(payload, ed25519Secret);
+    return Buffer.from(signature).toString('hex');
   }
 
   private async hashCartMandate(cart: any): Promise<string> {

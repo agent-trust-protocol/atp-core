@@ -19,6 +19,15 @@ import { AtpDidDocument } from '../types.js';
  * A did:web-style "%3A<port>" suffix on the domain becomes ":<port>" in the
  * URL authority. The fingerprint segments are binding material, not path —
  * they never appear in the URL.
+ *
+ * Deactivate (did:wba/did:web convention): the controller deactivates a DID
+ * by simply ceasing to serve its did.json — there is no tombstone document.
+ * A deactivated DID is therefore indistinguishable from one that never
+ * existed: resolution fails with DidResolutionError('notFound'). Update is
+ * similarly out-of-band: rotating either binding key changes the DID (see
+ * DidAtpDocument.rotate()), so the old DID's did.json is replaced or
+ * removed, after which resolving the old DID fails with 'didMismatch' (new
+ * document served at the same path) or 'notFound' (removed).
  */
 
 export type DidResolutionErrorCode =

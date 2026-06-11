@@ -73,8 +73,6 @@ export interface SimpleAgentOptions {
   did?: string;
   /** Optional private key (required if DID is provided) */
   privateKey?: string;
-  /** Print agent status banner after creation (default: false) */
-  log?: boolean;
 }
 
 /**
@@ -94,7 +92,6 @@ export class Agent extends EventEmitter {
   private name: string;
   private initialized = false;
   private _quantumSafe: boolean = false;
-  private _standalone: boolean = false;
   private eventHandlers: Map<AgentEventType, Set<(data: any) => void>> = new Map();
   // X25519 key pair for message encryption (separate from signing keys)
   private encryptionPublicKey: string | null = null;
@@ -154,22 +151,7 @@ export class Agent extends EventEmitter {
   static async create(name: string, options?: SimpleAgentOptions): Promise<Agent> {
     const agent = new Agent(name, options);
     await agent.initialize();
-    if (options?.log) {
-      agent.logBanner();
-    }
     return agent;
-  }
-
-  /**
-   * Create an agent and print its status — the 1-line quick start.
-   *
-   * @example
-   * ```typescript
-   * await Agent.quickstart('MyBot');
-   * ```
-   */
-  static async quickstart(name: string, options?: SimpleAgentOptions): Promise<Agent> {
-    return Agent.create(name, { ...options, log: true });
   }
 
   private async initialize(): Promise<void> {
@@ -180,33 +162,33 @@ export class Agent extends EventEmitter {
       if (!this.did || !this.privateKey) {
         // Generate hybrid quantum-safe keypair (Ed25519 + ML-DSA)
         // This provides protection against both classical and quantum attacks
-        const keyPair = await CryptoUtils.generateKeyPair(true); // quantumSafe = true by default
+        const keyPair = await CryptoUtils.generateHybridKeyPair();
+        // Legacy string form: hex of ed25519 || ml-dsa-65 key material
+        const publicKeyHex = Buffer.concat([
+          keyPair.ed25519.publicKey,
+          keyPair.mlDsa65.publicKey
+        ]).toString('hex');
+        const privateKeyHex = Buffer.concat([
+          keyPair.ed25519.secretKey,
+          keyPair.mlDsa65.secretKey
+        ]).toString('hex');
 
-        try {
-          const identity = await this.client.identity.registerDID({
-            publicKey: keyPair.publicKey,
-            metadata: {
-              name: this.name,
-              quantumSafe: keyPair.quantumSafe,
-              algorithm: keyPair.quantumSafe ? 'hybrid-ed25519-mldsa65' : 'ed25519'
-            }
-          });
-
-          if (identity.data) {
-            this.did = identity.data.did;
-            this.privateKey = keyPair.privateKey;
-            this._quantumSafe = keyPair.quantumSafe;
-          } else {
-            throw new Error('No DID returned from identity service');
+        const identity = await this.client.identity.registerDID({
+          publicKey: publicKeyHex,
+          metadata: {
+            name: this.name,
+            quantumSafe: true,
+            algorithm: 'hybrid-ed25519-mldsa65'
           }
-        } catch {
-          // Standalone mode: no ATP services available — generate DID locally
-          const pubKeyShort = keyPair.publicKey.slice(0, 16);
-          this.did = `did:atp:${pubKeyShort}`;
-          this.privateKey = keyPair.privateKey;
-          this._quantumSafe = keyPair.quantumSafe;
-          this._standalone = true;
-          console.log('\u26A1 Running in standalone mode (no ATP services detected). DID generated locally.');
+        });
+
+        if (identity.data) {
+          this.did = identity.data.did;
+          this.privateKey = privateKeyHex;
+          // Store quantum-safe flag for signing operations
+          this._quantumSafe = true;
+        } else {
+          throw new Error('Failed to register DID');
         }
       }
 
@@ -226,15 +208,6 @@ export class Agent extends EventEmitter {
     } catch (error) {
       throw new Error(`Failed to initialize agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-  }
-
-  private logBanner(): void {
-    const mode = this._standalone ? 'standalone (local)' : 'connected';
-    const qs = this.isQuantumSafe() ? 'yes' : 'no';
-    console.log(`\n\u26A1 ${this.name} ready!`);
-    console.log(`  DID:          ${this.did}`);
-    console.log(`  Quantum-safe: ${qs}`);
-    console.log(`  Mode:         ${mode}\n`);
   }
 
   /**
@@ -515,13 +488,6 @@ export class Agent extends EventEmitter {
    */
   isQuantumSafe(): boolean {
     return this._quantumSafe === true || !!(this.privateKey && this.privateKey.length > 8000); // Hybrid keys are ~8000 hex chars (4032 bytes)
-  }
-
-  /**
-   * Check if the agent is running in standalone mode (no ATP services)
-   */
-  isStandalone(): boolean {
-    return this._standalone;
   }
 
   /**

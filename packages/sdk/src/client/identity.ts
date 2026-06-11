@@ -47,6 +47,7 @@ export interface MFAVerificationRequest {
  */
 export class IdentityClient extends BaseClient {
   private static warnedDeprecatedResolve = false;
+  private static warnedDeprecatedRotate = false;
 
   constructor(config: ATPConfig) {
     super(config, 'identity');
@@ -110,9 +111,24 @@ export class IdentityClient extends BaseClient {
   }
 
   /**
-   * Rotate keys for a DID
+   * Update the registry's key record for a DID. Registry role only — this
+   * does NOT rotate a did:atp identifier's binding keys.
+   *
+   * @deprecated did:atp binding-key rotation changes the DID itself (both
+   * fingerprints are path segments), so it cannot be done in place via a
+   * registry call. Use `DidAtpDocument.rotate()` (utils/did-document.ts),
+   * which produces the new DID and its freshly dual-signed did.json. This
+   * method only updates the registry's own record.
    */
   async rotateKeys(did: string, newPublicKey: string): Promise<ATPResponse<DIDDocument>> {
+    if (!IdentityClient.warnedDeprecatedRotate) {
+      IdentityClient.warnedDeprecatedRotate = true;
+      console.warn(
+        '[atp-sdk] IdentityClient.rotateKeys() is deprecated: did:atp rotation changes the DID ' +
+          'and cannot be done in place. Use DidAtpDocument.rotate() to produce the new DID and ' +
+          'its dual-signed did.json; this method only updates the registry record.'
+      );
+    }
     return this.post(`/identity/${encodeURIComponent(did)}/rotate-keys`, {
       newPublicKey
     });

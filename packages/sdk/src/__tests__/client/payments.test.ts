@@ -15,7 +15,7 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 jest.mock('../../utils/crypto', () => ({
   CryptoUtils: {
     generateId: jest.fn().mockReturnValue('generated-id-123'),
-    sign: jest.fn().mockResolvedValue('signature-123'),
+    signEd25519: jest.fn().mockResolvedValue(new Uint8Array([0x51, 0x6e])),
     hash: jest.fn().mockResolvedValue('hash-123')
   }
 }));
@@ -79,7 +79,7 @@ describe('PaymentsClient', () => {
               agentDid: 'did:atp:agent456',
               purpose: 'Shopping assistance'
             }),
-            signature: 'signature-123'
+            signature: '516e'
           })
         });
         expect(result.data).toEqual(mockMandate);
@@ -543,9 +543,9 @@ describe('PaymentsClient', () => {
         purpose: 'Test'
       });
 
-      expect(CryptoUtils.sign).toHaveBeenCalledWith(
+      expect(CryptoUtils.signEd25519).toHaveBeenCalledWith(
         expect.any(String),
-        'test-private-key'
+        expect.any(Uint8Array)
       );
     });
 
