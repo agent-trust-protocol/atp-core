@@ -45,7 +45,8 @@ export { UniversalMonitor, SecurityEnforcer } from './monitoring/index.js';
 
 // Utility Classes
 export { CryptoUtils } from './utils/crypto.js';
-export { DIDUtils } from './utils/did.js';
+export { DidAtp } from './utils/did.js';
+export type { ParsedAtpDid, AtpDidType } from './utils/did.js';
 export { JWTUtils } from './utils/jwt.js';
 export { VersionManager, versionManager } from './utils/version-manager.js';
 export type { ProtocolVersion, AgentVersion, SDKCompatibility } from './utils/version-manager.js';
