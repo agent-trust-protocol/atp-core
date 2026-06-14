@@ -151,7 +151,7 @@ const ALLOWED_MONITORING_ENDPOINTS = new Set([
   'metrics',
   'alerts',
   'health',
-  'status',
+  'status'
 ]);
 
 // Forwarded query parameters are also limited so callers cannot smuggle
