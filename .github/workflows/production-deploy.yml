@@ -5,10 +5,8 @@ name: Production Deployment
 
 on:
   push:
-    branches: [main, 'claude/**']
-    tags: ['v*']
-  pull_request:
     branches: [main]
+    tags: ['v*']
   workflow_dispatch:
     inputs:
       environment:
@@ -33,12 +31,30 @@ env:
   HELM_VERSION: v3.12.0
 
 jobs:
+  # The `secrets` context cannot be read in a job-level `if:`, so this pre-check
+  # job reads it in a step and exposes a boolean output downstream jobs gate on.
+  check-secrets:
+    name: Check deploy secrets
+    runs-on: ubuntu-latest
+    outputs:
+      has_aws: ${{ steps.check.outputs.has_aws }}
+    steps:
+      - id: check
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        run: |
+          if [ -n "$AWS_ACCESS_KEY_ID" ]; then
+            echo "has_aws=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_aws=false" >> "$GITHUB_OUTPUT"
+          fi
+
   # Security and Quality Checks
   security-scan:
     name: Security Scanning
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/claude/')
-    
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -88,8 +104,8 @@ jobs:
   build-images:
     name: Build Container Images
     runs-on: ubuntu-latest
-    needs: security-scan
-    if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) && secrets.AWS_ACCESS_KEY_ID != ''
+    needs: [security-scan, check-secrets]
+    if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) && needs.check-secrets.outputs.has_aws == 'true'
     permissions:
       contents: read
       packages: write
