@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ATP Trust Scoring &amp; the TrustCredential — Verifiable Agent Trust</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      window.specConfig = {
+        shortName: "atp-trust",
+        title: "ATP Trust Scoring and the TrustCredential",
+        subtitle: "A Verifiable-Credentials Profile for AI Agent Trust",
+      };
+    </script>
+    <script src="../common/biblio.js"></script>
+    <script
+      src="https://www.w3.org/Tools/respec/respec-w3c"
+      class="remove"
+      defer
+    ></script>
+    <script src="../common/respec-config.js" class="remove" defer></script>
+  </head>
+  <body>
+    <section id="abstract">
+      <p>
+        This specification defines an <strong>agent trust scoring model</strong>
+        and a <strong>TrustCredential</strong>: the trust score for an AI agent,
+        issued and verified as a W3C Verifiable Credential [[VC-DATA-MODEL-2.0]].
+        The trust score is a single value in the interval <code>[0, 1]</code>
+        derived from four weighted factors. The TrustCredential expresses that
+        score as a credential whose integrity is secured by a Data Integrity
+        proof using the <code>eddsa-jcs-2022</code> cryptosuite [[VC-DI-EDDSA]],
+        optionally paired with a post-quantum ML-DSA-65 JWS [[RFC9964]].
+      </p>
+      <p>
+        Trust scoring and Verifiable Credentials previously existed in ATP as
+        decoupled mechanisms: a score was computed locally and never issued in a
+        portable, verifiable form. This specification couples them, so that a
+        relying party can verify a trust claim made by a third-party assessor
+        without re-running the assessment and without trusting the transport.
+      </p>
+      <p class="note" title="Shared cryptographic profile with did:atp">
+        The <code>eddsa-jcs-2022</code> proof and the optional ML-DSA-65 JWS use
+        the <em>same</em> construction as the <code>did:atp</code> DID Document
+        [[?DID-CORE]], so proof vectors are consistent across ATP artifacts.
+      </p>
+    </section>
+
+    <section id="sotd">
+      <p>
+        This document is a draft work product of the Agent Trust Protocol (ATP)
+        Community Group. It is <strong>not</strong> a W3C Standard nor on the W3C
+        Recommendation track. Publication as a Community Group Report does not
+        imply endorsement by W3C or its Membership.
+      </p>
+      <p>
+        This specification is a companion to the <code>did:atp</code> DID Method
+        specification. It reuses that method's classical
+        (<code>eddsa-jcs-2022</code>) and post-quantum (ML-DSA-65 JWS) integrity
+        mechanisms, but is otherwise DID-method-agnostic: any issuer and subject
+        identified by a resolvable DID MAY participate.
+      </p>
+      <p class="ednote" title="Revocation is not yet specified">
+        Credential status / revocation (e.g. a status-list mechanism) is
+        <strong>not</strong> defined by this version and is an open item. See
+        <a href="#conformance-gaps">Open Items and Conformance Gaps</a>.
+      </p>
+    </section>
+
+    <section id="conformance">
+      <p>
+        As well as sections marked as non-normative, all authoring guidelines,
+        diagrams, examples, and notes in this specification are non-normative.
+        Everything else is normative.
+      </p>
+      <p>
+        The key words <em>MUST</em>, <em>MUST NOT</em>, <em>SHOULD</em>,
+        <em>SHOULD NOT</em>, and <em>MAY</em> are to be interpreted as described
+        in BCP 14 [[RFC2119]] [[RFC8174]] when, and only when, they appear in all
+        capitals.
+      </p>
+    </section>
+
+    <section id="trust-model" class="normative">
+      <h2>Trust Scoring Model</h2>
+      <p>
+        A <dfn>trust score</dfn> is a number in the interval
+        <code>[0, 1]</code> computed from four <dfn>trust factors</dfn>, each
+        itself a number in <code>[0, 1]</code>. An assessor <em>MUST</em> compute
+        the trust score as the weighted sum of the four factors, and the four
+        weights <em>MUST</em> sum to <code>1</code>.
+      </p>
+      <table class="simple">
+        <thead>
+          <tr><th>Factor</th><th>Meaning</th><th>Default weight</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>interactionScore</code></td><td>Volume of interaction history.</td><td>0.25</td></tr>
+          <tr><td><code>recencyScore</code></td><td>Time-decayed recency of interactions.</td><td>0.25</td></tr>
+          <tr><td><code>credentialScore</code></td><td>Verified credentials held by the subject.</td><td>0.30</td></tr>
+          <tr><td><code>successScore</code></td><td>Success rate of past interactions.</td><td>0.20</td></tr>
+        </tbody>
+      </table>
+      <p>
+        An assessor <em>MAY</em> override the default weights, but the resulting
+        weights <em>MUST</em> still sum to <code>1</code>, and any non-default
+        weighting <em>SHOULD</em> be disclosed to relying parties. An assessor
+        <em>MUST</em> also report a <dfn>confidence</dfn> value in
+        <code>[0, 1]</code> indicating how much data informed the score; relying
+        parties <em>SHOULD</em> treat a low-confidence high score with caution.
+      </p>
+      <p>
+        Each trust score <em>MUST</em> be mapped to exactly one
+        <dfn>trust level</dfn> for coarse-grained policy decisions:
+      </p>
+      <table class="simple">
+        <thead><tr><th>Level</th><th>Score range</th></tr></thead>
+        <tbody>
+          <tr><td><code>UNKNOWN</code></td><td>no history</td></tr>
+          <tr><td><code>BASIC</code></td><td>0.00 – 0.25</td></tr>
+          <tr><td><code>VERIFIED</code></td><td>0.25 – 0.50</td></tr>
+          <tr><td><code>TRUSTED</code></td><td>0.50 – 0.75</td></tr>
+          <tr><td><code>PRIVILEGED</code></td><td>0.75 – 1.00</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="trust-credential" class="normative">
+      <h2>The TrustCredential VC Profile</h2>
+      <p>
+        A <dfn>TrustCredential</dfn> is a W3C Verifiable Credential
+        [[VC-DATA-MODEL-2.0]] that attests a <a>trust score</a> about a subject
+        agent. A conforming TrustCredential <em>MUST</em> satisfy all of the
+        following:
+      </p>
+      <ul>
+        <li>
+          Its <code>@context</code> <em>MUST</em> include the VC v2 base context
+          <code>https://www.w3.org/ns/credentials/v2</code>.
+        </li>
+        <li>
+          Its <code>type</code> <em>MUST</em> include both
+          <code>VerifiableCredential</code> and <code>TrustCredential</code>.
+        </li>
+        <li>
+          Its <code>issuer</code> <em>MUST</em> be the identifier (a DID
+          [[?DID-CORE]]) of the assessing trust service.
+        </li>
+        <li>
+          Its <code>credentialSubject</code> <em>MUST</em> contain:
+          <code>id</code> (the subject agent's DID), <code>trustScore</code>,
+          <code>trustLevel</code>, <code>factors</code> (the four factor scores),
+          <code>confidence</code>, and <code>assessedAt</code> (an ISO-8601
+          timestamp).
+        </li>
+        <li>
+          It <em>MUST</em> carry a Data Integrity proof whose
+          <code>type</code> is <code>DataIntegrityProof</code> and whose
+          <code>cryptosuite</code> is <code>eddsa-jcs-2022</code> [[VC-DI-EDDSA]],
+          with <code>proofPurpose</code> <code>assertionMethod</code>.
+        </li>
+        <li>
+          For post-quantum assurance it <em>SHOULD</em> additionally carry an
+          <code>atpPqProof</code>: an RFC 9964 [[RFC9964]] compact JWS with
+          algorithm <code>ML-DSA-65</code> over the same unsecured credential.
+        </li>
+      </ul>
+
+      <h3>Proof construction</h3>
+      <p>
+        The <code>eddsa-jcs-2022</code> proof <em>MUST</em> be computed exactly as
+        for an ATP DID Document: canonicalize the proof configuration and the
+        unsecured credential with JSON Canonicalization Scheme [[RFC8785]], hash
+        each with SHA-256, sign the concatenation
+        <code>sha256(JCS(config)) || sha256(JCS(credential))</code> with the
+        issuer's Ed25519 key, and encode the signature as a multibase
+        base58-btc <code>proofValue</code> (the <code>z</code> prefix). Verifiers
+        <em>MUST</em> reject any credential whose recomputed proof does not match.
+      </p>
+      <p>
+        When present, the <code>atpPqProof</code> JWS <em>MUST</em> be verified
+        independently, and a verifier that requires post-quantum assurance
+        <em>MUST NOT</em> treat a valid classical proof alone as sufficient.
+      </p>
+
+      <h3>Verification and trust derivation</h3>
+      <p>
+        A verifier <em>MUST</em>: (1) confirm the structural requirements above;
+        (2) obtain the issuer's public key(s) by resolving the
+        <code>issuer</code> identifier; (3) verify the
+        <code>eddsa-jcs-2022</code> proof; (4) verify the
+        <code>atpPqProof</code> when present and post-quantum assurance is
+        required; and (5) reject the credential if an <code>expirationDate</code>
+        is present and in the past. Only after all required checks pass <em>MAY</em>
+        a verifier derive and act on the asserted <a>trust score</a>.
+      </p>
+    </section>
+
+    <section id="security" class="normative">
+      <h2>Security and Privacy Considerations</h2>
+      <p>
+        A TrustCredential is a third-party assertion. Relying parties
+        <em>MUST NOT</em> treat a high <a>trust score</a> as authorization on its
+        own; trust scores feed policy, they do not replace it. Verifiers
+        <em>SHOULD</em> weight a credential by issuer reputation and by the
+        reported <a>confidence</a>.
+      </p>
+      <p>
+        Because a trust score can reveal interaction patterns, issuers
+        <em>SHOULD</em> mint short-lived TrustCredentials (via
+        <code>expirationDate</code>) and <em>SHOULD</em> consider pairwise
+        issuance to limit correlation. Selective-disclosure and unlinkability
+        mechanisms are out of scope for this version (see the ATP privacy work).
+      </p>
+    </section>
+
+    <section id="examples" class="informative">
+      <h2>Proof of Concept</h2>
+      <p>
+        A reference implementation issues and verifies TrustCredentials end to
+        end with real cryptography (Ed25519 + FIPS 204 ML-DSA-65), including:
+        round-trip issue/verify, rejection of a tampered
+        <code>credentialSubject</code>, rejection under a wrong issuer key,
+        rejection of an expired credential, and dual-proof (classical +
+        post-quantum) verification. The score consumed by the credential is
+        produced by the same four-factor engine defined in
+        <a href="#trust-model">Trust Scoring Model</a>.
+      </p>
+    </section>
+
+    <section id="conformance-gaps" class="informative">
+      <h2>Open Items and Conformance Gaps</h2>
+      <ul>
+        <li>
+          <strong>Revocation / credential status.</strong> No status-list or
+          revocation mechanism is defined yet. A verifier that encounters a
+          <code>credentialStatus</code> property <em>MUST NOT</em> silently
+          ignore it; the reference implementation treats its presence as a
+          verification failure pending a future status profile.
+        </li>
+        <li>
+          <strong>Issuer key discovery.</strong> This version assumes the
+          verifier resolves the issuer DID out of band; a normative binding to a
+          specific resolution path is future work.
+        </li>
+        <li>
+          <strong>Selective disclosure.</strong> Disclosing individual factors
+          without revealing the whole score is deferred to the ATP privacy
+          mechanisms (pairwise DIDs, selective disclosure, ZKP).
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

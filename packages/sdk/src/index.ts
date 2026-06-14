@@ -57,6 +57,27 @@ export {
 } from './utils/resolver.js';
 export { jcsCanonicalize } from './utils/jcs.js';
 export type { AtpDidDocument, AtpPqProof, DataIntegrityProof } from './types.js';
+export { TrustScoring } from './utils/trust.js';
+export type {
+  TrustScoreResult,
+  InteractionEvent,
+  TrustScoringConfig
+} from './utils/trust.js';
+export {
+  issueTrustCredential,
+  verifyTrustCredential,
+  VC_V2_CONTEXT,
+  TRUST_CREDENTIAL_TYPE,
+  TRUST_CREDENTIAL_CRYPTOSUITE
+} from './utils/trust-credential.js';
+export type {
+  TrustCredential,
+  TrustCredentialSubject,
+  IssueTrustCredentialParams,
+  TrustCredentialVerifyKeys,
+  TrustCredentialVerificationResult,
+  VerifiedTrustClaim
+} from './utils/trust-credential.js';
 export { JWTUtils } from './utils/jwt.js';
 export { VersionManager, versionManager } from './utils/version-manager.js';
 export type { ProtocolVersion, AgentVersion, SDKCompatibility } from './utils/version-manager.js';
