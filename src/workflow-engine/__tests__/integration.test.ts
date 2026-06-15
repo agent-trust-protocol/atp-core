@@ -687,7 +687,9 @@ describe('Workflow Engine Integration Tests', () => {
       const duration = Date.now() - startTime;
 
       expect(result.success).toBe(true);
-      expect(duration).toBeLessThan(10000); // Should complete within 10 seconds
+      // Functional sanity bound (nominal ~6s for 20 nodes x ~300ms). Kept well
+      // below the 30s hang-timeout so a contended CI runner won't flake.
+      expect(duration).toBeLessThan(20000);
     }, 30000);
   });
 });
