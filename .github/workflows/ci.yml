@@ -32,7 +32,7 @@ jobs:
         run: npm run type-check
 
       - name: Unit tests
-        run: npm test -- --ci --testPathPatterns='packages/' --passWithNoTests
+        run: npm test -- --ci --passWithNoTests
 
       - name: Build public packages
         run: |

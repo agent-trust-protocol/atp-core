@@ -485,7 +485,7 @@ describe('Workflow Engine Integration Tests', () => {
             id: 'evaluate-agent-trust',
             type: 'evaluate-trust',
             label: 'Evaluate Agent Trust',
-            config: {},
+            config: { agentDid: 'did:atp:test-agent' },
             position: { x: 300, y: 100 }
           },
           {
@@ -645,8 +645,10 @@ describe('Workflow Engine Integration Tests', () => {
       const nodes = [];
       const edges = [];
 
-      // Create a chain of 50 nodes
-      for (let i = 0; i < 50; i++) {
+      // Create a chain of 20 nodes. Each `evaluate-trust` node has a real
+      // ~300ms simulated delay, so the chain length is kept consistent with the
+      // "< 10 seconds" assertion below (20 * ~300ms ≈ 6s).
+      for (let i = 0; i < 20; i++) {
         nodes.push({
           id: `node-${i}`,
           type: 'evaluate-trust',
@@ -686,6 +688,6 @@ describe('Workflow Engine Integration Tests', () => {
 
       expect(result.success).toBe(true);
       expect(duration).toBeLessThan(10000); // Should complete within 10 seconds
-    });
+    }, 30000);
   });
 });

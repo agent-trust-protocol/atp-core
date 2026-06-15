@@ -6,7 +6,7 @@ module.exports = {
   verbose: true,
   
   // Test discovery
-  roots: ['<rootDir>/packages'],
+  roots: ['<rootDir>/packages', '<rootDir>/src/workflow-engine'],
   testMatch: [
     '**/__tests__/**/*.+(ts|tsx|js)',
     '**/?(*.)+(spec|test).+(ts|tsx|js)'
@@ -15,6 +15,7 @@ module.exports = {
   // Module resolution
   moduleNameMapper: {
     '^@atp/(.*)$': '<rootDir>/packages/$1/src',
+    '^@/(.*)$': '<rootDir>/src/$1',
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   

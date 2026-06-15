@@ -80,6 +80,13 @@ export class WorkflowEngine extends EventEmitter {
     }
   }
 
+  // Reads the (possibly externally mutated) execution state. Kept as a helper
+  // so cancellation checks aren't defeated by control-flow narrowing — the
+  // state can change via cancelExecution() while a node is awaited.
+  private isCancelled(context: WorkflowExecutionContext): boolean {
+    return context.state === WorkflowState.CANCELLED;
+  }
+
   private async runWorkflow(
     workflow: Workflow,
     context: WorkflowExecutionContext
@@ -89,11 +96,17 @@ export class WorkflowEngine extends EventEmitter {
       throw new Error('No start node found in workflow');
     }
 
+    const startedAt = performance.now();
     const visited = new Set<string>();
     const queue: WorkflowNode[] = [startNode];
     const results: Map<string, any> = new Map();
 
     while (queue.length > 0) {
+      // Honour cancellation requested between nodes.
+      if (this.isCancelled(context)) {
+        throw new Error('Workflow execution cancelled');
+      }
+
       const node = queue.shift()!;
 
       if (visited.has(node.id)) {
@@ -109,6 +122,11 @@ export class WorkflowEngine extends EventEmitter {
         const nodeHandler = this.nodeRegistry.getNode(node.type);
         const inputs = this.gatherNodeInputs(node, results, context);
         const output = await nodeHandler.execute(inputs, node.config as NodeConfig, context);
+
+        // Honour cancellation requested while this node was running.
+        if (this.isCancelled(context)) {
+          throw new Error('Workflow execution cancelled');
+        }
 
         results.set(node.id, output);
         context.completedNodes.push(node.id);
@@ -127,8 +145,7 @@ export class WorkflowEngine extends EventEmitter {
       success: true,
       data: results.get(visited.values().next().value as string),
       executionId: context.executionId,
-      duration: context.endTime ?
-        context.endTime.getTime() - context.startTime.getTime() : 0
+      duration: performance.now() - startedAt
     };
   }
 
