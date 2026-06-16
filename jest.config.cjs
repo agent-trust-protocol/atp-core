@@ -51,10 +51,13 @@ module.exports = {
   collectCoverage: false, // Disable by default for performance
   collectCoverageFrom: [
     'packages/*/src/**/*.{ts,tsx}',
+    'src/workflow-engine/**/*.{ts,tsx}',
     '!packages/*/src/**/*.d.ts',
     '!packages/*/src/**/__tests__/**',
     '!packages/*/src/**/*.test.{ts,tsx}',
-    '!packages/*/src/**/*.spec.{ts,tsx}'
+    '!packages/*/src/**/*.spec.{ts,tsx}',
+    '!src/workflow-engine/**/__tests__/**',
+    '!src/workflow-engine/**/*.test.{ts,tsx}'
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],

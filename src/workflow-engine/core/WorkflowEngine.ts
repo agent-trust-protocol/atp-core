@@ -66,6 +66,13 @@ export class WorkflowEngine extends EventEmitter {
       this.emit('workflow:completed', executionContext);
       return result;
     } catch (error) {
+      // A cancellation surfaces here as a thrown error, but it is not a failure:
+      // cancelExecution() already recorded CANCELLED and emitted workflow:cancelled.
+      // Re-throw (so the caller's promise rejects) without overwriting the state
+      // or emitting a spurious workflow:failed.
+      if (this.isCancelled(executionContext)) {
+        throw error;
+      }
       executionContext.state = WorkflowState.FAILED;
       executionContext.endTime = new Date();
       executionContext.errors.push({
