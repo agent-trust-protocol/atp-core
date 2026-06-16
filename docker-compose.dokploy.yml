@@ -1,0 +1,273 @@
+# ─── Dokploy production stack for the ATP backend ────────────────────────────
+# Deploy this as a Dokploy "Compose" application (see docs/DOKPLOY-SETUP.md).
+#
+# - Services build from the REPO ROOT via the workspace-aware docker/*.Dockerfile
+#   files, so the private @atp/shared package resolves correctly (the thing that
+#   broke on Railway's per-package NIXPACKS build).
+# - No host ports are published: Dokploy's built-in Traefik routes public traffic.
+#   Add a domain to `rpc-gateway` (port 3000) in the Dokploy UI; the other services
+#   talk to each other over the internal `atp` network by service name.
+# - All secrets come from the environment (set them in the Dokploy UI / project
+#   env). See .env.dokploy.example. Nothing secret is committed here.
+
+services:
+
+  # ── Data stores ───────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-atp_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-atp_prod}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-atp_user}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:?REDIS_PASSWORD is required}"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # ── One-shot schema + migrations (runs, then exits) ────────────────────────────
+  db-migrate:
+    image: postgres:16-alpine
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./packages/shared/src/database/migrations:/migrations:ro
+    command: >
+      sh -c "
+        echo 'Waiting for postgres...' &&
+        until pg_isready -h postgres -U ${POSTGRES_USER:-atp_user}; do sleep 1; done &&
+        echo 'Running init-db.sql...' &&
+        psql -h postgres -U ${POSTGRES_USER:-atp_user} -d ${POSTGRES_DB:-atp_prod} -f /docker-entrypoint-initdb.d/01-init.sql &&
+        echo 'Running migrations...' &&
+        for f in /migrations/*.sql; do
+          echo \"  applying $$f\" &&
+          psql -h postgres -U ${POSTGRES_USER:-atp_user} -d ${POSTGRES_DB:-atp_prod} -f $$f;
+        done &&
+        echo 'Migrations complete.'
+      "
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  # ── Backend services (built from repo root, workspace-aware Dockerfiles) ────────
+  identity-service:
+    build:
+      context: .
+      dockerfile: docker/identity-service.Dockerfile
+    expose:
+      - "3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-atp_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-atp_prod}
+      - SESSION_SECRET=${SESSION_SECRET:?SESSION_SECRET is required}
+      - CORS_ORIGIN=${CORS_ORIGIN:?CORS_ORIGIN is required}
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  vc-service:
+    build:
+      context: .
+      dockerfile: docker/vc-service.Dockerfile
+    expose:
+      - "3002"
+    environment:
+      - PORT=3002
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-atp_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-atp_prod}
+      - CORS_ORIGIN=${CORS_ORIGIN:?CORS_ORIGIN is required}
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  permission-service:
+    build:
+      context: .
+      dockerfile: docker/permission-service.Dockerfile
+    expose:
+      - "3003"
+    environment:
+      - PORT=3003
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-atp_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-atp_prod}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
+      - CORS_ORIGIN=${CORS_ORIGIN:?CORS_ORIGIN is required}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  audit-logger:
+    build:
+      context: .
+      dockerfile: docker/audit-logger.Dockerfile
+    expose:
+      - "3005"
+    environment:
+      - PORT=3005
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-atp_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-atp_prod}
+      - AUDIT_ENCRYPTION_KEY=${AUDIT_ENCRYPTION_KEY:?AUDIT_ENCRYPTION_KEY is required}
+      # IPFS_URL intentionally unset → IPFS anchoring disabled (see RAILWAY-SETUP).
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  protocol-integrations:
+    build:
+      context: .
+      dockerfile: docker/protocol-integrations.Dockerfile
+    expose:
+      - "3006"
+      - "3007"
+    environment:
+      - PORT=3006
+      - MCP_PORT=3007
+      - IDENTITY_SERVICE_URL=http://identity-service:3001
+      - GATEWAY_URL=http://rpc-gateway:3000
+    depends_on:
+      - identity-service
+      - audit-logger
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  payment-service:
+    build:
+      context: ./packages/payment-service
+      dockerfile: Dockerfile
+    expose:
+      - "3009"
+    environment:
+      - PORT=3009
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-atp_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-atp_prod}
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3009/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  monitoring-service:
+    build:
+      context: .
+      dockerfile: docker/monitoring-service.Dockerfile
+    expose:
+      - "3005"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - ATP_MONITORING_PORT=3005
+      - ATP_IDENTITY_URL=http://identity-service:3001
+      - ATP_CREDENTIALS_URL=http://vc-service:3002
+      - ATP_PERMISSIONS_URL=http://permission-service:3003
+      - ATP_AUDIT_URL=http://audit-logger:3005
+      - ATP_GATEWAY_URL=http://rpc-gateway:3000
+      - ATP_ALERT_WEBHOOK_URL=${ATP_ALERT_WEBHOOK_URL:-}
+    depends_on:
+      - identity-service
+      - audit-logger
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  rpc-gateway:
+    build:
+      context: .
+      dockerfile: docker/rpc-gateway.Dockerfile
+    expose:
+      - "3000"
+      - "8081"
+    environment:
+      - PORT=3000
+      - WS_PORT=8081
+      - NODE_ENV=${NODE_ENV:-production}
+      - IDENTITY_SERVICE_URL=http://identity-service:3001
+      - VC_SERVICE_URL=http://vc-service:3002
+      - PERMISSION_SERVICE_URL=http://permission-service:3003
+      - AUDIT_SERVICE_URL=http://audit-logger:3005
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
+      - CORS_ORIGIN=${CORS_ORIGIN:?CORS_ORIGIN is required}
+    depends_on:
+      - identity-service
+      - vc-service
+      - permission-service
+      - audit-logger
+      - protocol-integrations
+      - payment-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: atp
