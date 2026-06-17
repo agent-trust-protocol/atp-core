@@ -12,8 +12,20 @@
 **Audited against:** [`docs/specs/did-atp/index.html`](./index.html) — the finalized `did:atp`
 method specification, defined as a **delta over `did:wba`** (`did:web` → `did:wba` → `did:atp`).
 
-This report records the gap between the current `did:atp` implementation and the **finalized**
-spec, before any v2 implementation work. No code is changed by this report.
+This report records the gap between the legacy `did:atp` implementation and the **finalized**
+spec. The findings below describe the **pre-rebuild** state.
+
+> **Resolution status (Phase 1):** A new, self-contained, spec-conformant module now lives at
+> `packages/sdk/src/did-atp/` and closes items 1–7 and 9 below (two-segment identifier, RFC 7638
+> thumbprints, separate Ed25519 + ML-DSA-65 keys, RFC 9964 AKP JWK, the dual `eddsa-jcs-2022` +
+> ML-DSA-65 JWS proofs, `did:web`-style `did.json` resolution, and the correct FIPS 204 sizes —
+> the actual ML-DSA-65 signature is **3309** bytes, resolving the 3293/3309 discrepancy noted in
+> item 9). It is covered by `packages/sdk/src/__tests__/did-atp/did-atp.test.ts` (24 tests,
+> including the RFC 8037 thumbprint vector and the spec's forged-classical-signature
+> defense-in-depth case). The legacy `DIDUtils`/`CryptoUtils` are intentionally left in place
+> (consumed across 8+ packages); item 8's Update/Deactivate operations and the migration of
+> downstream consumers (`identity-service`, etc.) onto the new module remain as follow-up work.
+> The findings below are preserved as the original audit record.
 
 > **Important:** This supersedes the Phase-0 gap report, which was written against
 > `docs/W3C_ATP_SPECIFICATION.md` — the **legacy** v1 design we are rebuilding *away from*.
