@@ -350,8 +350,19 @@ export class PaymentsClient extends BaseClient {
   private async signMandate(mandate: any): Promise<string> {
     const payload = JSON.stringify(mandate);
     // The hybrid private key is hex of ed25519 secret || ml-dsa-65 secret;
-    // mandates are signed with the classical (Ed25519) half.
-    const secretHex = this.config.auth?.privateKey || '';
+    // mandates are signed with the classical (Ed25519) half, which is the
+    // first 32 bytes (64 hex chars). Validate the format before slicing —
+    // Buffer.from(<non-hex>, 'hex') silently yields garbage rather than
+    // throwing, and signing a mandate with wrong key material is a
+    // security-critical failure that must surface a clear error.
+    const secretHex = this.config.auth?.privateKey ?? '';
+    if (!/^[0-9a-fA-F]+$/.test(secretHex) || secretHex.length < 64) {
+      throw new Error(
+        'signMandate: config.auth.privateKey must be a hex-encoded hybrid ' +
+        'private key (hex of ed25519_seed(32B) || mlDsa65_secret); got a ' +
+        `value that is not at least 64 hex chars. Length=${secretHex.length}.`
+      );
+    }
     const ed25519Secret = new Uint8Array(Buffer.from(secretHex, 'hex')).slice(0, 32);
     const signature = await CryptoUtils.signEd25519(payload, ed25519Secret);
     return Buffer.from(signature).toString('hex');

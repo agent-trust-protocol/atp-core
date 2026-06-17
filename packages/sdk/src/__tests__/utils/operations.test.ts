@@ -18,10 +18,13 @@ function mockFetch(
 ): typeof fetch {
   return jest.fn(async (input: any) => {
     const status = init.status ?? 200;
+    const bodyText = typeof body === 'string' ? body : JSON.stringify(body);
     return {
       ok: status >= 200 && status < 300,
       status,
       url: init.url ?? String(input),
+      headers: new Headers({ 'content-length': String(Buffer.byteLength(bodyText, 'utf8')) }),
+      text: async () => bodyText,
       json: async () => body
     } as Response;
   }) as unknown as typeof fetch;

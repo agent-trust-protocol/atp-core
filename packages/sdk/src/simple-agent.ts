@@ -191,7 +191,7 @@ export class Agent extends EventEmitter {
           keyPair.mlDsa65.secretKey
         ]).toString('hex');
 
-try {
+        try {
           const identity = await this.client.identity.registerDID({
             publicKey: publicKeyHex,
             metadata: {

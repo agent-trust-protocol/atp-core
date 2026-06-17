@@ -60,6 +60,13 @@ export interface DidResolutionResult {
   document: AtpDidDocument;
 }
 
+/**
+ * Maximum accepted size of a fetched did.json. A conformant DID document with
+ * two verification methods and dual proofs is a few KB; 256 KiB is a generous
+ * ceiling that still defends against memory-exhaustion via oversized payloads.
+ */
+const MAX_DID_JSON_BYTES = 256 * 1024;
+
 export class DidAtpResolver {
   /**
    * Map a did:atp identifier to the HTTPS URL of its did.json document.
@@ -164,9 +171,34 @@ export class DidAtpResolver {
       throw new DidResolutionError('notFound', `did.json fetch returned HTTP ${response.status} for ${url}`);
     }
 
+    // DoS guard: a did.json is a small document. Reject oversized responses
+    // before buffering them into memory. Check the advertised Content-Length
+    // first (cheap), then enforce the same cap on the actual bytes read, since
+    // a hostile server can lie about or omit Content-Length.
+    const advertised = Number(response.headers.get('content-length'));
+    if (Number.isFinite(advertised) && advertised > MAX_DID_JSON_BYTES) {
+      throw new DidResolutionError(
+        'invalidDidDocument',
+        `did.json at ${url} exceeds the ${MAX_DID_JSON_BYTES}-byte limit (Content-Length ${advertised}).`
+      );
+    }
+
+    let body: string;
+    try {
+      body = await response.text();
+    } catch (e) {
+      throw new DidResolutionError('notFound', `Failed to read did.json body from ${url}: ${(e as Error).message}`);
+    }
+    if (Buffer.byteLength(body, 'utf8') > MAX_DID_JSON_BYTES) {
+      throw new DidResolutionError(
+        'invalidDidDocument',
+        `did.json at ${url} exceeds the ${MAX_DID_JSON_BYTES}-byte limit.`
+      );
+    }
+
     let document: unknown;
     try {
-      document = await response.json();
+      document = JSON.parse(body);
     } catch {
       throw new DidResolutionError('invalidDidDocument', `did.json at ${url} is not valid JSON`);
     }
