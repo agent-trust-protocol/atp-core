@@ -150,7 +150,7 @@ jobs:
           🎉 ATP™ SDK v${{ steps.version.outputs.version }} has been published!
           
           📦 Package: https://www.npmjs.com/package/@atp/sdk
-          📚 Docs: https://docs.atp.dev
+          📚 Docs: https://agenttrustprotocol.com/docs
           🔗 Release: ${{ github.event.release.html_url }}
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

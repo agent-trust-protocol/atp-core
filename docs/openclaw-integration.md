@@ -658,8 +658,7 @@ Full API documentation:
 
 Explore complete working examples:
 - [Finance Trading Workflow](../packages/openclaw-atp/examples/finance-workflow.ts)
-- [Research Crew](../packages/openclaw-atp/examples/research-crew.ts) (coming soon)
-- [Customer Service](../packages/openclaw-atp/examples/customer-service.ts) (coming soon)
+- [Stateful Session Walk-through](../packages/openclaw-atp/examples/stateful-session.ts)
 
 ## Migration Guide
 
@@ -689,7 +688,7 @@ Explore complete working examples:
 
 ## Python Support
 
-Python bindings coming soon:
+Python bindings (planned) — preview API:
 
 ```python
 from openclaw_atp import OpenClawATPClient

@@ -15,7 +15,7 @@ ATP SDK now supports multiple AI agent protocols with unified security, monitori
   - Retrieval patterns
   - App integrations
 
-### 2. **Swarm** (OpenAI Swarm) - Coming Soon
+### 2. **Swarm** (OpenAI Swarm) - Planned
 - **Vendor**: OpenAI
 - **Purpose**: Multi-agent orchestration
 - **Key Features**:
@@ -24,7 +24,7 @@ ATP SDK now supports multiple AI agent protocols with unified security, monitori
   - Context preservation
   - Stateful conversations
 
-### 3. **ADK** (Agent Development Kit) - Coming Soon
+### 3. **ADK** (Agent Development Kit) - Planned
 - **Vendor**: Google
 - **Purpose**: Enterprise agent development
 - **Key Features**:
@@ -33,7 +33,7 @@ ATP SDK now supports multiple AI agent protocols with unified security, monitori
   - Deployment management
   - Agent collaboration
 
-### 4. **A2A** (Agent2Agent Protocol) - Coming Soon
+### 4. **A2A** (Agent2Agent Protocol) - Planned
 - **Vendor**: Community/Open Standard
 - **Purpose**: Vendor-neutral agent communication
 - **Key Features**:

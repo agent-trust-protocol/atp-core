@@ -51,7 +51,7 @@ npm run test:quantum
 
 ## Community
 
-- **Discord**: Join our developer community (coming soon)
+- **Discord**: [Join our community](https://discord.gg/agenttrustprotocol)
 - **GitHub Discussions**: Ask questions and share ideas
 - **Documentation**: [docs.agenttrustprotocol.com](https://docs.agenttrustprotocol.com)
 

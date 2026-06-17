@@ -1,8 +1,6 @@
 # Roadmap
 
-> **Coming Soon**: Detailed product roadmap
-
-This roadmap document is currently being prepared. For now, see:
+See also:
 
 - [SDK Upgrade Plan](../SDK-UPGRADE-PLAN.md) - Multi-protocol support roadmap
 - [README](../README.md) - Current features and capabilities

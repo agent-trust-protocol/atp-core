@@ -20,7 +20,7 @@ Complete guide for integrating Agent Trust Protocol™ with OpenClaw agents.
 npm install @atpdevelopment/openclaw-atp atp-sdk
 ```
 
-### Python (Coming Soon)
+### Python (Planned)
 
 ```bash
 pip install atpdevelopment-openclaw-atp atp-sdk
