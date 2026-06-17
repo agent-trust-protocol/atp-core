@@ -108,13 +108,15 @@ declare module 'atp-sdk' {
   }
 
   export class DidAtpDocument {
-    constructor(...args: any[]);
-    [key: string]: any;
+    static create(...args: any[]): Promise<any>;
+    static rotate(...args: any[]): Promise<any>;
+    static verify(document: any): Promise<{ valid: boolean; errors: string[] }>;
+    static verifyClassicalProof(...args: any[]): Promise<boolean>;
+    static verifyPqProof(...args: any[]): boolean;
   }
 
   export class DidAtpResolver {
-    constructor(...args: any[]);
-    resolve(did: string): Promise<any>;
-    [key: string]: any;
+    static didToUrl(did: string): string;
+    static resolve(did: string, options?: any): Promise<any>;
   }
 }

@@ -1,5 +1,5 @@
 import { base58 } from '@scure/base';
-import { sha256 } from '@noble/hashes/sha256';
+import { sha256 } from '@noble/hashes/sha2.js';
 import { CryptoUtils, HybridKeyPair, ED25519_PUBLIC_KEY_BYTES } from './crypto.js';
 import { DidAtp } from './did.js';
 import { jcsCanonicalize } from './jcs.js';
