@@ -31,7 +31,7 @@
     "atp-sdk": "^2.0.0"
   },
   "dependencies": {
-    "atp-sdk": "workspace:*"
+    "atp-sdk": "file:../sdk"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
