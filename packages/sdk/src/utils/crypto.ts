@@ -71,7 +71,7 @@ export class CryptoUtils {
     combinedPublic.set(ed25519PublicKey, 0);
     combinedPublic.set(mlDsaKeyPair.publicKey, 32);
 
-    // Combine private keys: Ed25519 private (32) + ML-DSA private (4000) = 4032 bytes
+    // Combine private keys: Ed25519 private (32) + ML-DSA-65 secret (4032) = 4064 bytes
     const combinedPrivate = new Uint8Array(32 + mlDsaKeyPair.secretKey.length);
     combinedPrivate.set(ed25519PrivateKey, 0);
     combinedPrivate.set(mlDsaKeyPair.secretKey, 32);
@@ -94,8 +94,10 @@ export class CryptoUtils {
     const dataBuffer = typeof data === 'string' ? Buffer.from(data, 'utf8') : data;
     const privateKeyBuffer = Buffer.from(privateKey, 'hex');
 
-    // Detect if this is a hybrid key (4032 bytes = 32 Ed25519 + 4000 ML-DSA)
-    const isHybridKey = privateKeyBuffer.length === 4032 && quantumSafe;
+    // Detect if this is a hybrid key (4064 bytes = 32 Ed25519 + 4032 ML-DSA-65).
+    // Use a length threshold rather than an exact magic number so the check is
+    // robust to the precise ML-DSA secret-key size.
+    const isHybridKey = privateKeyBuffer.length > 64 && quantumSafe;
 
     if (!isHybridKey || privateKeyBuffer.length <= 64) {
       // Ed25519-only signature (32 bytes key, or not hybrid mode)
@@ -114,7 +116,7 @@ export class CryptoUtils {
     const ed25519Sig = await ed25519.sign(dataBuffer, ed25519PrivateKey);
     const mlDsaSig = ml_dsa65.sign(mlDsaPrivateKey, dataBuffer);
 
-    // Combine signatures: [ed25519_len(2)][ml_dsa_len(2)][ed25519_sig(64)][ml_dsa_sig(3293)]
+    // Combine signatures: [ed25519_len(2)][ml_dsa_len(2)][ed25519_sig(64)][ml_dsa_sig(3309)]
     const combined = new Uint8Array(4 + ed25519Sig.length + mlDsaSig.length);
     const view = new DataView(combined.buffer);
     view.setUint16(0, ed25519Sig.length, true); // little-endian
@@ -161,10 +163,26 @@ export class CryptoUtils {
       const ed25519PublicKey = publicKeyBuffer.slice(0, 32);
       const mlDsaPublicKey = publicKeyBuffer.slice(32);
 
-      // Extract signatures from combined format
-      const view = new DataView(signatureBuffer.buffer);
+      // Extract signatures from combined format.
+      // Bind the DataView to the Buffer's own region — Buffer.from(...) may
+      // return a view into a larger pooled ArrayBuffer with a non-zero
+      // byteOffset, so reading from `.buffer` alone would read the wrong bytes.
+      const view = new DataView(
+        signatureBuffer.buffer,
+        signatureBuffer.byteOffset,
+        signatureBuffer.byteLength
+      );
       const ed25519SigLen = view.getUint16(0, true);
       const mlDsaSigLen = view.getUint16(2, true);
+
+      // Strict, non-malleable encoding: the declared lengths must describe the
+      // buffer exactly. Without this, flipping a length prefix upward would be
+      // silently clamped by Buffer.slice back to the real signature end, so the
+      // tamper would go undetected (signature malleability).
+      if (4 + ed25519SigLen + mlDsaSigLen !== signatureBuffer.length) {
+        return false;
+      }
+
       const ed25519Sig = signatureBuffer.slice(4, 4 + ed25519SigLen);
       const mlDsaSig = signatureBuffer.slice(4 + ed25519SigLen, 4 + ed25519SigLen + mlDsaSigLen);
 

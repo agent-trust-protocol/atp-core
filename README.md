@@ -39,12 +39,12 @@ console.log('Standalone:', agent.isStandalone());
 
 | Package | Version | Status | Install |
 |---------|---------|--------|---------|
-| `atp-sdk` | ![npm](https://img.shields.io/npm/v/atp-sdk) |  **Production** | `npm install atp-sdk` |
-| `@atpdevelopment/openclaw-atp` | ![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp) |  **Production** | `npm install @atpdevelopment/openclaw-atp` |
+| `atp-sdk` | ![npm](https://img.shields.io/npm/v/atp-sdk) |  **Beta** | `npm install atp-sdk` |
+| `@atpdevelopment/openclaw-atp` | ![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp) |  **Beta** | `npm install @atpdevelopment/openclaw-atp` |
 | `atp-core` | v1.0.0 |  **Legacy**  Superseded by `atp-sdk` |  |
 | Services (`@atp/*`) | 0.1.0 |  **Development** | Monorepo only |
 
-**Use `atp-sdk`**  the only production-ready package for application development.  
+**Use `atp-sdk`**  the recommended package for application development.  
 See [VERSIONING.md](./VERSIONING.md) for full policy.
 
 ---
@@ -388,10 +388,8 @@ const validation = await atpClient.validateCrew(crew);
 
 ---
 
-##  Stats
+##  Project
 
-[![GitHub stars](https://img.shields.io/github/stars/agent-trust-protocol/atp-core?style=social)](https://github.com/agent-trust-protocol/atp-core)
-[![npm downloads](https://img.shields.io/npm/dm/atp-sdk)](https://www.npmjs.com/package/atp-sdk)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](https://github.com/agent-trust-protocol/atp-core/blob/main/LICENSE)
 
 ---

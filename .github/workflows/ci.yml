@@ -9,6 +9,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Lint · Type-check · Test
@@ -22,6 +25,7 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      # Reproducible install straight from the committed lockfile.
       - name: Install dependencies
         run: npm ci --include=dev
 
@@ -31,8 +35,9 @@ jobs:
       - name: Type check
         run: npm run type-check
 
+      # No --passWithNoTests: an empty suite must fail, not pass green.
       - name: Unit tests
-        run: npm test -- --ci --passWithNoTests
+        run: npm test -- --ci
 
       - name: Build public packages
         run: |
@@ -41,8 +46,19 @@ jobs:
 
       - name: Package tests (sdk + openclaw-atp)
         run: |
-          cd packages/sdk && npm test -- --ci --passWithNoTests
+          cd packages/sdk && npm test -- --ci
           cd ../../packages/openclaw-atp && npm test -- --ci
+
+      # Hard gate: no critical advisories may ship.
+      - name: Security audit (critical — blocking)
+        run: npm audit --audit-level=critical
+
+      # Advisory: surfaces high-severity debt (currently in the Next.js website
+      # toolchain) without blocking merges. Tighten to blocking once the
+      # remaining transitive upgrades land via Dependabot.
+      - name: Security audit (high — advisory)
+        run: npm audit --audit-level=high
+        continue-on-error: true
 
       - name: Upload coverage
         if: always()

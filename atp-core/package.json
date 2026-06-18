@@ -13,7 +13,7 @@
   },
   "keywords": ["agent", "trust", "protocol", "did", "blockchain"],
   "author": "",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "express": "^4.18.2",
     "better-sqlite3": "^8.7.0",

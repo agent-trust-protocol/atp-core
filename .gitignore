@@ -227,3 +227,6 @@ security-*/
 agent-*/
 .*.agent.md
 .env*.local
+
+# Generated SBOM (produced on release in CI, attached to the release)
+sbom.json

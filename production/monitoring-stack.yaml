@@ -1139,5 +1139,10 @@ metadata:
   name: grafana-secret
   namespace: atp-monitoring
 type: Opaque
-data:
-  admin-password: YWRtaW4xMjM= # admin123 - change in production
+stringData:
+  # SECURITY: never commit a real password here. Inject it at deploy time, e.g.
+  #   kubectl create secret generic grafana-secret \
+  #     --from-literal=admin-password="$GRAFANA_ADMIN_PASSWORD" -n atp-monitoring
+  # or via an external-secrets / sealed-secrets operator. The placeholder below
+  # MUST be overridden by your deployment pipeline.
+  admin-password: "${GRAFANA_ADMIN_PASSWORD}"
