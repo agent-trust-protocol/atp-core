@@ -2,8 +2,8 @@
 
 import { sha512 } from '@noble/hashes/sha2.js';
 import * as ed25519 from '@noble/ed25519';
-import { ml_dsa65 } from '@noble/post-quantum/ml-dsa';
-import { ml_kem768 } from '@noble/post-quantum/ml-kem';
+import { ml_dsa65 } from '@noble/post-quantum/ml-dsa.js';
+import { ml_kem768 } from '@noble/post-quantum/ml-kem.js';
 import { randomBytes } from 'crypto';
 
 // Custom CryptoKey interface for our implementation
@@ -433,13 +433,13 @@ class DilithiumProvider implements ICryptoProvider {
 
   async sign(message: Uint8Array, privateKey: ATPCryptoKey): Promise<Uint8Array> {
     const privKeyBytes = await this.extractKeyBytes(privateKey);
-    return ml_dsa65.sign(privKeyBytes, message);
+    return ml_dsa65.sign(message, privKeyBytes);
   }
 
   async verify(message: Uint8Array, signature: Uint8Array, publicKey: ATPCryptoKey): Promise<boolean> {
     try {
       const pubKeyBytes = await this.extractKeyBytes(publicKey);
-      return ml_dsa65.verify(pubKeyBytes, message, signature);
+      return ml_dsa65.verify(signature, message, pubKeyBytes);
     } catch {
       return false;
     }

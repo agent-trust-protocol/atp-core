@@ -3,7 +3,7 @@
  * Uses ML-DSA-65 (CRYSTALS-Dilithium) via @noble/post-quantum for real post-quantum signatures.
  */
 
-import { ml_dsa65 } from '@noble/post-quantum/ml-dsa';
+import { ml_dsa65 } from '@noble/post-quantum/ml-dsa.js';
 import { randomBytes } from 'crypto';
 
 export class QuantumSafeSignature {
@@ -25,7 +25,7 @@ export class QuantumSafeSignature {
 
   async sign(message: string): Promise<string> {
     const msgBytes = Buffer.from(message, 'utf8');
-    const signature = ml_dsa65.sign(this.secretKey, msgBytes);
+    const signature = ml_dsa65.sign(msgBytes, this.secretKey);
     return Buffer.from(signature).toString('hex');
   }
 
@@ -33,7 +33,7 @@ export class QuantumSafeSignature {
     try {
       const msgBytes = Buffer.from(message, 'utf8');
       const sigBytes = Buffer.from(signature, 'hex');
-      return ml_dsa65.verify(this._publicKey, msgBytes, sigBytes);
+      return ml_dsa65.verify(sigBytes, msgBytes, this._publicKey);
     } catch {
       return false;
     }
