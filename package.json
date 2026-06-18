@@ -64,7 +64,7 @@
     "axios": "^1.7.4",
     "did-jwt": "^7.4.0",
     "ws": "^8.14.0",
-    "@noble/post-quantum": "^0.4.1",
+    "@noble/post-quantum": "^0.6.1",
     "ioredis": "^5.0.0",
     "zod": "^4.1.12"
   },

@@ -28,7 +28,7 @@ const FORBIDDEN_PROPS = new Set([
   'constructor',
   'prototype',
   'valueOf',
-  'toString',
+  'toString'
 ]);
 
 class Parser {
@@ -57,7 +57,7 @@ class Parser {
   }
   private parseEquality(): AstNode {
     let left = this.parseRelational();
-    while (true) {
+    for (;;) {
       const op = this.matchOneOf(['===', '!==', '==', '!=']);
       if (!op) break;
       left = { type: 'binary', op, left, right: this.parseRelational() };
@@ -66,7 +66,7 @@ class Parser {
   }
   private parseRelational(): AstNode {
     let left = this.parseAdditive();
-    while (true) {
+    for (;;) {
       const op = this.matchOneOf(['<=', '>=', '<', '>']);
       if (!op) break;
       left = { type: 'binary', op, left, right: this.parseAdditive() };
@@ -75,7 +75,7 @@ class Parser {
   }
   private parseAdditive(): AstNode {
     let left = this.parseMultiplicative();
-    while (true) {
+    for (;;) {
       const op = this.matchOneOf(['+', '-']);
       if (!op) break;
       left = { type: 'binary', op, left, right: this.parseMultiplicative() };
@@ -84,7 +84,7 @@ class Parser {
   }
   private parseMultiplicative(): AstNode {
     let left = this.parseUnary();
-    while (true) {
+    for (;;) {
       const op = this.matchOneOf(['*', '/', '%']);
       if (!op) break;
       left = { type: 'binary', op, left, right: this.parseUnary() };
@@ -98,7 +98,7 @@ class Parser {
   }
   private parseMember(): AstNode {
     let node = this.parsePrimary();
-    while (true) {
+    for (;;) {
       this.skipWs();
       if (this.peek() === '.') {
         this.pos++;
