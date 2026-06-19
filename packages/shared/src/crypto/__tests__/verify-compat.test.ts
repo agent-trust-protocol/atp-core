@@ -106,6 +106,20 @@ describe('verifySignatureCompat — hybrid key availability', () => {
     expect(res).toEqual({ valid: false, algorithm: null });
   });
 
+  it('returns invalid for an ML-DSA-65 signature when only an Ed25519 key is supplied', async () => {
+    const ed = await makeEd25519();
+    const pq = makeMlDsa65();
+    const res = await verifySignatureCompat(MESSAGE, pq.signatureHex, { ed25519PublicKeyHex: ed.publicKeyHex });
+    expect(res).toEqual({ valid: false, algorithm: null });
+  });
+
+  it('returns invalid for an Ed25519 signature when only an ML-DSA-65 key is supplied', async () => {
+    const ed = await makeEd25519();
+    const pq = makeMlDsa65();
+    const res = await verifySignatureCompat(MESSAGE, ed.signatureHex, { mlDsa65PublicKeyHex: pq.publicKeyHex });
+    expect(res).toEqual({ valid: false, algorithm: null });
+  });
+
   it('does not throw on malformed signature hex', async () => {
     const ed = await makeEd25519();
     const res = await verifySignatureCompat(MESSAGE, 'zzzz', { ed25519PublicKeyHex: ed.publicKeyHex });
