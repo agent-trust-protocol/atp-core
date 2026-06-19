@@ -157,7 +157,8 @@ describe('Verify hardening (malformed verification methods are reported, not thr
 
     const fetch = mockFetch(tampered);
     await expect(DidAtpResolver.resolve(did, { fetch })).rejects.toMatchObject({
-      name: 'DidResolutionError'
+      name: 'DidResolutionError',
+      code: 'verificationFailed'
     });
   });
 });
