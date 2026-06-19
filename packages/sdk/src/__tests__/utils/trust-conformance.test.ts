@@ -112,6 +112,8 @@ describe('Trust scoring conformance — bounds & edge inputs', () => {
     { name: 'huge interaction count', interactions: repeat(5000, recentSuccess), credentials: 5 },
     { name: 'huge credential count (over cap)', interactions: [], credentials: 1000 },
     { name: 'negative credential count', interactions: [recentSuccess(0)], credentials: -5 },
+    { name: 'NaN credential count', interactions: [recentSuccess(0)], credentials: NaN },
+    { name: 'Infinity credential count', interactions: [recentSuccess(0)], credentials: Infinity },
     { name: 'future-dated interactions', interactions: repeat(5, (i) => ({ timestamp: ISO(NOW + (i + 1) * 86_400_000), action: 'm', success: true })), credentials: 0 },
     { name: 'ancient interactions', interactions: repeat(5, (i) => ({ timestamp: ISO(NOW - (i + 1) * 365 * 86_400_000), action: 'm', success: true })), credentials: 0 },
     { name: 'invalid timestamp strings', interactions: [{ timestamp: 'not-a-date', action: 'm', success: true }], credentials: 0 },

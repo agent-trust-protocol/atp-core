@@ -218,11 +218,14 @@ export class TrustScoring {
    * Calculate confidence in the trust score
    */
   private calculateConfidence(interactionCount: number, credentialCount: number): number {
+    // Guard against NaN/non-finite credential counts: Math.max(0, NaN) is NaN,
+    // which would propagate into confidence and break the [0,1] contract.
+    const safeCredentialCount = Number.isFinite(credentialCount) ? Math.max(0, credentialCount) : 0;
     const interactionConfidence = Math.min(
       1,
       Math.max(0, interactionCount) / this.config.minInteractionsForConfidence
     );
-    const credentialConfidence = Math.min(1, Math.max(0, credentialCount) * 0.25);
+    const credentialConfidence = Math.min(1, safeCredentialCount * 0.25);
 
     // Weighted average of confidence factors
     return interactionConfidence * 0.7 + credentialConfidence * 0.3;
