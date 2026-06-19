@@ -166,8 +166,16 @@ const decisionCases: DecisionCase[] = [
     expected: 'deny',
   },
   {
-    name: 'first_match returns first matching rule decision',
-    policy: policy([rule(toolCond('database_query'), allow)], { evaluationMode: 'first_match' }),
+    name: 'first_match returns the FIRST matching rule and skips later matches (first wins)',
+    // A second rule that ALSO matches the context but denies must be skipped;
+    // if the engine fell back to all_rules-style combining, this would flip to deny.
+    policy: policy(
+      [
+        rule(toolCond('database_query'), allow),
+        rule(toolCond('database_query'), deny),
+      ],
+      { evaluationMode: 'first_match' }
+    ),
     context: makeContext(),
     expected: 'allow',
   },
@@ -366,6 +374,17 @@ describe('Policy conformance — obligation handling', () => {
     const result = await evalPolicy(policy([rule(toolCond('database_query'), action)]), makeContext());
     const timeLimit = (result.obligations ?? []).find(o => o.type === 'time_limit');
     expect(timeLimit?.parameters).toEqual({ minutes: 45 });
+  });
+
+  it('carries obligation parameters through (usage_limit count)', async () => {
+    const action: VisualPolicyActionType = {
+      id: randomUUID(),
+      type: 'allow',
+      conditions: { usageLimit: 10 },
+    } as VisualPolicyActionType;
+    const result = await evalPolicy(policy([rule(toolCond('database_query'), action)]), makeContext());
+    const usageLimit = (result.obligations ?? []).find(o => o.type === 'usage_limit');
+    expect(usageLimit?.parameters).toEqual({ count: 10 });
   });
 });
 
