@@ -30,7 +30,6 @@ import {
   VisualPolicyCondition,
   VisualPolicyActionType,
   VisualPolicyTrustLevel,
-  VisualPolicyAction,
 } from '../visual-policy-schema.js';
 import { evaluateSafeExpression } from '../../security/safe-expression.js';
 
