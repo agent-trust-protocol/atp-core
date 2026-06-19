@@ -140,6 +140,80 @@ describe('TrustScoring', () => {
     });
   });
 
+  describe('recency / timestamp edge cases', () => {
+    // Each bad value, if parsed naively via new Date(x).getTime(), yields NaN and
+    // would poison the whole weighted score. These guard the "infinitely old"
+    // semantics: bad timestamps must never produce NaN and must never inflate trust.
+    const badTimestamps: Array<[string, unknown]> = [
+      ['undefined', undefined],
+      ['null', null],
+      ['empty string', ''],
+      ['malformed string', 'not-a-date'],
+      ['numeric zero', 0]
+    ];
+
+    it.each(badTimestamps)(
+      'produces a finite, in-range score for a %s timestamp',
+      (_label, ts) => {
+        const interactions = [
+          { timestamp: ts as any, action: 'message', success: true }
+        ] as InteractionEvent[];
+
+        const result = scorer.calculateTrustScore(interactions, 0);
+
+        expect(Number.isFinite(result.score)).toBe(true);
+        expect(Number.isFinite(result.factors.recencyScore)).toBe(true);
+        expect(result.score).toBeGreaterThanOrEqual(0);
+        expect(result.score).toBeLessThanOrEqual(1);
+        // An unparseable timestamp is "infinitely old" → zero recency contribution.
+        expect(result.factors.recencyScore).toBe(0);
+      }
+    );
+
+    it('does not let a future timestamp inflate recency above 1', () => {
+      const future = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+      const interactions: InteractionEvent[] = [
+        { timestamp: future, action: 'message', success: true }
+      ];
+
+      const result = scorer.calculateTrustScore(interactions, 0);
+
+      expect(result.factors.recencyScore).toBeLessThanOrEqual(1);
+      expect(result.score).toBeLessThanOrEqual(1);
+    });
+
+    it('keeps the score finite and lets a bad timestamp dilute (not boost) recency', () => {
+      const now = new Date().toISOString();
+      const allValid: InteractionEvent[] = [
+        { timestamp: now, action: 'message', success: true },
+        { timestamp: now, action: 'message', success: true }
+      ];
+      const mixed = [
+        { timestamp: now, action: 'message', success: true },
+        { timestamp: 'not-a-date' as any, action: 'message', success: true }
+      ] as InteractionEvent[];
+
+      const validResult = scorer.calculateTrustScore(allValid, 0);
+      const mixedResult = scorer.calculateTrustScore(mixed, 0);
+
+      expect(Number.isFinite(mixedResult.score)).toBe(true);
+      // The invalid interaction stays in the denominator, so recency is diluted
+      // relative to an all-valid baseline rather than NaN or inflated.
+      expect(mixedResult.factors.recencyScore).toBeLessThan(validResult.factors.recencyScore);
+    });
+
+    it('never selects a corrupt timestamp as the most recent interaction', () => {
+      const interactions = [
+        { timestamp: '2024-01-02T00:00:00Z', action: 'message', success: true },
+        { timestamp: 'not-a-date' as any, action: 'message', success: true }
+      ] as InteractionEvent[];
+
+      const result = scorer.calculateTrustScore(interactions, 0);
+
+      expect(result.metadata.lastInteractionAt).toBe('2024-01-02T00:00:00Z');
+    });
+  });
+
   describe('Trust Level Classification', () => {
     it('should classify no interactions as BASIC (neutral success score)', () => {
       const result = scorer.calculateTrustScore([], 0);
