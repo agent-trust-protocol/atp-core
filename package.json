@@ -16,8 +16,8 @@
     "lint": "next lint --max-warnings 99999",
     "lint:fix": "next lint --fix --max-warnings 99999",
     "format:check": "echo 'No formatter configured'",
-    "test": "jest --testPathPatterns='packages/' --passWithNoTests",
-    "test:coverage": "jest --testPathPatterns='packages/' --coverage",
+    "test": "jest --passWithNoTests",
+    "test:coverage": "jest --coverage",
     "test:integration": "echo 'No integration tests configured' && exit 0",
     "test:e2e": "echo 'No e2e tests configured' && exit 0",
     "type-check": "tsc --noEmit"

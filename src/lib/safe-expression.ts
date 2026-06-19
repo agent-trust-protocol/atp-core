@@ -57,36 +57,32 @@ class Parser {
   }
   private parseEquality(): AstNode {
     let left = this.parseRelational();
-    for (;;) {
-      const op = this.matchOneOf(['===', '!==', '==', '!=']);
-      if (!op) break;
+    let op: string | null;
+    while ((op = this.matchOneOf(['===', '!==', '==', '!=']))) {
       left = { type: 'binary', op, left, right: this.parseRelational() };
     }
     return left;
   }
   private parseRelational(): AstNode {
     let left = this.parseAdditive();
-    for (;;) {
-      const op = this.matchOneOf(['<=', '>=', '<', '>']);
-      if (!op) break;
+    let op: string | null;
+    while ((op = this.matchOneOf(['<=', '>=', '<', '>']))) {
       left = { type: 'binary', op, left, right: this.parseAdditive() };
     }
     return left;
   }
   private parseAdditive(): AstNode {
     let left = this.parseMultiplicative();
-    for (;;) {
-      const op = this.matchOneOf(['+', '-']);
-      if (!op) break;
+    let op: string | null;
+    while ((op = this.matchOneOf(['+', '-']))) {
       left = { type: 'binary', op, left, right: this.parseMultiplicative() };
     }
     return left;
   }
   private parseMultiplicative(): AstNode {
     let left = this.parseUnary();
-    for (;;) {
-      const op = this.matchOneOf(['*', '/', '%']);
-      if (!op) break;
+    let op: string | null;
+    while ((op = this.matchOneOf(['*', '/', '%']))) {
       left = { type: 'binary', op, left, right: this.parseUnary() };
     }
     return left;
@@ -98,14 +94,13 @@ class Parser {
   }
   private parseMember(): AstNode {
     let node = this.parsePrimary();
-    for (;;) {
-      this.skipWs();
-      if (this.peek() === '.') {
+    for (let c = this.peek(); c === '.' || c === '['; c = this.peek()) {
+      if (c === '.') {
         this.pos++;
         const name = this.readIdentifier();
         if (FORBIDDEN_PROPS.has(name)) throw new Error(`forbidden property: ${name}`);
         node = { type: 'member', object: node, property: name };
-      } else if (this.peek() === '[') {
+      } else {
         this.pos++;
         const key = this.parseOr();
         this.skipWs();
@@ -117,8 +112,6 @@ class Parser {
         const prop = String(key.value);
         if (FORBIDDEN_PROPS.has(prop)) throw new Error(`forbidden property: ${prop}`);
         node = { type: 'member', object: node, property: prop };
-      } else {
-        break;
       }
     }
     return node;
