@@ -1132,17 +1132,21 @@ spec:
   storageClassName: gp3
 
 ---
-# Secrets
-apiVersion: v1
-kind: Secret
-metadata:
-  name: grafana-secret
-  namespace: atp-monitoring
-type: Opaque
-stringData:
-  # SECURITY: never commit a real password here. Inject it at deploy time, e.g.
-  #   kubectl create secret generic grafana-secret \
-  #     --from-literal=admin-password="$GRAFANA_ADMIN_PASSWORD" -n atp-monitoring
-  # or via an external-secrets / sealed-secrets operator. The placeholder below
-  # MUST be overridden by your deployment pipeline.
-  admin-password: "${GRAFANA_ADMIN_PASSWORD}"
+# Secret: grafana-secret (key: admin-password)
+#
+# Intentionally NOT defined in this manifest. Kubernetes stores Secret
+# `stringData` values verbatim — no shell/Helm expansion at apply time — so
+# committing a placeholder like "${GRAFANA_ADMIN_PASSWORD}" would let a naive
+# `kubectl apply -f` silently set Grafana's admin password to a known,
+# predictable string.
+#
+# The grafana Deployment references this Secret via secretKeyRef
+# (grafana-secret / admin-password), so it MUST be created out-of-band before
+# deploying, e.g.:
+#
+#   kubectl create secret generic grafana-secret \
+#     --from-literal=admin-password="$GRAFANA_ADMIN_PASSWORD" -n atp-monitoring
+#
+# or via an external-secrets / sealed-secrets operator. Until the Secret exists
+# the grafana pod stays pending (fail-closed) instead of starting with a
+# predictable password.
