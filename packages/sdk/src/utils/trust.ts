@@ -94,6 +94,10 @@ const DEFAULT_CONFIG: Required<TrustScoringConfig> = {
  * poison the entire weighted trust score.
  */
 function parseTimestampMs(timestamp: unknown): number | null {
+  // null/undefined are unparseable per the contract. Handle them explicitly:
+  // new Date(null) coerces to the Unix epoch (getTime() === 0), which would
+  // otherwise pass Number.isFinite and be returned as 0 instead of null.
+  if (timestamp == null) return null;
   const ms = new Date(timestamp as string | number | Date).getTime();
   return Number.isFinite(ms) ? ms : null;
 }
