@@ -1,5 +1,6 @@
 import { VerifiableCredential, CredentialIssuanceRequest, CredentialVerificationRequest, VerificationResult, CredentialSchema, Proof } from '../models/credential.js';
 import { CryptoUtils } from '../utils/crypto.js';
+import { verifySignatureCompat } from '@atp/shared';
 import { StorageService } from './storage.js';
 import { randomUUID } from 'crypto';
 
@@ -127,7 +128,13 @@ export class CredentialService {
       return false;
     }
 
-    return await CryptoUtils.verify(canonicalized, proof.proofValue, publicKey);
+    // Backward-compatible verification: legacy Ed25519Signature2020 proofs
+    // still verify, and v2 post-quantum (ML-DSA-65) proofs verify once issuers
+    // rotate to hybrid keys, without changing this call site.
+    const result = await verifySignatureCompat(canonicalized, proof.proofValue, {
+      ed25519PublicKeyHex: publicKey,
+    });
+    return result.valid;
   }
 
   private checkExpiration(credential: VerifiableCredential): boolean {

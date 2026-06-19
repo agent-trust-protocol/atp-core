@@ -3,13 +3,13 @@
  *
  * Covers:
  *  1. Signature forgery / invalid signatures
- *  2. Replay attacks (stale timestamps + nonce reuse)
+ *  2. Message integrity (tamper detection)
  *  3. Key confusion (signing with wrong key pair)
- *  4. Hybrid quantum-safe signature tampering
- *  5. Expired verifiable credential rejection
- *  6. Revoked credential rejection
+ *  4. Quantum-safe (ML-DSA-65) sign/verify roundtrip
+ *  5. Cryptographic hash integrity
+ *  6. Key generation uniqueness
  *  7. Rate limiter fail-closed under Redis failure
- *  8. Quantum-safe (ML-DSA-65) sign/verify roundtrip
+ *  8. Random bytes quality
  */
 
 import { CryptoUtils } from '../../utils/crypto';
@@ -18,15 +18,15 @@ import { CryptoUtils } from '../../utils/crypto';
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-async function freshKeyPair(quantumSafe = false) {
-  return CryptoUtils.generateKeyPair(quantumSafe);
+async function freshKeyPair() {
+  return CryptoUtils.generateHybridKeyPair();
 }
 
-function flipBit(hex: string): string {
-  // Flip the last byte of the hex string to corrupt the value
-  const last = parseInt(hex.slice(-2), 16);
-  const flipped = ((last + 1) & 0xff).toString(16).padStart(2, '0');
-  return hex.slice(0, -2) + flipped;
+function flipBit(sig: Uint8Array): Uint8Array {
+  // Flip the last byte to corrupt the signature
+  const corrupted = new Uint8Array(sig);
+  corrupted[corrupted.length - 1] = (corrupted[corrupted.length - 1] + 1) & 0xff;
+  return corrupted;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -34,36 +34,35 @@ function flipBit(hex: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('Signature Forgery', () => {
-  it('rejects a randomly forged signature (Ed25519)', async () => {
+  it('rejects a corrupted signature (Ed25519)', async () => {
     const kp = await freshKeyPair();
     const message = 'pay Bob 100 USD';
-    // Generate a valid signature then corrupt it
-    const validSig = await CryptoUtils.signData(message, kp.privateKey, false);
+    const validSig = await CryptoUtils.signEd25519(message, kp.ed25519.secretKey);
     const forgedSig = flipBit(validSig);
 
-    const valid = await CryptoUtils.verifySignature(message, validSig, kp.publicKey, false);
-    const forged = await CryptoUtils.verifySignature(message, forgedSig, kp.publicKey, false);
+    const valid = await CryptoUtils.verifyEd25519(message, validSig, kp.ed25519.publicKey);
+    const forged = await CryptoUtils.verifyEd25519(message, forgedSig, kp.ed25519.publicKey);
 
     expect(valid).toBe(true);
     expect(forged).toBe(false);
   });
 
-  it('rejects a forged hybrid signature (Ed25519 + ML-DSA)', async () => {
-    const kp = await freshKeyPair(true);
-    const message = 'transfer asset A to agent B';
-    const validSig = await CryptoUtils.signData(message, kp.privateKey, true);
-    const forgedSig = flipBit(validSig);
-
-    const valid = await CryptoUtils.verifySignature(message, validSig, kp.publicKey, true);
-    const forged = await CryptoUtils.verifySignature(message, forgedSig, kp.publicKey, true);
-
-    expect(valid).toBe(true);
-    expect(forged).toBe(false);
-  });
-
-  it('rejects an empty string as a signature', async () => {
+  it('rejects a corrupted signature (ML-DSA-65)', async () => {
     const kp = await freshKeyPair();
-    const result = await CryptoUtils.verifySignature('hello', '', kp.publicKey, false);
+    const message = 'transfer asset A to agent B';
+    const validSig = CryptoUtils.signMlDsa65(message, kp.mlDsa65.secretKey);
+    const forgedSig = flipBit(validSig);
+
+    const valid = CryptoUtils.verifyMlDsa65(message, validSig, kp.mlDsa65.publicKey);
+    const forged = CryptoUtils.verifyMlDsa65(message, forgedSig, kp.mlDsa65.publicKey);
+
+    expect(valid).toBe(true);
+    expect(forged).toBe(false);
+  });
+
+  it('rejects an empty signature', async () => {
+    const kp = await freshKeyPair();
+    const result = await CryptoUtils.verifyEd25519('hello', new Uint8Array(0), kp.ed25519.publicKey);
     expect(result).toBe(false);
   });
 
@@ -72,9 +71,9 @@ describe('Signature Forgery', () => {
     const kp2 = await freshKeyPair();
     const message = 'execute trade';
 
-    const sig = await CryptoUtils.signData(message, kp1.privateKey, false);
+    const sig = await CryptoUtils.signEd25519(message, kp1.ed25519.secretKey);
     // Verify with kp2's public key — must fail
-    const result = await CryptoUtils.verifySignature(message, sig, kp2.publicKey, false);
+    const result = await CryptoUtils.verifyEd25519(message, sig, kp2.ed25519.publicKey);
     expect(result).toBe(false);
   });
 });
@@ -89,61 +88,51 @@ describe('Message Integrity', () => {
     const originalMessage = 'send 50 tokens to agent-A';
     const tamperedMessage = 'send 5000 tokens to agent-A';
 
-    const sig = await CryptoUtils.signData(originalMessage, kp.privateKey, false);
-    const result = await CryptoUtils.verifySignature(tamperedMessage, sig, kp.publicKey, false);
+    const sig = await CryptoUtils.signEd25519(originalMessage, kp.ed25519.secretKey);
+    const result = await CryptoUtils.verifyEd25519(tamperedMessage, sig, kp.ed25519.publicKey);
     expect(result).toBe(false);
   });
 
-  it('rejects verification when message is tampered (hybrid quantum-safe)', async () => {
-    const kp = await freshKeyPair(true);
+  it('rejects verification when message is tampered (ML-DSA-65)', async () => {
+    const kp = await freshKeyPair();
     const originalMessage = 'approve withdrawal 1000';
     const tamperedMessage = 'approve withdrawal 100000';
 
-    const sig = await CryptoUtils.signData(originalMessage, kp.privateKey, true);
-    const result = await CryptoUtils.verifySignature(tamperedMessage, sig, kp.publicKey, true);
+    const sig = CryptoUtils.signMlDsa65(originalMessage, kp.mlDsa65.secretKey);
+    const result = CryptoUtils.verifyMlDsa65(tamperedMessage, sig, kp.mlDsa65.publicKey);
     expect(result).toBe(false);
   });
 
   it('rejects verification for an empty-string message that was not signed', async () => {
     const kp = await freshKeyPair();
-    const sig = await CryptoUtils.signData('non-empty message', kp.privateKey, false);
-    const result = await CryptoUtils.verifySignature('', sig, kp.publicKey, false);
+    const sig = await CryptoUtils.signEd25519('non-empty message', kp.ed25519.secretKey);
+    const result = await CryptoUtils.verifyEd25519('', sig, kp.ed25519.publicKey);
     expect(result).toBe(false);
   });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 3. Key Confusion — cross-mode attacks
+// 3. Key Confusion — cross-algorithm attacks
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('Key Confusion', () => {
-  it('rejects hybrid signature verified with Ed25519-only mode', async () => {
-    const kp = await freshKeyPair(true); // hybrid keypair
+  it('rejects an ML-DSA-65 signature verified as Ed25519 with a wrong key', async () => {
+    const kp = await freshKeyPair();
     const message = 'sensitive action';
 
-    // Sign in quantum-safe (hybrid) mode
-    const hybridSig = await CryptoUtils.signData(message, kp.privateKey, true);
-
-    // Attempt to verify with quantum-safe=false (Ed25519-only mode)
-    // The hybrid sig format is different from a plain Ed25519 sig, so this should fail
-    // or at least not produce a false positive confirming integrity
-    await CryptoUtils.verifySignature(message, hybridSig, kp.publicKey, false);
-    // Ed25519-only mode slices first 64 bytes of combined sig — it may return true
-    // (the Ed25519 component is valid) but we document that mixed-mode usage is
-    // discouraged. The key assertion is that a WRONG key still fails:
-    const kp2 = await freshKeyPair(false);
-    const wrongKeyResult = await CryptoUtils.verifySignature(message, hybridSig, kp2.publicKey, false);
-    expect(wrongKeyResult).toBe(false);
+    const mlDsaSig = CryptoUtils.signMlDsa65(message, kp.mlDsa65.secretKey);
+    const kp2 = await freshKeyPair();
+    // An ML-DSA signature is not a valid Ed25519 signature for any key
+    const result = await CryptoUtils.verifyEd25519(message, mlDsaSig, kp2.ed25519.publicKey);
+    expect(result).toBe(false);
   });
 
-  it('hybrid public key cannot be confused with Ed25519-only public key for verification', async () => {
-    const hybridKp = await freshKeyPair(true);
-    const classicKp = await freshKeyPair(false);
+  it('rejects an Ed25519 signature verified as ML-DSA-65', async () => {
+    const kp = await freshKeyPair();
     const message = 'action';
 
-    const hybridSig = await CryptoUtils.signData(message, hybridKp.privateKey, true);
-    // Trying to verify a hybrid signature with a classic (32-byte) public key must not succeed
-    const result = await CryptoUtils.verifySignature(message, hybridSig, classicKp.publicKey, true);
+    const edSig = await CryptoUtils.signEd25519(message, kp.ed25519.secretKey);
+    const result = CryptoUtils.verifyMlDsa65(message, edSig, kp.mlDsa65.publicKey);
     expect(result).toBe(false);
   });
 });
@@ -153,28 +142,29 @@ describe('Key Confusion', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('Quantum-Safe Sign/Verify Roundtrip', () => {
-  it('signs and verifies correctly with hybrid keys', async () => {
-    const kp = await freshKeyPair(true);
+  it('signs and verifies correctly with both halves of the hybrid pair', async () => {
+    const kp = await freshKeyPair();
     const messages = [
       'short',
       'a'.repeat(1000), // 1KB message
       JSON.stringify({ agent: 'did:atp:abc', action: 'execute', resource: '/api/data' }),
     ];
     for (const msg of messages) {
-      const sig = await CryptoUtils.signData(msg, kp.privateKey, true);
-      const ok = await CryptoUtils.verifySignature(msg, sig, kp.publicKey, true);
-      expect(ok).toBe(true);
+      const edSig = await CryptoUtils.signEd25519(msg, kp.ed25519.secretKey);
+      expect(await CryptoUtils.verifyEd25519(msg, edSig, kp.ed25519.publicKey)).toBe(true);
+      const pqSig = CryptoUtils.signMlDsa65(msg, kp.mlDsa65.secretKey);
+      expect(CryptoUtils.verifyMlDsa65(msg, pqSig, kp.mlDsa65.publicKey)).toBe(true);
     }
   });
 
   it('two independent hybrid key pairs produce different signatures', async () => {
-    const kp1 = await freshKeyPair(true);
-    const kp2 = await freshKeyPair(true);
+    const kp1 = await freshKeyPair();
+    const kp2 = await freshKeyPair();
     const message = 'same message';
 
-    const sig1 = await CryptoUtils.signData(message, kp1.privateKey, true);
-    const sig2 = await CryptoUtils.signData(message, kp2.privateKey, true);
-    expect(sig1).not.toBe(sig2);
+    const sig1 = CryptoUtils.signMlDsa65(message, kp1.mlDsa65.secretKey);
+    const sig2 = CryptoUtils.signMlDsa65(message, kp2.mlDsa65.secretKey);
+    expect(Buffer.from(sig1).equals(Buffer.from(sig2))).toBe(false);
   });
 });
 
@@ -208,18 +198,12 @@ describe('Hash Integrity', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('Key Generation Uniqueness', () => {
-  it('generates unique key pairs on every call (Ed25519)', async () => {
+  it('generates unique key pairs on every call', async () => {
     const pairs = await Promise.all(Array.from({ length: 5 }, () => freshKeyPair()));
-    const pubKeys = pairs.map(p => p.publicKey);
-    const unique = new Set(pubKeys);
-    expect(unique.size).toBe(5);
-  });
-
-  it('generates unique key pairs on every call (hybrid)', async () => {
-    const pairs = await Promise.all(Array.from({ length: 3 }, () => freshKeyPair(true)));
-    const pubKeys = pairs.map(p => p.publicKey);
-    const unique = new Set(pubKeys);
-    expect(unique.size).toBe(3);
+    const edKeys = pairs.map(p => Buffer.from(p.ed25519.publicKey).toString('hex'));
+    const pqKeys = pairs.map(p => Buffer.from(p.mlDsa65.publicKey).toString('hex'));
+    expect(new Set(edKeys).size).toBe(5);
+    expect(new Set(pqKeys).size).toBe(5);
   });
 });
 

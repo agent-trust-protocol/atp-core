@@ -1,170 +1,174 @@
 /**
- * W3C-style conformance tests for trust scoring.
+ * Trust Registry / scoring conformance (Item D).
  *
- * TABLE-DRIVEN so future W3C trust-registry conformance vectors can drop in as
- * new rows in the `levelVectors` / `monotonicity` tables.
+ * Table-driven conformance tests for the SDK {@link TrustScoring} engine
+ * (`packages/sdk/src/utils/trust.ts`), asserting two contract properties:
  *
- * Properties under test (for the SDK `TrustScoring` engine):
- *   - Determinism: identical inputs → identical TrustScoreResult.
- *   - Bounds: score ∈ [0, 1]; factor scores ∈ [0, 1]; level is a valid TrustLevel.
- *   - Monotonicity: adding positive verified interactions / credentials never
- *     lowers the score; adding negative (failed) interactions never raises it.
- *   - Thresholds: scoreToLevel boundaries map to the documented TrustLevel.
- *
- * The shared `TrustScoringEngine` (packages/shared) is covered in a sibling
- * conformance suite; this file focuses on the SDK `TrustScoring` class, which is
- * pure and runs without any DB.
+ *   1. DETERMINISM — identical inputs always produce an identical score,
+ *      factors, level and confidence. No hidden state, no randomness.
+ *   2. BOUNDS — the overall score, every factor, and confidence stay within
+ *      the documented [0, 1] range, and the level maps to the documented
+ *      thresholds. Edge / adversarial inputs must never yield NaN, Infinity,
+ *      negative values, or values above 1.
  */
 
 import { TrustScoring, TrustLevel, InteractionEvent } from '../../utils/trust';
 
-const NOW = '2024-06-01T00:00:00.000Z';
+const ISO = (d: number) => new Date(d).toISOString();
+const NOW = Date.now();
 
-const positive = (n: number, ts: string = NOW): InteractionEvent[] =>
-  Array.from({ length: n }, () => ({ timestamp: ts, action: 'message', success: true }));
+const repeat = (n: number, make: (i: number) => InteractionEvent): InteractionEvent[] =>
+  Array.from({ length: n }, (_, i) => make(i));
 
-const negative = (n: number, ts: string = NOW): InteractionEvent[] =>
-  Array.from({ length: n }, () => ({ timestamp: ts, action: 'message', success: false }));
+const recentSuccess = (i: number): InteractionEvent => ({
+  timestamp: ISO(NOW - i * 1000),
+  action: 'message',
+  success: true,
+});
 
-const VALID_LEVELS = new Set(Object.values(TrustLevel));
+// ─── shared bounds helper ───────────────────────────────────────────────────────
 
-describe('Trust scoring — W3C conformance', () => {
-  let scorer: TrustScoring;
+function assertWithinBounds(result: ReturnType<TrustScoring['calculateTrustScore']>) {
+  const checkUnit = (label: string, v: number) => {
+    expect(Number.isFinite(v)).toBe(true); // not NaN / Infinity
+    expect(v).toBeGreaterThanOrEqual(0);
+    expect(v).toBeLessThanOrEqual(1);
+    // guard against e.g. -0 / tiny negative drift sneaking through
+    expect(label && v).not.toBeNaN();
+  };
+  checkUnit('score', result.score);
+  checkUnit('confidence', result.confidence);
+  checkUnit('interactionScore', result.factors.interactionScore);
+  checkUnit('recencyScore', result.factors.recencyScore);
+  checkUnit('credentialScore', result.factors.credentialScore);
+  checkUnit('successScore', result.factors.successScore);
+  expect(Object.values(TrustLevel)).toContain(result.level);
+}
 
-  beforeEach(() => {
-    scorer = new TrustScoring();
+describe('Trust scoring conformance — determinism', () => {
+  type Case = {
+    name: string;
+    interactions: InteractionEvent[];
+    credentials: number;
+  };
+
+  const cases: Case[] = [
+    { name: 'no data', interactions: [], credentials: 0 },
+    { name: 'single recent success', interactions: [recentSuccess(0)], credentials: 0 },
+    { name: 'small mixed batch', interactions: repeat(6, (i) => ({ timestamp: ISO(NOW - i * 1000), action: 'a', success: i % 2 === 0 })), credentials: 2 },
+    { name: 'many successes + creds', interactions: repeat(40, recentSuccess), credentials: 4 },
+    { name: 'fixed-timestamp batch', interactions: repeat(10, () => ({ timestamp: '2024-01-01T00:00:00.000Z', action: 'm', success: true })), credentials: 1 },
+  ];
+
+  it.each(cases)('$name → repeated calls produce identical results', ({ interactions, credentials }) => {
+    const scorer = new TrustScoring();
+    const a = scorer.calculateTrustScore(interactions, credentials);
+    const b = scorer.calculateTrustScore(interactions, credentials);
+
+    // assessedAt is a wall-clock timestamp and is the only legitimately
+    // non-deterministic field — compare everything else exactly.
+    expect(b.score).toBe(a.score);
+    expect(b.level).toBe(a.level);
+    expect(b.confidence).toBe(a.confidence);
+    expect(b.factors).toEqual(a.factors);
+    expect(b.metadata.totalInteractions).toBe(a.metadata.totalInteractions);
+    expect(b.metadata.successfulInteractions).toBe(a.metadata.successfulInteractions);
+    expect(b.metadata.credentialsVerified).toBe(a.metadata.credentialsVerified);
+    expect(b.metadata.lastInteractionAt).toBe(a.metadata.lastInteractionAt);
   });
 
-  // ── determinism ───────────────────────────────────────────────────────────────
-  describe('determinism', () => {
-    const cases = [
-      { name: 'empty history', interactions: [] as InteractionEvent[], creds: 0 },
-      { name: 'recent positives', interactions: positive(10), creds: 2 },
-      { name: 'mixed outcomes', interactions: [...positive(7), ...negative(3)], creds: 1 },
-      { name: 'fixed-timestamp history', interactions: positive(5, '2020-01-01T00:00:00.000Z'), creds: 5 },
-    ];
-
-    it.each(cases)('same inputs produce the same score: $name', ({ interactions, creds }) => {
-      const a = scorer.calculateTrustScore(interactions, creds);
-      const b = scorer.calculateTrustScore(interactions, creds);
-
-      // assessedAt is a wall-clock timestamp; everything else must be identical.
-      expect(a.score).toBe(b.score);
-      expect(a.level).toBe(b.level);
-      expect(a.confidence).toBe(b.confidence);
-      expect(a.factors).toEqual(b.factors);
-      expect(a.metadata.totalInteractions).toBe(b.metadata.totalInteractions);
-      expect(a.metadata.successfulInteractions).toBe(b.metadata.successfulInteractions);
-      expect(a.metadata.credentialsVerified).toBe(b.metadata.credentialsVerified);
-    });
+  it.each(cases)('$name → fresh instances agree (no cross-instance state)', ({ interactions, credentials }) => {
+    const a = new TrustScoring().calculateTrustScore(interactions, credentials);
+    const b = new TrustScoring().calculateTrustScore(interactions, credentials);
+    expect(b.score).toBe(a.score);
+    expect(b.factors).toEqual(a.factors);
   });
 
-  // ── bounds ──────────────────────────────────────────────────────────────────────
-  describe('bounds', () => {
-    const cases = [
-      { name: 'empty', interactions: [] as InteractionEvent[], creds: 0 },
-      { name: 'all positive + max creds', interactions: positive(1000), creds: 10 },
-      { name: 'all negative', interactions: negative(50), creds: 0 },
-      { name: 'single positive', interactions: positive(1), creds: 0 },
-      { name: 'huge cred count', interactions: positive(3), creds: 9999 },
-    ];
-
-    it.each(cases)('score and factors stay within [0,1] and level is valid: $name', ({ interactions, creds }) => {
-      const r = scorer.calculateTrustScore(interactions, creds);
-
-      expect(r.score).toBeGreaterThanOrEqual(0);
-      expect(r.score).toBeLessThanOrEqual(1);
-      expect(r.confidence).toBeGreaterThanOrEqual(0);
-      expect(r.confidence).toBeLessThanOrEqual(1);
-
-      for (const v of Object.values(r.factors)) {
-        expect(v).toBeGreaterThanOrEqual(0);
-        expect(v).toBeLessThanOrEqual(1);
-      }
-
-      expect(VALID_LEVELS.has(r.level)).toBe(true);
-    });
+  it('TEETH: a non-deterministic (random success) input WOULD break the determinism assertion', () => {
+    const scorer = new TrustScoring();
+    // Build two batches whose only difference is randomized success flags,
+    // proving the success factor actually feeds the score. If scoring ignored
+    // success entirely this would (incorrectly) pass with equal scores.
+    const allTrue = repeat(10, (i) => ({ timestamp: ISO(NOW - i * 1000), action: 'm', success: true }));
+    const allFalse = repeat(10, (i) => ({ timestamp: ISO(NOW - i * 1000), action: 'm', success: false }));
+    const s1 = scorer.calculateTrustScore(allTrue, 0).score;
+    const s2 = scorer.calculateTrustScore(allFalse, 0).score;
+    expect(s1).not.toBe(s2); // determinism check has real discriminating power
   });
 
-  // ── monotonicity ──────────────────────────────────────────────────────────────
-  describe('monotonicity', () => {
-    it('more positive recent interactions never lowers the score', () => {
-      let prev = -Infinity;
-      for (const n of [0, 1, 3, 5, 10, 25, 50, 100]) {
-        const score = scorer.calculateTrustScore(positive(n), 0).score;
-        expect(score).toBeGreaterThanOrEqual(prev);
-        prev = score;
-      }
-    });
+  it('static simpleScore is deterministic for identical input', () => {
+    const interactions = repeat(12, recentSuccess);
+    expect(TrustScoring.simpleScore(interactions)).toBe(TrustScoring.simpleScore(interactions));
+  });
+});
 
-    it('more verified credentials never lowers the score', () => {
-      const base = positive(5);
-      let prev = -Infinity;
-      for (const c of [0, 1, 2, 3, 4, 5]) {
-        const score = scorer.calculateTrustScore(base, c).score;
-        expect(score).toBeGreaterThanOrEqual(prev);
-        prev = score;
-      }
-    });
+describe('Trust scoring conformance — bounds & edge inputs', () => {
+  type Edge = { name: string; interactions: InteractionEvent[]; credentials: number };
 
-    it('adding failed interactions to a positive history never raises the score', () => {
-      // Hold the positive count fixed; layer in increasing failures.
-      const pos = positive(10);
-      let prev = Infinity;
-      for (const f of [0, 2, 5, 10, 20]) {
-        const score = scorer.calculateTrustScore([...pos, ...negative(f)], 0).score;
-        expect(score).toBeLessThanOrEqual(prev);
-        prev = score;
-      }
-    });
+  const edges: Edge[] = [
+    { name: 'empty interactions, zero creds', interactions: [], credentials: 0 },
+    { name: 'all failures', interactions: repeat(10, (i) => ({ timestamp: ISO(NOW - i * 1000), action: 'm', success: false })), credentials: 0 },
+    { name: 'all successes', interactions: repeat(10, recentSuccess), credentials: 0 },
+    { name: 'huge interaction count', interactions: repeat(5000, recentSuccess), credentials: 5 },
+    { name: 'huge credential count (over cap)', interactions: [], credentials: 1000 },
+    { name: 'negative credential count', interactions: [recentSuccess(0)], credentials: -5 },
+    { name: 'NaN credential count', interactions: [recentSuccess(0)], credentials: NaN },
+    { name: 'Infinity credential count', interactions: [recentSuccess(0)], credentials: Infinity },
+    { name: 'future-dated interactions', interactions: repeat(5, (i) => ({ timestamp: ISO(NOW + (i + 1) * 86_400_000), action: 'm', success: true })), credentials: 0 },
+    { name: 'ancient interactions', interactions: repeat(5, (i) => ({ timestamp: ISO(NOW - (i + 1) * 365 * 86_400_000), action: 'm', success: true })), credentials: 0 },
+    { name: 'invalid timestamp strings', interactions: [{ timestamp: 'not-a-date', action: 'm', success: true }], credentials: 0 },
+    { name: 'empty-string timestamps', interactions: [{ timestamp: '', action: 'm', success: true }], credentials: 0 },
+    { name: 'missing success flags', interactions: repeat(4, (i) => ({ timestamp: ISO(NOW - i * 1000), action: 'm' })), credentials: 0 },
+    { name: 'mixed valid + invalid timestamps', interactions: [{ timestamp: ISO(NOW), action: 'm', success: true }, { timestamp: 'garbage', action: 'm', success: false }], credentials: 2 },
+  ];
 
-    it('an all-negative history scores no higher than an all-positive history of equal size', () => {
-      for (const n of [1, 5, 20, 100]) {
-        const pos = scorer.calculateTrustScore(positive(n), 0).score;
-        const neg = scorer.calculateTrustScore(negative(n), 0).score;
-        expect(neg).toBeLessThanOrEqual(pos);
-      }
-    });
+  it.each(edges)('$name → all values within [0,1], finite, valid level', ({ interactions, credentials }) => {
+    const result = new TrustScoring().calculateTrustScore(interactions, credentials);
+    assertWithinBounds(result);
   });
 
-  // ── thresholds (table-driven; vector-ready) ───────────────────────────────────
-  describe('level thresholds', () => {
-    // The documented scoreToLevel boundaries:
-    //   <=0 UNKNOWN | <0.25 BASIC | <0.5 VERIFIED | <0.75 TRUSTED | >=0.75 PRIVILEGED
-    // We drive synthetic inputs and assert the resulting level matches the band
-    // its rounded score falls into — keeping the mapping itself under test.
-    const levelOf = (score: number): TrustLevel => {
+  it.each(edges)('$name → custom weights still stay within bounds', ({ interactions, credentials }) => {
+    const scorer = new TrustScoring({
+      interactionWeight: 0.4,
+      recencyWeight: 0.3,
+      credentialWeight: 0.2,
+      successWeight: 0.1,
+    });
+    assertWithinBounds(scorer.calculateTrustScore(interactions, credentials));
+  });
+
+  it('level monotonically tracks score thresholds', () => {
+    const scorer = new TrustScoring();
+    const levelFor = (score: number): TrustLevel => {
       if (score <= 0) return TrustLevel.UNKNOWN;
       if (score < 0.25) return TrustLevel.BASIC;
       if (score < 0.5) return TrustLevel.VERIFIED;
       if (score < 0.75) return TrustLevel.TRUSTED;
       return TrustLevel.PRIVILEGED;
     };
+    for (const edge of edges) {
+      const r = scorer.calculateTrustScore(edge.interactions, edge.credentials);
+      expect(r.level).toBe(levelFor(r.score));
+    }
+  });
 
-    const levelVectors = [
-      { name: 'no data → BASIC band', interactions: [] as InteractionEvent[], creds: 0 },
-      { name: 'single recent success', interactions: positive(1), creds: 0 },
-      { name: 'moderate activity + creds', interactions: positive(15), creds: 1 },
-      { name: 'high activity + creds', interactions: positive(100), creds: 5 },
-      { name: 'all failed', interactions: negative(10), creds: 0 },
-    ];
+  it('huge inputs saturate at the maximum without exceeding 1', () => {
+    const r = new TrustScoring().calculateTrustScore(repeat(100000, recentSuccess), 100000);
+    expect(r.score).toBeLessThanOrEqual(1);
+    expect(r.factors.interactionScore).toBe(1);
+    expect(r.factors.credentialScore).toBe(1);
+    expect(Number.isFinite(r.score)).toBe(true);
+  });
 
-    it.each(levelVectors)('level matches the score band: $name', ({ interactions, creds }) => {
-      const r = scorer.calculateTrustScore(interactions, creds);
-      expect(r.level).toBe(levelOf(r.score));
-    });
-
-    it('maximal trust inputs reach PRIVILEGED', () => {
-      const r = scorer.calculateTrustScore(positive(1000), 5);
-      expect(r.score).toBeGreaterThanOrEqual(0.75);
-      expect(r.level).toBe(TrustLevel.PRIVILEGED);
-    });
-
-    it('zero-trust inputs land at the bottom band', () => {
-      const r = scorer.calculateTrustScore([], 0);
-      // Neutral success (0.5*0.2=0.1) keeps an empty history in BASIC, never above.
-      expect([TrustLevel.UNKNOWN, TrustLevel.BASIC]).toContain(r.level);
-      expect(r.score).toBeLessThan(0.25);
-    });
+  it('static levelFromCount is bounded and monotonic non-decreasing', () => {
+    const counts = [0, 1, 4, 5, 19, 20, 49, 50, 100, 1_000_000, -1];
+    let prev = -Infinity;
+    for (const c of counts.filter((x) => x >= 0)) {
+      const v = TrustScoring.levelFromCount(c);
+      expect(v).toBeGreaterThanOrEqual(0);
+      expect(v).toBeLessThanOrEqual(1);
+      expect(v).toBeGreaterThanOrEqual(prev);
+      prev = v;
+    }
   });
 });

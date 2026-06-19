@@ -244,6 +244,41 @@ export interface VerificationMethod {
   publicKeyJwk?: any;
 }
 
+/** W3C Data Integrity proof (eddsa-jcs-2022 for did:atp's classical binding). */
+export interface DataIntegrityProof {
+  type: 'DataIntegrityProof';
+  cryptosuite: string;
+  created: string;
+  verificationMethod: string;
+  proofPurpose: string;
+  proofValue: string;
+  '@context'?: string[];
+}
+
+/**
+ * Post-quantum integrity signature for did:atp: an RFC 9964 compact JWS
+ * (alg ML-DSA-65) over the JCS-canonicalized unsecured DID Document.
+ * Kept separate from `proof` per the spec's hybrid two-mechanism design.
+ */
+export interface AtpPqProof {
+  type: 'AtpPqProof';
+  created: string;
+  verificationMethod: string;
+  proofPurpose: string;
+  jws: string;
+}
+
+/** did:atp v2 path-type DID Document: dual verification methods, dual proofs. */
+export interface AtpDidDocument {
+  '@context': string[];
+  id: string;
+  verificationMethod: VerificationMethod[];
+  authentication: string[];
+  service?: Service[];
+  proof?: DataIntegrityProof;
+  atpPqProof?: AtpPqProof;
+}
+
 export interface ServiceEndpoint {
   id: string;
   type: string;

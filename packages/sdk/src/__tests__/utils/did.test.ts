@@ -1,475 +1,202 @@
 /**
- * Tests for DIDUtils
+ * did:atp v2 DID Document tests — dual-VM document, dual-proof verification.
+ * Identifier-syntax tests live in did-v2.test.ts.
  */
 
-import { DIDUtils } from '../../utils/did';
-import { CryptoUtils } from '../../utils/crypto';
-import { DIDDocument } from '../../types';
+import { DidAtpDocument } from '../../utils/did-document';
+import { DidAtp } from '../../utils/did';
+import { CryptoUtils, HybridKeyPair } from '../../utils/crypto';
+import { jcsCanonicalize } from '../../utils/jcs';
+import { AtpDidDocument } from '../../types';
 
-// Mock CryptoUtils
-jest.mock('../../utils/crypto', () => ({
-  CryptoUtils: {
-    generateKeyPair: jest.fn(),
-    createKeyFingerprint: jest.fn(),
-    signData: jest.fn(),
-    verifySignature: jest.fn()
-  }
-}));
+const DOMAIN = 'agents.example.com';
+const PATH = ['billing'];
 
-describe('DIDUtils', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+// W3C did:key Ed25519 test vector (did:key spec / vc-di-eddsa).
+const DID_KEY_VECTOR = 'z6MkiTBz1ymuepAQ4HEHYSF1H8quG5GLVVQR3djdX3mDooWp';
 
-    // Default mock implementations
-    (CryptoUtils.generateKeyPair as jest.Mock).mockResolvedValue({
-      publicKey: 'a'.repeat(64),
-      privateKey: 'b'.repeat(128)
-    });
-    (CryptoUtils.createKeyFingerprint as jest.Mock).mockReturnValue('fingerprint123');
-    (CryptoUtils.signData as jest.Mock).mockResolvedValue('signature123');
-    (CryptoUtils.verifySignature as jest.Mock).mockResolvedValue(true);
+describe('jcsCanonicalize (RFC 8785)', () => {
+  it('sorts object members lexicographically with no whitespace', () => {
+    expect(jcsCanonicalize({ b: 2, a: [true, null, 'x'], c: { z: 1, y: 2 } })).toBe(
+      '{"a":[true,null,"x"],"b":2,"c":{"y":2,"z":1}}'
+    );
   });
 
-  describe('generateDID', () => {
-    it('should generate a DID with default options', async () => {
-      const result = await DIDUtils.generateDID();
+  it('drops undefined members and escapes strings via JSON.stringify', () => {
+    expect(jcsCanonicalize({ a: undefined, b: 'a"b' })).toBe('{"b":"a\\"b"}');
+  });
+});
 
-      expect(result.did).toBe('did:atp:mainnet:fingerprint123');
-      expect(result.document.id).toBe(result.did);
-      expect(result.keyPair.publicKey).toBe('a'.repeat(64));
-      expect(CryptoUtils.generateKeyPair).toHaveBeenCalled();
-    });
-
-    it('should generate DID for testnet', async () => {
-      const result = await DIDUtils.generateDID({ network: 'testnet' });
-
-      expect(result.did).toBe('did:atp:testnet:fingerprint123');
-    });
-
-    it('should generate DID for local network', async () => {
-      const result = await DIDUtils.generateDID({ network: 'local' });
-
-      expect(result.did).toBe('did:atp:local:fingerprint123');
-    });
-
-    it('should support custom method', async () => {
-      const result = await DIDUtils.generateDID({ method: 'web' });
-
-      expect(result.did).toBe('did:web:mainnet:fingerprint123');
-    });
-
-    it('should create valid DID document structure', async () => {
-      const result = await DIDUtils.generateDID();
-
-      expect(result.document['@context']).toContain('https://www.w3.org/ns/did/v1');
-      expect(result.document.verificationMethod).toHaveLength(1);
-      expect(result.document.authentication).toContain(`${result.did}#key-1`);
-      expect(result.document.assertionMethod).toContain(`${result.did}#key-1`);
-      expect(result.document.keyAgreement).toContain(`${result.did}#key-1`);
-    });
-
-    it('should include verification method with correct properties', async () => {
-      const result = await DIDUtils.generateDID();
-      const vm = result.document.verificationMethod[0];
-
-      expect(vm.id).toBe(`${result.did}#key-1`);
-      expect(vm.type).toBe('Ed25519VerificationKey2020');
-      expect(vm.controller).toBe(result.did);
-      expect(vm.publicKeyMultibase).toBeDefined();
-    });
+describe('Multikey encoding', () => {
+  it('matches the did:key Ed25519 test vector (multicodec 0xed01, base58btc)', () => {
+    const raw = DidAtpDocument.multibaseToEd25519(DID_KEY_VECTOR);
+    expect(raw.length).toBe(32);
+    expect(DidAtpDocument.ed25519ToMultibase(raw)).toBe(DID_KEY_VECTOR);
   });
 
-  describe('parseDID', () => {
-    it('should parse a valid DID', () => {
-      const result = DIDUtils.parseDID('did:atp:mainnet:abc123');
-
-      expect(result).toEqual({
-        method: 'atp',
-        network: 'mainnet',
-        identifier: 'abc123',
-        fragment: undefined
-      });
-    });
-
-    it('should parse DID with fragment', () => {
-      const result = DIDUtils.parseDID('did:atp:mainnet:abc123#key-1');
-
-      expect(result).toEqual({
-        method: 'atp',
-        network: 'mainnet',
-        identifier: 'abc123',
-        fragment: 'key-1'
-      });
-    });
-
-    it('should return null for invalid DID', () => {
-      expect(DIDUtils.parseDID('invalid')).toBeNull();
-      expect(DIDUtils.parseDID('did:invalid')).toBeNull();
-      expect(DIDUtils.parseDID('')).toBeNull();
-    });
-
-    it('should parse DIDs with different methods', () => {
-      const result = DIDUtils.parseDID('did:web:testnet:example');
-
-      expect(result?.method).toBe('web');
-      expect(result?.network).toBe('testnet');
-    });
+  it('rejects wrong multibase prefix and wrong key length', () => {
+    expect(() => DidAtpDocument.multibaseToEd25519('f00ff')).toThrow(/base58btc/);
+    expect(() => DidAtpDocument.ed25519ToMultibase(new Uint8Array(31))).toThrow(/32 bytes/);
   });
+});
 
-  describe('isValidDID', () => {
-    it('should return true for valid DIDs', () => {
-      expect(DIDUtils.isValidDID('did:atp:mainnet:abc123')).toBe(true);
-      expect(DIDUtils.isValidDID('did:web:testnet:example')).toBe(true);
-      expect(DIDUtils.isValidDID('did:atp:local:xyz789#key-2')).toBe(true);
+describe('DidAtpDocument', () => {
+  let keyPair: HybridKeyPair;
+  let did: string;
+  let document: AtpDidDocument;
+
+  beforeAll(async () => {
+    keyPair = await CryptoUtils.generateHybridKeyPair();
+    ({ did, document } = await DidAtpDocument.create(DOMAIN, PATH, keyPair));
+  }, 60000);
+
+  describe('create', () => {
+    it('produces a path-type DID whose fingerprints match the keys', () => {
+      const parsed = DidAtp.parse(did)!;
+      expect(parsed.type).toBe('path');
+      expect(parsed.e1).toBe(CryptoUtils.e1Fingerprint(keyPair.ed25519.publicKey));
+      expect(parsed.pq1).toBe(CryptoUtils.pq1Fingerprint(keyPair.mlDsa65.publicKey));
     });
 
-    it('should return false for invalid DIDs', () => {
-      expect(DIDUtils.isValidDID('invalid')).toBe(false);
-      expect(DIDUtils.isValidDID('did:only-two-parts')).toBe(false);
-      expect(DIDUtils.isValidDID('')).toBe(false);
-    });
-  });
-
-  describe('extractPublicKey', () => {
-    const mockDocument: DIDDocument = {
-      id: 'did:atp:mainnet:test',
-      '@context': ['https://www.w3.org/ns/did/v1'],
-      verificationMethod: [{
-        id: 'did:atp:mainnet:test#key-1',
-        type: 'Ed25519VerificationKey2020',
-        controller: 'did:atp:mainnet:test',
-        publicKeyMultibase: 'z' + Buffer.from('abcd', 'hex').toString('base64url')
-      }],
-      authentication: ['did:atp:mainnet:test#key-1']
-    };
-
-    it('should extract public key from document', () => {
-      const result = DIDUtils.extractPublicKey(mockDocument);
-
-      expect(result).toBe('abcd');
-    });
-
-    it('should extract public key by specific key ID', () => {
-      const result = DIDUtils.extractPublicKey(mockDocument, 'did:atp:mainnet:test#key-1');
-
-      expect(result).toBe('abcd');
-    });
-
-    it('should return null for non-existent key ID', () => {
-      const result = DIDUtils.extractPublicKey(mockDocument, 'did:atp:mainnet:test#key-99');
-
-      expect(result).toBeNull();
-    });
-
-    it('should extract from JWK format', () => {
-      const docWithJWK: DIDDocument = {
-        id: 'did:atp:mainnet:test',
-        '@context': ['https://www.w3.org/ns/did/v1'],
-        verificationMethod: [{
-          id: 'did:atp:mainnet:test#key-1',
-          type: 'Ed25519VerificationKey2020',
-          controller: 'did:atp:mainnet:test',
-          publicKeyJwk: {
-            x: Buffer.from('publickey', 'utf-8').toString('base64url'),
-            kty: 'OKP',
-            crv: 'Ed25519'
-          }
-        }],
-        authentication: ['did:atp:mainnet:test#key-1']
-      };
-
-      const result = DIDUtils.extractPublicKey(docWithJWK);
-      expect(result).toBeDefined();
-    });
-  });
-
-  describe('addVerificationMethod', () => {
-    const baseDocument: DIDDocument = {
-      id: 'did:atp:mainnet:test',
-      '@context': ['https://www.w3.org/ns/did/v1'],
-      verificationMethod: [{
-        id: 'did:atp:mainnet:test#key-1',
-        type: 'Ed25519VerificationKey2020',
-        controller: 'did:atp:mainnet:test',
-        publicKeyMultibase: 'zABC123'
-      }],
-      authentication: ['did:atp:mainnet:test#key-1']
-    };
-
-    it('should add a new verification method', () => {
-      const result = DIDUtils.addVerificationMethod(baseDocument, 'newpublickey123');
-
-      expect(result.verificationMethod).toHaveLength(2);
-      expect(result.verificationMethod[1].id).toBe('did:atp:mainnet:test#key-2');
-    });
-
-    it('should add to authentication by default', () => {
-      const result = DIDUtils.addVerificationMethod(baseDocument, 'newpublickey123');
-
-      expect(result.authentication).toContain('did:atp:mainnet:test#key-2');
-    });
-
-    it('should add to specified purposes', () => {
-      const result = DIDUtils.addVerificationMethod(
-        baseDocument,
-        'newpublickey123',
-        ['authentication', 'assertionMethod', 'keyAgreement']
+    it('has the classical Multikey VM first and the ML-DSA-65 JsonWebKey VM second', () => {
+      const [vm0, vm1] = document.verificationMethod;
+      expect(vm0.type).toBe('Multikey');
+      expect(vm0.id).toBe(`${did}#key-ed25519`);
+      expect(vm0.publicKeyMultibase!.startsWith('z')).toBe(true);
+      expect(DidAtpDocument.multibaseToEd25519(vm0.publicKeyMultibase!)).toEqual(
+        keyPair.ed25519.publicKey
       );
 
-      expect(result.authentication).toContain('did:atp:mainnet:test#key-2');
-      expect(result.assertionMethod).toContain('did:atp:mainnet:test#key-2');
-      expect(result.keyAgreement).toContain('did:atp:mainnet:test#key-2');
-    });
-
-    it('should not modify original document', () => {
-      const originalLength = baseDocument.verificationMethod.length;
-      DIDUtils.addVerificationMethod(baseDocument, 'newpublickey123');
-
-      expect(baseDocument.verificationMethod).toHaveLength(originalLength);
-    });
-  });
-
-  describe('createResolutionResult', () => {
-    const mockDocument: DIDDocument = {
-      id: 'did:atp:mainnet:test',
-      '@context': ['https://www.w3.org/ns/did/v1'],
-      verificationMethod: [],
-      authentication: []
-    };
-
-    it('should create resolution result with document', () => {
-      const result = DIDUtils.createResolutionResult(mockDocument);
-
-      expect(result['@context']).toBe('https://w3id.org/did-resolution/v1');
-      expect(result.didDocument).toEqual(mockDocument);
-      expect(result.didDocumentMetadata.created).toBeDefined();
-      expect(result.didResolutionMetadata.contentType).toBe('application/did+ld+json');
-    });
-
-    it('should include custom metadata', () => {
-      const result = DIDUtils.createResolutionResult(mockDocument, { version: 1 });
-
-      expect(result.didDocumentMetadata.version).toBe(1);
-    });
-  });
-
-  describe('signDIDDocument', () => {
-    const mockDocument: DIDDocument = {
-      id: 'did:atp:mainnet:test',
-      '@context': ['https://www.w3.org/ns/did/v1'],
-      verificationMethod: [{
-        id: 'did:atp:mainnet:test#key-1',
-        type: 'Ed25519VerificationKey2020',
-        controller: 'did:atp:mainnet:test',
-        publicKeyMultibase: 'zABC123'
-      }],
-      authentication: ['did:atp:mainnet:test#key-1']
-    };
-
-    it('should sign document and add proof', async () => {
-      const result = await DIDUtils.signDIDDocument(mockDocument, 'privatekey123');
-
-      expect(result.proof).toBeDefined();
-      expect(result.proof!.type).toBe('Ed25519Signature2020');
-      expect(result.proof!.proofValue).toBe('signature123');
-      expect(result.proof!.verificationMethod).toBe('did:atp:mainnet:test#key-1');
-    });
-
-    it('should use specified key ID', async () => {
-      const result = await DIDUtils.signDIDDocument(
-        mockDocument,
-        'privatekey123',
-        'did:atp:mainnet:test#key-2'
-      );
-
-      expect(result.proof!.verificationMethod).toBe('did:atp:mainnet:test#key-2');
-    });
-
-    it('should include timestamp in proof', async () => {
-      const result = await DIDUtils.signDIDDocument(mockDocument, 'privatekey123');
-
-      expect(result.proof!.created).toBeDefined();
-    });
-  });
-
-  describe('verifyDIDDocument', () => {
-    it('should return false if no proof', async () => {
-      const document: DIDDocument = {
-        id: 'did:atp:mainnet:test',
-        '@context': ['https://www.w3.org/ns/did/v1'],
-        verificationMethod: [],
-        authentication: []
-      };
-
-      const result = await DIDUtils.verifyDIDDocument(document);
-      expect(result).toBe(false);
-    });
-
-    it('should verify document with valid proof', async () => {
-      const document: DIDDocument = {
-        id: 'did:atp:mainnet:test',
-        '@context': ['https://www.w3.org/ns/did/v1'],
-        verificationMethod: [{
-          id: 'did:atp:mainnet:test#key-1',
-          type: 'Ed25519VerificationKey2020',
-          controller: 'did:atp:mainnet:test',
-          publicKeyMultibase: 'z' + Buffer.from('abcd', 'hex').toString('base64url')
-        }],
-        authentication: ['did:atp:mainnet:test#key-1'],
-        proof: {
-          type: 'Ed25519Signature2020',
-          created: '2024-01-01T00:00:00Z',
-          verificationMethod: 'did:atp:mainnet:test#key-1',
-          proofPurpose: 'assertionMethod',
-          proofValue: 'signature123'
-        }
-      };
-
-      const result = await DIDUtils.verifyDIDDocument(document);
-      expect(result).toBe(true);
-    });
-
-    it('should return false if signature verification fails', async () => {
-      (CryptoUtils.verifySignature as jest.Mock).mockResolvedValue(false);
-
-      const document: DIDDocument = {
-        id: 'did:atp:mainnet:test',
-        '@context': ['https://www.w3.org/ns/did/v1'],
-        verificationMethod: [{
-          id: 'did:atp:mainnet:test#key-1',
-          type: 'Ed25519VerificationKey2020',
-          controller: 'did:atp:mainnet:test',
-          publicKeyMultibase: 'z' + Buffer.from('abcd', 'hex').toString('base64url')
-        }],
-        authentication: ['did:atp:mainnet:test#key-1'],
-        proof: {
-          type: 'Ed25519Signature2020',
-          created: '2024-01-01T00:00:00Z',
-          verificationMethod: 'did:atp:mainnet:test#key-1',
-          proofPurpose: 'assertionMethod',
-          proofValue: 'invalidsig'
-        }
-      };
-
-      const result = await DIDUtils.verifyDIDDocument(document);
-      expect(result).toBe(false);
-    });
-  });
-
-  describe('createServiceEndpoint', () => {
-    it('should create a service endpoint object', () => {
-      const result = DIDUtils.createServiceEndpoint(
-        'did:atp:test#messaging',
-        'MessagingService',
-        'https://messaging.example.com'
-      );
-
-      expect(result).toEqual({
-        id: 'did:atp:test#messaging',
-        type: 'MessagingService',
-        serviceEndpoint: 'https://messaging.example.com'
+      expect(vm1.type).toBe('JsonWebKey');
+      expect(vm1.id).toBe(`${did}#key-mldsa65`);
+      expect(vm1.publicKeyJwk).toEqual({
+        kty: 'AKP',
+        alg: 'ML-DSA-65',
+        pub: CryptoUtils.base64url(keyPair.mlDsa65.publicKey)
       });
     });
-  });
 
-  describe('didFromPublicKey', () => {
-    it('should generate DID from public key', () => {
-      const result = DIDUtils.didFromPublicKey('publickey123');
-
-      expect(result).toBe('did:atp:mainnet:fingerprint123');
-      expect(CryptoUtils.createKeyFingerprint).toHaveBeenCalledWith('publickey123');
+    it('authorizes both verification methods for authentication', () => {
+      expect(document.authentication).toEqual([`${did}#key-ed25519`, `${did}#key-mldsa65`]);
     });
 
-    it('should support custom network and method', () => {
-      const result = DIDUtils.didFromPublicKey('publickey123', {
-        network: 'testnet',
-        method: 'web'
+    it('carries both proofs: eddsa-jcs-2022 Data Integrity and ML-DSA-65 JWS', () => {
+      expect(document.proof).toMatchObject({
+        type: 'DataIntegrityProof',
+        cryptosuite: 'eddsa-jcs-2022',
+        verificationMethod: `${did}#key-ed25519`
       });
-
-      expect(result).toBe('did:web:testnet:fingerprint123');
+      expect(document.atpPqProof).toMatchObject({
+        type: 'AtpPqProof',
+        verificationMethod: `${did}#key-mldsa65`
+      });
+      expect(document.atpPqProof!.jws.split('.')).toHaveLength(3);
+      const header = JSON.parse(
+        Buffer.from(document.atpPqProof!.jws.split('.')[0], 'base64url').toString('utf8')
+      );
+      expect(header.alg).toBe('ML-DSA-65');
     });
   });
 
-  describe('validateDIDDocument', () => {
-    it('should validate a correct DID document', () => {
-      const document = {
-        id: 'did:atp:mainnet:test',
-        '@context': ['https://www.w3.org/ns/did/v1'],
-        verificationMethod: [{
-          id: 'did:atp:mainnet:test#key-1',
-          type: 'Ed25519VerificationKey2020',
-          controller: 'did:atp:mainnet:test',
-          publicKeyMultibase: 'zABC123'
-        }],
-        authentication: ['did:atp:mainnet:test#key-1']
-      };
-
-      const result = DIDUtils.validateDIDDocument(document);
-
+  describe('verify', () => {
+    it('accepts a freshly created document', async () => {
+      const result = await DidAtpDocument.verify(document);
+      expect(result.errors).toEqual([]);
       expect(result.valid).toBe(true);
-      expect(result.errors).toHaveLength(0);
     });
 
-    it('should detect missing id', () => {
-      const document = {
-        '@context': ['https://www.w3.org/ns/did/v1'],
-        verificationMethod: [],
-        authentication: []
-      };
-
-      const result = DIDUtils.validateDIDDocument(document);
-
+    it('rejects a document whose id is not a path-type did:atp', async () => {
+      const result = await DidAtpDocument.verify({ ...document, id: `did:atp:${DOMAIN}` });
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Missing or invalid id');
     });
 
-    it('should detect missing @context', () => {
-      const document = {
-        id: 'did:atp:mainnet:test',
-        verificationMethod: [],
-        authentication: []
+    it('rejects when the classical VM key does not match the e1_ segment', async () => {
+      const otherKeys = await CryptoUtils.generateHybridKeyPair();
+      const tampered: AtpDidDocument = {
+        ...document,
+        verificationMethod: [
+          {
+            ...document.verificationMethod[0],
+            publicKeyMultibase: DidAtpDocument.ed25519ToMultibase(otherKeys.ed25519.publicKey)
+          },
+          document.verificationMethod[1]
+        ]
       };
-
-      const result = DIDUtils.validateDIDDocument(document);
-
+      const result = await DidAtpDocument.verify(tampered);
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Missing or invalid @context');
+      expect(result.errors.join()).toMatch(/e1_ fingerprint/);
+    }, 60000);
+
+    it('rejects when the AKP JWK does not match the pq1_ segment', async () => {
+      const otherKeys = await CryptoUtils.generateHybridKeyPair();
+      const tampered: AtpDidDocument = {
+        ...document,
+        verificationMethod: [
+          document.verificationMethod[0],
+          {
+            ...document.verificationMethod[1],
+            publicKeyJwk: CryptoUtils.mlDsa65PublicKeyToJwk(otherKeys.mlDsa65.publicKey)
+          }
+        ]
+      };
+      const result = await DidAtpDocument.verify(tampered);
+      expect(result.valid).toBe(false);
+      expect(result.errors.join()).toMatch(/pq1_ fingerprint/);
+    }, 60000);
+
+    it('rejects a document with either proof missing', async () => {
+      const { proof: _p, ...noClassical } = document;
+      const { atpPqProof: _q, ...noPq } = document;
+      expect((await DidAtpDocument.verify(noClassical as AtpDidDocument)).valid).toBe(false);
+      expect((await DidAtpDocument.verify(noPq as AtpDidDocument)).valid).toBe(false);
     });
 
-    it('should detect invalid verification method', () => {
-      const document = {
-        id: 'did:atp:mainnet:test',
-        '@context': ['https://www.w3.org/ns/did/v1'],
-        verificationMethod: [{
-          id: 'did:atp:mainnet:test#key-1'
-          // Missing type, controller, and public key
-        }],
-        authentication: []
+    it('rejects content tampering (both proofs fail)', async () => {
+      const tampered: AtpDidDocument = {
+        ...document,
+        service: [{ id: `${did}#evil`, type: 'Evil', serviceEndpoint: 'https://evil.example' }]
       };
-
-      const result = DIDUtils.validateDIDDocument(document);
-
+      const result = await DidAtpDocument.verify(tampered);
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('verification method'))).toBe(true);
+      expect(result.errors.join()).toMatch(/eddsa-jcs-2022 proof verification failed/);
+      expect(result.errors.join()).toMatch(/ML-DSA-65 JWS verification failed/);
     });
 
-    it('should detect verification method without public key', () => {
-      const document = {
-        id: 'did:atp:mainnet:test',
-        '@context': ['https://www.w3.org/ns/did/v1'],
-        verificationMethod: [{
-          id: 'did:atp:mainnet:test#key-1',
-          type: 'Ed25519VerificationKey2020',
-          controller: 'did:atp:mainnet:test'
-          // Missing publicKeyMultibase or publicKeyJwk
-        }],
-        authentication: ['did:atp:mainnet:test#key-1']
+    it('catches a forged classical proof via the post-quantum check', async () => {
+      // Simulate a future adversary who can forge Ed25519 (here: a leaked
+      // classical key) re-signing a tampered document. The classical proof
+      // verifies, but the ML-DSA-65 JWS over the same document does not —
+      // per spec, a valid classical proof alone is never sufficient.
+      const { proof: _proof, atpPqProof, ...unsigned } = document;
+      const tamperedUnsigned: AtpDidDocument = {
+        ...(unsigned as AtpDidDocument),
+        service: [{ id: `${did}#mitm`, type: 'Attack', serviceEndpoint: 'https://mitm.example' }]
       };
+      const forged = await (DidAtpDocument as any).signClassicalProof(
+        tamperedUnsigned,
+        keyPair.ed25519.secretKey,
+        `${did}#key-ed25519`,
+        new Date().toISOString()
+      );
 
-      const result = DIDUtils.validateDIDDocument(document);
+      // The forged classical proof is valid on its own…
+      expect(
+        await DidAtpDocument.verifyClassicalProof(tamperedUnsigned, forged, keyPair.ed25519.publicKey)
+      ).toBe(true);
 
+      // …but full verification fails because the PQ JWS no longer matches.
+      const result = await DidAtpDocument.verify({
+        ...tamperedUnsigned,
+        proof: forged,
+        atpPqProof
+      });
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('Missing public key'))).toBe(true);
+      expect(result.errors).toEqual(['atpPqProof ML-DSA-65 JWS verification failed']);
+    });
+
+    it('verifies a document round-tripped through JSON (did.json simulation)', async () => {
+      const roundTripped = JSON.parse(JSON.stringify(document));
+      expect((await DidAtpDocument.verify(roundTripped)).valid).toBe(true);
     });
   });
 });

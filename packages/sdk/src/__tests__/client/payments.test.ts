@@ -15,7 +15,7 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 jest.mock('../../utils/crypto', () => ({
   CryptoUtils: {
     generateId: jest.fn().mockReturnValue('generated-id-123'),
-    sign: jest.fn().mockResolvedValue('signature-123'),
+    signEd25519: jest.fn().mockResolvedValue(new Uint8Array([0x51, 0x6e])),
     hash: jest.fn().mockResolvedValue('hash-123')
   }
 }));
@@ -42,7 +42,10 @@ describe('PaymentsClient', () => {
       services: { payments: 'http://payments-service:3005' },
       auth: {
         did: 'did:atp:user123',
-        privateKey: 'test-private-key'
+        // Hybrid private key is hex(ed25519_seed(32B) || mlDsa65_secret).
+        // signMandate validates hex format + min length before slicing the
+        // first 32 bytes as the Ed25519 seed, so the fixture must be valid hex.
+        privateKey: 'a'.repeat(128)
       }
     };
 
@@ -79,7 +82,7 @@ describe('PaymentsClient', () => {
               agentDid: 'did:atp:agent456',
               purpose: 'Shopping assistance'
             }),
-            signature: 'signature-123'
+            signature: expect.stringMatching(/^[0-9a-f]+$/)
           })
         });
         expect(result.data).toEqual(mockMandate);
@@ -543,10 +546,27 @@ describe('PaymentsClient', () => {
         purpose: 'Test'
       });
 
-      expect(CryptoUtils.sign).toHaveBeenCalledWith(
+      expect(CryptoUtils.signEd25519).toHaveBeenCalledWith(
         expect.any(String),
-        'test-private-key'
+        expect.any(Uint8Array)
       );
+    });
+
+    it('rejects a non-hex / too-short private key before signing', async () => {
+      const badClient = new PaymentsClient({
+        baseUrl: 'http://localhost',
+        services: { payments: 'http://payments-service:3005' },
+        auth: { did: 'did:atp:user123', privateKey: 'not-a-hex-key' }
+      });
+      mockAxiosInstance.request.mockResolvedValue({ data: { success: true, data: {} } });
+
+      await expect(
+        badClient.createIntentMandate({
+          userDid: 'did:atp:user',
+          agentDid: 'did:atp:agent',
+          purpose: 'Test'
+        })
+      ).rejects.toThrow(/hex-encoded hybrid private key/);
     });
 
     it('should hash cart mandates', async () => {

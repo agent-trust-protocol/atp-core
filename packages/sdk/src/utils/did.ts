@@ -1,305 +1,188 @@
-import { CryptoUtils } from './crypto.js';
-import { DIDDocument, VerificationMethod } from '../types.js';
+import { CryptoUtils, HybridKeyPair } from './crypto.js';
 
 /**
- * DID utilities for ATP™ SDK
+ * did:atp v2 identifier core.
+ *
+ * Implements the method-specific identifier syntax from the did:atp spec
+ * (docs/specs/did-atp/index.html), which follows did:wba/did:web with two
+ * trailing binding-key fingerprint segments on path-type DIDs:
+ *
+ *   atp-root-did = "did:atp:" domain-name
+ *   atp-path-did = "did:atp:" domain-name 1*(":" path-segment)
+ *                  ":" e1-fingerprint ":" pq1-fingerprint
+ *
+ *   e1-fingerprint  = "e1_"  43base64url-char   ; Ed25519, per did:wba
+ *   pq1-fingerprint = "pq1_" 43base64url-char   ; ML-DSA-65, this spec
+ *
+ * There is no network segment; the domain is the resolution authority.
+ * Rotating either binding key changes the DID, since both fingerprints
+ * are part of the path.
  */
-export class DIDUtils {
-  /**
-   * Generate a new ATP DID
-   */
-  static async generateDID(options?: {
-    network?: 'mainnet' | 'testnet' | 'local';
-    method?: string;
-  }): Promise<{
-    did: string;
-    document: DIDDocument;
-    keyPair: { publicKey: string; privateKey: string };
-  }> {
-    const network = options?.network || 'mainnet';
-    const method = options?.method || 'atp';
 
-    const keyPair = await CryptoUtils.generateKeyPair();
-    const fingerprint = CryptoUtils.createKeyFingerprint(keyPair.publicKey);
+export type AtpDidType = 'root' | 'path';
 
-    const did = `did:${method}:${network}:${fingerprint}`;
+export interface ParsedAtpDid {
+  /** The DID without any fragment. */
+  did: string;
+  type: AtpDidType;
+  /** Lowercase domain name, with optional did:web-style "%3A<port>" suffix. */
+  domain: string;
+  /** Path segments between the domain and the fingerprints; [] for root DIDs. */
+  path: string[];
+  /** Full classical fingerprint segment ("e1_" + 43 chars); path DIDs only. */
+  e1?: string;
+  /** Full post-quantum fingerprint segment ("pq1_" + 43 chars); path DIDs only. */
+  pq1?: string;
+  /** Fragment after "#", if present (e.g. a key id). */
+  fragment?: string;
+}
 
-    const document: DIDDocument = {
-      id: did,
-      '@context': ['https://www.w3.org/ns/did/v1'],
-      verificationMethod: [{
-        id: `${did}#key-1`,
-        type: 'Ed25519VerificationKey2020',
-        controller: did,
-        publicKeyMultibase: this.encodeMultibase(keyPair.publicKey)
-      }],
-      authentication: [`${did}#key-1`],
-      assertionMethod: [`${did}#key-1`],
-      keyAgreement: [`${did}#key-1`]
-    };
+/** RFC 7638 SHA-256 thumbprints are 32 bytes → 43 base64url chars, no padding. */
+const THUMBPRINT_LENGTH = 43;
 
-    return {
-      did,
-      document,
-      keyPair
-    };
-  }
+const E1_RE = /^e1_[A-Za-z0-9_-]{43}$/;
+const PQ1_RE = /^pq1_[A-Za-z0-9_-]{43}$/;
+const PATH_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
+// Lowercase hostname per did:web, with an optional percent-encoded port.
+const DOMAIN_RE = /^(?=.{1,253}(%3[aA]|$))[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*(%3[aA][0-9]{1,5})?$/;
+
+export class DidAtp {
+  static readonly METHOD = 'atp';
+  static readonly PREFIX = 'did:atp:';
 
   /**
-   * Parse a DID string
+   * Build a path-type did:atp identifier from the two binding public keys.
+   * At least one path segment is required (per the spec ABNF); root DIDs
+   * carry no fingerprints and are built with `rootDid()`.
    */
-  static parseDID(did: string): {
-    method: string;
-    network: string;
-    identifier: string;
-    fragment?: string;
-  } | null {
-    const didRegex = /^did:([^:]+):([^:]+):([^#]+)(?:#(.+))?$/;
-    const match = did.match(didRegex);
-
-    if (!match) {
-      return null;
-    }
-
-    return {
-      method: match[1],
-      network: match[2],
-      identifier: match[3],
-      fragment: match[4]
-    };
-  }
-
-  /**
-   * Validate DID format
-   */
-  static isValidDID(did: string): boolean {
-    return this.parseDID(did) !== null;
-  }
-
-  /**
-   * Extract public key from DID document
-   */
-  static extractPublicKey(document: DIDDocument, keyId?: string): string | null {
-    const targetKeyId = keyId || `${document.id}#key-1`;
-
-    const verificationMethod = document.verificationMethod?.find(
-      vm => vm.id === targetKeyId
-    );
-
-    if (!verificationMethod) {
-      return null;
-    }
-
-    if (verificationMethod.publicKeyMultibase) {
-      return this.decodeMultibase(verificationMethod.publicKeyMultibase);
-    }
-
-    if (verificationMethod.publicKeyJwk) {
-      // Convert JWK to hex (simplified)
-      const jwk = verificationMethod.publicKeyJwk;
-      if (jwk.x) {
-        return Buffer.from(jwk.x, 'base64url').toString('hex');
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Add verification method to DID document
-   */
-  static addVerificationMethod(
-    document: DIDDocument,
-    publicKey: string,
-    purposes: ('authentication' | 'assertionMethod' | 'keyAgreement' | 'capabilityInvocation' | 'capabilityDelegation')[] = ['authentication']
-  ): DIDDocument {
-    const keyNumber = document.verificationMethod.length + 1;
-    const keyId = `${document.id}#key-${keyNumber}`;
-
-    const verificationMethod: VerificationMethod = {
-      id: keyId,
-      type: 'Ed25519VerificationKey2020',
-      controller: document.id,
-      publicKeyMultibase: this.encodeMultibase(publicKey)
-    };
-
-    const updatedDocument = { ...document };
-    updatedDocument.verificationMethod = [...document.verificationMethod, verificationMethod];
-
-    // Add to specified purposes
-    purposes.forEach(purpose => {
-      if (!updatedDocument[purpose]) {
-        updatedDocument[purpose] = [];
-      }
-      updatedDocument[purpose]!.push(keyId);
-    });
-
-    return updatedDocument;
-  }
-
-  /**
-   * Create DID resolution result
-   */
-  static createResolutionResult(
-    document: DIDDocument,
-    metadata?: any
-  ): {
-    '@context': string;
-    didDocument: DIDDocument;
-    didDocumentMetadata: any;
-    didResolutionMetadata: any;
-  } {
-    return {
-      '@context': 'https://w3id.org/did-resolution/v1',
-      didDocument: document,
-      didDocumentMetadata: {
-        created: new Date().toISOString(),
-        updated: new Date().toISOString(),
-        ...metadata
-      },
-      didResolutionMetadata: {
-        contentType: 'application/did+ld+json'
-      }
-    };
-  }
-
-  /**
-   * Sign DID document
-   */
-  static async signDIDDocument(
-    document: DIDDocument,
-    privateKey: string,
-    keyId?: string
-  ): Promise<DIDDocument> {
-    const targetKeyId = keyId || `${document.id}#key-1`;
-    const documentJson = JSON.stringify(document, null, 2);
-    const signature = await CryptoUtils.signData(documentJson, privateKey);
-
-    // Add proof to document
-    const signedDocument = {
-      ...document,
-      proof: {
-        type: 'Ed25519Signature2020',
-        created: new Date().toISOString(),
-        verificationMethod: targetKeyId,
-        proofPurpose: 'assertionMethod',
-        proofValue: signature
-      }
-    };
-
-    return signedDocument;
-  }
-
-  /**
-   * Verify DID document signature
-   */
-  static async verifyDIDDocument(document: DIDDocument): Promise<boolean> {
-    if (!document.proof) {
-      return false;
-    }
-
-    const { proof, ...documentWithoutProof } = document;
-    const publicKey = this.extractPublicKey(document, proof.verificationMethod);
-
-    if (!publicKey) {
-      return false;
-    }
-
-    const documentJson = JSON.stringify(documentWithoutProof, null, 2);
-    return CryptoUtils.verifySignature(documentJson, proof.proofValue, publicKey);
-  }
-
-  /**
-   * Create service endpoint
-   */
-  static createServiceEndpoint(
-    id: string,
-    type: string,
-    serviceEndpoint: string
-  ) {
-    return {
-      id,
-      type,
-      serviceEndpoint
-    };
-  }
-
-  /**
-   * Encode public key as multibase
-   */
-  private static encodeMultibase(publicKeyHex: string): string {
-    // Simplified multibase encoding (base58btc)
-    const publicKeyBuffer = Buffer.from(publicKeyHex, 'hex');
-    // In a real implementation, this would use proper multibase encoding
-    return `z${  publicKeyBuffer.toString('base64url')}`;
-  }
-
-  /**
-   * Decode multibase public key
-   */
-  private static decodeMultibase(multibase: string): string {
-    // Simplified multibase decoding
-    if (multibase.startsWith('z')) {
-      const base64url = multibase.slice(1);
-      return Buffer.from(base64url, 'base64url').toString('hex');
-    }
-    throw new Error('Unsupported multibase encoding');
-  }
-
-  /**
-   * Generate DID from public key
-   */
-  static didFromPublicKey(
-    publicKey: string,
-    options?: {
-      network?: string;
-      method?: string;
-    }
+  static fromPublicKeys(
+    domain: string,
+    path: string[],
+    ed25519PublicKey: Uint8Array,
+    mlDsa65PublicKey: Uint8Array
   ): string {
-    const network = options?.network || 'mainnet';
-    const method = options?.method || 'atp';
-    const fingerprint = CryptoUtils.createKeyFingerprint(publicKey);
-
-    return `did:${method}:${network}:${fingerprint}`;
+    this.assertDomain(domain);
+    this.assertPath(path);
+    const e1 = CryptoUtils.e1Fingerprint(ed25519PublicKey);
+    const pq1 = CryptoUtils.pq1Fingerprint(mlDsa65PublicKey);
+    return `${this.PREFIX}${domain}:${path.join(':')}:${e1}:${pq1}`;
   }
 
   /**
-   * Validate DID document structure
+   * Build a root did:atp identifier (domain only, no binding fingerprints).
    */
-  static validateDIDDocument(document: any): { valid: boolean; errors: string[] } {
-    const errors: string[] = [];
+  static rootDid(domain: string): string {
+    this.assertDomain(domain);
+    return `${this.PREFIX}${domain}`;
+  }
 
-    if (!document.id || typeof document.id !== 'string') {
-      errors.push('Missing or invalid id');
+  /**
+   * Generate a fresh hybrid keypair and the path-type DID bound to it.
+   */
+  static async generate(
+    domain: string,
+    path: string[]
+  ): Promise<{ did: string; keyPair: HybridKeyPair }> {
+    this.assertDomain(domain);
+    this.assertPath(path);
+    const keyPair = await CryptoUtils.generateHybridKeyPair();
+    const did = this.fromPublicKeys(
+      domain,
+      path,
+      keyPair.ed25519.publicKey,
+      keyPair.mlDsa65.publicKey
+    );
+    return { did, keyPair };
+  }
+
+  /**
+   * Parse a did:atp identifier. Returns null if the string is not a valid
+   * did:atp root or path DID per the spec ABNF.
+   */
+  static parse(input: string): ParsedAtpDid | null {
+    if (typeof input !== 'string') return null;
+
+    let fragment: string | undefined;
+    let did = input;
+    const hashIndex = input.indexOf('#');
+    if (hashIndex !== -1) {
+      fragment = input.slice(hashIndex + 1);
+      did = input.slice(0, hashIndex);
+      if (fragment.length === 0) return null;
     }
 
-    if (!document['@context'] || !Array.isArray(document['@context'])) {
-      errors.push('Missing or invalid @context');
+    if (!did.startsWith(this.PREFIX)) return null;
+    const msi = did.slice(this.PREFIX.length);
+    if (msi.length === 0) return null;
+
+    const segments = msi.split(':');
+    const domain = segments[0];
+    if (!DOMAIN_RE.test(domain)) return null;
+
+    if (segments.length === 1) {
+      return { did, type: 'root', domain, path: [], fragment };
     }
 
-    if (!document.verificationMethod || !Array.isArray(document.verificationMethod)) {
-      errors.push('Missing or invalid verificationMethod');
+    // Path-type: domain, >=1 path segment, then e1_ and pq1_ fingerprints.
+    if (segments.length < 4) return null;
+
+    const pq1 = segments[segments.length - 1];
+    const e1 = segments[segments.length - 2];
+    if (!E1_RE.test(e1) || !PQ1_RE.test(pq1)) return null;
+
+    const path = segments.slice(1, -2);
+    for (const segment of path) {
+      if (!PATH_SEGMENT_RE.test(segment)) return null;
+      // A fingerprint-shaped path segment would make the DID ambiguous.
+      if (E1_RE.test(segment) || PQ1_RE.test(segment)) return null;
     }
 
-    if (!document.authentication || !Array.isArray(document.authentication)) {
-      errors.push('Missing or invalid authentication');
-    }
+    return { did, type: 'path', domain, path, e1, pq1, fragment };
+  }
 
-    // Validate verification methods
-    if (document.verificationMethod) {
-      document.verificationMethod.forEach((vm: any, index: number) => {
-        if (!vm.id || !vm.type || !vm.controller) {
-          errors.push(`Invalid verification method at index ${index}`);
-        }
-        if (!vm.publicKeyMultibase && !vm.publicKeyJwk) {
-          errors.push(`Missing public key in verification method at index ${index}`);
-        }
-      });
-    }
+  /**
+   * True if the string is a valid did:atp root or path DID.
+   */
+  static isValid(did: string): boolean {
+    return this.parse(did) !== null;
+  }
 
-    return {
-      valid: errors.length === 0,
-      errors
-    };
+  /**
+   * Verify that a path-type DID's fingerprints match the given public keys
+   * (the create-time half of the spec's dual-binding requirement).
+   */
+  static matchesPublicKeys(
+    did: string,
+    ed25519PublicKey: Uint8Array,
+    mlDsa65PublicKey: Uint8Array
+  ): boolean {
+    const parsed = this.parse(did);
+    if (!parsed || parsed.type !== 'path') return false;
+    return (
+      CryptoUtils.constantTimeEqual(parsed.e1!, CryptoUtils.e1Fingerprint(ed25519PublicKey)) &&
+      CryptoUtils.constantTimeEqual(parsed.pq1!, CryptoUtils.pq1Fingerprint(mlDsa65PublicKey))
+    );
+  }
+
+  private static assertDomain(domain: string): void {
+    if (!DOMAIN_RE.test(domain)) {
+      throw new Error(`Invalid did:atp domain: "${domain}" (lowercase hostname, optional %3A port)`);
+    }
+  }
+
+  private static assertPath(path: string[]): void {
+    if (!Array.isArray(path) || path.length === 0) {
+      throw new Error('A path-type did:atp requires at least one path segment');
+    }
+    for (const segment of path) {
+      if (!PATH_SEGMENT_RE.test(segment)) {
+        throw new Error(`Invalid did:atp path segment: "${segment}"`);
+      }
+      if (E1_RE.test(segment) || PQ1_RE.test(segment)) {
+        throw new Error(`Path segment "${segment}" is fingerprint-shaped and would be ambiguous`);
+      }
+    }
   }
 }
+
+export { THUMBPRINT_LENGTH };

@@ -2,7 +2,7 @@ import { AuthMessage } from '../models/rpc.js';
 import { DIDJWTService, DIDJWTPayload } from './did-jwt.js';
 import { MTLSService, ClientCertificate } from './mtls.js';
 import { IncomingMessage } from 'http';
-import { nonceService } from '@atp/shared';
+import { nonceService, verifySignatureCompat } from '@atp/shared';
 
 export interface AuthContext {
   did?: string;
@@ -174,19 +174,21 @@ export class AuthService {
     }
   }
 
-  private async verifySignature(message: string, signatureHex: string, publicKeyHex: string): Promise<boolean> {
+  private async verifySignature(
+    message: string,
+    signatureHex: string,
+    publicKeyHex: string,
+    mlDsa65PublicKeyHex?: string
+  ): Promise<boolean> {
     try {
-      // Import crypto setup
-      const { initializeCrypto } = await import('@atp/shared');
-      initializeCrypto();
-      
-      const crypto = await import('@noble/ed25519');
-      
-      const messageBytes = Buffer.from(message, 'utf8');
-      const signatureBytes = Buffer.from(signatureHex, 'hex');
-      const publicKeyBytes = Buffer.from(publicKeyHex, 'hex');
-      
-      return await crypto.verify(signatureBytes, messageBytes, publicKeyBytes);
+      // Backward-compatible verification: legacy Ed25519 signatures still
+      // verify, and v2 post-quantum (ML-DSA-65) signatures verify when the
+      // agent's DID Document exposes a post-quantum verification method.
+      const result = await verifySignatureCompat(message, signatureHex, {
+        ed25519PublicKeyHex: publicKeyHex,
+        mlDsa65PublicKeyHex,
+      });
+      return result.valid;
     } catch (error) {
       console.error('Signature verification failed:', error);
       return false;

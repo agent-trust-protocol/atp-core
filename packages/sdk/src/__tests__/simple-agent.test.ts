@@ -54,15 +54,10 @@ describe('Agent', () => {
       setAuthentication: jest.fn()
     }));
 
-    // Mock CryptoUtils.generateKeyPair
-    (CryptoUtils.generateKeyPair as jest.Mock).mockResolvedValue({
-      publicKey: 'a'.repeat(3968), // Correct length for hybrid public key
-      privateKey: 'b'.repeat(8128), // Correct length for hybrid private key
-      quantumSafe: true,
-      ed25519PublicKey: 'c'.repeat(64),
-      ed25519PrivateKey: 'd'.repeat(64),
-      mlDsaPublicKey: 'e'.repeat(3904),
-      mlDsaPrivateKey: 'f'.repeat(8064)
+    // Mock CryptoUtils.generateHybridKeyPair (split key model)
+    (CryptoUtils.generateHybridKeyPair as jest.Mock).mockResolvedValue({
+      ed25519: { publicKey: new Uint8Array(32).fill(0xaa), secretKey: new Uint8Array(32).fill(0xbb) },
+      mlDsa65: { publicKey: new Uint8Array(1952).fill(0xcc), secretKey: new Uint8Array(4032).fill(0xdd) }
     });
 
     // Mock CryptoUtils.generateX25519KeyPair for message encryption
@@ -123,12 +118,12 @@ describe('Agent', () => {
       expect(agent.getDID()).toBe('did:atp:test123');
       expect(agent.isQuantumSafe()).toBe(true);
 
-      // Verify CryptoUtils was called with quantum-safe flag
-      expect(CryptoUtils.generateKeyPair).toHaveBeenCalledWith(true);
+      // Verify a hybrid keypair was generated
+      expect(CryptoUtils.generateHybridKeyPair).toHaveBeenCalled();
 
-      // Verify DID was registered
+      // Verify DID was registered with hex of ed25519 || ml-dsa-65 public keys
       expect(mockIdentityClient.registerDID).toHaveBeenCalledWith({
-        publicKey: 'a'.repeat(3968),
+        publicKey: 'aa'.repeat(32) + 'cc'.repeat(1952),
         metadata: {
           name: 'TestBot',
           quantumSafe: true,
@@ -150,7 +145,7 @@ describe('Agent', () => {
       expect(agent.isInitialized()).toBe(true);
 
       // Should not generate new keypair when DID is provided
-      expect(CryptoUtils.generateKeyPair).not.toHaveBeenCalled();
+      expect(CryptoUtils.generateHybridKeyPair).not.toHaveBeenCalled();
     });
 
     it('should fall back to standalone mode if DID registration fails', async () => {

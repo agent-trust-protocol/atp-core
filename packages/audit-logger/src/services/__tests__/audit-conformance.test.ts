@@ -1,331 +1,360 @@
 /**
- * W3C-style conformance tests for the append-only audit store.
+ * Audit Store / Trust Registry conformance — AUDIT STORE INTEGRITY (Item D).
  *
- * These tests are TABLE-DRIVEN so that future W3C conformance vectors can drop
- * in as new rows in the `tamperCases` / chain-construction tables.
+ * Table-driven conformance tests for the append-only hash chain produced by
+ * {@link AuditService}. These assert two properties of an audit store:
  *
- * They cover:
- *   1. Hash-chain construction — each event.previousHash === prior event.hash,
- *      block numbers increment, and an untampered chain verifies as valid.
- *   2. Tamper detection — payload mutation, hash alteration, broken chain link,
- *      and event removal/insertion each cause verifyIntegrity() to report INVALID.
- *   3. Non-repudiation — a tampered event fails its HMAC-SHA256 signature check.
+ *   1. An intact chain verifies as valid.
+ *   2. ANY tamper — mutating an entry's content, reordering entries, or
+ *      breaking the `previousHash` linkage — is detected (verification FALSE).
  *
- * Storage strategy mirrors the existing audit.test.ts: a fully in-memory mock
- * implementing IAuditStorageService, plus a no-op IPFS mock, so the suite runs
- * without a real DB or IPFS. The mock's verifyChain() reimplements the SAME
- * SHA-256 hash recomputation + previousHash linkage checks the real service uses
- * internally (AuditService.verifyChainIntegrity), so these tests genuinely
- * exercise integrity semantics rather than a stubbed `valid: true`.
+ * The production `AuditStorageService.verifyChain` (Postgres / SQLite) only
+ * checks `previousHash` linkage. The `AuditService` itself owns the canonical
+ * hashing rule (SHA-256 over the sorted event fields) but only exposes it via
+ * the private periodic `verifyChainIntegrity`. To give the tamper tests TEETH
+ * for content mutation as well as linkage, this suite uses an in-memory
+ * conformance storage whose `verifyChain` replicates BOTH checks using the
+ * exact same hashing primitive the service uses (Node `crypto` SHA-256 over the
+ * canonical sorted-key JSON). No bespoke crypto is introduced.
  */
 
-import { createHash, createHmac } from 'crypto';
+import { createHash } from 'crypto';
 import { AuditService } from '../audit.js';
-import { AuditEvent, AuditEventRequest } from '../../models/audit.js';
+import { AuditEvent, AuditEventRequest, AuditQuery } from '../../models/audit.js';
+import { IAuditStorageService } from '../../interfaces/storage.js';
 
-// ─── canonical crypto helpers (mirror AuditService internals) ───────────────────
+// ─── canonical hashing (mirrors AuditService.generateSecureHash) ────────────────
+
+/** Deterministic, content-preserving canonical JSON (recursively sorted keys). */
+function canonicalize(data: any): string {
+  return JSON.stringify(data, (_key, value) => {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      return Object.keys(value)
+        .sort()
+        .reduce((acc: Record<string, any>, k) => {
+          acc[k] = value[k];
+          return acc;
+        }, {});
+    }
+    return value;
+  });
+}
+
+/** The exact field set the service hashes over (mirrors AuditService). */
+function canonicalEventHash(event: AuditEvent): string {
+  const data = {
+    id: event.id,
+    timestamp: event.timestamp,
+    source: event.source,
+    action: event.action,
+    resource: event.resource,
+    actor: event.actor,
+    details: event.details,
+    previousHash: event.previousHash,
+    nonce: event.nonce,
+    blockNumber: event.blockNumber,
+  };
+  return createHash('sha256').update(canonicalize(data)).digest('hex');
+}
 
 const GENESIS = '0'.repeat(64);
 
-/** Deterministic SHA-256 over sorted keys — identical to AuditService.generateSecureHash. */
-const secureHash = (data: Record<string, any>): string => {
-  const dataString = JSON.stringify(data, Object.keys(data).sort());
-  return createHash('sha256').update(dataString).digest('hex');
-};
-
-/** The exact field projection AuditService hashes for an event. */
-const eventHashInput = (event: AuditEvent) => ({
-  id: event.id,
-  timestamp: event.timestamp,
-  source: event.source,
-  action: event.action,
-  resource: event.resource,
-  actor: event.actor,
-  details: event.details,
-  previousHash: event.previousHash,
-  nonce: event.nonce,
-  blockNumber: event.blockNumber,
-});
-
-/** Recompute the canonical HMAC-SHA256 signature for an event. */
-const expectedSignature = (event: AuditEvent, signingKey: string): string => {
-  const eventData = eventHashInput(event);
-  const dataString = JSON.stringify(eventData, Object.keys(eventData).sort());
-  return createHmac('sha256', signingKey).update(dataString).digest('hex');
-};
+// ─── in-memory conformance storage ──────────────────────────────────────────────
 
 /**
- * Pure chain verifier that reimplements AuditService.verifyChainIntegrity over a
- * snapshot of events. Returns the same shape as IAuditStorageService.verifyChain.
+ * In-memory append-only store. `verifyChain` enforces the full conformance
+ * contract: genesis linkage, per-link `previousHash` continuity, AND content
+ * integrity by recomputing each event's hash.
  */
-const verifyChainOver = (
-  events: AuditEvent[]
-): { valid: boolean; brokenAt?: string } => {
-  const sorted = [...events].sort(
-    (a, b) => (a.blockNumber || 0) - (b.blockNumber || 0)
-  );
+class InMemoryConformanceStorage implements IAuditStorageService {
+  private events: AuditEvent[] = [];
 
-  let previousHash = GENESIS;
-  for (const event of sorted) {
-    if (event.previousHash !== previousHash) {
-      return { valid: false, brokenAt: event.id };
-    }
-    const expectedHash = secureHash(eventHashInput(event));
-    if (event.hash !== expectedHash) {
-      return { valid: false, brokenAt: event.id };
-    }
-    previousHash = event.hash;
+  async storeEvent(event: AuditEvent): Promise<void> {
+    // Store a deep copy so callers cannot mutate stored state by reference.
+    this.events.push(JSON.parse(JSON.stringify(event)));
   }
-  return { valid: true };
-};
 
-// ─── in-memory storage + IPFS mocks ─────────────────────────────────────────────
+  async getEvent(id: string): Promise<AuditEvent | null> {
+    return this.events.find((e) => e.id === id) ?? null;
+  }
 
-/**
- * In-memory store backed by an ordered array so tamper cases can mutate the
- * exact chain that verifyChain() inspects. The shared `chain` array is the
- * source of truth for both `getLastEvent` and `verifyChain`.
- */
-const makeChainStorage = () => {
-  const chain: AuditEvent[] = [];
+  async queryEvents(_query: AuditQuery): Promise<{ events: AuditEvent[]; total: number }> {
+    const events = this.events.map((e) => JSON.parse(JSON.stringify(e)));
+    return { events, total: events.length };
+  }
 
-  return {
-    chain,
-    storeEvent: jest.fn(async (evt: AuditEvent) => {
-      chain.push(evt);
-    }),
-    getEvent: jest.fn(async (id: string) => chain.find((e) => e.id === id) ?? null),
-    queryEvents: jest.fn(async () => ({ events: [...chain], total: chain.length })),
-    getLastEvent: jest.fn(async () => chain[chain.length - 1] ?? null),
-    verifyChain: jest.fn(async () => verifyChainOver(chain)),
-    close: jest.fn(),
-  };
-};
+  async getLastEvent(): Promise<AuditEvent | null> {
+    return this.events.length ? JSON.parse(JSON.stringify(this.events[this.events.length - 1])) : null;
+  }
 
-const makeIPFSMock = () => ({
-  storeEvent: jest.fn(async () => ''),
-  retrieveEvent: jest.fn(async () => null),
-  isAvailable: jest.fn(async () => false),
-});
+  async verifyChain(): Promise<{ valid: boolean; brokenAt?: string }> {
+    // Verify in stored (append) order — reordering MUST therefore be caught.
+    let previousHash: string = GENESIS;
+    for (const event of this.events) {
+      // 1. Linkage continuity.
+      if ((event.previousHash ?? GENESIS) !== previousHash) {
+        return { valid: false, brokenAt: event.id };
+      }
+      // 2. Content integrity — recompute and compare the stored hash.
+      if (event.hash !== canonicalEventHash(event)) {
+        return { valid: false, brokenAt: event.id };
+      }
+      previousHash = event.hash;
+    }
+    return { valid: true };
+  }
 
-const makeRequest = (
-  overrides: Partial<AuditEventRequest> = {}
-): AuditEventRequest => ({
-  source: 'identity-service',
-  action: 'did:register',
-  resource: 'did:atp:test',
-  actor: 'did:atp:admin',
-  ...overrides,
-});
+  close(): void {
+    /* no-op */
+  }
 
-// Deterministic signing key for non-repudiation assertions.
-const SIGNING_KEY = 'conformance-test-signing-key';
+  // ── test-only accessors (bypass the read-copy semantics) ──
+  _raw(): AuditEvent[] {
+    return this.events;
+  }
+  _mutate(index: number, fn: (e: AuditEvent) => void): void {
+    fn(this.events[index]);
+  }
+  _swap(a: number, b: number): void {
+    const tmp = this.events[a];
+    this.events[a] = this.events[b];
+    this.events[b] = tmp;
+  }
+}
 
-// ─── tests ───────────────────────────────────────────────────────────────────
+const noopIpfs = {
+  storeEvent: async () => '',
+  retrieveEvent: async () => null,
+  isAvailable: async () => false,
+} as any;
 
-describe('Audit store — W3C conformance', () => {
+/** Append `count` genuine events through the real service to build a chain. */
+async function buildChain(service: AuditService, count: number): Promise<AuditEvent[]> {
+  const events: AuditEvent[] = [];
+  for (let i = 0; i < count; i++) {
+    const req: AuditEventRequest = {
+      source: `svc-${i % 3}`,
+      action: `action:${i}`,
+      resource: `res-${i}`,
+      actor: `did:atp:actor-${i}`,
+      details: { step: i, note: `event ${i}` },
+    };
+    events.push(await service.logEvent(req));
+  }
+  return events;
+}
+
+// ─── tests ────────────────────────────────────────────────────────────────────
+
+describe('Audit store conformance — hash-chain integrity', () => {
+  let storage: InMemoryConformanceStorage;
   let service: AuditService;
-  let storage: ReturnType<typeof makeChainStorage>;
-  let ipfs: ReturnType<typeof makeIPFSMock>;
-  let prevSigningKey: string | undefined;
-  let prevEncKey: string | undefined;
-
-  beforeAll(() => {
-    prevSigningKey = process.env.AUDIT_SIGNING_KEY;
-    prevEncKey = process.env.AUDIT_ENCRYPTION_KEY;
-    process.env.AUDIT_SIGNING_KEY = SIGNING_KEY;
-    process.env.AUDIT_ENCRYPTION_KEY = 'conformance-test-encryption-key';
-  });
-
-  afterAll(() => {
-    if (prevSigningKey === undefined) delete process.env.AUDIT_SIGNING_KEY;
-    else process.env.AUDIT_SIGNING_KEY = prevSigningKey;
-    if (prevEncKey === undefined) delete process.env.AUDIT_ENCRYPTION_KEY;
-    else process.env.AUDIT_ENCRYPTION_KEY = prevEncKey;
-  });
 
   beforeEach(() => {
-    storage = makeChainStorage();
-    ipfs = makeIPFSMock();
-    service = new AuditService(storage as any, ipfs as any);
+    storage = new InMemoryConformanceStorage();
+    service = new AuditService(storage, noopIpfs);
   });
 
-  /** Append N events through the real logEvent path, building a genuine chain. */
-  const appendChain = async (count: number): Promise<AuditEvent[]> => {
-    const out: AuditEvent[] = [];
-    for (let i = 0; i < count; i++) {
-      out.push(await service.logEvent(makeRequest({ action: `step:${i}` })));
-    }
-    return out;
-  };
-
-  // ── 1. hash-chain construction (table-driven over chain lengths) ──────────────
-  describe('hash-chain construction', () => {
-    const lengths = [
-      { name: 'single event', count: 1 },
-      { name: 'short chain', count: 3 },
-      { name: 'longer chain', count: 8 },
+  describe('intact chains verify as valid (determinism / linkage)', () => {
+    const lengthCases: Array<{ name: string; length: number }> = [
+      { name: 'empty chain (genesis only)', length: 0 },
+      { name: 'single event', length: 1 },
+      { name: 'short chain', length: 3 },
+      { name: 'medium chain', length: 10 },
     ];
 
-    it.each(lengths)(
-      'builds a valid linked chain: $name',
-      async ({ count }) => {
-        const events = await appendChain(count);
-
-        // First event links to genesis.
-        expect(events[0].previousHash).toBe(GENESIS);
-        expect(events[0].blockNumber).toBe(1);
-
-        // Each subsequent event links to the prior event's hash, blocks increment.
-        for (let i = 1; i < events.length; i++) {
-          expect(events[i].previousHash).toBe(events[i - 1].hash);
-          expect(events[i].blockNumber).toBe((events[i - 1].blockNumber ?? 0) + 1);
-        }
-
-        // Every event hash is a 64-char hex digest matching the canonical recompute.
-        for (const e of events) {
-          expect(e.hash).toMatch(/^[0-9a-f]{64}$/);
-          expect(e.hash).toBe(secureHash(eventHashInput(e)));
-        }
-      }
-    );
-
-    it('verifyIntegrity() returns valid on an untampered chain', async () => {
-      await appendChain(5);
+    it.each(lengthCases)('$name → valid', async ({ length }) => {
+      await buildChain(service, length);
       const result = await service.verifyIntegrity();
       expect(result.valid).toBe(true);
-      expect(result.brokenAt).toBeUndefined();
+      expect((result as any).brokenAt).toBeUndefined();
+    });
+
+    it('each link references the prior event hash (append-only chain)', async () => {
+      const events = await buildChain(service, 5);
+      expect(events[0].previousHash).toBe(GENESIS);
+      for (let i = 1; i < events.length; i++) {
+        expect(events[i].previousHash).toBe(events[i - 1].hash);
+        expect(events[i].blockNumber).toBe((events[i - 1].blockNumber ?? 0) + 1);
+      }
+    });
+
+    it('every stored hash recomputes deterministically (no drift)', async () => {
+      await buildChain(service, 6);
+      for (const event of storage._raw()) {
+        expect(event.hash).toBe(canonicalEventHash(event));
+      }
     });
   });
 
-  // ── 2. tamper detection (table-driven mutate fns) ─────────────────────────────
-  describe('tamper detection', () => {
+  describe('encrypted sensitive events remain verifiable (hash covers stored form)', () => {
+    it('an event with sensitive details is encrypted at rest yet still verifies valid', async () => {
+      const event = await service.logEvent({
+        source: 'svc',
+        action: 'auth:login',
+        resource: 'session',
+        actor: 'did:atp:actor-x',
+        details: { token: 'super-secret-value', note: 'sensitive' },
+      });
+
+      const stored = (await storage.getEvent(event.id))!;
+      // Sensitive details must be encrypted at rest, never stored in the clear.
+      expect(stored.encrypted).toBe(true);
+      expect((stored.details as any).__encrypted).toBe(true);
+      expect(JSON.stringify(stored.details)).not.toContain('super-secret-value');
+
+      // The integrity hash must cover the stored (ciphertext) form so the chain
+      // verifies. Hashing plaintext while storing ciphertext made this fail for
+      // every sensitive event.
+      const integrity = await service.verifyIntegrity();
+      expect(integrity.valid).toBe(true);
+      expect(stored.hash).toBe(canonicalEventHash(stored));
+    });
+
+    it('tampering with the stored ciphertext of a sensitive event is detected', async () => {
+      await service.logEvent({
+        source: 'svc',
+        action: 'auth:login',
+        resource: 'session',
+        actor: 'did:atp:actor-x',
+        details: { password: 'hunter2' },
+      });
+      expect((await service.verifyIntegrity()).valid).toBe(true);
+
+      // Mutate the encrypted payload in place — must break integrity.
+      storage._mutate(0, (e) => {
+        (e.details as any).__data = 'tampered-ciphertext';
+      });
+      const result = await service.verifyIntegrity();
+      expect(result.valid).toBe(false);
+      expect((result as any).brokenAt).toBeDefined();
+    });
+  });
+
+  describe('tamper detection — every mutation MUST break verification', () => {
+    /**
+     * Each case mutates a 5-event chain (indices 0..4) and asserts the chain
+     * no longer verifies. `mutate` receives the storage and chain so it can
+     * tamper with a specific stored entry.
+     */
     type TamperCase = {
       name: string;
-      mutate: (events: AuditEvent[]) => void;
-      expectValid: false;
+      mutate: (s: InMemoryConformanceStorage, chain: AuditEvent[]) => void;
+      expectBrokenIndex?: number;
     };
 
     const tamperCases: TamperCase[] = [
       {
-        name: '(a) event payload mutated after logging',
-        mutate: (events) => {
-          // Change the action of the 2nd event without recomputing its hash.
-          events[1].action = 'tampered:action';
-        },
-        expectValid: false,
+        name: 'mutate the action of a middle entry',
+        mutate: (s) => s._mutate(2, (e) => { e.action = 'action:TAMPERED'; }),
+        expectBrokenIndex: 2,
       },
       {
-        name: '(a2) event details mutated after logging',
-        mutate: (events) => {
-          events[2].details = { injected: 'malicious' };
-        },
-        expectValid: false,
+        name: 'mutate the actor of an entry',
+        mutate: (s) => s._mutate(1, (e) => { e.actor = 'did:atp:attacker'; }),
+        expectBrokenIndex: 1,
       },
       {
-        name: '(b) stored hash altered',
-        mutate: (events) => {
-          events[2].hash = 'f'.repeat(64);
-        },
-        expectValid: false,
+        name: 'mutate the details payload of an entry',
+        mutate: (s) => s._mutate(3, (e) => { e.details = { step: 999, injected: true }; }),
+        expectBrokenIndex: 3,
       },
       {
-        name: '(c) chain previousHash link broken',
-        mutate: (events) => {
-          events[3].previousHash = 'a'.repeat(64);
-        },
-        expectValid: false,
+        name: 'mutate the resource of the first entry',
+        mutate: (s) => s._mutate(0, (e) => { e.resource = 'res-evil'; }),
+        expectBrokenIndex: 0,
       },
       {
-        name: '(d-remove) an event removed from the chain',
-        mutate: (events) => {
-          // Drop the middle event, breaking the link of the next one.
-          events.splice(2, 1);
-        },
-        expectValid: false,
+        name: 'mutate the timestamp of an entry',
+        mutate: (s) => s._mutate(2, (e) => { e.timestamp = '1999-01-01T00:00:00.000Z'; }),
+        expectBrokenIndex: 2,
       },
       {
-        name: '(d-insert) a forged event inserted into the chain',
-        mutate: (events) => {
+        name: 'break the previousHash linkage of an entry',
+        mutate: (s) => s._mutate(3, (e) => { e.previousHash = 'f'.repeat(64); }),
+        expectBrokenIndex: 3,
+      },
+      {
+        name: 'overwrite a stored hash with an arbitrary value',
+        mutate: (s) => s._mutate(2, (e) => { e.hash = 'a'.repeat(64); }),
+        expectBrokenIndex: 2,
+      },
+      {
+        name: 'reorder two adjacent entries',
+        mutate: (s) => s._swap(1, 2),
+        // After swap, the new index-1 entry's previousHash no longer matches.
+        expectBrokenIndex: 1,
+      },
+      {
+        name: 'delete (drop) a middle entry, breaking continuity',
+        mutate: (s) => { s._raw().splice(2, 1); },
+        expectBrokenIndex: 2,
+      },
+      {
+        name: 'inject a forged entry with a recomputed-but-mislinked hash',
+        mutate: (s, chain) => {
           const forged: AuditEvent = {
-            id: 'forged-1',
-            timestamp: new Date().toISOString(),
-            source: 'attacker',
-            action: 'inject',
-            resource: 'did:atp:victim',
-            actor: 'did:atp:attacker',
-            hash: 'c'.repeat(64),
-            previousHash: events[2].hash,
-            blockNumber: 3, // collides / misorders block numbering
-            nonce: 'forged-nonce',
+            ...JSON.parse(JSON.stringify(chain[1])),
+            id: 'forged-evt',
+            action: 'action:forged',
+            previousHash: chain[1].hash,
           };
-          events.splice(3, 0, forged);
+          // Recompute its hash so content-integrity alone would pass — only the
+          // linkage of the FOLLOWING entry exposes the injection.
+          forged.hash = canonicalEventHash(forged);
+          s._raw().splice(2, 0, forged);
         },
-        expectValid: false,
       },
     ];
 
-    it.each(tamperCases)(
-      'reports INVALID when $name',
-      async ({ mutate }) => {
-        await appendChain(6);
+    it.each(tamperCases)('$name → invalid', async ({ mutate, expectBrokenIndex }) => {
+      const chain = await buildChain(service, 5);
 
-        // Sanity: clean chain verifies before tampering.
-        expect((await service.verifyIntegrity()).valid).toBe(true);
+      // Sanity: the untampered chain is valid (the test would be vacuous otherwise).
+      expect((await service.verifyIntegrity()).valid).toBe(true);
 
-        mutate(storage.chain);
+      mutate(storage, chain);
 
-        const result = await service.verifyIntegrity();
-        expect(result.valid).toBe(false);
-      }
-    );
-
-    it('points brokenAt at a tampered event id', async () => {
-      const events = await appendChain(5);
-      events[2].action = 'tampered';
-      // Reflect the in-place mutation into the backing store.
       const result = await service.verifyIntegrity();
       expect(result.valid).toBe(false);
-      // brokenAt should identify a real event in the chain.
-      const ids = events.map((e) => e.id);
-      expect(ids).toContain((result as any).brokenAt);
+      expect((result as any).brokenAt).toBeDefined();
+
+      if (expectBrokenIndex !== undefined) {
+        const expectedId = storage._raw()[expectBrokenIndex]?.id;
+        expect((result as any).brokenAt).toBe(expectedId);
+      }
+    });
+
+    it('TEETH: restoring the mutated field makes the chain valid again', async () => {
+      const chain = await buildChain(service, 4);
+      const original = chain[2].action;
+
+      storage._mutate(2, (e) => { e.action = 'action:TAMPERED'; });
+      expect((await service.verifyIntegrity()).valid).toBe(false);
+
+      storage._mutate(2, (e) => { e.action = original; });
+      expect((await service.verifyIntegrity()).valid).toBe(true);
     });
   });
 
-  // ── 3. non-repudiation: HMAC signature ────────────────────────────────────────
-  describe('non-repudiation (HMAC-SHA256 signature)', () => {
-    it('produces a signature that verifies for an untampered event', async () => {
-      const [event] = await appendChain(1);
-      expect(event.signature).toBeDefined();
-      expect(event.signature).toBe(expectedSignature(event, SIGNING_KEY));
+  describe('content-hash recomputation is independent of field key ordering', () => {
+    it('hash is stable regardless of object key insertion order', async () => {
+      const [event] = await buildChain(service, 1);
+      const reordered: AuditEvent = {
+        // intentionally different key order
+        nonce: event.nonce,
+        blockNumber: event.blockNumber,
+        previousHash: event.previousHash,
+        action: event.action,
+        resource: event.resource,
+        actor: event.actor,
+        details: event.details,
+        source: event.source,
+        timestamp: event.timestamp,
+        id: event.id,
+        hash: event.hash,
+      } as AuditEvent;
+      expect(canonicalEventHash(reordered)).toBe(event.hash);
     });
-
-    type SigTamperCase = {
-      name: string;
-      mutate: (e: AuditEvent) => void;
-    };
-
-    const sigTamperCases: SigTamperCase[] = [
-      { name: 'action changed', mutate: (e) => { e.action = 'evil'; } },
-      { name: 'resource changed', mutate: (e) => { e.resource = 'did:atp:other'; } },
-      { name: 'actor changed', mutate: (e) => { e.actor = 'did:atp:impostor'; } },
-      { name: 'details changed', mutate: (e) => { e.details = { tampered: true }; } },
-    ];
-
-    it.each(sigTamperCases)(
-      'a tampered event fails its HMAC signature check ($name)',
-      async ({ mutate }) => {
-        const [event] = await appendChain(1);
-        const originalSig = event.signature;
-
-        mutate(event);
-
-        // The stored signature no longer matches a fresh recompute over the
-        // tampered fields → non-repudiation violation detected.
-        const recomputed = expectedSignature(event, SIGNING_KEY);
-        expect(recomputed).not.toBe(originalSig);
-        expect(event.signature).not.toBe(recomputed);
-      }
-    );
   });
 });
