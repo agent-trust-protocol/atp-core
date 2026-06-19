@@ -275,6 +275,25 @@ describe('Policy conformance — explicit deny-by-default', () => {
     const result = await evalPolicy(allowDefault, makeContext({ trustLevel: 'BASIC', trustScore: 1 }));
     expect(result.decision).toBe('allow');
   });
+
+  it('defaultAction:allow does NOT govern first_match / all_rules fallthrough (engine boundary)', async () => {
+    // Conformance boundary: in the current engine `defaultAction` is honored
+    // only in priority_order mode. first_match and all_rules hard-deny on a
+    // no-match regardless of the field. Pinning this prevents a false reading
+    // that `defaultAction` governs fallthrough in all three modes — if a future
+    // change made these modes honor it, this row would catch the behavior shift.
+    for (const evaluationMode of ['first_match', 'all_rules'] as const) {
+      const p = policy([rule(toolCond('some_other_tool'), allow)], {
+        evaluationMode,
+        defaultAction: 'allow',
+      });
+      const result = await evalPolicy(
+        p,
+        makeContext({ tool: { id: 'database_query', type: 'database', sensitivity: 'internal' } })
+      );
+      expect(result.decision).toBe('deny');
+    }
+  });
 });
 
 // ===========================================================================
@@ -369,7 +388,12 @@ const adversarialCases: AdversarialCase[] = [
   { name: 'globalThis access', expression: 'globalThis.x', expectedError: /unknown identifier/ },
   { name: 'prototype pollution via __proto__', expression: 'data.__proto__', expectedError: /forbidden property/ },
   { name: 'constructor escape', expression: 'data.constructor', expectedError: /forbidden property/ },
+  { name: 'prototype access', expression: 'data.prototype', expectedError: /forbidden property/ },
+  { name: 'valueOf access', expression: 'data.valueOf', expectedError: /forbidden property/ },
+  { name: 'toString access', expression: 'data.toString', expectedError: /forbidden property/ },
   { name: 'computed __proto__ access', expression: "data['__proto__']", expectedError: /forbidden property/ },
+  { name: 'computed constructor access', expression: "data['constructor']", expectedError: /forbidden property/ },
+  { name: 'computed prototype access', expression: "data['prototype']", expectedError: /forbidden property/ },
   { name: 'arbitrary function call', expression: 'data.x()', expectedError: /unexpected token/ },
   { name: 'assignment (state mutation)', expression: 'data.x = 1', expectedError: /unexpected token/ },
 ];
@@ -380,7 +404,7 @@ describe('Policy conformance — adversarial expressions are rejected, not evalu
   });
 
   it('rejects template literals (no host interpolation)', () => {
-    expect(() => evaluateSafeExpression('`${data.x}`', { x: 1 })).toThrow();
+    expect(() => evaluateSafeExpression('`${data.x}`', { x: 1 })).toThrow(/unexpected character/);
   });
 
   it('rejects over-long expressions (DoS guard)', () => {
