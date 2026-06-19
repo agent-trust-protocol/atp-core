@@ -187,6 +187,50 @@ describe('Audit store conformance — hash-chain integrity', () => {
     });
   });
 
+  describe('encrypted sensitive events remain verifiable (hash covers stored form)', () => {
+    it('an event with sensitive details is encrypted at rest yet still verifies valid', async () => {
+      const event = await service.logEvent({
+        source: 'svc',
+        action: 'auth:login',
+        resource: 'session',
+        actor: 'did:atp:actor-x',
+        details: { token: 'super-secret-value', note: 'sensitive' },
+      });
+
+      const stored = (await storage.getEvent(event.id))!;
+      // Sensitive details must be encrypted at rest, never stored in the clear.
+      expect(stored.encrypted).toBe(true);
+      expect((stored.details as any).__encrypted).toBe(true);
+      expect(JSON.stringify(stored.details)).not.toContain('super-secret-value');
+
+      // The integrity hash must cover the stored (ciphertext) form so the chain
+      // verifies. Hashing plaintext while storing ciphertext made this fail for
+      // every sensitive event.
+      const integrity = await service.verifyIntegrity();
+      expect(integrity.valid).toBe(true);
+      expect(stored.hash).toBe(canonicalEventHash(stored));
+    });
+
+    it('tampering with the stored ciphertext of a sensitive event is detected', async () => {
+      await service.logEvent({
+        source: 'svc',
+        action: 'auth:login',
+        resource: 'session',
+        actor: 'did:atp:actor-x',
+        details: { password: 'hunter2' },
+      });
+      expect((await service.verifyIntegrity()).valid).toBe(true);
+
+      // Mutate the encrypted payload in place — must break integrity.
+      storage._mutate(0, (e) => {
+        (e.details as any).__data = 'tampered-ciphertext';
+      });
+      const result = await service.verifyIntegrity();
+      expect(result.valid).toBe(false);
+      expect((result as any).brokenAt).toBeDefined();
+    });
+  });
+
   describe('tamper detection — every mutation MUST break verification', () => {
     /**
      * Each case mutates a 5-event chain (indices 0..4) and asserts the chain
