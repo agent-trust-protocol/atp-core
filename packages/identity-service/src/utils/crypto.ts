@@ -1,6 +1,6 @@
 import * as ed25519 from '@noble/ed25519';
 import { createHash } from 'crypto';
-import { initializeCrypto, CryptoAgilityManager, defaultPQCConfig, PQCAlgorithm } from '@atp/shared';
+import { initializeCrypto, CryptoAgilityManager, defaultPQCConfig, PQCAlgorithm, verifySignatureCompat } from '@atp/shared';
 
 // Initialize crypto polyfills
 initializeCrypto();
@@ -81,6 +81,21 @@ export class CryptoUtils {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Backward-compatible verification for the did:atp v2 rollout. Verifies a
+   * legacy Ed25519 signature or a v2 post-quantum ML-DSA-65 signature,
+   * auto-selecting by signature size. Pass whichever public key(s) the
+   * signer's DID Document exposes.
+   */
+  static async verifyCompat(
+    message: string,
+    signatureHex: string,
+    keys: { ed25519PublicKeyHex?: string; mlDsa65PublicKeyHex?: string }
+  ): Promise<boolean> {
+    const result = await verifySignatureCompat(message, signatureHex, keys);
+    return result.valid;
   }
   
   // Quantum-safe signing with hybrid algorithms
