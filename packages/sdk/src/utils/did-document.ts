@@ -238,9 +238,14 @@ export class DidAtpDocument {
     if (!jwk || jwk.kty !== 'AKP' || jwk.alg !== 'ML-DSA-65' || typeof jwk.pub !== 'string') {
       errors.push('missing or malformed ML-DSA-65 AKP verification method');
     } else {
-      mlDsaPublicKey = new Uint8Array(Buffer.from(jwk.pub, 'base64url'));
-      if (!CryptoUtils.constantTimeEqual(parsed.pq1!, CryptoUtils.pq1Fingerprint(mlDsaPublicKey))) {
-        errors.push('pq1_ fingerprint does not match the post-quantum verification method');
+      try {
+        mlDsaPublicKey = new Uint8Array(Buffer.from(jwk.pub, 'base64url'));
+        if (!CryptoUtils.constantTimeEqual(parsed.pq1!, CryptoUtils.pq1Fingerprint(mlDsaPublicKey))) {
+          errors.push('pq1_ fingerprint does not match the post-quantum verification method');
+        }
+      } catch (e) {
+        errors.push(`invalid ML-DSA-65 public key in JWK: ${(e as Error).message}`);
+        mlDsaPublicKey = null;
       }
     }
 
