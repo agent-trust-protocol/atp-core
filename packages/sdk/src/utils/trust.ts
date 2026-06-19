@@ -170,8 +170,17 @@ export class TrustScoring {
     let recentWeight = 0;
 
     for (const interaction of interactions) {
-      const age = now.getTime() - new Date(interaction.timestamp).getTime();
-      const weight = Math.max(0, 1 - age / decayPeriod);
+      const interactionTime = new Date(interaction.timestamp).getTime();
+      // Guard against unparseable timestamps (NaN), which would otherwise
+      // poison the score with NaN. Treat them as having zero recency weight.
+      if (Number.isNaN(interactionTime)) {
+        totalWeight += 1;
+        continue;
+      }
+      const age = now.getTime() - interactionTime;
+      // Clamp to [0, 1]: future-dated interactions (negative age) must not
+      // produce a weight above 1, and very old interactions floor at 0.
+      const weight = Math.min(1, Math.max(0, 1 - age / decayPeriod));
       recentWeight += weight;
       totalWeight += 1;
     }
@@ -184,7 +193,8 @@ export class TrustScoring {
    * Calculate score based on verified credentials
    */
   private calculateCredentialScore(verifiedCount: number): number {
-    if (verifiedCount === 0) return 0;
+    // Clamp negative / non-finite inputs to 0 so the factor never goes below 0.
+    if (!Number.isFinite(verifiedCount) || verifiedCount <= 0) return 0;
     if (verifiedCount >= 5) return 1.0;
 
     // Each credential adds 0.2 to the score up to 1.0
@@ -208,11 +218,14 @@ export class TrustScoring {
    * Calculate confidence in the trust score
    */
   private calculateConfidence(interactionCount: number, credentialCount: number): number {
+    // Guard against NaN/non-finite credential counts: Math.max(0, NaN) is NaN,
+    // which would propagate into confidence and break the [0,1] contract.
+    const safeCredentialCount = Number.isFinite(credentialCount) ? Math.max(0, credentialCount) : 0;
     const interactionConfidence = Math.min(
       1,
-      interactionCount / this.config.minInteractionsForConfidence
+      Math.max(0, interactionCount) / this.config.minInteractionsForConfidence
     );
-    const credentialConfidence = Math.min(1, credentialCount * 0.25);
+    const credentialConfidence = Math.min(1, safeCredentialCount * 0.25);
 
     // Weighted average of confidence factors
     return interactionConfidence * 0.7 + credentialConfidence * 0.3;

@@ -34,6 +34,18 @@ export class AuditService {
     const lastEvent = await this.storage.getLastEvent();
     const previousHash = lastEvent?.hash || '0'.repeat(64); // Genesis hash
 
+    // Encrypt sensitive details BEFORE hashing so the integrity hash and the
+    // HMAC signature cover exactly what is persisted. Hashing the plaintext
+    // here while storing ciphertext made verifyChainIntegrity() — which
+    // recomputes the hash from the stored (encrypted) details — fail for every
+    // event that contained sensitive data.
+    let details = request.details;
+    let encrypted = false;
+    if (request.details && this.containsSensitiveData(request.details)) {
+      details = await this.encryptSensitiveData(request.details);
+      encrypted = true;
+    }
+
     // Create the event data with enhanced security
     const eventData = {
       id,
@@ -42,7 +54,7 @@ export class AuditService {
       action: request.action,
       resource: request.resource,
       actor: request.actor,
-      details: request.details,
+      details,
       previousHash,
       nonce: randomUUID(), // Add nonce for additional entropy
       blockNumber: (lastEvent?.blockNumber || 0) + 1,
@@ -53,15 +65,6 @@ export class AuditService {
 
     // Create HMAC-SHA256 signature for non-repudiation
     const signature = await this.signEvent(eventData);
-
-    let details = request.details;
-    let encrypted = false;
-
-    // Encrypt sensitive details before storage
-    if (request.details && this.containsSensitiveData(request.details)) {
-      details = await this.encryptSensitiveData(request.details);
-      encrypted = true;
-    }
 
     const event: AuditEvent = {
       id,
@@ -120,14 +123,38 @@ export class AuditService {
     return await this.ipfs.isAvailable();
   }
 
+  /**
+   * Produce a deterministic JSON encoding with recursively sorted object keys.
+   *
+   * NOTE: a previous implementation used `JSON.stringify(data, Object.keys(data).sort())`.
+   * The second argument is interpreted by JSON.stringify as an *allowlist* replacer
+   * that is applied recursively, so nested objects (notably `details`) were
+   * serialized as `{}` — their content was silently excluded from both the hash
+   * chain and the HMAC signature, leaving `details` tampering undetectable.
+   * This helper sorts keys deterministically WITHOUT dropping nested content.
+   */
+  private canonicalize(data: any): string {
+    return JSON.stringify(data, (_key, value) => {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        return Object.keys(value)
+          .sort()
+          .reduce((acc: Record<string, any>, k) => {
+            acc[k] = value[k];
+            return acc;
+          }, {});
+      }
+      return value;
+    });
+  }
+
   private generateSecureHash(data: any): string {
-    // Create deterministic hash by sorting keys
-    const dataString = JSON.stringify(data, Object.keys(data).sort());
+    // Create deterministic hash by sorting keys (recursively, content-preserving)
+    const dataString = this.canonicalize(data);
     return createHash('sha256').update(dataString).digest('hex');
   }
 
   private async signEvent(eventData: any): Promise<string> {
-    const dataString = JSON.stringify(eventData, Object.keys(eventData).sort());
+    const dataString = this.canonicalize(eventData);
     if (!this.signingKey) {
       // No key configured — fall back to a hash-only signature in non-production
       return createHash('sha256').update(dataString).digest('hex');
