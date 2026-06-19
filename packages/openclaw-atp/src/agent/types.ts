@@ -8,7 +8,7 @@ export interface AgentMetadata {
   /** ATP-assigned agent DID */
   did: string;
   
-  /** Agent's public key (Ed25519 + Dilithium hybrid) */
+  /** Agent's public key (Ed25519 + ML-DSA-65 hybrid) */
   publicKey: string;
   
   /** Agent's private key (encrypted at rest) */

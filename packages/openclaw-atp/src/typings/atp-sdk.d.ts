@@ -74,4 +74,49 @@ declare module 'atp-sdk' {
     timeout?: number;
     [key: string]: any;
   }
+
+  export interface KeyPairBytes {
+    publicKey: Uint8Array;
+    secretKey: Uint8Array;
+  }
+
+  /** Split hybrid key pair: independent Ed25519 and ML-DSA-65 keys (v2). */
+  export interface HybridKeyPair {
+    ed25519: KeyPairBytes;
+    mlDsa65: KeyPairBytes;
+  }
+
+  export type AtpDidType = 'root' | 'path';
+
+  export interface ParsedAtpDid {
+    did: string;
+    type: AtpDidType;
+    domain: string;
+    path: string[];
+    e1?: string;
+    pq1?: string;
+    fragment?: string;
+  }
+
+  export class DidAtp {
+    static readonly METHOD: string;
+    static readonly PREFIX: string;
+    static fromPublicKeys(...args: any[]): string;
+    static rootDid(domain: string): string;
+    static generate(...args: any[]): Promise<any>;
+    static parse(input: string): ParsedAtpDid | null;
+  }
+
+  export class DidAtpDocument {
+    static create(...args: any[]): Promise<any>;
+    static rotate(...args: any[]): Promise<any>;
+    static verify(document: any): Promise<{ valid: boolean; errors: string[] }>;
+    static verifyClassicalProof(...args: any[]): Promise<boolean>;
+    static verifyPqProof(...args: any[]): boolean;
+  }
+
+  export class DidAtpResolver {
+    static didToUrl(did: string): string;
+    static resolve(did: string, options?: any): Promise<any>;
+  }
 }

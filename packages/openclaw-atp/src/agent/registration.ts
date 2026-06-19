@@ -47,7 +47,7 @@ export async function registerAgentWithAtp(
     },
     cryptoOptions: {
       quantumSafe,
-      keyType: quantumSafe ? 'hybrid-ed25519-dilithium' : 'ed25519'
+      keyType: quantumSafe ? 'hybrid-ed25519-mldsa65' : 'ed25519'
     }
   });
 

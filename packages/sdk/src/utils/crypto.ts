@@ -1,7 +1,6 @@
 import * as ed25519 from '@noble/ed25519';
-import { sha256 } from '@noble/hashes/sha2.js';
-import { sha512 } from '@noble/hashes/sha2.js';
-import { ml_dsa65 } from '@noble/post-quantum/ml-dsa';
+import { sha256, sha512 } from '@noble/hashes/sha2.js';
+import { ml_dsa65 } from '@noble/post-quantum/ml-dsa.js';
 import { randomBytes as cryptoRandomBytes, createCipheriv, createDecipheriv } from 'crypto';
 import { x25519 } from '@noble/curves/ed25519';
 import { hkdf } from '@noble/hashes/hkdf.js';
@@ -10,169 +9,161 @@ import { hkdf } from '@noble/hashes/hkdf.js';
 ed25519.etc.sha512Sync = (...m) => sha512(ed25519.etc.concatBytes(...m));
 
 /**
- * Cryptographic utilities for ATP™ SDK
- * Supports both classical Ed25519 and hybrid quantum-safe (Ed25519 + ML-DSA) cryptography
+ * Cryptographic utilities for ATP™ SDK — did:atp v2 key model.
+ *
+ * Ed25519 and ML-DSA-65 (FIPS 204 final) are kept as separate keypairs.
+ * Key identifiers are RFC 7638 JWK thumbprints with `e1_` / `pq1_` prefixes.
  */
-export interface HybridKeyPair {
-  publicKey: string;
-  privateKey: string;
-  quantumSafe: boolean;
-  ed25519PublicKey?: string;
-  ed25519PrivateKey?: string;
-  mlDsaPublicKey?: string;
-  mlDsaPrivateKey?: string;
+
+export interface KeyPairBytes {
+  publicKey: Uint8Array;
+  secretKey: Uint8Array;
 }
+
+export interface HybridKeyPair {
+  ed25519: KeyPairBytes;
+  mlDsa65: KeyPairBytes;
+}
+
+/** Ed25519 public JWK (RFC 8037). Contains exactly the RFC 7638 required members. */
+export interface Ed25519Jwk {
+  crv: 'Ed25519';
+  kty: 'OKP';
+  x: string;
+}
+
+/** ML-DSA-65 public JWK in RFC 9964 AKP form. */
+export interface MlDsa65Jwk {
+  alg: 'ML-DSA-65';
+  kty: 'AKP';
+  pub: string;
+}
+
+export const ED25519_PUBLIC_KEY_BYTES = 32;
+export const ML_DSA_65_PUBLIC_KEY_BYTES = 1952;
+export const ML_DSA_65_SIGNATURE_BYTES = 3309;
 
 export class CryptoUtils {
   /**
-   * Generate a new hybrid quantum-safe key pair (Ed25519 + ML-DSA)
-   * This is now the default for quantum-safe security
+   * Generate a hybrid key pair: independent Ed25519 and ML-DSA-65 keypairs.
    */
-  static async generateKeyPair(quantumSafe: boolean = true): Promise<HybridKeyPair> {
-    // Generate Ed25519 key pair (classical)
-    const ed25519PrivateKey = ed25519.utils.randomPrivateKey();
-    const ed25519PublicKey = await ed25519.getPublicKey(ed25519PrivateKey);
+  static async generateHybridKeyPair(): Promise<HybridKeyPair> {
+    const edSecretKey = ed25519.utils.randomPrivateKey();
+    const edPublicKey = await ed25519.getPublicKey(edSecretKey);
 
-    // Ensure keys are exactly 32 bytes (Ed25519 standard)
-    if (ed25519PrivateKey.length !== 32) {
-      throw new Error(`Invalid Ed25519 private key length: expected 32 bytes, got ${ed25519PrivateKey.length}`);
-    }
-    if (ed25519PublicKey.length !== 32) {
-      throw new Error(`Invalid Ed25519 public key length: expected 32 bytes, got ${ed25519PublicKey.length}`);
+    if (edPublicKey.length !== ED25519_PUBLIC_KEY_BYTES) {
+      throw new Error(`Invalid Ed25519 public key length: expected 32 bytes, got ${edPublicKey.length}`);
     }
 
-    if (!quantumSafe) {
-      // Legacy mode: Ed25519 only
-      const publicKeyHex = Buffer.from(ed25519PublicKey).toString('hex');
-      const privateKeyHex = Buffer.from(ed25519PrivateKey).toString('hex');
-      
-      // Validate hex string lengths (32 bytes = 64 hex characters)
-      if (publicKeyHex.length !== 64) {
-        throw new Error(`Invalid public key hex length: expected 64 characters, got ${publicKeyHex.length}`);
-      }
-      if (privateKeyHex.length !== 64) {
-        throw new Error(`Invalid private key hex length: expected 64 characters, got ${privateKeyHex.length}`);
-      }
-      
-      return {
-        publicKey: publicKeyHex,
-        privateKey: privateKeyHex,
-        quantumSafe: false
-      };
-    }
-
-    // Generate ML-DSA key pair (post-quantum)
-    const seed = cryptoRandomBytes(32);
+    const seed = new Uint8Array(cryptoRandomBytes(32));
     const mlDsaKeyPair = ml_dsa65.keygen(seed);
-    
-    // Combine keys: Ed25519 public (32) + ML-DSA public (1952) = 1984 bytes
-    // Format: [ed25519_public(32)][ml_dsa_public(1952)]
-    const combinedPublic = new Uint8Array(32 + mlDsaKeyPair.publicKey.length);
-    combinedPublic.set(ed25519PublicKey, 0);
-    combinedPublic.set(mlDsaKeyPair.publicKey, 32);
 
-    // Combine private keys: Ed25519 private (32) + ML-DSA private (4000) = 4032 bytes
-    const combinedPrivate = new Uint8Array(32 + mlDsaKeyPair.secretKey.length);
-    combinedPrivate.set(ed25519PrivateKey, 0);
-    combinedPrivate.set(mlDsaKeyPair.secretKey, 32);
+    if (mlDsaKeyPair.publicKey.length !== ML_DSA_65_PUBLIC_KEY_BYTES) {
+      throw new Error(`Invalid ML-DSA-65 public key length: expected 1952 bytes, got ${mlDsaKeyPair.publicKey.length}`);
+    }
 
     return {
-      publicKey: Buffer.from(combinedPublic).toString('hex'),
-      privateKey: Buffer.from(combinedPrivate).toString('hex'),
-      quantumSafe: true,
-      ed25519PublicKey: Buffer.from(ed25519PublicKey).toString('hex'),
-      ed25519PrivateKey: Buffer.from(ed25519PrivateKey).toString('hex'),
-      mlDsaPublicKey: Buffer.from(mlDsaKeyPair.publicKey).toString('hex'),
-      mlDsaPrivateKey: Buffer.from(mlDsaKeyPair.secretKey).toString('hex')
+      ed25519: { publicKey: edPublicKey, secretKey: edSecretKey },
+      mlDsa65: { publicKey: mlDsaKeyPair.publicKey, secretKey: mlDsaKeyPair.secretKey }
     };
   }
 
   /**
-   * Sign data with private key (supports both Ed25519-only and hybrid quantum-safe)
+   * Base64url encoding without padding (RFC 4648 §5).
    */
-  static async signData(data: string | Buffer, privateKey: string, quantumSafe: boolean = true): Promise<string> {
-    const dataBuffer = typeof data === 'string' ? Buffer.from(data, 'utf8') : data;
-    const privateKeyBuffer = Buffer.from(privateKey, 'hex');
-
-    // Detect if this is a hybrid key (4032 bytes = 32 Ed25519 + 4000 ML-DSA)
-    const isHybridKey = privateKeyBuffer.length === 4032 && quantumSafe;
-
-    if (!isHybridKey || privateKeyBuffer.length <= 64) {
-      // Ed25519-only signature (32 bytes key, or not hybrid mode)
-      const ed25519PrivateKey = privateKeyBuffer.length <= 64 
-        ? privateKeyBuffer.slice(0, 32)
-        : privateKeyBuffer.slice(0, 32);
-      const signature = await ed25519.sign(dataBuffer, ed25519PrivateKey);
-    return Buffer.from(signature).toString('hex');
-  }
-
-    // Hybrid signature: Ed25519 + ML-DSA
-    const ed25519PrivateKey = privateKeyBuffer.slice(0, 32);
-    const mlDsaPrivateKey = privateKeyBuffer.slice(32);
-
-    // Sign with both algorithms (ML-DSA uses sign(secretKey, message) order)
-    const ed25519Sig = await ed25519.sign(dataBuffer, ed25519PrivateKey);
-    const mlDsaSig = ml_dsa65.sign(mlDsaPrivateKey, dataBuffer);
-
-    // Combine signatures: [ed25519_len(2)][ml_dsa_len(2)][ed25519_sig(64)][ml_dsa_sig(3293)]
-    const combined = new Uint8Array(4 + ed25519Sig.length + mlDsaSig.length);
-    const view = new DataView(combined.buffer);
-    view.setUint16(0, ed25519Sig.length, true); // little-endian
-    view.setUint16(2, mlDsaSig.length, true);
-    combined.set(ed25519Sig, 4);
-    combined.set(mlDsaSig, 4 + ed25519Sig.length);
-
-    return Buffer.from(combined).toString('hex');
+  static base64url(bytes: Uint8Array): string {
+    return Buffer.from(bytes).toString('base64url');
   }
 
   /**
-   * Verify signature with public key (supports both Ed25519-only and hybrid quantum-safe)
+   * Build the public JWK for an Ed25519 public key (RFC 8037).
    */
-  static async verifySignature(
-    data: string | Buffer,
-    signature: string,
-    publicKey: string,
-    quantumSafe: boolean = true
+  static ed25519PublicKeyToJwk(publicKey: Uint8Array): Ed25519Jwk {
+    if (publicKey.length !== ED25519_PUBLIC_KEY_BYTES) {
+      throw new Error(`Invalid Ed25519 public key length: expected 32 bytes, got ${publicKey.length}`);
+    }
+    return { crv: 'Ed25519', kty: 'OKP', x: this.base64url(publicKey) };
+  }
+
+  /**
+   * Build the public JWK for an ML-DSA-65 public key (RFC 9964 AKP form).
+   */
+  static mlDsa65PublicKeyToJwk(publicKey: Uint8Array): MlDsa65Jwk {
+    if (publicKey.length !== ML_DSA_65_PUBLIC_KEY_BYTES) {
+      throw new Error(`Invalid ML-DSA-65 public key length: expected 1952 bytes, got ${publicKey.length}`);
+    }
+    return { alg: 'ML-DSA-65', kty: 'AKP', pub: this.base64url(publicKey) };
+  }
+
+  /**
+   * RFC 7638 JWK thumbprint: members sorted lexicographically, serialized as
+   * JSON with no whitespace, UTF-8 encoded, SHA-256 hashed, base64url encoded.
+   * The supplied JWK must contain exactly the required members for its key type.
+   */
+  static jwkThumbprint(jwk: Ed25519Jwk | MlDsa65Jwk | Record<string, string>): string {
+    const sortedKeys = Object.keys(jwk).sort();
+    const canonical = JSON.stringify(jwk, sortedKeys);
+    const digest = sha256(new TextEncoder().encode(canonical));
+    return this.base64url(digest);
+  }
+
+  /**
+   * Classical key fingerprint: "e1_" + RFC 7638 thumbprint of the Ed25519 JWK.
+   */
+  static e1Fingerprint(ed25519PublicKey: Uint8Array): string {
+    return `e1_${this.jwkThumbprint(this.ed25519PublicKeyToJwk(ed25519PublicKey))}`;
+  }
+
+  /**
+   * Post-quantum key fingerprint: "pq1_" + RFC 7638 thumbprint of the AKP JWK.
+   */
+  static pq1Fingerprint(mlDsa65PublicKey: Uint8Array): string {
+    return `pq1_${this.jwkThumbprint(this.mlDsa65PublicKeyToJwk(mlDsa65PublicKey))}`;
+  }
+
+  /**
+   * Sign data with an Ed25519 secret key.
+   */
+  static async signEd25519(data: Uint8Array | string, secretKey: Uint8Array): Promise<Uint8Array> {
+    const message = typeof data === 'string' ? new TextEncoder().encode(data) : data;
+    return ed25519.sign(message, secretKey);
+  }
+
+  /**
+   * Verify an Ed25519 signature.
+   */
+  static async verifyEd25519(
+    data: Uint8Array | string,
+    signature: Uint8Array,
+    publicKey: Uint8Array
   ): Promise<boolean> {
     try {
-      const dataBuffer = typeof data === 'string' ? Buffer.from(data, 'utf8') : data;
-      const signatureBuffer = Buffer.from(signature, 'hex');
-      const publicKeyBuffer = Buffer.from(publicKey, 'hex');
+      const message = typeof data === 'string' ? new TextEncoder().encode(data) : data;
+      return await ed25519.verify(signature, message, publicKey);
+    } catch {
+      return false;
+    }
+  }
 
-      // Detect if this is a hybrid signature (has length prefix)
-      // Hybrid sigs are > 64 bytes (Ed25519) and start with length prefixes
-      const isHybridSig = signatureBuffer.length > 100 && quantumSafe;
+  /**
+   * Sign data with an ML-DSA-65 secret key (FIPS 204 final; 3309-byte signature).
+   */
+  static signMlDsa65(data: Uint8Array | string, secretKey: Uint8Array): Uint8Array {
+    const message = typeof data === 'string' ? new TextEncoder().encode(data) : data;
+    return ml_dsa65.sign(message, secretKey);
+  }
 
-      // Detect if this is a hybrid public key (1984 bytes = 32 Ed25519 + 1952 ML-DSA)
-      const isHybridKey = publicKeyBuffer.length === 1984 && quantumSafe;
-
-      if (!isHybridSig || !isHybridKey || publicKeyBuffer.length <= 64) {
-        // Ed25519-only verification
-        const ed25519PublicKey = publicKeyBuffer.length <= 64 
-          ? publicKeyBuffer.slice(0, 32)
-          : publicKeyBuffer.slice(0, 32);
-        const ed25519Sig = signatureBuffer.length <= 100 
-          ? signatureBuffer.slice(0, 64)
-          : signatureBuffer.slice(0, 64);
-        return await ed25519.verify(ed25519Sig, dataBuffer, ed25519PublicKey);
-      }
-
-      // Hybrid verification: Ed25519 + ML-DSA
-      const ed25519PublicKey = publicKeyBuffer.slice(0, 32);
-      const mlDsaPublicKey = publicKeyBuffer.slice(32);
-
-      // Extract signatures from combined format
-      const view = new DataView(signatureBuffer.buffer);
-      const ed25519SigLen = view.getUint16(0, true);
-      const mlDsaSigLen = view.getUint16(2, true);
-      const ed25519Sig = signatureBuffer.slice(4, 4 + ed25519SigLen);
-      const mlDsaSig = signatureBuffer.slice(4 + ed25519SigLen, 4 + ed25519SigLen + mlDsaSigLen);
-
-      // Verify both signatures (ML-DSA uses verify(publicKey, message, signature) order)
-      const ed25519Valid = await ed25519.verify(ed25519Sig, dataBuffer, ed25519PublicKey);
-      const mlDsaValid = ml_dsa65.verify(mlDsaPublicKey, dataBuffer, mlDsaSig);
-
-      return ed25519Valid && mlDsaValid;
+  /**
+   * Verify an ML-DSA-65 signature.
+   */
+  static verifyMlDsa65(
+    data: Uint8Array | string,
+    signature: Uint8Array,
+    publicKey: Uint8Array
+  ): boolean {
+    try {
+      const message = typeof data === 'string' ? new TextEncoder().encode(data) : data;
+      return ml_dsa65.verify(signature, message, publicKey);
     } catch {
       return false;
     }
@@ -210,15 +201,6 @@ export class CryptoUtils {
   }
 
   /**
-   * Create a fingerprint from public key
-   */
-  static createKeyFingerprint(publicKey: string): string {
-    const hash = this.hash(publicKey);
-    // Return first 16 characters for a shorter fingerprint
-    return hash.slice(0, 16);
-  }
-
-  /**
    * Validate hex string
    */
   static isValidHex(hex: string): boolean {
@@ -242,34 +224,14 @@ export class CryptoUtils {
   }
 
   /**
-   * Generate a cryptographically secure RFC 4122 v4 UUID.
+   * Generate a unique ID (UUID v4 style)
    */
   static generateId(): string {
-    const bytes = cryptoRandomBytes(16);
-    // RFC 4122 §4.4: set version (4) and variant (10xx) bits.
-    bytes[6] = (bytes[6] & 0x0f) | 0x40;
-    bytes[8] = (bytes[8] & 0x3f) | 0x80;
-    const hex = bytes.toString('hex');
-    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`;
-  }
-
-  /**
-   * Sign data with a private key
-   */
-  static async sign(data: string, privateKey: string): Promise<string> {
-    const messageBytes = Buffer.from(data, 'utf-8');
-    const privateKeyBytes = Buffer.from(privateKey, 'hex');
-
-    if (privateKeyBytes.length === 32) {
-      // Ed25519 signature
-      const signature = await ed25519.sign(messageBytes, privateKeyBytes);
-      return Buffer.from(signature).toString('hex');
-    } else {
-      // Hybrid key - use Ed25519 portion
-      const ed25519PrivateKey = privateKeyBytes.slice(0, 32);
-      const signature = await ed25519.sign(messageBytes, ed25519PrivateKey);
-      return Buffer.from(signature).toString('hex');
-    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
   }
 
   /**

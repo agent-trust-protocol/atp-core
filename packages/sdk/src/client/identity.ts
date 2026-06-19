@@ -35,7 +35,20 @@ export interface MFAVerificationRequest {
   };
 }
 
+/**
+ * REST client for the ATP identity *registry* service: registration, trust
+ * levels, key rotation, MFA, and registry lookups.
+ *
+ * This client is NOT the did:atp resolver. Spec-compliant resolution
+ * (did.json over HTTPS with mandatory dual-binding verification) lives in
+ * `DidAtpResolver` (utils/resolver.ts). The registry endpoints here return
+ * the service's own records, which carry none of the cryptographic
+ * guarantees of resolution.
+ */
 export class IdentityClient extends BaseClient {
+  private static warnedDeprecatedResolve = false;
+  private static warnedDeprecatedRotate = false;
+
   constructor(config: ATPConfig) {
     super(config, 'identity');
   }
@@ -48,14 +61,36 @@ export class IdentityClient extends BaseClient {
   }
 
   /**
-   * Resolve a DID to get its document
+   * Look up a DID's registry record (agent profile) from the identity
+   * service. This is a registry lookup, not DID resolution.
+   *
+   * @deprecated For did:atp resolution use `DidAtpResolver.resolve()`
+   * (utils/resolver.ts), which retrieves did.json over HTTPS and enforces
+   * the mandatory dual-binding verification. This method only returns the
+   * registry's unverified record and will be removed in a future release.
    */
   async resolveDID(did: string): Promise<ATPResponse<Agent>> {
+    if (!IdentityClient.warnedDeprecatedResolve) {
+      IdentityClient.warnedDeprecatedResolve = true;
+      console.warn(
+        '[atp-sdk] IdentityClient.resolveDID() is deprecated: it performs a registry lookup, ' +
+          'not DID resolution. Use DidAtpResolver.resolve() for spec-compliant did:atp resolution.'
+      );
+    }
+    return this.getRegistryRecord(did);
+  }
+
+  /**
+   * Fetch a DID's registry record (agent profile) from the identity service.
+   * Registry lookup only — no resolution-level verification is performed.
+   */
+  async getRegistryRecord(did: string): Promise<ATPResponse<Agent>> {
     return this.get(`/identity/${encodeURIComponent(did)}`);
   }
 
   /**
-   * Get DID document
+   * Fetch the registry's stored copy of a DID document. Registry lookup
+   * only — for verified resolution use `DidAtpResolver.resolve()`.
    */
   async getDIDDocument(did: string): Promise<ATPResponse<DIDDocument>> {
     return this.get(`/identity/${encodeURIComponent(did)}/document`);
@@ -76,9 +111,24 @@ export class IdentityClient extends BaseClient {
   }
 
   /**
-   * Rotate keys for a DID
+   * Update the registry's key record for a DID. Registry role only — this
+   * does NOT rotate a did:atp identifier's binding keys.
+   *
+   * @deprecated did:atp binding-key rotation changes the DID itself (both
+   * fingerprints are path segments), so it cannot be done in place via a
+   * registry call. Use `DidAtpDocument.rotate()` (utils/did-document.ts),
+   * which produces the new DID and its freshly dual-signed did.json. This
+   * method only updates the registry's own record.
    */
   async rotateKeys(did: string, newPublicKey: string): Promise<ATPResponse<DIDDocument>> {
+    if (!IdentityClient.warnedDeprecatedRotate) {
+      IdentityClient.warnedDeprecatedRotate = true;
+      console.warn(
+        '[atp-sdk] IdentityClient.rotateKeys() is deprecated: did:atp rotation changes the DID ' +
+          'and cannot be done in place. Use DidAtpDocument.rotate() to produce the new DID and ' +
+          'its dual-signed did.json; this method only updates the registry record.'
+      );
+    }
     return this.post(`/identity/${encodeURIComponent(did)}/rotate-keys`, {
       newPublicKey
     });

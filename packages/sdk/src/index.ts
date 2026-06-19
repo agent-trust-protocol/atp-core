@@ -12,7 +12,7 @@
  * - Policy-based access control
  * - Blockchain-anchored audit trails
  *
- * @version 1.2.0
+ * @version 2.0.0
  * @author Agent Trust Protocol™ Team
  * @license Apache-2.0
  */
@@ -45,7 +45,18 @@ export { UniversalMonitor, SecurityEnforcer } from './monitoring/index.js';
 
 // Utility Classes
 export { CryptoUtils } from './utils/crypto.js';
-export { DIDUtils } from './utils/did.js';
+export { DidAtp } from './utils/did.js';
+export type { ParsedAtpDid, AtpDidType } from './utils/did.js';
+export { DidAtpDocument } from './utils/did-document.js';
+export {
+  DidAtpResolver,
+  DidResolutionError,
+  type DidResolutionErrorCode,
+  type DidResolutionResult,
+  type ResolveOptions
+} from './utils/resolver.js';
+export { jcsCanonicalize } from './utils/jcs.js';
+export type { AtpDidDocument, AtpPqProof, DataIntegrityProof } from './types.js';
 export { JWTUtils } from './utils/jwt.js';
 export { VersionManager, versionManager } from './utils/version-manager.js';
 export type { ProtocolVersion, AgentVersion, SDKCompatibility } from './utils/version-manager.js';
@@ -223,7 +234,7 @@ export type {
 } from './profiles/index.js';
 
 // Version information
-export const VERSION = '1.2.0';
+export const VERSION = '2.0.0';
 export const PROTOCOL_VERSION = '1.0';
 
 // Constants

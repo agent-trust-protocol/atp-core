@@ -180,31 +180,40 @@ export class Agent extends EventEmitter {
       if (!this.did || !this.privateKey) {
         // Generate hybrid quantum-safe keypair (Ed25519 + ML-DSA)
         // This provides protection against both classical and quantum attacks
-        const keyPair = await CryptoUtils.generateKeyPair(true); // quantumSafe = true by default
+        const keyPair = await CryptoUtils.generateHybridKeyPair();
+        // Legacy string form: hex of ed25519 || ml-dsa-65 key material
+        const publicKeyHex = Buffer.concat([
+          keyPair.ed25519.publicKey,
+          keyPair.mlDsa65.publicKey
+        ]).toString('hex');
+        const privateKeyHex = Buffer.concat([
+          keyPair.ed25519.secretKey,
+          keyPair.mlDsa65.secretKey
+        ]).toString('hex');
 
         try {
           const identity = await this.client.identity.registerDID({
-            publicKey: keyPair.publicKey,
+            publicKey: publicKeyHex,
             metadata: {
               name: this.name,
-              quantumSafe: keyPair.quantumSafe,
-              algorithm: keyPair.quantumSafe ? 'hybrid-ed25519-mldsa65' : 'ed25519'
+              quantumSafe: true,
+              algorithm: 'hybrid-ed25519-mldsa65'
             }
           });
 
           if (identity.data) {
             this.did = identity.data.did;
-            this.privateKey = keyPair.privateKey;
-            this._quantumSafe = keyPair.quantumSafe;
+            this.privateKey = privateKeyHex;
+            this._quantumSafe = true;
           } else {
             throw new Error('No DID returned from identity service');
           }
         } catch {
           // Standalone mode: no ATP services available — generate DID locally
-          const pubKeyShort = keyPair.publicKey.slice(0, 16);
+          const pubKeyShort = publicKeyHex.slice(0, 16);
           this.did = `did:atp:${pubKeyShort}`;
-          this.privateKey = keyPair.privateKey;
-          this._quantumSafe = keyPair.quantumSafe;
+          this.privateKey = privateKeyHex;
+          this._quantumSafe = true;
           this._standalone = true;
           console.log('\u26A1 Running in standalone mode (no ATP services detected). DID generated locally.');
         }
@@ -781,7 +790,7 @@ export class Agent extends EventEmitter {
       didDoc = this.didDocument;
     } else {
       try {
-        const resolved = await this.client.identity.resolveDID(this.did);
+        const resolved = await this.client.identity.getRegistryRecord(this.did);
         didDoc = resolved.data?.document || this.createDefaultDIDDocument();
         this.didDocument = didDoc;
       } catch {
