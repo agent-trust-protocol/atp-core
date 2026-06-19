@@ -129,3 +129,35 @@ describe('Deactivate (did:wba convention: stop serving did.json)', () => {
     });
   });
 });
+
+describe('Verify hardening (malformed verification methods are reported, not thrown)', () => {
+  it('a wrong-length ML-DSA-65 public key returns { valid: false } instead of throwing', async () => {
+    const keyPair = await CryptoUtils.generateHybridKeyPair();
+    const { document } = await DidAtpDocument.create('agents.example.com', ['user', 'eve'], keyPair);
+
+    // Corrupt the post-quantum AKP JWK with a public key that base64url-decodes
+    // to far fewer than the required 1952 bytes. This previously made
+    // pq1Fingerprint() throw an unguarded Error out of verify().
+    const tampered = JSON.parse(JSON.stringify(document));
+    const pqVm = tampered.verificationMethod.find((vm: any) => vm.type === 'JsonWebKey');
+    pqVm.publicKeyJwk.pub = Buffer.from([1, 2, 3]).toString('base64url');
+
+    const result = await DidAtpDocument.verify(tampered);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => /invalid ML-DSA-65 public key/i.test(e))).toBe(true);
+  });
+
+  it('resolve() surfaces the same malformed key as a DidResolutionError, not a raw throw', async () => {
+    const keyPair = await CryptoUtils.generateHybridKeyPair();
+    const { did, document } = await DidAtpDocument.create('agents.example.com', ['user', 'mallory'], keyPair);
+
+    const tampered = JSON.parse(JSON.stringify(document));
+    const pqVm = tampered.verificationMethod.find((vm: any) => vm.type === 'JsonWebKey');
+    pqVm.publicKeyJwk.pub = Buffer.from([9, 9, 9, 9]).toString('base64url');
+
+    const fetch = mockFetch(tampered);
+    await expect(DidAtpResolver.resolve(did, { fetch })).rejects.toMatchObject({
+      name: 'DidResolutionError'
+    });
+  });
+});
