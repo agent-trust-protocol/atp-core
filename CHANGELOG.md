@@ -3,6 +3,32 @@
 All notable changes to Agent Trust Protocol (ATP) are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Changed
+- **BREAKING (audit-logger): audit integrity hash redefined.** The per-event
+  SHA-256 integrity hash and HMAC signature are now computed over a stable,
+  storage-independent field set (`id`, `timestamp`, `source`, `action`,
+  `resource`, `actor`, `details`, `previousHash`) and no longer include the
+  storage-managed `nonce` and `blockNumber` fields. This makes
+  `AuditService.verifyIntegrity()` recompute hashes consistently across all
+  backends (previously the Postgres backend stored `nonce` as NULL and assigned
+  `block_number` via a stored procedure, so recomputation diverged from the
+  stored hash). Event ordering remains bound cryptographically by `previousHash`.
+
+  **Migration:** audit events written before this change will be reported as
+  tampered the first time `verifyIntegrity()` runs after upgrade (this affects
+  in-memory and SQLite deployments that persisted real `nonce` values; existing
+  Postgres chains were already inconsistent). Treat the upgrade as a hash-chain
+  boundary: archive/seal the pre-upgrade chain and start a fresh chain, or
+  re-anchor as appropriate for your deployment. No automatic re-hash is performed.
+
+### Fixed
+- `AuditService.verifyIntegrity()` now performs full content + linkage
+  verification instead of delegating to `storage.verifyChain()` (which only
+  checked `previousHash` linkage), so content tampering of an entry that still
+  links correctly is now detected.
+
 ## [1.1.0] - 2026-03-27
 
 ### Added
