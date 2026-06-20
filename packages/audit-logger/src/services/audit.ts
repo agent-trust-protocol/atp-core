@@ -52,6 +52,12 @@ export class AuditService {
    * Whether an audit event signature is an authenticated HMAC (true) rather than
    * the keyless UNSIGNED fallback (false). Use to reject unsigned events where
    * non-repudiation is required.
+   *
+   * CAVEAT — legacy data: events written before this change stored a bare
+   * SHA-256 with no prefix when no signing key was configured. Those legacy
+   * unsigned events lack the marker and will be reported as signed (true). For
+   * pre-migration events, rely on your migration/seal policy rather than this
+   * check.
    */
   static isSigned(signature: string | undefined | null): boolean {
     return !!signature && !signature.startsWith(UNSIGNED_SIGNATURE_PREFIX);

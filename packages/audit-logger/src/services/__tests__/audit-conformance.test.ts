@@ -521,12 +521,16 @@ describe('Audit store conformance — hash-chain integrity', () => {
     beforeEach(() => {
       prevSigning = process.env.AUDIT_SIGNING_KEY;
       prevEnc = process.env.AUDIT_ENCRYPTION_KEY;
+      // Reset the one-time warning flag so this suite is order-independent and
+      // does not leak the "already warned" state to other suites/workers.
+      (AuditService as unknown as { unsignedWarningEmitted: boolean }).unsignedWarningEmitted = false;
     });
     afterEach(() => {
       if (prevSigning === undefined) delete process.env.AUDIT_SIGNING_KEY;
       else process.env.AUDIT_SIGNING_KEY = prevSigning;
       if (prevEnc === undefined) delete process.env.AUDIT_ENCRYPTION_KEY;
       else process.env.AUDIT_ENCRYPTION_KEY = prevEnc;
+      (AuditService as unknown as { unsignedWarningEmitted: boolean }).unsignedWarningEmitted = false;
     });
 
     it('marks the signature unsigned and isSigned() is false when no key is configured', async () => {
