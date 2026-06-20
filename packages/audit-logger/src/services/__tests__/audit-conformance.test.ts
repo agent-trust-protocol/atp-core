@@ -20,7 +20,7 @@
  */
 
 import { createHash, createHmac } from 'crypto';
-import { AuditService } from '../audit.js';
+import { AuditService, UNSIGNED_SIGNATURE_PREFIX } from '../audit.js';
 import { AuditEvent, AuditEventRequest, AuditQuery } from '../../models/audit.js';
 import { IAuditStorageService } from '../../interfaces/storage.js';
 
@@ -503,6 +503,53 @@ describe('Audit store conformance — hash-chain integrity', () => {
       // ...but recomputing the HMAC over the tampered event no longer matches.
       const tampered = mutate(JSON.parse(JSON.stringify(event)));
       expect(event.signature).not.toBe(hmacSig(tampered, SIGNING_KEY));
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────────
+  // Keyless fallback must be EXPLICITLY UNSIGNED (no signature masquerade).
+  //
+  // With no signing key, a bare SHA-256 would be byte-indistinguishable from a
+  // real HMAC, so an unsigned event could masquerade as authenticated. The
+  // service instead marks the value `unsigned-sha256:` and AuditService.isSigned()
+  // reports it as unsigned, so callers can reject it where non-repudiation matters.
+  // ──────────────────────────────────────────────────────────────────────────────
+  describe('keyless fallback is explicitly UNSIGNED (no signature masquerade)', () => {
+    let prevSigning: string | undefined;
+    let prevEnc: string | undefined;
+
+    beforeEach(() => {
+      prevSigning = process.env.AUDIT_SIGNING_KEY;
+      prevEnc = process.env.AUDIT_ENCRYPTION_KEY;
+    });
+    afterEach(() => {
+      if (prevSigning === undefined) delete process.env.AUDIT_SIGNING_KEY;
+      else process.env.AUDIT_SIGNING_KEY = prevSigning;
+      if (prevEnc === undefined) delete process.env.AUDIT_ENCRYPTION_KEY;
+      else process.env.AUDIT_ENCRYPTION_KEY = prevEnc;
+    });
+
+    it('marks the signature unsigned and isSigned() is false when no key is configured', async () => {
+      delete process.env.AUDIT_SIGNING_KEY;
+      delete process.env.AUDIT_ENCRYPTION_KEY;
+      const svc = new AuditService(new InMemoryConformanceStorage(), noopIpfs);
+      const event = await svc.logEvent({
+        source: 'svc', action: 'transfer', resource: 'ledger',
+        actor: 'did:atp:actor-x', details: { amount: 100 },
+      });
+      expect((event.signature ?? '').startsWith(UNSIGNED_SIGNATURE_PREFIX)).toBe(true);
+      expect(AuditService.isSigned(event.signature)).toBe(false);
+    });
+
+    it('a configured signing key yields a signed (non-prefixed) HMAC', async () => {
+      process.env.AUDIT_SIGNING_KEY = 'a-real-signing-key';
+      const svc = new AuditService(new InMemoryConformanceStorage(), noopIpfs);
+      const event = await svc.logEvent({
+        source: 'svc', action: 'transfer', resource: 'ledger',
+        actor: 'did:atp:actor-x', details: { amount: 100 },
+      });
+      expect((event.signature ?? '').startsWith(UNSIGNED_SIGNATURE_PREFIX)).toBe(false);
+      expect(AuditService.isSigned(event.signature)).toBe(true);
     });
   });
 
