@@ -180,6 +180,58 @@ const DECISION_VECTORS: DecisionVector[] = [
     context: makeContext(),
     expected: { allowed: false, reasonContains: 'default deny' },
   },
+
+  // --- numeric comparison operators (SafeEvaluator >, <, >=, <=) ------------
+  // TEETH: the conformance suite previously exercised only boolean/string and
+  // .includes() conditions, so a mutation that broke a numeric comparator (e.g.
+  // '>' always returning false) survived. These rows bind every relational
+  // operator to an observable allow/deny via context-supplied numbers.
+  {
+    name: 'numeric greater_than condition allows when satisfied',
+    rules: [makeRule({ name: 'GT Allow', condition: 'context.risk > 5', effect: 'allow', priority: 100 })],
+    context: makeContext({ context: { risk: 10 } }),
+    expected: { allowed: true, reasonContains: 'gt allow' },
+  },
+  {
+    name: 'numeric greater_than condition denies-by-default when not satisfied',
+    rules: [makeRule({ name: 'GT Allow', condition: 'context.risk > 5', effect: 'allow', priority: 100 })],
+    context: makeContext({ context: { risk: 3 } }),
+    expected: { allowed: false, reasonContains: 'default deny' },
+  },
+  {
+    name: 'numeric less_than condition allows when satisfied',
+    rules: [makeRule({ name: 'LT Allow', condition: 'context.risk < 5', effect: 'allow', priority: 100 })],
+    context: makeContext({ context: { risk: 1 } }),
+    expected: { allowed: true, reasonContains: 'lt allow' },
+  },
+  {
+    name: 'numeric greater_than_or_equal is inclusive at boundary',
+    rules: [makeRule({ name: 'GTE Allow', condition: 'context.score >= 5', effect: 'allow', priority: 100 })],
+    context: makeContext({ context: { score: 5 } }),
+    expected: { allowed: true, reasonContains: 'gte allow' },
+  },
+  {
+    name: 'numeric less_than_or_equal is inclusive at boundary',
+    rules: [makeRule({ name: 'LTE Allow', condition: 'context.score <= 5', effect: 'allow', priority: 100 })],
+    context: makeContext({ context: { score: 5 } }),
+    expected: { allowed: true, reasonContains: 'lte allow' },
+  },
+
+  // --- equal-priority deny-wins (precedence guard) -------------------------
+  // TEETH: when an allow and a deny rule BOTH match at the SAME priority, the
+  // engine must not silently allow. (The first matching rule in the sorted
+  // order decides; insertion order is preserved for equal priorities, with the
+  // deny added first here so it is encountered first.) This pins behaviour that
+  // would otherwise be left to undocumented sort stability.
+  {
+    name: 'equal-priority deny encountered first yields deny',
+    rules: [
+      makeRule({ name: 'Equal Deny', condition: 'true', effect: 'deny', priority: 100 }),
+      makeRule({ name: 'Equal Allow', condition: 'true', effect: 'allow', priority: 100 }),
+    ],
+    context: makeContext(),
+    expected: { allowed: false, reasonContains: 'equal deny' },
+  },
 ];
 
 describe('PolicyEngine — W3C decision conformance vectors (table-driven)', () => {

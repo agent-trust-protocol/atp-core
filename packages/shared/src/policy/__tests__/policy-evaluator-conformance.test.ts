@@ -403,6 +403,168 @@ const VECTORS: ConformanceVector[] = [
     expected: { decision: 'allow', actionType: 'allow', obligations: ['throttle'] },
   },
 
+  // --- all_rules precedence: deny outranks require_approval ----------------
+  // TEETH: with both a matching deny AND a matching require_approval, deny MUST
+  // win. Earlier vectors only covered deny-vs-allow and approval-vs-allow, so a
+  // swap of the deny/approval precedence in combineRuleDecisions survived. This
+  // row pins deny > require_approval.
+  {
+    name: 'all_rules deny outranks require_approval when both match',
+    policy: makePolicy({
+      evaluationMode: 'all_rules',
+      rules: [
+        makeRule({
+          name: 'Approval basic',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: requireApproval(),
+        }),
+        makeRule({
+          name: 'Deny basic',
+          priority: 20,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: deny(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'TRUSTED' }),
+    expected: { decision: 'deny', actionType: 'deny' },
+  },
+  // --- all_rules precedence: require_approval outranks throttle -------------
+  // TEETH: require_approval must beat a matching throttle when no deny present.
+  {
+    name: 'all_rules require_approval outranks throttle when both match (no deny)',
+    policy: makePolicy({
+      evaluationMode: 'all_rules',
+      rules: [
+        makeRule({
+          name: 'Throttle basic',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: throttle(),
+        }),
+        makeRule({
+          name: 'Approval basic',
+          priority: 20,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: requireApproval(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'TRUSTED' }),
+    expected: { decision: 'require_approval', actionType: 'require_approval' },
+  },
+
+  // --- comparison operator boundaries (>= and <) ---------------------------
+  // TEETH: 'greater_than_or_equal' must be inclusive at the boundary. With the
+  // context trust EXACTLY at the threshold, a mutation to strict '>' flips this
+  // from allow to deny-by-default.
+  {
+    name: 'greater_than_or_equal is inclusive at the exact boundary (allow)',
+    policy: makePolicy({
+      evaluationMode: 'first_match',
+      rules: [
+        makeRule({
+          name: 'Allow at-or-above verified',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'VERIFIED'),
+          action: allow(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'VERIFIED' }),
+    expected: { decision: 'allow', actionType: 'allow', reasonContains: 'Allow at-or-above verified' },
+  },
+  {
+    name: 'less_than is exclusive at the exact boundary (no match -> deny-by-default)',
+    // TEETH: 'less_than' must be strict. At the exact boundary (VERIFIED < VERIFIED
+    // is false) the rule must NOT fire, so the engine falls through to
+    // deny-by-default. Using an ALLOW rule makes the mutation observable: if '<'
+    // wrongly became '<=', the rule would fire and ALLOW; correct strict '<'
+    // yields no-match -> deny-by-default.
+    policy: makePolicy({
+      evaluationMode: 'first_match',
+      rules: [
+        makeRule({
+          name: 'Allow strictly-below verified',
+          priority: 10,
+          condition: trustCondition('less_than', 'VERIFIED'),
+          action: allow(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'VERIFIED' }),
+    expected: { decision: 'deny', actionType: 'deny', reasonContains: 'No rules matched' },
+  },
+
+  // --- per-rule enabled flag is honoured -----------------------------------
+  // TEETH: a disabled (enabled:false) rule must be filtered out before matching.
+  // Here the ONLY allow rule is disabled; if the per-rule enabled filter were
+  // removed it would match and ALLOW. Correct behaviour: it is skipped and the
+  // request is denied-by-default (first_match no-match).
+  {
+    name: 'disabled rule is ignored -> deny-by-default (first_match)',
+    policy: makePolicy({
+      evaluationMode: 'first_match',
+      rules: [
+        makeRule({
+          name: 'Disabled allow-all',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'UNKNOWN'),
+          action: allow(),
+          enabled: false,
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'TRUSTED' }),
+    expected: { decision: 'deny', actionType: 'deny', reasonContains: 'No rules matched' },
+  },
+  {
+    name: 'disabled deny rule is ignored, later enabled allow wins (priority_order)',
+    // TEETH: a higher-priority DENY that is disabled must not suppress a
+    // lower-priority enabled ALLOW.
+    policy: makePolicy({
+      evaluationMode: 'priority_order',
+      rules: [
+        makeRule({
+          name: 'Disabled early deny',
+          priority: 1,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: deny(),
+          enabled: false,
+        }),
+        makeRule({
+          name: 'Enabled allow',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: allow(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'TRUSTED' }),
+    expected: { decision: 'allow', actionType: 'allow', reasonContains: 'Enabled allow' },
+  },
+
+  // --- usage_limit obligation pass-through ---------------------------------
+  // TEETH: completes obligation coverage in this suite (usage_limit was only
+  // checked in the permission-package suite).
+  {
+    name: 'obligation emission — allow with usage-limit condition emits usage_limit',
+    policy: makePolicy({
+      evaluationMode: 'first_match',
+      rules: [
+        makeRule({
+          name: 'Allow with usage cap',
+          priority: 10,
+          condition: didCondition('equals', 'did:atp:agent-conformance'),
+          action: allow({ conditions: { usageLimit: 7 } } as Partial<VisualPolicyActionType>),
+        }),
+      ],
+    }),
+    context: makeContext(),
+    expected: { decision: 'allow', actionType: 'allow', obligations: ['usage_limit'] },
+  },
+
   // --- disabled policy -----------------------------------------------------
   {
     name: 'disabled policy denies regardless of rules',
