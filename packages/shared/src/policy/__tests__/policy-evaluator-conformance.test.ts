@@ -360,6 +360,36 @@ const VECTORS: ConformanceVector[] = [
     expected: { decision: 'deny', actionType: 'deny' },
   },
 
+  // --- precedence: EQUAL-priority deny-wins (regression guard, finding #1) --
+  // TEETH: the allow rule is listed FIRST at the SAME priority as the deny. In
+  // priority_order the engine must still deny — equal-priority ties resolve in
+  // favour of the more restrictive action, independent of authoring order.
+  // Before the fix this returned ALLOW purely because allow was authored first.
+  // (Note: first_match is first-applicable by contract, so deny-wins does NOT
+  // apply there — that behaviour is covered in policy-conformance.test.ts.)
+  {
+    name: 'priority_order equal-priority deny-wins — allow listed first still denies',
+    policy: makePolicy({
+      evaluationMode: 'priority_order',
+      rules: [
+        makeRule({
+          name: 'Allow equal',
+          priority: 50,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: allow(),
+        }),
+        makeRule({
+          name: 'Deny equal',
+          priority: 50,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: deny(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'TRUSTED' }),
+    expected: { decision: 'deny', actionType: 'deny' },
+  },
+
   // --- obligation emission -------------------------------------------------
   {
     name: 'obligation emission — allow with MFA + time-limit conditions',

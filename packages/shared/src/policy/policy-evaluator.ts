@@ -18,6 +18,36 @@ import {
 } from './visual-policy-schema.js';
 
 // ============================================================================
+// RULE ORDERING
+// ============================================================================
+
+/**
+ * Tie-break order for rules of EQUAL priority. The more restrictive action is
+ * evaluated first so an equal-priority `deny` can never be silently overridden
+ * by an `allow` (deny-wins). Without this, equal-priority ties were resolved by
+ * rule insertion order, so whether a deny or an allow won depended on authoring
+ * order rather than security intent. Lower rank = evaluated first.
+ */
+const ACTION_TIE_BREAK: Record<string, number> = {
+  deny: 0,
+  require_approval: 1,
+  throttle: 2,
+  allow: 3,
+  log: 4,
+  alert: 4,
+};
+
+function compareRuleOrder(
+  a: { priority: number; action: { type: string } },
+  b: { priority: number; action: { type: string } }
+): number {
+  // Primary: priority (lower number = higher priority).
+  if (a.priority !== b.priority) return a.priority - b.priority;
+  // Tie-break: more restrictive action first (deny-wins on equal priority).
+  return (ACTION_TIE_BREAK[a.action.type] ?? 99) - (ACTION_TIE_BREAK[b.action.type] ?? 99);
+}
+
+// ============================================================================
 // EVALUATION CONTEXT TYPES
 // ============================================================================
 
@@ -153,22 +183,36 @@ export class PolicyEvaluator {
         };
       }
 
-      // Sort rules by priority (lower number = higher priority)
-      const sortedRules = [...policy.rules]
-        .filter(rule => rule.enabled)
-        .sort((a, b) => a.priority - b.priority);
+      const enabledRules = [...policy.rules].filter(rule => rule.enabled);
+      // Base ordering is by priority (lower number = higher priority). A stable
+      // sort preserves authoring order among equal-priority rules.
+      const byPriority = [...enabledRules].sort((a, b) => a.priority - b.priority);
 
       // Evaluate rules based on evaluation mode
       switch (policy.evaluationMode) {
         case 'first_match':
-          return await this.evaluateFirstMatch(sortedRules, context, evaluationTrace, startTime);
+          // "first_match" is first-applicable by contract — the first matching
+          // rule wins, so authoring order is significant and deny-wins
+          // tie-breaking must NOT be applied here.
+          return await this.evaluateFirstMatch(byPriority, context, evaluationTrace, startTime);
 
         case 'all_rules':
-          return await this.evaluateAllRules(sortedRules, context, evaluationTrace, startTime);
+          // all_rules combines order-independently (combineRuleDecisions already
+          // applies deny-wins), so ordering does not affect the decision.
+          return await this.evaluateAllRules(byPriority, context, evaluationTrace, startTime);
 
         case 'priority_order':
         default:
-          return await this.evaluatePriorityOrder(sortedRules, context, evaluationTrace, startTime, policy.defaultAction);
+          // priority_order: break equal-priority ties in favour of the more
+          // restrictive action, so an equal-priority deny is never silently
+          // overridden by an allow (deny-wins).
+          return await this.evaluatePriorityOrder(
+            [...enabledRules].sort(compareRuleOrder),
+            context,
+            evaluationTrace,
+            startTime,
+            policy.defaultAction
+          );
       }
 
     } catch (error) {

@@ -181,7 +181,15 @@ export class PolicyEngine {
   async evaluate(context: PolicyContext): Promise<PolicyResult> {
     const applicableRules = Array.from(this.rules.values())
       .filter(rule => rule.active)
-      .sort((a, b) => b.priority - a.priority);
+      .sort((a, b) => {
+        // Primary: higher priority number wins.
+        if (b.priority !== a.priority) return b.priority - a.priority;
+        // Tie-break: at equal priority, deny-wins — evaluate a deny rule before
+        // an allow rule regardless of insertion order, so the engine never
+        // silently allows when an equal-priority deny also matches.
+        if (a.effect === b.effect) return 0;
+        return a.effect === 'deny' ? -1 : 1;
+      });
 
     for (const rule of applicableRules) {
       try {

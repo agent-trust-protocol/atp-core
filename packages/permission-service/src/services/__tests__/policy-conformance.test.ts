@@ -219,15 +219,23 @@ const DECISION_VECTORS: DecisionVector[] = [
 
   // --- equal-priority deny-wins (precedence guard) -------------------------
   // TEETH: when an allow and a deny rule BOTH match at the SAME priority, the
-  // engine must not silently allow. (The first matching rule in the sorted
-  // order decides; insertion order is preserved for equal priorities, with the
-  // deny added first here so it is encountered first.) This pins behaviour that
-  // would otherwise be left to undocumented sort stability.
+  // engine must deny — deny-wins, independent of insertion order. The two cases
+  // below add the rules in OPPOSITE orders; both must deny. This pins real
+  // deny-wins behaviour rather than relying on undocumented sort stability.
   {
-    name: 'equal-priority deny encountered first yields deny',
+    name: 'equal-priority deny added first yields deny',
     rules: [
       makeRule({ name: 'Equal Deny', condition: 'true', effect: 'deny', priority: 100 }),
       makeRule({ name: 'Equal Allow', condition: 'true', effect: 'allow', priority: 100 }),
+    ],
+    context: makeContext(),
+    expected: { allowed: false, reasonContains: 'equal deny' },
+  },
+  {
+    name: 'equal-priority allow added first STILL yields deny (deny-wins)',
+    rules: [
+      makeRule({ name: 'Equal Allow', condition: 'true', effect: 'allow', priority: 100 }),
+      makeRule({ name: 'Equal Deny', condition: 'true', effect: 'deny', priority: 100 }),
     ],
     context: makeContext(),
     expected: { allowed: false, reasonContains: 'equal deny' },
