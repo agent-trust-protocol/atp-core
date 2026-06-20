@@ -44,6 +44,24 @@ const ITEMS = [
 const requested = process.argv.slice(2).map(Number).filter((n) => !Number.isNaN(n));
 const items = requested.length ? ITEMS.filter((i) => requested.includes(i.id)) : ITEMS;
 
+// Never let the gate pass vacuously: an unknown/typo'd item ID must fail loudly
+// rather than run zero tests and report "ALL GREEN".
+if (requested.length) {
+  const validIds = new Set(ITEMS.map((i) => i.id));
+  const unknown = requested.filter((id) => !validIds.has(id));
+  if (unknown.length) {
+    console.error(
+      `Unknown conformance item id(s): ${unknown.join(', ')}. ` +
+      `Valid ids: ${ITEMS.map((i) => i.id).join(', ')}.`
+    );
+    process.exit(2);
+  }
+}
+if (items.length === 0) {
+  console.error('No conformance items selected — nothing to run.');
+  process.exit(2);
+}
+
 const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
 const DIM = '\x1b[2m';
