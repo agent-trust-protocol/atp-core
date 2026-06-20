@@ -22,19 +22,27 @@ import {
 // ============================================================================
 
 /**
- * Tie-break order for rules of EQUAL priority. The more restrictive action is
- * evaluated first so an equal-priority `deny` can never be silently overridden
- * by an `allow` (deny-wins). Without this, equal-priority ties were resolved by
- * rule insertion order, so whether a deny or an allow won depended on authoring
- * order rather than security intent. Lower rank = evaluated first.
+ * Tie-break order for rules of EQUAL priority. Without it, equal-priority ties
+ * were resolved by rule authoring order, so whether a deny or an allow won
+ * depended on declaration order rather than security intent. Lower rank =
+ * evaluated first.
+ *
+ * Ordering rationale (matters for `evaluatePriorityOrder`, which returns on the
+ * FIRST decisive rule):
+ *   1. Non-decisive, obligation-bearing actions (`log`, `alert`, `throttle`)
+ *      come FIRST so their obligations are always collected before any decisive
+ *      rule returns. (Ranking them after `allow` would drop a co-priority log
+ *      obligation the instant a decisive allow matched.)
+ *   2. Decisive actions follow, most restrictive first, so an equal-priority
+ *      `deny` is never silently overridden by an `allow` (deny-wins).
  */
 const ACTION_TIE_BREAK: Record<string, number> = {
-  deny: 0,
-  require_approval: 1,
-  throttle: 2,
-  allow: 3,
-  log: 4,
-  alert: 4,
+  log: 0,
+  alert: 0,
+  throttle: 1,
+  deny: 2,
+  require_approval: 3,
+  allow: 4,
 };
 
 function compareRuleOrder(

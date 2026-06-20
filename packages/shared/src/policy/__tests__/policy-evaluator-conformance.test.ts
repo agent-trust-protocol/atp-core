@@ -389,6 +389,31 @@ const VECTORS: ConformanceVector[] = [
     context: makeContext({ trustLevel: 'TRUSTED' }),
     expected: { decision: 'deny', actionType: 'deny' },
   },
+  {
+    name: 'priority_order equal-priority — log obligation is collected even when allow is decisive',
+    // The non-decisive log rule shares the allow rule's priority and is authored
+    // FIRST. The deny-wins tie-break must still evaluate the log rule before the
+    // decisive allow returns, so the log obligation is not silently dropped.
+    policy: makePolicy({
+      evaluationMode: 'priority_order',
+      rules: [
+        makeRule({
+          name: 'Allow basic',
+          priority: 50,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: allow(),
+        }),
+        makeRule({
+          name: 'Log everything',
+          priority: 50,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: logAction(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'TRUSTED' }),
+    expected: { decision: 'allow', actionType: 'allow', obligations: ['log'] },
+  },
 
   // --- obligation emission -------------------------------------------------
   {
