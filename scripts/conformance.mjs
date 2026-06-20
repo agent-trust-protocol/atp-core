@@ -68,9 +68,22 @@ function runItem(item) {
       { stdio: ['ignore', 'ignore', 'ignore'] }
     );
   } catch {
-    // jest exits non-zero when a suite fails; the JSON report is still written.
+    // jest exits non-zero when a suite fails; the JSON report is still written,
+    // so we fall through and read it below. If jest instead failed to START
+    // (bad config, module resolution error, …) no report exists — the read
+    // below is guarded to surface a readable diagnostic rather than an ENOENT.
   }
-  const r = JSON.parse(readFileSync(outFile, 'utf8'));
+  let r;
+  try {
+    r = JSON.parse(readFileSync(outFile, 'utf8'));
+  } catch {
+    console.error(
+      `\n  [${item.id}] jest did not produce a JSON report — it likely failed to start.\n` +
+      `  Re-run to see the error:\n` +
+      `    npx jest --config jest.config.cjs --testPathPattern "${item.pattern}"\n`
+    );
+    process.exit(1);
+  }
   return {
     suites: r.numTotalTestSuites,
     passed: r.numPassedTests,
