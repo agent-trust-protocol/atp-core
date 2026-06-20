@@ -26,7 +26,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push identity-service image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         continue-on-error: true
         with:
           context: ./packages/identity-service
@@ -35,7 +35,7 @@ jobs:
           tags: ghcr.io/${{ env.IMAGE_OWNER }}/atp-identity:latest
 
       - name: Build and push permission-service image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         continue-on-error: true
         with:
           context: ./packages/permission-service
@@ -44,7 +44,7 @@ jobs:
           tags: ghcr.io/${{ env.IMAGE_OWNER }}/atp-permission:latest
 
       - name: Build and push audit-logger image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         continue-on-error: true
         with:
           context: ./packages/audit-logger
@@ -53,7 +53,7 @@ jobs:
           tags: ghcr.io/${{ env.IMAGE_OWNER }}/atp-audit:latest
 
       - name: Build and push vc-service image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         continue-on-error: true
         with:
           context: ./packages/vc-service
@@ -62,7 +62,7 @@ jobs:
           tags: ghcr.io/${{ env.IMAGE_OWNER }}/atp-vc:latest
 
       - name: Build and push rpc-gateway image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         continue-on-error: true
         with:
           context: ./packages/rpc-gateway
