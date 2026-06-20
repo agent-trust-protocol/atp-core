@@ -415,6 +415,86 @@ const VECTORS: ConformanceVector[] = [
     expected: { decision: 'allow', actionType: 'allow', obligations: ['log'] },
   },
 
+  // --- defaultAction honoured across modes (finding #2) --------------------
+  // defaultAction was previously only consulted in priority_order; first_match
+  // and all_rules hardcoded deny on no-match. It must apply consistently.
+  {
+    name: 'first_match honours defaultAction=allow when no rule matches',
+    policy: makePolicy({
+      evaluationMode: 'first_match',
+      defaultAction: 'allow',
+      rules: [
+        makeRule({
+          name: 'Allow privileged only',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'PRIVILEGED'),
+          action: allow(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'BASIC' }),
+    expected: { decision: 'allow', actionType: 'allow', reasonContains: 'default action' },
+  },
+  {
+    name: 'all_rules honours defaultAction=allow when no rule matches',
+    policy: makePolicy({
+      evaluationMode: 'all_rules',
+      defaultAction: 'allow',
+      rules: [
+        makeRule({
+          name: 'Allow privileged only',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'PRIVILEGED'),
+          action: allow(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'BASIC' }),
+    expected: { decision: 'allow', actionType: 'allow' },
+  },
+
+  // --- first_match: log/alert are non-decisive (finding #3) ----------------
+  // A matching log/alert rule must NOT authorize the request in first_match;
+  // its obligation is collected and evaluation continues to a decisive rule.
+  {
+    name: 'first_match: a matching log rule does NOT authorize — a later deny still applies',
+    policy: makePolicy({
+      evaluationMode: 'first_match',
+      rules: [
+        makeRule({
+          name: 'Log first',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: logAction(),
+        }),
+        makeRule({
+          name: 'Deny basic',
+          priority: 20,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: deny(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'TRUSTED' }),
+    expected: { decision: 'deny', actionType: 'deny', obligations: ['log'] },
+  },
+  {
+    name: 'first_match: a log-only match falls through to default deny (log is non-decisive)',
+    policy: makePolicy({
+      evaluationMode: 'first_match',
+      rules: [
+        makeRule({
+          name: 'Log only',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: logAction(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'TRUSTED' }),
+    expected: { decision: 'deny', actionType: 'deny', obligations: ['log'], reasonContains: 'No rules matched' },
+  },
+
   // --- obligation emission -------------------------------------------------
   {
     name: 'obligation emission — allow with MFA + time-limit conditions',

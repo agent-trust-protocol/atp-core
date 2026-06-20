@@ -284,12 +284,10 @@ describe('Policy conformance — explicit deny-by-default', () => {
     expect(result.decision).toBe('allow');
   });
 
-  it('defaultAction:allow does NOT govern first_match / all_rules fallthrough (engine boundary)', async () => {
-    // Conformance boundary: in the current engine `defaultAction` is honored
-    // only in priority_order mode. first_match and all_rules hard-deny on a
-    // no-match regardless of the field. Pinning this prevents a false reading
-    // that `defaultAction` governs fallthrough in all three modes — if a future
-    // change made these modes honor it, this row would catch the behavior shift.
+  it('defaultAction:allow governs fallthrough in first_match / all_rules too', async () => {
+    // `defaultAction` is now honored consistently across all evaluation modes:
+    // on a no-match the configured default applies, rather than a hardcoded deny
+    // in first_match/all_rules. (The secure default remains 'deny' when unset.)
     for (const evaluationMode of ['first_match', 'all_rules'] as const) {
       const p = policy([rule(toolCond('some_other_tool'), allow)], {
         evaluationMode,
@@ -299,7 +297,7 @@ describe('Policy conformance — explicit deny-by-default', () => {
         p,
         makeContext({ tool: { id: 'database_query', type: 'database', sensitivity: 'internal' } })
       );
-      expect(result.decision).toBe('deny');
+      expect(result.decision).toBe('allow');
     }
   });
 });

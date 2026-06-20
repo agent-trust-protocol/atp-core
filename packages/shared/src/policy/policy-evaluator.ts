@@ -202,12 +202,12 @@ export class PolicyEvaluator {
           // "first_match" is first-applicable by contract — the first matching
           // rule wins, so authoring order is significant and deny-wins
           // tie-breaking must NOT be applied here.
-          return await this.evaluateFirstMatch(byPriority, context, evaluationTrace, startTime);
+          return await this.evaluateFirstMatch(byPriority, context, evaluationTrace, startTime, policy.defaultAction);
 
         case 'all_rules':
           // all_rules combines order-independently (combineRuleDecisions already
           // applies deny-wins), so ordering does not affect the decision.
-          return await this.evaluateAllRules(byPriority, context, evaluationTrace, startTime);
+          return await this.evaluateAllRules(byPriority, context, evaluationTrace, startTime, policy.defaultAction);
 
         case 'priority_order':
         default:
@@ -240,8 +240,13 @@ export class PolicyEvaluator {
     rules: VisualPolicyRule[],
     context: PolicyEvaluationContext,
     trace: EvaluationStep[],
-    startTime: number
+    startTime: number,
+    defaultAction: VisualPolicyAction
   ): Promise<PolicyEvaluationResult> {
+    // Obligations from non-decisive (log/alert) rules encountered before the
+    // first decisive rule must travel with the eventual decision.
+    const obligations: PolicyObligation[] = [];
+
     for (const rule of rules) {
       const ruleStartTime = Date.now();
       const conditionResult = await this.evaluateCondition(rule.condition, context);
@@ -255,6 +260,17 @@ export class PolicyEvaluator {
 
       if (conditionResult) {
         step.actionTaken = rule.action.type;
+
+        // log/alert are non-decisive side-effects — they must NOT decide the
+        // request (mapping them to "allow" would let a logging rule silently
+        // authorize). Collect their obligations and continue to the first
+        // decisive rule.
+        if (rule.action.type === 'log' || rule.action.type === 'alert') {
+          obligations.push(...this.extractObligations(rule.action));
+          trace.push(step);
+          continue;
+        }
+
         trace.push(step);
 
         return {
@@ -262,7 +278,7 @@ export class PolicyEvaluator {
           action: rule.action,
           matchedRule: rule,
           reason: `Matched rule: ${rule.name}`,
-          obligations: this.extractObligations(rule.action),
+          obligations: [...obligations, ...this.extractObligations(rule.action)],
           evaluationTrace: this.debugMode ? trace : undefined,
           processingTime: Date.now() - startTime
         };
@@ -271,11 +287,17 @@ export class PolicyEvaluator {
       trace.push(step);
     }
 
-    // No rules matched
+    // No decisive rule matched — apply the policy's configured default action
+    // (consistent with priority_order; previously this hardcoded deny and
+    // ignored defaultAction).
+    const decision = defaultAction === 'allow' ? 'allow' : 'deny';
     return {
-      decision: 'deny',
-      action: { id: randomUUID(), type: 'deny', reason: 'No matching rules', notifyAdmin: false },
-      reason: 'No rules matched the request',
+      decision,
+      action: decision === 'allow'
+        ? { id: randomUUID(), type: 'allow', description: 'Default action applied' }
+        : { id: randomUUID(), type: 'deny', reason: 'No matching rules', notifyAdmin: false },
+      reason: `No rules matched the request; applied default action: ${defaultAction ?? 'deny'}`,
+      obligations,
       evaluationTrace: this.debugMode ? trace : undefined,
       processingTime: Date.now() - startTime
     };
@@ -288,7 +310,8 @@ export class PolicyEvaluator {
     rules: VisualPolicyRule[],
     context: PolicyEvaluationContext,
     trace: EvaluationStep[],
-    startTime: number
+    startTime: number,
+    defaultAction: VisualPolicyAction
   ): Promise<PolicyEvaluationResult> {
     const matchedRules: VisualPolicyRule[] = [];
     const obligations: PolicyObligation[] = [];
@@ -313,8 +336,9 @@ export class PolicyEvaluator {
       trace.push(step);
     }
 
-    // Determine final decision based on all matched rules
-    const finalDecision = this.combineRuleDecisions(matchedRules);
+    // Determine final decision based on all matched rules (falling back to the
+    // policy's configured default action when no decisive rule matched).
+    const finalDecision = this.combineRuleDecisions(matchedRules, defaultAction);
 
     return {
       decision: finalDecision.decision,
@@ -873,7 +897,10 @@ export class PolicyEvaluator {
   /**
    * Combines decisions from multiple matched rules
    */
-  private combineRuleDecisions(rules: VisualPolicyRule[]): { decision: 'allow' | 'deny' | 'throttle' | 'require_approval', action: VisualPolicyActionType } {
+  private combineRuleDecisions(
+    rules: VisualPolicyRule[],
+    defaultAction: VisualPolicyAction = 'deny'
+  ): { decision: 'allow' | 'deny' | 'throttle' | 'require_approval', action: VisualPolicyActionType } {
     // If any rule denies, deny
     const denyRule = rules.find(rule => rule.action.type === 'deny');
     if (denyRule) {
@@ -898,10 +925,10 @@ export class PolicyEvaluator {
       return { decision: 'allow', action: allowRule.action };
     }
 
-    // Default to deny
-    return {
-      decision: 'deny',
-      action: { id: randomUUID(), type: 'deny', reason: 'No decisive action found', notifyAdmin: false }
-    };
+    // No decisive rule matched (no rules, or only non-decisive log/alert) —
+    // apply the policy's configured default action instead of hardcoding deny.
+    return defaultAction === 'allow'
+      ? { decision: 'allow', action: { id: randomUUID(), type: 'allow', description: 'Default action applied' } }
+      : { decision: 'deny', action: { id: randomUUID(), type: 'deny', reason: 'No decisive action found', notifyAdmin: false } };
   }
 }
