@@ -87,6 +87,29 @@ const DEFAULT_CONFIG: Required<TrustScoringConfig> = {
   minInteractionsForConfidence: 20
 };
 
+/**
+ * Parse a timestamp into epoch milliseconds, returning null for any value that
+ * cannot be parsed (undefined, null, empty, malformed). Using Number.isFinite
+ * guards against `new Date(bad).getTime()` returning NaN, which would otherwise
+ * poison the entire weighted trust score.
+ */
+function parseTimestampMs(timestamp: unknown): number | null {
+  // null/undefined are unparseable per the contract. Handle them explicitly:
+  // new Date(null) coerces to the Unix epoch (getTime() === 0), which would
+  // otherwise pass Number.isFinite and be returned as 0 instead of null.
+  if (timestamp == null) return null;
+  const ms = new Date(timestamp as string | number | Date).getTime();
+  return Number.isFinite(ms) ? ms : null;
+}
+
+/**
+ * Round to 2 decimal places, collapsing any non-finite value (NaN/Infinity) to 0
+ * so the public TrustScoreResult always exposes finite, in-range numbers.
+ */
+function round2(n: number): number {
+  return Number.isFinite(n) ? Math.round(n * 100) / 100 : 0;
+}
+
 export class TrustScoring {
   private config: Required<TrustScoringConfig>;
 
@@ -109,12 +132,15 @@ export class TrustScoring {
     const credentialScore = this.calculateCredentialScore(verifiedCredentials);
     const successScore = this.calculateSuccessScore(interactions);
 
-    // Weighted combination
-    const score =
+    // Weighted combination. Collapse any non-finite result to 0 so a bad factor
+    // can never leak NaN into the score or misclassify the level (NaN comparisons
+    // are always false, which would otherwise fall through scoreToLevel to PRIVILEGED).
+    const rawScore =
       interactionScore * this.config.interactionWeight +
       recencyScore * this.config.recencyWeight +
       credentialScore * this.config.credentialWeight +
       successScore * this.config.successWeight;
+    const score = Number.isFinite(rawScore) ? rawScore : 0;
 
     // Calculate confidence based on data availability
     const confidence = this.calculateConfidence(interactions.length, verifiedCredentials);
@@ -127,15 +153,15 @@ export class TrustScoring {
     const lastInteraction = this.getLastInteraction(interactions);
 
     return {
-      score: Math.round(score * 100) / 100, // Round to 2 decimal places
+      score: round2(score), // Round to 2 decimal places; non-finite collapses to 0
       level,
       factors: {
-        interactionScore: Math.round(interactionScore * 100) / 100,
-        recencyScore: Math.round(recencyScore * 100) / 100,
-        credentialScore: Math.round(credentialScore * 100) / 100,
-        successScore: Math.round(successScore * 100) / 100
+        interactionScore: round2(interactionScore),
+        recencyScore: round2(recencyScore),
+        credentialScore: round2(credentialScore),
+        successScore: round2(successScore)
       },
-      confidence: Math.round(confidence * 100) / 100,
+      confidence: round2(confidence),
       metadata: {
         totalInteractions: interactions.length,
         successfulInteractions,
@@ -170,17 +196,13 @@ export class TrustScoring {
     let recentWeight = 0;
 
     for (const interaction of interactions) {
-      const interactionTime = new Date(interaction.timestamp).getTime();
-      // Guard against unparseable timestamps (NaN), which would otherwise
-      // poison the score with NaN. Treat them as having zero recency weight.
-      if (Number.isNaN(interactionTime)) {
-        totalWeight += 1;
-        continue;
-      }
-      const age = now.getTime() - interactionTime;
-      // Clamp to [0, 1]: future-dated interactions (negative age) must not
-      // produce a weight above 1, and very old interactions floor at 0.
-      const weight = Math.min(1, Math.max(0, 1 - age / decayPeriod));
+      const ms = parseTimestampMs(interaction.timestamp);
+      // An unparseable timestamp is treated as "infinitely old": it contributes
+      // zero recency weight but still counts as an interaction (stays in the
+      // denominator). Clamp to [0,1] so a future timestamp (negative age) can't
+      // inflate recency above 1.
+      const weight =
+        ms === null ? 0 : Math.max(0, Math.min(1, 1 - (now.getTime() - ms) / decayPeriod));
       recentWeight += weight;
       totalWeight += 1;
     }
@@ -249,8 +271,10 @@ export class TrustScoring {
     if (interactions.length === 0) return undefined;
 
     return interactions.reduce((latest, current) => {
-      const latestTime = new Date(latest.timestamp).getTime();
-      const currentTime = new Date(current.timestamp).getTime();
+      // Treat unparseable timestamps as -Infinity so a corrupt value can never
+      // win the "most recent" comparison.
+      const latestTime = parseTimestampMs(latest.timestamp) ?? -Infinity;
+      const currentTime = parseTimestampMs(current.timestamp) ?? -Infinity;
       return currentTime > latestTime ? current : latest;
     });
   }

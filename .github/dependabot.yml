@@ -1,0 +1,29 @@
+version: 2
+updates:
+  # Root app + monorepo packages. The cooldown delays adopting brand-new
+  # releases so a freshly compromised version is not auto-pulled the hour it
+  # lands (mitigates worm-style npm supply-chain campaigns).
+  - package-ecosystem: "npm"
+    directories:
+      - "/"
+      - "/packages/*"
+      - "/atp-core"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 10
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+      production-dependencies:
+        dependency-type: "production"
+
+  # Keep CI/release actions patched (pin-by-SHA is still recommended).
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5

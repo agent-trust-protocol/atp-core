@@ -111,7 +111,12 @@ export class TrustScoringEngine {
 
     const identityVerified = identityResult.rows[0]?.verified || false;
     const accountCreated = identityResult.rows[0]?.created_at || new Date();
-    const accountAge = Math.floor((Date.now() - accountCreated.getTime()) / (1000 * 60 * 60 * 24));
+    // created_at may arrive as a Date, an ISO string, or an invalid value from the
+    // DB driver. Coerce and guard against NaN so accountAge never poisons the score.
+    const accountCreatedMs = new Date(accountCreated).getTime();
+    const accountAge = Number.isFinite(accountCreatedMs)
+      ? Math.floor((Date.now() - accountCreatedMs) / (1000 * 60 * 60 * 24))
+      : 0;
 
     // Get validated credentials
     const credentialsResult = await this.db.query(
@@ -201,8 +206,10 @@ export class TrustScoringEngine {
     const activityScore = Math.min(factors.timeFactors.activeTime / 1000, 0.05);
     score += ageScore + activityScore;
 
-    // Ensure score is within 0-1 range
-    return Math.max(0, Math.min(1, score));
+    // Ensure score is within 0-1 range. Collapse non-finite values to 0 first —
+    // Math.max(0, NaN) is NaN, so the clamp alone would not catch a poisoned score.
+    const safe = Number.isFinite(score) ? score : 0;
+    return Math.max(0, Math.min(1, safe));
   }
 
   /**
