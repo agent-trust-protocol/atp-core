@@ -3,6 +3,7 @@
  * RFC 7638 JWK thumbprints, e1_/pq1_ fingerprints.
  */
 
+import { createHash } from 'crypto';
 import {
   CryptoUtils,
   HybridKeyPair,
@@ -131,6 +132,164 @@ describe('did:atp v2 key model', () => {
     it('rejects modified data', () => {
       const sig = CryptoUtils.signMlDsa65('hello atp v2', keyPair.mlDsa65.secretKey);
       expect(CryptoUtils.verifyMlDsa65('tampered', sig, keyPair.mlDsa65.publicKey)).toBe(false);
+    });
+
+    it('rejects a signature verified against a different (wrong) ML-DSA-65 key', async () => {
+      const sig = CryptoUtils.signMlDsa65('hello atp v2', keyPair.mlDsa65.secretKey);
+      const other = await CryptoUtils.generateHybridKeyPair();
+      expect(CryptoUtils.verifyMlDsa65('hello atp v2', sig, other.mlDsa65.publicKey)).toBe(false);
+    });
+  });
+
+  // --- Adversarial hardening added by conformance loop -----------------------
+
+  describe('signature tampering (bit-flips)', () => {
+    it('Ed25519: a single flipped bit anywhere in the signature is rejected', async () => {
+      const sig = await CryptoUtils.signEd25519('hello atp v2', keyPair.ed25519.secretKey);
+      for (const idx of [0, 1, 31, 32, 63]) {
+        const bad = Uint8Array.from(sig);
+        bad[idx] ^= 0x01;
+        expect(await CryptoUtils.verifyEd25519('hello atp v2', bad, keyPair.ed25519.publicKey)).toBe(false);
+      }
+    });
+
+    it('ML-DSA-65: a single flipped bit in the signature is rejected', () => {
+      const sig = CryptoUtils.signMlDsa65('hello atp v2', keyPair.mlDsa65.secretKey);
+      for (const idx of [0, 100, ML_DSA_65_SIGNATURE_BYTES - 1]) {
+        const bad = Uint8Array.from(sig);
+        bad[idx] ^= 0x01;
+        expect(CryptoUtils.verifyMlDsa65('hello atp v2', bad, keyPair.mlDsa65.publicKey)).toBe(false);
+      }
+    });
+  });
+
+  describe('malformed signature lengths (truncated / over-long / empty)', () => {
+    it('Ed25519 verify returns false (never throws) for wrong-length signatures', async () => {
+      const sig = await CryptoUtils.signEd25519('hello atp v2', keyPair.ed25519.secretKey);
+      const truncated = sig.slice(0, 63);
+      const overlong = new Uint8Array(65);
+      overlong.set(sig.slice(0, 64));
+      const empty = new Uint8Array(0);
+      for (const bad of [truncated, overlong, empty]) {
+        await expect(
+          CryptoUtils.verifyEd25519('hello atp v2', bad, keyPair.ed25519.publicKey)
+        ).resolves.toBe(false);
+      }
+    });
+
+    it('ML-DSA-65 verify returns false (never throws) for wrong-length signatures', () => {
+      const sig = CryptoUtils.signMlDsa65('hello atp v2', keyPair.mlDsa65.secretKey);
+      const truncated = sig.slice(0, ML_DSA_65_SIGNATURE_BYTES - 1);
+      const overlong = new Uint8Array(ML_DSA_65_SIGNATURE_BYTES + 1);
+      overlong.set(sig);
+      const empty = new Uint8Array(0);
+      for (const bad of [truncated, overlong, empty]) {
+        expect(() => CryptoUtils.verifyMlDsa65('hello atp v2', bad, keyPair.mlDsa65.publicKey)).not.toThrow();
+        expect(CryptoUtils.verifyMlDsa65('hello atp v2', bad, keyPair.mlDsa65.publicKey)).toBe(false);
+      }
+    });
+  });
+
+  describe('cross-algorithm confusion', () => {
+    it('an Ed25519 signature does not verify under ML-DSA-65 (and vice versa)', async () => {
+      const edSig = await CryptoUtils.signEd25519('hello atp v2', keyPair.ed25519.secretKey);
+      const pqSig = CryptoUtils.signMlDsa65('hello atp v2', keyPair.mlDsa65.secretKey);
+
+      // Ed25519 signature fed to the ML-DSA verifier (wrong size + wrong scheme).
+      expect(CryptoUtils.verifyMlDsa65('hello atp v2', edSig, keyPair.mlDsa65.publicKey)).toBe(false);
+      // ML-DSA signature fed to the Ed25519 verifier (wrong size + wrong scheme).
+      expect(await CryptoUtils.verifyEd25519('hello atp v2', pqSig, keyPair.ed25519.publicKey)).toBe(false);
+    });
+
+    it('a key from the other algorithm cannot be used as a verification key', async () => {
+      const edSig = await CryptoUtils.signEd25519('hello atp v2', keyPair.ed25519.secretKey);
+      // Verify an Ed25519 signature using the (1952-byte) ML-DSA public key.
+      expect(await CryptoUtils.verifyEd25519('hello atp v2', edSig, keyPair.mlDsa65.publicKey)).toBe(false);
+    });
+  });
+
+  describe('binary safety of signed payloads', () => {
+    it('round-trips arbitrary bytes including NUL and high bytes (Ed25519 + ML-DSA-65)', async () => {
+      const data = new Uint8Array([0, 1, 2, 255, 254, 0, 128, 64]);
+      const edSig = await CryptoUtils.signEd25519(data, keyPair.ed25519.secretKey);
+      expect(await CryptoUtils.verifyEd25519(data, edSig, keyPair.ed25519.publicKey)).toBe(true);
+
+      const pqSig = CryptoUtils.signMlDsa65(data, keyPair.mlDsa65.secretKey);
+      expect(CryptoUtils.verifyMlDsa65(data, pqSig, keyPair.mlDsa65.publicKey)).toBe(true);
+
+      // Flipping one payload byte must break both.
+      const tampered = Uint8Array.from(data);
+      tampered[0] ^= 0xff;
+      expect(await CryptoUtils.verifyEd25519(tampered, edSig, keyPair.ed25519.publicKey)).toBe(false);
+      expect(CryptoUtils.verifyMlDsa65(tampered, pqSig, keyPair.mlDsa65.publicKey)).toBe(false);
+    });
+  });
+
+  describe('RFC 7638 thumbprint — independent recomputation & canonicalization', () => {
+    // Independent RFC 7638 implementation: build canonical JSON from the
+    // required members only, in lexicographic order, SHA-256, base64url(no pad).
+    function independentThumbprint(members: Record<string, string>): string {
+      const ordered = Object.keys(members).sort();
+      const canonical = '{' + ordered.map((k) => `${JSON.stringify(k)}:${JSON.stringify(members[k])}`).join(',') + '}';
+      const digest = createHash('sha256').update(Buffer.from(canonical, 'utf8')).digest();
+      return digest.toString('base64url');
+    }
+
+    it('e1Fingerprint thumbprint equals an independent RFC 7638 computation for a generated key', () => {
+      const x = Buffer.from(keyPair.ed25519.publicKey).toString('base64url');
+      const expected = independentThumbprint({ crv: 'Ed25519', kty: 'OKP', x });
+      expect(CryptoUtils.e1Fingerprint(keyPair.ed25519.publicKey)).toBe(`e1_${expected}`);
+    });
+
+    it('pq1Fingerprint thumbprint equals an independent RFC 7638 computation for a generated key', () => {
+      const pub = Buffer.from(keyPair.mlDsa65.publicKey).toString('base64url');
+      const expected = independentThumbprint({ alg: 'ML-DSA-65', kty: 'AKP', pub });
+      expect(CryptoUtils.pq1Fingerprint(keyPair.mlDsa65.publicKey)).toBe(`pq1_${expected}`);
+    });
+
+    it('thumbprint output is unpadded base64url (no +, /, or = characters)', () => {
+      const tp = CryptoUtils.jwkThumbprint({ crv: 'Ed25519', kty: 'OKP', x: 'abc' });
+      expect(tp).toMatch(/^[A-Za-z0-9_-]+$/);
+      expect(tp).not.toContain('=');
+    });
+
+    it('different keys produce different thumbprints', async () => {
+      const other = await CryptoUtils.generateHybridKeyPair();
+      expect(CryptoUtils.e1Fingerprint(keyPair.ed25519.publicKey))
+        .not.toBe(CryptoUtils.e1Fingerprint(other.ed25519.publicKey));
+      expect(CryptoUtils.pq1Fingerprint(keyPair.mlDsa65.publicKey))
+        .not.toBe(CryptoUtils.pq1Fingerprint(other.mlDsa65.publicKey));
+    });
+  });
+
+  describe('fingerprint prefix is load-bearing & domain-separated', () => {
+    it('e1_ and pq1_ prefixes are present and distinct', () => {
+      const e1 = CryptoUtils.e1Fingerprint(keyPair.ed25519.publicKey);
+      const pq1 = CryptoUtils.pq1Fingerprint(keyPair.mlDsa65.publicKey);
+      expect(e1.startsWith('e1_')).toBe(true);
+      expect(pq1.startsWith('pq1_')).toBe(true);
+      // The classical fingerprint must not be mistakable for a PQ one.
+      expect(e1.startsWith('pq1_')).toBe(false);
+      expect(pq1.startsWith('e1_')).toBe(false);
+      // The thumbprint bodies are over different JWKs, hence different.
+      expect(e1.slice(3)).not.toBe(pq1.slice(4));
+    });
+  });
+
+  describe('generateHybridKeyPair output invariants', () => {
+    it('public keys have exactly the FIPS-mandated lengths (32 / 1952)', () => {
+      expect(keyPair.ed25519.publicKey.length).toBe(ED25519_PUBLIC_KEY_BYTES);
+      expect(keyPair.mlDsa65.publicKey.length).toBe(ML_DSA_65_PUBLIC_KEY_BYTES);
+      // Guards against a regression that lets a non-1952-byte ML-DSA key through.
+      expect(ML_DSA_65_PUBLIC_KEY_BYTES).toBe(1952);
+      expect(ED25519_PUBLIC_KEY_BYTES).toBe(32);
+    });
+
+    it('secret keys actually sign verifiably under their paired public keys', async () => {
+      const edSig = await CryptoUtils.signEd25519('invariant', keyPair.ed25519.secretKey);
+      expect(await CryptoUtils.verifyEd25519('invariant', edSig, keyPair.ed25519.publicKey)).toBe(true);
+      const pqSig = CryptoUtils.signMlDsa65('invariant', keyPair.mlDsa65.secretKey);
+      expect(CryptoUtils.verifyMlDsa65('invariant', pqSig, keyPair.mlDsa65.publicKey)).toBe(true);
     });
   });
 });

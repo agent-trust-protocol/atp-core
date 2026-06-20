@@ -8,17 +8,18 @@
  *   2. ANY tamper — mutating an entry's content, reordering entries, or
  *      breaking the `previousHash` linkage — is detected (verification FALSE).
  *
- * The production `AuditStorageService.verifyChain` (Postgres / SQLite) only
- * checks `previousHash` linkage. The `AuditService` itself owns the canonical
- * hashing rule (SHA-256 over the sorted event fields) but only exposes it via
- * the private periodic `verifyChainIntegrity`. To give the tamper tests TEETH
- * for content mutation as well as linkage, this suite uses an in-memory
- * conformance storage whose `verifyChain` replicates BOTH checks using the
- * exact same hashing primitive the service uses (Node `crypto` SHA-256 over the
- * canonical sorted-key JSON). No bespoke crypto is introduced.
+ * The public `AuditService.verifyIntegrity()` performs full content + linkage
+ * verification: it recomputes each event's SHA-256 hash over the canonical
+ * field set (see `AuditService.integrityFields`) and checks `previousHash`
+ * continuity. It does NOT delegate to `storage.verifyChain()`, whose backend
+ * implementations only check linkage and would miss content tampering. These
+ * tests recompute hashes with the exact same primitive the service uses (Node
+ * `crypto` SHA-256 over the canonical sorted-key JSON); no bespoke crypto is
+ * introduced. A `LyingVerifyChainStorage` further proves verifyIntegrity() does
+ * its own content verification rather than trusting a storage-supplied verdict.
  */
 
-import { createHash } from 'crypto';
+import { createHash, createHmac } from 'crypto';
 import { AuditService } from '../audit.js';
 import { AuditEvent, AuditEventRequest, AuditQuery } from '../../models/audit.js';
 import { IAuditStorageService } from '../../interfaces/storage.js';
@@ -40,7 +41,11 @@ function canonicalize(data: any): string {
   });
 }
 
-/** The exact field set the service hashes over (mirrors AuditService). */
+/**
+ * The exact field set the service hashes over (mirrors AuditService.integrityFields).
+ * Deliberately excludes `nonce`/`blockNumber` — they are storage-managed metadata
+ * that some backends do not round-trip, so they are not part of the integrity hash.
+ */
 function canonicalEventHash(event: AuditEvent): string {
   const data = {
     id: event.id,
@@ -51,8 +56,6 @@ function canonicalEventHash(event: AuditEvent): string {
     actor: event.actor,
     details: event.details,
     previousHash: event.previousHash,
-    nonce: event.nonce,
-    blockNumber: event.blockNumber,
   };
   return createHash('sha256').update(canonicalize(data)).digest('hex');
 }
@@ -119,6 +122,18 @@ class InMemoryConformanceStorage implements IAuditStorageService {
     const tmp = this.events[a];
     this.events[a] = this.events[b];
     this.events[b] = tmp;
+  }
+}
+
+/**
+ * Storage whose `verifyChain` always claims the chain is intact. Used to prove
+ * that `AuditService.verifyIntegrity()` performs its OWN content verification
+ * and does not trust a verdict supplied by the storage layer — a regression
+ * guard against re-introducing `verifyIntegrity = () => storage.verifyChain()`.
+ */
+class LyingVerifyChainStorage extends InMemoryConformanceStorage {
+  async verifyChain(): Promise<{ valid: boolean; brokenAt?: string }> {
+    return { valid: true };
   }
 }
 
@@ -280,10 +295,19 @@ describe('Audit store conformance — hash-chain integrity', () => {
         expectBrokenIndex: 2,
       },
       {
-        name: 'reorder two adjacent entries',
-        mutate: (s) => s._swap(1, 2),
-        // After swap, the new index-1 entry's previousHash no longer matches.
-        expectBrokenIndex: 1,
+        name: 'reorder two adjacent entries (swap their block numbers)',
+        // The canonical chain order is by blockNumber (robust to storage backends
+        // that do not guarantee row order), so a meaningful reorder swaps the
+        // entries' blockNumbers. After the swap the sorted order flips and the
+        // now-second entry's previousHash no longer matches its predecessor.
+        mutate: (s) => {
+          const a = s._raw()[1];
+          const b = s._raw()[2];
+          const tmp = a.blockNumber;
+          a.blockNumber = b.blockNumber;
+          b.blockNumber = tmp;
+        },
+        expectBrokenIndex: 2,
       },
       {
         name: 'delete (drop) a middle entry, breaking continuity',
@@ -337,6 +361,38 @@ describe('Audit store conformance — hash-chain integrity', () => {
     });
   });
 
+  describe('verifyIntegrity owns content verification (does not trust storage.verifyChain)', () => {
+    it('catches a content tamper even when storage.verifyChain lies "valid"', async () => {
+      const lyingStorage = new LyingVerifyChainStorage();
+      const lyingService = new AuditService(lyingStorage, noopIpfs);
+      const chain = await buildChain(lyingService, 4);
+
+      // Storage's own verdict is a (lying) clean bill of health...
+      expect((await lyingStorage.verifyChain()).valid).toBe(true);
+      // ...and an untampered chain still verifies through the service.
+      expect((await lyingService.verifyIntegrity()).valid).toBe(true);
+
+      // Tamper an entry's content. storage.verifyChain would STILL say valid,
+      // so only the service's own content recomputation can catch this.
+      lyingStorage._mutate(2, (e) => { e.action = 'action:TAMPERED'; });
+      expect((await lyingStorage.verifyChain()).valid).toBe(true); // storage still lies
+      const result = await lyingService.verifyIntegrity();
+      expect(result.valid).toBe(false);
+      expect((result as any).brokenAt).toBe(chain[2].id);
+    });
+
+    it('integrity hash is independent of nonce / blockNumber (round-trips on any backend)', async () => {
+      const [event] = await buildChain(service, 1);
+      const stored = (await storage.getEvent(event.id))!;
+      // Recompute with nonce/blockNumber stripped (as a backend that drops them
+      // would return them) — the hash MUST still match, proving they are not
+      // part of the integrity hash.
+      const withoutMeta: AuditEvent = { ...stored, nonce: undefined, blockNumber: undefined };
+      expect(canonicalEventHash(withoutMeta)).toBe(stored.hash);
+      expect((await service.verifyIntegrity()).valid).toBe(true);
+    });
+  });
+
   describe('content-hash recomputation is independent of field key ordering', () => {
     it('hash is stable regardless of object key insertion order', async () => {
       const [event] = await buildChain(service, 1);
@@ -355,6 +411,168 @@ describe('Audit store conformance — hash-chain integrity', () => {
         hash: event.hash,
       } as AuditEvent;
       expect(canonicalEventHash(reordered)).toBe(event.hash);
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────────
+  // HMAC-SHA256 non-repudiation signature.
+  //
+  // TEETH for `signEvent`: with no signing key configured the service falls back
+  // to a plain SHA-256 of the canonical event, so a "downgrade HMAC → sha256"
+  // mutation is invisible. These tests configure AUDIT_SIGNING_KEY so the real
+  // HMAC branch runs, then prove (a) the produced signature is exactly
+  // HMAC-SHA256(key, canonical-event) and NOT the keyless sha256, and (b) the
+  // signature binds the integrity-relevant fields (details + previousHash), so
+  // any content or linkage tamper invalidates it.
+  // ──────────────────────────────────────────────────────────────────────────────
+  describe('HMAC-SHA256 event signature (non-repudiation)', () => {
+    const SIGNING_KEY = 'conformance-signing-key-7f3a';
+    let signedStorage: InMemoryConformanceStorage;
+    let signedService: AuditService;
+    const prevSigningKey = process.env.AUDIT_SIGNING_KEY;
+
+    /** Canonical field set the service signs over (mirrors AuditService.integrityFields). */
+    const signedPayload = (e: AuditEvent) => ({
+      id: e.id,
+      timestamp: e.timestamp,
+      source: e.source,
+      action: e.action,
+      resource: e.resource,
+      actor: e.actor,
+      details: e.details,
+      previousHash: e.previousHash,
+    });
+    const hmacSig = (e: AuditEvent, key: string) =>
+      createHmac('sha256', key).update(canonicalize(signedPayload(e))).digest('hex');
+    const plainSig = (e: AuditEvent) =>
+      createHash('sha256').update(canonicalize(signedPayload(e))).digest('hex');
+
+    beforeEach(() => {
+      process.env.AUDIT_SIGNING_KEY = SIGNING_KEY;
+      signedStorage = new InMemoryConformanceStorage();
+      signedService = new AuditService(signedStorage, noopIpfs);
+    });
+    afterEach(() => {
+      if (prevSigningKey === undefined) delete process.env.AUDIT_SIGNING_KEY;
+      else process.env.AUDIT_SIGNING_KEY = prevSigningKey;
+    });
+
+    it('signature is a true HMAC-SHA256 over the canonical event, not a keyless sha256', async () => {
+      const event = await signedService.logEvent({
+        source: 'svc',
+        action: 'transfer',
+        resource: 'ledger',
+        actor: 'did:atp:actor-x',
+        details: { amount: 100 },
+      });
+      expect(event.signature).toBe(hmacSig(event, SIGNING_KEY));
+      // A plain (keyless) sha256 downgrade MUST NOT match — proves the HMAC has teeth.
+      expect(event.signature).not.toBe(plainSig(event));
+    });
+
+    it('a wrong signing key yields a different signature (key actually authenticates)', async () => {
+      const event = await signedService.logEvent({
+        source: 'svc',
+        action: 'transfer',
+        resource: 'ledger',
+        actor: 'did:atp:actor-x',
+        details: { amount: 100 },
+      });
+      expect(event.signature).not.toBe(hmacSig(event, 'attacker-key'));
+    });
+
+    type SigTamper = { name: string; mutate: (e: AuditEvent) => AuditEvent };
+    const sigTampers: SigTamper[] = [
+      { name: 'details payload', mutate: (e) => ({ ...e, details: { amount: 999_999 } }) },
+      { name: 'actor', mutate: (e) => ({ ...e, actor: 'did:atp:attacker' }) },
+      { name: 'action', mutate: (e) => ({ ...e, action: 'action:TAMPERED' }) },
+      { name: 'previousHash linkage', mutate: (e) => ({ ...e, previousHash: 'f'.repeat(64) }) },
+      { name: 'timestamp', mutate: (e) => ({ ...e, timestamp: '1999-01-01T00:00:00.000Z' }) },
+    ];
+
+    it.each(sigTampers)('tampering with $name invalidates the HMAC signature', async ({ mutate }) => {
+      const event = await signedService.logEvent({
+        source: 'svc',
+        action: 'transfer',
+        resource: 'ledger',
+        actor: 'did:atp:actor-x',
+        details: { amount: 100 },
+      });
+      // The stored signature still authenticates the original event...
+      expect(event.signature).toBe(hmacSig(event, SIGNING_KEY));
+      // ...but recomputing the HMAC over the tampered event no longer matches.
+      const tampered = mutate(JSON.parse(JSON.stringify(event)));
+      expect(event.signature).not.toBe(hmacSig(tampered, SIGNING_KEY));
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────────
+  // Service-owned periodic self-verification (`verifyChainIntegrity`).
+  //
+  // The public verifyIntegrity() now routes through this same checker, but the
+  // every-100-blocks self-audit is an independent trigger worth its own teeth.
+  // These tests drive the chain to block 100 with a tamper already in place and
+  // assert the self-audit logs an INTEGRITY VIOLATION — isolating BOTH the
+  // content-hash check and the linkage check so disabling either is caught.
+  // ──────────────────────────────────────────────────────────────────────────────
+  describe('periodic self-verification detects tamper at the 100-block checkpoint', () => {
+    /** Build n events directly into `storage`, returning the service used. */
+    async function logN(n: number): Promise<void> {
+      for (let i = 0; i < n; i++) {
+        await service.logEvent({
+          source: 'svc',
+          action: `action:${i}`,
+          resource: `res-${i}`,
+          actor: `did:atp:actor-${i}`,
+          details: { step: i },
+        });
+      }
+    }
+
+    it('CONTENT tamper: mutating a stored event before block 100 triggers a violation', async () => {
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      try {
+        await logN(99); // blocks 1..99
+        // Tamper an earlier event's content; its recorded hash no longer matches.
+        storage._mutate(5, (e) => { e.action = 'action:TAMPERED'; });
+        await logN(1); // block 100 → fires verifyChainIntegrity over the whole chain
+        const flagged = spy.mock.calls.some((c) =>
+          String(c[0]).includes('AUDIT CHAIN INTEGRITY VIOLATION'),
+        );
+        expect(flagged).toBe(true);
+      } finally {
+        spy.mockRestore();
+      }
+    });
+
+    it('PURE LINKAGE break: dropping a middle event before block 100 triggers a violation', async () => {
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      try {
+        await logN(99); // blocks 1..99
+        // Drop a middle event: every surviving event's OWN content hash is still
+        // valid, so only the previousHash-linkage check can catch this.
+        storage._raw().splice(40, 1);
+        await logN(1); // block 100 → fires verifyChainIntegrity
+        const flagged = spy.mock.calls.some((c) =>
+          String(c[0]).includes('AUDIT CHAIN INTEGRITY VIOLATION'),
+        );
+        expect(flagged).toBe(true);
+      } finally {
+        spy.mockRestore();
+      }
+    });
+
+    it('TEETH: an intact 100-block chain raises NO violation (no false positives)', async () => {
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      try {
+        await logN(100); // reaches block 100 with no tamper
+        const flagged = spy.mock.calls.some((c) =>
+          String(c[0]).includes('AUDIT CHAIN INTEGRITY VIOLATION'),
+        );
+        expect(flagged).toBe(false);
+      } finally {
+        spy.mockRestore();
+      }
     });
   });
 });

@@ -60,11 +60,13 @@ export class AuditService {
       blockNumber: (lastEvent?.blockNumber || 0) + 1,
     };
 
-    // Generate cryptographic hash for integrity (SHA-256)
-    const hash = this.generateSecureHash(eventData);
+    // Generate cryptographic hash for integrity (SHA-256). Both the hash and the
+    // signature cover only the stable, storage-independent fields (see
+    // integrityFields) so they can be recomputed from any backend on read-back.
+    const hash = this.generateSecureHash(this.integrityFields(eventData));
 
     // Create HMAC-SHA256 signature for non-repudiation
-    const signature = await this.signEvent(eventData);
+    const signature = await this.signEvent(this.integrityFields(eventData));
 
     const event: AuditEvent = {
       id,
@@ -112,7 +114,13 @@ export class AuditService {
   }
 
   async verifyIntegrity(): Promise<{ valid: boolean; brokenAt?: string }> {
-    return await this.storage.verifyChain();
+    // Perform full content + linkage verification at the service level rather
+    // than delegating to storage.verifyChain(), whose backend implementations
+    // only check previousHash linkage and would silently miss content tampering
+    // of an entry that still links correctly. verifyChainIntegrity recomputes
+    // each event's hash from the stored fields (see integrityFields).
+    const { valid, brokenAt } = await this.verifyChainIntegrity();
+    return { valid, brokenAt };
   }
 
   async getEventFromIPFS(hash: string): Promise<AuditEvent | null> {
@@ -145,6 +153,41 @@ export class AuditService {
       }
       return value;
     });
+  }
+
+  /**
+   * The stable, storage-independent field set that the integrity hash and the
+   * HMAC signature are computed over.
+   *
+   * Deliberately EXCLUDES `nonce` and `blockNumber`. Those are storage-managed
+   * metadata that some backends do not faithfully round-trip — Postgres assigns
+   * `block_number` via a stored procedure and persists `nonce` as NULL (see
+   * postgres-storage.ts) — so hashing them made the hash recomputed on
+   * read-back diverge from the stored hash, which would make verifyIntegrity()
+   * report tampering for every event on those backends. Event ordering remains
+   * bound cryptographically by `previousHash`, so dropping the positional
+   * fields does not weaken content-tamper or reordering detection.
+   */
+  private integrityFields(e: {
+    id: string;
+    timestamp: string;
+    source: string;
+    action: string;
+    resource: string;
+    actor: string;
+    details: any;
+    previousHash: string;
+  }): Record<string, any> {
+    return {
+      id: e.id,
+      timestamp: e.timestamp,
+      source: e.source,
+      action: e.action,
+      resource: e.resource,
+      actor: e.actor,
+      details: e.details,
+      previousHash: e.previousHash,
+    };
   }
 
   private generateSecureHash(data: any): string {
@@ -218,19 +261,9 @@ export class AuditService {
           };
         }
 
-        // Verify event hash
-        const expectedHash = this.generateSecureHash({
-          id: event.id,
-          timestamp: event.timestamp,
-          source: event.source,
-          action: event.action,
-          resource: event.resource,
-          actor: event.actor,
-          details: event.details,
-          previousHash: event.previousHash,
-          nonce: event.nonce,
-          blockNumber: event.blockNumber,
-        });
+        // Verify event hash — recompute over the same stable field set used at
+        // store time so it matches regardless of storage backend.
+        const expectedHash = this.generateSecureHash(this.integrityFields(event));
 
         if (event.hash !== expectedHash) {
           return {

@@ -25,6 +25,25 @@ describe('jcsCanonicalize (RFC 8785)', () => {
   it('drops undefined members and escapes strings via JSON.stringify', () => {
     expect(jcsCanonicalize({ a: undefined, b: 'a"b' })).toBe('{"b":"a\\"b"}');
   });
+
+  it('serializes undefined array elements as null (RFC 8785 array holes)', () => {
+    // Unlike object members (which are dropped), an undefined element of an
+    // array MUST be emitted as `null` — dropping it would shift indices and
+    // change the canonical form, breaking signatures over array-valued fields.
+    expect(jcsCanonicalize([1, undefined, 3])).toBe('[1,null,3]');
+    expect(jcsCanonicalize([undefined])).toBe('[null]');
+    expect(jcsCanonicalize({ k: [true, undefined] })).toBe('{"k":[true,null]}');
+  });
+
+  it('orders keys deterministically regardless of insertion order', () => {
+    // Two objects with identical entries inserted in different orders MUST
+    // canonicalize to the same byte string — this is what makes the proof
+    // hash reproducible across serializers.
+    const a = jcsCanonicalize({ b: 1, a: 2, '@context': ['x'], id: 'z' });
+    const b = jcsCanonicalize({ id: 'z', '@context': ['x'], a: 2, b: 1 });
+    expect(a).toBe(b);
+    expect(a).toBe('{"@context":["x"],"a":2,"b":1,"id":"z"}');
+  });
 });
 
 describe('Multikey encoding', () => {

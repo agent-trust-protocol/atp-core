@@ -99,6 +99,57 @@ describe('DidAtpResolver.fetchDidJson', () => {
       })
     ).rejects.toMatchObject({ code: 'invalidDidDocument' });
   });
+
+  it('rejects a body whose id is present but not a string', async () => {
+    await expect(
+      DidAtpResolver.fetchDidJson('https://example.com/did.json', {
+        fetch: mockFetch({ id: 12345 })
+      })
+    ).rejects.toMatchObject({ code: 'invalidDidDocument' });
+  });
+
+  it('rejects an oversized payload advertised via Content-Length (before buffering)', async () => {
+    // Server honestly advertises a body far larger than the 256 KiB cap. The
+    // resolver MUST reject on the cheap header check, never reading the body.
+    const textSpy = jest.fn(async () => '{}');
+    const fetchSpy = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      url: 'https://example.com/did.json',
+      headers: new Headers({ 'content-length': String(256 * 1024 + 1) }),
+      text: textSpy,
+      json: async () => ({})
+    })) as unknown as typeof fetch;
+    await expect(
+      DidAtpResolver.fetchDidJson('https://example.com/did.json', { fetch: fetchSpy })
+    ).rejects.toMatchObject({ code: 'invalidDidDocument' });
+    expect(textSpy).not.toHaveBeenCalled();
+  });
+
+  it('rejects an oversized body even when Content-Length lies (small or absent)', async () => {
+    // A hostile server understates Content-Length to slip past the header
+    // check; the resolver MUST re-enforce the cap on the bytes actually read.
+    // The body is *valid JSON* and a structurally-valid DID Document, so the
+    // only thing that can reject it is the body-size cap — if that guard were
+    // removed this would resolve far enough to expose the DoS.
+    const huge = JSON.stringify({ id: 'did:atp:example.com', pad: 'a'.repeat(256 * 1024 + 1) });
+    const fetchSpy = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      url: 'https://example.com/did.json',
+      // Lie: claim the body is tiny.
+      headers: new Headers({ 'content-length': '10' }),
+      text: async () => huge,
+      json: async () => JSON.parse(huge)
+    })) as unknown as typeof fetch;
+    await expect(
+      DidAtpResolver.fetchDidJson('https://example.com/did.json', { fetch: fetchSpy })
+    ).rejects.toMatchObject({ code: 'invalidDidDocument' });
+    // And the rejection message must be the size-limit one, not a parse error.
+    await expect(
+      DidAtpResolver.fetchDidJson('https://example.com/did.json', { fetch: fetchSpy })
+    ).rejects.toThrow(/exceeds the .* limit/);
+  });
 });
 
 describe('DidAtpResolver.resolve (end-to-end with Phase 3 documents)', () => {
