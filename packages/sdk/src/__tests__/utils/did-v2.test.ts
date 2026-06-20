@@ -152,6 +152,28 @@ describe('did:atp v2 identifier core', () => {
       expect(DidAtp.parse(`did:atp:example.com:billing:${E1}:${PQ1}#`)).toBeNull();
     });
 
+    it('rejects path DIDs whose path segment contains illegal characters', () => {
+      // Exercises parse()'s own per-segment PATH_SEGMENT_RE guard, not just
+      // the create-time assertPath() — a hand-built DID string must still be
+      // rejected when a middle segment uses chars outside [A-Za-z0-9._-].
+      for (const bad of ['ba~d', 'b!ad', 'b@d', 'b+d', 'b d', 'b%3Ad']) {
+        expect(DidAtp.parse(`did:atp:example.com:${bad}:${E1}:${PQ1}`)).toBeNull();
+      }
+    });
+
+    it('rejects a fingerprint-shaped middle path segment (ambiguous) on parse', () => {
+      // A path segment that itself looks like e1_/pq1_ would make the trailing
+      // binding fingerprints ambiguous; parse() must reject it directly.
+      expect(DidAtp.parse(`did:atp:example.com:${E1}:billing:${E1}:${PQ1}`)).toBeNull();
+      expect(DidAtp.parse(`did:atp:example.com:${PQ1}:billing:${E1}:${PQ1}`)).toBeNull();
+    });
+
+    it('accepts a valid multi-segment path on parse and preserves order', () => {
+      const parsed = DidAtp.parse(`did:atp:example.com:user:alice:agent-7:${E1}:${PQ1}`);
+      expect(parsed).not.toBeNull();
+      expect(parsed!.path).toEqual(['user', 'alice', 'agent-7']);
+    });
+
     it('round-trips a generated DID', () => {
       const parsed = DidAtp.parse(did)!;
       expect(parsed.did).toBe(did);
