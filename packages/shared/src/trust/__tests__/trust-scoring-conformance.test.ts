@@ -78,13 +78,21 @@ const makeMockDb = (fx: AgentFixture) => {
   return { query } as any;
 };
 
-// `null` is the explicit "no verifier" sentinel (passing `undefined` would
-// trigger the default param and inject verifyAll, masking fail-closed behaviour).
 const scoreFor = async (
   fx: AgentFixture,
-  verifier: CredentialVerifier | null = verifyAll
+  verifier: CredentialVerifier = verifyAll
 ): Promise<{ score: number; level: AgentTrustLevel }> => {
-  const engine = new TrustScoringEngine(makeMockDb(fx), verifier ?? undefined);
+  const engine = new TrustScoringEngine(makeMockDb(fx), verifier);
+  const result = await engine.calculateTrustScore('did:atp:subject');
+  return { score: result.score, level: result.level };
+};
+
+/** Score with NO verifier injected — exercises the fail-closed path explicitly.
+ *  A named helper avoids the undefined-vs-null default-param footgun. */
+const scoreForNoVerifier = async (
+  fx: AgentFixture
+): Promise<{ score: number; level: AgentTrustLevel }> => {
+  const engine = new TrustScoringEngine(makeMockDb(fx));
   const result = await engine.calculateTrustScore('did:atp:subject');
   return { score: result.score, level: result.level };
 };
@@ -210,8 +218,8 @@ describe('Shared TrustScoringEngine — W3C conformance', () => {
     const onlyGood: CredentialVerifier = { isVerified: async (row: any) => row.type === 'good' };
 
     it('fail-closed: with NO verifier, candidate credentials do not raise the score', async () => {
-      const withCreds = (await scoreFor({ credentials: ['a', 'b', 'c'] }, null)).score;
-      const noCreds = (await scoreFor({}, null)).score;
+      const withCreds = (await scoreForNoVerifier({ credentials: ['a', 'b', 'c'] })).score;
+      const noCreds = (await scoreForNoVerifier({})).score;
       expect(withCreds).toBe(noCreds);
     });
 
@@ -231,7 +239,7 @@ describe('Shared TrustScoringEngine — W3C conformance', () => {
 
     it('TEETH: verified credentials credit more than the same unverified candidates', async () => {
       const verified = (await scoreFor({ credentials: ['a', 'b'] }, verifyAll)).score;
-      const unverified = (await scoreFor({ credentials: ['a', 'b'] }, null)).score;
+      const unverified = (await scoreForNoVerifier({ credentials: ['a', 'b'] })).score;
       expect(verified).toBeGreaterThan(unverified);
     });
   });

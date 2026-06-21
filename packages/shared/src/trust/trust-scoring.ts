@@ -43,6 +43,20 @@ export interface TrustScore {
 }
 
 /**
+ * The credential row the engine currently selects — only `type` + `issuer`.
+ * A real verifier that performs signature/expiry/revocation checks will need the
+ * full VC payload, which requires extending the `credentials` SELECT (and the
+ * trust tables) — tracked as follow-up work. The index signature documents that
+ * those extra columns are expected to arrive here later, so an implementer sees
+ * the data gap at the type level rather than discovering it at runtime.
+ */
+export interface CredentialRow {
+  type: string;
+  issuer: string;
+  [key: string]: unknown;
+}
+
+/**
  * Gate for crediting a credential toward trust. An implementation must return
  * true ONLY for a genuinely verified credential — valid issuer signature, not
  * expired, not revoked (e.g. by delegating to vc-service `verifyCredential`).
@@ -53,7 +67,7 @@ export interface TrustScore {
  * forged/expired/revoked credential can never inflate a trust score.
  */
 export interface CredentialVerifier {
-  isVerified(credentialRow: any): Promise<boolean>;
+  isVerified(credentialRow: CredentialRow): Promise<boolean>;
 }
 
 export class TrustScoringEngine {
