@@ -4,9 +4,19 @@ import { IAuditStorageService } from '../interfaces/storage.js';
 import { IPFSService } from './ipfs.js';
 import { ATPEncryptionService } from '@atp/shared';
 
+/**
+ * Prefix marking an audit event signature as UNSIGNED — produced only when no
+ * signing key is configured (non-production). It makes the value impossible to
+ * mistake for an authenticated HMAC: a bare SHA-256 would be indistinguishable
+ * from a real signature yet provides no non-repudiation (anyone can recompute
+ * it). Consumers can detect an unsigned event via `AuditService.isSigned()`.
+ */
+export const UNSIGNED_SIGNATURE_PREFIX = 'unsigned-sha256:';
+
 export class AuditService {
   private encryptionKey: Buffer;
   private signingKey: string;
+  private static unsignedWarningEmitted = false;
 
   constructor(
     private storage: IAuditStorageService,
@@ -21,9 +31,36 @@ export class AuditService {
 
     // Signing key for HMAC-SHA256 audit event signatures
     this.signingKey = process.env.AUDIT_SIGNING_KEY || process.env.AUDIT_ENCRYPTION_KEY || '';
-    if (!this.signingKey && process.env.NODE_ENV === 'production') {
-      throw new Error('AUDIT_SIGNING_KEY (or AUDIT_ENCRYPTION_KEY) must be set in production');
+    if (!this.signingKey) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('AUDIT_SIGNING_KEY (or AUDIT_ENCRYPTION_KEY) must be set in production');
+      }
+      // Non-production with no key: events are UNSIGNED (integrity only, no
+      // non-repudiation). Warn once so the misconfiguration is never silent.
+      if (!AuditService.unsignedWarningEmitted) {
+        AuditService.unsignedWarningEmitted = true;
+        console.warn(
+          '[audit] No AUDIT_SIGNING_KEY/AUDIT_ENCRYPTION_KEY configured — audit ' +
+          `events will be UNSIGNED (signature marked "${UNSIGNED_SIGNATURE_PREFIX}"). ` +
+          'They retain integrity but NOT non-repudiation. Set a signing key outside local development.'
+        );
+      }
     }
+  }
+
+  /**
+   * Whether an audit event signature is an authenticated HMAC (true) rather than
+   * the keyless UNSIGNED fallback (false). Use to reject unsigned events where
+   * non-repudiation is required.
+   *
+   * CAVEAT — legacy data: events written before this change stored a bare
+   * SHA-256 with no prefix when no signing key was configured. Those legacy
+   * unsigned events lack the marker and will be reported as signed (true). For
+   * pre-migration events, rely on your migration/seal policy rather than this
+   * check.
+   */
+  static isSigned(signature: string | undefined | null): boolean {
+    return !!signature && !signature.startsWith(UNSIGNED_SIGNATURE_PREFIX);
   }
 
   async logEvent(request: AuditEventRequest): Promise<AuditEvent> {
@@ -199,8 +236,10 @@ export class AuditService {
   private async signEvent(eventData: any): Promise<string> {
     const dataString = this.canonicalize(eventData);
     if (!this.signingKey) {
-      // No key configured — fall back to a hash-only signature in non-production
-      return createHash('sha256').update(dataString).digest('hex');
+      // No key configured (non-production only — the constructor throws in
+      // production). Return an explicitly UNSIGNED, self-identifying marker so
+      // this can never be mistaken for an authenticated HMAC signature.
+      return `${UNSIGNED_SIGNATURE_PREFIX}${createHash('sha256').update(dataString).digest('hex')}`;
     }
     return createHmac('sha256', this.signingKey).update(dataString).digest('hex');
   }
