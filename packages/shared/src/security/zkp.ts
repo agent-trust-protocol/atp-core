@@ -219,7 +219,17 @@ export class ATPZKProofService {
   }
 
   /**
-   * Create range proof (prove a value is within a range without revealing the value)
+   * Create a range proof (intended: prove a value is within [min,max] without
+   * revealing it).
+   *
+   * ⚠️ EXPERIMENTAL — NOT a sound zero-knowledge range proof. It uses a
+   * hash-based, non-homomorphic commitment and a structural "boundary proof"
+   * (see createBoundaryProof: "In practice, this would use proper range proof
+   * techniques"). It does NOT cryptographically guarantee the committed value
+   * lies in range. Replace with bulletproofs / a Ristretto-based scheme via a
+   * vetted library before relying on it — do NOT roll your own (see CLAUDE.md).
+   * Excluded from the privacy conformance suite, which scopes to the
+   * cryptographically-real mechanisms (Merkle membership, challenge-response).
    */
   createRangeProof(value: number, min: number, max: number): RangeProof {
     if (value < min || value > max) {
