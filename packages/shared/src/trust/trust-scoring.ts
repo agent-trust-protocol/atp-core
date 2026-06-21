@@ -42,11 +42,27 @@ export interface TrustScore {
   recommendations: string[];
 }
 
+/**
+ * Gate for crediting a credential toward trust. An implementation must return
+ * true ONLY for a genuinely verified credential — valid issuer signature, not
+ * expired, not revoked (e.g. by delegating to vc-service `verifyCredential`).
+ *
+ * The engine takes this by dependency injection so `@atp/shared` does not depend
+ * on vc-service. When no verifier is supplied the engine FAILS CLOSED: it counts
+ * zero credentials rather than trusting an unverifiable `status` column, so a
+ * forged/expired/revoked credential can never inflate a trust score.
+ */
+export interface CredentialVerifier {
+  isVerified(credentialRow: any): Promise<boolean>;
+}
+
 export class TrustScoringEngine {
   private db: DatabaseManager;
+  private verifier?: CredentialVerifier;
 
-  constructor(db: DatabaseManager) {
+  constructor(db: DatabaseManager, verifier?: CredentialVerifier) {
     this.db = db;
+    this.verifier = verifier;
   }
 
   /**
@@ -118,13 +134,37 @@ export class TrustScoringEngine {
       ? Math.floor((Date.now() - accountCreatedMs) / (1000 * 60 * 60 * 24))
       : 0;
 
-    // Get validated credentials
+    // Get candidate credentials. A `status = 'valid'` column is necessary but
+    // NOT sufficient — each candidate must pass real verification (signature,
+    // expiration, revocation) before it can count toward trust.
     const credentialsResult = await this.db.query(
       'SELECT type, issuer FROM credentials WHERE subject_did = $1 AND status = $2',
       [agentDid, 'valid']
     );
 
-    const credentialsValidated = credentialsResult.rows.map((row: any) => row.type);
+    let credentialsValidated: string[];
+    if (this.verifier) {
+      const verifier = this.verifier;
+      const checks = await Promise.all(
+        credentialsResult.rows.map((row: any) =>
+          verifier.isVerified(row).catch(() => false)
+        )
+      );
+      credentialsValidated = credentialsResult.rows
+        .filter((_: any, i: number) => checks[i])
+        .map((row: any) => row.type);
+    } else {
+      // Fail closed: without a verifier we cannot confirm a credential is
+      // genuine, so none may inflate trust. Callers that want credentials to
+      // count must inject a CredentialVerifier.
+      credentialsValidated = [];
+      if (credentialsResult.rows.length > 0) {
+        logger.warn(
+          'No CredentialVerifier injected — credentials not counted toward trust score',
+          { agentDid, candidates: credentialsResult.rows.length }
+        );
+      }
+    }
 
     // Get interaction history
     const interactionResult = await this.db.query(`
@@ -317,18 +357,20 @@ export class TrustScoringEngine {
 // Export convenience functions
 export async function calculateTrustScore(
   agentDid: string,
-  db: DatabaseManager
+  db: DatabaseManager,
+  verifier?: CredentialVerifier
 ): Promise<TrustScore> {
-  const engine = new TrustScoringEngine(db);
+  const engine = new TrustScoringEngine(db, verifier);
   return engine.calculateTrustScore(agentDid);
 }
 
 export async function checkTrustLevel(
   agentDid: string,
   requiredLevel: AgentTrustLevel,
-  db: DatabaseManager
+  db: DatabaseManager,
+  verifier?: CredentialVerifier
 ): Promise<boolean> {
-  const engine = new TrustScoringEngine(db);
+  const engine = new TrustScoringEngine(db, verifier);
   const score = await engine.calculateTrustScore(agentDid);
   return score.score >= requiredLevel;
 }

@@ -17,7 +17,12 @@
  *       >=0.9 PRIVILEGED | >=0.7 TRUSTED | >=0.4 VERIFIED | >=0.2 BASIC | else UNKNOWN.
  */
 
-import { TrustScoringEngine, AgentTrustLevel } from '../trust-scoring';
+import { TrustScoringEngine, AgentTrustLevel, CredentialVerifier } from '../trust-scoring';
+
+/** Default test verifier: treats every candidate credential as verified, so the
+ *  credential fixtures below exercise the credential-scoring path. The
+ *  fail-closed / gating behaviour is covered explicitly in its own block. */
+const verifyAll: CredentialVerifier = { isVerified: async () => true };
 
 // ─── fixture + SQL-aware mock DB ────────────────────────────────────────────────
 
@@ -73,8 +78,13 @@ const makeMockDb = (fx: AgentFixture) => {
   return { query } as any;
 };
 
-const scoreFor = async (fx: AgentFixture): Promise<{ score: number; level: AgentTrustLevel }> => {
-  const engine = new TrustScoringEngine(makeMockDb(fx));
+// `null` is the explicit "no verifier" sentinel (passing `undefined` would
+// trigger the default param and inject verifyAll, masking fail-closed behaviour).
+const scoreFor = async (
+  fx: AgentFixture,
+  verifier: CredentialVerifier | null = verifyAll
+): Promise<{ score: number; level: AgentTrustLevel }> => {
+  const engine = new TrustScoringEngine(makeMockDb(fx), verifier ?? undefined);
   const result = await engine.calculateTrustScore('did:atp:subject');
   return { score: result.score, level: result.level };
 };
@@ -188,6 +198,41 @@ describe('Shared TrustScoringEngine — W3C conformance', () => {
     it.each(vectors)('level matches score band: $name', async ({ fx }) => {
       const { score, level } = await scoreFor(fx);
       expect(level).toBe(levelOf(score));
+    });
+  });
+
+  // ── credential verification gating (VC-backed trust is real, fail-closed) ───────
+  // A credential may only raise trust if it passes verification. Without a
+  // verifier the engine must FAIL CLOSED (credit zero), so an unverifiable
+  // `status='valid'` row can never inflate a score.
+  describe('credential verification gating', () => {
+    const rejectAll: CredentialVerifier = { isVerified: async () => false };
+    const onlyGood: CredentialVerifier = { isVerified: async (row: any) => row.type === 'good' };
+
+    it('fail-closed: with NO verifier, candidate credentials do not raise the score', async () => {
+      const withCreds = (await scoreFor({ credentials: ['a', 'b', 'c'] }, null)).score;
+      const noCreds = (await scoreFor({}, null)).score;
+      expect(withCreds).toBe(noCreds);
+    });
+
+    it('a verifier that rejects everything credits zero (forged/unverified creds never inflate)', async () => {
+      const rejected = (await scoreFor({ credentials: ['a', 'b', 'c'] }, rejectAll)).score;
+      const baseline = (await scoreFor({}, rejectAll)).score;
+      expect(rejected).toBe(baseline);
+    });
+
+    it('only verified credentials count (subset gating)', async () => {
+      const none = (await scoreFor({ credentials: ['bad', 'bad'] }, onlyGood)).score;
+      const some = (await scoreFor({ credentials: ['good', 'bad'] }, onlyGood)).score;
+      const all = (await scoreFor({ credentials: ['good', 'good'] }, onlyGood)).score;
+      expect(none).toBeLessThan(some);
+      expect(some).toBeLessThan(all);
+    });
+
+    it('TEETH: verified credentials credit more than the same unverified candidates', async () => {
+      const verified = (await scoreFor({ credentials: ['a', 'b'] }, verifyAll)).score;
+      const unverified = (await scoreFor({ credentials: ['a', 'b'] }, null)).score;
+      expect(verified).toBeGreaterThan(unverified);
     });
   });
 });
