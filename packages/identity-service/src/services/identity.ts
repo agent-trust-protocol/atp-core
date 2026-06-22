@@ -31,7 +31,7 @@ export class IdentityService {
     // and post-quantum pq1_ binding fingerprints; classical-only keys fall back
     // to the legacy v1 form.
     const binding = CryptoUtils.extractBindingPublicKeys(keyPair);
-    const did = CryptoUtils.generateQuantumSafeDID(keyPair);
+    const did = CryptoUtils.generateQuantumSafeDID(keyPair, { binding });
     const now = new Date().toISOString();
 
     const verificationMethodId = `${did}#key-ed25519`;

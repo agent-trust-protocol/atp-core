@@ -22,6 +22,10 @@ const ML_DSA_65_PUBLIC_KEY_BYTES = 1952;
  */
 const DEFAULT_ATP_DID_DOMAIN = 'agents.atp.local';
 
+// One-time guard so we warn (rather than spam) when DIDs are minted under the
+// non-resolvable default domain because ATP_DID_DOMAIN is unset.
+let warnedMissingDidDomain = false;
+
 const PATH_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
 const DOMAIN_RE = /^(?=.{1,253}(%3[aA]|$))[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*(%3[aA][0-9]{1,5})?$/;
 
@@ -334,14 +338,33 @@ export class CryptoUtils {
    */
   static generateQuantumSafeDID(
     keyPair: QuantumSafeKeyPair,
-    options: { domain?: string; path?: string[] } = {}
+    options: {
+      domain?: string;
+      path?: string[];
+      // Optional precomputed binding, so callers that already extracted it
+      // (e.g. registerDID, which needs it for the verification methods) don't
+      // pay for a second extraction.
+      binding?: {
+        ed25519PublicKey: Uint8Array;
+        mlDsa65PublicKey: Uint8Array;
+      } | null;
+    } = {}
   ): string {
-    const binding = this.extractBindingPublicKeys(keyPair);
+    const binding = options.binding ?? this.extractBindingPublicKeys(keyPair);
     if (!binding) {
       // Classical-only key material cannot satisfy the dual-binding v2 syntax.
       return this.generateDID(keyPair.publicKey);
     }
-    const domain = options.domain ?? process.env.ATP_DID_DOMAIN ?? DEFAULT_ATP_DID_DOMAIN;
+    const envDomain = options.domain ?? process.env.ATP_DID_DOMAIN;
+    const domain = envDomain ?? DEFAULT_ATP_DID_DOMAIN;
+    if (!envDomain && !warnedMissingDidDomain) {
+      warnedMissingDidDomain = true;
+      console.warn(
+        `[ATP][identity] ATP_DID_DOMAIN is not set; minting did:atp identifiers under ` +
+          `the non-resolvable default "${DEFAULT_ATP_DID_DOMAIN}". Set ATP_DID_DOMAIN to ` +
+          `your HTTPS resolution domain so agent DIDs resolve outside this host.`
+      );
+    }
     const path = options.path ?? [`agent-${this.randomLabel()}`];
     return this.buildAtpV2Did(domain, path, binding.ed25519PublicKey, binding.mlDsa65PublicKey);
   }
