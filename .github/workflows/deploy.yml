@@ -48,7 +48,12 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy ${{ matrix.service }}
+        # Run from the repo root so the full monorepo is the build context:
+        # the docker/<service>.Dockerfile files COPY the root package.json /
+        # package-lock.json / lerna.json and packages/shared, which do not
+        # exist when the context is a single packages/<service> folder. Each
+        # Railway service sets Builder = Dockerfile, Dockerfile Path =
+        # docker/<service>.Dockerfile, Root Directory = /.
         run: railway up --service ${{ matrix.service }} --detach
-        working-directory: packages/${{ matrix.service }}
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

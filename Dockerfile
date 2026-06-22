@@ -51,7 +51,7 @@ ENV ATP_LOG_LEVEL=info
 ENV ATP_QUANTUM_SAFE=true
 
 # Start the quantum-safe server
-CMD ["node", "quantum-safe-server-improved.js"]
+CMD ["node", "scripts/quantum/quantum-safe-server-improved.mjs"]
 
 # Metadata
 LABEL maintainer="Larry Lewis <llewis@agenttrustprotocol.com>"
