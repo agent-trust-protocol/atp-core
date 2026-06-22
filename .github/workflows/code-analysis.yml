@@ -33,9 +33,6 @@ jobs:
   semgrep:
     name: Semgrep (OSS)
     runs-on: ubuntu-latest
-    # SARIF upload needs security-events: write, which forked PRs don't get.
-    # Run on push + same-repo PRs; forks are analyzed once merged to main.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     container:
       image: semgrep/semgrep
     steps:
@@ -45,7 +42,8 @@ jobs:
       - name: Run Semgrep (advisory)
         # Free registry rulesets — no login / SEMGREP_APP_TOKEN required.
         # `|| true` keeps the scan advisory: findings are reported via SARIF,
-        # never by failing the job.
+        # never by failing the job. The scan itself runs on every PR, forks
+        # included (no write permission needed).
         run: |
           semgrep scan \
             --sarif --output=semgrep.sarif \
@@ -55,9 +53,16 @@ jobs:
             --config p/javascript || true
 
       - name: Upload Semgrep results
-        # Skip if the scan crashed before writing SARIF; keep upload failures
-        # non-blocking so the advisory job never goes red on a transient upload.
-        if: always() && hashFiles('semgrep.sarif') != ''
+        # Only the upload needs security-events: write, which forked PRs don't
+        # get — so gate just this step to push + same-repo PRs (forks still run
+        # the scan above; their findings show in the Actions log and get
+        # uploaded once merged to main). Also skip if the scan wrote no SARIF,
+        # and keep upload failures non-blocking (advisory).
+        if: >-
+          always()
+          && hashFiles('semgrep.sarif') != ''
+          && (github.event_name != 'pull_request'
+              || github.event.pull_request.head.repo.full_name == github.repository)
         continue-on-error: true
         uses: github/codeql-action/upload-sarif@v3
         with:

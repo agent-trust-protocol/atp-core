@@ -25,13 +25,32 @@ repository **Security → Code scanning** tab, but do **not** fail the PR. The
 merge gate remains the `Lint · Type-check · Test` job in
 [`ci.yml`](../../../.github/workflows/ci.yml).
 
-> CodeQL also runs (push-only) inside `production-deploy.yml`; that is separate
-> from default setup's PR scanning and unaffected by this workflow.
+> CodeQL is **only** run by default setup. The CodeQL steps that used to live in
+> `production-deploy.yml` were removed because they conflict with default setup
+> (same "advanced configurations cannot be processed" error). Default setup is
+> the single CodeQL path.
+
+### ⚙️ Operator prerequisite — keep CodeQL default setup enabled
+
+This PR does not (and cannot) commit the CodeQL configuration; it lives in repo
+**Settings → Code security → CodeQL analysis → Default**. Keep it **enabled** —
+that is what gives pull requests their CodeQL coverage. If it is ever turned off,
+PRs lose CodeQL entirely (the removed workflow no longer provides a fallback), so
+treat leaving it on as a required setting. Do **not** re-add a committed CodeQL
+workflow while default setup is enabled — the two cannot coexist.
+
+## Fork PRs
+
+For pull requests from **forks**, the Semgrep *scan* still runs (its findings
+appear in the job's Actions log), but the **SARIF upload is skipped** — forked
+PRs get a read-only `GITHUB_TOKEN` and cannot write code-scanning results. Such
+findings surface in the Security tab once the change lands on `main` (the push
+run uploads them). CodeQL default setup applies its own fork handling.
 
 ## How to read findings
 
 1. Open the PR → **Files changed**: Semgrep / CodeQL findings show as inline
-   annotations on the relevant lines.
+   annotations on the relevant lines (same-repo PRs).
 2. Repository → **Security → Code scanning**: the full list of open alerts,
    grouped by tool (`semgrep`, CodeQL), with severity and remediation guidance.
 3. The `Code Analysis / Semgrep (OSS)` check (and the CodeQL check from default
@@ -41,8 +60,9 @@ merge gate remains the `Lint · Type-check · Test` job in
 
 If you later want Semgrep to gate merges, add the `Code Analysis / Semgrep (OSS)`
 check as a **required status check** under **Settings → Branches → Branch
-protection** for `main`. (Left advisory by default so it never throws a surprise
-red ✗ on open PRs.)
+protection** for `main`. The Semgrep job runs on fork PRs too (only its upload is
+skipped), so the check is still produced and is safe to require. (Left advisory
+by default so it never throws a surprise red ✗ on open PRs.)
 
 ## Tuning Semgrep rulesets
 
