@@ -30,6 +30,9 @@ jobs:
   semgrep:
     name: Semgrep (OSS)
     runs-on: ubuntu-latest
+    # SARIF upload needs security-events: write, which forked PRs don't get.
+    # Run on push + same-repo PRs; forks are analyzed once merged to main.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     container:
       image: semgrep/semgrep
     steps:
@@ -49,7 +52,10 @@ jobs:
             --config p/javascript || true
 
       - name: Upload Semgrep results
-        if: always()
+        # Skip if the scan crashed before writing SARIF; keep upload failures
+        # non-blocking so the advisory job never goes red on a transient upload.
+        if: always() && hashFiles('semgrep.sarif') != ''
+        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: semgrep.sarif
@@ -58,6 +64,9 @@ jobs:
   codeql:
     name: CodeQL
     runs-on: ubuntu-latest
+    # SARIF upload needs security-events: write, which forked PRs don't get.
+    # Run on push + same-repo PRs; forks are analyzed once merged to main.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       contents: read
       security-events: write
@@ -66,14 +75,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # No continue-on-error: CodeQL findings don't fail the action by default
+      # (so this stays advisory for findings), but a genuine init/analyze failure
+      # should surface as red rather than a fake green.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
-        continue-on-error: true
         with:
           languages: javascript-typescript
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
-        continue-on-error: true
         with:
           category: "/language:js-ts"
