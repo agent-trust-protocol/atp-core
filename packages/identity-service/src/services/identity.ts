@@ -26,25 +26,44 @@ export class IdentityService {
       keyPair = await CryptoUtils.generateQuantumSafeKeyPair(useQuantumSafe);
     }
     
+    // Emit a spec-v2 did:atp identifier (docs/specs/did-atp/index.html): for a
+    // hybrid keypair this is a path-type DID carrying both the classical e1_
+    // and post-quantum pq1_ binding fingerprints; classical-only keys fall back
+    // to the legacy v1 form.
+    const binding = CryptoUtils.extractBindingPublicKeys(keyPair);
     const did = CryptoUtils.generateQuantumSafeDID(keyPair);
     const now = new Date().toISOString();
-    
-    const verificationMethodId = `${did}#key-1`;
-    const pqcVerificationMethodId = `${did}#pqc-key-1`;
-    
+
+    const verificationMethodId = `${did}#key-ed25519`;
+    const pqcVerificationMethodId = `${did}#key-mldsa65`;
+
     // Create verification methods based on key type
     const verificationMethods = [];
-    
-    // Classical Ed25519 verification method (for backward compatibility)
+
+    // Classical Ed25519 verification method (the did:wba e1_ binding).
     verificationMethods.push({
       id: verificationMethodId,
       type: 'Ed25519VerificationKey2020',
       controller: did,
       publicKeyMultibase: CryptoUtils.encodeMultibase(Buffer.from(keyPair.publicKey, 'hex')),
     });
-    
-    // Add quantum-safe verification method if available
-    if (keyPair.isQuantumSafe && keyPair.pqcPublicKey) {
+
+    // Add the post-quantum ML-DSA-65 binding as an RFC 9964 AKP JWK, so the
+    // verification method's RFC 7638 thumbprint matches the pq1_ segment of
+    // the v2 identifier.
+    if (binding) {
+      verificationMethods.push({
+        id: pqcVerificationMethodId,
+        type: 'JsonWebKey',
+        controller: did,
+        publicKeyJwk: {
+          kty: 'AKP',
+          alg: 'ML-DSA-65',
+          pub: CryptoUtils.base64url(binding.mlDsa65PublicKey),
+        },
+      });
+    } else if (keyPair.isQuantumSafe && keyPair.pqcPublicKey) {
+      // Defensive fallback for any non-standard hybrid encoding.
       verificationMethods.push({
         id: pqcVerificationMethodId,
         type: 'DilithiumVerificationKey2023',
@@ -83,11 +102,14 @@ export class IdentityService {
       updated: now,
       metadata: {
         protocol: 'Agent Trust Protocol™',
-        version: '1.0.0',
+        version: '2.0.0',
         trustLevel: TrustLevel.UNTRUSTED,
         additionalInfo: {
           createdBy: 'ATP Identity Service',
           initialTrustLevel: TrustLevel.UNTRUSTED,
+          // did:atp identifier syntax version: 'v2' = spec path-type DID with
+          // e1_/pq1_ binding fingerprints; 'v1' = legacy did:atp:<multibase>.
+          didMethodVersion: binding ? 'v2' : 'v1',
           // Quantum-safe metadata
           algorithm: keyPair.algorithm,
           isQuantumSafe: keyPair.isQuantumSafe,
