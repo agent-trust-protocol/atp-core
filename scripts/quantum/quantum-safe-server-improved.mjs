@@ -50,7 +50,7 @@ class ImprovedQuantumSafeMCPServer {
     try {
       // Create HTTP server with health check endpoint
       this.server = http.createServer((req, res) => {
-        if (req.url === '/health' && req.method === 'GET') {
+        if ((req.url === '/health' || req.url === '/') && req.method === 'GET') {
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({
             status: 'healthy',
@@ -93,10 +93,10 @@ class ImprovedQuantumSafeMCPServer {
       });
 
       // Start listening
-      this.server.listen(this.port, '127.0.0.1', () => {
+      this.server.listen(this.port, '0.0.0.0', () => {
         console.log('🛡️ Improved Quantum-Safe MCP Server Started');
         console.log(`   Port: ${this.port}`);
-        console.log(`   Address: 127.0.0.1:${this.port}`);
+        console.log(`   Address: 0.0.0.0:${this.port}`);
         console.log(`   Security: Hybrid Ed25519 + Dilithium`);
         console.log(`   Trust Levels: basic, verified, enterprise`);
         console.log(`   Status: Production Ready`);
@@ -382,7 +382,7 @@ class ImprovedQuantumSafeMCPServer {
 
 // Start the server
 if (import.meta.url === `file://${process.argv[1]}`) {
-  new ImprovedQuantumSafeMCPServer(3008);
+  new ImprovedQuantumSafeMCPServer(Number(process.env.PORT) || 3008);
 }
 
 export { ImprovedQuantumSafeMCPServer };
