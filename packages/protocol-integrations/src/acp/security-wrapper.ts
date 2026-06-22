@@ -17,7 +17,9 @@ export class ACPSecurityWrapper extends EventEmitter {
   constructor(config: ACPSecurityConfig) {
     super();
     this.config = config;
-    this.trustEngine = new TrustScoringEngine(config.database);
+    // Inject the credential verifier so genuinely verified VCs count toward
+    // trust. Without one the engine fails closed (zero credentials credited).
+    this.trustEngine = new TrustScoringEngine(config.database, config.credentialVerifier);
     this.auditLogger = new AuditLogger('acp-security');
   }
 

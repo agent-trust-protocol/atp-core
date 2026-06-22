@@ -89,4 +89,12 @@ export interface ACPSecurityConfig {
   rateLimitPerAgent: number;
   conversationTimeout: number;
   database: any; // DatabaseManager instance
+  /**
+   * Verifies W3C Verifiable Credentials so they can count toward an agent's
+   * trust score. Inject `VcServiceCredentialVerifier` (from `@atp/vc-service`)
+   * at the composition root. When omitted the TrustScoringEngine FAILS CLOSED —
+   * it credits ZERO credentials — so a forged/expired/revoked credential can
+   * never inflate trust.
+   */
+  credentialVerifier?: import('@atp/shared').CredentialVerifier;
 }
