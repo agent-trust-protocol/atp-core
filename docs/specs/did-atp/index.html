@@ -40,11 +40,11 @@
         path. Stripping the post-quantum segment from a <code>did:atp</code>
         identifier yields a syntactically valid <code>did:wba</code> identifier.
       </p>
-      <p class="note" title="This design has a runnable proof">
-        The hybrid construction defined here has been demonstrated end-to-end
-        with real cryptography (FIPS 204 ML-DSA-65 + Ed25519), including
-        dual-binding resolution, defense-in-depth against a forged classical
-        signature, and a method-agnostic trust credential. See
+      <p class="ednote" title="Proof of concept in development">
+        A runnable reference proof of the hybrid construction (FIPS 204
+        ML-DSA-65 + Ed25519 — dual-binding resolution, defense-in-depth against
+        a forged classical signature, and a method-agnostic trust credential)
+        is in development and will accompany the next draft. See
         <a href="#proof-of-concept">Proof of Concept</a>.
       </p>
     </section>
@@ -321,9 +321,10 @@ did:atp:agents.example.com:billing:e1_vW7u8CVMklXkz...:pq1_-MT7q-QasC380...
     <section id="proof-of-concept" class="informative">
       <h2>Proof of Concept</h2>
       <p>
-        A runnable reference proof accompanies this specification (see the
-        <code>/proof</code> directory of the repository). Using FIPS 204
-        ML-DSA-65 and Ed25519, it demonstrates, with all checks passing:
+        A runnable reference proof is in development and will accompany the next
+        draft (in the <code>/proof</code> directory of the repository). Using
+        FIPS 204 ML-DSA-65 and Ed25519, it is intended to demonstrate, with all
+        checks passing:
       </p>
       <ul>
         <li>ML-DSA-65 keys and signatures at exact FIPS 204 sizes (1952-byte key, 3309-byte signature).</li>

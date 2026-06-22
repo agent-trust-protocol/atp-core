@@ -200,8 +200,7 @@
 ### Our Team Contacts
 - **Primary**: Larry Lewis (larry@sovrlabs.com)
 - **Technical**: ATP Development Team
-- **Demo**: https://480de8e2ca61.ngrok-free.app
-- **Code**: https://github.com/agent-trust-protocol/core
+- **Code**: https://github.com/agent-trust-protocol/atp-core
 
 ## Next Immediate Actions
 
