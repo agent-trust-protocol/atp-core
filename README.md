@@ -8,7 +8,7 @@
 [![Quantum Safe](https://img.shields.io/badge/Security-Quantum%20Safe-blueviolet)](https://github.com/agent-trust-protocol/atp-core)
 [![Est. March 2025](https://img.shields.io/badge/Est.-March%202025-green)](https://github.com/agent-trust-protocol/atp-core)
 
-**Build secure AI agents in 1 line of code.** The world's first quantum-safe security protocol for AI agents with zero-knowledge proof authentication.
+**Build secure AI agents in 1 line of code.** The world's first quantum-safe security protocol for AI agents with cryptographic identity and verifiable-credential trust.
 
 >  Image guidance: any featured screenshot or illustration should include the ATP shield logo for consistent branding.
 
@@ -150,16 +150,24 @@ console.log(`Trust level: ${trustScore}`); // 0.0 to 1.0
 
 ### Zero-Knowledge Authentication
 
+> ⚠️ **Experimental.** The trust-level / range "proofs" use a hash-based
+> commitment (`H(value‖blinding)`), not a true Pedersen commitment, and the
+> verifier checks proof *structure* rather than an arithmetic range relation —
+> so it does **not** yet cryptographically prevent a prover from claiming a
+> threshold it doesn't meet. A vetted EC/Ristretto + bulletproofs
+> implementation is planned. Today's sound mechanisms are challenge-response
+> authentication, selective disclosure, and Merkle membership.
+
 ```typescript
 // Alice challenges Bob to prove trust level
 const challenge = await alice.requestAuth(bob.getDID(), [
   { type: 'trust_level', params: { minTrustLevel: 0.7 } }
 ]);
 
-// Bob generates ZK proof (proves trust >= 0.7 without revealing exact score)
+// Bob generates a trust-level proof (experimental — see note above)
 const response = await bob.respondToChallenge(challenge);
 
-// Alice verifies - cryptographically guaranteed
+// Alice verifies the response (structural check today; soundness is roadmap)
 const result = await alice.verifyAuthResponse(response);
 console.log('Verified:', result.verified); // true
 ```

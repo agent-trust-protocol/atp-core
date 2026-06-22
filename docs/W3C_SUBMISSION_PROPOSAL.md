@@ -1,7 +1,7 @@
 # W3C Community Group Proposal: Agent Trust Protocol (ATP)
 
-**Date**: January 2025  
-**Proposer**: Larry Lewis, Sovr INC. (larry@sovrlabs.com)  
+**Date**: June 2026  
+**Proposer**: Larry Lewis, Sovr Labs (larry@sovrlabs.com)  
 **Co-Proposers**: Agent Trust Protocol Development Team
 
 ## Executive Summary
@@ -37,7 +37,7 @@ We propose the creation of a W3C Community Group to standardize the Agent Trust 
 
 - **Extends W3C DID Core 1.0** with `did:atp` method
 - **Enhances W3C VC Data Model** with agent-specific credential types
-- **Implements NIST PQC Standards** (Dilithium, Kyber)
+- **Implements finalized NIST PQC standards** — ML-DSA-65 (FIPS 204) and ML-KEM-768 (FIPS 203)
 - **JSON-RPC 2.0 messaging** for interoperability
 
 ## Why W3C?
@@ -114,11 +114,11 @@ The ATP Community Group would:
 
 ## Current Implementation Status
 
-### Production Ready ✅
-- **Enterprise UI**: Live at https://480de8e2ca61.ngrok-free.app
-- **Core Services**: All 5 microservices operational
-- **Quantum-Safe Crypto**: Ed25519 + Dilithium hybrid
-- **Reference SDK**: TypeScript implementation
+### Current status (beta)
+- **Core Services**: 5 microservices (identity, credentials, permissions, audit, gateway)
+- **Quantum-Safe Crypto**: hybrid Ed25519 + ML-DSA-65 (FIPS 204), via an audited PQC library
+- **Reference SDK**: TypeScript implementation (`atp-sdk`, beta)
+- **DID Method**: `did:atp` v2 draft specification (extends `did:wba`)
 
 ### Adoption Metrics
 - **GitHub Stars**: Growing community interest
@@ -196,19 +196,17 @@ We're actively engaging with:
 ## Timeline
 
 ```
-Q1 2025: Community Group Formation
-Q2 2025: Core Specification Draft
-Q3 2025: Industry Pilot Programs
-Q4 2025: First Public Review
-Q1 2026: Candidate Recommendation
-Q2 2026: W3C Recommendation Vote
+Q3 2026: Community Group engagement + did:atp draft published
+Q4 2026: Core specification draft + interop test vectors
+Q1 2027: Industry pilot programs
+Q2 2027: First public review
+H2 2027: Candidate Recommendation track (subject to W3C process)
 ```
 
 ## Resources
 
-- **Live Demo**: https://480de8e2ca61.ngrok-free.app
-- **GitHub**: https://github.com/agent-trust-protocol/core
-- **Specification**: docs/W3C_ATP_SPECIFICATION.md
+- **GitHub**: https://github.com/agent-trust-protocol/atp-core
+- **DID Method Specification**: docs/specs/did-atp/index.html
 - **Reference SDK**: packages/sdk/
 
 ## Contact Information
