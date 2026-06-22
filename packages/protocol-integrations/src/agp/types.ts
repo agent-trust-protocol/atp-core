@@ -2,6 +2,8 @@
  * Cisco Agent Gateway Protocol (AGP) Type Definitions
  */
 
+import type { CredentialVerifier } from '@atp/shared';
+
 export interface AGPMessage {
   messageId: string;
   messageType: AGPMessageType;
@@ -130,7 +132,7 @@ export interface AGPSecurityConfig {
    * it credits ZERO credentials — so a forged/expired/revoked credential can
    * never inflate trust.
    */
-  credentialVerifier?: import('@atp/shared').CredentialVerifier;
+  credentialVerifier?: CredentialVerifier;
 }
 
 export interface AGPGatewayConfig {

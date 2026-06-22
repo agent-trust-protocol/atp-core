@@ -66,6 +66,9 @@ describe('VcServiceCredentialVerifier', () => {
     });
 
     expect(result).toBe(false);
+    // Verify the service was actually reached; without this assertion the test
+    // passes even when credential extraction silently fails (fail-closed path).
+    expect(verify).toHaveBeenCalledTimes(1);
   });
 
   it('returns false (fail-closed) when verifyCredential throws', async () => {

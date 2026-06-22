@@ -28,7 +28,7 @@
 
 import type { CredentialVerifier, CredentialRow } from '@atp/shared';
 import type { VerifiableCredential } from '../models/credential.js';
-import { CredentialService } from './credential.js';
+import type { CredentialService } from './credential.js';
 
 /**
  * The columns this adapter needs in order to verify a credential. The trust
@@ -121,7 +121,7 @@ export class VcServiceCredentialVerifier implements CredentialVerifier {
       'proof' in v &&
       'credentialSubject' in v &&
       'issuer' in v &&
-      Array.isArray((v as { type?: unknown }).type)
+      Array.isArray(v.type)
     );
   }
 }

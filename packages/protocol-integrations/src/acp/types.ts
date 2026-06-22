@@ -2,6 +2,8 @@
  * IBM Agent Communication Protocol (ACP) Type Definitions
  */
 
+import type { CredentialVerifier } from '@atp/shared';
+
 export interface ACPMessage {
   id: string;
   performative: ACPPerformative;
@@ -96,5 +98,5 @@ export interface ACPSecurityConfig {
    * it credits ZERO credentials — so a forged/expired/revoked credential can
    * never inflate trust.
    */
-  credentialVerifier?: import('@atp/shared').CredentialVerifier;
+  credentialVerifier?: CredentialVerifier;
 }
