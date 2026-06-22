@@ -47,8 +47,15 @@ const makeMockDb = (fx: AgentFixture) => {
         rows: [{ verified: fx.identityVerified ?? false, created_at: fx.createdAt ?? new Date() }],
       };
     }
-    if (text.includes('FROM credentials')) {
-      return { rows: (fx.credentials ?? []).map((type) => ({ type, issuer: 'did:atp:issuer' })) };
+    if (text.includes('atp_credentials.credentials')) {
+      return {
+        rows: (fx.credentials ?? []).map((type) => ({
+          type,
+          issuer: 'did:atp:issuer',
+          credential_data: { type: ['VerifiableCredential', type], issuer: 'did:atp:issuer' },
+          credential_id: `urn:uuid:${type}`,
+        })),
+      };
     }
     if (text.includes('FROM agent_interactions')) {
       return {
