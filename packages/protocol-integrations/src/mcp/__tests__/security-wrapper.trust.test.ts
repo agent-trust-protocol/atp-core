@@ -27,7 +27,7 @@ const makeMockDb = () => {
     if (text.includes('FROM identities')) {
       return { rows: [{ verified: true, created_at: new Date() }] };
     }
-    if (text.includes('FROM credentials')) {
+    if (text.includes('atp_credentials.credentials')) {
       return {
         rows: [
           { type: 'vc-a', issuer: 'did:atp:issuer', credential_id: 'c-a' },

@@ -148,12 +148,18 @@ export class TrustScoringEngine {
       ? Math.floor((Date.now() - accountCreatedMs) / (1000 * 60 * 60 * 24))
       : 0;
 
-    // Get candidate credentials. A `status = 'valid'` column is necessary but
-    // NOT sufficient — each candidate must pass real verification (signature,
-    // expiration, revocation) before it can count toward trust.
+    // Get candidate credentials from the canonical credential store
+    // (atp_credentials.credentials, written by vc-service). A `status = 'active'`
+    // row is necessary but NOT sufficient — each candidate must still pass real
+    // verification (issuer signature, expiry, revocation) via the injected
+    // CredentialVerifier before it can count toward trust. We select
+    // credential_data (the full VC) and credential_id so the verifier has what
+    // it needs to do that work.
     const credentialsResult = await this.db.query(
-      'SELECT type, issuer FROM credentials WHERE subject_did = $1 AND status = $2',
-      [agentDid, 'valid']
+      `SELECT credential_type AS type, issuer_did AS issuer, credential_data, credential_id
+       FROM atp_credentials.credentials
+       WHERE subject_did = $1 AND status = $2`,
+      [agentDid, 'active']
     );
 
     let credentialsValidated: string[];
