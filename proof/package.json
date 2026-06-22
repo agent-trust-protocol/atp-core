@@ -1,0 +1,11 @@
+{
+  "name": "did-atp-proof",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Runnable reference proof of concept for the did:atp DID method (hybrid Ed25519 + ML-DSA-65).",
+  "scripts": {
+    "proof": "tsx index.ts"
+  },
+  "comment": "Run from the repository root with `npx tsx proof/index.ts`. Dependencies (@noble/ed25519, @noble/post-quantum, @noble/hashes, @scure/base) are provided by the repository's root node_modules; this proof reuses the production SDK in ../packages/sdk."
+}

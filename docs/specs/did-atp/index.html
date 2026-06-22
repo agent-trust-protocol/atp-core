@@ -333,10 +333,14 @@ did:atp:agents.example.com:billing:e1_vW7u8CVMklXkz...:pq1_-MT7q-QasC380...
         <li>A method-agnostic trust credential verified over a <code>did:atp</code> subject and a <code>did:web</code> subject, with tampering detected.</li>
       </ul>
       <p class="note">
-        The proof uses a pure-Python ML-DSA implementation for clarity; the
-        production ATP stack uses an audited TypeScript post-quantum library.
-        The proof validates the protocol design against real standards, not the
-        production implementation.
+        The proof is a self-contained TypeScript program
+        (<code>npx tsx proof/index.ts</code>) that uses the audited
+        <code>@noble/post-quantum</code> ML-DSA-65 and <code>@noble/ed25519</code>
+        libraries and reuses the production ATP SDK for the identifier syntax,
+        DID-Document construction, dual proofs, and resolution — so it validates
+        the protocol design against real standards and against the production
+        implementation. Every check is asserted; the program exits non-zero on
+        any failure.
       </p>
     </section>
 
