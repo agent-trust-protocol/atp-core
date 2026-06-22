@@ -39,13 +39,24 @@ PRs lose CodeQL entirely (the removed workflow no longer provides a fallback), s
 treat leaving it on as a required setting. Do **not** re-add a committed CodeQL
 workflow while default setup is enabled — the two cannot coexist.
 
-## Fork PRs
+## Fork PRs (known coverage gaps)
 
-For pull requests from **forks**, the Semgrep *scan* still runs (its findings
-appear in the job's Actions log), but the **SARIF upload is skipped** — forked
-PRs get a read-only `GITHUB_TOKEN` and cannot write code-scanning results. Such
-findings surface in the Security tab once the change lands on `main` (the push
-run uploads them). CodeQL default setup applies its own fork handling.
+Pull requests from **forks** run with a read-only `GITHUB_TOKEN`, which changes
+what analysis is available before merge:
+
+- **Semgrep:** the *scan* still runs, but the **code-scanning upload is skipped**
+  (it needs `security-events: write`). Findings are written to `semgrep.sarif`,
+  **not** printed to the Actions log — to read them on a fork PR, download the
+  **`semgrep-sarif` artifact** from the workflow run (Actions → run → Artifacts).
+  The same findings appear in the Security tab automatically once the change
+  lands on `main` (the push run uploads them).
+- **CodeQL:** GitHub's CodeQL **default setup does not analyze pull requests from
+  forks**. External-contributor PRs therefore get **no CodeQL** until the change
+  is merged to `main`, at which point the push-triggered default-setup run scans
+  it. Do not treat fork PRs as CodeQL-covered.
+
+Both gaps close on merge to `main`. For same-repo PRs (the common case here),
+both Semgrep and CodeQL run and upload normally.
 
 ## How to read findings
 
