@@ -66,3 +66,4 @@ async function startServer() {
 startServer();
 
 export { StorageService, CredentialService, CredentialController };
+export { VcServiceCredentialVerifier } from './services/credential-verifier.js';
