@@ -12,10 +12,12 @@
 
   // eslint-disable-next-line no-undef
   window.respecConfig = {
-    specStatus: "CG-DRAFT",
+    // Use "unofficial" until the ATP Community Group is formally registered
+    // with W3C. ReSpec resolves `group` against the W3C API, so setting a
+    // not-yet-registered group (e.g. "atp") would 404 and break the render.
+    // Once the CG is registered, switch to "CG-DRAFT" and add group: "atp".
+    specStatus: "unofficial",
     shortName: spec.shortName || "atp-spec",
-    // ATP Community Group (coordinates with the W3C AI Agent Protocol CG).
-    group: "atp",
     editors: [
       {
         name: "Larry Lewis",
