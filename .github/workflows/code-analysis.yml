@@ -1,15 +1,18 @@
 name: Code Analysis
 
-# Free, open-source PR code analysis — the replacement for the (now-removed)
-# recurseml GitHub App. Two advisory analyzers run on every PR (and on push to
-# main, to establish a baseline so PR findings register as "new"):
+# Free, open-source PR code analysis — the OSS replacement for the (now-removed)
+# recurseml GitHub App.
 #
-#   * Semgrep OSS  — open-source static analysis (LGPL), registry rulesets, no token.
-#   * CodeQL       — GitHub-native SAST, free for public repositories, no token.
-#
-# Both are ADVISORY: findings surface as inline PR annotations and in the
+# Semgrep OSS — open-source static analysis (LGPL), registry rulesets, no token.
+# Runs as an ADVISORY check: findings surface as inline PR annotations and in the
 # repository Security tab, but never fail the PR. No LLM/API key or paid secret
 # is required.
+#
+# NOTE on CodeQL: this repo uses GitHub's CodeQL *default setup* (Settings → Code
+# security → CodeQL analysis), which already scans pull requests. A custom CodeQL
+# workflow cannot upload alongside default setup ("CodeQL analyses from advanced
+# configurations cannot be processed when the default setup is enabled"), so
+# CodeQL is intentionally NOT duplicated here.
 
 on:
   pull_request:
@@ -60,30 +63,3 @@ jobs:
         with:
           sarif_file: semgrep.sarif
           category: semgrep
-
-  codeql:
-    name: CodeQL
-    runs-on: ubuntu-latest
-    # SARIF upload needs security-events: write, which forked PRs don't get.
-    # Run on push + same-repo PRs; forks are analyzed once merged to main.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # No continue-on-error: CodeQL findings don't fail the action by default
-      # (so this stays advisory for findings), but a genuine init/analyze failure
-      # should surface as red rather than a fake green.
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: javascript-typescript
-
-      - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:js-ts"

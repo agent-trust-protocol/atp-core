@@ -1,45 +1,48 @@
 # PR Code Analysis (free & open source)
 
 Automated pull-request code analysis for `atp-core`. This **replaces the old
-Recurse ML GitHub App** (a paid third-party trial) with two free, open-source
-analyzers that run directly in GitHub Actions — **no API key, no paid plan, no
-secret required.**
+Recurse ML GitHub App** (a paid third-party trial) with free, open-source
+analysis that runs directly in GitHub — **no API key, no paid plan, no secret
+required.** Two complementary engines provide it:
 
 ## What runs
 
-Defined in [`.github/workflows/code-analysis.yml`](../../../.github/workflows/code-analysis.yml).
-On every pull request (and on push to `main`, to set the baseline), two
-**advisory** jobs run:
+| Engine | Source | What it finds | License / cost |
+|--------|--------|---------------|----------------|
+| `Semgrep (OSS)` | [`.github/workflows/code-analysis.yml`](../../../.github/workflows/code-analysis.yml) | Bug patterns, insecure code, leaked secrets, TS/JS anti-patterns (registry rulesets `p/default`, `p/secrets`, `p/typescript`, `p/javascript`) | LGPL, free, no token |
+| `CodeQL` | GitHub **CodeQL default setup** (Settings → Code security → CodeQL analysis) | Security vulnerabilities & data-flow bugs (SAST) for JavaScript/TypeScript | Free for public repos, no token |
 
-| Job | Tool | What it finds | License / cost |
-|-----|------|---------------|----------------|
-| `Semgrep (OSS)` | [Semgrep OSS](https://github.com/semgrep/semgrep) | Bug patterns, insecure code, leaked secrets, TS/JS anti-patterns (registry rulesets `p/default`, `p/secrets`, `p/typescript`, `p/javascript`) | LGPL, free, no token |
-| `CodeQL` | [GitHub CodeQL](https://codeql.github.com/) | Security vulnerabilities & data-flow bugs (SAST) for JavaScript/TypeScript | Free for public repos, no token |
+**CodeQL is provided by the repo's built-in default setup**, which already scans
+pull requests — so it is intentionally **not** duplicated in
+`code-analysis.yml`. (GitHub rejects a custom CodeQL workflow upload while
+default setup is enabled: *"CodeQL analyses from advanced configurations cannot
+be processed when the default setup is enabled."*) The workflow therefore adds
+only the piece default setup doesn't cover: **Semgrep OSS**.
 
-Both jobs are **advisory / non-blocking**: results appear as inline PR
-annotations and in the repository **Security → Code scanning** tab, but they do
-**not** fail the PR. The merge gate remains the `Lint · Type-check · Test` job in
+Semgrep runs as an **advisory / non-blocking** check on pull requests (and push
+to `main` for a baseline): results appear as inline PR annotations and in the
+repository **Security → Code scanning** tab, but do **not** fail the PR. The
+merge gate remains the `Lint · Type-check · Test` job in
 [`ci.yml`](../../../.github/workflows/ci.yml).
 
-> CodeQL also runs (push-only) inside `production-deploy.yml`; the
-> `code-analysis.yml` workflow is what gives **pull requests** their CodeQL pass.
+> CodeQL also runs (push-only) inside `production-deploy.yml`; that is separate
+> from default setup's PR scanning and unaffected by this workflow.
 
 ## How to read findings
 
-1. Open the PR → **Files changed**: Semgrep/CodeQL findings show as inline
+1. Open the PR → **Files changed**: Semgrep / CodeQL findings show as inline
    annotations on the relevant lines.
 2. Repository → **Security → Code scanning**: the full list of open alerts,
    grouped by tool (`semgrep`, CodeQL), with severity and remediation guidance.
-3. The two checks (`Code Analysis / Semgrep (OSS)`, `Code Analysis / CodeQL`)
-   appear in the PR **Checks** list — green/neutral even when findings exist,
-   because they are advisory.
+3. The `Code Analysis / Semgrep (OSS)` check (and the CodeQL check from default
+   setup) appear in the PR **Checks** list.
 
-## Making them blocking (optional)
+## Making Semgrep blocking (optional)
 
-If you later want analysis to gate merges, add the relevant check(s) as
-**required status checks** under **Settings → Branches → Branch protection** for
-`main`. (Left advisory by default so it never throws a surprise red ✗ on open
-PRs.)
+If you later want Semgrep to gate merges, add the `Code Analysis / Semgrep (OSS)`
+check as a **required status check** under **Settings → Branches → Branch
+protection** for `main`. (Left advisory by default so it never throws a surprise
+red ✗ on open PRs.)
 
 ## Tuning Semgrep rulesets
 
