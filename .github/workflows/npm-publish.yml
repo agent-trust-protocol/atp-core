@@ -113,7 +113,7 @@ jobs:
       - name: Publish atp-sdk
         if: steps.version-check.outputs.skip == 'false' && inputs.dry_run != true
         working-directory: packages/sdk
-        run: npm publish --access public
+        run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -179,7 +179,7 @@ jobs:
       - name: Publish @atpdevelopment/openclaw-atp
         if: steps.version-check.outputs.skip == 'false' && inputs.dry_run != true
         working-directory: packages/openclaw-atp
-        run: npm publish --access public
+        run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -243,7 +243,7 @@ jobs:
       - name: Publish create-atp-agent
         if: steps.version-check.outputs.skip == 'false' && inputs.dry_run != true
         working-directory: packages/create-atp-agent
-        run: npm publish --access public
+        run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -307,7 +307,7 @@ jobs:
       - name: Publish atp-profiles
         if: steps.version-check.outputs.skip == 'false' && inputs.dry_run != true
         working-directory: packages/atp-profiles
-        run: npm publish --access public
+        run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

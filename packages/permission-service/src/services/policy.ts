@@ -165,6 +165,17 @@ class SafeEvaluator {
   }
 }
 
+/**
+ * Tie-break precedence for rules of EQUAL priority — more restrictive effects
+ * first (deny-wins). A ranked table (rather than a binary deny check) gives any
+ * future effect a defined precedence instead of relying on sort stability.
+ * Lower rank = evaluated first.
+ */
+const EFFECT_PRECEDENCE: Record<string, number> = {
+  deny: 0,
+  allow: 1,
+};
+
 export class PolicyEngine {
   private rules: Map<string, PolicyRule> = new Map();
 
@@ -181,7 +192,14 @@ export class PolicyEngine {
   async evaluate(context: PolicyContext): Promise<PolicyResult> {
     const applicableRules = Array.from(this.rules.values())
       .filter(rule => rule.active)
-      .sort((a, b) => b.priority - a.priority);
+      .sort((a, b) => {
+        // Primary: higher priority number wins.
+        if (b.priority !== a.priority) return b.priority - a.priority;
+        // Tie-break at equal priority by effect restrictiveness (deny-wins) via a
+        // ranked table, so any future effect gets a defined precedence instead of
+        // relying on sort stability. Lower rank = evaluated first.
+        return (EFFECT_PRECEDENCE[a.effect] ?? 99) - (EFFECT_PRECEDENCE[b.effect] ?? 99);
+      });
 
     for (const rule of applicableRules) {
       try {

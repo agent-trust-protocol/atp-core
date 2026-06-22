@@ -360,6 +360,141 @@ const VECTORS: ConformanceVector[] = [
     expected: { decision: 'deny', actionType: 'deny' },
   },
 
+  // --- precedence: EQUAL-priority deny-wins (regression guard, finding #1) --
+  // TEETH: the allow rule is listed FIRST at the SAME priority as the deny. In
+  // priority_order the engine must still deny — equal-priority ties resolve in
+  // favour of the more restrictive action, independent of authoring order.
+  // Before the fix this returned ALLOW purely because allow was authored first.
+  // (Note: first_match is first-applicable by contract, so deny-wins does NOT
+  // apply there — that behaviour is covered in policy-conformance.test.ts.)
+  {
+    name: 'priority_order equal-priority deny-wins — allow listed first still denies',
+    policy: makePolicy({
+      evaluationMode: 'priority_order',
+      rules: [
+        makeRule({
+          name: 'Allow equal',
+          priority: 50,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: allow(),
+        }),
+        makeRule({
+          name: 'Deny equal',
+          priority: 50,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: deny(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'TRUSTED' }),
+    expected: { decision: 'deny', actionType: 'deny' },
+  },
+  {
+    name: 'priority_order equal-priority — log obligation is collected even when allow is decisive',
+    // The non-decisive log rule shares the allow rule's priority and is authored
+    // FIRST. The deny-wins tie-break must still evaluate the log rule before the
+    // decisive allow returns, so the log obligation is not silently dropped.
+    policy: makePolicy({
+      evaluationMode: 'priority_order',
+      rules: [
+        makeRule({
+          name: 'Allow basic',
+          priority: 50,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: allow(),
+        }),
+        makeRule({
+          name: 'Log everything',
+          priority: 50,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: logAction(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'TRUSTED' }),
+    expected: { decision: 'allow', actionType: 'allow', obligations: ['log'] },
+  },
+
+  // --- defaultAction honoured across modes (finding #2) --------------------
+  // defaultAction was previously only consulted in priority_order; first_match
+  // and all_rules hardcoded deny on no-match. It must apply consistently.
+  {
+    name: 'first_match honours defaultAction=allow when no rule matches',
+    policy: makePolicy({
+      evaluationMode: 'first_match',
+      defaultAction: 'allow',
+      rules: [
+        makeRule({
+          name: 'Allow privileged only',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'PRIVILEGED'),
+          action: allow(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'BASIC' }),
+    expected: { decision: 'allow', actionType: 'allow', reasonContains: 'default action' },
+  },
+  {
+    name: 'all_rules honours defaultAction=allow when no rule matches',
+    policy: makePolicy({
+      evaluationMode: 'all_rules',
+      defaultAction: 'allow',
+      rules: [
+        makeRule({
+          name: 'Allow privileged only',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'PRIVILEGED'),
+          action: allow(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'BASIC' }),
+    expected: { decision: 'allow', actionType: 'allow' },
+  },
+
+  // --- first_match: log/alert are non-decisive (finding #3) ----------------
+  // A matching log/alert rule must NOT authorize the request in first_match;
+  // its obligation is collected and evaluation continues to a decisive rule.
+  {
+    name: 'first_match: a matching log rule does NOT authorize — a later deny still applies',
+    policy: makePolicy({
+      evaluationMode: 'first_match',
+      rules: [
+        makeRule({
+          name: 'Log first',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: logAction(),
+        }),
+        makeRule({
+          name: 'Deny basic',
+          priority: 20,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: deny(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'TRUSTED' }),
+    expected: { decision: 'deny', actionType: 'deny', obligations: ['log'] },
+  },
+  {
+    name: 'first_match: a log-only match falls through to default deny (log is non-decisive)',
+    policy: makePolicy({
+      evaluationMode: 'first_match',
+      rules: [
+        makeRule({
+          name: 'Log only',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: logAction(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'TRUSTED' }),
+    expected: { decision: 'deny', actionType: 'deny', obligations: ['log'], reasonContains: 'No rules matched' },
+  },
+
   // --- obligation emission -------------------------------------------------
   {
     name: 'obligation emission — allow with MFA + time-limit conditions',
@@ -401,6 +536,168 @@ const VECTORS: ConformanceVector[] = [
     // allow/deny/require_approval short-circuit. Throttle's obligation is
     // collected, then the allow rule is decisive.
     expected: { decision: 'allow', actionType: 'allow', obligations: ['throttle'] },
+  },
+
+  // --- all_rules precedence: deny outranks require_approval ----------------
+  // TEETH: with both a matching deny AND a matching require_approval, deny MUST
+  // win. Earlier vectors only covered deny-vs-allow and approval-vs-allow, so a
+  // swap of the deny/approval precedence in combineRuleDecisions survived. This
+  // row pins deny > require_approval.
+  {
+    name: 'all_rules deny outranks require_approval when both match',
+    policy: makePolicy({
+      evaluationMode: 'all_rules',
+      rules: [
+        makeRule({
+          name: 'Approval basic',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: requireApproval(),
+        }),
+        makeRule({
+          name: 'Deny basic',
+          priority: 20,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: deny(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'TRUSTED' }),
+    expected: { decision: 'deny', actionType: 'deny' },
+  },
+  // --- all_rules precedence: require_approval outranks throttle -------------
+  // TEETH: require_approval must beat a matching throttle when no deny present.
+  {
+    name: 'all_rules require_approval outranks throttle when both match (no deny)',
+    policy: makePolicy({
+      evaluationMode: 'all_rules',
+      rules: [
+        makeRule({
+          name: 'Throttle basic',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: throttle(),
+        }),
+        makeRule({
+          name: 'Approval basic',
+          priority: 20,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: requireApproval(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'TRUSTED' }),
+    expected: { decision: 'require_approval', actionType: 'require_approval' },
+  },
+
+  // --- comparison operator boundaries (>= and <) ---------------------------
+  // TEETH: 'greater_than_or_equal' must be inclusive at the boundary. With the
+  // context trust EXACTLY at the threshold, a mutation to strict '>' flips this
+  // from allow to deny-by-default.
+  {
+    name: 'greater_than_or_equal is inclusive at the exact boundary (allow)',
+    policy: makePolicy({
+      evaluationMode: 'first_match',
+      rules: [
+        makeRule({
+          name: 'Allow at-or-above verified',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'VERIFIED'),
+          action: allow(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'VERIFIED' }),
+    expected: { decision: 'allow', actionType: 'allow', reasonContains: 'Allow at-or-above verified' },
+  },
+  {
+    name: 'less_than is exclusive at the exact boundary (no match -> deny-by-default)',
+    // TEETH: 'less_than' must be strict. At the exact boundary (VERIFIED < VERIFIED
+    // is false) the rule must NOT fire, so the engine falls through to
+    // deny-by-default. Using an ALLOW rule makes the mutation observable: if '<'
+    // wrongly became '<=', the rule would fire and ALLOW; correct strict '<'
+    // yields no-match -> deny-by-default.
+    policy: makePolicy({
+      evaluationMode: 'first_match',
+      rules: [
+        makeRule({
+          name: 'Allow strictly-below verified',
+          priority: 10,
+          condition: trustCondition('less_than', 'VERIFIED'),
+          action: allow(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'VERIFIED' }),
+    expected: { decision: 'deny', actionType: 'deny', reasonContains: 'No rules matched' },
+  },
+
+  // --- per-rule enabled flag is honoured -----------------------------------
+  // TEETH: a disabled (enabled:false) rule must be filtered out before matching.
+  // Here the ONLY allow rule is disabled; if the per-rule enabled filter were
+  // removed it would match and ALLOW. Correct behaviour: it is skipped and the
+  // request is denied-by-default (first_match no-match).
+  {
+    name: 'disabled rule is ignored -> deny-by-default (first_match)',
+    policy: makePolicy({
+      evaluationMode: 'first_match',
+      rules: [
+        makeRule({
+          name: 'Disabled allow-all',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'UNKNOWN'),
+          action: allow(),
+          enabled: false,
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'TRUSTED' }),
+    expected: { decision: 'deny', actionType: 'deny', reasonContains: 'No rules matched' },
+  },
+  {
+    name: 'disabled deny rule is ignored, later enabled allow wins (priority_order)',
+    // TEETH: a higher-priority DENY that is disabled must not suppress a
+    // lower-priority enabled ALLOW.
+    policy: makePolicy({
+      evaluationMode: 'priority_order',
+      rules: [
+        makeRule({
+          name: 'Disabled early deny',
+          priority: 1,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: deny(),
+          enabled: false,
+        }),
+        makeRule({
+          name: 'Enabled allow',
+          priority: 10,
+          condition: trustCondition('greater_than_or_equal', 'BASIC'),
+          action: allow(),
+        }),
+      ],
+    }),
+    context: makeContext({ trustLevel: 'TRUSTED' }),
+    expected: { decision: 'allow', actionType: 'allow', reasonContains: 'Enabled allow' },
+  },
+
+  // --- usage_limit obligation pass-through ---------------------------------
+  // TEETH: completes obligation coverage in this suite (usage_limit was only
+  // checked in the permission-package suite).
+  {
+    name: 'obligation emission — allow with usage-limit condition emits usage_limit',
+    policy: makePolicy({
+      evaluationMode: 'first_match',
+      rules: [
+        makeRule({
+          name: 'Allow with usage cap',
+          priority: 10,
+          condition: didCondition('equals', 'did:atp:agent-conformance'),
+          action: allow({ conditions: { usageLimit: 7 } } as Partial<VisualPolicyActionType>),
+        }),
+      ],
+    }),
+    context: makeContext(),
+    expected: { decision: 'allow', actionType: 'allow', obligations: ['usage_limit'] },
   },
 
   // --- disabled policy -----------------------------------------------------

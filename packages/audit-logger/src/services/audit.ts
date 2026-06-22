@@ -4,9 +4,19 @@ import { IAuditStorageService } from '../interfaces/storage.js';
 import { IPFSService } from './ipfs.js';
 import { ATPEncryptionService } from '@atp/shared';
 
+/**
+ * Prefix marking an audit event signature as UNSIGNED — produced only when no
+ * signing key is configured (non-production). It makes the value impossible to
+ * mistake for an authenticated HMAC: a bare SHA-256 would be indistinguishable
+ * from a real signature yet provides no non-repudiation (anyone can recompute
+ * it). Consumers can detect an unsigned event via `AuditService.isSigned()`.
+ */
+export const UNSIGNED_SIGNATURE_PREFIX = 'unsigned-sha256:';
+
 export class AuditService {
   private encryptionKey: Buffer;
   private signingKey: string;
+  private static unsignedWarningEmitted = false;
 
   constructor(
     private storage: IAuditStorageService,
@@ -21,9 +31,36 @@ export class AuditService {
 
     // Signing key for HMAC-SHA256 audit event signatures
     this.signingKey = process.env.AUDIT_SIGNING_KEY || process.env.AUDIT_ENCRYPTION_KEY || '';
-    if (!this.signingKey && process.env.NODE_ENV === 'production') {
-      throw new Error('AUDIT_SIGNING_KEY (or AUDIT_ENCRYPTION_KEY) must be set in production');
+    if (!this.signingKey) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('AUDIT_SIGNING_KEY (or AUDIT_ENCRYPTION_KEY) must be set in production');
+      }
+      // Non-production with no key: events are UNSIGNED (integrity only, no
+      // non-repudiation). Warn once so the misconfiguration is never silent.
+      if (!AuditService.unsignedWarningEmitted) {
+        AuditService.unsignedWarningEmitted = true;
+        console.warn(
+          '[audit] No AUDIT_SIGNING_KEY/AUDIT_ENCRYPTION_KEY configured — audit ' +
+          `events will be UNSIGNED (signature marked "${UNSIGNED_SIGNATURE_PREFIX}"). ` +
+          'They retain integrity but NOT non-repudiation. Set a signing key outside local development.'
+        );
+      }
     }
+  }
+
+  /**
+   * Whether an audit event signature is an authenticated HMAC (true) rather than
+   * the keyless UNSIGNED fallback (false). Use to reject unsigned events where
+   * non-repudiation is required.
+   *
+   * CAVEAT — legacy data: events written before this change stored a bare
+   * SHA-256 with no prefix when no signing key was configured. Those legacy
+   * unsigned events lack the marker and will be reported as signed (true). For
+   * pre-migration events, rely on your migration/seal policy rather than this
+   * check.
+   */
+  static isSigned(signature: string | undefined | null): boolean {
+    return !!signature && !signature.startsWith(UNSIGNED_SIGNATURE_PREFIX);
   }
 
   async logEvent(request: AuditEventRequest): Promise<AuditEvent> {
@@ -60,11 +97,13 @@ export class AuditService {
       blockNumber: (lastEvent?.blockNumber || 0) + 1,
     };
 
-    // Generate cryptographic hash for integrity (SHA-256)
-    const hash = this.generateSecureHash(eventData);
+    // Generate cryptographic hash for integrity (SHA-256). Both the hash and the
+    // signature cover only the stable, storage-independent fields (see
+    // integrityFields) so they can be recomputed from any backend on read-back.
+    const hash = this.generateSecureHash(this.integrityFields(eventData));
 
     // Create HMAC-SHA256 signature for non-repudiation
-    const signature = await this.signEvent(eventData);
+    const signature = await this.signEvent(this.integrityFields(eventData));
 
     const event: AuditEvent = {
       id,
@@ -112,7 +151,13 @@ export class AuditService {
   }
 
   async verifyIntegrity(): Promise<{ valid: boolean; brokenAt?: string }> {
-    return await this.storage.verifyChain();
+    // Perform full content + linkage verification at the service level rather
+    // than delegating to storage.verifyChain(), whose backend implementations
+    // only check previousHash linkage and would silently miss content tampering
+    // of an entry that still links correctly. verifyChainIntegrity recomputes
+    // each event's hash from the stored fields (see integrityFields).
+    const { valid, brokenAt } = await this.verifyChainIntegrity();
+    return { valid, brokenAt };
   }
 
   async getEventFromIPFS(hash: string): Promise<AuditEvent | null> {
@@ -147,6 +192,41 @@ export class AuditService {
     });
   }
 
+  /**
+   * The stable, storage-independent field set that the integrity hash and the
+   * HMAC signature are computed over.
+   *
+   * Deliberately EXCLUDES `nonce` and `blockNumber`. Those are storage-managed
+   * metadata that some backends do not faithfully round-trip — Postgres assigns
+   * `block_number` via a stored procedure and persists `nonce` as NULL (see
+   * postgres-storage.ts) — so hashing them made the hash recomputed on
+   * read-back diverge from the stored hash, which would make verifyIntegrity()
+   * report tampering for every event on those backends. Event ordering remains
+   * bound cryptographically by `previousHash`, so dropping the positional
+   * fields does not weaken content-tamper or reordering detection.
+   */
+  private integrityFields(e: {
+    id: string;
+    timestamp: string;
+    source: string;
+    action: string;
+    resource: string;
+    actor: string;
+    details: any;
+    previousHash: string;
+  }): Record<string, any> {
+    return {
+      id: e.id,
+      timestamp: e.timestamp,
+      source: e.source,
+      action: e.action,
+      resource: e.resource,
+      actor: e.actor,
+      details: e.details,
+      previousHash: e.previousHash,
+    };
+  }
+
   private generateSecureHash(data: any): string {
     // Create deterministic hash by sorting keys (recursively, content-preserving)
     const dataString = this.canonicalize(data);
@@ -156,8 +236,10 @@ export class AuditService {
   private async signEvent(eventData: any): Promise<string> {
     const dataString = this.canonicalize(eventData);
     if (!this.signingKey) {
-      // No key configured — fall back to a hash-only signature in non-production
-      return createHash('sha256').update(dataString).digest('hex');
+      // No key configured (non-production only — the constructor throws in
+      // production). Return an explicitly UNSIGNED, self-identifying marker so
+      // this can never be mistaken for an authenticated HMAC signature.
+      return `${UNSIGNED_SIGNATURE_PREFIX}${createHash('sha256').update(dataString).digest('hex')}`;
     }
     return createHmac('sha256', this.signingKey).update(dataString).digest('hex');
   }
@@ -218,19 +300,9 @@ export class AuditService {
           };
         }
 
-        // Verify event hash
-        const expectedHash = this.generateSecureHash({
-          id: event.id,
-          timestamp: event.timestamp,
-          source: event.source,
-          action: event.action,
-          resource: event.resource,
-          actor: event.actor,
-          details: event.details,
-          previousHash: event.previousHash,
-          nonce: event.nonce,
-          blockNumber: event.blockNumber,
-        });
+        // Verify event hash — recompute over the same stable field set used at
+        // store time so it matches regardless of storage backend.
+        const expectedHash = this.generateSecureHash(this.integrityFields(event));
 
         if (event.hash !== expectedHash) {
           return {

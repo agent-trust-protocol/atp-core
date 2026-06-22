@@ -2,6 +2,8 @@
  * Cisco Agent Gateway Protocol (AGP) Type Definitions
  */
 
+import type { CredentialVerifier } from '@atp/shared';
+
 export interface AGPMessage {
   messageId: string;
   messageType: AGPMessageType;
@@ -123,6 +125,14 @@ export interface AGPSecurityConfig {
   rateLimitPerAgent: number;
   quantumSafeEnabled: boolean;
   database: any; // DatabaseManager instance
+  /**
+   * Verifies W3C Verifiable Credentials so they can count toward an agent's
+   * trust score. Inject `VcServiceCredentialVerifier` (from `@atp/vc-service`)
+   * at the composition root. When omitted the TrustScoringEngine FAILS CLOSED —
+   * it credits ZERO credentials — so a forged/expired/revoked credential can
+   * never inflate trust.
+   */
+  credentialVerifier?: CredentialVerifier;
 }
 
 export interface AGPGatewayConfig {

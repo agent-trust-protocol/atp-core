@@ -1,6 +1,12 @@
 import { IdentityService } from '../identity.js';
 import { DIDDocument } from '../../models/did.js';
+import { CryptoUtils } from '../../utils/crypto.js';
 import { TrustLevel } from '@atp/shared';
+
+// Spec-v2 did:atp path-type identifier (docs/specs/did-atp/index.html):
+//   did:atp:<domain>:<path...>:e1_<43 base64url>:pq1_<43 base64url>
+const ATP_V2_RE =
+  /^did:atp:[a-z0-9.-]+(:[A-Za-z0-9._-]+)+:e1_[A-Za-z0-9_-]{43}:pq1_[A-Za-z0-9_-]{43}$/;
 
 // In-memory storage mock
 const makeStorageMock = () => {
@@ -75,6 +81,57 @@ describe('IdentityService', () => {
 
       const contexts = document['@context'] as string[];
       expect(contexts).toContain('https://www.w3.org/ns/did/v1');
+    });
+
+    it('emits a spec-v2 did:atp identifier with e1_ and pq1_ bindings', async () => {
+      const response = await service.registerDID();
+
+      // Domain-based, path-type DID carrying both binding fingerprints.
+      expect(response.did).toMatch(ATP_V2_RE);
+      expect(response.did).not.toMatch(/^did:atp:z[1-9A-HJ-NP-Za-km-z]+$/); // not legacy v1 multibase
+      expect(response.document.metadata?.additionalInfo?.didMethodVersion).toBe('v2');
+    });
+
+    it('binds the v2 identifier to the actual Ed25519 and ML-DSA-65 keys', async () => {
+      const response = await service.registerDID();
+
+      const segments = response.did.split(':');
+      const pq1 = segments[segments.length - 1];
+      const e1 = segments[segments.length - 2];
+
+      // Recompute both fingerprints from the document's verification methods
+      // and confirm they match the identifier (the create-time half of the
+      // spec's dual-binding requirement).
+      const edVm = response.document.verificationMethod.find(
+        (vm) => vm.type === 'Ed25519VerificationKey2020'
+      );
+      const pqVm = response.document.verificationMethod.find(
+        (vm) => vm.type === 'JsonWebKey'
+      );
+      expect(edVm?.publicKeyMultibase).toBeDefined();
+      expect(pqVm?.publicKeyJwk).toBeDefined();
+
+      const mlPub = new Uint8Array(
+        Buffer.from((pqVm!.publicKeyJwk as { pub: string }).pub, 'base64url')
+      );
+
+      // The pq1_ segment must equal the recomputed AKP-JWK fingerprint.
+      expect(mlPub.length).toBe(1952);
+      expect(CryptoUtils.pq1Fingerprint(mlPub)).toBe(pq1);
+      // e1_ segment is always present and well-formed.
+      expect(e1.startsWith('e1_')).toBe(true);
+    });
+
+    it('falls back to a legacy v1 identifier for classical-only registration', async () => {
+      // Provided public key => classical mode => no PQ binding available.
+      const response = await service.registerDID({
+        publicKey: 'aabbccdd1122334455667788',
+        quantumSafe: false,
+      });
+
+      expect(response.did).toMatch(/^did:atp:/);
+      expect(response.did).not.toMatch(ATP_V2_RE);
+      expect(response.document.metadata?.additionalInfo?.didMethodVersion).toBe('v1');
     });
   });
 

@@ -226,6 +226,38 @@ To run the unit tests: `cd packages/openclaw-atp && npm test` — covers registr
 
 ---
 
+## Testing & Conformance
+
+- **Run the full conformance gate:** `npm run conformance` from the repo root.
+  It runs the W3C conformance suites for the four ATP core items and prints a
+  per-item PASS/FAIL summary, exiting non-zero on any failure (so it doubles as
+  a CI / release gate). Per-item: `conformance:did`, `conformance:sigs`,
+  `conformance:policy`, `conformance:audit`.
+- **Use the repo-root Jest config for package suites.** Running `npm test`
+  *inside* some packages (e.g. `packages/audit-logger`) fails to start because
+  the package-level setup does not transpile TypeScript. Run from the repo root
+  instead: `npx jest --config jest.config.cjs --testPathPattern "<pattern>"`,
+  or use `npm run conformance`.
+
+---
+
+## Audit Integrity Invariant (`packages/audit-logger`)
+
+- `AuditService.verifyIntegrity()` performs **full content + linkage**
+  verification — it recomputes each event's SHA-256 hash and checks the
+  `previousHash` chain. Do not revert it to delegating to
+  `storage.verifyChain()` (which is linkage-only and misses content tampering).
+- The integrity hash **and** the HMAC signature cover only the stable,
+  storage-independent fields, via `AuditService.integrityFields()`: `id`,
+  `timestamp`, `source`, `action`, `resource`, `actor`, `details`,
+  `previousHash`. Do **NOT** add `nonce` or `blockNumber` back into the hashed
+  set — storage backends do not round-trip them (e.g. Postgres persists `nonce`
+  as NULL and assigns `block_number` via a stored procedure), so including them
+  makes recomputed hashes diverge and `verifyIntegrity()` falsely report
+  tampering. Event ordering is already bound cryptographically by `previousHash`.
+
+---
+
 ## Reference Documents
 
 - `README.md` — SDK quick start and integration examples.

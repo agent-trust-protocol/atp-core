@@ -6,6 +6,7 @@
 import { EventEmitter } from 'events';
 import { createHash } from 'crypto';
 import { AgentTrustLevel, TrustScoringEngine } from '@atp/shared';
+import type { CredentialVerifier } from '@atp/shared';
 import { DatabaseManager } from '@atp/shared';
 
 export interface MCPSecurityConfig {
@@ -15,6 +16,15 @@ export interface MCPSecurityConfig {
   quantumSafeSignatures: boolean;
   trustedDomains: string[];
   maxRequestsPerMinute: number;
+  /**
+   * Verifies W3C Verifiable Credentials so they can count toward an agent's
+   * trust score. Inject `VcServiceCredentialVerifier` (from `@atp/vc-service`)
+   * at the composition root. When omitted the TrustScoringEngine FAILS CLOSED —
+   * it credits ZERO credentials — so a forged/expired/revoked credential can
+   * never inflate trust. We do not hardcode a verifier here to keep this
+   * adapter free of a dependency edge on vc-service.
+   */
+  credentialVerifier?: CredentialVerifier;
 }
 
 export interface SecuredMCPRequest {
@@ -54,7 +64,9 @@ export class MCPSecurityWrapper extends EventEmitter {
     super();
     this.config = config;
     this.db = db;
-    this.trustEngine = new TrustScoringEngine(db);
+    // Inject the credential verifier so genuinely verified VCs count toward
+    // trust. Without one the engine fails closed (zero credentials credited).
+    this.trustEngine = new TrustScoringEngine(db, config.credentialVerifier);
   }
   
   /**

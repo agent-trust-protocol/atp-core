@@ -34,8 +34,18 @@ import {
 // =============================================================================
 
 /**
- * Generate a Pedersen commitment to a value
- * C = H(value || blinding)
+ * Generate a commitment to a value as `C = H(value || blinding)`.
+ *
+ * ⚠️ EXPERIMENTAL — NOT a real Pedersen commitment. This is a hash-based
+ * commitment: it is hiding/binding for commit-and-reveal, but it is NOT
+ * additively homomorphic and provides NO zero-knowledge range/relation
+ * soundness. Do not rely on it for confidentiality of compared values or for
+ * range/aggregation proofs. A production deployment needing those properties
+ * must migrate to a real Pedersen commitment over an elliptic curve
+ * (Ed25519/Ristretto) via a vetted library — do NOT roll your own (see
+ * CLAUDE.md). Tracked as deferred work; the privacy conformance suite scopes
+ * itself to the cryptographically-real mechanisms (Merkle membership,
+ * selective disclosure, challenge-response) and excludes this primitive.
  *
  * @param value - The secret value to commit to
  * @param blinding - Random blinding factor for hiding
@@ -123,8 +133,15 @@ export function isChallengeExpired(challenge: ZKPChallenge): boolean {
 // =============================================================================
 
 /**
- * Create a range proof that trust score meets a threshold
- * Proves: "My trust score >= minRequired" without revealing exact score
+ * Create a proof that a trust score meets a threshold ("score >= minRequired").
+ *
+ * ⚠️ EXPERIMENTAL — this is NOT a sound zero-knowledge range proof. It builds on
+ * the hash-based commitment above (no homomorphic/range soundness) and the
+ * verifier ({@link verifyTrustLevelProof}) checks proof STRUCTURE, not an
+ * arithmetic range relation, so it does not cryptographically prevent a prover
+ * from claiming a threshold it does not meet. Treat as a placeholder pending a
+ * real range proof (e.g. bulletproofs) via a vetted library — do NOT roll your
+ * own (see CLAUDE.md). Excluded from the privacy conformance suite.
  *
  * @param actualScore - The actual trust score (0-1)
  * @param minRequired - Minimum score required

@@ -212,6 +212,33 @@ describe('TrustScoring', () => {
 
       expect(result.metadata.lastInteractionAt).toBe('2024-01-02T00:00:00Z');
     });
+
+    // TEETH: the existing "dilute (not boost)" test only asserts
+    // mixed.recency < valid.recency, which a NaN-poisoned recency (collapsing to 0
+    // via round2) ALSO satisfies. If parseTimestampMs returned NaN instead of the
+    // null sentinel, a single bad timestamp would poison the whole recency sum to
+    // NaN → round2 → 0, silently wiping out the perfectly valid recent interaction.
+    // Pin the EXACT diluted values so that failure mode is caught: one fresh
+    // (weight ≈ 1) + one unparseable (weight 0) over a denominator of 2 must yield
+    // recency 0.5, score 0.38 and a VERIFIED level — not the all-zero collapse.
+    it('a single valid + single invalid timestamp yields a POSITIVE diluted recency (no NaN collapse)', () => {
+      const now = new Date().toISOString();
+      const mixed = [
+        { timestamp: now, action: 'message', success: true },
+        { timestamp: 'not-a-date' as any, action: 'message', success: true }
+      ] as InteractionEvent[];
+
+      const result = scorer.calculateTrustScore(mixed, 0);
+
+      // Valid recent interaction (weight ≈ 1) survives; the bad one contributes
+      // weight 0 but stays in the denominator (2) → recency exactly 0.5, strictly > 0.
+      expect(result.factors.recencyScore).toBeGreaterThan(0);
+      expect(result.factors.recencyScore).toBe(0.5);
+      // The surviving valid interaction must still move the overall score / level.
+      expect(result.score).toBeGreaterThan(0);
+      expect(result.score).toBe(0.38);
+      expect(result.level).toBe(TrustLevel.VERIFIED);
+    });
   });
 
   describe('Trust Level Classification', () => {

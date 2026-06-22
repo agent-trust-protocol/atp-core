@@ -186,15 +186,16 @@ describe('AuditService', () => {
       expect(result.valid).toBe(true);
     });
 
-    it('returns valid: false when chain is broken', async () => {
-      storage.verifyChain.mockResolvedValueOnce({
-        valid: false,
-        brokenAt: 'evt-broken'
-      } as any);
+    it('returns valid: false when a stored event has been tampered', async () => {
+      // verifyIntegrity performs its own content verification (it does not trust
+      // storage.verifyChain), so tampering a stored event's content must break it.
+      const event = await service.logEvent(makeRequest());
+      const stored = storage._events.get(event.id)!;
+      stored.action = 'action:TAMPERED';
 
       const result = await service.verifyIntegrity();
       expect(result.valid).toBe(false);
-      expect((result as any).brokenAt).toBe('evt-broken');
+      expect((result as any).brokenAt).toBe(event.id);
     });
   });
 
