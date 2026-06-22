@@ -14,17 +14,19 @@ This guide covers deploying all ATP backend services to Railway.
 
 Each backend service runs as a separate Railway **service** within one Railway **project**. The shared Postgres database is provisioned as a Railway Postgres plugin and its `DATABASE_URL` is injected per-service automatically.
 
-Services to deploy:
+Services to deploy (these seven are auto-deployed by `.github/workflows/deploy.yml`). Each has a committed **config-as-code** file at the repo root so the dashboard only needs the root directory + config path:
 
-| Service              | Directory                         | Port |
-|----------------------|-----------------------------------|------|
-| identity-service     | docker/identity-service.Dockerfile | 3001 |
-| vc-service           | docker/vc-service.Dockerfile       | 3002 |
-| permission-service   | docker/permission-service.Dockerfile | 3003 |
-| audit-logger         | docker/audit-logger.Dockerfile     | 3005 |
-| protocol-integrations| docker/protocol-integrations.Dockerfile | 3006 |
-| payment-service      | packages/payment-service/Dockerfile | 3009 |
-| rpc-gateway          | docker/rpc-gateway.Dockerfile      | 3000 |
+| Service              | Dockerfile                          | Config-as-code (repo root)      | Port |
+|----------------------|-------------------------------------|---------------------------------|------|
+| identity-service     | docker/identity-service.Dockerfile   | railway.identity-service.json   | 3001 |
+| vc-service           | docker/vc-service.Dockerfile         | railway.vc-service.json         | 3002 |
+| permission-service   | docker/permission-service.Dockerfile | railway.permission-service.json | 3003 |
+| audit-logger         | docker/audit-logger.Dockerfile       | railway.audit-logger.json       | 3005 |
+| monitoring-service   | docker/monitoring-service.Dockerfile | railway.monitoring-service.json | 3005† |
+| rpc-gateway          | docker/rpc-gateway.Dockerfile        | railway.rpc-gateway.json        | 3000 |
+| payment-service      | docker/payment-service.Dockerfile    | railway.payment-service.json    | 3009 |
+
+† Railway injects a per-service `PORT`, so the shared 3005 default for audit-logger and monitoring-service is harmless. `protocol-integrations` (docker/protocol-integrations.Dockerfile, port 3006) has a Dockerfile but is **not** in the auto-deploy matrix; add it to both `deploy.yml` and a `railway.protocol-integrations.json` if/when you deploy it.
 
 ---
 
@@ -64,15 +66,15 @@ psql "$DATABASE_URL" -f scripts/init-db.sql
 
 ## 4. Deploy Each Service
 
-For each service, create a Railway service pointing at the correct Dockerfile:
+For each service, create a Railway service that reads its committed config-as-code file (which already declares the Dockerfile builder, Dockerfile path, and `/health` healthcheck):
 
 ### Via Dashboard (recommended for first setup)
 
-1. Click **+ New** → **GitHub Repo**.
-2. Select the `atp-core` repository.
-3. Under **Build & Deploy**, set the **Dockerfile path** to the value from the table above (e.g. `docker/identity-service.Dockerfile`).
-4. Set the **Root Directory** to `/` (repo root) — the Dockerfiles use monorepo-relative COPY paths.
-5. Repeat for every service.
+1. Click **+ New** → **GitHub Repo**, select the `atp-core` repository.
+2. Set the service **Name** to the service name (e.g. `identity-service`) so the CI `railway up --service <name>` targets it.
+3. Set the **Root Directory** to `/` (repo root) — the Dockerfiles use monorepo-relative COPY paths.
+4. Set the **Config-as-Code Path** (Settings → Config) to `/railway.<service>.json` (e.g. `/railway.identity-service.json`). The builder (Dockerfile), Dockerfile path, and healthcheck `/health` all come from that file — no need to set them by hand.
+5. Add the service's environment variables (Section 5). Repeat for every service.
 
 ### Via CLI
 
@@ -211,3 +213,17 @@ To set it up:
 2. Add it as `RAILWAY_TOKEN` in your GitHub repository's **Settings → Secrets and variables → Actions**.
 
 Each service is deployed in parallel via a matrix strategy in the workflow.
+
+### Database keep-alive (managed Postgres / Supabase)
+
+If a deployed service points at a managed Postgres that auto-pauses on
+inactivity (e.g. a Supabase free-tier project, which pauses after ~7 days),
+the `.github/workflows/db-keep-alive.yml` workflow runs a `SELECT 1` against it
+every 3 days to keep it warm. It is a no-op until you add the connection string:
+
+1. Get the Postgres connection string (in Supabase: **Project Settings →
+   Database → Connection string**).
+2. Add it as **`SUPABASE_DB_URL`** in **Settings → Secrets and variables →
+   Actions**.
+
+You can also trigger it manually from the Actions tab (`workflow_dispatch`).
