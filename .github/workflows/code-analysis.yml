@@ -1,0 +1,79 @@
+name: Code Analysis
+
+# Free, open-source PR code analysis — the replacement for the (now-removed)
+# recurseml GitHub App. Two advisory analyzers run on every PR (and on push to
+# main, to establish a baseline so PR findings register as "new"):
+#
+#   * Semgrep OSS  — open-source static analysis (LGPL), registry rulesets, no token.
+#   * CodeQL       — GitHub-native SAST, free for public repositories, no token.
+#
+# Both are ADVISORY: findings surface as inline PR annotations and in the
+# repository Security tab, but never fail the PR. No LLM/API key or paid secret
+# is required.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: code-analysis-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+  pull-requests: read
+
+jobs:
+  semgrep:
+    name: Semgrep (OSS)
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep (advisory)
+        # Free registry rulesets — no login / SEMGREP_APP_TOKEN required.
+        # `|| true` keeps the scan advisory: findings are reported via SARIF,
+        # never by failing the job.
+        run: |
+          semgrep scan \
+            --sarif --output=semgrep.sarif \
+            --config p/default \
+            --config p/secrets \
+            --config p/typescript \
+            --config p/javascript || true
+
+      - name: Upload Semgrep results
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+
+  codeql:
+    name: CodeQL
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        continue-on-error: true
+        with:
+          languages: javascript-typescript
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        continue-on-error: true
+        with:
+          category: "/language:js-ts"
