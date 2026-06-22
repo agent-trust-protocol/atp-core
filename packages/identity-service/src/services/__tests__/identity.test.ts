@@ -188,8 +188,10 @@ describe('IdentityService', () => {
       expect(result).toBeNull();
     });
 
-    it('updates the verification method after key rotation', async () => {
-      const { did } = await service.registerDID();
+    it('updates the verification method after key rotation (legacy v1 DID)', async () => {
+      // In-place rotation applies to legacy v1 DIDs; a spec-v2 did:atp rotation
+      // changes the identifier and is guarded (see the v2 test below).
+      const { did } = await service.registerDID({ quantumSafe: false });
 
       const updated = await service.rotateKeys(did);
 
@@ -199,8 +201,14 @@ describe('IdentityService', () => {
       expect(updated!.updated).toBeDefined();
     });
 
-    it('calls storeKeyPair on the storage service', async () => {
-      const { did } = await service.registerDID();
+    it('rejects in-place rotation for a spec-v2 did:atp (rotation changes the DID)', async () => {
+      const { did } = await service.registerDID(); // v2 by default
+
+      await expect(service.rotateKeys(did)).rejects.toThrow(/changes the DID/);
+    });
+
+    it('calls storeKeyPair on the storage service (legacy v1 DID)', async () => {
+      const { did } = await service.registerDID({ quantumSafe: false });
       storage.storeDIDDocument.mockClear();
 
       await service.rotateKeys(did);

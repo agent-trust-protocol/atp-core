@@ -221,6 +221,20 @@ export class IdentityService {
       return null;
     }
 
+    // A spec-v2 did:atp binds the identifier to its key fingerprints
+    // (…:e1_<thumbprint>:pq1_<thumbprint>), so rotating a binding key changes
+    // the DID itself (docs/specs/did-atp/index.html, "Method Operations"). An
+    // in-place rotation that keeps the same DID would leave the document's keys
+    // inconsistent with the identifier — and previously dropped the ML-DSA-65
+    // verification method entirely. Reject it explicitly rather than emit a
+    // broken dual-binding document; a v2 agent rotates by re-registering.
+    if (/:e1_[A-Za-z0-9_-]+:pq1_[A-Za-z0-9_-]+$/.test(did)) {
+      throw new Error(
+        `Cannot rotate keys in place for spec-v2 did:atp identifier ${did}: ` +
+          'rotating a binding key changes the DID. Re-register to obtain a new did:atp.'
+      );
+    }
+
     const newKeyPair = await this.storage.rotateKey(did);
     const now = new Date().toISOString();
     
