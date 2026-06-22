@@ -159,16 +159,22 @@ export class CryptoUtils {
     const messageBytes = Buffer.from(message, 'utf8');
     
     if (keyPair.isQuantumSafe && keyPair.pqcPrivateKey) {
-      // Use quantum-safe hybrid signing
-      const provider = await this.cryptoManager.getCurrentProvider();
+      // Sign with the post-quantum ML-DSA-65 binding. The combined pqcPrivateKey
+      // is Ed25519(32 bytes) || ML-DSA-65; strip the classical prefix and use
+      // the ML-DSA provider (the default cryptoManager is Ed25519-only and would
+      // reject the oversized key).
+      const provider = await this.pqcManager.getCurrentProvider();
+      const mlDsaPrivateKey = Buffer.from(keyPair.pqcPrivateKey, 'hex').subarray(
+        ED25519_PUBLIC_KEY_BYTES
+      );
       const privateKey = {
         algorithm: { name: keyPair.algorithm },
         extractable: true,
         type: 'private' as const,
         usages: ['sign'],
-        keyData: Buffer.from(keyPair.pqcPrivateKey, 'hex')
+        keyData: mlDsaPrivateKey
       };
-      
+
       const signature = await provider.sign(messageBytes, privateKey);
       return {
         signature: Buffer.from(signature).toString('hex'),
@@ -195,15 +201,21 @@ export class CryptoUtils {
     
     if (keyPair.isQuantumSafe && keyPair.pqcPublicKey) {
       try {
-        const provider = await this.cryptoManager.getCurrentProvider();
+        // Verify against the post-quantum ML-DSA-65 binding. pqcPublicKey is
+        // Ed25519(32 bytes) || ML-DSA-65; strip the classical prefix and use
+        // the ML-DSA provider.
+        const provider = await this.pqcManager.getCurrentProvider();
+        const mlDsaPublicKey = Buffer.from(keyPair.pqcPublicKey, 'hex').subarray(
+          ED25519_PUBLIC_KEY_BYTES
+        );
         const publicKey = {
           algorithm: { name: keyPair.algorithm },
           extractable: true,
           type: 'public' as const,
           usages: ['verify'],
-          keyData: Buffer.from(keyPair.pqcPublicKey, 'hex')
+          keyData: mlDsaPublicKey
         };
-        
+
         return await provider.verify(messageBytes, signatureBytes, publicKey);
       } catch {
         // Fall back to classical verification
