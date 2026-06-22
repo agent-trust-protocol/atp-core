@@ -1,0 +1,30 @@
+name: DB Keep-Alive
+
+# Keeps a managed Postgres (e.g. a Supabase free-tier project a deployed service
+# points at) from auto-pausing on inactivity. Runs a trivial `SELECT 1` against
+# the connection string in the SUPABASE_DB_URL secret. No-ops when the secret is
+# absent (forks, or before it is configured).
+
+on:
+  schedule:
+    - cron: '0 7 */3 * *' # every 3 days at 07:00 UTC — well under Supabase's ~7-day pause
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  keep-alive:
+    name: Ping database (SELECT 1)
+    runs-on: ubuntu-latest
+    steps:
+      - name: SELECT 1
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "SUPABASE_DB_URL not set — skipping keep-alive (no-op)."
+            exit 0
+          fi
+          command -v psql >/dev/null 2>&1 || { sudo apt-get update && sudo apt-get install -y postgresql-client; }
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -c "select 1 as keep_alive;"
