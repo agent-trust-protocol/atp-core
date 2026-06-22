@@ -94,6 +94,10 @@ jobs:
     # security), which scans PRs and the default branch. A custom CodeQL run
     # here would be rejected ("advanced configurations cannot be processed when
     # the default setup is enabled"), so it is intentionally not duplicated.
+    # Note: the previous in-workflow CodeQL step was continue-on-error (never a
+    # gate). Release paths here (v* tags / workflow_dispatch) therefore rely on
+    # the latest default-branch CodeQL result rather than a per-deploy scan;
+    # tags are cut from main, which default setup has already analyzed.
 
   # Build and Push Container Images
   build-images:

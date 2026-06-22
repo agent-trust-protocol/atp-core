@@ -58,11 +58,23 @@ run uploads them). CodeQL default setup applies its own fork handling.
 
 ## Making Semgrep blocking (optional)
 
-If you later want Semgrep to gate merges, add the `Code Analysis / Semgrep (OSS)`
-check as a **required status check** under **Settings → Branches → Branch
-protection** for `main`. The Semgrep job runs on fork PRs too (only its upload is
-skipped), so the check is still produced and is safe to require. (Left advisory
-by default so it never throws a surprise red ✗ on open PRs.)
+By default the Semgrep job is **advisory**: the scan is run with `|| true` and
+the SARIF upload is `continue-on-error`, so the job stays green even if Semgrep
+can't fetch rules, crashes, or emits no SARIF. **Do not make it a required status
+check in this state** — branch protection would see it pass while no analysis
+actually ran.
+
+To gate merges on Semgrep, first make failures real, then require it:
+
+1. In `code-analysis.yml`, drop the `|| true` on the scan (and remove
+   `continue-on-error` from the SARIF upload) so a failed scan / missing report
+   fails the job.
+2. Add the `Code Analysis / Semgrep (OSS)` check as a **required status check**
+   under **Settings → Branches → Branch protection** for `main`. (The job runs
+   on fork PRs too — only its upload is skipped — so the check is still produced
+   on forks.)
+
+It is left advisory by default so it never throws a surprise red ✗ on open PRs.
 
 ## Tuning Semgrep rulesets
 
