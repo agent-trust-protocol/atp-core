@@ -1,333 +1,112 @@
-# 🤖 Recurse ML GitHub PR Bot Setup Guide
+# PR Code Analysis (free & open source)
 
-## ✨ What You're Installing
+Automated pull-request code analysis for `atp-core`. This **replaces the old
+Recurse ML GitHub App** (a paid third-party trial) with free, open-source
+analysis that runs directly in GitHub — **no API key, no paid plan, no secret
+required.** Two complementary engines provide it:
 
-The **FREE Recurse ML GitHub App** for automated pull request reviews.
+## What runs
 
-### Features:
-- 🔍 **Automatic Code Analysis** on every PR
-- 🐛 **Bug Detection** before merge
-- 🚨 **Breaking Change Alerts**
-- 📚 **Documentation Links** for fixes
-- 🔒 **Security Issue Detection**
-- ✅ **Zero Cost** for open source projects
+| Engine | Source | What it finds | License / cost |
+|--------|--------|---------------|----------------|
+| `Semgrep (OSS)` | [`.github/workflows/code-analysis.yml`](../../../.github/workflows/code-analysis.yml) | Bug patterns, insecure code, leaked secrets, TS/JS anti-patterns (registry rulesets `p/default`, `p/secrets`, `p/typescript`, `p/javascript`) | LGPL, free, no token |
+| `CodeQL` | GitHub **CodeQL default setup** (Settings → Code security → CodeQL analysis) | Security vulnerabilities & data-flow bugs (SAST) for JavaScript/TypeScript | Free for public repos, no token |
 
----
+**CodeQL is provided by the repo's built-in default setup**, which already scans
+pull requests — so it is intentionally **not** duplicated in
+`code-analysis.yml`. (GitHub rejects a custom CodeQL workflow upload while
+default setup is enabled: *"CodeQL analyses from advanced configurations cannot
+be processed when the default setup is enabled."*) The workflow therefore adds
+only the piece default setup doesn't cover: **Semgrep OSS**.
 
-## 🚀 Installation Steps
+Semgrep runs as an **advisory / non-blocking** check on pull requests (and push
+to `main` for a baseline): results appear as inline PR annotations and in the
+repository **Security → Code scanning** tab, but do **not** fail the PR. The
+merge gate remains the `Lint · Type-check · Test` job in
+[`ci.yml`](../../../.github/workflows/ci.yml).
 
-### Step 1: Open GitHub Marketplace
+> CodeQL is **only** run by default setup. The CodeQL steps that used to live in
+> `production-deploy.yml` were removed because they conflict with default setup
+> (same "advanced configurations cannot be processed" error). Default setup is
+> the single CodeQL path.
 
-**Click this link:**
-```
-https://github.com/marketplace/recurse-ml
-```
+### ⚙️ Operator prerequisite — keep CodeQL default setup enabled
 
-Or manually navigate to:
-1. Go to https://github.com/marketplace
-2. Search for "Recurse ML"
-3. Click on the Recurse ML app
+This PR does not (and cannot) commit the CodeQL configuration; it lives in repo
+**Settings → Code security → CodeQL analysis → Default**. Keep it **enabled** —
+that is what gives pull requests their CodeQL coverage. If it is ever turned off,
+PRs lose CodeQL entirely (the removed workflow no longer provides a fallback), so
+treat leaving it on as a required setting. Do **not** re-add a committed CodeQL
+workflow while default setup is enabled — the two cannot coexist.
 
-### Step 2: Install the App
+## Fork PRs (known coverage gaps)
 
-1. Click **"Set up a plan"** or **"Install it for free"**
-2. Select **"Free for open source"** plan
-3. Click **"Install it for free"**
-4. Click **"Complete order and begin installation"**
+Pull requests from **forks** run with a read-only `GITHUB_TOKEN`, which changes
+what analysis is available before merge:
 
-### Step 3: Configure Repository Access
+- **Semgrep:** the *scan* still runs, but the **code-scanning upload is skipped**
+  (it needs `security-events: write`). Findings are written to `semgrep.sarif`,
+  **not** printed to the Actions log — to read them on a fork PR, download the
+  **`semgrep-sarif` artifact** from the workflow run (Actions → run → Artifacts).
+  The same findings appear in the Security tab automatically once the change
+  lands on `main` (the push run uploads them).
+- **CodeQL:** GitHub's CodeQL **default setup does not analyze pull requests from
+  forks**. External-contributor PRs therefore get **no CodeQL** until the change
+  is merged to `main`, at which point the push-triggered default-setup run scans
+  it. Do not treat fork PRs as CodeQL-covered.
 
-Choose one of these options:
+Both gaps close on merge to `main`. For same-repo PRs (the common case here),
+both Semgrep and CodeQL run and upload normally.
 
-**Option A: All Repositories** (Recommended)
-- Select "All repositories"
-- This will analyze all your repos automatically
+## How to read findings
 
-**Option B: Specific Repository**
-- Select "Only select repositories"
-- Choose: `agent-trust-protocol`
-- Click **"Install"**
+1. Open the PR → **Files changed**: Semgrep / CodeQL findings show as inline
+   annotations on the relevant lines (same-repo PRs).
+2. Repository → **Security → Code scanning**: the full list of open alerts,
+   grouped by tool (`semgrep`, CodeQL), with severity and remediation guidance.
+3. The `Code Analysis / Semgrep (OSS)` check (and the CodeQL check from default
+   setup) appear in the PR **Checks** list.
 
-### Step 4: Authorize the App
+## Making Semgrep blocking (optional)
 
-1. GitHub will show permissions required
-2. Review the permissions:
-   - Read access to code
-   - Read and write access to pull requests
-   - Read access to metadata
-3. Click **"Authorize"** or **"Install"**
+By default the Semgrep job is **advisory**: the scan is run with `|| true` and
+the SARIF upload is `continue-on-error`, so the job stays green even if Semgrep
+can't fetch rules, crashes, or emits no SARIF. **Do not make it a required status
+check in this state** — branch protection would see it pass while no analysis
+actually ran.
 
-### Step 5: Verify Installation
+To gate merges on Semgrep, first make failures real, then require it:
 
-After installation, you'll be redirected to Recurse ML dashboard.
+1. In `code-analysis.yml`, drop the `|| true` on the scan (and remove
+   `continue-on-error` from the SARIF upload) so a failed scan / missing report
+   fails the job.
+2. Add the `Code Analysis / Semgrep (OSS)` check as a **required status check**
+   under **Settings → Branches → Branch protection** for `main`. (The job runs
+   on fork PRs too — only its upload is skipped — so the check is still produced
+   on forks.)
 
----
+It is left advisory by default so it never throws a surprise red ✗ on open PRs.
 
-## 📊 How It Works
+## Tuning Semgrep rulesets
 
-### Automatic PR Review Workflow:
-
-```
-Developer creates PR
-       ↓
-GitHub triggers Recurse ML bot
-       ↓
-Bot analyzes changed files with Context 7
-       ↓
-Bot posts review comments on PR
-       ↓
-Developer sees inline suggestions
-       ↓
-Developer fixes issues
-       ↓
-Bot re-analyzes after changes
-       ↓
-PR gets approval when clean
-```
-
----
-
-## 🎯 Testing the Setup
-
-### Create a Test PR
-
-1. **Create a new branch:**
-   ```bash
-   cd /Users/jacklu/agent-trust-protocol-1
-   git checkout -b test-recurse-ml-bot
-   ```
-
-2. **Make a small change:**
-   ```bash
-   echo "// Testing Recurse ML bot" >> website-repo/src/app/page.tsx
-   git add website-repo/src/app/page.tsx
-   git commit -m "test: verify Recurse ML bot integration"
-   git push origin test-recurse-ml-bot
-   ```
-
-3. **Create PR on GitHub:**
-   - Go to https://github.com/YOUR_USERNAME/agent-trust-protocol
-   - Click "Compare & pull request"
-   - Create the PR
-
-4. **Watch for bot comment:**
-   - Recurse ML bot should comment within 1-2 minutes
-   - You'll see analysis results and any issues found
+Edit the `--config` flags in `code-analysis.yml`. All
+[Semgrep registry](https://semgrep.dev/explore) `p/*` packs are free and need no
+token. To ignore paths, add a `.semgrepignore` file at the repo root.
 
 ---
 
-## 💡 What the Bot Analyzes
+## ⚠️ One manual step: remove the old Recurse ML app
 
-### In Your Authentication Code:
+The workflow above replaces Recurse ML, but Recurse ML was installed as a
+**GitHub App** (it was never configured in this repo), so it must be uninstalled
+in GitHub's UI — nothing in the repository can stop it from posting its
+`recurseml/analysis` status:
 
-#### Security Issues:
-- SQL injection vulnerabilities
-- XSS vulnerabilities
-- Authentication bypasses
-- Token handling issues
-- Password storage problems
-- Session management flaws
+1. Go to the org's GitHub App settings:
+   **GitHub → Organization → Settings → GitHub Apps** (or
+   <https://github.com/settings/installations> for a personal account).
+2. Find **Recurse ML** → **Configure**.
+3. Either **remove `agent-trust-protocol/atp-core`** from its repository access,
+   or **Uninstall** the app entirely.
 
-#### Logic Bugs:
-- Missing error handling
-- Race conditions
-- Validation gaps
-- Edge cases in auth flow
-- Async/await issues
-
-#### Code Quality:
-- Unused variables
-- Dead code paths
-- Performance issues
-- Best practice violations
-- TypeScript type issues
-
-#### Breaking Changes:
-- API contract changes
-- Database schema changes
-- Dependency updates
-- Config changes
-
----
-
-## 📋 Expected Bot Comments
-
-### Example Bot Review Comment:
-
-```
-🐛 Recurse ML found potential issues:
-
-**Security Issue - High Severity**
-📍 src/app/api/auth/login/route.ts:42
-
-Issue: Password comparison using == instead of bcrypt.compare()
-Risk: Authentication bypass vulnerability
-
-Suggestion: Use bcrypt.compare() for secure password verification
-```
-
-With link to documentation and suggested fix.
-
----
-
-## 🔧 Configuration Options
-
-### Configure Bot Behavior (Optional)
-
-After installation, you can configure:
-
-1. **Severity Threshold**: Which issues trigger comments
-   - Critical only
-   - High and above
-   - Medium and above (default)
-   - All issues
-
-2. **Auto-fix**: Let bot create commits with fixes
-   - Enabled/Disabled
-
-3. **File Ignore Patterns**:
-   - `node_modules/**`
-   - `dist/**`
-   - `*.test.ts`
-
-Access configuration at:
-```
-https://github.com/settings/installations
-→ Configure Recurse ML
-```
-
----
-
-## 🎓 Best Practices
-
-### 1. Review Bot Comments Promptly
-- Bot provides valuable security insights
-- Address critical issues before merging
-
-### 2. Use Bot as Learning Tool
-- Bot links to documentation
-- Learn from suggested fixes
-
-### 3. Integrate with CI/CD
-- Bot comments appear in PR checks
-- Use as merge requirement
-
-### 4. Don't Ignore Security Issues
-- Bot flags real vulnerabilities
-- Fix before production deployment
-
----
-
-## 🔍 Monitoring Bot Activity
-
-### Check Bot Performance:
-
-1. **PR Comments**: See inline reviews on pull requests
-2. **GitHub Checks**: View in PR "Checks" tab
-3. **Recurse Dashboard**: Visit https://app.recurse.ml for analytics
-
----
-
-## 🆘 Troubleshooting
-
-### Bot Not Commenting on PR
-
-**Check:**
-1. Is bot installed on correct repository?
-2. Does PR contain code changes? (Not just markdown)
-3. Are changes in analyzed file types? (.ts, .tsx, .js, .jsx)
-4. Check GitHub Settings → Installed Apps → Recurse ML
-
-**Fix:**
-```bash
-# Re-trigger bot by pushing new commit
-git commit --allow-empty -m "chore: trigger Recurse ML bot"
-git push
-```
-
-### Bot Permissions Issue
-
-If bot can't comment:
-1. Go to https://github.com/settings/installations
-2. Click "Configure" next to Recurse ML
-3. Ensure these permissions are granted:
-   - Read access to code
-   - Write access to pull requests
-
-### Bot Missing from Repository
-
-Reinstall:
-1. Go to https://github.com/marketplace/recurse-ml
-2. Click "Install" again
-3. Select your repository
-4. Authorize
-
----
-
-## 📊 What to Expect
-
-### First PR Review:
-
-The bot will analyze your authentication code and likely find:
-
-1. **Security Issues** (if any):
-   - Token validation edge cases
-   - Session management issues
-   - SQL injection risks
-
-2. **Logic Bugs**:
-   - Missing error boundaries
-   - Async/await patterns
-   - Race conditions
-
-3. **Code Quality**:
-   - Unused imports
-   - Type safety improvements
-   - Best practices
-
-### After Fixes:
-
-Bot re-analyzes automatically when you push fixes. You'll see:
-- ✅ Issues resolved
-- 🎉 Clean code approval
-- 📊 Code quality score
-
----
-
-## 🎉 Success Criteria
-
-Your setup is successful when:
-
-✅ Bot appears in repository's installed apps
-✅ Bot comments on test PR within 2 minutes
-✅ Bot provides actionable feedback with documentation links
-✅ Bot re-analyzes after fixes
-✅ PR shows "Recurse ML approved" when clean
-
----
-
-## 🔗 Quick Links
-
-- **Install Bot**: https://github.com/marketplace/recurse-ml
-- **Bot Settings**: https://github.com/settings/installations
-- **Dashboard**: https://app.recurse.ml
-- **Documentation**: https://docs.recurse.ml
-
----
-
-## 📝 Next Steps After Installation
-
-1. ✅ Install bot from GitHub Marketplace
-2. ✅ Configure repository access
-3. ✅ Create test PR to verify
-4. ✅ Review bot comments
-5. ✅ Make bot a required check for PRs (optional)
-6. ✅ Share setup with team
-
----
-
-**Installation Link:** https://github.com/marketplace/recurse-ml
-
-**Start the installation now!** 🚀
-
-After installation, create a test PR to see the bot in action.
+Once uninstalled, the stale `recurseml/analysis` check stops appearing on PRs.
