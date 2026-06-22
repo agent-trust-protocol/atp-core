@@ -57,6 +57,7 @@ jobs:
         # which skip the code-scanning upload below) so findings are readable
         # even when they can't be pushed to the Security tab.
         if: always() && hashFiles('semgrep.sarif') != ''
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: semgrep-sarif
