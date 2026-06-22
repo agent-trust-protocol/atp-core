@@ -39,6 +39,11 @@ const ITEMS = [
     name: 'Audit Store / Trust Registry — integrity + tamper detection',
     pattern: '(audit-conformance|trust-conformance|trust-scoring-conformance|trust)\\.test\\.ts$',
   },
+  {
+    id: 5,
+    name: 'Privacy — selective disclosure (Merkle membership)',
+    pattern: '(zkp-conformance|selective-disclosure)\\.test\\.ts$',
+  },
 ];
 
 const requested = process.argv.slice(2).map(Number).filter((n) => !Number.isNaN(n));

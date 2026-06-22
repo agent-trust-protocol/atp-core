@@ -4,6 +4,9 @@
  */
 
 import { createHash } from 'crypto';
+import * as ed25519 from '@noble/ed25519';
+import { sha512 } from '@noble/hashes/sha2.js';
+import { ml_dsa65 } from '@noble/post-quantum/ml-dsa.js';
 import {
   CryptoUtils,
   HybridKeyPair,
@@ -11,6 +14,9 @@ import {
   ML_DSA_65_PUBLIC_KEY_BYTES,
   ML_DSA_65_SIGNATURE_BYTES
 } from '../../utils/crypto';
+
+// @noble/ed25519 needs a synchronous SHA-512 for getPublicKey (matches crypto.ts).
+ed25519.etc.sha512Sync = (...m) => sha512(ed25519.etc.concatBytes(...m));
 
 const BASE64URL_43 = /^[A-Za-z0-9_-]{43}$/;
 
@@ -291,5 +297,77 @@ describe('did:atp v2 key model', () => {
       const pqSig = CryptoUtils.signMlDsa65('invariant', keyPair.mlDsa65.secretKey);
       expect(CryptoUtils.verifyMlDsa65('invariant', pqSig, keyPair.mlDsa65.publicKey)).toBe(true);
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Deterministic known-answer vectors (KAT) — hybrid Ed25519 + ML-DSA-65.
+//
+// Keys are derived from FIXED seeds so the e1_/pq1_ fingerprints are
+// reproducible across implementations. Signature BYTES are not pinned:
+// ML-DSA-65 signing is randomized (hedged), so we pin the fingerprints, key
+// sizes and Ed25519 public key, and assert sign/verify round-trips + negatives.
+// ---------------------------------------------------------------------------
+
+describe('hybrid key model — deterministic known-answer vectors (KAT)', () => {
+  const ED25519_SECRET = new Uint8Array(32).fill(7);
+  const ML_DSA_65_SEED = new Uint8Array(32).fill(42);
+  const KAT_MESSAGE = 'atp-conformance-kat-v1';
+
+  const EXPECTED = {
+    e1: 'e1_--6IM5l0OosLj9yWskISYhUA3n_3CURQkmrYMSha_ck',
+    pq1: 'pq1_K7M2FNxAf3VIdhLYkrd0zH51TMhQ8YGULqtpEA-nY4c',
+    edPublicKeyB64u: '6kpsY-KcUgq-9VB7Ey7F-ZVHdq6-vnuSQh7qaRRG0iw',
+  };
+
+  let edPublicKey: Uint8Array;
+  let mlDsa: { publicKey: Uint8Array; secretKey: Uint8Array };
+
+  beforeAll(async () => {
+    edPublicKey = await ed25519.getPublicKey(ED25519_SECRET);
+    mlDsa = ml_dsa65.keygen(ML_DSA_65_SEED);
+  });
+
+  it('derives the pinned Ed25519 public key from the fixed seed', () => {
+    expect(edPublicKey.length).toBe(ED25519_PUBLIC_KEY_BYTES);
+    expect(Buffer.from(edPublicKey).toString('base64url')).toBe(EXPECTED.edPublicKeyB64u);
+  });
+
+  it('derives the pinned e1_ fingerprint (RFC 7638 over the Ed25519 JWK)', () => {
+    expect(CryptoUtils.e1Fingerprint(edPublicKey)).toBe(EXPECTED.e1);
+  });
+
+  it('derives a 1952-byte ML-DSA-65 public key from the fixed seed', () => {
+    expect(mlDsa.publicKey.length).toBe(ML_DSA_65_PUBLIC_KEY_BYTES);
+    expect(mlDsa.publicKey.length).toBe(1952);
+  });
+
+  it('derives the pinned pq1_ fingerprint (RFC 7638 over the RFC 9964 AKP JWK)', () => {
+    expect(CryptoUtils.pq1Fingerprint(mlDsa.publicKey)).toBe(EXPECTED.pq1);
+  });
+
+  it('round-trips an ML-DSA-65 signature over the fixed message (3309-byte sig)', () => {
+    const sig = CryptoUtils.signMlDsa65(KAT_MESSAGE, mlDsa.secretKey);
+    expect(sig.length).toBe(ML_DSA_65_SIGNATURE_BYTES);
+    expect(sig.length).toBe(3309);
+    expect(CryptoUtils.verifyMlDsa65(KAT_MESSAGE, sig, mlDsa.publicKey)).toBe(true);
+  });
+
+  it('rejects a tampered ML-DSA-65 signature', () => {
+    const sig = CryptoUtils.signMlDsa65(KAT_MESSAGE, mlDsa.secretKey);
+    sig[0] ^= 0xff;
+    expect(CryptoUtils.verifyMlDsa65(KAT_MESSAGE, sig, mlDsa.publicKey)).toBe(false);
+  });
+
+  it('rejects an ML-DSA-65 signature verified against the wrong message', () => {
+    const sig = CryptoUtils.signMlDsa65(KAT_MESSAGE, mlDsa.secretKey);
+    expect(CryptoUtils.verifyMlDsa65('a-different-message', sig, mlDsa.publicKey)).toBe(false);
+  });
+
+  it('fingerprints are stable across re-derivation from the same seeds', async () => {
+    const ed2 = await ed25519.getPublicKey(ED25519_SECRET);
+    const ml2 = ml_dsa65.keygen(ML_DSA_65_SEED);
+    expect(CryptoUtils.e1Fingerprint(ed2)).toBe(EXPECTED.e1);
+    expect(CryptoUtils.pq1Fingerprint(ml2.publicKey)).toBe(EXPECTED.pq1);
   });
 });

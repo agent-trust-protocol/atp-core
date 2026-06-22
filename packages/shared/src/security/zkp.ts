@@ -37,11 +37,19 @@ export interface ZKProof {
   timestamp: string;
 }
 
+/** One step of a Merkle authentication path. `hash` is a hex SHA-256 digest. */
+export interface MerkleProofStep {
+  position: 'left' | 'right';
+  hash: string;
+}
+
 export interface SelectiveDisclosureProof {
   disclosedAttributes: Record<string, any>;
-  proof: ZKProof;
-  merkleProof: string[];
+  /** One authentication path per revealed attribute (parallel to revealedIndices). */
+  merkleProof: MerkleProofStep[][];
   revealedIndices: number[];
+  /** Hex SHA-256 Merkle root binding the disclosure to the full credential. */
+  merkleRoot: string;
 }
 
 export interface RangeProof {
@@ -143,25 +151,34 @@ export class ATPZKProofService {
   }
 
   /**
-   * Create selective disclosure proof for verifiable credentials
-   * Allows revealing only specific attributes while proving possession of the full credential
+   * Create a selective-disclosure proof for a verifiable credential.
+   *
+   * Trust model: the proof reveals only the requested attributes and commits to
+   * the full credential via a domain-separated SHA-256 Merkle root. A verifier
+   * establishes that the disclosed attributes belong to a specific, authentic
+   * credential by checking each attribute's membership against that root AND
+   * binding the root to the issuer's attestation (`expectedMerkleRoot` —
+   * typically the root the issuer signed, verified out-of-band by the VC
+   * service). This service does NOT itself attest credential authenticity.
    */
   createSelectiveDisclosureProof(
     fullCredential: Record<string, any>,
-    attributesToReveal: string[],
-    credentialSignature: string
+    attributesToReveal: string[]
   ): SelectiveDisclosureProof {
-    // Create Merkle tree of all attributes
+    // Create Merkle tree of all attributes (leaf order = credential key order)
     const allAttributes = Object.keys(fullCredential);
     const merkleTree = this.buildMerkleTree(allAttributes.map(attr =>
       sha256(Buffer.from(JSON.stringify(fullCredential[attr])))
     ));
+    const merkleRoot = Buffer.from(merkleTree[merkleTree.length - 1][0]).toString('hex');
 
-    // Get revealed indices and proofs
+    // One authentication path per revealed attribute (kept parallel to
+    // revealedIndices — NOT flattened, so each disclosed attribute verifies
+    // against its own path).
     const revealedIndices = attributesToReveal.map(attr => allAttributes.indexOf(attr));
     const merkleProof = revealedIndices.map(index =>
       this.getMerkleProof(merkleTree, index)
-    ).flat();
+    );
 
     // Create disclosed attributes
     const disclosedAttributes: Record<string, any> = {};
@@ -171,43 +188,73 @@ export class ATPZKProofService {
       }
     });
 
-    // Generate ZK proof that we know the full credential
-    const credentialHash = this.hashCredential(fullCredential);
-    const proof = this.createProofOfKnowledge(
-      BigInt(`0x${  credentialHash}`),
-      credentialSignature
-    );
-
     return {
       disclosedAttributes,
-      proof,
       merkleProof,
-      revealedIndices
+      revealedIndices,
+      merkleRoot
     };
   }
 
   /**
-   * Verify selective disclosure proof
+   * Deterministic hex SHA-256 Merkle root over a credential's attributes,
+   * computed identically to `createSelectiveDisclosureProof` (leaf order =
+   * credential key order). A verifier holding the issuer's published root can
+   * pass it as `expectedMerkleRoot` to bind a disclosure to that credential.
+   */
+  credentialMerkleRoot(fullCredential: Record<string, any>): string {
+    const allAttributes = Object.keys(fullCredential);
+    if (allAttributes.length === 0) {
+      throw new Error('Cannot compute Merkle root of a credential with no attributes');
+    }
+    const merkleTree = this.buildMerkleTree(allAttributes.map(attr =>
+      sha256(Buffer.from(JSON.stringify(fullCredential[attr])))
+    ));
+    return Buffer.from(merkleTree[merkleTree.length - 1][0]).toString('hex');
+  }
+
+  /**
+   * Verify a selective-disclosure proof by Merkle membership and root binding.
+   *
+   * Returns true iff every disclosed attribute authenticates against the SAME
+   * committed root AND — when `expectedMerkleRoot` is supplied — that root
+   * matches the issuer-attested credential root. Pass the issuer's signed root
+   * as `expectedMerkleRoot` to bind the disclosure to an authentic credential;
+   * the issuer's signature over that root is verified out-of-band (VC service).
    */
   verifySelectiveDisclosureProof(
     sdProof: SelectiveDisclosureProof,
-    credentialSignature: string,
     expectedMerkleRoot?: string
   ): boolean {
     try {
-      // Verify the ZK proof
-      if (!this.verifyProofOfKnowledge(sdProof.proof, credentialSignature)) {
+      const attrNames = Object.keys(sdProof.disclosedAttributes);
+      // Structural integrity: one disclosed attribute, one index, one path each.
+      if (
+        attrNames.length !== sdProof.revealedIndices.length ||
+        attrNames.length !== sdProof.merkleProof.length
+      ) {
         return false;
       }
 
-      // Verify Merkle proofs for disclosed attributes
-      for (let i = 0; i < sdProof.revealedIndices.length; i++) {
-        const index = sdProof.revealedIndices[i];
-        const attrName = Object.keys(sdProof.disclosedAttributes)[i];
-        const attrValue = sdProof.disclosedAttributes[attrName];
+      // Every disclosed attribute must authenticate against the SAME committed
+      // root — this binds the disclosure to one credential (prevents mixing
+      // attributes from different credentials).
+      for (let i = 0; i < attrNames.length; i++) {
+        const attrValue = sdProof.disclosedAttributes[attrNames[i]];
         const attrHash = sha256(Buffer.from(JSON.stringify(attrValue)));
+        const recomputedRoot = this.recomputeMerkleRoot(attrHash, sdProof.merkleProof[i]);
+        if (!timingSafeHexEqual(recomputedRoot, sdProof.merkleRoot)) {
+          return false;
+        }
+      }
 
-        if (!this.verifyMerkleProof(attrHash, index, sdProof.merkleProof, expectedMerkleRoot)) {
+      // Optional external binding: the committed root must match the issuer's
+      // published credential root.
+      if (expectedMerkleRoot) {
+        const expected = expectedMerkleRoot.startsWith('0x')
+          ? expectedMerkleRoot.slice(2)
+          : expectedMerkleRoot;
+        if (!timingSafeHexEqual(sdProof.merkleRoot, expected)) {
           return false;
         }
       }
@@ -396,19 +443,6 @@ export class ATPZKProofService {
     return hasher.digest('hex');
   }
 
-  private hashCredential(credential: Record<string, any>): string {
-    const sorted = Object.keys(credential)
-      .sort()
-      .reduce((acc, key) => {
-        acc[key] = credential[key];
-        return acc;
-      }, {} as Record<string, any>);
-
-    return createHash('sha256')
-      .update(JSON.stringify(sorted))
-      .digest('hex');
-  }
-
   private buildMerkleTree(leaves: Uint8Array[]): Uint8Array[][] {
     if (leaves.length === 0) return [];
 
@@ -436,8 +470,8 @@ export class ATPZKProofService {
     return tree;
   }
 
-  private getMerkleProof(tree: Uint8Array[][], leafIndex: number): string[] {
-    const proof: string[] = [];
+  private getMerkleProof(tree: Uint8Array[][], leafIndex: number): MerkleProofStep[] {
+    const proof: MerkleProofStep[] = [];
     let currentIndex = leafIndex;
 
     for (let level = 0; level < tree.length - 1; level++) {
@@ -445,7 +479,19 @@ export class ATPZKProofService {
       const siblingIndex = isRightNode ? currentIndex - 1 : currentIndex + 1;
 
       if (siblingIndex < tree[level].length) {
-        proof.push(tree[level][siblingIndex].toString());
+        // Sibling hashes are serialized as hex (NOT Uint8Array.toString(), which
+        // emits a decimal CSV that cannot be re-parsed into the original bytes).
+        proof.push({
+          position: isRightNode ? 'left' : 'right',
+          hash: Buffer.from(tree[level][siblingIndex]).toString('hex'),
+        });
+      } else {
+        // Orphan node: buildMerkleTree pairs it with the fixed empty
+        // placeholder on the right, so the path must carry that placeholder.
+        proof.push({
+          position: 'right',
+          hash: Buffer.from(MERKLE_EMPTY_PLACEHOLDER).toString('hex'),
+        });
       }
 
       currentIndex = Math.floor(currentIndex / 2);
@@ -454,35 +500,23 @@ export class ATPZKProofService {
     return proof;
   }
 
-  private verifyMerkleProof(
-    leafHash: Uint8Array,
-    leafIndex: number,
-    proof: string[],
-    expectedRoot?: string
-  ): boolean {
-    // The leaf must already be domain-separated to match the tree built by
-    // `buildMerkleTree` (which hashes leaves with the 0x00 tag before
-    // combining them with 0x01-tagged node hashes).
+  /**
+   * Recompute the Merkle root from a domain-separated leaf and its
+   * authentication path, returning the hex root. The leaf is hashed with the
+   * 0x00 tag to match `buildMerkleTree`; each step combines with a 0x01-tagged
+   * node hash on the side given by `step.position`.
+   */
+  private recomputeMerkleRoot(leafHash: Uint8Array, proof: MerkleProofStep[]): string {
     let currentHash = hashLeaf(leafHash);
-    let currentIndex = leafIndex;
 
-    for (const proofElement of proof) {
-      const siblingHash = new Uint8Array(Buffer.from(proofElement));
-      const isRightNode = currentIndex % 2 === 1;
-      currentHash = isRightNode
+    for (const step of proof) {
+      const siblingHash = new Uint8Array(Buffer.from(step.hash, 'hex'));
+      currentHash = step.position === 'left'
         ? hashNode(siblingHash, currentHash)
         : hashNode(currentHash, siblingHash);
-      currentIndex = Math.floor(currentIndex / 2);
     }
 
-    if (expectedRoot) {
-      return timingSafeHexEqual(
-        Buffer.from(currentHash).toString('hex'),
-        expectedRoot.startsWith('0x') ? expectedRoot.slice(2) : expectedRoot
-      );
-    }
-
-    return true;
+    return Buffer.from(currentHash).toString('hex');
   }
 
   private createBoundaryProof(
