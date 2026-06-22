@@ -34,6 +34,7 @@
 import * as ed25519 from '@noble/ed25519';
 import { ml_dsa65 } from '@noble/post-quantum/ml-dsa.js';
 import { sha512 } from '@noble/hashes/sha2.js';
+import canonicalize from 'canonicalize';
 
 // Reuse the production SDK implementation under test.
 import {
@@ -301,15 +302,18 @@ function verifyCredential(signed: SignedTrustCredential, publicKey: Uint8Array):
   }
 }
 
-/** Minimal deterministic JSON canonicalization (sorted keys) for signing. */
+/**
+ * RFC 8785 JSON Canonicalization Scheme via a vetted library (not hand-rolled).
+ * Unlike a simple key-sort, this also applies RFC 8785 number serialization and
+ * string-escaping rules, so signatures stay interoperable for numeric/Unicode
+ * claims (e.g. a trust score) rather than diverging from a conformant signer.
+ */
 function jcs(value: unknown): string {
-  if (value === null || typeof value !== 'object') return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map(jcs).join(',')}]`;
-  const obj = value as Record<string, unknown>;
-  const entries = Object.keys(obj)
-    .sort()
-    .map((k) => `${JSON.stringify(k)}:${jcs(obj[k])}`);
-  return `{${entries.join(',')}}`;
+  const canonical = canonicalize(value);
+  if (canonical === undefined) {
+    throw new Error('jcs: value is not JSON-serializable');
+  }
+  return canonical;
 }
 
 function shorten(did: string): string {
