@@ -21,9 +21,11 @@ export const ATP_ML_DSA_65_PUBLIC_KEY_BYTES = 1952;
 /** RFC 7638 SHA-256 thumbprints are 32 bytes → 43 base64url chars, no padding. */
 export const ATP_THUMBPRINT_LENGTH = 43;
 
-/** did:atp v2 identifier ABNF anchors (shared by builders and validators). */
-export const ATP_E1_RE = /^e1_[A-Za-z0-9_-]{43}$/;
-export const ATP_PQ1_RE = /^pq1_[A-Za-z0-9_-]{43}$/;
+// did:atp v2 identifier ABNF anchors (shared by builders and validators). The
+// e1_/pq1_ anchors are built from ATP_THUMBPRINT_LENGTH so the fingerprint
+// length has a single source of truth and the regexes cannot silently diverge.
+export const ATP_E1_RE = new RegExp(`^e1_[A-Za-z0-9_-]{${ATP_THUMBPRINT_LENGTH}}$`);
+export const ATP_PQ1_RE = new RegExp(`^pq1_[A-Za-z0-9_-]{${ATP_THUMBPRINT_LENGTH}}$`);
 export const ATP_PATH_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
 // Lowercase hostname per did:web, with an optional percent-encoded port.
 export const ATP_DOMAIN_RE =
