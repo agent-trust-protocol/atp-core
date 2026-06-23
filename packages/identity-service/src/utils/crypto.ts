@@ -1,19 +1,31 @@
 import * as ed25519 from '@noble/ed25519';
 import { createHash } from 'crypto';
-import { sha256 } from '@noble/hashes/sha2.js';
-import { initializeCrypto, CryptoAgilityManager, defaultPQCConfig, PQCAlgorithm, verifySignatureCompat } from '@atp/shared';
+import {
+  initializeCrypto,
+  CryptoAgilityManager,
+  defaultPQCConfig,
+  PQCAlgorithm,
+  verifySignatureCompat,
+  // Canonical did:atp v2 primitives — single source of truth lives in
+  // @atp/shared so this service can never drift from the SDK/spec.
+  atpBase64Url,
+  atpJwkThumbprint,
+  atpE1Fingerprint,
+  atpPq1Fingerprint,
+  buildAtpV2Did as buildAtpV2DidImpl,
+  ATP_ED25519_PUBLIC_KEY_BYTES as ED25519_PUBLIC_KEY_BYTES,
+  ATP_ML_DSA_65_PUBLIC_KEY_BYTES as ML_DSA_65_PUBLIC_KEY_BYTES,
+} from '@atp/shared';
 
 // Initialize crypto polyfills
 initializeCrypto();
 
-/**
- * Byte sizes for the did:atp v2 hybrid key model (FIPS 204 final, ML-DSA-65).
- * The hybrid keypair produced by @atp/shared concatenates the 32-byte Ed25519
- * public key with the 1952-byte ML-DSA-65 public key, so the ML-DSA-65 portion
- * is the tail of the combined `pqcPublicKey`.
- */
-const ED25519_PUBLIC_KEY_BYTES = 32;
-const ML_DSA_65_PUBLIC_KEY_BYTES = 1952;
+// Byte sizes for the did:atp v2 hybrid key model (FIPS 204 final, ML-DSA-65)
+// are imported from @atp/shared (ED25519_PUBLIC_KEY_BYTES /
+// ML_DSA_65_PUBLIC_KEY_BYTES). The hybrid keypair produced by @atp/shared
+// concatenates the 32-byte Ed25519 public key with the 1952-byte ML-DSA-65
+// public key, so the ML-DSA-65 portion is the tail of the combined
+// `pqcPublicKey`.
 
 /**
  * Default resolution authority for did:atp v2 identifiers minted by this
@@ -25,9 +37,6 @@ const DEFAULT_ATP_DID_DOMAIN = 'agents.atp.local';
 // One-time guard so we warn (rather than spam) when DIDs are minted under the
 // non-resolvable default domain because ATP_DID_DOMAIN is unset.
 let warnedMissingDidDomain = false;
-
-const PATH_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
-const DOMAIN_RE = /^(?=.{1,253}(%3[aA]|$))[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*(%3[aA][0-9]{1,5})?$/;
 
 // Enhanced key pair interface for quantum-safe support
 export interface QuantumSafeKeyPair {
@@ -254,38 +263,29 @@ export class CryptoUtils {
   // crypto primitives are introduced).
   // ---------------------------------------------------------------------------
 
+  // The did:atp v2 fingerprint + identifier algorithm is owned by @atp/shared
+  // (packages/shared/src/identity/did-atp.ts). These thin delegations keep the
+  // CryptoUtils.* surface stable for existing callers while ensuring there is a
+  // single implementation that cannot drift from the SDK/spec.
+
   /** base64url without padding (RFC 4648 §5). */
   static base64url(bytes: Uint8Array): string {
-    return Buffer.from(bytes).toString('base64url');
+    return atpBase64Url(bytes);
   }
 
-  /**
-   * RFC 7638 JWK thumbprint: members sorted lexicographically, serialized as
-   * JSON with no whitespace, UTF-8 encoded, SHA-256 hashed, base64url encoded.
-   */
+  /** RFC 7638 JWK thumbprint (sorted members, SHA-256, base64url). */
   static jwkThumbprint(jwk: Record<string, string>): string {
-    const sortedKeys = Object.keys(jwk).sort();
-    const canonical = JSON.stringify(jwk, sortedKeys);
-    const digest = sha256(new TextEncoder().encode(canonical));
-    return this.base64url(digest);
+    return atpJwkThumbprint(jwk);
   }
 
   /** Classical key fingerprint: "e1_" + RFC 7638 thumbprint of the Ed25519 JWK. */
   static e1Fingerprint(ed25519PublicKey: Uint8Array): string {
-    if (ed25519PublicKey.length !== ED25519_PUBLIC_KEY_BYTES) {
-      throw new Error(`Invalid Ed25519 public key length: expected 32 bytes, got ${ed25519PublicKey.length}`);
-    }
-    const jwk = { crv: 'Ed25519', kty: 'OKP', x: this.base64url(ed25519PublicKey) };
-    return `e1_${this.jwkThumbprint(jwk)}`;
+    return atpE1Fingerprint(ed25519PublicKey);
   }
 
   /** Post-quantum key fingerprint: "pq1_" + RFC 7638 thumbprint of the AKP JWK. */
   static pq1Fingerprint(mlDsa65PublicKey: Uint8Array): string {
-    if (mlDsa65PublicKey.length !== ML_DSA_65_PUBLIC_KEY_BYTES) {
-      throw new Error(`Invalid ML-DSA-65 public key length: expected 1952 bytes, got ${mlDsa65PublicKey.length}`);
-    }
-    const jwk = { alg: 'ML-DSA-65', kty: 'AKP', pub: this.base64url(mlDsa65PublicKey) };
-    return `pq1_${this.jwkThumbprint(jwk)}`;
+    return atpPq1Fingerprint(mlDsa65PublicKey);
   }
 
   /**
@@ -299,20 +299,7 @@ export class CryptoUtils {
     ed25519PublicKey: Uint8Array,
     mlDsa65PublicKey: Uint8Array
   ): string {
-    if (!DOMAIN_RE.test(domain)) {
-      throw new Error(`Invalid did:atp domain: "${domain}" (lowercase hostname, optional %3A port)`);
-    }
-    if (!Array.isArray(path) || path.length === 0) {
-      throw new Error('A path-type did:atp requires at least one path segment');
-    }
-    for (const segment of path) {
-      if (!PATH_SEGMENT_RE.test(segment)) {
-        throw new Error(`Invalid did:atp path segment: "${segment}"`);
-      }
-    }
-    const e1 = this.e1Fingerprint(ed25519PublicKey);
-    const pq1 = this.pq1Fingerprint(mlDsa65PublicKey);
-    return `did:atp:${domain}:${path.join(':')}:${e1}:${pq1}`;
+    return buildAtpV2DidImpl(domain, path, ed25519PublicKey, mlDsa65PublicKey);
   }
 
   /**
