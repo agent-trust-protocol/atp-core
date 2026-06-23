@@ -135,5 +135,11 @@ describe('did:atp pairwise (per-peer unlinkable DIDs)', () => {
     it('rejects an invalid domain', async () => {
       await expect(DidAtp.generatePairwise('Not A Domain', MASTER, PEER_A)).rejects.toThrow();
     });
+
+    it('pairwisePeerSegment validates its inputs directly (weak master / empty peer)', () => {
+      expect(() => CryptoUtils.pairwisePeerSegment(new Uint8Array(8), PEER_A)).toThrow();
+      expect(() => CryptoUtils.pairwisePeerSegment(MASTER, '')).toThrow();
+      expect(CryptoUtils.pairwisePeerSegment(MASTER, PEER_A)).toMatch(/^p_[0-9a-f]{32}$/);
+    });
   });
 });

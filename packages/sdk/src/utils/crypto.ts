@@ -84,12 +84,7 @@ export class CryptoUtils {
     peerId: string,
     opts: { salt?: Uint8Array } = {}
   ): Promise<HybridKeyPair> {
-    if (!(masterSecret instanceof Uint8Array) || masterSecret.length < 32) {
-      throw new Error('Pairwise master secret must be a Uint8Array of at least 32 bytes');
-    }
-    if (typeof peerId !== 'string' || peerId.length === 0) {
-      throw new Error('Pairwise peerId must be a non-empty string');
-    }
+    this.assertPairwiseInputs(masterSecret, peerId);
 
     const edSecretKey = this.pairwiseSeed(masterSecret, peerId, 'ed25519', opts.salt, 32);
     const edPublicKey = await ed25519.getPublicKey(edSecretKey);
@@ -120,6 +115,7 @@ export class CryptoUtils {
     peerId: string,
     opts: { salt?: Uint8Array } = {}
   ): string {
+    this.assertPairwiseInputs(masterSecret, peerId);
     const seed = this.pairwiseSeed(masterSecret, peerId, 'path', opts.salt, 16);
     return `p_${Buffer.from(seed).toString('hex')}`;
   }
@@ -140,6 +136,19 @@ export class CryptoUtils {
     return hkdf(sha256, masterSecret, salt, info, length);
   }
 
+  /**
+   * Validate pairwise derivation inputs: a high-entropy master secret (>=32
+   * bytes) and a non-empty peer identifier. Shared by every public pairwise
+   * method so none can be invoked with weak or empty key material.
+   */
+  private static assertPairwiseInputs(masterSecret: Uint8Array, peerId: string): void {
+    if (!(masterSecret instanceof Uint8Array) || masterSecret.length < 32) {
+      throw new Error('Pairwise master secret must be a Uint8Array of at least 32 bytes');
+    }
+    if (typeof peerId !== 'string' || peerId.length === 0) {
+      throw new Error('Pairwise peerId must be a non-empty string');
+    }
+  }
 
   /**
    * Base64url encoding without padding (RFC 4648 §5).
