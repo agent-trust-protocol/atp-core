@@ -22,7 +22,7 @@ const ITEMS = [
   {
     id: 1,
     name: 'did:atp — create / parse / resolve',
-    pattern: '(did-v2|did|operations|resolver)\\.test\\.ts$',
+    pattern: '(did-v2|did-pairwise|did|operations|resolver)\\.test\\.ts$',
   },
   {
     id: 2,
