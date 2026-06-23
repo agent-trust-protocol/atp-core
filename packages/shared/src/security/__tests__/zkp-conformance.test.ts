@@ -18,6 +18,7 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
+import { RistrettoPoint } from '@noble/curves/ed25519';
 import { ATPZKProofService } from '../zkp.js';
 
 // Fixed credential — 5 attributes (odd count => exercises the orphan/empty
@@ -135,5 +136,75 @@ describe('Selective disclosure — privacy conformance (Merkle membership)', () 
     const proof = zk.createSelectiveDisclosureProof(CREDENTIAL, ['role']); // index 2
     proof.revealedIndices = [0];
     expect(zk.verifySelectiveDisclosureProof(proof, EXPECTED_ROOT)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Pedersen commitments on Ristretto255 (real, homomorphic) + opening proof.
+// Replaces the removed, unsound hash-based range proof. Scoped to the
+// cryptographically-real mechanism only — see createRangeProof (deprecated).
+// ---------------------------------------------------------------------------
+
+describe('Pedersen commitments (Ristretto255) + opening proof', () => {
+  const zk = new ATPZKProofService();
+
+  it('is binding-shaped: a 32-byte Ristretto point, deterministic in (value, blinding)', () => {
+    const c1 = zk.pedersenCommit(42n, 12345n);
+    const c2 = zk.pedersenCommit(42n, 12345n);
+    expect(c1).toMatch(/^[0-9a-f]{64}$/);
+    expect(c1).toBe(c2); // same opening => same commitment
+  });
+
+  it('is hiding-shaped: different blindings for the same value give different commitments', () => {
+    expect(zk.pedersenCommit(42n, 1n)).not.toBe(zk.pedersenCommit(42n, 2n));
+  });
+
+  it('is additively homomorphic: commit(a,r1) + commit(b,r2) == commit(a+b, r1+r2)', () => {
+    const a = 7n, b = 35n, r1 = 1000n, r2 = 2500n;
+    const cA = RistrettoPoint.fromHex(zk.pedersenCommit(a, r1));
+    const cB = RistrettoPoint.fromHex(zk.pedersenCommit(b, r2));
+    const summed = Buffer.from(cA.add(cB).toBytes()).toString('hex');
+    expect(summed).toBe(zk.pedersenCommit(a + b, r1 + r2));
+  });
+
+  it('createPedersenCommitment yields a verifiable opening', () => {
+    const { commitment, blinding } = zk.createPedersenCommitment(99n);
+    const proof = zk.provePedersenOpening(99n, BigInt(`0x${blinding}`));
+    expect(proof.commitment).toBe(commitment);
+    expect(zk.verifyPedersenOpening(proof)).toBe(true);
+  });
+
+  it('opening proof round-trips and is zero-knowledge (no value/blinding in the proof)', () => {
+    const proof = zk.provePedersenOpening(123456789n, 987654321n, 'ctx');
+    expect(zk.verifyPedersenOpening(proof, 'ctx')).toBe(true);
+    // The proof carries only the commitment, nonce point, and two responses.
+    expect(Object.keys(proof).sort()).toEqual(['commitment', 'sr', 'sv', 't']);
+  });
+
+  it('rejects a proof verified under the wrong context (Fiat–Shamir binding)', () => {
+    const proof = zk.provePedersenOpening(5n, 6n, 'context-A');
+    expect(zk.verifyPedersenOpening(proof, 'context-B')).toBe(false);
+  });
+
+  it('rejects a tampered response', () => {
+    const proof = zk.provePedersenOpening(5n, 6n, 'ctx');
+    const bad = { ...proof, sv: (BigInt(`0x${proof.sv}`) + 1n).toString(16) };
+    expect(zk.verifyPedersenOpening(bad, 'ctx')).toBe(false);
+  });
+
+  it('rejects a proof whose commitment was swapped for a different opening', () => {
+    const proof = zk.provePedersenOpening(5n, 6n, 'ctx');
+    const swapped = { ...proof, commitment: zk.pedersenCommit(6n, 6n) };
+    expect(zk.verifyPedersenOpening(swapped, 'ctx')).toBe(false);
+  });
+
+  it('handles zero value and zero blinding without throwing', () => {
+    const proof = zk.provePedersenOpening(0n, 0n, 'zero');
+    expect(zk.verifyPedersenOpening(proof, 'zero')).toBe(true);
+  });
+
+  it('the deprecated range-proof API throws rather than returning an unsound result', () => {
+    expect(() => zk.createRangeProof(5, 0, 10)).toThrow(/not implemented/i);
+    expect(() => zk.verifyRangeProof({} as any)).toThrow(/not implemented/i);
   });
 });

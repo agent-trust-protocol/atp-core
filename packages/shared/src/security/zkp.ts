@@ -1,6 +1,64 @@
 import { randomBytes, createHash, timingSafeEqual } from 'crypto';
 import { sha256 } from '@noble/hashes/sha2.js';
-import { ed25519 } from '@noble/curves/ed25519';
+import { RistrettoPoint } from '@noble/curves/ed25519';
+
+// ---------------------------------------------------------------------------
+// Pedersen commitments on Ristretto255 (real, additively homomorphic).
+//
+// C = value·G + blinding·H, where G is the Ristretto base point and H is a
+// second "nothing-up-my-sleeve" generator derived by hash-to-curve, so its
+// discrete log relative to G is unknown and commitments are computationally
+// binding (and perfectly hiding under a uniform blinding). All group
+// operations come from @noble/curves (audited) — no cryptographic primitive is
+// implemented here, only their standard composition.
+// ---------------------------------------------------------------------------
+
+type RistrettoPt = InstanceType<typeof RistrettoPoint>;
+
+/** Ristretto255 scalar-field order L = 2^252 + 27742317777372353535851937790883648493. */
+const RISTRETTO_ORDER = 2n ** 252n + 27742317777372353535851937790883648493n;
+
+const PEDERSEN_G: RistrettoPt = RistrettoPoint.BASE;
+// Independent generator H with unknown discrete log relative to G, derived by
+// the ristretto255 hash-to-group map over 64 uniform bytes (SHA-512 of a fixed
+// domain label) — a nothing-up-my-sleeve construction.
+const PEDERSEN_H: RistrettoPt = RistrettoPoint.hashToCurve(
+  new Uint8Array(createHash('sha512').update('ATP-pedersen-generator-H:v1').digest())
+);
+
+/** Reduce an integer into the scalar field [0, L). */
+function modOrder(x: bigint): bigint {
+  const r = x % RISTRETTO_ORDER;
+  return r < 0n ? r + RISTRETTO_ORDER : r;
+}
+
+/** Uniform random scalar in [0, L) via wide (64-byte) reduction to avoid modulo bias. */
+function randomScalar(): bigint {
+  return modOrder(BigInt(`0x${randomBytes(64).toString('hex')}`));
+}
+
+/** scalar·P, handling the 0 scalar (which @noble's multiply rejects). */
+function mulPoint(P: RistrettoPt, scalar: bigint): RistrettoPt {
+  const s = modOrder(scalar);
+  return s === 0n ? RistrettoPoint.ZERO : P.multiply(s);
+}
+
+function pointToHex(P: RistrettoPt): string {
+  return Buffer.from(P.toBytes()).toString('hex');
+}
+
+/** Fiat–Shamir challenge over the generators, commitment, nonce point and context. */
+function pedersenChallenge(C: RistrettoPt, T: RistrettoPt, context: string): bigint {
+  const enc = Buffer.concat([
+    Buffer.from('ATP-pedersen-pok:v1', 'utf8'),
+    Buffer.from(PEDERSEN_G.toBytes()),
+    Buffer.from(PEDERSEN_H.toBytes()),
+    Buffer.from(C.toBytes()),
+    Buffer.from(T.toBytes()),
+    Buffer.from(context, 'utf8'),
+  ]);
+  return modOrder(BigInt(`0x${createHash('sha512').update(enc).digest('hex')}`));
+}
 
 /** Constant-time equality for two hex strings of equal length. */
 function timingSafeHexEqual(a: string, b: string): boolean {
@@ -64,6 +122,18 @@ export interface MembershipProof {
   commitment: string;
   merkleRoot: string;
   isMember: boolean;
+}
+
+/** Schnorr proof of knowledge of a Pedersen commitment opening (value, blinding). */
+export interface PedersenOpeningProof {
+  /** Commitment C = value·G + blinding·H, hex (32-byte Ristretto encoding). */
+  commitment: string;
+  /** Prover nonce point T = kv·G + kr·H, hex. */
+  t: string;
+  /** Response sv = kv + e·value (mod L), hex. */
+  sv: string;
+  /** Response sr = kr + e·blinding (mod L), hex. */
+  sr: string;
 }
 
 /**
@@ -301,56 +371,91 @@ export class ATPZKProofService {
   }
 
   /**
-   * Create a range proof (intended: prove a value is within [min,max] without
-   * revealing it).
-   *
-   * ⚠️ EXPERIMENTAL — NOT a sound zero-knowledge range proof. It uses a
-   * hash-based, non-homomorphic commitment and a structural "boundary proof"
-   * (see createBoundaryProof: "In practice, this would use proper range proof
-   * techniques"). It does NOT cryptographically guarantee the committed value
-   * lies in range. Replace with bulletproofs / a Ristretto-based scheme via a
-   * vetted library before relying on it — do NOT roll your own (see CLAUDE.md).
-   * Excluded from the privacy conformance suite, which scopes to the
-   * cryptographically-real mechanisms (Merkle membership, challenge-response).
+   * Create a real Pedersen commitment C = value·G + blinding·H on Ristretto255.
+   * Additively homomorphic and computationally binding / perfectly hiding —
+   * unlike the legacy hash-based `generateCommitment`. Returns the 32-byte
+   * commitment as hex.
    */
-  createRangeProof(value: number, min: number, max: number): RangeProof {
-    if (value < min || value > max) {
-      throw new Error('Value outside specified range');
-    }
-
-    // Generate random blinding factor
-    const blinding = this.generateRandomBigInt();
-
-    // Create commitment to the value
-    const commitment = this.generateCommitment(BigInt(value), blinding);
-
-    // Create proof that committed value is in range [min, max]
-    // Simplified: In practice, this would use bulletproofs or similar
-    const proof = this.createBoundaryProof(value, min, max, blinding);
-
-    return {
-      value: commitment, // The commitment hides the actual value
-      proof,
-      range: { min, max },
-      commitment
-    };
+  pedersenCommit(value: bigint, blinding: bigint): string {
+    const C = mulPoint(PEDERSEN_G, value).add(mulPoint(PEDERSEN_H, blinding));
+    return pointToHex(C);
   }
 
   /**
-   * Verify range proof
+   * Commit to a value with a fresh uniform random blinding.
+   * Returns the commitment and the blinding (hex) so the prover can later open
+   * it or prove knowledge of the opening.
    */
-  verifyRangeProof(rangeProof: RangeProof): boolean {
-    try {
-      // Verify the commitment
-      if (rangeProof.value !== rangeProof.commitment) {
-        return false;
-      }
+  createPedersenCommitment(value: bigint): { commitment: string; blinding: string } {
+    const blinding = randomScalar();
+    return { commitment: this.pedersenCommit(value, blinding), blinding: blinding.toString(16) };
+  }
 
-      // Verify the boundary proof
-      return this.verifyBoundaryProof(rangeProof.proof, rangeProof.range);
+  /**
+   * Prove knowledge of the opening (value, blinding) of a Pedersen commitment
+   * WITHOUT revealing them — a standard Schnorr proof for the linear relation
+   * C = value·G + blinding·H, made non-interactive via Fiat–Shamir. `context`
+   * is bound into the challenge for domain separation / replay resistance.
+   */
+  provePedersenOpening(value: bigint, blinding: bigint, context = ''): PedersenOpeningProof {
+    const v = modOrder(value);
+    const r = modOrder(blinding);
+    const C = mulPoint(PEDERSEN_G, v).add(mulPoint(PEDERSEN_H, r));
+
+    const kv = randomScalar();
+    const kr = randomScalar();
+    const T = mulPoint(PEDERSEN_G, kv).add(mulPoint(PEDERSEN_H, kr));
+
+    const e = pedersenChallenge(C, T, context);
+    const sv = modOrder(kv + e * v);
+    const sr = modOrder(kr + e * r);
+
+    return { commitment: pointToHex(C), t: pointToHex(T), sv: sv.toString(16), sr: sr.toString(16) };
+  }
+
+  /**
+   * Verify a Pedersen opening proof by checking sv·G + sr·H == T + e·C.
+   * `context` MUST match the value used at proving time.
+   */
+  verifyPedersenOpening(proof: PedersenOpeningProof, context = ''): boolean {
+    try {
+      const C = RistrettoPoint.fromHex(proof.commitment);
+      const T = RistrettoPoint.fromHex(proof.t);
+      const sv = modOrder(BigInt(`0x${proof.sv}`));
+      const sr = modOrder(BigInt(`0x${proof.sr}`));
+      const e = pedersenChallenge(C, T, context);
+
+      const lhs = mulPoint(PEDERSEN_G, sv).add(mulPoint(PEDERSEN_H, sr));
+      const rhs = T.add(mulPoint(C, e));
+      return lhs.equals(rhs);
     } catch {
       return false;
     }
+  }
+
+  /**
+   * @deprecated Sound range proofs are NOT implemented. The previous hash-based
+   * implementation was not a zero-knowledge range proof (it performed only a
+   * structural check) and has been removed rather than left as security theatre.
+   * Build range statements on `pedersenCommit` with a vetted bulletproofs
+   * library — do NOT roll your own (see CLAUDE.md).
+   */
+  createRangeProof(_value: number, _min: number, _max: number): RangeProof {
+    throw new Error(
+      'createRangeProof is not implemented: the previous hash-based range proof was ' +
+        'unsound and has been removed. Use a vetted bulletproofs implementation over ' +
+        'Pedersen/Ristretto commitments (see pedersenCommit).'
+    );
+  }
+
+  /**
+   * @deprecated See {@link createRangeProof} — sound range proofs are not implemented.
+   */
+  verifyRangeProof(_rangeProof: RangeProof): boolean {
+    throw new Error(
+      'verifyRangeProof is not implemented: range proofs were removed as unsound. ' +
+        'Use a vetted bulletproofs implementation.'
+    );
   }
 
   /**
@@ -552,40 +657,6 @@ export class ATPZKProofService {
     }
 
     return Buffer.from(currentHash).toString('hex');
-  }
-
-  private createBoundaryProof(
-    value: number,
-    min: number,
-    max: number,
-    blinding: bigint
-  ): ZKProof {
-    // Simplified boundary proof
-    // In practice, this would use proper range proof techniques
-    const valueCommitment = this.generateCommitment(BigInt(value), blinding);
-    const minCommitment = this.generateCommitment(BigInt(min), BigInt(0));
-    const maxCommitment = this.generateCommitment(BigInt(max), BigInt(0));
-
-    const challenge = this.generateChallenge(
-      valueCommitment,
-      minCommitment + maxCommitment
-    );
-
-    return {
-      proof: 'range-proof',
-      commitment: valueCommitment,
-      challenge,
-      response: blinding.toString(16),
-      publicInputs: [min.toString(), max.toString()],
-      timestamp: new Date().toISOString()
-    };
-  }
-
-  private verifyBoundaryProof(proof: ZKProof, range: { min: number; max: number }): boolean {
-    // Simplified verification
-    return proof.publicInputs.includes(range.min.toString()) &&
-           proof.publicInputs.includes(range.max.toString()) &&
-           proof.proof === 'range-proof';
   }
 
   private createNonMembershipProof(
