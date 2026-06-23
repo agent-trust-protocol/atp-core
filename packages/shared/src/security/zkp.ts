@@ -165,11 +165,21 @@ export class ATPZKProofService {
     fullCredential: Record<string, any>,
     attributesToReveal: string[]
   ): SelectiveDisclosureProof {
-    // Create Merkle tree of all attributes (leaf order = credential key order)
     const allAttributes = Object.keys(fullCredential);
-    const merkleTree = this.buildMerkleTree(allAttributes.map(attr =>
-      sha256(Buffer.from(JSON.stringify(fullCredential[attr])))
-    ));
+
+    // Fail loudly on unknown attributes rather than silently emitting a proof
+    // with a -1 leaf index (which produces a garbage path that never verifies).
+    const unknown = attributesToReveal.filter(attr => !allAttributes.includes(attr));
+    if (unknown.length > 0) {
+      throw new Error(
+        `Cannot disclose attribute(s) not present in the credential: ${unknown.join(', ')}`
+      );
+    }
+
+    // Create Merkle tree of all attributes (leaf order = credential key order).
+    const merkleTree = this.buildMerkleTree(
+      allAttributes.map(attr => this.attributeLeaf(attr, fullCredential[attr]))
+    );
     const merkleRoot = Buffer.from(merkleTree[merkleTree.length - 1][0]).toString('hex');
 
     // One authentication path per revealed attribute (kept parallel to
@@ -183,9 +193,7 @@ export class ATPZKProofService {
     // Create disclosed attributes
     const disclosedAttributes: Record<string, any> = {};
     attributesToReveal.forEach(attr => {
-      if (fullCredential[attr] !== undefined) {
-        disclosedAttributes[attr] = fullCredential[attr];
-      }
+      disclosedAttributes[attr] = fullCredential[attr];
     });
 
     return {
@@ -194,6 +202,17 @@ export class ATPZKProofService {
       revealedIndices,
       merkleRoot
     };
+  }
+
+  /**
+   * Compute a credential attribute's Merkle leaf preimage hash. The attribute
+   * NAME is bound into the preimage alongside the value, so two attributes that
+   * share a value (e.g. `{ role: 'engineer', title: 'engineer' }`) produce
+   * distinct leaves — this prevents an attribute-swap attack where a valid path
+   * for one field is replayed to claim another field with the same value.
+   */
+  private attributeLeaf(name: string, value: unknown): Uint8Array {
+    return sha256(Buffer.from(JSON.stringify({ [name]: value })));
   }
 
   /**
@@ -207,9 +226,9 @@ export class ATPZKProofService {
     if (allAttributes.length === 0) {
       throw new Error('Cannot compute Merkle root of a credential with no attributes');
     }
-    const merkleTree = this.buildMerkleTree(allAttributes.map(attr =>
-      sha256(Buffer.from(JSON.stringify(fullCredential[attr])))
-    ));
+    const merkleTree = this.buildMerkleTree(
+      allAttributes.map(attr => this.attributeLeaf(attr, fullCredential[attr]))
+    );
     return Buffer.from(merkleTree[merkleTree.length - 1][0]).toString('hex');
   }
 
@@ -240,9 +259,25 @@ export class ATPZKProofService {
       // root — this binds the disclosure to one credential (prevents mixing
       // attributes from different credentials).
       for (let i = 0; i < attrNames.length; i++) {
-        const attrValue = sdProof.disclosedAttributes[attrNames[i]];
-        const attrHash = sha256(Buffer.from(JSON.stringify(attrValue)));
-        const recomputedRoot = this.recomputeMerkleRoot(attrHash, sdProof.merkleProof[i]);
+        const attrName = attrNames[i];
+        const path = sdProof.merkleProof[i];
+
+        // The claimed leaf index must match the parity sequence encoded in the
+        // path (left sibling => current node is a right child => that bit is 1),
+        // otherwise a forged revealedIndices value would mislead consumers.
+        let derivedIndex = 0;
+        for (let level = 0; level < path.length; level++) {
+          if (path[level].position === 'left') {
+            derivedIndex |= 1 << level;
+          }
+        }
+        if (derivedIndex !== sdProof.revealedIndices[i]) {
+          return false;
+        }
+
+        // Bind BOTH the attribute name and value into the leaf preimage.
+        const attrHash = this.attributeLeaf(attrName, sdProof.disclosedAttributes[attrName]);
+        const recomputedRoot = this.recomputeMerkleRoot(attrHash, path);
         if (!timingSafeHexEqual(recomputedRoot, sdProof.merkleRoot)) {
           return false;
         }

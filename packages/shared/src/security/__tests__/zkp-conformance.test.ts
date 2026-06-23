@@ -34,7 +34,7 @@ const CREDENTIAL = {
 // from the documented tree construction (0x00 leaf tag, 0x01 node tag, fixed
 // 'ATP-merkle-empty' placeholder for orphans).
 const EXPECTED_ROOT =
-  '2dbbe21c6d40b712f53521c28442e2944e9751c66144225f480f1fa732fe2a9e';
+  'e22c3d1565d0a4fdf85286018145138a60146bba89d59e6e44cdbe7f568e5213';
 
 describe('Selective disclosure — privacy conformance (Merkle membership)', () => {
   const zk = new ATPZKProofService();
@@ -109,5 +109,31 @@ describe('Selective disclosure — privacy conformance (Merkle membership)', () 
     expect(proof.disclosedAttributes).toEqual({ role: 'engineer' });
     expect(proof.disclosedAttributes).not.toHaveProperty('clearance');
     expect(proof.disclosedAttributes).not.toHaveProperty('name');
+  });
+
+  it('rejects an attribute-swap attack (leaf binds the attribute name)', () => {
+    // Two fields share a value; a valid path for one must NOT prove the other.
+    const cred = { role: 'engineer', title: 'engineer' };
+    const root = zk.credentialMerkleRoot(cred);
+    const roleProof = zk.createSelectiveDisclosureProof(cred, ['role']);
+    // Relabel the disclosed field 'role' -> 'title', reusing role's path.
+    const swapped = {
+      ...roleProof,
+      disclosedAttributes: { title: roleProof.disclosedAttributes.role },
+    };
+    expect(zk.verifySelectiveDisclosureProof(roleProof, root)).toBe(true);
+    expect(zk.verifySelectiveDisclosureProof(swapped, root)).toBe(false);
+  });
+
+  it('throws when asked to disclose an attribute not in the credential', () => {
+    expect(() =>
+      zk.createSelectiveDisclosureProof(CREDENTIAL, ['role', 'nonexistent']),
+    ).toThrow(/not present in the credential/i);
+  });
+
+  it('rejects a forged revealedIndices value', () => {
+    const proof = zk.createSelectiveDisclosureProof(CREDENTIAL, ['role']); // index 2
+    proof.revealedIndices = [0];
+    expect(zk.verifySelectiveDisclosureProof(proof, EXPECTED_ROOT)).toBe(false);
   });
 });
