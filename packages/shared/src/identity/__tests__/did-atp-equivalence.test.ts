@@ -37,6 +37,24 @@ describe('did:atp primitives — @atp/shared ⇆ atp-sdk equivalence (anti-drift
     }
   });
 
+  it('rejects fingerprint-shaped path segments exactly like the SDK', async () => {
+    const kp = await CryptoUtils.generateHybridKeyPair();
+    const ed = kp.ed25519.publicKey;
+    const ml = kp.mlDsa65.publicKey;
+    const ambiguous = [`e1_${'A'.repeat(43)}`];
+
+    // Both builders must throw on a fingerprint-shaped segment (no divergence
+    // where shared mints a DID the SDK parser would reject).
+    expect(() => buildAtpV2Did('example.com', ambiguous, ed, ml)).toThrow();
+    expect(() => DidAtp.fromPublicKeys('example.com', ambiguous, ed, ml)).toThrow();
+
+    // And a normal underscore-bearing segment is still accepted by both.
+    const ok = ['agent_01'];
+    expect(buildAtpV2Did('example.com', ok, ed, ml)).toBe(
+      DidAtp.fromPublicKeys('example.com', ok, ed, ml),
+    );
+  });
+
   it('jwkThumbprint matches the SDK and the RFC 8037 §A.3 vector', () => {
     const jwk = {
       crv: 'Ed25519',

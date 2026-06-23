@@ -91,6 +91,12 @@ export function buildAtpV2Did(
     if (!ATP_PATH_SEGMENT_RE.test(segment)) {
       throw new Error(`Invalid did:atp path segment: "${segment}"`);
     }
+    // A fingerprint-shaped path segment would make the DID ambiguous (the
+    // parser locates the e1_/pq1_ bindings positionally). Reject it so this
+    // builder stays byte-compatible with the SDK's DidAtp parser/builder.
+    if (ATP_E1_RE.test(segment) || ATP_PQ1_RE.test(segment)) {
+      throw new Error(`Path segment "${segment}" is fingerprint-shaped and would be ambiguous`);
+    }
   }
   const e1 = atpE1Fingerprint(ed25519PublicKey);
   const pq1 = atpPq1Fingerprint(mlDsa65PublicKey);
