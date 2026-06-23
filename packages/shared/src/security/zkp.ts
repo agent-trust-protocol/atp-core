@@ -1,6 +1,6 @@
 import { randomBytes, createHash, timingSafeEqual } from 'crypto';
 import { sha256 } from '@noble/hashes/sha2.js';
-import { ed25519, RistrettoPoint } from '@noble/curves/ed25519';
+import { RistrettoPoint } from '@noble/curves/ed25519';
 
 // ---------------------------------------------------------------------------
 // Pedersen commitments on Ristretto255 (real, additively homomorphic).
