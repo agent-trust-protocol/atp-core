@@ -69,6 +69,79 @@ export class CryptoUtils {
   }
 
   /**
+   * Deterministically derive a per-peer hybrid keypair from a master secret,
+   * for pairwise (unlinkable) did:atp identifiers.
+   *
+   * Both seeds are derived with HKDF-SHA256 using domain-separated `info`
+   * labels, so the same (masterSecret, peerId[, salt]) always yields the same
+   * keypair, while different peers yield independent keys whose e1_/pq1_
+   * fingerprints cannot be correlated without the master secret. No new
+   * cryptographic primitive is introduced — Ed25519 and ML-DSA-65 (FIPS 204)
+   * key generation are both deterministic functions of a 32-byte seed.
+   */
+  static async deriveHybridKeyPairForPeer(
+    masterSecret: Uint8Array,
+    peerId: string,
+    opts: { salt?: Uint8Array } = {}
+  ): Promise<HybridKeyPair> {
+    if (!(masterSecret instanceof Uint8Array) || masterSecret.length < 32) {
+      throw new Error('Pairwise master secret must be a Uint8Array of at least 32 bytes');
+    }
+    if (typeof peerId !== 'string' || peerId.length === 0) {
+      throw new Error('Pairwise peerId must be a non-empty string');
+    }
+
+    const edSecretKey = this.pairwiseSeed(masterSecret, peerId, 'ed25519', opts.salt, 32);
+    const edPublicKey = await ed25519.getPublicKey(edSecretKey);
+    if (edPublicKey.length !== ED25519_PUBLIC_KEY_BYTES) {
+      throw new Error(`Invalid Ed25519 public key length: expected 32 bytes, got ${edPublicKey.length}`);
+    }
+
+    const mlSeed = this.pairwiseSeed(masterSecret, peerId, 'ml-dsa-65', opts.salt, 32);
+    const mlDsaKeyPair = ml_dsa65.keygen(mlSeed);
+    if (mlDsaKeyPair.publicKey.length !== ML_DSA_65_PUBLIC_KEY_BYTES) {
+      throw new Error(`Invalid ML-DSA-65 public key length: expected 1952 bytes, got ${mlDsaKeyPair.publicKey.length}`);
+    }
+
+    return {
+      ed25519: { publicKey: edPublicKey, secretKey: edSecretKey },
+      mlDsa65: { publicKey: mlDsaKeyPair.publicKey, secretKey: mlDsaKeyPair.secretKey }
+    };
+  }
+
+  /**
+   * Derive the pseudonymous path segment ("p_<32 hex>") for a pairwise did:atp.
+   * Bound to (masterSecret, peerId[, salt]) so it is stable per peer but cannot
+   * be correlated across peers — it is NOT a plain hash of the peerId. The
+   * "p_" prefix keeps it distinct from the e1_/pq1_ fingerprint segments.
+   */
+  static pairwisePeerSegment(
+    masterSecret: Uint8Array,
+    peerId: string,
+    opts: { salt?: Uint8Array } = {}
+  ): string {
+    const seed = this.pairwiseSeed(masterSecret, peerId, 'path', opts.salt, 16);
+    return `p_${Buffer.from(seed).toString('hex')}`;
+  }
+
+  /**
+   * HKDF-SHA256 expansion with domain-separated info for pairwise derivation.
+   * The `label` separates the Ed25519 seed, the ML-DSA-65 seed and the path
+   * pseudonym so they are mutually independent for a given (masterSecret, peer).
+   */
+  private static pairwiseSeed(
+    masterSecret: Uint8Array,
+    peerId: string,
+    label: 'ed25519' | 'ml-dsa-65' | 'path',
+    salt: Uint8Array | undefined,
+    length: number
+  ): Uint8Array {
+    const info = new TextEncoder().encode(`atp-pairwise:v1:${label}:${peerId}`);
+    return hkdf(sha256, masterSecret, salt, info, length);
+  }
+
+
+  /**
    * Base64url encoding without padding (RFC 4648 §5).
    */
   static base64url(bytes: Uint8Array): string {

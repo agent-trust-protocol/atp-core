@@ -96,6 +96,37 @@ export class DidAtp {
   }
 
   /**
+   * Generate a pairwise (per-peer, unlinkable) path-type did:atp.
+   *
+   * Derives a per-peer hybrid keypair AND a pseudonymous path segment from the
+   * master secret, so each peer is presented a distinct DID that cannot be
+   * correlated to the agent's other pairwise DIDs (or its canonical DID)
+   * without the master secret. Derivation is deterministic: the same
+   * (domain, masterSecret, peerId[, salt]) always yields the same DID, so the
+   * agent can recompute the keypair on demand rather than storing one per peer.
+   *
+   * The agent proves control exactly as for any path-type DID — by signing with
+   * the returned keypair (whose e1_/pq1_ fingerprints are bound into the DID).
+   */
+  static async generatePairwise(
+    domain: string,
+    masterSecret: Uint8Array,
+    peerId: string,
+    opts: { salt?: Uint8Array } = {}
+  ): Promise<{ did: string; keyPair: HybridKeyPair; peerSegment: string }> {
+    this.assertDomain(domain);
+    const keyPair = await CryptoUtils.deriveHybridKeyPairForPeer(masterSecret, peerId, opts);
+    const peerSegment = CryptoUtils.pairwisePeerSegment(masterSecret, peerId, opts);
+    const did = this.fromPublicKeys(
+      domain,
+      [peerSegment],
+      keyPair.ed25519.publicKey,
+      keyPair.mlDsa65.publicKey
+    );
+    return { did, keyPair, peerSegment };
+  }
+
+  /**
    * Parse a did:atp identifier. Returns null if the string is not a valid
    * did:atp root or path DID per the spec ABNF.
    */

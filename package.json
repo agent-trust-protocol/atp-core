@@ -19,7 +19,7 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "conformance": "node scripts/conformance.mjs",
-    "conformance:did": "jest --runInBand --testPathPattern \"(did-v2|did|operations|resolver)\\.test\\.ts$\"",
+    "conformance:did": "jest --runInBand --testPathPattern \"(did-v2|did-pairwise|did|operations|resolver)\\.test\\.ts$\"",
     "conformance:sigs": "jest --runInBand --testPathPattern \"(crypto-v2|crypto|verify-compat)\\.test\\.ts$\"",
     "conformance:policy": "jest --runInBand --testPathPattern \"(policy-conformance|policy-evaluator-conformance)\\.test\\.ts$\"",
     "conformance:audit": "jest --runInBand --testPathPattern \"(audit-conformance|trust-conformance|trust-scoring-conformance|trust)\\.test\\.ts$\"",
