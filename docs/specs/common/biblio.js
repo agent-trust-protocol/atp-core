@@ -38,6 +38,11 @@ window.atpBiblio = {
     href: "https://w3c.github.io/vc-di-pqc/",
     publisher: "W3C (Final Community Group Report, 22 April 2026)",
   },
+  RFC5869: {
+    title: "HMAC-based Extract-and-Expand Key Derivation Function (HKDF)",
+    href: "https://www.rfc-editor.org/rfc/rfc5869",
+    publisher: "IETF",
+  },
   RFC7638: {
     title: "JSON Web Key (JWK) Thumbprint",
     href: "https://www.rfc-editor.org/rfc/rfc7638",
