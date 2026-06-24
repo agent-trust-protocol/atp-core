@@ -4,6 +4,12 @@ import { ml_dsa65 } from '@noble/post-quantum/ml-dsa.js';
 import { randomBytes as cryptoRandomBytes, createCipheriv, createDecipheriv } from 'crypto';
 import { x25519 } from '@noble/curves/ed25519';
 import { hkdf } from '@noble/hashes/hkdf.js';
+import {
+  atpBase64Url,
+  atpJwkThumbprint,
+  atpE1Fingerprint,
+  atpPq1Fingerprint,
+} from '@atp/did-atp';
 
 // Configure @noble/ed25519 to use SHA-512
 ed25519.etc.sha512Sync = (...m) => sha512(ed25519.etc.concatBytes(...m));
@@ -154,7 +160,7 @@ export class CryptoUtils {
    * Base64url encoding without padding (RFC 4648 §5).
    */
   static base64url(bytes: Uint8Array): string {
-    return Buffer.from(bytes).toString('base64url');
+    return atpBase64Url(bytes);
   }
 
   /**
@@ -183,24 +189,21 @@ export class CryptoUtils {
    * The supplied JWK must contain exactly the required members for its key type.
    */
   static jwkThumbprint(jwk: Ed25519Jwk | MlDsa65Jwk | Record<string, string>): string {
-    const sortedKeys = Object.keys(jwk).sort();
-    const canonical = JSON.stringify(jwk, sortedKeys);
-    const digest = sha256(new TextEncoder().encode(canonical));
-    return this.base64url(digest);
+    return atpJwkThumbprint(jwk as Record<string, string>);
   }
 
   /**
    * Classical key fingerprint: "e1_" + RFC 7638 thumbprint of the Ed25519 JWK.
    */
   static e1Fingerprint(ed25519PublicKey: Uint8Array): string {
-    return `e1_${this.jwkThumbprint(this.ed25519PublicKeyToJwk(ed25519PublicKey))}`;
+    return atpE1Fingerprint(ed25519PublicKey);
   }
 
   /**
    * Post-quantum key fingerprint: "pq1_" + RFC 7638 thumbprint of the AKP JWK.
    */
   static pq1Fingerprint(mlDsa65PublicKey: Uint8Array): string {
-    return `pq1_${this.jwkThumbprint(this.mlDsa65PublicKeyToJwk(mlDsa65PublicKey))}`;
+    return atpPq1Fingerprint(mlDsa65PublicKey);
   }
 
   /**
