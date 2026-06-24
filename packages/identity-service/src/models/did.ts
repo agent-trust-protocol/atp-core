@@ -67,4 +67,26 @@ export interface DIDRegistrationResponse {
   algorithm?: string;
   isQuantumSafe?: boolean;
   hybridMode?: boolean;
+  // Set only for pairwise registrations: the pseudonymous "p_<hex>" path
+  // segment that makes this DID unlinkable to the agent's other DIDs.
+  peerSegment?: string;
+}
+
+/**
+ * Register a pairwise (per-peer, unlinkable) did:atp. The per-peer hybrid
+ * keypair and pseudonym are derived deterministically from the agent's master
+ * secret, so the service never needs to store them — they are returned to the
+ * caller, who recomputes them on demand. See docs/specs/did-atp/index.html
+ * § "Pairwise (Per-Peer, Unlinkable) Identifiers".
+ */
+export interface PairwiseDIDRegistrationRequest {
+  /** Agent master secret as hex; MUST decode to >= 32 bytes. Never persisted. */
+  masterSecret: string;
+  /** Peer (relying-party) identifier the pairwise DID is presented to. */
+  peerId: string;
+  /** Optional salt as hex; rotates the agent's entire pairwise DID set. */
+  salt?: string;
+  /** Optional resolution domain; defaults to ATP_DID_DOMAIN. */
+  domain?: string;
+  services?: Service[];
 }

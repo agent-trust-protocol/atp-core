@@ -135,6 +135,94 @@ describe('IdentityService', () => {
     });
   });
 
+  describe('registerPairwiseDID', () => {
+    // Same pinned known-answer vector as the SDK + @atp/shared pairwise tests:
+    // master = 32 bytes of 0x09, peer A, domain agents.example.com.
+    const MASTER_HEX = Buffer.alloc(32, 9).toString('hex');
+    const PEER_A = 'did:example:relying-party-1';
+    const PEER_B = 'did:example:relying-party-2';
+    const DOMAIN = 'agents.example.com';
+    const KAT_DID =
+      'did:atp:agents.example.com:p_fad4fe7b41096f53e62fc34133eab6e7:' +
+      'e1_lmymt0BeCG1HJGFK7COftXLzJGOrDDNY1vmLYBMe5A0:' +
+      'pq1_YQm0BqWxJDTUol5l-MGoy5N9fn6sEM7_Zx3g8MUe8rw';
+
+    it('mints the pinned pairwise DID for a fixed master/peer/domain', async () => {
+      const res = await service.registerPairwiseDID({
+        masterSecret: MASTER_HEX,
+        peerId: PEER_A,
+        domain: DOMAIN,
+      });
+
+      expect(res.did).toBe(KAT_DID);
+      expect(res.peerSegment).toBe('p_fad4fe7b41096f53e62fc34133eab6e7');
+      expect(res.did).toMatch(ATP_V2_RE);
+      expect(res.document.id).toBe(res.did);
+      expect(res.document.metadata?.additionalInfo?.pairwise).toBe(true);
+      expect(res.document.metadata?.additionalInfo?.didMethodVersion).toBe('v2');
+    });
+
+    it('returns the derived private keys but never persists them', async () => {
+      const res = await service.registerPairwiseDID({
+        masterSecret: MASTER_HEX,
+        peerId: PEER_A,
+        domain: DOMAIN,
+      });
+
+      // Caller recomputes keys from the master secret; only the public document
+      // is stored, never the keypair.
+      expect(res.privateKey).toBeDefined();
+      expect(res.pqcPrivateKey).toBeDefined();
+      expect(storage.storeDIDDocument).toHaveBeenCalledTimes(1);
+      expect(storage.storeKeyPair).not.toHaveBeenCalled();
+    });
+
+    it('resolves the minted pairwise DID', async () => {
+      const { did } = await service.registerPairwiseDID({
+        masterSecret: MASTER_HEX,
+        peerId: PEER_A,
+        domain: DOMAIN,
+      });
+
+      const doc = await service.resolveDID(did);
+      expect(doc).not.toBeNull();
+      expect(doc!.id).toBe(did);
+    });
+
+    it('is deterministic — same inputs yield the same DID', async () => {
+      const a = await service.registerPairwiseDID({ masterSecret: MASTER_HEX, peerId: PEER_A, domain: DOMAIN });
+      const b = await service.registerPairwiseDID({ masterSecret: MASTER_HEX, peerId: PEER_A, domain: DOMAIN });
+      expect(b.did).toBe(a.did);
+    });
+
+    it('is unlinkable — different peers yield independent DIDs and BOTH fingerprints', async () => {
+      const a = await service.registerPairwiseDID({ masterSecret: MASTER_HEX, peerId: PEER_A, domain: DOMAIN });
+      const b = await service.registerPairwiseDID({ masterSecret: MASTER_HEX, peerId: PEER_B, domain: DOMAIN });
+
+      expect(b.did).not.toBe(a.did);
+      expect(b.peerSegment).not.toBe(a.peerSegment);
+      const segA = a.did.split(':');
+      const segB = b.did.split(':');
+      expect(segB[segB.length - 1]).not.toBe(segA[segA.length - 1]); // pq1_
+      expect(segB[segB.length - 2]).not.toBe(segA[segA.length - 2]); // e1_
+    });
+
+    it('rejects a master secret shorter than 32 bytes', async () => {
+      await expect(
+        service.registerPairwiseDID({ masterSecret: 'aabb', peerId: PEER_A, domain: DOMAIN })
+      ).rejects.toThrow(/32 bytes/);
+    });
+
+    it('rejects an empty peerId and a non-hex master secret', async () => {
+      await expect(
+        service.registerPairwiseDID({ masterSecret: MASTER_HEX, peerId: '', domain: DOMAIN })
+      ).rejects.toThrow();
+      await expect(
+        service.registerPairwiseDID({ masterSecret: 'nothex!!', peerId: PEER_A, domain: DOMAIN })
+      ).rejects.toThrow(/hex/);
+    });
+  });
+
   describe('resolveDID', () => {
     it('returns null for unknown DID', async () => {
       const doc = await service.resolveDID('did:atp:nonexistent');

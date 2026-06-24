@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { IdentityService } from '../services/identity.js';
-import { DIDRegistrationRequest } from '../models/did.js';
+import { DIDRegistrationRequest, PairwiseDIDRegistrationRequest } from '../models/did.js';
 
 export class IdentityController {
   constructor(private identityService: IdentityService) {}
@@ -9,13 +9,40 @@ export class IdentityController {
     try {
       const request: DIDRegistrationRequest = req.body;
       const result = await this.identityService.registerDID(request);
-      
+
       res.status(201).json({
         success: true,
         data: result,
       });
     } catch (error) {
       res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+
+  async registerPairwise(req: Request, res: Response): Promise<void> {
+    try {
+      const request: PairwiseDIDRegistrationRequest = req.body;
+      if (!request || !request.masterSecret || !request.peerId) {
+        res.status(400).json({
+          success: false,
+          error: 'masterSecret and peerId are required',
+        });
+        return;
+      }
+
+      const result = await this.identityService.registerPairwiseDID(request);
+
+      res.status(201).json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      // The service's throws on this path are input-validation failures
+      // (bad hex, master secret too short, empty peerId), so report 400.
+      res.status(400).json({
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       });
