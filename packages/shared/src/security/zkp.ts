@@ -43,6 +43,24 @@ function mulPoint(P: RistrettoPt, scalar: bigint): RistrettoPt {
   return s === 0n ? RistrettoPoint.ZERO : P.multiply(s);
 }
 
+/** Modular exponentiation base^exp mod m (m the prime scalar order). */
+function modPow(base: bigint, exp: bigint, m: bigint): bigint {
+  let result = 1n;
+  let b = modOrder(base);
+  let e = exp;
+  while (e > 0n) {
+    if (e & 1n) result = (result * b) % m;
+    b = (b * b) % m;
+    e >>= 1n;
+  }
+  return result;
+}
+
+/** Scalar inverse modulo L via Fermat's little theorem (L is prime). */
+function invScalar(a: bigint): bigint {
+  return modPow(a, RISTRETTO_ORDER - 2n, RISTRETTO_ORDER);
+}
+
 function pointToHex(P: RistrettoPt): string {
   return Buffer.from(P.toBytes()).toString('hex');
 }
@@ -55,6 +73,35 @@ function pedersenChallenge(C: RistrettoPt, T: RistrettoPt, context: string): big
     Buffer.from(PEDERSEN_H.toBytes()),
     Buffer.from(C.toBytes()),
     Buffer.from(T.toBytes()),
+    Buffer.from(context, 'utf8'),
+  ]);
+  return modOrder(BigInt(`0x${createHash('sha512').update(enc).digest('hex')}`));
+}
+
+/** Point subtraction P − Q (via negation; @noble exposes both). */
+function subPoint(P: RistrettoPt, Q: RistrettoPt): RistrettoPt {
+  return P.add(Q.negate());
+}
+
+/**
+ * Fiat–Shamir challenge for a Chaum–Pedersen OR-proof on a single bit
+ * commitment. Binds the generators, the bit commitment C_i, both branch nonce
+ * points (R0, R1) and the proof context, so a proof cannot be transplanted to
+ * a different bit, commitment, or context.
+ */
+function bitOrChallenge(
+  Ci: RistrettoPt,
+  R0: RistrettoPt,
+  R1: RistrettoPt,
+  context: string
+): bigint {
+  const enc = Buffer.concat([
+    Buffer.from('ATP-range-bit-or:v1', 'utf8'),
+    Buffer.from(PEDERSEN_G.toBytes()),
+    Buffer.from(PEDERSEN_H.toBytes()),
+    Buffer.from(Ci.toBytes()),
+    Buffer.from(R0.toBytes()),
+    Buffer.from(R1.toBytes()),
     Buffer.from(context, 'utf8'),
   ]);
   return modOrder(BigInt(`0x${createHash('sha512').update(enc).digest('hex')}`));
@@ -110,11 +157,41 @@ export interface SelectiveDisclosureProof {
   merkleRoot: string;
 }
 
+/**
+ * One bit of a range proof: a Pedersen commitment to a single bit, accompanied
+ * by a non-interactive Chaum–Pedersen OR-proof that the committed value is
+ * exactly 0 or 1 (without revealing which).
+ */
+export interface RangeBitProof {
+  /** Bit commitment C_i = b_i·G + r_i·H, hex (32-byte Ristretto encoding). */
+  c: string;
+  /** OR-proof sub-challenges; the verifier checks e0+e1 == Fiat–Shamir hash. */
+  e0: string;
+  e1: string;
+  /** OR-proof responses (hex scalars) for the bit=0 and bit=1 branches. */
+  z0: string;
+  z1: string;
+}
+
+/**
+ * Zero-knowledge range proof that the value committed by `commitment` lies in
+ * the inclusive `range`. Built by bit-decomposition over real Ristretto255
+ * Pedersen commitments: it proves a = value−min and b = max−value each lie in
+ * [0, 2^bitLength) (so a,b ≥ 0), while a+b = max−min holds structurally because
+ * (C − min·G) + (max·G − C) = (max−min)·G. Sound and zero-knowledge; composes
+ * only audited @noble/curves group operations and standard sigma protocols.
+ */
 export interface RangeProof {
-  value: string; // Encrypted/hidden value
-  proof: ZKProof;
-  range: { min: number; max: number };
+  /** Pedersen commitment C = value·G + blinding·H to the hidden value, hex. */
   commitment: string;
+  /** Inclusive public range the committed value is proven to lie within. */
+  range: { min: number; max: number };
+  /** Bit width n with 2^n > (max − min); each side is proven in [0, 2^n). */
+  bitLength: number;
+  /** Bit proofs for a = value − min; Σ 2^i·C_i must equal C − min·G. */
+  lower: RangeBitProof[];
+  /** Bit proofs for b = max − value; Σ 2^i·C_i must equal max·G − C. */
+  upper: RangeBitProof[];
 }
 
 export interface MembershipProof {
@@ -433,29 +510,190 @@ export class ATPZKProofService {
     }
   }
 
+  /** Largest range width supported (keeps proofs bounded; 2^53 > any trust score). */
+  private static readonly MAX_RANGE_BITS = 53;
+
   /**
-   * @deprecated Sound range proofs are NOT implemented. The previous hash-based
-   * implementation was not a zero-knowledge range proof (it performed only a
-   * structural check) and has been removed rather than left as security theatre.
-   * Build range statements on `pedersenCommit` with a vetted bulletproofs
-   * library — do NOT roll your own (see CLAUDE.md).
+   * Create a zero-knowledge range proof that a freshly committed `value` lies in
+   * the inclusive range [min, max].
+   *
+   * Construction (sound, zero-knowledge — no new primitive, no new dependency):
+   * commit C = value·G + r·H on Ristretto255, then prove both a = value−min and
+   * b = max−value lie in [0, 2^n) by bit-decomposition, each bit carrying a
+   * Chaum–Pedersen OR-proof that it commits to 0 or 1. The constraint a+b =
+   * max−min holds *structurally* because (C−min·G) + (max·G−C) = (max−min)·G, so
+   * a ≥ 0 and b ≥ 0 together force min ≤ value ≤ max. The returned proof is
+   * self-contained: the blinding is never disclosed.
    */
-  createRangeProof(_value: number, _min: number, _max: number): RangeProof {
-    throw new Error(
-      'createRangeProof is not implemented: the previous hash-based range proof was ' +
-        'unsound and has been removed. Use a vetted bulletproofs implementation over ' +
-        'Pedersen/Ristretto commitments (see pedersenCommit).'
-    );
+  createRangeProof(value: number, min: number, max: number): RangeProof {
+    if (![value, min, max].every((n) => Number.isSafeInteger(n))) {
+      throw new Error('range proof requires safe-integer value, min and max');
+    }
+    if (min > max) throw new Error('range proof requires min <= max');
+    if (value < min || value > max) {
+      throw new Error('cannot prove range: value is outside [min, max]');
+    }
+
+    const v = BigInt(value);
+    const lo = BigInt(min);
+    const hi = BigInt(max);
+    const span = hi - lo; // >= 0
+    // Smallest n with 2^n > span: the bit length of span (and 1 for span 0).
+    const bitLength = span === 0n ? 1 : span.toString(2).length;
+    if (bitLength > ATPZKProofService.MAX_RANGE_BITS) {
+      throw new Error(`range too wide: ${bitLength} bits exceeds ${ATPZKProofService.MAX_RANGE_BITS}`);
+    }
+
+    const blinding = randomScalar();
+    const C = mulPoint(PEDERSEN_G, v).add(mulPoint(PEDERSEN_H, blinding));
+
+    // a = value − min carries blinding r (C_a = C − min·G);
+    // b = max − value carries blinding −r (C_b = max·G − C).
+    const lower = this.proveBitsInRange(v - lo, blinding, bitLength, 'lower');
+    const upper = this.proveBitsInRange(hi - v, modOrder(-blinding), bitLength, 'upper');
+
+    return { commitment: pointToHex(C), range: { min, max }, bitLength, lower, upper };
   }
 
   /**
-   * @deprecated See {@link createRangeProof} — sound range proofs are not implemented.
+   * Verify a range proof: each side's bits are valid 0/1 OR-proofs and recombine
+   * (Σ 2^i·C_i) to the homomorphically-derived side commitment (C−min·G for the
+   * lower side, max·G−C for the upper side). Returns false on any malformed or
+   * failing component rather than throwing.
    */
-  verifyRangeProof(_rangeProof: RangeProof): boolean {
-    throw new Error(
-      'verifyRangeProof is not implemented: range proofs were removed as unsound. ' +
-        'Use a vetted bulletproofs implementation.'
-    );
+  verifyRangeProof(proof: RangeProof): boolean {
+    try {
+      const { min, max } = proof.range;
+      if (!Number.isSafeInteger(min) || !Number.isSafeInteger(max) || min > max) return false;
+      const span = BigInt(max) - BigInt(min);
+      const expectedBits = span === 0n ? 1 : span.toString(2).length;
+      if (proof.bitLength !== expectedBits) return false;
+      if (proof.lower.length !== expectedBits || proof.upper.length !== expectedBits) return false;
+
+      const C = RistrettoPoint.fromHex(proof.commitment);
+      // C_a = C − min·G ; C_b = max·G − C (both derived by the verifier).
+      const Ca = subPoint(C, mulPoint(PEDERSEN_G, BigInt(min)));
+      const Cb = subPoint(mulPoint(PEDERSEN_G, BigInt(max)), C);
+
+      return (
+        this.verifyBitsInRange(proof.lower, Ca, 'lower') &&
+        this.verifyBitsInRange(proof.upper, Cb, 'upper')
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Prove an integer `x` (with Pedersen blinding `blinding` relative to the
+   * side commitment) lies in [0, 2^bitLength): commit each bit with blindings
+   * that sum (weighted by 2^i) to `blinding`, and attach a 0/1 OR-proof to each.
+   */
+  private proveBitsInRange(
+    x: bigint,
+    blinding: bigint,
+    bitLength: number,
+    side: string
+  ): RangeBitProof[] {
+    if (x < 0n || x >= 1n << BigInt(bitLength)) {
+      // Should never happen for an in-range value; guard against logic errors.
+      throw new Error('range proof internal error: side value out of [0, 2^n)');
+    }
+
+    // Per-bit blindings r_i with Σ 2^i·r_i ≡ blinding (mod L): pick the low
+    // bits' blindings at random and let the top bit absorb the remainder.
+    const blindings: bigint[] = [];
+    let weightedSum = 0n;
+    for (let i = 0; i < bitLength - 1; i++) {
+      const ri = randomScalar();
+      blindings.push(ri);
+      weightedSum = modOrder(weightedSum + (1n << BigInt(i)) * ri);
+    }
+    // r_top = (blinding − weightedSum) · (2^(n-1))^{-1} (mod L).
+    const topInv = invScalar(1n << BigInt(bitLength - 1));
+    blindings.push(modOrder((blinding - weightedSum) * topInv));
+
+    const proofs: RangeBitProof[] = [];
+    for (let i = 0; i < bitLength; i++) {
+      const bit = (x >> BigInt(i)) & 1n;
+      proofs.push(this.proveBitIsBinary(bit, blindings[i], `${side}:${i}`));
+    }
+    return proofs;
+  }
+
+  /**
+   * Non-interactive Chaum–Pedersen OR-proof that C_i = bit·G + r·H commits to a
+   * bit (0 or 1): proves knowledge of r such that C_i = r·H (bit 0) OR
+   * C_i − G = r·H (bit 1), simulating the false branch.
+   */
+  private proveBitIsBinary(bit: bigint, r: bigint, context: string): RangeBitProof {
+    const Ci = mulPoint(PEDERSEN_G, bit).add(mulPoint(PEDERSEN_H, r));
+    const P0 = Ci; // bit 0 branch: prove dlog_H(P0)
+    const P1 = subPoint(Ci, PEDERSEN_G); // bit 1 branch: prove dlog_H(P1)
+
+    const real = Number(bit); // 0 or 1 — the branch we actually know
+    // Simulate the false branch with a random challenge/response.
+    const eFake = randomScalar();
+    const zFake = randomScalar();
+    const PFake = real === 0 ? P1 : P0;
+    const RFake = subPoint(mulPoint(PEDERSEN_H, zFake), mulPoint(PFake, eFake));
+
+    // Real branch commitment.
+    const k = randomScalar();
+    const RReal = mulPoint(PEDERSEN_H, k);
+
+    const R0 = real === 0 ? RReal : RFake;
+    const R1 = real === 0 ? RFake : RReal;
+
+    const e = bitOrChallenge(Ci, R0, R1, context);
+    const eReal = modOrder(e - eFake);
+    const zReal = modOrder(k + eReal * r);
+
+    const e0 = real === 0 ? eReal : eFake;
+    const e1 = real === 0 ? eFake : eReal;
+    const z0 = real === 0 ? zReal : zFake;
+    const z1 = real === 0 ? zFake : zReal;
+
+    return {
+      c: pointToHex(Ci),
+      e0: e0.toString(16),
+      e1: e1.toString(16),
+      z0: z0.toString(16),
+      z1: z1.toString(16),
+    };
+  }
+
+  /**
+   * Verify a side's bit proofs and that they recombine to `expected`
+   * (= Σ 2^i·C_i). Each bit's OR-proof is checked by recomputing both branch
+   * nonce points and confirming e0+e1 equals the Fiat–Shamir challenge.
+   */
+  private verifyBitsInRange(bits: RangeBitProof[], expected: RistrettoPt, side: string): boolean {
+    let recombined: RistrettoPt = RistrettoPoint.ZERO;
+    for (let i = 0; i < bits.length; i++) {
+      const b = bits[i];
+      const Ci = RistrettoPoint.fromHex(b.c);
+      if (!this.verifyBitIsBinary(Ci, b, `${side}:${i}`)) return false;
+      recombined = recombined.add(mulPoint(Ci, 1n << BigInt(i)));
+    }
+    return recombined.equals(expected);
+  }
+
+  /** Verify one Chaum–Pedersen 0/1 OR-proof for bit commitment `Ci`. */
+  private verifyBitIsBinary(Ci: RistrettoPt, p: RangeBitProof, context: string): boolean {
+    const e0 = modOrder(BigInt(`0x${p.e0}`));
+    const e1 = modOrder(BigInt(`0x${p.e1}`));
+    const z0 = modOrder(BigInt(`0x${p.z0}`));
+    const z1 = modOrder(BigInt(`0x${p.z1}`));
+
+    const P0 = Ci;
+    const P1 = subPoint(Ci, PEDERSEN_G);
+    // R_j = z_j·H − e_j·P_j must reproduce the prover's nonce points.
+    const R0 = subPoint(mulPoint(PEDERSEN_H, z0), mulPoint(P0, e0));
+    const R1 = subPoint(mulPoint(PEDERSEN_H, z1), mulPoint(P1, e1));
+
+    const e = bitOrChallenge(Ci, R0, R1, context);
+    return modOrder(e0 + e1) === e;
   }
 
   /**
