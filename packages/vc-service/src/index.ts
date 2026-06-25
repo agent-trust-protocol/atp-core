@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { StorageService } from './services/storage.js';
 import { CredentialService } from './services/credential.js';
+import { TrustCredentialService } from './services/trust-credential.js';
 import { CredentialController } from './controllers/credential.js';
 import { DatabaseConfig } from '@atp/shared';
 import { config } from './config.js';
@@ -23,6 +24,7 @@ const dbConfig: DatabaseConfig = {
 const storage = new StorageService(dbConfig);
 const credentialService = new CredentialService(storage);
 const credentialController = new CredentialController(credentialService);
+const trustCredentialService = new TrustCredentialService(credentialService);
 
 app.post('/vc/issue', (req, res) => credentialController.issue(req, res));
 app.post('/vc/verify', (req, res) => credentialController.verify(req, res));
@@ -30,6 +32,25 @@ app.post('/vc/revoke/:credentialId', (req, res) => credentialController.revoke(r
 app.post('/vc/schemas', (req, res) => credentialController.registerSchema(req, res));
 app.get('/vc/schemas/:schemaId', (req, res) => credentialController.getSchema(req, res));
 app.get('/vc/schemas', (req, res) => credentialController.listSchemas(req, res));
+
+// ATP Trust Credential: issue a signed trust attestation, and verify a
+// presented one (returns the asserted trust level on success).
+app.post('/vc/trust/issue', async (req, res) => {
+  try {
+    const credential = await trustCredentialService.issueTrustCredential(req.body);
+    res.status(201).json({ success: true, data: credential });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+app.post('/vc/trust/verify', async (req, res) => {
+  try {
+    const result = await trustCredentialService.verifyPresentedTrustCredential(req.body?.credential);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
 
 app.get('/health', async (req, res) => {
   try {
