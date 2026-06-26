@@ -1,0 +1,24 @@
+{
+  "name": "@atp/did-atp",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Canonical did:atp v2 identifier and key-fingerprint primitives (single source of truth for the did:atp method across ATP packages)",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc --skipLibCheck || true",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --fix",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@noble/hashes": "^1.3.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.0.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0"
+  },
+  "license": "Apache-2.0"
+}

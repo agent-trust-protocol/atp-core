@@ -21,7 +21,11 @@ export default {
   },
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^@/(.*)$': '<rootDir>/src/$1'
+    '^@/(.*)$': '<rootDir>/src/$1',
+    // Resolve sibling @atp/* workspace packages (e.g. @atp/did-atp) to their
+    // TypeScript source, mirroring the root jest config and tsconfig.base.json
+    // ("@atp/*" -> "packages/*/src"). <rootDir> here is packages/sdk.
+    '^@atp/(.*)$': '<rootDir>/../$1/src'
   },
   transformIgnorePatterns: [
     'node_modules/(?!(@noble|uint8arrays|@sindresorhus)/)'

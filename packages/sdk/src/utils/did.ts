@@ -1,4 +1,12 @@
 import { CryptoUtils, HybridKeyPair } from './crypto.js';
+import {
+  ATP_E1_RE,
+  ATP_PQ1_RE,
+  ATP_PATH_SEGMENT_RE,
+  ATP_DOMAIN_RE,
+  ATP_THUMBPRINT_LENGTH,
+  buildAtpV2Did,
+} from '@atp/did-atp';
 
 /**
  * did:atp v2 identifier core.
@@ -37,14 +45,15 @@ export interface ParsedAtpDid {
   fragment?: string;
 }
 
-/** RFC 7638 SHA-256 thumbprints are 32 bytes → 43 base64url chars, no padding. */
-const THUMBPRINT_LENGTH = 43;
-
-const E1_RE = /^e1_[A-Za-z0-9_-]{43}$/;
-const PQ1_RE = /^pq1_[A-Za-z0-9_-]{43}$/;
-const PATH_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
-// Lowercase hostname per did:web, with an optional percent-encoded port.
-const DOMAIN_RE = /^(?=.{1,253}(%3[aA]|$))[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*(%3[aA][0-9]{1,5})?$/;
+// did:atp v2 ABNF anchors and the thumbprint length are sourced from the
+// canonical @atp/did-atp package (single source of truth) so the SDK's
+// parser/builder cannot drift from the shared algorithm. Local aliases keep
+// the call sites below unchanged.
+const THUMBPRINT_LENGTH = ATP_THUMBPRINT_LENGTH;
+const E1_RE = ATP_E1_RE;
+const PQ1_RE = ATP_PQ1_RE;
+const PATH_SEGMENT_RE = ATP_PATH_SEGMENT_RE;
+const DOMAIN_RE = ATP_DOMAIN_RE;
 
 export class DidAtp {
   static readonly METHOD = 'atp';
@@ -61,11 +70,10 @@ export class DidAtp {
     ed25519PublicKey: Uint8Array,
     mlDsa65PublicKey: Uint8Array
   ): string {
-    this.assertDomain(domain);
-    this.assertPath(path);
-    const e1 = CryptoUtils.e1Fingerprint(ed25519PublicKey);
-    const pq1 = CryptoUtils.pq1Fingerprint(mlDsa65PublicKey);
-    return `${this.PREFIX}${domain}:${path.join(':')}:${e1}:${pq1}`;
+    // Delegates to the canonical @atp/did-atp builder (single source of truth);
+    // it performs the same domain/path validation and produces a byte-identical
+    // identifier, with the e1_/pq1_ fingerprints bound to the two public keys.
+    return buildAtpV2Did(domain, path, ed25519PublicKey, mlDsa65PublicKey);
   }
 
   /**
