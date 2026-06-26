@@ -5,6 +5,7 @@
 # rolling, W3C-hosted tool (a pinned hash would break rendering on every ReSpec
 # release) and it is stripped from the exported spec via class="remove", so it
 # never ships. This triggers a false positive for
-# html.security.audit.missing-integrity, which is also suppressed inline via
-# nosemgrep on the loader line; this entry is a belt-and-suspenders fallback.
+# html.security.audit.missing-integrity. The spec HTML is kept clean of
+# tooling comments (W3C best practice), so suppression lives here at the repo
+# level rather than inline in the documents.
 docs/specs/**/*.html
