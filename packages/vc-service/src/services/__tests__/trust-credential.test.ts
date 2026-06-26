@@ -18,6 +18,7 @@ import {
   TrustCredentialService,
   ATP_TRUST_CREDENTIAL_TYPE,
   ATP_TRUST_CREDENTIAL_SCHEMA,
+  DEFAULT_TRUST_CREDENTIAL_TTL_SECONDS,
 } from '../trust-credential.js';
 import type { VerifiableCredential, CredentialSchema } from '../../models/credential.js';
 
@@ -83,6 +84,20 @@ describe('TrustCredentialService — issuance', () => {
     });
     expect(cred.expirationDate).toBeDefined();
     expect(new Date(cred.expirationDate!).getTime()).toBeGreaterThan(Date.now());
+  });
+
+  it('ALWAYS sets an expirationDate (spec MUST) — defaults the window when none is supplied', async () => {
+    const before = Date.now();
+    const cred = await trust.issueTrustCredential({
+      subjectDid: SUBJECT_DID, trustLevel: 'verified', issuerDid: ISSUER_DID,
+      issuerPrivateKey: 'a'.repeat(64), // no expiresInSeconds
+    });
+    expect(cred.expirationDate).toBeDefined();
+    const expiry = new Date(cred.expirationDate!).getTime();
+    // Defaulted ~90 days out (allow a generous window for execution time).
+    const expected = before + DEFAULT_TRUST_CREDENTIAL_TTL_SECONDS * 1000;
+    expect(expiry).toBeGreaterThan(Date.now());
+    expect(Math.abs(expiry - expected)).toBeLessThan(60_000);
   });
 
   it('rejects issuance without a subject or trust level', async () => {

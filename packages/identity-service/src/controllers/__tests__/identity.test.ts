@@ -91,3 +91,31 @@ describe('IdentityController.registerPairwise — HTTP status mapping', () => {
     expect(res._body.data.did).toBe('did:atp:example');
   });
 });
+
+describe('IdentityController.resolveDidDocument — { didDocument } resolver envelope', () => {
+  // The vc-service issuer-key lookup calls GET /identity/resolve/:did and reads
+  // body.didDocument; these pin that contract so the verifier can resolve keys.
+  it('returns 200 with { didDocument } for a known DID', async () => {
+    const doc = { id: 'did:atp:agent-42', verificationMethod: [{ id: '#k', publicKeyMultibase: 'z123' }] };
+    const service = { resolveDID: jest.fn(async () => doc) } as unknown as IdentityService;
+    const controller = new IdentityController(service);
+    const res = makeRes();
+
+    await controller.resolveDidDocument({ params: { did: 'did:atp:agent-42' } } as unknown as Request, res);
+
+    expect(res._status).toBe(0); // res.json without status() → default 200 path
+    expect(res._body.didDocument).toEqual(doc);
+    expect(res._body.didDocument.id).toBe('did:atp:agent-42');
+  });
+
+  it('returns 404 with { didDocument: null } for an unknown DID', async () => {
+    const service = { resolveDID: jest.fn(async () => null) } as unknown as IdentityService;
+    const controller = new IdentityController(service);
+    const res = makeRes();
+
+    await controller.resolveDidDocument({ params: { did: 'did:atp:nope' } } as unknown as Request, res);
+
+    expect(res._status).toBe(404);
+    expect(res._body.didDocument).toBeNull();
+  });
+});
