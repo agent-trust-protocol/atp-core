@@ -230,3 +230,6 @@ agent-*/
 
 # Generated SBOM (produced on release in CI, attached to the release)
 sbom.json
+
+# W3C CG upload staging area (manual copy-out; not tracked source)
+w3c-cg-upload/
