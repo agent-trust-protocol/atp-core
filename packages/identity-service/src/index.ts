@@ -57,6 +57,7 @@ const mfaController = new MFAController(pool);
 
 app.post('/identity/register', (req, res) => identityController.register(req, res));
 app.post('/identity/register-pairwise', (req, res) => identityController.registerPairwise(req, res));
+app.get('/identity/resolve/:did', (req, res) => identityController.resolveDidDocument(req, res));
 app.get('/identity/:did', (req, res) => identityController.resolve(req, res));
 app.get('/identity/:did/document', (req, res) => identityController.getDocument(req, res));
 app.post('/identity/:did/rotate-keys', (req, res) => identityController.rotateKeys(req, res));

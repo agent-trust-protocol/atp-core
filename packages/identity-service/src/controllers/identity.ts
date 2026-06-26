@@ -58,7 +58,7 @@ export class IdentityController {
     try {
       const { did } = req.params;
       const document = await this.identityService.resolveDID(did);
-      
+
       if (!document) {
         res.status(404).json({
           success: false,
@@ -74,6 +74,31 @@ export class IdentityController {
     } catch (error) {
       res.status(500).json({
         success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+
+  /**
+   * DID resolution endpoint returning a `{ didDocument }` envelope, the shape
+   * the standard DID-resolution convention (and the vc-service issuer-key
+   * lookup) expects — distinct from the CRUD `GET /identity/:did` envelope.
+   * 404 with `{ didDocument: null }` when the DID is unknown.
+   */
+  async resolveDidDocument(req: Request, res: Response): Promise<void> {
+    try {
+      const { did } = req.params;
+      const document = await this.identityService.resolveDID(did);
+
+      if (!document) {
+        res.status(404).json({ didDocument: null });
+        return;
+      }
+
+      res.json({ didDocument: document });
+    } catch (error) {
+      res.status(500).json({
+        didDocument: null,
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }

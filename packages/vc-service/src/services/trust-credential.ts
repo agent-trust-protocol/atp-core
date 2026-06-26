@@ -24,6 +24,14 @@ import type { CredentialService } from './credential.js';
 export const ATP_TRUST_CREDENTIAL_TYPE = 'AtpTrustCredential';
 
 /**
+ * Default validity window applied when a caller does not supply
+ * `expiresInSeconds`. The ATP Trust Credential spec requires every credential to
+ * carry an `expirationDate` (a trust attestation must not be valid indefinitely),
+ * so issuance always sets one. 90 days mirrors the spec's worked example.
+ */
+export const DEFAULT_TRUST_CREDENTIAL_TTL_SECONDS = 90 * 24 * 60 * 60;
+
+/**
  * Schema for the trust credential. `required` deliberately omits `id`: the
  * subject DID is supplied separately to `CredentialService.issueCredential`
  * (which validates the bare claims object before merging the subject `id`),
@@ -55,7 +63,12 @@ export interface IssueTrustCredentialRequest {
   /** Issuing authority DID and its signing key. */
   issuerDid: string;
   issuerPrivateKey: string;
-  /** Optional validity window in seconds; sets `expirationDate` when provided. */
+  /**
+   * Validity window in seconds. Optional; defaults to
+   * {@link DEFAULT_TRUST_CREDENTIAL_TTL_SECONDS}. The issued credential ALWAYS
+   * carries an `expirationDate` (the spec forbids a non-expiring trust
+   * attestation), so this only tunes the window, never whether one is set.
+   */
   expiresInSeconds?: number;
 }
 
@@ -90,10 +103,10 @@ export class TrustCredentialService {
     await this.ensureSchema();
 
     const evaluatedAt = req.evaluatedAt ?? new Date().toISOString();
-    const expirationDate =
-      req.expiresInSeconds !== undefined
-        ? new Date(Date.now() + req.expiresInSeconds * 1000).toISOString()
-        : undefined;
+    // The spec requires every AtpTrustCredential to carry an expirationDate, so
+    // always set one — defaulting the window when the caller omits it.
+    const ttlSeconds = req.expiresInSeconds ?? DEFAULT_TRUST_CREDENTIAL_TTL_SECONDS;
+    const expirationDate = new Date(Date.now() + ttlSeconds * 1000).toISOString();
 
     const claims: Record<string, unknown> = { trustLevel: req.trustLevel, evaluatedAt };
     if (req.trustScore !== undefined) claims.trustScore = req.trustScore;
