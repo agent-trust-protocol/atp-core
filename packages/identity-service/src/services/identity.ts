@@ -12,8 +12,7 @@ import {
   TrustLevel,
   TrustLevelManager,
   PQCAlgorithm,
-  derivePairwiseHybridKeyPair,
-  pairwisePeerSegment,
+  verifySignatureCompat,
 } from '@atp/shared';
 
 /** Raw binding public keys split out of a hybrid keypair. */
@@ -78,40 +77,43 @@ export class IdentityService {
   /**
    * Register a pairwise (per-peer, unlinkable) did:atp.
    *
-   * The per-peer hybrid keypair and the pseudonymous "p_<hex>" path segment are
-   * derived deterministically from the agent's master secret (HKDF-SHA256, via
-   * @atp/shared — the same single-source derivation the SDK uses), so every
-   * peer sees a different did:atp that cannot be correlated to the agent's other
-   * DIDs without the master secret. The service NEVER stores the master secret
-   * or the derived private keys: they are returned to the caller, who recomputes
-   * them on demand. Only the public DID Document is persisted so the pairwise
-   * DID still resolves.
+   * The per-peer hybrid keypair and the pseudonymous "p_<hex>" path segment
+   * MUST be derived client-side (e.g. via `DidAtp.generatePairwise` in
+   * `atp-sdk`) from the agent's master secret — the master secret and the
+   * derived private keys never leave the caller and are never transmitted to
+   * or seen by this service. The caller submits only the resulting public
+   * keys plus a signature (`proof`) over the recomputed DID proving control
+   * of the matching private key(s). This method independently recomputes the
+   * did:atp identifier from the submitted public material, verifies the
+   * proof against it (reusing `verifySignatureCompat` — no bespoke crypto),
+   * and persists only the public DID Document.
    */
   async registerPairwiseDID(
     request: PairwiseDIDRegistrationRequest
   ): Promise<DIDRegistrationResponse> {
-    const masterSecret = this.decodeMasterSecret(request.masterSecret);
-    const salt = request.salt ? this.decodeHex(request.salt, 'salt') : undefined;
     if (typeof request.peerId !== 'string' || request.peerId.length === 0) {
       throw new ValidationError('peerId must be a non-empty string');
     }
+    if (!/^p_[0-9a-fA-F]+$/.test(request.peerSegment || '')) {
+      throw new ValidationError('peerSegment must be a "p_<hex>" pseudonym segment');
+    }
+    const edPub = this.decodeHex(request.ed25519PublicKey, 'ed25519PublicKey');
+    if (edPub.length !== 32) {
+      throw new ValidationError('ed25519PublicKey must decode to 32 bytes');
+    }
+    const mlPub = this.decodeHex(request.mlDsa65PublicKey, 'mlDsa65PublicKey');
+    if (mlPub.length !== 1952) {
+      throw new ValidationError('mlDsa65PublicKey must decode to 1952 bytes');
+    }
+    const proof = this.decodeHex(request.proof, 'proof');
 
-    // Deterministic per-peer derivation (canonical impl in @atp/shared).
-    const derived = await derivePairwiseHybridKeyPair(masterSecret, request.peerId, { salt });
-    const peerSegment = pairwisePeerSegment(masterSecret, request.peerId, { salt });
-
-    // Shape the raw bytes into the QuantumSafeKeyPair encoding the rest of the
-    // service understands: classical Ed25519 fields, plus combined
-    // Ed25519(32) || ML-DSA-65(1952) public/private blobs for the pq1_ binding.
-    const edPub = Buffer.from(derived.ed25519.publicKey);
-    const edPriv = Buffer.from(derived.ed25519.secretKey);
-    const mlPub = Buffer.from(derived.mlDsa65.publicKey);
-    const mlPriv = Buffer.from(derived.mlDsa65.secretKey);
+    // Shape the submitted public bytes into the QuantumSafeKeyPair encoding
+    // the rest of the service understands. No private key material is ever
+    // present here.
     const keyPair: QuantumSafeKeyPair = {
-      publicKey: edPub.toString('hex'),
-      privateKey: edPriv.toString('hex'),
-      pqcPublicKey: Buffer.concat([edPub, mlPub]).toString('hex'),
-      pqcPrivateKey: Buffer.concat([edPriv, mlPriv]).toString('hex'),
+      publicKey: Buffer.from(edPub).toString('hex'),
+      privateKey: '',
+      pqcPublicKey: Buffer.concat([Buffer.from(edPub), Buffer.from(mlPub)]).toString('hex'),
       algorithm: PQCAlgorithm.CRYSTALS_DILITHIUM,
       isQuantumSafe: true,
       hybridMode: true,
@@ -121,38 +123,38 @@ export class IdentityService {
     // The pseudonym is the single path segment, so the DID is unlinkable.
     const did = CryptoUtils.generateQuantumSafeDID(keyPair, {
       domain: request.domain,
-      path: [peerSegment],
+      path: [request.peerSegment],
       binding,
     });
+
+    // Verify the caller controls the private key(s) matching the submitted
+    // public keys by checking their signature over the recomputed DID.
+    const verification = await verifySignatureCompat(did, Buffer.from(proof).toString('hex'), {
+      ed25519PublicKeyHex: keyPair.publicKey,
+      mlDsa65PublicKeyHex: mlPub.length ? Buffer.from(mlPub).toString('hex') : undefined,
+    });
+    if (!verification.valid) {
+      throw new ValidationError('proof does not verify against the submitted public keys');
+    }
+
     const now = new Date().toISOString();
 
     const document = this.assembleDidDocument(did, keyPair, binding, request.services, now, {
       pairwise: true,
-      peerSegment,
+      peerSegment: request.peerSegment,
     });
 
-    // Persist only the public document — never the recomputable private keys.
+    // Persist only the public document — private keys are never seen here.
     await this.storage.storeDIDDocument(document);
 
     return {
       did,
       document,
-      privateKey: keyPair.privateKey,
-      pqcPrivateKey: keyPair.pqcPrivateKey,
       algorithm: keyPair.algorithm,
       isQuantumSafe: true,
       hybridMode: true,
-      peerSegment,
+      peerSegment: request.peerSegment,
     };
-  }
-
-  /** Decode a hex master secret and enforce the >= 32-byte entropy floor. */
-  private decodeMasterSecret(hex: string): Uint8Array {
-    const bytes = this.decodeHex(hex, 'masterSecret');
-    if (bytes.length < 32) {
-      throw new ValidationError('masterSecret must decode to at least 32 bytes');
-    }
-    return bytes;
   }
 
   /** Strictly decode a hex string (even length, hex chars only). */

@@ -1,7 +1,62 @@
 import { IdentityService } from '../identity.js';
 import { DIDDocument } from '../../models/did.js';
 import { CryptoUtils } from '../../utils/crypto.js';
-import { TrustLevel } from '@atp/shared';
+import { TrustLevel, PQCAlgorithm, derivePairwiseHybridKeyPair, pairwisePeerSegment } from '@atp/shared';
+
+/**
+ * Test helper standing in for the client-side derivation an SDK caller would
+ * perform (e.g. `DidAtp.generatePairwise`): derive the per-peer keypair and
+ * pseudonym from a master secret, build the registration request the service
+ * now expects (public keys + a signature proof — no master secret or private
+ * keys), and sign over the *recomputed* DID exactly as the service does.
+ */
+async function buildPairwiseRegistration(
+  masterSecret: Uint8Array,
+  peerId: string,
+  domain: string,
+  salt?: Uint8Array
+) {
+  const derived = await derivePairwiseHybridKeyPair(masterSecret, peerId, { salt });
+  const peerSegment = pairwisePeerSegment(masterSecret, peerId, { salt });
+  const edPubHex = Buffer.from(derived.ed25519.publicKey).toString('hex');
+  const mlPubHex = Buffer.from(derived.mlDsa65.publicKey).toString('hex');
+  const edPrivHex = Buffer.from(derived.ed25519.secretKey).toString('hex');
+
+  const binding = CryptoUtils.extractBindingPublicKeys({
+    publicKey: edPubHex,
+    privateKey: '',
+    pqcPublicKey: edPubHex + mlPubHex,
+    algorithm: PQCAlgorithm.CRYSTALS_DILITHIUM,
+    isQuantumSafe: true,
+    hybridMode: true,
+  });
+  const did = CryptoUtils.generateQuantumSafeDID(
+    {
+      publicKey: edPubHex,
+      privateKey: '',
+      pqcPublicKey: edPubHex + mlPubHex,
+      algorithm: PQCAlgorithm.CRYSTALS_DILITHIUM,
+      isQuantumSafe: true,
+      hybridMode: true,
+    },
+    { domain, path: [peerSegment], binding }
+  );
+
+  const proof = await CryptoUtils.sign(did, edPrivHex);
+
+  return {
+    request: {
+      peerId,
+      peerSegment,
+      ed25519PublicKey: edPubHex,
+      mlDsa65PublicKey: mlPubHex,
+      proof,
+      domain,
+    },
+    did,
+    peerSegment,
+  };
+}
 
 // Spec-v2 did:atp path-type identifier (docs/specs/did-atp/index.html):
 //   did:atp:<domain>:<path...>:e1_<43 base64url>:pq1_<43 base64url>
@@ -147,12 +202,11 @@ describe('IdentityService', () => {
       'e1_lmymt0BeCG1HJGFK7COftXLzJGOrDDNY1vmLYBMe5A0:' +
       'pq1_YQm0BqWxJDTUol5l-MGoy5N9fn6sEM7_Zx3g8MUe8rw';
 
+    const MASTER_BYTES = new Uint8Array(Buffer.from(MASTER_HEX, 'hex'));
+
     it('mints the pinned pairwise DID for a fixed master/peer/domain', async () => {
-      const res = await service.registerPairwiseDID({
-        masterSecret: MASTER_HEX,
-        peerId: PEER_A,
-        domain: DOMAIN,
-      });
+      const { request } = await buildPairwiseRegistration(MASTER_BYTES, PEER_A, DOMAIN);
+      const res = await service.registerPairwiseDID(request);
 
       expect(res.did).toBe(KAT_DID);
       expect(res.peerSegment).toBe('p_fad4fe7b41096f53e62fc34133eab6e7');
@@ -162,27 +216,19 @@ describe('IdentityService', () => {
       expect(res.document.metadata?.additionalInfo?.didMethodVersion).toBe('v2');
     });
 
-    it('returns the derived private keys but never persists them', async () => {
-      const res = await service.registerPairwiseDID({
-        masterSecret: MASTER_HEX,
-        peerId: PEER_A,
-        domain: DOMAIN,
-      });
+    it('never receives or returns private key material; persists only the public document', async () => {
+      const { request } = await buildPairwiseRegistration(MASTER_BYTES, PEER_A, DOMAIN);
+      const res = await service.registerPairwiseDID(request);
 
-      // Caller recomputes keys from the master secret; only the public document
-      // is stored, never the keypair.
-      expect(res.privateKey).toBeDefined();
-      expect(res.pqcPrivateKey).toBeDefined();
+      expect(res.privateKey).toBeUndefined();
+      expect(res.pqcPrivateKey).toBeUndefined();
       expect(storage.storeDIDDocument).toHaveBeenCalledTimes(1);
       expect(storage.storeKeyPair).not.toHaveBeenCalled();
     });
 
     it('resolves the minted pairwise DID', async () => {
-      const { did } = await service.registerPairwiseDID({
-        masterSecret: MASTER_HEX,
-        peerId: PEER_A,
-        domain: DOMAIN,
-      });
+      const { request } = await buildPairwiseRegistration(MASTER_BYTES, PEER_A, DOMAIN);
+      const { did } = await service.registerPairwiseDID(request);
 
       const doc = await service.resolveDID(did);
       expect(doc).not.toBeNull();
@@ -190,14 +236,18 @@ describe('IdentityService', () => {
     });
 
     it('is deterministic — same inputs yield the same DID', async () => {
-      const a = await service.registerPairwiseDID({ masterSecret: MASTER_HEX, peerId: PEER_A, domain: DOMAIN });
-      const b = await service.registerPairwiseDID({ masterSecret: MASTER_HEX, peerId: PEER_A, domain: DOMAIN });
+      const { request: reqA } = await buildPairwiseRegistration(MASTER_BYTES, PEER_A, DOMAIN);
+      const { request: reqB } = await buildPairwiseRegistration(MASTER_BYTES, PEER_A, DOMAIN);
+      const a = await service.registerPairwiseDID(reqA);
+      const b = await service.registerPairwiseDID(reqB);
       expect(b.did).toBe(a.did);
     });
 
     it('is unlinkable — different peers yield independent DIDs and BOTH fingerprints', async () => {
-      const a = await service.registerPairwiseDID({ masterSecret: MASTER_HEX, peerId: PEER_A, domain: DOMAIN });
-      const b = await service.registerPairwiseDID({ masterSecret: MASTER_HEX, peerId: PEER_B, domain: DOMAIN });
+      const { request: reqA } = await buildPairwiseRegistration(MASTER_BYTES, PEER_A, DOMAIN);
+      const { request: reqB } = await buildPairwiseRegistration(MASTER_BYTES, PEER_B, DOMAIN);
+      const a = await service.registerPairwiseDID(reqA);
+      const b = await service.registerPairwiseDID(reqB);
 
       expect(b.did).not.toBe(a.did);
       expect(b.peerSegment).not.toBe(a.peerSegment);
@@ -207,19 +257,36 @@ describe('IdentityService', () => {
       expect(segB[segB.length - 2]).not.toBe(segA[segA.length - 2]); // e1_
     });
 
-    it('rejects a master secret shorter than 32 bytes', async () => {
+    it('rejects a malformed peerSegment', async () => {
+      const { request } = await buildPairwiseRegistration(MASTER_BYTES, PEER_A, DOMAIN);
       await expect(
-        service.registerPairwiseDID({ masterSecret: 'aabb', peerId: PEER_A, domain: DOMAIN })
-      ).rejects.toThrow(/32 bytes/);
+        service.registerPairwiseDID({ ...request, peerSegment: 'not-a-pseudonym' })
+      ).rejects.toThrow(/peerSegment/);
     });
 
-    it('rejects an empty peerId and a non-hex master secret', async () => {
+    it('rejects an empty peerId', async () => {
+      const { request } = await buildPairwiseRegistration(MASTER_BYTES, PEER_A, DOMAIN);
       await expect(
-        service.registerPairwiseDID({ masterSecret: MASTER_HEX, peerId: '', domain: DOMAIN })
+        service.registerPairwiseDID({ ...request, peerId: '' })
       ).rejects.toThrow();
+    });
+
+    it('rejects a non-hex public key', async () => {
+      const { request } = await buildPairwiseRegistration(MASTER_BYTES, PEER_A, DOMAIN);
       await expect(
-        service.registerPairwiseDID({ masterSecret: 'nothex!!', peerId: PEER_A, domain: DOMAIN })
+        service.registerPairwiseDID({ ...request, ed25519PublicKey: 'nothex!!' })
       ).rejects.toThrow(/hex/);
+    });
+
+    it('rejects a proof that does not match the submitted public keys', async () => {
+      const { request: reqA } = await buildPairwiseRegistration(MASTER_BYTES, PEER_A, DOMAIN);
+      const { request: reqB } = await buildPairwiseRegistration(MASTER_BYTES, PEER_B, DOMAIN);
+
+      // Swap in another registration's proof — it won't verify against this
+      // request's recomputed DID, exactly the case this check exists to catch.
+      await expect(
+        service.registerPairwiseDID({ ...reqA, proof: reqB.proof })
+      ).rejects.toThrow(/proof/);
     });
   });
 

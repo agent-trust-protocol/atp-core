@@ -73,19 +73,33 @@ export interface DIDRegistrationResponse {
 }
 
 /**
- * Register a pairwise (per-peer, unlinkable) did:atp. The per-peer hybrid
- * keypair and pseudonym are derived deterministically from the agent's master
- * secret, so the service never needs to store them — they are returned to the
- * caller, who recomputes them on demand. See docs/specs/did-atp/index.html
- * § "Pairwise (Per-Peer, Unlinkable) Identifiers".
+ * Register a pairwise (per-peer, unlinkable) did:atp.
+ *
+ * The per-peer hybrid keypair and the pseudonymous "p_<hex>" path segment MUST
+ * be derived client-side from the agent's master secret (e.g. via
+ * `DidAtp.generatePairwise` in `atp-sdk`) — the master secret and the derived
+ * private keys never leave the caller. The caller submits only the resulting
+ * public key material plus a signature proving control of the corresponding
+ * private keys; the service independently recomputes the DID from that public
+ * material, verifies the proof, and persists only the public DID Document.
+ * See docs/specs/did-atp/index.html § "Pairwise (Per-Peer, Unlinkable)
+ * Identifiers".
  */
 export interface PairwiseDIDRegistrationRequest {
-  /** Agent master secret as hex; MUST decode to >= 32 bytes. Never persisted. */
-  masterSecret: string;
   /** Peer (relying-party) identifier the pairwise DID is presented to. */
   peerId: string;
-  /** Optional salt as hex; rotates the agent's entire pairwise DID set. */
-  salt?: string;
+  /** Client-derived pseudonymous "p_<hex>" path segment for this peer. */
+  peerSegment: string;
+  /** Hex-encoded 32-byte Ed25519 public key, derived client-side for this peer. */
+  ed25519PublicKey: string;
+  /** Hex-encoded 1952-byte ML-DSA-65 public key, derived client-side for this peer. */
+  mlDsa65PublicKey: string;
+  /**
+   * Hex-encoded signature over the recomputed did:atp identifier, proving
+   * control of the private key(s) matching the submitted public keys. Either
+   * an Ed25519 (64-byte) or ML-DSA-65 (3309-byte) signature is accepted.
+   */
+  proof: string;
   /** Optional resolution domain; defaults to ATP_DID_DOMAIN. */
   domain?: string;
   services?: Service[];

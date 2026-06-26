@@ -26,10 +26,18 @@ export class IdentityController {
   async registerPairwise(req: Request, res: Response): Promise<void> {
     try {
       const request: PairwiseDIDRegistrationRequest = req.body;
-      if (!request || !request.masterSecret || !request.peerId) {
+      if (
+        !request ||
+        !request.peerId ||
+        !request.peerSegment ||
+        !request.ed25519PublicKey ||
+        !request.mlDsa65PublicKey ||
+        !request.proof
+      ) {
         res.status(400).json({
           success: false,
-          error: 'masterSecret and peerId are required',
+          error:
+            'peerId, peerSegment, ed25519PublicKey, mlDsa65PublicKey, and proof are required',
         });
         return;
       }
@@ -41,10 +49,10 @@ export class IdentityController {
         data: result,
       });
     } catch (error) {
-      // Input-validation failures (bad hex, master secret too short, empty
-      // peerId) are client errors → 400. Anything else on this path — key
-      // derivation or a storage/infrastructure fault from storeDIDDocument — is
-      // a server-side fault → 500, so clients and monitoring can tell a
+      // Input-validation failures (bad hex, wrong key length, empty peerId, an
+      // invalid proof) are client errors → 400. Anything else on this path —
+      // a storage/infrastructure fault from storeDIDDocument — is a
+      // server-side fault → 500, so clients and monitoring can tell a
       // malformed request apart from an outage and retry/alert accordingly.
       const status = error instanceof ValidationError ? 400 : 500;
       res.status(status).json({
