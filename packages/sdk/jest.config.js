@@ -22,9 +22,9 @@ export default {
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@/(.*)$': '<rootDir>/src/$1',
-    // Resolve internal @atp/* packages to their TypeScript source so the
-    // isolated SDK test run does not depend on a sibling package's built dist
-    // (mirrors the repo-root jest config).
+    // Resolve sibling @atp/* workspace packages (e.g. @atp/did-atp) to their
+    // TypeScript source, mirroring the root jest config and tsconfig.base.json
+    // ("@atp/*" -> "packages/*/src"). <rootDir> here is packages/sdk.
     '^@atp/(.*)$': '<rootDir>/../$1/src'
   },
   transformIgnorePatterns: [
