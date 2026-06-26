@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { IdentityService } from '../services/identity.js';
 import { DIDRegistrationRequest, PairwiseDIDRegistrationRequest } from '../models/did.js';
+import { ValidationError } from '../errors.js';
 
 export class IdentityController {
   constructor(private identityService: IdentityService) {}
@@ -40,9 +41,13 @@ export class IdentityController {
         data: result,
       });
     } catch (error) {
-      // The service's throws on this path are input-validation failures
-      // (bad hex, master secret too short, empty peerId), so report 400.
-      res.status(400).json({
+      // Input-validation failures (bad hex, master secret too short, empty
+      // peerId) are client errors → 400. Anything else on this path — key
+      // derivation or a storage/infrastructure fault from storeDIDDocument — is
+      // a server-side fault → 500, so clients and monitoring can tell a
+      // malformed request apart from an outage and retry/alert accordingly.
+      const status = error instanceof ValidationError ? 400 : 500;
+      res.status(status).json({
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       });

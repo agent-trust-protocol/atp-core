@@ -7,6 +7,7 @@ import {
 } from '../models/did.js';
 import { CryptoUtils, QuantumSafeKeyPair } from '../utils/crypto.js';
 import { StorageService } from './storage.js';
+import { ValidationError } from '../errors.js';
 import {
   TrustLevel,
   TrustLevelManager,
@@ -92,7 +93,7 @@ export class IdentityService {
     const masterSecret = this.decodeMasterSecret(request.masterSecret);
     const salt = request.salt ? this.decodeHex(request.salt, 'salt') : undefined;
     if (typeof request.peerId !== 'string' || request.peerId.length === 0) {
-      throw new Error('peerId must be a non-empty string');
+      throw new ValidationError('peerId must be a non-empty string');
     }
 
     // Deterministic per-peer derivation (canonical impl in @atp/shared).
@@ -149,7 +150,7 @@ export class IdentityService {
   private decodeMasterSecret(hex: string): Uint8Array {
     const bytes = this.decodeHex(hex, 'masterSecret');
     if (bytes.length < 32) {
-      throw new Error('masterSecret must decode to at least 32 bytes');
+      throw new ValidationError('masterSecret must decode to at least 32 bytes');
     }
     return bytes;
   }
@@ -157,7 +158,7 @@ export class IdentityService {
   /** Strictly decode a hex string (even length, hex chars only). */
   private decodeHex(hex: string, field: string): Uint8Array {
     if (typeof hex !== 'string' || hex.length === 0 || hex.length % 2 !== 0 || !/^[0-9a-fA-F]+$/.test(hex)) {
-      throw new Error(`${field} must be a non-empty, even-length hex string`);
+      throw new ValidationError(`${field} must be a non-empty, even-length hex string`);
     }
     return new Uint8Array(Buffer.from(hex, 'hex'));
   }

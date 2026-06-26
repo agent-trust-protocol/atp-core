@@ -12,11 +12,8 @@
       };
     </script>
     <script src="../common/biblio.js" class="remove"></script>
-    <script
-      src="https://www.w3.org/Tools/respec/respec-w3c"
-      class="remove"
-      defer
-    ></script>
+    <!-- nosemgrep: html.security.audit.missing-integrity.missing-integrity -- ReSpec is a rolling, W3C-hosted build tool: an SRI hash would break rendering on every ReSpec release, and class="remove" strips this loader from the exported spec, so it never ships. -->
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove" defer></script>
     <script src="../common/respec-config.js" class="remove" defer></script>
   </head>
   <body>
