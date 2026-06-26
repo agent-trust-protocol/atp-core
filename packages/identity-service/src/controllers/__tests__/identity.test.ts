@@ -32,7 +32,14 @@ function makeRes(): Response & { _status: number; _body: any } {
 
 const reqWith = (body: any) => ({ body } as Request);
 
-const VALID = { masterSecret: 'a'.repeat(64), peerId: 'peer-1', domain: 'agents.example.com' };
+const VALID = {
+  peerId: 'peer-1',
+  peerSegment: 'p_' + 'a'.repeat(32),
+  ed25519PublicKey: 'a'.repeat(64),
+  mlDsa65PublicKey: 'b'.repeat(3904),
+  proof: 'c'.repeat(128),
+  domain: 'agents.example.com',
+};
 
 describe('IdentityController.registerPairwise — HTTP status mapping', () => {
   it('returns 400 when required fields are missing', async () => {
@@ -48,7 +55,7 @@ describe('IdentityController.registerPairwise — HTTP status mapping', () => {
   it('returns 400 when the service throws a ValidationError (bad input)', async () => {
     const service = {
       registerPairwiseDID: jest.fn(async () => {
-        throw new ValidationError('masterSecret must decode to at least 32 bytes');
+        throw new ValidationError('proof does not verify against the submitted public keys');
       }),
     } as unknown as IdentityService;
     const controller = new IdentityController(service);
@@ -57,7 +64,7 @@ describe('IdentityController.registerPairwise — HTTP status mapping', () => {
     await controller.registerPairwise(reqWith(VALID), res);
 
     expect(res._status).toBe(400);
-    expect(res._body.error).toMatch(/32 bytes/);
+    expect(res._body.error).toMatch(/proof/);
   });
 
   it('returns 500 when the service throws a non-validation (storage/infra) error', async () => {
