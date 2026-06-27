@@ -291,6 +291,41 @@ Your AI Agents (LangChain, OpenClaw, AutoGPT, MCP, Swarm, ADK, A2A)
 
 ---
 
+## Specifications & Conformance
+
+ATP is being standardized as a set of open specifications under a dedicated W3C
+Community Group. The drafts live in [`docs/specs/`](./docs/specs/) as
+[ReSpec](https://respec.org/) documents — open any spec's `index.html` in a
+browser to read the rendered specification.
+
+| Pillar | Specification | Maturity |
+| --- | --- | --- |
+| **Identity** | [`did:atp` DID Method](./docs/specs/did-atp/index.html) — quantum-safe, hybrid Ed25519 + ML-DSA-65 | Draft + runnable [proof](./proof/) |
+| **Trust** | [Agent Trust Scoring & Credentials](./docs/specs/atp-trust/index.html) — backed by W3C Verifiable Credentials | Early draft |
+| **Privacy** | [Pairwise DIDs, Selective Disclosure & ZKP](./docs/specs/atp-privacy/index.html) | Early draft |
+| **Conformance** | [Conformance & Interoperability](./docs/specs/atp-conformance/index.html) | Early draft |
+
+> These are **Community Group drafts** — not yet W3C standards — coordinated with
+> the [W3C AI Agent Protocol CG](https://www.w3.org/community/agentprotocol/).
+> `did:atp` is the most mature, with an end-to-end runnable proof; the trust,
+> privacy, and conformance specs are early drafts seeking member review.
+> Zero-knowledge range proofs remain experimental (see the note above).
+
+### Conformance suite
+
+One command runs the W3C-style conformance suites for all five core items and
+doubles as a CI / release gate (exits non-zero on any failure):
+
+```bash
+npm run conformance          # did · sigs · policy · audit · privacy
+npm run conformance -- 1     # a single item (here, did:atp)
+```
+
+Per-item scripts are also available: `conformance:did`, `conformance:sigs`,
+`conformance:policy`, `conformance:audit`, and `conformance:privacy`.
+
+---
+
 ##  Installation
 
 ```bash
@@ -316,6 +351,8 @@ pnpm add atp-sdk
 - **[Examples](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/examples)** - Working code examples
 - **[Multi-Protocol Support](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/multi-protocol.md)** - MCP, Swarm, ADK, A2A
 - **[Troubleshooting](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/troubleshooting.md)** - Common issues
+- **[Specifications (W3C CG drafts)](https://github.com/agent-trust-protocol/atp-core/tree/main/docs/specs)** - did:atp, trust, privacy & conformance ReSpec specs
+- **[Conformance Suite](https://github.com/agent-trust-protocol/atp-core/blob/main/scripts/conformance.mjs)** - `npm run conformance` interoperability gate
 
 ---
 
