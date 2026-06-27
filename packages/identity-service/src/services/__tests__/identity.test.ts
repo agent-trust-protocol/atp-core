@@ -166,6 +166,14 @@ describe('IdentityService', () => {
       expect(edVm?.publicKeyMultibase).toBeDefined();
       expect(pqVm?.publicKeyJwk).toBeDefined();
 
+      // The Ed25519 method also carries publicKeyHex (for hex-verifying consumers
+      // such as the vc-service issuer-key lookup); it MUST encode the same key as
+      // publicKeyMultibase.
+      expect(edVm?.publicKeyHex).toMatch(/^[0-9a-f]{64}$/i);
+      expect(CryptoUtils.encodeMultibase(Buffer.from(edVm!.publicKeyHex!, 'hex'))).toBe(
+        edVm!.publicKeyMultibase
+      );
+
       const mlPub = new Uint8Array(
         Buffer.from((pqVm!.publicKeyJwk as { pub: string }).pub, 'base64url')
       );

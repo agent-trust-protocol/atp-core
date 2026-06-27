@@ -190,6 +190,8 @@ export class IdentityService {
       type: 'Ed25519VerificationKey2020',
       controller: did,
       publicKeyMultibase: CryptoUtils.encodeMultibase(Buffer.from(keyPair.publicKey, 'hex')),
+      // Same key in hex, so hex-verifying consumers need not decode multibase.
+      publicKeyHex: keyPair.publicKey,
     });
 
     // Add the post-quantum ML-DSA-65 binding as an RFC 9964 AKP JWK, so the
@@ -370,6 +372,8 @@ export class IdentityService {
         type: 'Ed25519VerificationKey2020',
         controller: did,
         publicKeyMultibase: CryptoUtils.encodeMultibase(Buffer.from(newKeyPair.publicKey, 'hex')),
+        // Same key in hex, so hex-verifying consumers need not decode multibase.
+        publicKeyHex: newKeyPair.publicKey,
       }],
       updated: now,
     };
