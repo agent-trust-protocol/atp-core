@@ -10,8 +10,8 @@
  * root. Verification establishes that each disclosed attribute is a member of
  * that root AND (when given) that the root matches the issuer-attested root.
  * The issuer's signature over the root is verified out-of-band (VC service) and
- * is out of scope here. The experimental hash-based range proof is also out of
- * scope (it is not a sound ZK range proof — see `createRangeProof`).
+ * is out of scope here. Sound range proofs (bit-decomposition + Chaum–Pedersen
+ * OR over Ristretto Pedersen commitments) are covered in their own suite below.
  *
  * The Merkle root is a known-answer (KAT): it is fully determined by the fixed
  * credential below and was computed independently of the implementation.
@@ -203,8 +203,87 @@ describe('Pedersen commitments (Ristretto255) + opening proof', () => {
     expect(zk.verifyPedersenOpening(proof, 'zero')).toBe(true);
   });
 
-  it('the deprecated range-proof API throws rather than returning an unsound result', () => {
-    expect(() => zk.createRangeProof(5, 0, 10)).toThrow(/not implemented/i);
-    expect(() => zk.verifyRangeProof({} as any)).toThrow(/not implemented/i);
+});
+
+// ---------------------------------------------------------------------------
+// Range proofs (bit-decomposition + Chaum–Pedersen OR over Ristretto Pedersen
+// commitments). Replaces the removed unsound hash-based range proof with a
+// real, sound, zero-knowledge construction (no new primitive / dependency).
+// ---------------------------------------------------------------------------
+
+describe('Range proofs (bit-decomposition OR over Ristretto255)', () => {
+  const zk = new ATPZKProofService();
+
+  it('proves and verifies a value strictly inside the range', () => {
+    const proof = zk.createRangeProof(42, 0, 100);
+    expect(proof.commitment).toMatch(/^[0-9a-f]{64}$/);
+    expect(zk.verifyRangeProof(proof)).toBe(true);
+  });
+
+  it('verifies at both inclusive boundaries and a single-point range', () => {
+    expect(zk.verifyRangeProof(zk.createRangeProof(0, 0, 10))).toBe(true); // min
+    expect(zk.verifyRangeProof(zk.createRangeProof(10, 0, 10))).toBe(true); // max
+    expect(zk.verifyRangeProof(zk.createRangeProof(7, 7, 7))).toBe(true); // span 0
+  });
+
+  it('verifies across several widths and non-zero lower bounds', () => {
+    for (const [v, lo, hi] of [
+      [1, 0, 1],
+      [500, 100, 1000],
+      [123456, 0, 1_000_000],
+      [950, 900, 1000],
+    ] as const) {
+      expect(zk.verifyRangeProof(zk.createRangeProof(v, lo, hi))).toBe(true);
+    }
+  });
+
+  it('refuses to prove a value outside [min, max]', () => {
+    expect(() => zk.createRangeProof(11, 0, 10)).toThrow(/outside/i);
+    expect(() => zk.createRangeProof(-1, 0, 10)).toThrow(/outside/i);
+    expect(() => zk.createRangeProof(5, 10, 0)).toThrow(/min <= max/);
+  });
+
+  it('is zero-knowledge: the proof discloses neither the value nor the blinding', () => {
+    const proof = zk.createRangeProof(42, 0, 100);
+    const serialized = JSON.stringify(proof);
+    // The value commitment is present, but no opening (value/blinding) is.
+    expect(serialized).not.toContain('"blinding"');
+    expect(proof).not.toHaveProperty('value');
+    // Two different proofs of the same statement use fresh randomness.
+    expect(zk.createRangeProof(42, 0, 100).commitment).not.toBe(proof.commitment);
+  });
+
+  it('rejects a proof whose claimed range no longer contains the committed value', () => {
+    // A valid proof for 5 ∈ [0,10]; re-labelling it [6,10] must fail (the bit
+    // recomposition no longer equals C − min·G / max·G − C).
+    const proof = zk.createRangeProof(5, 0, 10);
+    expect(zk.verifyRangeProof({ ...proof, range: { min: 6, max: 10 } })).toBe(false);
+    expect(zk.verifyRangeProof({ ...proof, range: { min: 0, max: 4 } })).toBe(false);
+  });
+
+  it('rejects a tampered bit OR-proof (soundness of the 0/1 sub-proofs)', () => {
+    const proof = zk.createRangeProof(42, 0, 100);
+    const lower = proof.lower.map((b, i) =>
+      i === 0 ? { ...b, e0: (BigInt(`0x${b.e0}`) ^ 1n).toString(16) } : b
+    );
+    expect(zk.verifyRangeProof({ ...proof, lower })).toBe(false);
+  });
+
+  it('rejects a swapped/altered bit commitment', () => {
+    const proof = zk.createRangeProof(42, 0, 100);
+    // Replace one bit commitment with a different valid Ristretto point.
+    const other = zk.pedersenCommit(1n, 7n);
+    const upper = proof.upper.map((b, i) => (i === 0 ? { ...b, c: other } : b));
+    expect(zk.verifyRangeProof({ ...proof, upper })).toBe(false);
+  });
+
+  it('rejects a tampered value commitment', () => {
+    const proof = zk.createRangeProof(42, 0, 100);
+    expect(zk.verifyRangeProof({ ...proof, commitment: zk.pedersenCommit(42n, 99n) })).toBe(false);
+  });
+
+  it('rejects a proof with the wrong bitLength', () => {
+    const proof = zk.createRangeProof(42, 0, 100);
+    expect(zk.verifyRangeProof({ ...proof, bitLength: proof.bitLength + 1 })).toBe(false);
   });
 });

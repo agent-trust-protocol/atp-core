@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ATP Agent Trust Scoring &amp; Trust Credentials</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      window.specConfig = {
+        shortName: "atp-trust",
+        title: "ATP Agent Trust Scoring & Trust Credentials",
+        subtitle: "A Verifiable-Credential-Backed Trust Model and Policy-Assertion Profile for AI Agents",
+      };
+    </script>
+    <script src="../common/biblio.js" class="remove"></script>
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove" defer></script>
+    <script src="../common/respec-config.js" class="remove" defer></script>
+  </head>
+  <body>
+    <section id="abstract">
+      <p>
+        This specification defines a <strong>trust model for AI agents</strong>
+        built on W3C Verifiable Credentials [[VC-DATA-MODEL]]. It has two parts:
+        a deterministic <strong>trust-scoring</strong> function that maps
+        observable evidence about an agent to a bounded score and a discrete
+        trust level, and an <strong>ATP Trust Credential</strong> — a verifiable
+        credential through which an issuer attests an agent's trust level to a
+        relying party. It also profiles a <strong>policy-assertion</strong>
+        decision model that consumes a verified trust level to make
+        allow/deny decisions.
+      </p>
+      <p>
+        The model is <em>fail-closed</em>: unverifiable evidence never raises an
+        agent's trust. A credential contributes to trust only after it is
+        cryptographically verified; absent a verifier, candidate credentials are
+        credited zero.
+      </p>
+      <p class="note" title="Companion specifications">
+        Agent identity and key material are defined by the
+        <a href="../did-atp/">did:atp DID Method</a>. Privacy-preserving
+        disclosure of credential attributes is defined by
+        <a href="../atp-privacy/">ATP Privacy-First Interaction</a>.
+        Interoperability vectors are defined by
+        <a href="../atp-conformance/">ATP Conformance &amp; Interoperability</a>.
+      </p>
+    </section>
+
+    <section id="sotd">
+      <p>
+        This document is an <strong>early draft</strong> work product of the
+        Agent Trust Protocol (ATP) Community Group. It is <strong>not</strong> a
+        W3C Standard nor on the W3C Recommendation track. It is published to
+        seek review, comment, and contribution from Community Group members; the
+        normative thresholds, factor weights, and credential shape below are
+        <em>provisional</em> and expected to change in response to that review.
+      </p>
+      <p>
+        The ATP Community Group coordinates with the W3C AI Agent Protocol
+        Community Group [[AI-AGENT-PROTOCOL]]. The scoring weights given here are
+        seeded from a running reference implementation and its conformance
+        vectors; they are presented as a starting point for discussion, not as a
+        finalized normative scale.
+      </p>
+    </section>
+
+    <section id="conformance">
+      <p>
+        As well as sections marked as non-normative, all authoring guidelines,
+        diagrams, examples, and notes in this specification are non-normative.
+        Everything else is normative.
+      </p>
+      <p>
+        The key words <em>MUST</em>, <em>MUST NOT</em>, <em>SHOULD</em>, and
+        <em>MAY</em> are to be interpreted as described in BCP 14 [[RFC2119]]
+        [[RFC8174]] when, and only when, they appear in all capitals.
+      </p>
+    </section>
+
+    <section id="trust-levels" class="normative">
+      <h2>Trust Levels</h2>
+      <p>
+        A conforming trust-scoring engine MUST compute a score
+        <var>s</var> &isin; [0, 1] and map it to exactly one trust level using
+        the following bands:
+      </p>
+      <table class="simple">
+        <thead>
+          <tr><th>Score band</th><th>Level</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><var>s</var> &ge; 0.9</td><td><code>PRIVILEGED</code></td></tr>
+          <tr><td>0.7 &le; <var>s</var> &lt; 0.9</td><td><code>TRUSTED</code></td></tr>
+          <tr><td>0.4 &le; <var>s</var> &lt; 0.7</td><td><code>VERIFIED</code></td></tr>
+          <tr><td>0.2 &le; <var>s</var> &lt; 0.4</td><td><code>BASIC</code></td></tr>
+          <tr><td><var>s</var> &lt; 0.2</td><td><code>UNKNOWN</code></td></tr>
+        </tbody>
+      </table>
+      <p class="ednote" title="Open issue: band boundaries">
+        The band boundaries are seeded from the reference implementation. CG
+        members are invited to challenge the five-level scheme and the exact
+        cut-points (e.g. whether <code>PRIVILEGED</code> should require attested
+        credentials in addition to a high score).
+      </p>
+    </section>
+
+    <section id="scoring" class="normative">
+      <h2>Trust-Scoring Function</h2>
+      <p>
+        The scoring function takes evidence about an agent and returns a score in
+        [0, 1]. A conforming implementation MUST satisfy the following
+        properties (each is exercised by the conformance suite):
+      </p>
+      <dl>
+        <dt>Determinism</dt>
+        <dd>Identical evidence MUST yield an identical score and level.</dd>
+        <dt>Bounds</dt>
+        <dd>The score MUST lie in [0, 1] and the level MUST be one of the
+          values in <a href="#trust-levels">Trust Levels</a>.</dd>
+        <dt>Monotonicity</dt>
+        <dd>Additional successful interactions, endorsements, or
+          <em>verified</em> credentials MUST NOT lower the score; additional
+          failed interactions or violations MUST NOT raise it.</dd>
+        <dt>Fail-closed credential gating</dt>
+        <dd>A candidate credential MUST contribute to the score only after it is
+          verified. With no verifier available, candidate credentials MUST be
+          credited zero.</dd>
+      </dl>
+      <p>
+        The reference evidence factors are: identity verification, the count of
+        <em>verified</em> credentials, the success/failure ratio of recorded
+        interactions, and net reputation (endorsements minus violations, each
+        term capped).
+      </p>
+      <pre class="example" title="Evidence fixture → level (illustrative vector)">
+{
+  "identityVerified": true,
+  "credentials": ["a", "b", "c", "d"],   // verified
+  "successful": 500, "failed": 0,
+  "endorsements": 20, "violations": 0
+}
+// → score in the PRIVILEGED/TRUSTED band; see conformance vectors
+      </pre>
+    </section>
+
+    <section id="trust-credential" class="normative">
+      <h2>The ATP Trust Credential</h2>
+      <p>
+        An <dfn>ATP Trust Credential</dfn> is a Verifiable Credential
+        [[VC-DATA-MODEL]] through which an issuer attests an agent's trust level.
+        Its <code>type</code> MUST include both
+        <code>VerifiableCredential</code> and <code>AtpTrustCredential</code>.
+        The <code>credentialSubject</code> MUST identify the agent
+        (<code>id</code>) and MUST carry a <code>trustLevel</code>; it MAY carry
+        a <code>trustScore</code> and an <code>evaluatedAt</code> timestamp. The
+        credential MUST carry an <code>expirationDate</code>.
+      </p>
+      <pre class="example" title="ATP Trust Credential (shape)">
+{
+  "@context": ["https://www.w3.org/ns/credentials/v2"],
+  "type": ["VerifiableCredential", "AtpTrustCredential"],
+  "issuer": "did:atp:authority.example.com:e1_...:pq1_...",
+  "validFrom": "2026-06-26T00:00:00Z",
+  "expirationDate": "2026-09-26T00:00:00Z",
+  "credentialSubject": {
+    "id": "did:atp:agents.example.com:...",
+    "trustLevel": "TRUSTED",
+    "trustScore": 0.78,
+    "evaluatedAt": "2026-06-26T00:00:00Z"
+  }
+}
+      </pre>
+      <p>
+        A relying party that receives a <em>presented</em> ATP Trust Credential
+        MUST cryptographically verify it (signature, expiry, revocation, schema)
+        before mapping its <code>trustLevel</code> into a policy decision. A
+        valid presented credential lets a relying party gate on attested trust
+        without querying the issuer's scoring engine directly.
+      </p>
+      <p class="ednote" title="Open issue: revocation & status">
+        Revocation is referenced but not yet profiled here. CG members are
+        invited to propose whether to adopt
+        <code>BitstringStatusList</code> or another status mechanism.
+      </p>
+    </section>
+
+    <section id="policy-assertion" class="normative">
+      <h2>Policy-Assertion Decision Model</h2>
+      <p>
+        This section profiles how a verified trust level drives an authorization
+        decision. A policy evaluator takes an evaluation context and returns an
+        <code>allow</code> or <code>deny</code> decision, optionally with
+        obligations.
+      </p>
+      <p>The evaluation context carries at least:</p>
+      <pre class="example" title="Policy evaluation context">
+{
+  "agentDID": "did:atp:agent-1",
+  "trustLevel": "VERIFIED",          // from a verified Trust Credential or engine
+  "credentials": [ /* VerifiableCredentialInfo[] */ ],
+  "tool": { "id": "database_query", "type": "database", "sensitivity": "internal" },
+  "requestedAction": "read",
+  "organizationId": "org_test",
+  "timestamp": "2026-06-19T12:00:00.000Z"
+}
+      </pre>
+      <p>A conforming policy evaluator MUST:</p>
+      <ul>
+        <li>return <code>allow</code> or <code>deny</code> for each request;</li>
+        <li>apply <strong>deny-by-default</strong>: a request with no matching
+          allow rule MUST be denied;</li>
+        <li>return any obligations attached to a matched allow rule;</li>
+        <li>
+          <strong>reject</strong> (not evaluate) adversarial or malicious policy
+          expressions, using a safe-expression sandbox rather than a
+          general-purpose evaluator.
+        </li>
+      </ul>
+      <p class="ednote" title="Open issue: condition language">
+        The reference engine uses a constrained visual-policy condition schema
+        and a safe-expression sandbox. Whether to standardize that condition
+        language, or reference an existing policy language, is open for CG
+        discussion.
+      </p>
+    </section>
+
+    <section id="conformance-vectors" class="normative">
+      <h2>Conformance Vectors</h2>
+      <p>
+        Conforming implementations are validated against deterministic vectors
+        covering determinism, bounds, monotonicity, level thresholds, and
+        fail-closed credential gating, plus policy allow/deny, deny-by-default,
+        and obligation handling. These vectors are maintained alongside the
+        <a href="../atp-conformance/">ATP Conformance &amp; Interoperability</a>
+        suite. CG members may contribute additional vectors as table rows.
+      </p>
+    </section>
+
+    <section id="security" class="normative">
+      <h2>Security &amp; Privacy Considerations</h2>
+      <p>
+        Because trust drives authorization, the fail-closed property is
+        security-critical: an implementation MUST NOT credit a credential it
+        cannot verify. Trust Credentials disclose an agent's standing; relying
+        parties SHOULD prefer privacy-preserving presentation
+        (<a href="../atp-privacy/">selective disclosure</a>) where the full
+        credential is not required.
+      </p>
+    </section>
+  </body>
+</html>

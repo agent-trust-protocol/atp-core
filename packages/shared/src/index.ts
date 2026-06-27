@@ -16,3 +16,4 @@ export * from './auth/index.js';
 export * from './compliance/index.js';
 export * from './clustering/index.js';
 export * from './identity/did-atp.js';
+export * from './identity/pairwise.js';

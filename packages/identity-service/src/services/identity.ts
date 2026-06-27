@@ -1,7 +1,22 @@
-import { DIDDocument, DIDRegistrationRequest, DIDRegistrationResponse, Service } from '../models/did.js';
+import {
+  DIDDocument,
+  DIDRegistrationRequest,
+  DIDRegistrationResponse,
+  PairwiseDIDRegistrationRequest,
+  Service,
+} from '../models/did.js';
 import { CryptoUtils, QuantumSafeKeyPair } from '../utils/crypto.js';
 import { StorageService } from './storage.js';
-import { TrustLevel, TrustLevelManager, PQCAlgorithm } from '@atp/shared';
+import { ValidationError } from '../errors.js';
+import {
+  TrustLevel,
+  TrustLevelManager,
+  PQCAlgorithm,
+  verifySignatureCompat,
+} from '@atp/shared';
+
+/** Raw binding public keys split out of a hybrid keypair. */
+type HybridBinding = { ed25519PublicKey: Uint8Array; mlDsa65PublicKey: Uint8Array } | null;
 
 export class IdentityService {
   constructor(private storage: StorageService) {}
@@ -34,10 +49,139 @@ export class IdentityService {
     const did = CryptoUtils.generateQuantumSafeDID(keyPair, { binding });
     const now = new Date().toISOString();
 
+    const document = this.assembleDidDocument(did, keyPair, binding, request.services, now);
+
+    await this.storage.storeDIDDocument(document);
+    
+    if (!request.publicKey) {
+      await this.storage.storeKeyPair({
+        did,
+        publicKey: keyPair.publicKey,
+        privateKey: keyPair.privateKey,
+        created: now,
+      });
+    }
+
+    return {
+      did,
+      document,
+      privateKey: request.publicKey ? undefined : keyPair.privateKey,
+      // Quantum-safe response fields
+      pqcPrivateKey: request.publicKey ? undefined : keyPair.pqcPrivateKey,
+      algorithm: keyPair.algorithm,
+      isQuantumSafe: keyPair.isQuantumSafe,
+      hybridMode: keyPair.hybridMode,
+    };
+  }
+
+  /**
+   * Register a pairwise (per-peer, unlinkable) did:atp.
+   *
+   * The per-peer hybrid keypair and the pseudonymous "p_<hex>" path segment
+   * MUST be derived client-side (e.g. via `DidAtp.generatePairwise` in
+   * `atp-sdk`) from the agent's master secret — the master secret and the
+   * derived private keys never leave the caller and are never transmitted to
+   * or seen by this service. The caller submits only the resulting public
+   * keys plus a signature (`proof`) over the recomputed DID proving control
+   * of the matching private key(s). This method independently recomputes the
+   * did:atp identifier from the submitted public material, verifies the
+   * proof against it (reusing `verifySignatureCompat` — no bespoke crypto),
+   * and persists only the public DID Document.
+   */
+  async registerPairwiseDID(
+    request: PairwiseDIDRegistrationRequest
+  ): Promise<DIDRegistrationResponse> {
+    if (typeof request.peerId !== 'string' || request.peerId.length === 0) {
+      throw new ValidationError('peerId must be a non-empty string');
+    }
+    if (!/^p_[0-9a-fA-F]+$/.test(request.peerSegment || '')) {
+      throw new ValidationError('peerSegment must be a "p_<hex>" pseudonym segment');
+    }
+    const edPub = this.decodeHex(request.ed25519PublicKey, 'ed25519PublicKey');
+    if (edPub.length !== 32) {
+      throw new ValidationError('ed25519PublicKey must decode to 32 bytes');
+    }
+    const mlPub = this.decodeHex(request.mlDsa65PublicKey, 'mlDsa65PublicKey');
+    if (mlPub.length !== 1952) {
+      throw new ValidationError('mlDsa65PublicKey must decode to 1952 bytes');
+    }
+    const proof = this.decodeHex(request.proof, 'proof');
+
+    // Shape the submitted public bytes into the QuantumSafeKeyPair encoding
+    // the rest of the service understands. No private key material is ever
+    // present here.
+    const keyPair: QuantumSafeKeyPair = {
+      publicKey: Buffer.from(edPub).toString('hex'),
+      privateKey: '',
+      pqcPublicKey: Buffer.concat([Buffer.from(edPub), Buffer.from(mlPub)]).toString('hex'),
+      algorithm: PQCAlgorithm.CRYSTALS_DILITHIUM,
+      isQuantumSafe: true,
+      hybridMode: true,
+    };
+
+    const binding = CryptoUtils.extractBindingPublicKeys(keyPair);
+    // The pseudonym is the single path segment, so the DID is unlinkable.
+    const did = CryptoUtils.generateQuantumSafeDID(keyPair, {
+      domain: request.domain,
+      path: [request.peerSegment],
+      binding,
+    });
+
+    // Verify the caller controls the private key(s) matching the submitted
+    // public keys by checking their signature over the recomputed DID.
+    const verification = await verifySignatureCompat(did, Buffer.from(proof).toString('hex'), {
+      ed25519PublicKeyHex: keyPair.publicKey,
+      mlDsa65PublicKeyHex: mlPub.length ? Buffer.from(mlPub).toString('hex') : undefined,
+    });
+    if (!verification.valid) {
+      throw new ValidationError('proof does not verify against the submitted public keys');
+    }
+
+    const now = new Date().toISOString();
+
+    const document = this.assembleDidDocument(did, keyPair, binding, request.services, now, {
+      pairwise: true,
+      peerSegment: request.peerSegment,
+    });
+
+    // Persist only the public document — private keys are never seen here.
+    await this.storage.storeDIDDocument(document);
+
+    return {
+      did,
+      document,
+      algorithm: keyPair.algorithm,
+      isQuantumSafe: true,
+      hybridMode: true,
+      peerSegment: request.peerSegment,
+    };
+  }
+
+  /** Strictly decode a hex string (even length, hex chars only). */
+  private decodeHex(hex: string, field: string): Uint8Array {
+    if (typeof hex !== 'string' || hex.length === 0 || hex.length % 2 !== 0 || !/^[0-9a-fA-F]+$/.test(hex)) {
+      throw new ValidationError(`${field} must be a non-empty, even-length hex string`);
+    }
+    return new Uint8Array(Buffer.from(hex, 'hex'));
+  }
+
+  /**
+   * Assemble a did:atp DID Document for a (preferably hybrid) keypair. Shared by
+   * standard and pairwise registration so the dual-binding verification-method
+   * and proof structure has a single implementation. `extraInfo` is merged into
+   * `metadata.additionalInfo` (used e.g. to flag pairwise DIDs).
+   */
+  private assembleDidDocument(
+    did: string,
+    keyPair: QuantumSafeKeyPair,
+    binding: HybridBinding,
+    services: Service[] | undefined,
+    now: string,
+    extraInfo: Record<string, unknown> = {}
+  ): DIDDocument {
     const verificationMethodId = `${did}#key-ed25519`;
     const pqcVerificationMethodId = `${did}#key-mldsa65`;
 
-    // Create verification methods based on key type
     const verificationMethods = [];
 
     // Classical Ed25519 verification method (the did:wba e1_ binding).
@@ -71,10 +215,10 @@ export class IdentityService {
         publicKeyMultibase: CryptoUtils.encodeMultibase(Buffer.from(keyPair.pqcPublicKey, 'hex')),
       });
     }
-    
-    const document: DIDDocument = {
+
+    return {
       '@context': [
-        'https://www.w3.org/ns/did/v1', 
+        'https://www.w3.org/ns/did/v1',
         'https://w3id.org/security/suites/ed25519-2020/v1',
         ...(keyPair.isQuantumSafe ? ['https://w3id.org/security/suites/dilithium-2023/v1'] : [])
       ],
@@ -97,7 +241,7 @@ export class IdentityService {
         verificationMethodId,
         ...(keyPair.isQuantumSafe ? [pqcVerificationMethodId] : [])
       ],
-      service: request.services || [],
+      service: services || [],
       created: now,
       updated: now,
       metadata: {
@@ -114,33 +258,12 @@ export class IdentityService {
           algorithm: keyPair.algorithm,
           isQuantumSafe: keyPair.isQuantumSafe,
           hybridMode: keyPair.hybridMode,
-          supportedAlgorithms: keyPair.isQuantumSafe 
+          supportedAlgorithms: keyPair.isQuantumSafe
             ? [PQCAlgorithm.ED25519, PQCAlgorithm.CRYSTALS_DILITHIUM]
-            : [PQCAlgorithm.ED25519]
+            : [PQCAlgorithm.ED25519],
+          ...extraInfo,
         },
       },
-    };
-
-    await this.storage.storeDIDDocument(document);
-    
-    if (!request.publicKey) {
-      await this.storage.storeKeyPair({
-        did,
-        publicKey: keyPair.publicKey,
-        privateKey: keyPair.privateKey,
-        created: now,
-      });
-    }
-
-    return {
-      did,
-      document,
-      privateKey: request.publicKey ? undefined : keyPair.privateKey,
-      // Quantum-safe response fields
-      pqcPrivateKey: request.publicKey ? undefined : keyPair.pqcPrivateKey,
-      algorithm: keyPair.algorithm,
-      isQuantumSafe: keyPair.isQuantumSafe,
-      hybridMode: keyPair.hybridMode,
     };
   }
 

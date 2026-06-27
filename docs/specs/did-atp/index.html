@@ -12,11 +12,7 @@
       };
     </script>
     <script src="../common/biblio.js" class="remove"></script>
-    <script
-      src="https://www.w3.org/Tools/respec/respec-w3c"
-      class="remove"
-      defer
-    ></script>
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove" defer></script>
     <script src="../common/respec-config.js" class="remove" defer></script>
   </head>
   <body>
@@ -304,6 +300,120 @@ did:atp:agents.example.com:billing:e1_vW7u8CVMklXkz...:pq1_-MT7q-QasC380...
       </ul>
     </section>
 
+    <section id="pairwise" class="normative">
+      <h2>Pairwise (Per-Peer, Unlinkable) Identifiers</h2>
+      <p>
+        An agent MAY present a <strong>different</strong> <code>did:atp</code>
+        identifier to each peer (relying party) so that its interactions cannot
+        be correlated across peers by the identifiers alone. Such a
+        <dfn>pairwise</dfn> identifier is an ordinary path-type
+        <code>did:atp</code> whose single path segment is a
+        <strong>pseudonym</strong> rather than a human-meaningful label, and
+        whose <code>e1_</code> / <code>pq1_</code> bindings are a per-peer
+        hybrid keypair. No new identifier syntax, resolution rule, or proof
+        mechanism is introduced: a pairwise DID is created, parsed, resolved,
+        and control-proved exactly as any other path-type <code>did:atp</code>.
+      </p>
+      <p>
+        A conforming pairwise identifier MUST be derived such that, without the
+        agent's master secret, no two pairwise identifiers of the same agent
+        (nor a pairwise identifier and the agent's canonical DID) are
+        correlatable — i.e. the pseudonym segment, the <code>e1_</code>
+        fingerprint, and the <code>pq1_</code> fingerprint MUST each be
+        independent across peers. Because both binding fingerprints are part of
+        the path, distinct per-peer keypairs already yield distinct
+        <code>e1_</code> and <code>pq1_</code> segments; the pseudonym segment
+        MUST likewise be a per-peer value and MUST NOT be a plain function of
+        the peer identifier alone (which would be linkable by any party that
+        learns the peer identifier).
+      </p>
+
+      <section id="pairwise-pseudonym" class="normative">
+        <h3>The <code>p_</code> Pseudonym Path Segment</h3>
+        <p>
+          A pairwise identifier uses a single path segment of the form
+          <code>p_</code> followed by a lowercase-hex pseudonym. It is a
+          well-formed <code>path-segment</code> under the
+          <a href="#identifier-syntax">syntax</a> above; the <code>p_</code>
+          prefix is a profile convention that distinguishes the pseudonym from
+          the trailing <code>e1_</code> / <code>pq1_</code> binding segments and
+          from human-meaningful labels.
+        </p>
+        <pre class="abnf">
+pairwise-segment = "p_" 32HEXDIG-lower      ; 16-byte pseudonym, lowercase hex
+        </pre>
+        <p>Example pairwise identifier (one path segment, both bindings):</p>
+        <pre>
+did:atp:agents.example.com:p_fad4fe7b41096f53e62fc34133eab6e7:e1_lmymt0Be…:pq1_YQm0BqWx…
+        </pre>
+      </section>
+
+      <section id="pairwise-derivation" class="normative">
+        <h3>Recommended Derivation</h3>
+        <p>
+          To make pairwise identifiers reproducible (so the agent can recompute
+          a peer's keypair on demand rather than storing one per peer) while
+          keeping them unlinkable, an implementation SHOULD derive all per-peer
+          material from a single high-entropy master secret using
+          HKDF-SHA256 [[RFC5869]] with domain-separated <code>info</code>
+          labels. The master secret MUST be at least 32 bytes and MUST NOT be
+          shared with any peer.
+        </p>
+        <p>
+          For a master secret <var>MS</var>, a peer identifier <var>peerId</var>,
+          and an OPTIONAL <var>salt</var>, derive three independent outputs:
+        </p>
+        <pre class="example">
+info(label)   = "atp-pairwise:v1:" label ":" peerId
+ed25519_seed  = HKDF-SHA256(IKM = MS, salt, info("ed25519"),   L = 32)
+mldsa65_seed  = HKDF-SHA256(IKM = MS, salt, info("ml-dsa-65"), L = 32)
+pseudonym     = HKDF-SHA256(IKM = MS, salt, info("path"),      L = 16)
+pairwise-seg  = "p_" lowerhex(pseudonym)
+        </pre>
+        <p>
+          The Ed25519 binding key is generated from <code>ed25519_seed</code>
+          and the ML-DSA-65 binding key from <code>mldsa65_seed</code>; both
+          algorithms are deterministic functions of a 32-byte seed, so the same
+          <code>(MS, peerId, salt)</code> always yields the same keypair and the
+          same identifier. The <code>e1_</code> and <code>pq1_</code> segments
+          are then computed from those public keys exactly as in
+          <a href="#pq1-fingerprint">the binding-fingerprint rules</a>. No new
+          cryptographic primitive is introduced; the construction composes
+          HKDF, Ed25519, and ML-DSA-65 only.
+        </p>
+        <p class="note">
+          The domain-separating labels (<code>ed25519</code>,
+          <code>ml-dsa-65</code>, <code>path</code>) make the three outputs
+          mutually independent for a given peer, and binding <var>peerId</var>
+          into <code>info</code> makes outputs independent across peers. The
+          OPTIONAL <var>salt</var> permits rotating an agent's entire set of
+          pairwise identifiers without changing the master secret.
+        </p>
+      </section>
+
+      <section id="pairwise-privacy" class="informative">
+        <h3>Privacy Properties and Limits</h3>
+        <p>
+          Pairwise identifiers remove <em>identifier-level</em> correlation:
+          the DID string, both binding keys, and the pseudonym segment differ
+          per peer and are not correlatable without the master secret. They do
+          <strong>not</strong> by themselves defeat correlation through other
+          channels — network metadata, timing, the <code>domain-name</code>
+          component (which is shared across an agent's pairwise DIDs at the same
+          domain), or application-layer content. Agents requiring stronger
+          unlinkability SHOULD additionally vary or proxy those channels.
+        </p>
+        <p>
+          Control of a pairwise identifier is proved exactly as for any
+          path-type <code>did:atp</code>: the agent signs a challenge with the
+          per-peer hybrid keypair whose <code>e1_</code> / <code>pq1_</code>
+          fingerprints are bound into the DID. A keypair derived for one peer
+          cannot satisfy another peer's bindings, so pairwise identifiers are
+          unforgeable across peers as well as unlinkable.
+        </p>
+      </section>
+    </section>
+
     <section id="security" class="normative">
       <h2>Security and Privacy Considerations</h2>
       <p>
@@ -315,6 +425,12 @@ did:atp:agents.example.com:billing:e1_vW7u8CVMklXkz...:pq1_-MT7q-QasC380...
         classical proof as sufficient on its own for a <code>did:atp</code>
         identifier. This property is demonstrated by the forged-classical-
         signature test in the <a href="#proof-of-concept">Proof of Concept</a>.
+      </p>
+      <p>
+        For agents that must avoid cross-peer correlation of their identifiers,
+        <a href="#pairwise">Pairwise Identifiers</a> defines per-peer,
+        unlinkable <code>did:atp</code> values and states the privacy properties
+        they do and do not provide.
       </p>
     </section>
 
