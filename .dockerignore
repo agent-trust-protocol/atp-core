@@ -47,7 +47,6 @@ bmad-core/
 
 # Exclude unnecessary packages (keep SDK and shared)
 packages/atp-support-agent/
-packages/audit-logger/
 packages/identity-service/
 packages/monitoring-service/
 packages/payment-service/
