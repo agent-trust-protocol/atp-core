@@ -5,6 +5,11 @@ export const VerificationMethodSchema = z.object({
   type: z.string(),
   controller: z.string(),
   publicKeyMultibase: z.string().optional(),
+  // Hex encoding of the same key material as publicKeyMultibase. Emitted for the
+  // Ed25519 (e1_) method so consumers that verify with a hex public key (e.g. the
+  // vc-service issuer-key lookup → verifySignatureCompat) can use it directly
+  // without decoding multibase.
+  publicKeyHex: z.string().optional(),
   publicKeyJwk: z.record(z.any()).optional(),
 });
 
