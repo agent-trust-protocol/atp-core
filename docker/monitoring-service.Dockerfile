@@ -1,5 +1,5 @@
 # Build stage
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 # sqlite3 requires native compilation
@@ -17,7 +17,7 @@ RUN npm run build --workspace=@atp/monitoring-service
 RUN npm install --omit=dev
 
 # Production stage
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 WORKDIR /app
 
 # sqlite3 native module needs these at runtime on Alpine

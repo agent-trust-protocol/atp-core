@@ -2,7 +2,7 @@
 # Supports native compilation of better-sqlite3 on Alpine Linux
 
 # Build stage with complete toolchain
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Install comprehensive build dependencies for native modules
@@ -48,7 +48,7 @@ RUN ls -la packages/permission-service/node_modules/better-sqlite3/build/ || \
     echo "Native module verification step"
 
 # Production stage - minimal runtime image
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 WORKDIR /app
 
 # Install only runtime dependencies

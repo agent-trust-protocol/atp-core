@@ -1,4 +1,4 @@
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 WORKDIR /app
 
 # Install build dependencies
@@ -22,7 +22,7 @@ RUN npm run build --workspace=@atp/shared
 RUN npm run build --workspace=@atp/rpc-gateway
 
 # Production stage
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 WORKDIR /app
 
 # Copy built application
