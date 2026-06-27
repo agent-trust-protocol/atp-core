@@ -2,7 +2,7 @@
 # Optimized for WebSocket and HTTP proxy functionality
 
 # Build stage with complete toolchain
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Install comprehensive build dependencies for native modules
@@ -45,7 +45,7 @@ RUN npm run build --workspace=@atp/rpc-gateway
 RUN echo "RPC Gateway build verification complete"
 
 # Production stage - minimal runtime image
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 WORKDIR /app
 
 # Install only runtime dependencies
