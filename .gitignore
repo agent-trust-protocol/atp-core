@@ -36,6 +36,12 @@ yarn-error.log*
 .zenflow/
 .zencoder/
 
+# Local W3C CG staging bundle and generated download artifacts (kept local,
+# not distributed via the repo; see GitHub Pages if/when published)
+/w3c-cg-upload/
+/atp-w3c-cg-drafts-*.zip
+/atp-w3c-cg-drafts-*.tar.gz
+
 # OS generated files
 .DS_Store
 .DS_Store?
