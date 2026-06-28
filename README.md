@@ -1,4 +1,4 @@
-# Agent Trust Protocol™ (ATP) SDK 
+# Agent Trust Protocol™ (ATP) SDK
 
 *The original Agent Trust Protocol™ — securing AI agents since March 2025*
 
@@ -8,9 +8,9 @@
 [![Quantum Safe](https://img.shields.io/badge/Security-Quantum%20Safe-blueviolet)](https://github.com/agent-trust-protocol/atp-core)
 [![Est. March 2025](https://img.shields.io/badge/Est.-March%202025-green)](https://github.com/agent-trust-protocol/atp-core)
 
-**Build secure AI agents in 1 line of code.** The world's first quantum-safe security protocol for AI agents with cryptographic identity and verifiable-credential trust.
+**The identity and trust layer for AI agents.** ATP gives an agent a portable, cryptographically verifiable identity (`did:atp`) and a trust score that travel with it across any protocol it speaks — MCP, A2A, Swarm, ADK, and more. It doesn’t replace those protocols; it’s the layer underneath that answers “who is this agent, and can I trust it?” Identities use hybrid post-quantum signatures (Ed25519 + ML-DSA-65, FIPS 204), so verification holds even if one scheme is broken. Build it in 1 line of code.
 
->  Image guidance: any featured screenshot or illustration should include the ATP shield logo for consistent branding.
+> Image guidance: any featured screenshot or illustration should include the ATP shield logo for consistent branding.
 
 ```bash
 npm install atp-sdk
@@ -26,43 +26,44 @@ console.log('Standalone:', agent.isStandalone());
 //   Standalone:   true
 ```
 
-**That's it!** Your AI agent now has:
+**That’s it!** Your AI agent now has:
 
--  **Quantum-safe cryptography** (hybrid Ed25519 + ML-DSA)
--  **Decentralized Identity** (DID)
--  **Cryptographic signatures** for every action
--  **Trust scoring** and verification
+- **Post-quantum cryptography** (hybrid Ed25519 + ML-DSA-65, FIPS 204)
+- **Decentralized Identity** (DID)
+- **Cryptographic signatures** for every action
+- **Trust scoring** and verification
 
----
+-----
 
-##  Package Status
+## Package Status
 
-| Package | Version | Status | Install |
-|---------|---------|--------|---------|
-| `atp-sdk` | ![npm](https://img.shields.io/npm/v/atp-sdk) |  **Beta** | `npm install atp-sdk` |
-| `@atpdevelopment/openclaw-atp` | ![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp) |  **Beta** | `npm install @atpdevelopment/openclaw-atp` |
-| `atp-core` | v1.0.0 |  **Legacy**  Superseded by `atp-sdk` |  |
-| Services (`@atp/*`) | 0.1.0 |  **Development** | Monorepo only |
+|Package                       |Version                                                          |Status                             |Install                                   |
+|------------------------------|-----------------------------------------------------------------|-----------------------------------|------------------------------------------|
+|`atp-sdk`                     |![npm](https://img.shields.io/npm/v/atp-sdk)                     |**Beta**                           |`npm install atp-sdk`                     |
+|`@atpdevelopment/openclaw-atp`|![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp)|**Beta**                           |`npm install @atpdevelopment/openclaw-atp`|
+|`create-atp-agent`            |![npm](https://img.shields.io/npm/v/create-atp-agent)            |**Stable**                         |`npx create-atp-agent`                    |
+|`atp-core`                    |v1.0.0                                                           |**Legacy**  Superseded by `atp-sdk`|                                          |
+|Services (`@atp/*`)           |0.1.0                                                            |**Development**                    |Monorepo only                             |
 
 **Use `atp-sdk`**  the recommended package for application development.  
 See [VERSIONING.md](./VERSIONING.md) for full policy.
 
----
+-----
 
-##  Try It Now
+## Try It Now
 
 Follow the GitHub docs and examples below to get started with ATP, or use the hosted website and dashboard when available.
 
--  Create quantum-safe agents
--  See trust scoring in action
--  Test quantum-safe signatures
--  Run OpenClaw multi-agent workflows
--  Explore the policy engine
--  Verify blockchain audit trails
+- Create quantum-safe agents
+- See trust scoring in action
+- Test quantum-safe signatures
+- Run OpenClaw multi-agent workflows
+- Explore the policy engine
+- Verify blockchain audit trails
 
----
+-----
 
-##  Quick Start (60 Seconds)
+## Quick Start (60 Seconds)
 
 ### New Developers: Start with Scaffolding
 
@@ -73,6 +74,7 @@ npx create-atp-agent my-agent
 ```
 
 This creates a project folder with:
+
 - `"type": "module"` and `atp-sdk` in `package.json`
 - TypeScript or JavaScript starter (`agent.ts` or `agent.mjs`) with top-level `await`
 - `.atp.json` with your chosen security profile
@@ -97,6 +99,7 @@ npm install atp-sdk
 ```
 
 Then use it:
+
 ```typescript
 import { Agent } from 'atp-sdk';
 const agent = await Agent.quickstart('MyBot');
@@ -105,31 +108,33 @@ const agent = await Agent.quickstart('MyBot');
 ### Zero Install (Nothing on your machine? No problem.)
 
 **Mac / Linux:**
+
 ```bash
 curl -fsSL https://agenttrustprotocol.com/install.sh | bash
 ```
 
 **Windows (PowerShell as Admin):**
+
 ```powershell
 irm https://agenttrustprotocol.com/install.ps1 | iex
 ```
 
----
+-----
 
-##  What Makes ATP Different?
+## What Makes ATP Different?
 
-| Feature | Traditional Security | **ATP (Quantum-Safe)** |
-| --- | --- | --- |
-| **Setup** | Complex infrastructure | 1 line of code |
-| **Quantum Safe** |  Vulnerable |  **Protected** |
-| **Identity** | Username/password | Cryptographic DID |
-| **Trust** | Manual verification | Dynamic scoring |
-| **Audit** | Basic logs | Cryptographic proof |
-| **Protocols** | Single protocol | **Universal** (MCP, Swarm, ADK, A2A) |
+|Feature         |Traditional Security  |**ATP (Quantum-Safe)**                      |
+|----------------|----------------------|--------------------------------------------|
+|**Setup**       |Complex infrastructure|1 line of code                              |
+|**Quantum Safe**|Vulnerable            |**Protected**                               |
+|**Identity**    |Username/password     |Cryptographic DID                           |
+|**Trust**       |Manual verification   |Dynamic scoring                             |
+|**Audit**       |Basic logs            |Cryptographic proof                         |
+|**Protocols**   |Single protocol       |**Protocol-agnostic** (MCP, Swarm, ADK, A2A)|
 
----
+-----
 
-##  Examples
+## Examples
 
 ### Basic Agent Communication
 
@@ -150,12 +155,12 @@ console.log(`Trust level: ${trustScore}`); // 0.0 to 1.0
 
 ### Zero-Knowledge Authentication
 
-> ⚠️ **Experimental.** The trust-level / range "proofs" use a hash-based
+> ⚠️ **Experimental.** The trust-level / range “proofs” use a hash-based
 > commitment (`H(value‖blinding)`), not a true Pedersen commitment, and the
 > verifier checks proof *structure* rather than an arithmetic range relation —
 > so it does **not** yet cryptographically prevent a prover from claiming a
-> threshold it doesn't meet. A vetted EC/Ristretto + bulletproofs
-> implementation is planned. Today's sound mechanisms are challenge-response
+> threshold it doesn’t meet. A vetted EC/Ristretto + bulletproofs
+> implementation is planned. Today’s sound mechanisms are challenge-response
 > authentication, selective disclosure, and Merkle membership.
 
 ```typescript
@@ -235,12 +240,12 @@ const decision = client.evaluateActionWithProfile({
 console.log(decision); // "allow" | "deny" | "require_approval"
 ```
 
-| Profile | Description | Use Case |
-| --- | --- | --- |
-| `safe-default` | Read-only FS, shell blocked, full audit | Most agents |
-| `dev-mode` | All tools enabled, no approval gates | Local development |
-| `enterprise-locked` | Maximum security, strict controls | Production |
-| `openclaw-sandbox` | OpenClaw-tuned sandbox, state-based | OpenClaw agents |
+|Profile            |Description                            |Use Case         |
+|-------------------|---------------------------------------|-----------------|
+|`safe-default`     |Read-only FS, shell blocked, full audit|Most agents      |
+|`dev-mode`         |All tools enabled, no approval gates   |Local development|
+|`enterprise-locked`|Maximum security, strict controls      |Production       |
+|`openclaw-sandbox` |OpenClaw-tuned sandbox, state-based    |OpenClaw agents  |
 
 ### Onboarding
 
@@ -263,11 +268,11 @@ npx atp-onboard-agent
 
 `create-atp-agent` ships a small static wizard plus a mock `POST /api/agents/onboard` on the same port (for local demos). The full Next.js wizard at `/onboard/agent` is separate and can be wired to real ATP services in production.
 
----
+-----
 
-##  Architecture
+## Architecture
 
-ATP provides universal security across all AI agent protocols:
+ATP is designed to layer under any agent protocol — the same `did:atp` identity and trust score apply whether an agent speaks MCP, A2A, Swarm, or ADK:
 
 ```
 Your AI Agents (LangChain, OpenClaw, AutoGPT, MCP, Swarm, ADK, A2A)
@@ -289,21 +294,22 @@ Your AI Agents (LangChain, OpenClaw, AutoGPT, MCP, Swarm, ADK, A2A)
             └───────────────┘
 ```
 
----
+-----
 
 ## Specifications & Conformance
 
 ATP is being standardized as a set of open specifications under a dedicated W3C
 Community Group. The drafts live in [`docs/specs/`](./docs/specs/) as
-[ReSpec](https://respec.org/) documents — open any spec's `index.html` in a
+[ReSpec](https://respec.org/) documents — open any spec’s `index.html` in a
 browser to read the rendered specification.
 
-| Pillar | Specification | Maturity |
-| --- | --- | --- |
-| **Identity** | [`did:atp` DID Method](./docs/specs/did-atp/index.html) — quantum-safe, hybrid Ed25519 + ML-DSA-65 | Draft + runnable [proof](./proof/) |
-| **Trust** | [Agent Trust Scoring & Credentials](./docs/specs/atp-trust/index.html) — backed by W3C Verifiable Credentials | Early draft |
-| **Privacy** | [Pairwise DIDs, Selective Disclosure & ZKP](./docs/specs/atp-privacy/index.html) | Early draft |
-| **Conformance** | [Conformance & Interoperability](./docs/specs/atp-conformance/index.html) | Early draft |
+|Pillar         |Specification                                                                                                |Maturity                          |
+|---------------|-------------------------------------------------------------------------------------------------------------|----------------------------------|
+|**Identity**   |[`did:atp` DID Method](./docs/specs/did-atp/index.html) — quantum-safe, hybrid Ed25519 + ML-DSA-65           |Draft + runnable [proof](./proof/)|
+|**Trust**      |[Agent Trust Scoring & Credentials](./docs/specs/atp-trust/index.html) — backed by W3C Verifiable Credentials|Early draft                       |
+|**Privacy**    |[Pairwise DIDs, Selective Disclosure & ZKP](./docs/specs/atp-privacy/index.html)                             |Early draft                       |
+|**Conformance**|[Conformance & Interoperability](./docs/specs/atp-conformance/index.html)                                    |Early draft                       |
+
 
 > These are **Community Group drafts** — not yet W3C standards — coordinated with
 > the [W3C AI Agent Protocol CG](https://www.w3.org/community/agentprotocol/).
@@ -324,9 +330,9 @@ npm run conformance -- 1     # a single item (here, did:atp)
 Per-item scripts are also available: `conformance:did`, `conformance:sigs`,
 `conformance:policy`, `conformance:audit`, and `conformance:privacy`.
 
----
+-----
 
-##  Installation
+## Installation
 
 ```bash
 # npm
@@ -339,9 +345,9 @@ yarn add atp-sdk
 pnpm add atp-sdk
 ```
 
----
+-----
 
-##  Documentation
+## Documentation
 
 - **[ White Paper v2.1](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/white-paper-v2.1.md)**  ATP architecture, trust model, compliance, and roadmap
 - **[Quick Start Guide](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/getting-started.md)** - 5-minute setup
@@ -354,9 +360,9 @@ pnpm add atp-sdk
 - **[Specifications (W3C CG drafts)](https://github.com/agent-trust-protocol/atp-core/tree/main/docs/specs)** - did:atp, trust, privacy & conformance ReSpec specs
 - **[Conformance Suite](https://github.com/agent-trust-protocol/atp-core/blob/main/scripts/conformance.mjs)** - `npm run conformance` interoperability gate
 
----
+-----
 
-##  Deployment
+## Deployment
 
 ### Vercel (Next.js Frontend)
 
@@ -364,10 +370,10 @@ Deploy the ATP dashboard to Vercel with a single click:
 
 - **[Vercel Deployment Guide](./VERCEL_DEPLOYMENT.md)** - Full setup instructions (env vars, database, email, services)
 - **Auto-deploy:** Push to `main` → production | Push to `develop` → preview
-- **Quick start:** 
-  1. Connect this repo to [vercel.com/new](https://vercel.com/new)
-  2. Set environment variables from [.env.example](.env.example)
-  3. Click "Deploy"
+- **Quick start:**
+1. Connect this repo to [vercel.com/new](https://vercel.com/new)
+1. Set environment variables from <.env.example>
+1. Click “Deploy”
 
 ### Backend Services (Railway, Docker, Kubernetes)
 
@@ -378,9 +384,9 @@ Each service in `packages/` has its own deployment guide:
 - **[packages/audit-logger](./packages/audit-logger/README.md)** - Blockchain audit
 - Other services: See individual `packages/*/README.md`
 
----
+-----
 
-##  Multi-Agent Systems with OpenClaw
+## Multi-Agent Systems with OpenClaw
 
 ATP now provides first-class support for [OpenClaw](https://openclaw.ai) multi-agent frameworks via the [`@atpdevelopment/openclaw-atp`](https://www.npmjs.com/package/@atpdevelopment/openclaw-atp) package. Secure entire agent crews with quantum-safe cryptography:
 
@@ -412,17 +418,17 @@ const validation = await atpClient.validateCrew(crew);
 
 **Features:**
 
--  **Quantum-safe agent identities** for every OpenClaw agent
--  **Tool-level security** with ATP permission checks on every call
--  **Security profiles** - Built-in profiles (safe-default, dev-mode, enterprise-locked, openclaw-sandbox) with `evaluateActionWithProfile`
--  **Graph validation** - Policy-based constraints on agent interactions
--  **Trust-based access control** - Dynamic trust scores adjust permissions
--  **Observability integration** - Monitoring feeds into ATP trust engine
--  **Secret management** - Short-lived, scoped credentials for external services
+- **Quantum-safe agent identities** for every OpenClaw agent
+- **Tool-level security** with ATP permission checks on every call
+- **Security profiles** - Built-in profiles (safe-default, dev-mode, enterprise-locked, openclaw-sandbox) with `evaluateActionWithProfile`
+- **Graph validation** - Policy-based constraints on agent interactions
+- **Trust-based access control** - Dynamic trust scores adjust permissions
+- **Observability integration** - Monitoring feeds into ATP trust engine
+- **Secret management** - Short-lived, scoped credentials for external services
 
 [Read the full guide →](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/openclaw-integration.md)
 
----
+-----
 
 ## Community
 
@@ -431,34 +437,34 @@ const validation = await atpClient.validateCrew(crew);
 - **Twitter**: [@agenttrustproto](https://twitter.com/agenttrustproto)
 - **Blog**: [ATP Developer Blog](https://blog.agenttrustprotocol.com)
 
----
+-----
 
-##  Project
+## Project
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](https://github.com/agent-trust-protocol/atp-core/blob/main/LICENSE)
 
----
+-----
 
-##  Ready to Build?
+## Ready to Build?
 
-| | |
-| --- | --- |
-|  Developers<br>**Start coding in 30 seconds**<br>`npm install atp-sdk`<br>[View Quick Start →](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/getting-started.md) |  Enterprise<br>**Production-ready security**<br> SOC2 compliance ready<br> Enterprise support<br> Custom deployment<br>[Contact Sales →](mailto:support@agenttrustprotocol.com) |
+|                                                                                                                                                                                 |                                                                                                                                                                                                                        |
+|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|Developers<br>**Start coding in 30 seconds**<br>`npm install atp-sdk`<br>[View Quick Start →](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/getting-started.md)|Enterprise<br>**Built for production**<br> Audit logging designed for SOC 2 programs (certification on roadmap)<br> Enterprise support<br> Custom deployment<br>[Contact Sales →](mailto:support@agenttrustprotocol.com)|
 
----
+-----
 
-##  License
+## License
 
 Licensed under [Apache 2.0](https://github.com/agent-trust-protocol/atp-core/blob/main/LICENSE) - free for commercial use.
 
-##  Security
+## Security
 
 Found a security issue? Email [security@agenttrustprotocol.com](mailto:security@agenttrustprotocol.com)
 
----
+-----
 
-**Agent Trust Protocol™ (ATP)** is developed and operated by **Sovr Labs**. It is not affiliated with zCloak Network's similarly named protocol or any Binance-hosted initiatives.
+**Agent Trust Protocol™ (ATP)** is developed and operated by **Sovr Labs** — the original Agent Trust Protocol, in development since March 2025. Several projects share the “ATP” acronym; this is the protocol-agnostic identity and trust layer (`did:atp` + post-quantum signatures), not the payments, commerce, or single-platform protocols of the same name. Not affiliated with zCloak Network or any Binance-hosted initiative.
 
-Agent Trust Protocol™  The original agent trust protocol, securing AI agents since March 2025. Protecting AI agents from today's threats and tomorrow's quantum computers.
+Agent Trust Protocol™  The original agent trust protocol, securing AI agents since March 2025. Protecting AI agents from today’s threats and tomorrow’s quantum computers.
 
 [Website](https://agenttrustprotocol.com)  [Documentation](https://agenttrustprotocol.com/docs)  [GitHub](https://github.com/agent-trust-protocol/atp-core)  [White Paper v2.1](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/white-paper-v2.1.md)
