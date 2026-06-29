@@ -41,7 +41,7 @@ console.log('Standalone:', agent.isStandalone());
 |------------------------------|-----------------------------------------------------------------|-----------------------------------|------------------------------------------|
 |`atp-sdk`                     |![npm](https://img.shields.io/npm/v/atp-sdk)                     |**Beta**                           |`npm install atp-sdk`                     |
 |`@atpdevelopment/openclaw-atp`|![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp)|**Beta**                           |`npm install @atpdevelopment/openclaw-atp`|
-|`create-atp-agent`            |![npm](https://img.shields.io/npm/v/create-atp-agent)            |**Stable**                         |`npx create-atp-agent`                    |
+|`create-atp-agent`            |![npm](https://img.shields.io/npm/v/create-atp-agent)            |**Beta**                           |`npx create-atp-agent`                    |
 |`atp-core`                    |v1.0.0                                                           |**Legacy**  Superseded by `atp-sdk`|                                          |
 |Services (`@atp/*`)           |0.1.0                                                            |**Development**                    |Monorepo only                             |
 
