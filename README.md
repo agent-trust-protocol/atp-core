@@ -299,9 +299,12 @@ Your AI Agents (LangChain, OpenClaw, AutoGPT, MCP, Swarm, ADK, A2A)
 ## Specifications & Conformance
 
 ATP is being standardized as a set of open specifications under a dedicated W3C
-Community Group. The drafts live in [`docs/specs/`](./docs/specs/) as
-[ReSpec](https://respec.org/) documents — open any spec’s `index.html` in a
-browser to read the rendered specification.
+Community Group. The drafts live in [`docs/specs/`](./docs/specs/index.html) as
+[ReSpec](https://respec.org/) documents — start from the
+[specifications landing page](./docs/specs/index.html), or open any spec’s
+`index.html` in a browser to read the rendered specification. See
+[`docs/COMMUNITY-RELEASE.md`](./docs/COMMUNITY-RELEASE.md) for how these are
+published to the `w3c-cg/atp` Community Group repository.
 
 |Pillar         |Specification                                                                                                |Maturity                          |
 |---------------|-------------------------------------------------------------------------------------------------------------|----------------------------------|
