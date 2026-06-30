@@ -17,7 +17,7 @@ is never required to stay involved.
 
 ## Pre-read (sent with the invite)
 
-- Specifications landing page: https://agent-trust-protocol.github.io/atp-core/specs/
+- Specifications landing page: https://w3c-cg.github.io/atp/specs/
 - The open GitHub issues filed during the review window (the de facto agenda input)
 
 ---

@@ -35,16 +35,16 @@ short asynchronous review with our members before our first call:
 - Conformance & interoperability (vendor-neutral test vectors)
 
 They're rendered here if you or your members would like to look:
-https://agent-trust-protocol.github.io/atp-core/specs/
+https://w3c-cg.github.io/atp/specs/
 
 **My one question:** how often would you like to hear from us, and in what form? I don't
 want to over-communicate. A few lightweight options I had in mind:
 
 - A brief written progress update to you (the chairs) on a cadence you choose — quarterly
   is my default guess, but you know your group's rhythm.
-- Your members are welcome to raise issues directly on our repo
-  (https://github.com/agent-trust-protocol/atp-core/issues), and we're happy to do the
-  same on yours — a low-overhead way to stay coordinated without joint meetings.
+- Your members are welcome to raise issues directly on our CG repo
+  (https://github.com/w3c-cg/atp/issues), and we're happy to do the same on yours — a
+  low-overhead way to stay coordinated without joint meetings.
 
 I'd rather not set up recurring joint meetings unless and until there's a concrete need;
 the cross-repo issue channel plus periodic written updates should keep us aligned. But

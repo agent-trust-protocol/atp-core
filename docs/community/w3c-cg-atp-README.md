@@ -1,5 +1,7 @@
 <!--
   READY-TO-PASTE README for the w3c-cg/atp repository.
+  This is the SELF-CONTAINED version (no links back to agent-trust-protocol/atp-core).
+  It is identical to the README.md inside atp-cg-specs-review.zip.
   Copy the content BELOW the line into w3c-cg/atp/README.md.
   (This wrapper note is not part of the README.)
 -->
@@ -32,7 +34,7 @@ Rendered (via GitHub Pages):
 
 | Spec | What it covers |
 |---|---|
-| [did:atp — Quantum-Safe DID Method](https://w3c-cg.github.io/atp/specs/did-atp/) | A DID method binding a classical Ed25519 key and a post-quantum ML-DSA-65 (FIPS 204) key in one hybrid identifier, with deterministic pairwise derivation. Backed by a runnable proof and published test vectors. |
+| [did:atp — Quantum-Safe DID Method](https://w3c-cg.github.io/atp/specs/did-atp/) | A DID method binding a classical Ed25519 key and a post-quantum ML-DSA-65 (FIPS 204) key in one hybrid identifier, with deterministic pairwise derivation. Includes published, vendor-neutral test vectors. |
 | [Agent Trust Scoring & Credentials](https://w3c-cg.github.io/atp/specs/atp-trust/) | A deterministic, bounded, fail-closed trust model whose levels are expressible as signed W3C Verifiable Credentials. |
 | [Privacy-First Interaction](https://w3c-cg.github.io/atp/specs/atp-privacy/) | Pairwise (per-relationship) identifiers, Merkle-based selective disclosure, and experimental zero-knowledge range proofs. |
 | [Conformance & Interoperability](https://w3c-cg.github.io/atp/specs/atp-conformance/) | Normative conformance items and a vendor-neutral test-vector format for independent implementations to verify interoperability. |
@@ -46,24 +48,18 @@ Please file one **[GitHub issue](https://github.com/w3c-cg/atp/issues)** per top
 questions, disagreements, gaps, and editorial nits are all welcome. We're running an
 asynchronous review; there is no need to wait for a meeting to comment.
 
-## Reference implementation & source of truth
+## Implementation status
 
-These specs are edited and maintained, alongside a runnable reference implementation and
-conformance suite, in the project repository:
-
-- **Source & code:** https://github.com/agent-trust-protocol/atp-core
-- **Runnable proof of concept:** https://github.com/agent-trust-protocol/atp-core/tree/main/proof
-- **Conformance suite (`npm run conformance`):** https://github.com/agent-trust-protocol/atp-core/blob/main/scripts/conformance.mjs
-
-The copies in *this* repository are review snapshots; spec edits are made in `atp-core` and
-re-published here.
+These specifications are backed by a reference implementation and a conformance test
+suite. The implementation is being finalized for public review and will be linked here
+once it is ready; until then, the specifications above stand on their own (the did:atp
+spec ships with its own published test vectors).
 
 ## License
 
-Specifications are made available under the
+Specifications will be made available under the
 [W3C Software and Document Notice and License](https://www.w3.org/copyright/software-license/)
-when adopted as CG Reports. The reference implementation in `atp-core` is licensed under
-Apache-2.0.
+when adopted as CG Reports.
 
 ---
 

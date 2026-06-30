@@ -15,13 +15,17 @@ not the other way around.
 
 ## Recommended path
 
-### Stage 1 — Now: point members at the existing repo (no `w3c-cg/atp` push yet)
-- Keep everything in `agent-trust-protocol/atp-core` (specs under `docs/specs/`, code,
-  conformance suite, proof).
-- Share the rendered specs via GitHub Pages:
-  https://agent-trust-protocol.github.io/atp-core/specs/
-- Members review and file issues against `atp-core`. **No content goes to `w3c-cg/atp`
-  yet** — there's nothing the CG has adopted to put there.
+### Stage 1 — Now: self-contained spec review copies in `w3c-cg/atp` (specs only, no code)
+- Keep the **editing source of truth** in `agent-trust-protocol/atp-core` (specs under
+  `docs/specs/`, plus code, conformance suite, proof).
+- Upload **review-only copies of the four specs** to `w3c-cg/atp` so members read and file
+  feedback in the CG repo. These copies are **self-contained** — no links back to atp-core,
+  so the in-progress implementation isn't put under scrutiny yet. See
+  `05-W3C-CG-REPO-UPLOAD.md` (and the ready-to-push `atp-cg-specs-review.zip`).
+- Share the rendered specs via the CG Pages site:
+  https://w3c-cg.github.io/atp/specs/
+- **No code goes to `w3c-cg/atp` yet** — specs only. Members who need the implementation
+  get it later (Stage 2/3), or on request.
 
 ### Stage 2 — After the CG adopts a first document: `w3c-cg/atp` becomes specs-home
 - When the group votes to adopt (e.g. did:atp) as a CG report, publish **the specs** to
@@ -70,26 +74,17 @@ just execute the relevant section when the CG decides.
 
 ## Concrete next actions tied to this decision
 
-- [ ] **Now:** confirm GitHub Pages is live on `atp-core`; share the landing-page link
-      (see `01-MEMBER-OUTREACH-EMAIL.md`).
-- [ ] **Now:** do *not* push to `w3c-cg/atp`. Leave it empty or with a placeholder README
-      that points back to `atp-core` and explains adoption is pending.
+- [ ] **Now:** upload the self-contained spec review copies to `w3c-cg/atp` (specs only,
+      no code) — unzip `atp-cg-specs-review.zip` and push per `05-W3C-CG-REPO-UPLOAD.md`.
+- [ ] **Now:** use the self-contained README (`w3c-cg-atp-README.md`) — no atp-core links;
+      enable Pages and share `https://w3c-cg.github.io/atp/specs/` (see `01`).
+- [ ] **When atp-core is verified** (npm updates, README, code green): re-add the
+      implementation links to the spec landing page + README (see `05` §5).
 - [ ] **At first adoption vote:** execute Option A from `COMMUNITY-RELEASE.md` into
-      `w3c-cg/atp`, apply the community-report requirements, flip ReSpec to `CG-DRAFT`.
+      `w3c-cg/atp`, apply the community-report requirements, flip ReSpec to
+      `CG-DRAFT` + `group: "atp"`.
 - [ ] **Only on CG request:** add the Option B service subset.
 
-### Suggested placeholder README for `w3c-cg/atp` (if you want the repo to not look empty)
-
-```markdown
-# Agent Trust Protocol (ATP) — W3C Community Group
-
-This repository will host ATP specifications once the Community Group adopts them as
-CG reports. Until then, the draft specifications and reference implementation live at:
-
-- Specifications (rendered): https://agent-trust-protocol.github.io/atp-core/specs/
-- Source & reference code: https://github.com/agent-trust-protocol/atp-core
-
-ATP's charter: produce open specifications that fill the Security and Privacy modules
-described by the AI Agent Protocol Community Group. Feedback is welcome as issues on the
-atp-core repository.
-```
+> The ready-to-paste README for `w3c-cg/atp` is `w3c-cg-atp-README.md` (self-contained,
+> identical to the README inside the bundle). It supersedes the old placeholder that
+> pointed back to atp-core.

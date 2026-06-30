@@ -17,7 +17,7 @@ to **share the drafts and grow participation** before formalizing anything.
 ## The flow
 
 1. **Share** the four drafts with members; open a **1–2 week async review** window
-   (`01`). Point everyone at https://agent-trust-protocol.github.io/atp-core/specs/.
+   (`01`). Point everyone at https://w3c-cg.github.io/atp/specs/ (self-contained copies).
 2. **Reach out** to the AI Agent Protocol CG chairs to ask how often they'd like updates
    (`03`) — low overhead, no joint meetings yet.
 3. **Meet** once the review window closes, with an agenda built from the feedback (`02`).

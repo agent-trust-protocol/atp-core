@@ -35,12 +35,11 @@ reports. They are written with [ReSpec](https://respec.org/), a W3C-supported sp
 and render in any browser:
 
 > **Specifications landing page:**
-> https://agent-trust-protocol.github.io/atp-core/specs/
+> https://w3c-cg.github.io/atp/specs/
 
 1. **did:atp — Quantum-Safe DID Method** — a DID method binding a classical Ed25519 key
    and a post-quantum ML-DSA-65 (FIPS 204) key in one hybrid identifier, with
-   deterministic pairwise derivation. *Backed by a runnable proof and published test
-   vectors.*
+   deterministic pairwise derivation. *Includes published, vendor-neutral test vectors.*
 2. **Agent Trust Scoring & Credentials** — a deterministic, bounded, fail-closed trust
    model whose levels are expressible as signed W3C Verifiable Credentials.
 3. **Privacy-First Interaction** — pairwise (per-relationship) identifiers, Merkle-based
@@ -48,19 +47,13 @@ and render in any browser:
 4. **Conformance & Interoperability** — normative conformance items and a vendor-neutral
    test-vector format so independent implementations can verify interoperability.
 
-**If you want to go deeper**, the reference implementation is open source:
-
-- Runnable proof of concept: https://github.com/agent-trust-protocol/atp-core/tree/main/proof
-- Conformance suite (`npm run conformance`): https://github.com/agent-trust-protocol/atp-core/blob/main/scripts/conformance.mjs
-- Project repository: https://github.com/agent-trust-protocol/atp-core
-
 **What I'm asking of you:**
 
 - Please **read at least the landing page and the two draft specs closest to your
   interest** over the next **1–2 weeks**.
-- Raise questions, disagreements, or gaps as **GitHub issues** on the project repo:
-  https://github.com/agent-trust-protocol/atp-core/issues — one issue per topic is
-  easiest to track. (No issue is too small; editorial nits are welcome too.)
+- Raise questions, disagreements, or gaps as **GitHub issues** on the CG repo:
+  https://github.com/w3c-cg/atp/issues — one issue per topic is easiest to track. (No
+  issue is too small; editorial nits are welcome too.)
 - If you'd rather comment by email, just reply to this thread.
 
 I'll send a calendar invite for our **first call** once the review window is open, with
@@ -82,9 +75,10 @@ Sovr Labs
 
 - **Timing:** send 1–2 weeks before the proposed first-call date. The review window *is*
   the ramp-up; don't shorten it.
-- **Links:** confirm the GitHub Pages site is live (`Settings → Pages → Source: GitHub
-  Actions`) before sending. If Pages isn't enabled yet, link to the spec sources under
-  `docs/specs/` in the repo instead.
+- **Links:** confirm the CG GitHub Pages site is live before sending — `w3c-cg/atp`
+  → `Settings → Pages → Deploy from a branch → main → / (root)` (see
+  `05-W3C-CG-REPO-UPLOAD.md`). Open `https://w3c-cg.github.io/atp/specs/` and click each
+  card first. The review copies are self-contained (no links back to atp-core).
 - **Issues vs. Discussions:** if you enable GitHub Discussions, point editorial feedback
   there and reserve Issues for actionable spec changes. Pick one and be consistent.
 - **Don't over-claim status:** keep the "input documents / not yet adopted" framing.
