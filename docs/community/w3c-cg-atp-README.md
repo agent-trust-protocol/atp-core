@@ -60,7 +60,3 @@ spec ships with its own published test vectors).
 Specifications will be made available under the
 [W3C Software and Document Notice and License](https://www.w3.org/copyright/software-license/)
 when adopted as CG Reports.
-
----
-
-*Agent Trust Protocol™ — securing the agentic web, one trust relationship at a time.*
