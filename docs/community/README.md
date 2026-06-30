@@ -11,6 +11,8 @@ to **share the drafts and grow participation** before formalizing anything.
 | `02-FIRST-MEETING-AGENDA.md` | 60-min first-meeting agenda + speaker notes | After the async review window |
 | `03-AI-AGENT-PROTOCOL-CG-OUTREACH.md` | Note to AI Agent Protocol CG chairs asking their preferred update cadence | In parallel with member outreach |
 | `04-REPO-STRATEGY-DECISION.md` | Decision: specs-first vs. mirroring code to `w3c-cg/atp` | Reference; act at first adoption vote |
+| `05-W3C-CG-REPO-UPLOAD.md` | Naming guidance + exact file list + steps to upload review copies to `w3c-cg/atp` | Before uploading specs for member review |
+| `w3c-cg-atp-README.md` | Ready-to-paste README for the `w3c-cg/atp` repo | Paste into `w3c-cg/atp/README.md` |
 
 ## The flow
 
