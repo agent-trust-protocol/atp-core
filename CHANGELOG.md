@@ -28,6 +28,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   verification instead of delegating to `storage.verifyChain()` (which only
   checked `previousHash` linkage), so content tampering of an entry that still
   links correctly is now detected.
+- **atp-sdk: standalone-mode crash on `send()`, `establishTrust()`, and the ZKP
+  auth methods (`requestAuth`, `respondToChallenge`, `verifyAuthResponse`).**
+  `Agent.quickstart()` correctly falls back to standalone mode when no ATP
+  services are reachable, but these methods still made unguarded audit-log
+  calls that threw `ATPNetworkError` (`ECONNREFUSED`) the moment they ran,
+  crashing the README quick-start example on first use. Added a
+  `recordAudit()` helper that writes to a local in-memory audit trail instead
+  of throwing when standalone (or when the audit service is otherwise
+  unreachable); `getTrustScore()` now scores from that local trail in
+  standalone mode. This fix is currently only on the unpublished SDK version
+  in this repo — the published `atp-sdk@1.2.5` on npm still has the bug and
+  should get this fix backported as a `1.2.6` patch release.
+- Fixed 5 broken documentation links in `README.md`: Multi-Protocol Support
+  and Troubleshooting now point at the docs that actually exist
+  (`packages/sdk/docs/MULTI-PROTOCOL-SUPPORT.md`,
+  `docs/TROUBLESHOOTING-GUIDE.md`); the `identity-service`,
+  `permission-service`, and `audit-logger` deployment links now point at the
+  package directories since those packages have no README yet.
 
 ## [1.1.0] - 2026-03-27
 

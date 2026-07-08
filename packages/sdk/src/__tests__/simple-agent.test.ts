@@ -718,6 +718,62 @@ describe('Agent', () => {
     });
   });
 
+  describe('standalone mode audit fallback', () => {
+    beforeEach(() => {
+      // Simulate no ATP services reachable: DID registration and all audit/query calls fail
+      mockIdentityClient.registerDID.mockRejectedValue(
+        Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:3001'), { code: 'ECONNREFUSED' })
+      );
+      mockAuditClient.logEvent.mockRejectedValue(
+        Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:3005'), { code: 'ECONNREFUSED' })
+      );
+      mockAuditClient.queryEvents.mockRejectedValue(
+        Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:3005'), { code: 'ECONNREFUSED' })
+      );
+    });
+
+    it('should not throw when sending a message in standalone mode', async () => {
+      const agent = await Agent.create('StandaloneSender');
+      expect(agent.isStandalone()).toBe(true);
+
+      const result = await agent.send('did:atp:recipient', 'Hello!');
+
+      expect(result).toHaveProperty('messageId');
+      // Should not have attempted the network call at all
+      expect(mockAuditClient.logEvent).not.toHaveBeenCalled();
+    });
+
+    it('should not throw when establishing trust in standalone mode', async () => {
+      const agent = await Agent.create('StandaloneTruster');
+
+      const result = await agent.establishTrust('did:atp:other');
+
+      expect(result).toEqual({ established: false, level: 0 });
+    });
+
+    it('should score trust from the local audit trail in standalone mode', async () => {
+      const agent = await Agent.create('StandaloneScorer');
+
+      await agent.send('did:atp:peer', 'hi');
+      await agent.send('did:atp:peer', 'hi again');
+
+      const score = await agent.getTrustScore('did:atp:peer');
+
+      // 2 local interactions recorded against did:atp:peer -> basic trust tier
+      expect(score).toBe(0.25);
+    });
+
+    it('should not throw during ZKP auth request/response/verify flow in standalone mode', async () => {
+      const agent = await Agent.create('StandaloneZkp');
+
+      const challenge = await agent.requestAuth('did:atp:target', []);
+      expect(challenge).toBeTruthy();
+
+      const challengeFromThem = { ...challenge, verifierDid: agent.getDID(), proverDid: 'did:atp:target' } as any;
+      await expect(agent.respondToChallenge(challengeFromThem)).resolves.toBeTruthy();
+    });
+  });
+
   describe('Agent.create with log option', () => {
     let consoleSpy: jest.SpyInstance;
 

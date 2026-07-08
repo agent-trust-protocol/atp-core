@@ -355,8 +355,8 @@ pnpm add atp-sdk
 - **[VERSIONING.md](./VERSIONING.md)** - Package status and versioning policy
 - **[OpenClaw Integration](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/openclaw-integration.md)** - Secure multi-agent workflows
 - **[Examples](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/examples)** - Working code examples
-- **[Multi-Protocol Support](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/multi-protocol.md)** - MCP, Swarm, ADK, A2A
-- **[Troubleshooting](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/troubleshooting.md)** - Common issues
+- **[Multi-Protocol Support](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/docs/MULTI-PROTOCOL-SUPPORT.md)** - MCP, Swarm, ADK, A2A
+- **[Troubleshooting](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/TROUBLESHOOTING-GUIDE.md)** - Common issues
 - **[Specifications (W3C CG drafts)](https://github.com/agent-trust-protocol/atp-core/tree/main/docs/specs)** - did:atp, trust, privacy & conformance ReSpec specs
 - **[Conformance Suite](https://github.com/agent-trust-protocol/atp-core/blob/main/scripts/conformance.mjs)** - `npm run conformance` interoperability gate
 
@@ -379,9 +379,9 @@ Deploy the ATP dashboard to Vercel with a single click:
 
 Each service in `packages/` has its own deployment guide:
 
-- **[packages/identity-service](./packages/identity-service/README.md)** - DID + agent identity
-- **[packages/permission-service](./packages/permission-service/README.md)** - RBAC + policies
-- **[packages/audit-logger](./packages/audit-logger/README.md)** - Blockchain audit
+- **[packages/identity-service](./packages/identity-service)** - DID + agent identity
+- **[packages/permission-service](./packages/permission-service)** - RBAC + policies
+- **[packages/audit-logger](./packages/audit-logger)** - Blockchain audit
 - Other services: See individual `packages/*/README.md`
 
 -----
