@@ -110,6 +110,8 @@ export class Agent extends EventEmitter {
   private didDocument: DIDDocument | null = null;
   // Cached credentials for ZKP credential proofs
   private cachedCredentials: VerifiableCredential[] = [];
+  // Local audit trail used when the audit service is unreachable (e.g. standalone mode)
+  private localAuditTrail: Array<{ source: string; action: string; resource: string; actor: string; details?: any; timestamp: string }> = [];
 
   private constructor(name: string, options?: SimpleAgentOptions) {
     super();
@@ -237,6 +239,30 @@ export class Agent extends EventEmitter {
     }
   }
 
+  /**
+   * Log an audit event, falling back to a local in-memory trail when the
+   * audit service is unreachable (standalone mode, or a transient outage)
+   * instead of letting the network error propagate to the caller.
+   */
+  private async recordAudit(request: {
+    source: string;
+    action: string;
+    resource: string;
+    actor: string;
+    details?: any;
+  }): Promise<void> {
+    if (this._standalone) {
+      this.localAuditTrail.push({ ...request, timestamp: new Date().toISOString() });
+      return;
+    }
+
+    try {
+      await this.client.audit.logEvent(request);
+    } catch {
+      this.localAuditTrail.push({ ...request, timestamp: new Date().toISOString() });
+    }
+  }
+
   private logBanner(): void {
     const mode = this._standalone ? 'standalone (local)' : 'connected';
     const qs = this.isQuantumSafe() ? 'yes' : 'no';
@@ -285,7 +311,7 @@ export class Agent extends EventEmitter {
     const messageId = CryptoUtils.generateId();
 
     // Log the message send event (for audit trail)
-    await this.client.audit.logEvent({
+    await this.recordAudit({
       source: 'agent-sdk',
       action: 'message.sent',
       resource: recipientDid,
@@ -358,6 +384,13 @@ export class Agent extends EventEmitter {
   async getTrustScore(agentDid: string): Promise<number> {
     if (!this.initialized) {
       throw new Error('Agent not initialized');
+    }
+
+    if (this._standalone) {
+      const interactionCount = this.localAuditTrail.filter(
+        (event) => event.actor === this.did && event.resource === agentDid
+      ).length;
+      return TrustScoring.levelFromCount(interactionCount);
     }
 
     try {
@@ -658,7 +691,7 @@ export class Agent extends EventEmitter {
 
     // In production, this would initiate a trust establishment protocol
     // For now, we'll just log the attempt
-    await this.client.audit.logEvent({
+    await this.recordAudit({
       source: 'agent-sdk',
       action: 'trust.establish.attempted',
       resource: agentDid,
@@ -749,7 +782,7 @@ export class Agent extends EventEmitter {
     this.pendingChallenges.set(challenge.id, challenge);
 
     // Log the auth request
-    await this.client.audit.logEvent({
+    await this.recordAudit({
       source: 'agent-sdk',
       action: 'zkp.auth.requested',
       resource: targetDid,
@@ -817,7 +850,7 @@ export class Agent extends EventEmitter {
     );
 
     // Log the response
-    await this.client.audit.logEvent({
+    await this.recordAudit({
       source: 'agent-sdk',
       action: 'zkp.auth.responded',
       resource: challenge.verifierDid,
@@ -873,7 +906,7 @@ export class Agent extends EventEmitter {
     this.pendingChallenges.delete(challenge.id);
 
     // Log the verification result
-    await this.client.audit.logEvent({
+    await this.recordAudit({
       source: 'agent-sdk',
       action: result.verified ? 'zkp.auth.verified' : 'zkp.auth.failed',
       resource: response.proverDid,
