@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent Trust Protocol — Specifications</title>
+  <meta name="description"
+    content="Agent Trust Protocol (ATP) specifications: the did:atp DID method, agent trust scoring & credentials, privacy-first interaction, and conformance & interoperability." />
+  <style>
+    :root {
+      --bg: #0f1226;
+      --card: #1a1f3a;
+      --accent: #7c6cff;
+      --accent-2: #4dd0e1;
+      --text: #e8eaf6;
+      --muted: #a6abce;
+      --border: #2a3158;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(1200px 600px at 70% -10%, #21285a 0%, var(--bg) 60%);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 56px 24px 80px; }
+    header { margin-bottom: 40px; }
+    .eyebrow {
+      text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.78rem;
+      color: var(--accent-2); font-weight: 600;
+    }
+    h1 { font-size: 2.4rem; margin: 8px 0 12px; line-height: 1.15; }
+    h1 small { font-weight: 400; font-size: 1rem; color: var(--muted); display: block; margin-top: 8px; }
+    .lede { color: var(--muted); max-width: 70ch; }
+    .grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px; margin: 36px 0;
+    }
+    a.card {
+      display: block; text-decoration: none; color: inherit;
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 22px; transition: transform .15s ease, border-color .15s ease;
+    }
+    a.card:hover { transform: translateY(-3px); border-color: var(--accent); }
+    .pillar { font-size: 0.78rem; text-transform: uppercase; letter-spacing: .1em; color: var(--accent-2); font-weight: 600; }
+    .card h2 { font-size: 1.18rem; margin: 6px 0 8px; }
+    .card p { color: var(--muted); font-size: 0.95rem; }
+    .badge {
+      display: inline-block; margin-top: 14px; font-size: 0.74rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted);
+    }
+    .badge.draft { color: #9be9a8; border-color: #2f5d3a; background: #14321f; }
+    .badge.early { color: #ffd27f; border-color: #5d4a22; background: #2c2412; }
+    .links { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 18px; }
+    .links a { color: var(--accent-2); text-decoration: none; font-size: 0.95rem; border-bottom: 1px solid transparent; }
+    .links a:hover { border-bottom-color: var(--accent-2); }
+    footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.88rem; }
+    code { background: #0c0f22; padding: 1px 6px; border-radius: 6px; font-size: 0.85em; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow">W3C Community Group Drafts</div>
+      <h1>Agent Trust Protocol™ Specifications
+        <small>A quantum-safe identity, trust, and privacy layer for AI agents.</small>
+      </h1>
+      <p class="lede">
+        ATP extends the W3C <a href="https://www.w3.org/TR/did-core/" style="color:var(--accent-2)">Decentralized
+        Identifiers</a> and <a href="https://www.w3.org/TR/vc-data-model/" style="color:var(--accent-2)">Verifiable
+        Credentials</a> data models for autonomous agents. The four drafts below are
+        <a href="https://respec.org/" style="color:var(--accent-2)">ReSpec</a> documents — click any to read the
+        rendered specification. They cross-reference one another and are backed by a runnable reference
+        implementation and conformance suite.
+      </p>
+    </header>
+
+    <div class="grid">
+      <a class="card" href="./did-atp/">
+        <div class="pillar">Identity</div>
+        <h2>did:atp — Quantum-Safe DID Method</h2>
+        <p>A DID method binding a classical Ed25519 key and a post-quantum ML-DSA-65 (FIPS 204) key in a single
+           hybrid identifier, with deterministic pairwise derivation.</p>
+        <span class="badge draft">Draft · runnable proof + published test vectors</span>
+      </a>
+
+      <a class="card" href="./atp-trust/">
+        <div class="pillar">Trust</div>
+        <h2>Agent Trust Scoring &amp; Credentials</h2>
+        <p>A deterministic, bounded, fail-closed trust model whose levels are expressible as signed, presentable
+           W3C Verifiable Credentials (the ATP Trust Credential).</p>
+        <span class="badge early">Early draft · seeking CG review</span>
+      </a>
+
+      <a class="card" href="./atp-privacy/">
+        <div class="pillar">Privacy</div>
+        <h2>Privacy-First Interaction</h2>
+        <p>Pairwise (per-relationship) identifiers, Merkle-based selective disclosure with known-answer vectors,
+           and experimental zero-knowledge range proofs.</p>
+        <span class="badge early">Early draft · ZKP pending crypto review</span>
+      </a>
+
+      <a class="card" href="./atp-conformance/">
+        <div class="pillar">Conformance</div>
+        <h2>Conformance &amp; Interoperability</h2>
+        <p>Normative conformance items, audit-store integrity rules, and the vendor-neutral test-vector format
+           that lets independent implementations verify interoperability.</p>
+        <span class="badge early">Early draft</span>
+      </a>
+    </div>
+
+    <div class="links">
+      <a href="https://github.com/agent-trust-protocol/atp-core/tree/main/proof">Runnable proof of concept ↗</a>
+      <a href="https://github.com/agent-trust-protocol/atp-core/blob/main/scripts/conformance.mjs">Conformance suite (<code>npm run conformance</code>) ↗</a>
+      <a href="https://github.com/agent-trust-protocol/atp-core/blob/main/docs/W3C_SUBMISSION_PROPOSAL.md">Community Group proposal ↗</a>
+      <a href="https://github.com/agent-trust-protocol/atp-core">Project repository ↗</a>
+    </div>
+
+    <footer>
+      <p>These drafts use ReSpec <code>specStatus: "unofficial"</code> until the ATP Community Group is formally
+         registered with the W3C, at which point they move to <code>CG-DRAFT</code>. Feedback is welcome via GitHub
+         issues and pull requests.</p>
+      <p style="margin-top:10px;">Agent Trust Protocol™ — Securing the Agentic Web, one trust relationship at a time.</p>
+    </footer>
+  </div>
+</body>
+</html>
