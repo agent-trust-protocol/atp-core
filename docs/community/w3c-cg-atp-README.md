@@ -57,6 +57,12 @@ spec ships with its own published test vectors).
 
 ## License
 
-Specifications will be made available under the
-[W3C Software and Document Notice and License](https://www.w3.org/copyright/software-license/)
-when adopted as CG Reports.
+This repository follows the standard W3C Community Group licensing (see
+[`LICENSE.md`](LICENSE.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md)):
+
+- **Specifications** — contributions are made under the
+  [W3C Community Contributor License Agreement (CLA)](https://www.w3.org/community/about/agreements/cla/).
+- **Other reports** — [W3C Software and Document License](https://www.w3.org/copyright/software-license/).
+- **Test suites** — [W3C 3-clause BSD License](https://www.w3.org/copyright/3-clause-bsd-license-2008/).
+
+Substantive contributions to specifications require joining the Community Group.

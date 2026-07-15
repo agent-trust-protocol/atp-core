@@ -33,6 +33,9 @@
     localBiblio: window.atpBiblio || {},
     subtitle: spec.subtitle || "",
     xref: ["DID-CORE", "VC-DATA-MODEL", "INFRA"],
-    license: "w3c-software-doc",
+    // Input drafts (pre-adoption) render under CC-BY. On CG adoption, switch
+    // specStatus to "CG-DRAFT" and ReSpec applies the W3C Community CLA. Repo-level
+    // licensing (spec contributions under the W3C CLA) lives in LICENSE.md.
+    license: "cc-by",
   };
 })();

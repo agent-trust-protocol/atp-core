@@ -62,6 +62,8 @@ Copy these from `atp-core/docs/specs/` (plus the root `.nojekyll`). Target layou
 
 ```
 README.md                          ← new; use docs/community/w3c-cg-atp-README.md
+LICENSE.md                         ← W3C CG license; use docs/community/w3c-cg-LICENSE.md
+CONTRIBUTING.md                    ← W3C CG contributing; use docs/community/w3c-cg-CONTRIBUTING.md
 .nojekyll                          ← REQUIRED so GitHub Pages serves ReSpec verbatim
 specs/
   index.html                       ← landing page (4 cards)
@@ -84,6 +86,8 @@ relative `../common/respec-config.js` loads keep working):
 
 | From `atp-core` | To `w3c-cg/atp` |
 |---|---|
+| `docs/community/w3c-cg-LICENSE.md` | `/LICENSE.md` |
+| `docs/community/w3c-cg-CONTRIBUTING.md` | `/CONTRIBUTING.md` |
 | `docs/.nojekyll` | `/.nojekyll` |
 | `docs/specs/index.html` | `/specs/index.html` |
 | `docs/specs/common/respec-config.js` | `/specs/common/respec-config.js` |
@@ -168,6 +172,21 @@ The bundle already has these applied — listed here so you can reproduce or aud
 3. **`README.md`** → no atp-core links; an "Implementation status" section states the
    reference implementation is being finalized and will be linked when ready.
 
+**W3C liaison corrections (also applied in the bundle):**
+
+4. **No trademark on titles.** Removed the ™ from "Agent Trust Protocol" in the landing
+   page (title and footer). W3C requires that CG specification titles not be trademarked
+   prior to discussion with W3C. (Keep ™ on your own marketing site, not here.)
+5. **No premature "CG document" status.** Landing-page eyebrow changed from "W3C Community
+   Group Drafts" to "Draft specifications — community review", and the footer now states
+   these are draft input documents, **not** adopted CG Reports.
+6. **Correct W3C CG licensing.** Added `LICENSE.md` (W3C CG license: specs under the W3C
+   CLA) and `CONTRIBUTING.md` (W3C CG contributing) from
+   [w3c/licenses](https://github.com/w3c/licenses); README license section and the ReSpec
+   `license` (now `cc-by` for the unofficial drafts, not `w3c-software-doc`) updated to
+   match. On CG adoption, `specStatus` → `CG-DRAFT` and ReSpec applies the W3C CLA
+   automatically.
+
 > Tradeoff: review feedback lands in `w3c-cg/atp` issues, separate from atp-core issues.
 > That's intended — members review in the CG repo. When you fix something, edit in atp-core
 > (source of truth) and re-copy the changed file here.
@@ -183,7 +202,8 @@ implementation links: edit `specs/index.html`'s footer `links` block and the REA
 ## 6. Quick checklist
 
 - [ ] Unzip `atp-cg-specs-review.zip` locally (don't upload the zip itself).
-- [ ] Upload the contents (`README.md`, `.nojekyll`, `specs/`) via Method A or B (§3).
+- [ ] Upload the contents (`README.md`, `LICENSE.md`, `CONTRIBUTING.md`, `.nojekyll`,
+      `specs/`) via Method A or B (§3).
 - [ ] Verify `.nojekyll` made it into the repo root (Method B's common miss).
 - [ ] Enable Pages (Deploy from branch → main → `/ root`).
 - [ ] Open `https://w3c-cg.github.io/atp/specs/` and click each of the four cards — confirm
