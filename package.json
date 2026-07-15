@@ -26,14 +26,12 @@
     "conformance:privacy": "jest --runInBand --testPathPattern \"(zkp-conformance|selective-disclosure)\\.test\\.ts$\"",
     "vectors": "TSX_TSCONFIG_PATH=tsconfig.base.json tsx scripts/gen-did-atp-vectors.ts",
     "vectors:check": "TSX_TSCONFIG_PATH=tsconfig.base.json tsx scripts/gen-did-atp-vectors.ts --check",
-    "test:integration": "echo 'No integration tests configured yet — see scripts/tests/' && exit 1",
-    "test:e2e": "echo 'No e2e tests configured yet — see scripts/tests/' && exit 1",
     "type-check": "tsc --noEmit",
     "sbom": "npx --yes @cyclonedx/cyclonedx-npm@^1.20.0 --output-file sbom.json --omit dev"
   },
   "dependencies": {
     "@noble/ed25519": "^2.0.0",
-    "@noble/post-quantum": "^0.4.1",
+    "@noble/post-quantum": "^0.6.1",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.4",
