@@ -238,10 +238,10 @@ To run the unit tests: `cd packages/openclaw-atp && npm test` — covers registr
 ## Testing & Conformance
 
 - **Run the full conformance gate:** `npm run conformance` from the repo root.
-  It runs the W3C conformance suites for the four ATP core items and prints a
+  It runs the W3C conformance suites for the five ATP core items and prints a
   per-item PASS/FAIL summary, exiting non-zero on any failure (so it doubles as
   a CI / release gate). Per-item: `conformance:did`, `conformance:sigs`,
-  `conformance:policy`, `conformance:audit`.
+  `conformance:policy`, `conformance:audit`, `conformance:privacy`.
 - **Use the repo-root Jest config for package suites.** Running `npm test`
   *inside* some packages (e.g. `packages/audit-logger`) fails to start because
   the package-level setup does not transpile TypeScript. Run from the repo root
