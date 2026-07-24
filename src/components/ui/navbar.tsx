@@ -46,12 +46,6 @@ export function Navbar() {
               Integrations
             </Link>
             <Link
-              href="/pricing"
-              className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              Pricing
-            </Link>
-            <Link
               href="/playground"
               className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
             >
@@ -107,13 +101,6 @@ export function Navbar() {
               onClick={() => setMobileOpen(false)}
             >
               Integrations
-            </Link>
-            <Link
-              href="/pricing"
-              className="block text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
-              onClick={() => setMobileOpen(false)}
-            >
-              Pricing
             </Link>
             <Link
               href="/playground"

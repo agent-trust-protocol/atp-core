@@ -31,7 +31,6 @@ export { CredentialsClient } from './client/credentials.js';
 export { PermissionsClient } from './client/permissions.js';
 export { AuditClient } from './client/audit.js';
 export { GatewayClient } from './client/gateway.js';
-export { PaymentsClient } from './client/payments.js';
 
 // Multi-Protocol Support (NEW in v1.1.0)
 export {

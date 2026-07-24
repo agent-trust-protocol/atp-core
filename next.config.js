@@ -17,6 +17,32 @@ const nextConfig = {
     NEXT_PUBLIC_APP_DOMAIN: process.env.NEXT_PUBLIC_APP_DOMAIN || 'http://localhost:3030',
     NEXT_PUBLIC_DEV_DOMAIN: process.env.NEXT_PUBLIC_DEV_DOMAIN || 'http://localhost:3000',
   },
+  // Product surfaces (Studio, cloud, billing, enterprise) moved out of the
+  // public ATP 1.x repo — redirect their old routes to the home page.
+  async redirects() {
+    return [
+      '/dashboard',
+      '/pricing',
+      '/monitoring',
+      '/policy-editor',
+      '/policy-testing',
+      '/cloud',
+      '/enterprise',
+    ].map((path) => ({
+      source: `${path}/:path*`,
+      destination: '/',
+      permanent: false,
+    })).concat([
+      { source: '/dashboard', destination: '/', permanent: false },
+      { source: '/pricing', destination: '/', permanent: false },
+      { source: '/monitoring', destination: '/', permanent: false },
+      { source: '/policy-editor', destination: '/', permanent: false },
+      { source: '/policy-testing', destination: '/', permanent: false },
+      { source: '/cloud', destination: '/', permanent: false },
+      { source: '/enterprise', destination: '/', permanent: false },
+      { source: '/integrations/openclaw/agents', destination: '/integrations/openclaw', permanent: false },
+    ]);
+  },
   // Serve installer scripts as plain text for curl/irm piping
   async headers() {
     return [
