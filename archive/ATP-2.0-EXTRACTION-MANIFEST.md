@@ -43,3 +43,7 @@ backend repo directly.
   auth modules; imports of those symbols must resolve to this archive's copies.
 - Conformance gate (`npm run conformance`, 510 tests) and the sdk/shared Jest suites
   (843 tests) pass in atp-core after extraction.
+
+## Added in second pass (site redesign to ATP 1.x)
+- `src/app/sales-guide/` — internal sales guide page
+- `src/app/page.tsx.atp2-product-homepage` — original product-narrative homepage (replaced by the ATP 1.x protocol homepage)

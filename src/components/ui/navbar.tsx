@@ -33,6 +33,12 @@ export function Navbar() {
             >
               Developers
             </Link>
+            <a
+              href="/specs/"
+              className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              Specs
+            </a>
             <Link
               href="/docs"
               className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -88,6 +94,12 @@ export function Navbar() {
             >
               Developers
             </Link>
+            <a
+              href="/specs/"
+              className="block text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              Specs
+            </a>
             <Link
               href="/docs"
               className="block text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"

@@ -41,6 +41,8 @@ const nextConfig = {
       { source: '/cloud', destination: '/', permanent: false },
       { source: '/enterprise', destination: '/', permanent: false },
       { source: '/integrations/openclaw/agents', destination: '/integrations/openclaw', permanent: false },
+      { source: '/sales-guide', destination: '/', permanent: false },
+      { source: '/sales-guide/:path*', destination: '/', permanent: false },
     ]);
   },
   // Serve installer scripts as plain text for curl/irm piping

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ATP Capability Request &amp; Policy Decision Envelope</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      window.specConfig = {
+        shortName: "atp-capability",
+        title: "ATP Capability Request & Policy Decision Envelope",
+        subtitle: "A Standard Request Object and Normalized Authorization Decision for AI Agent Actions",
+      };
+    </script>
+    <script src="../common/biblio.js" class="remove"></script>
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove" defer></script>
+    <script src="../common/respec-config.js" class="remove" defer></script>
+  </head>
+  <body>
+    <section id="abstract">
+      <p>
+        This specification defines the two envelopes at the heart of the Agent
+        Trust Protocol's trust plane: the <strong>Capability Request</strong> —
+        a standard, runtime-agnostic object through which an agent asks to
+        perform an action (a tool call, an agent-to-agent invocation, a resource
+        access, or a delegated action) — and the
+        <strong>Policy Decision</strong> — the normalized authorization result
+        (<code>allow</code>, <code>deny</code>, <code>throttle</code>, or
+        <code>require_approval</code>) returned by a policy decision point,
+        carrying a reason code, a policy reference, and any obligations.
+      </p>
+      <p>
+        Together with agent identity (<a href="../did-atp/">did:atp</a>) and
+        attested trust (<a href="../atp-trust/">ATP Trust</a>), these envelopes
+        answer the protocol's second question: <em>what action is being
+        requested, under which policy context, and what was decided?</em>
+      </p>
+      <p class="note" title="Companion specifications">
+        Agent identity is defined by the <a href="../did-atp/">did:atp DID
+        Method</a>. The trust model consumed during evaluation is defined by
+        <a href="../atp-trust/">ATP Agent Trust</a>. Evidence emitted about a
+        decision is anchored per
+        <a href="../atp-conformance/">ATP Conformance &amp; Interoperability</a>.
+        Runtime-specific mappings of this envelope are defined by
+        <a href="../atp-interop/">ATP Interop Profiles</a>.
+      </p>
+    </section>
+
+    <section id="sotd">
+      <p>
+        This document is an <strong>early draft</strong> work product of the
+        Agent Trust Protocol (ATP) Community Group. It is <strong>not</strong> a
+        W3C Standard nor on the W3C Recommendation track. The envelope fields
+        below are seeded from a running reference implementation and are
+        <em>provisional</em>; Community Group members are invited to challenge
+        field names, the scope vocabulary, and the decision taxonomy.
+      </p>
+    </section>
+
+    <section id="conformance">
+      <p>
+        As well as sections marked as non-normative, all authoring guidelines,
+        diagrams, examples, and notes in this specification are non-normative.
+        Everything else is normative.
+      </p>
+      <p>
+        The key words <em>MUST</em>, <em>MUST NOT</em>, <em>SHOULD</em>, and
+        <em>MAY</em> are to be interpreted as described in BCP 14 [[RFC2119]]
+        [[RFC8174]] when, and only when, they appear in all capitals.
+      </p>
+    </section>
+
+    <section id="model" class="informative">
+      <h2>Model</h2>
+      <p>
+        A <dfn>capability subject</dfn> (an agent, identified by a DID) submits
+        a <a href="#capability-request">Capability Request</a> to a
+        <dfn>policy decision point</dfn> (PDP). The PDP evaluates the request in
+        a <a href="#policy-context">policy context</a> — the subject's verified
+        trust level, credentials, the target's sensitivity, and environmental
+        conditions — and returns exactly one
+        <a href="#policy-decision">Policy Decision</a>. An
+        <dfn>enforcement point</dfn> (typically the tool wrapper or runtime
+        adapter) executes or blocks the action accordingly and emits evidence.
+        Long-lived grants are represented as
+        <a href="#capability-token">Capability Tokens</a> so that repeated
+        requests need not re-consult the PDP for the token's validity window.
+      </p>
+    </section>
+
+    <section id="capability-request" class="normative">
+      <h2>The Capability Request</h2>
+      <p>
+        A <dfn>Capability Request</dfn> is a JSON object with the following
+        members:
+      </p>
+      <table class="simple">
+        <thead>
+          <tr><th>Member</th><th>Req.</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>subject</code></td><td>MUST</td>
+            <td>DID of the agent requesting the action.</td></tr>
+          <tr><td><code>action</code></td><td>MUST</td>
+            <td>The requested action, drawn from the
+              <a href="#scopes">scope vocabulary</a> or a profile-registered
+              action string.</td></tr>
+          <tr><td><code>target</code></td><td>MUST</td>
+            <td>Object identifying what the action operates on:
+              <code>kind</code> (one of <code>tool</code>,
+              <code>agent</code>, <code>resource</code>,
+              <code>delegation</code>), <code>id</code>, and OPTIONAL
+              <code>type</code> and <code>sensitivity</code>
+              (<code>public</code> | <code>internal</code> |
+              <code>confidential</code> | <code>restricted</code>).</td></tr>
+          <tr><td><code>context</code></td><td>SHOULD</td>
+            <td>The <a href="#policy-context">policy context</a> under which
+              evaluation is requested.</td></tr>
+          <tr><td><code>arguments</code></td><td>MAY</td>
+            <td>Action arguments, or a digest of them when the arguments are
+              large or sensitive.</td></tr>
+          <tr><td><code>justification</code></td><td>MAY</td>
+            <td>Human- or agent-readable rationale, surfaced to reviewers when
+              the decision is <code>require_approval</code>.</td></tr>
+          <tr><td><code>requestId</code></td><td>MUST</td>
+            <td>Unique identifier for correlating the request, decision, and
+              emitted evidence.</td></tr>
+          <tr><td><code>timestamp</code></td><td>MUST</td>
+            <td>RFC 3339 timestamp of submission.</td></tr>
+        </tbody>
+      </table>
+      <pre class="example" title="Capability Request — tool call">
+{
+  "requestId": "req_9f2c1e",
+  "subject": "did:atp:agents.example.com:e1_...:pq1_...",
+  "action": "read",
+  "target": {
+    "kind": "tool",
+    "id": "database_query",
+    "type": "database",
+    "sensitivity": "internal"
+  },
+  "context": {
+    "organizationId": "org_test",
+    "sessionState": "executing"
+  },
+  "timestamp": "2026-07-24T12:00:00Z"
+}
+      </pre>
+      <pre class="example" title="Capability Request — A2A invocation">
+{
+  "requestId": "req_51ab77",
+  "subject": "did:atp:agents.example.com:researcher...",
+  "action": "execute",
+  "target": {
+    "kind": "agent",
+    "id": "did:atp:agents.example.com:trader...",
+    "type": "a2a-invocation",
+    "sensitivity": "confidential"
+  },
+  "justification": "Hand off validated trade plan for execution",
+  "timestamp": "2026-07-24T12:00:05Z"
+}
+      </pre>
+    </section>
+
+    <section id="scopes" class="normative">
+      <h2>Scope Vocabulary</h2>
+      <p>
+        The base scope vocabulary is: <code>read</code>, <code>write</code>,
+        <code>execute</code>, <code>admin</code>, <code>identity:read</code>,
+        <code>identity:write</code>, <code>vc:issue</code>,
+        <code>vc:verify</code>, <code>vc:revoke</code>,
+        <code>permission:grant</code>, <code>permission:revoke</code>,
+        <code>audit:read</code>, <code>audit:write</code>.
+        Interop profiles MAY register additional
+        <code>&lt;namespace&gt;:&lt;verb&gt;</code> scopes; implementations
+        MUST treat unrecognized scopes as unmatchable (and therefore, under
+        deny-by-default, denied).
+      </p>
+    </section>
+
+    <section id="policy-context" class="normative">
+      <h2>Policy Context</h2>
+      <p>
+        The <dfn>policy context</dfn> is the evaluation input alongside the
+        request itself. It carries at least the subject's
+        <code>trustLevel</code> (obtained from a verified
+        <a href="../atp-trust/">ATP Trust Credential</a> or a trusted scoring
+        engine), the subject's presented <code>credentials</code>, and MAY carry
+        an <code>organizationId</code>, a <code>sessionState</code> (see
+        <a href="../atp-interop/">Interop Profiles</a>), and environmental
+        attributes (time, origin, rate counters). A PDP MUST NOT accept a
+        caller-asserted trust level that is not backed by verification.
+      </p>
+    </section>
+
+    <section id="policy-decision" class="normative">
+      <h2>The Policy Decision</h2>
+      <p>
+        A PDP MUST return exactly one <dfn>Policy Decision</dfn> per Capability
+        Request, with the following members:
+      </p>
+      <table class="simple">
+        <thead>
+          <tr><th>Member</th><th>Req.</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>decision</code></td><td>MUST</td>
+            <td>One of <code>allow</code>, <code>deny</code>,
+              <code>throttle</code>, <code>require_approval</code>.</td></tr>
+          <tr><td><code>reason</code></td><td>MUST</td>
+            <td>Human-readable explanation of the outcome.</td></tr>
+          <tr><td><code>reasonCode</code></td><td>SHOULD</td>
+            <td>Stable machine-readable code (e.g.
+              <code>NO_MATCHING_RULE</code>, <code>TRUST_BELOW_THRESHOLD</code>,
+              <code>POLICY_DISABLED</code>, <code>RATE_EXCEEDED</code>,
+              <code>EVALUATION_ERROR</code>).</td></tr>
+          <tr><td><code>policyRef</code></td><td>SHOULD</td>
+            <td>Identifier (and version, if versioned) of the policy and rule
+              that produced the decision.</td></tr>
+          <tr><td><code>obligations</code></td><td>MAY</td>
+            <td>Array of obligations the enforcement point MUST discharge when
+              acting on an <code>allow</code>: <code>log</code>,
+              <code>alert</code>, <code>mfa_required</code>,
+              <code>time_limit</code>, <code>usage_limit</code>,
+              <code>throttle</code>.</td></tr>
+          <tr><td><code>requestId</code></td><td>MUST</td>
+            <td>Echo of the request's <code>requestId</code>.</td></tr>
+          <tr><td><code>timestamp</code></td><td>MUST</td>
+            <td>RFC 3339 timestamp of evaluation.</td></tr>
+        </tbody>
+      </table>
+      <p>A conforming PDP MUST:</p>
+      <ul>
+        <li>apply <strong>deny-by-default</strong>: a request matching no allow
+          rule MUST yield <code>deny</code> with
+          <code>reasonCode: "NO_MATCHING_RULE"</code>;</li>
+        <li>fail closed: an evaluation error MUST yield <code>deny</code> with
+          <code>reasonCode: "EVALUATION_ERROR"</code>, never
+          <code>allow</code>;</li>
+        <li>resolve rule conflicts deterministically, with <code>deny</code>
+          winning ties at equal priority;</li>
+        <li>evaluate rule conditions only in a safe-expression sandbox, and
+          <strong>reject</strong> (not evaluate) policy expressions outside the
+          sandboxed grammar.</li>
+      </ul>
+      <p>
+        An enforcement point receiving <code>throttle</code> MUST delay or
+        rate-limit the action per the accompanying obligation; receiving
+        <code>require_approval</code>, it MUST NOT execute the action until an
+        out-of-band approval is recorded, and MUST treat approval timeout as
+        <code>deny</code>.
+      </p>
+      <pre class="example" title="Policy Decision">
+{
+  "requestId": "req_9f2c1e",
+  "decision": "allow",
+  "reason": "VERIFIED trust level permits internal database reads",
+  "reasonCode": "RULE_MATCHED",
+  "policyRef": "policy:org_test/data-access@3#rule-7",
+  "obligations": [
+    { "type": "log" },
+    { "type": "usage_limit", "limit": 100, "window": "PT1H" }
+  ],
+  "timestamp": "2026-07-24T12:00:00Z"
+}
+      </pre>
+    </section>
+
+    <section id="capability-token" class="normative">
+      <h2>Capability Tokens</h2>
+      <p>
+        A <dfn>Capability Token</dfn> represents a standing grant so that
+        repeated identical requests need not re-consult the PDP. A token MUST
+        carry <code>id</code>, <code>issuer</code>, <code>subject</code>,
+        <code>audience</code>, <code>scopes</code> (from the
+        <a href="#scopes">scope vocabulary</a>), <code>issuedAt</code>, and
+        <code>expiresAt</code>; it MAY carry <code>resource</code>,
+        <code>conditions</code>, and <code>notBefore</code>. Tokens MUST be
+        integrity-protected (signed by the issuer), MUST be validated for
+        signature, audience, and temporal validity before use, and MUST be
+        revocable by the issuer. A token never overrides a <code>deny</code>
+        produced by a live evaluation of the same request.
+      </p>
+      <p class="ednote" title="Open issue: token encoding">
+        The reference implementation encodes tokens as JWTs. Whether to mandate
+        JWT, allow SD-JWT / VC-based encodings, or leave encoding to interop
+        profiles is open for CG discussion.
+      </p>
+    </section>
+
+    <section id="security" class="normative">
+      <h2>Security &amp; Privacy Considerations</h2>
+      <p>
+        The decision taxonomy is deliberately closed: introducing
+        vendor-specific decision values would fragment enforcement semantics,
+        so extensions MUST be expressed as obligations, not new decision kinds.
+        Because <code>arguments</code> may contain sensitive data, requests
+        SHOULD carry digests rather than raw values when the PDP does not need
+        them, and emitted evidence MUST NOT embed raw secrets. Deny-by-default
+        and fail-closed evaluation are security-critical and are exercised by
+        the <a href="../atp-conformance/">conformance suite</a>.
+      </p>
+    </section>
+  </body>
+</html>
