@@ -1,7 +1,5 @@
 # Agent Trust Protocol™ (ATP) SDK
 
-*The original Agent Trust Protocol™ — securing AI agents since March 2025*
-
 [![npm version](https://badge.fury.io/js/atp-sdk.svg)](https://www.npmjs.com/package/atp-sdk)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
@@ -9,8 +7,6 @@
 [![Est. March 2025](https://img.shields.io/badge/Est.-March%202025-green)](https://github.com/agent-trust-protocol/atp-core)
 
 **The identity and trust layer for AI agents.** ATP gives an agent a portable, cryptographically verifiable identity (`did:atp`) and a trust score that travel with it across any protocol it speaks — MCP, A2A, Swarm, ADK, and more. It doesn’t replace those protocols; it’s the layer underneath that answers “who is this agent, and can I trust it?” Identities use hybrid post-quantum signatures (Ed25519 + ML-DSA-65, FIPS 204), so verification holds even if one scheme is broken. Build it in 1 line of code.
-
-> Image guidance: any featured screenshot or illustration should include the ATP shield logo for consistent branding.
 
 ```bash
 npm install atp-sdk
@@ -20,7 +16,7 @@ npm install atp-sdk
 import { Agent } from 'atp-sdk';
 const agent = await Agent.quickstart('MyBot');
 console.log('Standalone:', agent.isStandalone());
-//  MyBot ready!
+// MyBot ready!
 //   DID:          did:atp:a1b2c3...
 //   Quantum-safe: yes
 //   Standalone:   true
@@ -45,14 +41,14 @@ console.log('Standalone:', agent.isStandalone());
 |`atp-core`                    |v1.0.0                                                           |**Legacy**  Superseded by `atp-sdk`|                                          |
 |Services (`@atp/*`)           |0.1.0                                                            |**Development**                    |Monorepo only                             |
 
-**Use `atp-sdk`**  the recommended package for application development.  
+**Use `atp-sdk`** — the recommended package for application development.  
 See [VERSIONING.md](./VERSIONING.md) for full policy.
 
 -----
 
 ## Try It Now
 
-Follow the GitHub docs and examples below to get started with ATP, or use the hosted website and dashboard when available.
+Follow the GitHub docs and examples below to get started with ATP, or use the hosted dashboard at [agenttrustprotocol.com](https://agenttrustprotocol.com).
 
 - Create quantum-safe agents
 - See trust scoring in action
@@ -266,7 +262,7 @@ npx atp-onboard-agent
 # /onboard/agent
 ```
 
-`create-atp-agent` ships a small static wizard plus a mock `POST /api/agents/onboard` on the same port (for local demos). The full Next.js wizard at `/onboard/agent` is separate and can be wired to real ATP services in production.
+`create-atp-agent` ships a small static wizard plus a mock `POST /api/agents/onboard` on the same port (for local demos). The full web wizard at `/onboard/agent` lives in the [atp-website](https://github.com/agent-trust-protocol/atp-website) repository and can be wired to real ATP services in production.
 
 -----
 
@@ -352,7 +348,7 @@ pnpm add atp-sdk
 
 ## Documentation
 
-- **[ White Paper v2.1](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/white-paper-v2.1.md)**  ATP architecture, trust model, compliance, and roadmap
+- **[White Paper v2.1](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/white-paper-v2.1.md)**  ATP architecture, trust model, compliance, and roadmap
 - **[Quick Start Guide](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/getting-started.md)** - 5-minute setup
 - **[API Reference](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/docs/api/README.md)** - Complete API docs
 - **[VERSIONING.md](./VERSIONING.md)** - Package status and versioning policy
@@ -367,16 +363,11 @@ pnpm add atp-sdk
 
 ## Deployment
 
-### Vercel (Next.js Frontend)
+### Website & Dashboard
 
-Deploy the ATP dashboard to Vercel with a single click:
-
-- **[Vercel Deployment Guide](./VERCEL_DEPLOYMENT.md)** - Full setup instructions (env vars, database, email, services)
-- **Auto-deploy:** Push to `main` → production | Push to `develop` → preview
-- **Quick start:**
-  1. Connect this repo to [vercel.com/new](https://vercel.com/new)
-  2. Set environment variables from [.env.example](.env.example)
-  3. Click “Deploy”
+The marketing site, dashboard, and onboarding wizard live in the
+[atp-website](https://github.com/agent-trust-protocol/atp-website) repository —
+see its README for Vercel deployment instructions.
 
 ### Backend Services (Railway, Docker, Kubernetes)
 
@@ -452,7 +443,7 @@ const validation = await atpClient.validateCrew(crew);
 
 |                                                                                                                                                                                 |                                                                                                                                                                                                                        |
 |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|Developers<br>**Start coding in 30 seconds**<br>`npm install atp-sdk`<br>[View Quick Start →](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/getting-started.md)|Enterprise<br>**Built for production**<br> Audit logging designed for SOC 2 programs (certification on roadmap)<br> Enterprise support<br> Custom deployment<br>[Contact Sales →](mailto:support@agenttrustprotocol.com)|
+|Developers<br>**Start coding in 30 seconds**<br>`npm install atp-sdk`<br>[View Quick Start →](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/getting-started.md)|Enterprise<br>**Built for production**<br>Audit logging designed for SOC 2 programs (certification on roadmap)<br>Enterprise support<br>Custom deployment<br>[Contact Sales →](mailto:support@agenttrustprotocol.com)|
 
 -----
 
@@ -468,6 +459,6 @@ Found a security issue? Email [security@agenttrustprotocol.com](mailto:security@
 
 **Agent Trust Protocol™ (ATP)** is developed and operated by **Sovr Labs** — the original Agent Trust Protocol, in development since March 2025. Several projects share the “ATP” acronym; this is the protocol-agnostic identity and trust layer (`did:atp` + post-quantum signatures), not the payments, commerce, or single-platform protocols of the same name. Not affiliated with zCloak Network or any Binance-hosted initiative.
 
-Agent Trust Protocol™  The original agent trust protocol, securing AI agents since March 2025. Protecting AI agents from today’s threats and tomorrow’s quantum computers.
+Protecting AI agents from today’s threats and tomorrow’s quantum computers.
 
-[Website](https://agenttrustprotocol.com)  [Documentation](https://agenttrustprotocol.com/docs)  [GitHub](https://github.com/agent-trust-protocol/atp-core)  [White Paper v2.1](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/white-paper-v2.1.md)
+[Website](https://agenttrustprotocol.com) · [Documentation](https://agenttrustprotocol.com/docs) · [GitHub](https://github.com/agent-trust-protocol/atp-core) · [White Paper v2.1](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/white-paper-v2.1.md)

@@ -11,8 +11,10 @@
  * Properties:
  *   - Determinism: identical fixtures → identical score & level.
  *   - Bounds: score ∈ [0, 1]; level ∈ AgentTrustLevel.
- *   - Monotonicity: more successes / endorsements / valid credentials never
- *     lower the score; more failures / violations never raise it.
+ *   - Monotonicity (with respect to evidence at a fixed point in time): more
+ *     successes / endorsements / valid credentials never lower the score; more
+ *     failures / violations never raise it. Recency decay may lower scores as
+ *     time passes with no new evidence — that is legal and out of scope here.
  *   - Thresholds: documented level bands
  *       >=0.9 PRIVILEGED | >=0.7 TRUSTED | >=0.4 VERIFIED | >=0.2 BASIC | else UNKNOWN.
  */
