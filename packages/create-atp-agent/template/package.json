@@ -9,6 +9,6 @@
     "start": "node agent.mjs"
   },
   "dependencies": {
-    "atp-sdk": "^1.2.5"
+    "atp-sdk": "^2.1.0"
   }
 }

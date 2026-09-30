@@ -1,0 +1,64 @@
+name: Publish ATP CLI
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact create-atp-agent version to release
+        required: true
+        default: '1.3.2'
+        type: string
+      dry_run:
+        description: Validate and pack without publishing
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  cli:
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org/'
+      - name: Check exact versions
+        working-directory: packages/create-atp-agent
+        env:
+          EXPECTED_VERSION: ${{ inputs.version }}
+        run: |
+          test "$(node -p "require('./package.json').version")" = "$EXPECTED_VERSION"
+          test "$(node -p "require('./template/package.json').dependencies['atp-sdk']")" = "^2.1.0"
+          npm view atp-sdk@2.1.0 version
+          if npm view "create-atp-agent@$EXPECTED_VERSION" version >/dev/null 2>&1; then
+            echo "Version already published; refusing to republish"
+            exit 1
+          fi
+      - name: Install CLI dependencies
+        working-directory: packages/create-atp-agent
+        run: npm ci --include=dev
+      - name: Test and build CLI
+        working-directory: packages/create-atp-agent
+        run: npm test
+      - name: Smoke test generated project against npm SDK
+        run: |
+          tmpdir="$(mktemp -d)"
+          cd "$tmpdir"
+          node "$GITHUB_WORKSPACE/packages/create-atp-agent/dist/index.js" test-agent --no-dashboard --skip-install
+          cd test-agent
+          npm install
+          npm start
+      - name: Inspect package
+        working-directory: packages/create-atp-agent
+        run: npm pack --dry-run
+      - name: Publish CLI
+        if: inputs.dry_run != true
+        working-directory: packages/create-atp-agent
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance
