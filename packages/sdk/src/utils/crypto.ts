@@ -9,7 +9,7 @@ import {
   atpJwkThumbprint,
   atpE1Fingerprint,
   atpPq1Fingerprint,
-} from '@atp/did-atp';
+} from '@atpdeveloper/did-atp';
 
 // Configure @noble/ed25519 to use SHA-512
 ed25519.etc.sha512Sync = (...m) => sha512(ed25519.etc.concatBytes(...m));

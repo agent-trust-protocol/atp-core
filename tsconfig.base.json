@@ -16,6 +16,7 @@
     "emitDecoratorMetadata": true,
     "baseUrl": ".",
     "paths": {
+      "@atpdeveloper/did-atp": ["packages/did-atp/src"],
       "@atp/*": ["packages/*/src"]
     }
   }
