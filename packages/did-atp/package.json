@@ -5,15 +5,22 @@
   "description": "Canonical did:atp v2 identifier and key-fingerprint primitives (single source of truth for the did:atp method across ATP packages)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist",
-    "src"
+    "README.md"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepare": "npm run build",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "npm run build && node --test test/*.test.mjs",
     "lint": "eslint src --fix",
     "clean": "rm -rf dist"
   },
@@ -25,5 +32,16 @@
     "@types/node": "^18.0.0",
     "typescript": "^5.0.0"
   },
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agent-trust-protocol/atp-core.git",
+    "directory": "packages/did-atp"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
