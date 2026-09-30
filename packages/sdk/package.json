@@ -3,22 +3,20 @@
   "version": "2.1.0",
   "description": "Official TypeScript SDK for Agent Trust Protocol™ - Build secure, verifiable, and trustworthy applications with decentralized identity, verifiable credentials, payment protocols (AP2/ACP), and robust access control",
   "main": "dist/index.js",
-  "module": "dist/index.esm.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "npm run clean && npm run build:types && npm run build:esm && npm run build:cjs",
-    "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist --skipLibCheck || true",
-    "build:esm": "tsc --module esnext --outDir dist --target es2020 --skipLibCheck || true",
-    "build:cjs": "tsc --module commonjs --moduleResolution node --outDir dist/cjs --target es2018 --skipLibCheck || true && mv dist/cjs/index.js dist/index.cjs && rm -rf dist/cjs",
+    "build": "npm run clean && tsc --project tsconfig.json",
+    "build:types": "npm run build",
+    "build:esm": "npm run build",
     "dev": "tsc --watch",
     "test": "jest",
     "test:coverage": "jest --coverage",
@@ -30,7 +28,7 @@
     "clean": "rm -rf dist coverage",
     "docs": "typedoc src/index.ts --out docs/api-generated",
     "examples": "node examples/index.js",
-    "prepublishOnly": "npm run test && npm run build",
+    "prepublishOnly": "node scripts/check-publishable.mjs && npm run test && npm run build",
     "release": "npm run prepublishOnly && npm publish",
     "release:beta": "npm run prepublishOnly && npm publish --tag beta",
     "release:alpha": "npm run prepublishOnly && npm publish --tag alpha"
@@ -59,15 +57,15 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/agent-trust-protocol/core.git",
+    "url": "git+https://github.com/agent-trust-protocol/atp-core.git",
     "directory": "packages/sdk"
   },
   "homepage": "https://agenttrustprotocol.com/developers",
   "bugs": {
-    "url": "https://github.com/agent-trust-protocol/core/issues"
+    "url": "https://github.com/agent-trust-protocol/atp-core/issues"
   },
   "dependencies": {
-    "@atpdeveloper/did-atp": "file:../did-atp",
+    "@atpdeveloper/did-atp": "0.1.0",
     "@noble/curves": "^1.4.0",
     "@noble/ed25519": "^2.0.0",
     "@noble/hashes": "^1.3.0",

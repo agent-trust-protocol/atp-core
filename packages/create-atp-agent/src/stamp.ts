@@ -9,19 +9,19 @@ const program = new Command();
 
 program
   .name('atp-stamp-agent')
-  .description('Stamp an existing agent project with ATP identity and security profile')
+  .description('Configure an existing agent project for ATP SDK integration')
   .option('--no-open', 'Do not launch the system browser')
   .option('--no-dashboard', 'Do not start the embedded dashboard')
   .option('-p, --port <port>', 'Port to serve on (default 3456)', (v) => Number.parseInt(v, 10))
   .action(async function (this: Command) {
     const opts = this.opts<{
-      noOpen?: boolean;
-      noDashboard?: boolean;
+      open: boolean;
+      dashboard: boolean;
       port?: number;
     }>();
 
     const openBrowser =
-      !opts.noOpen && process.env.CREATE_ATP_AGENT_NO_OPEN !== '1';
+      opts.open && process.env.CREATE_ATP_AGENT_NO_OPEN !== '1';
 
     const projectDir = process.cwd();
     const pkgPath = path.join(projectDir, 'package.json');
@@ -38,8 +38,8 @@ program
 
     console.log(chalk.green('✓ Detected existing agent project'));
 
-    if (opts.noDashboard) {
-      console.log(chalk.green('✓ To skip dashboard: npx atp-stamp-agent --no-dashboard'));
+    if (!opts.dashboard) {
+      console.log(chalk.blue('No files changed. Install atp-sdk and integrate it in your agent. npx atp-stamp-agent opens the local config UI.'));
       return;
     }
 
@@ -55,10 +55,7 @@ program
         language: 'typescript',
         agentFile: 'agent.ts'
       },
-      logLines: [
-        '✓ Complete stamping in browser',
-        '✓ To skip dashboard: npx atp-stamp-agent --no-dashboard'
-      ]
+      logLines: ['Configure a local profile in the browser; integrate the SDK in your application.']
     });
   });
 

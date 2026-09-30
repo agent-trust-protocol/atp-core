@@ -1,0 +1,61 @@
+name: Publish ATP SDK
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact atp-sdk version to release
+        required: true
+        default: '2.1.0'
+        type: string
+      dry_run:
+        description: Validate and pack without publishing
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  sdk:
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org/'
+      - name: Check exact version and DID dependency
+        working-directory: packages/sdk
+        env:
+          EXPECTED_VERSION: ${{ inputs.version }}
+        run: |
+          test "$(node -p "require('./package.json').version")" = "$EXPECTED_VERSION"
+          test "$(node -p "require('./package.json').dependencies['@atpdeveloper/did-atp']")" = "0.1.0"
+          npm view @atpdeveloper/did-atp@0.1.0 version
+          if npm view "atp-sdk@$EXPECTED_VERSION" version >/dev/null 2>&1; then
+            echo "Version already published; refusing to republish"
+            exit 1
+          fi
+      - name: Install repository dependencies
+        run: npm ci --include=dev
+      - name: Install SDK dependencies
+        working-directory: packages/sdk
+        run: npm ci --include=dev
+      - name: Test and build SDK
+        working-directory: packages/sdk
+        run: |
+          node scripts/check-publishable.mjs
+          npm test -- --ci
+          npm run build
+      - name: Inspect package
+        working-directory: packages/sdk
+        run: npm pack --dry-run
+      - name: Publish SDK
+        if: inputs.dry_run != true
+        working-directory: packages/sdk
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance

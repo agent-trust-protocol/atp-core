@@ -1,8 +1,8 @@
 # atp-sdk — Agent Trust Protocol™ SDK
 
-> **The First Quantum-Safe AI Agent SDK with Zero-Knowledge Proof Authentication**
+> Open developer implementation of Agent Trust Protocol (ATP). Specification work in the W3C Community Group is separate from SDK releases.
 
-ATP provides universal quantum-safe security for all AI agent protocols (MCP, Swarm, ADK, A2A, and more). Build secure, verifiable, and trustworthy AI agents in 1 line of code!
+The SDK provides hybrid key generation and identity, credential, and trust utilities. Integrations and verification depend on the services and policies you connect.
 
 **One unified SDK** - Quantum-safe cryptography + ZKP authentication + Identity + Credentials + Payments - all included.
 
@@ -11,6 +11,8 @@ ATP provides universal quantum-safe security for all AI agent protocols (MCP, Sw
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![Quantum Safe](https://img.shields.io/badge/Security-Quantum%20Safe-blueviolet)](https://github.com/agent-trust-protocol/core)
+
+**Release status:** The npm registry currently serves `atp-sdk@1.2.5`. This repository contains unreleased `2.1.0` source. The SDK release is blocked until the local `@atpdeveloper/did-atp` dependency is published and replaced with a registry version. The current registry tarball also lacks `dist/index.d.ts`; use the CLI JavaScript starter until a typed package is released.
 
 ##  Get Started in 30 Seconds
 
@@ -22,7 +24,7 @@ Use the [`create-atp-agent`](https://www.npmjs.com/package/create-atp-agent) CLI
 npx create-atp-agent my-agent
 ```
 
-This creates `my-agent/` with `atp-sdk`, starter agent code, and `.atp.json` for the profile you pick. After scaffolding, the CLI starts an embedded onboarding UI at **`http://127.0.0.1:3456`** (or the next free port) and opens your browser. Flags: `--no-dashboard`, `--dashboard-only`, `--no-open` (or `CREATE_ATP_AGENT_NO_OPEN=1`). The local UI uses a **mock** onboard API for demos; wire real ATP services in your own app.
+This creates `my-agent/` with the published `atp-sdk` and a TypeScript starter. The local configuration UI opens at **`http://127.0.0.1:3456`** (or the next free port). Flags: `--no-dashboard` for terminal-only setup, `--dashboard-only`, `--no-open` (or `CREATE_ATP_AGENT_NO_OPEN=1`). The UI can write `.atp.json` metadata; it does not create a DID, generate keys, or enforce the selected profile.
 
 For the hosted marketing site and full product UI, see **[agenttrustprotocol.com](https://agenttrustprotocol.com)** (including the web wizard at `/onboard/agent` in this repos Next.js app).
 
@@ -37,9 +39,9 @@ import { Agent } from 'atp-sdk';
 const agent = await Agent.quickstart('MyBot');
 console.log('Standalone:', agent.isStandalone());
 //  MyBot ready!
-//   DID:          did:atp:a1b2c3...
-//   Quantum-safe: yes
-//   Standalone:   true
+//   DID:          did:atp:localhost:local:e1_...:pq1_...
+//   Quantum-safe: yes (hybrid keys generated)
+//   Mode:         standalone (local)
 ```
 
 One line. Auto-prints DID, quantum-safe status, and connection mode. Need the agent reference? Use `const agent = await Agent.quickstart('MyBot')`. Need silent creation for library use? Use `Agent.create('MyBot')` instead.
@@ -57,7 +59,8 @@ One line. Auto-prints DID, quantum-safe status, and connection mode. Need the ag
 
 `Agent.create()` works immediately without any backend services. When ATP services are unavailable, the agent automatically falls back to **standalone mode**:
 
-- DID is generated locally from the quantum-safe keypair
+- A v2-shaped local identifier is bound to both public keys. It is not remotely resolvable.
+- Keys are ephemeral in this quickstart and must be persisted securely for use across runs.
 - No 30-second timeout or crash
 - All crypto operations work offline
 - `agent.isStandalone()` returns `true`
