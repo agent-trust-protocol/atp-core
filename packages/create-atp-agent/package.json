@@ -4,9 +4,9 @@
   "description": "Create Agent Trust Protocol agents",
   "type": "module",
   "bin": {
-    "create-atp-agent": "./dist/index.js",
-    "atp-onboard-agent": "./dist/onboard.js",
-    "atp-stamp-agent": "./dist/stamp.js"
+    "create-atp-agent": "dist/index.js",
+    "atp-onboard-agent": "dist/onboard.js",
+    "atp-stamp-agent": "dist/stamp.js"
   },
   "scripts": {
     "build": "tsc",
@@ -31,5 +31,10 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agent-trust-protocol/atp-core.git",
+    "directory": "packages/create-atp-agent"
   }
 }
