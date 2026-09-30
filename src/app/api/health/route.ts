@@ -4,6 +4,6 @@ export async function GET() {
   return NextResponse.json({
     status: 'healthy',
     service: 'atp-core',
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString()
   });
 }

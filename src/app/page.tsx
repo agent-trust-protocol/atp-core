@@ -12,7 +12,7 @@ import {
   Code2,
   Fingerprint,
   Scale,
-  Link2,
+  Link2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,7 +26,7 @@ const MODULES = [
     pillar: 'Identity',
     title: 'Agent Identity',
     description:
-      'The did:atp method — a quantum-safe DID binding a classical Ed25519 key and a post-quantum ML-DSA-65 key in one identifier, with controller, issuer, and runtime binding.',
+      'The did:atp method — a quantum-safe DID binding a classical Ed25519 key and a post-quantum ML-DSA-65 key in one identifier, with controller, issuer, and runtime binding.'
   },
   {
     href: '/specs/atp-capability/',
@@ -34,7 +34,7 @@ const MODULES = [
     pillar: 'Authorization',
     title: 'Capability Request',
     description:
-      'One standard request envelope for every guarded action: tool calls, A2A invocations, resource access, and delegated actions.',
+      'One standard request envelope for every guarded action: tool calls, A2A invocations, resource access, and delegated actions.'
   },
   {
     href: '/specs/atp-capability/#policy-decision',
@@ -42,7 +42,7 @@ const MODULES = [
     pillar: 'Authorization',
     title: 'Policy Decision',
     description:
-      'A normalized, deny-by-default decision — allow, deny, throttle, or require-approval — with reason codes, policy references, and obligations.',
+      'A normalized, deny-by-default decision — allow, deny, throttle, or require-approval — with reason codes, policy references, and obligations.'
   },
   {
     href: '/specs/atp-trust/',
@@ -50,7 +50,7 @@ const MODULES = [
     pillar: 'Trust',
     title: 'Trust Evidence',
     description:
-      'Bounded, fail-closed trust levels attested as signed W3C Verifiable Credentials, so relying parties can gate on verified trust.',
+      'Bounded, fail-closed trust levels attested as signed W3C Verifiable Credentials, so relying parties can gate on verified trust.'
   },
   {
     href: '/specs/atp-conformance/',
@@ -58,7 +58,7 @@ const MODULES = [
     pillar: 'Audit',
     title: 'Audit Anchoring',
     description:
-      'Hash-chained, tamper-evident audit evidence with a backend-agnostic anchoring interface — no single anchor backend is mandated.',
+      'Hash-chained, tamper-evident audit evidence with a backend-agnostic anchoring interface — no single anchor backend is mandated.'
   },
   {
     href: '/specs/atp-interop/',
@@ -66,26 +66,26 @@ const MODULES = [
     pillar: 'Interop',
     title: 'Interop Profiles',
     description:
-      'Normative bindings of the trust plane to MCP servers, A2A invocation, local agent frameworks, and multi-agent orchestration.',
-  },
+      'Normative bindings of the trust plane to MCP servers, A2A invocation, local agent frameworks, and multi-agent orchestration.'
+  }
 ];
 
 const QUESTIONS = [
   {
     icon: Fingerprint,
     q: 'Who is this agent?',
-    a: 'Every agent holds a quantum-safe decentralized identifier (did:atp) with verifiable key material and runtime binding.',
+    a: 'Every agent holds a quantum-safe decentralized identifier (did:atp) with verifiable key material and runtime binding.'
   },
   {
     icon: Scale,
     q: 'What action, under which policy?',
-    a: 'Every guarded action is a standard Capability Request, evaluated deny-by-default into a normalized Policy Decision.',
+    a: 'Every guarded action is a standard Capability Request, evaluated deny-by-default into a normalized Policy Decision.'
   },
   {
     icon: Eye,
     q: 'What proof is emitted?',
-    a: 'Every request, decision, and outcome becomes signed, hash-chained evidence that any party can independently verify.',
-  },
+    a: 'Every request, decision, and outcome becomes signed, hash-chained evidence that any party can independently verify.'
+  }
 ];
 
 export default function HomePage() {
