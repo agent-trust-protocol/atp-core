@@ -14,6 +14,7 @@ module.exports = {
   
   // Module resolution
   moduleNameMapper: {
+    '^@atpdeveloper/did-atp$': '<rootDir>/packages/did-atp/src',
     '^@atp/(.*)$': '<rootDir>/packages/$1/src',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^(\\.{1,2}/.*)\\.js$': '$1',

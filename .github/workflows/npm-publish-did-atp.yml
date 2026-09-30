@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Exact @atp/did-atp version to publish'
+        description: 'Exact @atpdeveloper/did-atp version to publish'
         required: true
         default: '0.1.0'
         type: string
@@ -37,7 +37,7 @@ jobs:
           EXPECTED_VERSION: ${{ inputs.version }}
         run: |
           test "$(node -p "require('./package.json').version")" = "$EXPECTED_VERSION"
-          if npm view "@atp/did-atp@$EXPECTED_VERSION" version >/dev/null 2>&1; then
+          if npm view "@atpdeveloper/did-atp@$EXPECTED_VERSION" version >/dev/null 2>&1; then
             echo "Version already exists on npm; refusing to republish"
             exit 1
           fi

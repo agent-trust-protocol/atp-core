@@ -22,9 +22,9 @@ export default {
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@/(.*)$': '<rootDir>/src/$1',
-    // Resolve sibling @atp/* workspace packages (e.g. @atp/did-atp) to their
-    // TypeScript source, mirroring the root jest config and tsconfig.base.json
-    // ("@atp/*" -> "packages/*/src"). <rootDir> here is packages/sdk.
+    // Resolve the published DID dependency and sibling workspace packages to
+    // their TypeScript sources. <rootDir> here is packages/sdk.
+    '^@atpdeveloper/did-atp$': '<rootDir>/../did-atp/src',
     '^@atp/(.*)$': '<rootDir>/../$1/src'
   },
   transformIgnorePatterns: [

@@ -1,4 +1,4 @@
-# @atp/did-atp
+# @atpdeveloper/did-atp
 
 Canonical **did:atp v2** identifier and key-fingerprint primitives — the single
 source of truth for the did:atp method across all ATP packages.
