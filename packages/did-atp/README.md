@@ -1,11 +1,11 @@
-# @atp/did-atp
+# @atpdeveloper/did-atp
 
 Canonical **did:atp v2** identifier and key-fingerprint primitives — the single
 source of truth for the did:atp method across all ATP packages.
 
-The SDK (`atp-sdk`), `@atp/shared`, and the identity service all delegate to
-this package rather than re-implementing the algorithm, so they can never drift
-from each other or from the [did:atp specification](https://github.com/w3c-cg/atp).
+The SDK (`atp-sdk`), `@atp/shared`, and the identity service delegate to
+these primitives. Cross-package tests and the public vectors check alignment
+with the [did:atp Community Group draft](https://github.com/w3c-cg/atp).
 
 A path-type did:atp v2 identifier is:
 

@@ -1,4 +1,5 @@
 import * as ed25519 from '@noble/ed25519';
+import { sha512 } from '@noble/hashes/sha2.js';
 import { createHash } from 'crypto';
 import {
   initializeCrypto,
@@ -19,6 +20,10 @@ import {
 
 // Initialize crypto polyfills
 initializeCrypto();
+// The service can resolve a separate @noble/ed25519 instance from @atp/shared
+// when both packages have their own node_modules. Configure the instance used
+// here as well so key generation works in either install layout.
+ed25519.etc.sha512Sync ??= (...messages) => sha512(ed25519.etc.concatBytes(...messages));
 
 // Byte sizes for the did:atp v2 hybrid key model (FIPS 204 final, ML-DSA-65)
 // are imported from @atp/shared (ED25519_PUBLIC_KEY_BYTES /
