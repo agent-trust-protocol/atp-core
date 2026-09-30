@@ -48,7 +48,6 @@ jobs:
       - name: Smoke test generated project against npm SDK
         run: |
           tmpdir="$(mktemp -d)"
-          node "$GITHUB_WORKSPACE/packages/create-atp-agent/dist/index.js" test-agent --no-dashboard --skip-install --help >/dev/null || true
           cd "$tmpdir"
           node "$GITHUB_WORKSPACE/packages/create-atp-agent/dist/index.js" test-agent --no-dashboard --skip-install
           cd test-agent
