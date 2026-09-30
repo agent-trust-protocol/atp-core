@@ -6,7 +6,7 @@ import {
   ATP_DOMAIN_RE,
   ATP_THUMBPRINT_LENGTH,
   buildAtpV2Did,
-} from '@atp/did-atp';
+} from '@atpdeveloper/did-atp';
 
 /**
  * did:atp v2 identifier core.
@@ -46,7 +46,7 @@ export interface ParsedAtpDid {
 }
 
 // did:atp v2 ABNF anchors and the thumbprint length are sourced from the
-// canonical @atp/did-atp package (single source of truth) so the SDK's
+// canonical @atpdeveloper/did-atp package (single source of truth) so the SDK's
 // parser/builder cannot drift from the shared algorithm. Local aliases keep
 // the call sites below unchanged.
 const THUMBPRINT_LENGTH = ATP_THUMBPRINT_LENGTH;
@@ -70,7 +70,7 @@ export class DidAtp {
     ed25519PublicKey: Uint8Array,
     mlDsa65PublicKey: Uint8Array
   ): string {
-    // Delegates to the canonical @atp/did-atp builder (single source of truth);
+    // Delegates to the canonical @atpdeveloper/did-atp builder (single source of truth);
     // it performs the same domain/path validation and produces a byte-identical
     // identifier, with the e1_/pq1_ fingerprints bound to the two public keys.
     return buildAtpV2Did(domain, path, ed25519PublicKey, mlDsa65PublicKey);

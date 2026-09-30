@@ -12,7 +12,7 @@ The SDK provides hybrid key generation and identity, credential, and trust utili
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![Quantum Safe](https://img.shields.io/badge/Security-Quantum%20Safe-blueviolet)](https://github.com/agent-trust-protocol/core)
 
-**Release status:** The npm registry currently serves `atp-sdk@1.2.5`. This repository contains unreleased `2.1.0` source. The SDK release is blocked until the local `@atp/did-atp` dependency is published and replaced with a registry version. The current registry tarball also lacks `dist/index.d.ts`; use the CLI JavaScript starter until a typed package is released.
+**Release status:** The npm registry currently serves `atp-sdk@1.2.5`. This repository contains unreleased `2.1.0` source. The SDK release is blocked until the local `@atpdeveloper/did-atp` dependency is published and replaced with a registry version. The current registry tarball also lacks `dist/index.d.ts`; use the CLI JavaScript starter until a typed package is released.
 
 ##  Get Started in 30 Seconds
 
