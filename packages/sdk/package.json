@@ -14,7 +14,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "npm --prefix ../did-atp run build && npm run clean && tsc --project tsconfig.json",
+    "build": "npm run clean && tsc --project tsconfig.json",
     "build:types": "npm run build",
     "build:esm": "npm run build",
     "dev": "tsc --watch",
@@ -65,7 +65,7 @@
     "url": "https://github.com/agent-trust-protocol/atp-core/issues"
   },
   "dependencies": {
-    "@atpdeveloper/did-atp": "file:../did-atp",
+    "@atpdeveloper/did-atp": "0.1.0",
     "@noble/curves": "^1.4.0",
     "@noble/ed25519": "^2.0.0",
     "@noble/hashes": "^1.3.0",
