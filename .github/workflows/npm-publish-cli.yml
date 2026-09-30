@@ -34,6 +34,7 @@ jobs:
         run: |
           test "$(node -p "require('./package.json').version")" = "$EXPECTED_VERSION"
           test "$(node -p "require('./template/package.json').dependencies['atp-sdk']")" = "^2.1.0"
+          node -e "const p=require('./package.json'); if (!p.repository?.url?.includes('agent-trust-protocol/atp-core') || Object.values(p.bin).some(v=>v.startsWith('./'))) process.exit(1)"
           npm view atp-sdk@2.1.0 version
           if npm view "create-atp-agent@$EXPECTED_VERSION" version >/dev/null 2>&1; then
             echo "Version already published; refusing to republish"
