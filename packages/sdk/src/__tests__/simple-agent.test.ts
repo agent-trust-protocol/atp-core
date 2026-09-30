@@ -153,7 +153,7 @@ describe('Agent', () => {
 
       const agent = await Agent.create('FailBot');
       expect(agent.isStandalone()).toBe(true);
-      expect(agent.getDID()).toMatch(/^did:atp:/);
+      expect(agent.getDID()).toMatch(/^did:atp:localhost:local:e1_[A-Za-z0-9_-]{43}:pq1_[A-Za-z0-9_-]{43}$/);
       expect(agent.isInitialized()).toBe(true);
     });
 

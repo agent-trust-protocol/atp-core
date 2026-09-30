@@ -1,37 +1,7 @@
-# my-atp-agent
+# Agent Trust Protocol starter
 
-Scaffolded with [create-atp-agent](https://www.npmjs.com/package/create-atp-agent) (Agent Trust Protocol).
+Run `npm start` after installing dependencies. This calls `Agent.quickstart` from `atp-sdk` and prints the identity created at runtime.
 
-## Quick start
+Without ATP services, the SDK generates ephemeral local keys. That identifier is not publicly resolvable and will change on the next run. Persist keys securely and configure DID resolution before relying on it across systems.
 
-```bash
-npx create-atp-agent my-agent
-cd my-agent
-npm install
-npm start
-```
-
-```js
-import { Agent } from 'atp-sdk';
-const agent = await Agent.quickstart('MyBot');
-console.log('Standalone:', agent.isStandalone());
-```
-
-> **CommonJS?** This template is **ESM-first** (`"type": "module"`). Top-level `await` needs ESM or a `.mjs` entry file. If you must stay on CommonJS, wrap the quickstart in an async IIFE:
->
-> ```js
-> (async () => {
->   const { Agent } = await import('atp-sdk');
->   const agent = await Agent.quickstart('MyBot');
-> })();
-> ```
-
-## Scripts
-
-- `npm start` — run the agent (JavaScript: `agent.mjs`, TypeScript: `tsx agent.ts`)
-- `npm run dev` — watch mode
-- `npm run build` — TypeScript projects only: compile to `dist/`
-
-## Security profile
-
-Profile selection is stored in `.atp.json` for your reference. Wire it into your runtime using ATP security profiles and `evaluateActionWithProfile` as documented in the ATP SDK.
+The optional `.atp.json` file is configuration metadata from the local wizard; the starter does not load or enforce its profile and capabilities. Wire policy evaluation into your own runtime.

@@ -6,15 +6,9 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "start": "node agent.mjs",
-    "dev": "tsx watch agent.ts",
-    "build": "tsc"
+    "start": "node agent.mjs"
   },
   "dependencies": {
-    "atp-sdk": "^1.0.0"
-  },
-  "devDependencies": {
-    "tsx": "^4.7.0",
-    "typescript": "^5.4.0"
+    "atp-sdk": "^1.2.5"
   }
 }

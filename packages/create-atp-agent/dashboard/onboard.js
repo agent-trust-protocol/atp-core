@@ -4,27 +4,27 @@ const PROFILES = [
   {
     id: 'safe-default',
     name: 'Safe Default',
-    shortDesc: 'Read-only FS, shell approval required, internal network only',
+    shortDesc: 'Suggested baseline for a future policy integration; this UI does not enforce tool permissions.',
     tagline: 'Most agents start here',
     recommended: true
   },
   {
     id: 'dev-mode',
     name: 'Dev Mode',
-    shortDesc: 'Permissive profile for local development',
-    tagline: 'Full tool access, no approval gates'
+    shortDesc: 'Suggested local development settings; enforcement requires an integrated policy service.',
+    tagline: 'Suggested for local development'
   },
   {
     id: 'enterprise-locked',
     name: 'Enterprise Locked',
-    shortDesc: 'Maximum security for production',
-    tagline: 'All actions require approval'
+    shortDesc: 'Suggested strict policy label; this UI does not install production controls.',
+    tagline: 'Suggested strict policy'
   },
   {
     id: 'openclaw-sandbox',
     name: 'OpenClaw Sandbox',
-    shortDesc: 'Sandbox profile tuned for OpenClaw / NemoClaw',
-    tagline: 'Multi-agent crew ready'
+    shortDesc: 'Suggested OpenClaw integration label; no sandbox is installed here.',
+    tagline: 'Suggested OpenClaw integration'
   }
 ];
 
@@ -96,6 +96,7 @@ async function loadContext() {
     if (!res.ok) return;
     const data = await res.json();
     if (data && data.mode) state.mode = data.mode;
+    state.projectName = data && data.projectName ? data.projectName : '';
     if (data && data.projectName) {
       state.projectName = data.projectName;
       if (!state.agentName) {
@@ -149,7 +150,7 @@ function renderWelcome() {
   setBody(`
     <div class="step">
       <h2>Name your agent</h2>
-      <p class="lead">We'll mint a DID and quantum-safe keys for this agent.</p>
+      <p class="lead">Configure your project. The SDK creates identity when you run the agent.</p>
       <div class="field">
         <label for="agent-name">Agent name</label>
         <input type="text" id="agent-name" placeholder="e.g. TestBot" value="${escapeAttr(state.agentName)}" autocomplete="off" />
@@ -196,7 +197,7 @@ function renderProfile() {
   setBody(`
     <div class="step">
       <h2>Security profile</h2>
-      <p class="lead">Profiles define tools, network, and filesystem policies.</p>
+      <p class="lead">Choose a configuration label. Connect policy enforcement in your runtime separately.</p>
       <div class="grid profile-grid">
         ${PROFILES.map(
           (p) => `
@@ -213,7 +214,7 @@ function renderProfile() {
       <p id="error-msg" class="error" ${state.error ? '' : 'hidden'}>${escapeHtml(state.error)}</p>
       <div class="nav">
         <button type="button" class="btn secondary" id="btn-back">← Back</button>
-        <button type="button" class="btn primary" id="btn-next">Next: Generate Identity →</button>
+        <button type="button" class="btn primary" id="btn-next">Save local config →</button>
       </div>
     </div>
   `);
@@ -237,7 +238,7 @@ function renderProfile() {
       navigate('identity');
     } else {
       nextBtn.disabled = false;
-      nextBtn.textContent = 'Next: Generate Identity →';
+      nextBtn.textContent = 'Save local config →';
     }
   });
 }
@@ -249,11 +250,11 @@ function renderIdentity() {
   });
   setBody(`
     <div class="step">
-      <h2>Identity generated</h2>
+      <h2>Configuration saved</h2>
       <ul class="check-list">
-        <li class="check-item">✅ DID minted: <code>${escapeHtml(state.did || '—')}</code></li>
-        <li class="check-item">✅ Quantum-safe keys: Ed25519 + ML-DSA</li>
-        <li class="check-item">✅ <code>.atp.json</code> written to project</li>
+        <li class="check-item">Identity and keys are not created by this UI.</li>
+        <li class="check-item">Run the SDK to generate identity locally.</li>
+        <li class="check-item">${state.projectName ? '✅ <code>.atp.json</code> written to project' : 'No project was scaffolded; local selection saved only'}</li>
         <li class="check-item">✅ Profile: <code>${escapeHtml(state.profile)}</code></li>
       </ul>
       <div class="nav">
@@ -273,28 +274,28 @@ function renderSuccess() {
     agentLabel: state.agentName,
     progressText: '4/4'
   });
-  const runCmd = state.projectName ? `cd ${state.projectName}\nnpm start` : 'npm start';
+  const runCmd = state.mode === 'stamp' ? 'npm install atp-sdk' : state.projectName ? `cd ${state.projectName}\nnpm start` : 'npm install atp-sdk';
   setBody(`
     <div class="step success-screen">
       <div class="success-icon" aria-hidden="true">🎉</div>
-      <h2>Your ATP agent is ready</h2>
+      <h2>Your project configuration is ready</h2>
       <dl class="summary">
         <dt>Agent</dt><dd>${escapeHtml(state.agentName)}</dd>
-        <dt>DID</dt><dd>${escapeHtml(state.did || '—')}</dd>
+        <dt>Identity</dt><dd>Created by the SDK, not this UI</dd>
         <dt>Profile</dt><dd>${escapeHtml(state.profile)}</dd>
-        <dt>Quantum-safe</dt><dd>✅ Ed25519 + ML-DSA</dd>
+        <dt>Keys</dt><dd>Not created yet</dd>
       </dl>
       <div class="next-block">
-        <h3>Run your agent</h3>
+        <h3>Next command</h3>
         <pre class="codeblock" id="run-cmd">${escapeHtml(runCmd)}</pre>
         <button type="button" class="btn secondary btn-copy" data-copy-target="run-cmd">Copy Terminal</button>
       </div>
       <div class="next-block">
         <h3>Next steps</h3>
         <ul class="next-steps">
-          <li>Customize <code>.atp.json</code> to tune capabilities</li>
+          <li>Review <code>.atp.json</code> as metadata; the SDK does not enforce it automatically</li>
           <li>Wire in your tools via the ATP SDK</li>
-          <li>Register with the audit service for compliance</li>
+          <li>Connect ATP services if you need managed identity or audit</li>
         </ul>
       </div>
       <div class="actions">
@@ -315,7 +316,6 @@ function renderSuccess() {
 }
 
 async function submitOnboard() {
-  if (state.did) return true;
   if (state.submitting) return false;
   state.submitting = true;
   showError('');
@@ -332,7 +332,7 @@ async function submitOnboard() {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || 'Failed to onboard agent');
-    state.did = data.did || '';
+    state.did = '';
     saveState();
     return true;
   } catch (e) {
@@ -428,7 +428,7 @@ function renderStampDetails() {
       <p id="error-msg" class="error" ${state.error ? '' : 'hidden'}>${escapeHtml(state.error)}</p>
       <div class="nav">
         <button type="button" class="btn secondary" id="btn-back">← Back</button>
-        <button type="button" class="btn primary" id="btn-next">Generate ATP Identity →</button>
+        <button type="button" class="btn primary" id="btn-next">Save local config →</button>
       </div>
     </div>
   `);
@@ -467,14 +467,14 @@ function renderStampDetails() {
     }
     const btn = document.getElementById('btn-next');
     btn.disabled = true;
-    btn.textContent = 'Generating…';
+    btn.textContent = 'Saving…';
     const ok = await submitOnboard();
     if (ok) {
       saveState();
       navigate('stamp-complete');
     } else {
       btn.disabled = false;
-      btn.textContent = 'Generate ATP Identity →';
+      btn.textContent = 'Save local config →';
     }
   });
 }
@@ -486,10 +486,10 @@ function renderStampComplete() {
   });
   setBody(`
     <div class="step">
-      <h2>Stamping complete</h2>
+      <h2>Local configuration saved</h2>
       <ul class="check-list">
-        <li class="check-item">✅ DID minted: <code>${escapeHtml(state.did || '—')}</code></li>
-        <li class="check-item">✅ Quantum-safe keys issued</li>
+        <li class="check-item">Identity and keys are not created by this UI.</li>
+        <li class="check-item">Integrate the SDK to create identity.</li>
         <li class="check-item">✅ <code>.atp.json</code> written alongside your project</li>
         <li class="check-item">✅ Runtime: <code>${escapeHtml(state.runtime)}</code></li>
         <li class="check-item">✅ Profile: <code>${escapeHtml(state.profile)}</code></li>
@@ -509,28 +509,28 @@ function renderStampSuccess() {
     agentLabel: state.agentName,
     progressText: '4/4'
   });
-  const runCmd = state.projectName ? `cd ${state.projectName}\nnpm start` : 'npm start';
+  const runCmd = state.mode === 'stamp' ? 'npm install atp-sdk' : state.projectName ? `cd ${state.projectName}\nnpm start` : 'npm install atp-sdk';
   setBody(`
     <div class="step success-screen">
       <div class="success-icon" aria-hidden="true">🎉</div>
-      <h2>Agent stamped successfully</h2>
+      <h2>Local configuration saved</h2>
       <dl class="summary">
         <dt>Agent</dt><dd>${escapeHtml(state.agentName)}</dd>
-        <dt>DID</dt><dd>${escapeHtml(state.did || '—')}</dd>
+        <dt>Identity</dt><dd>Created by the SDK, not this UI</dd>
         <dt>Runtime</dt><dd>${escapeHtml(state.runtime)}</dd>
         <dt>Profile</dt><dd>${escapeHtml(state.profile)}</dd>
         <dt>Capabilities</dt><dd>${escapeHtml(state.capabilities.join(', '))}</dd>
-        <dt>Quantum-safe</dt><dd>✅ Ed25519 + ML-DSA</dd>
+        <dt>Keys</dt><dd>Not created yet</dd>
       </dl>
       <div class="next-block">
-        <h3>Run your agent</h3>
+        <h3>Next command</h3>
         <pre class="codeblock" id="run-cmd">${escapeHtml(runCmd)}</pre>
         <button type="button" class="btn secondary btn-copy" data-copy-target="run-cmd">Copy Terminal</button>
       </div>
       <div class="next-block">
         <h3>Next steps</h3>
         <ul class="next-steps">
-          <li>Review the generated <code>.atp.json</code></li>
+          <li>Review <code>.atp.json</code> as configuration metadata; integrate the SDK separately</li>
           <li>Audit the diff before committing</li>
           <li>Upgrade profile once you've tested locally</li>
         </ul>

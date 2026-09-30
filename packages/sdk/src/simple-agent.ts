@@ -8,6 +8,7 @@
 import { EventEmitter } from 'events';
 import { ATPClient } from './client/atp.js';
 import { CryptoUtils } from './utils/crypto.js';
+import { DidAtp } from './utils/did.js';
 import { TrustScoring, TrustScoreResult, TrustLevel, InteractionEvent } from './utils/trust.js';
 import {
   BehaviorMerkleTree,
@@ -211,13 +212,19 @@ export class Agent extends EventEmitter {
             throw new Error('No DID returned from identity service');
           }
         } catch {
-          // Standalone mode: no ATP services available — generate DID locally
-          const pubKeyShort = publicKeyHex.slice(0, 16);
-          this.did = `did:atp:${pubKeyShort}`;
+          // A syntactically valid v2 local identifier, bound to both public keys.
+          // localhost has no published DID document; this identity is not
+          // remotely resolvable and keys are ephemeral unless the app persists them.
+          this.did = DidAtp.fromPublicKeys(
+            'localhost',
+            ['local'],
+            keyPair.ed25519.publicKey,
+            keyPair.mlDsa65.publicKey
+          );
           this.privateKey = privateKeyHex;
           this._quantumSafe = true;
           this._standalone = true;
-          console.log('\u26A1 Running in standalone mode (no ATP services detected). DID generated locally.');
+          console.log('⚡ Standalone mode: local keys and a non-resolvable did:atp identifier. Persist keys and publish a DID document for cross-system verification.');
         }
       }
 
