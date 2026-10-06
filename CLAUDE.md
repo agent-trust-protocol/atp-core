@@ -226,13 +226,22 @@ To run the unit tests: `cd packages/openclaw-atp && npm test` — covers registr
 
 ---
 
+## Git Workflow Rules (all agent sessions MUST follow)
+
+1. **One task = one branch off fresh main.** Always `git fetch origin main && git checkout -b <branch> origin/main` — never branch from another task branch.
+2. **Rebase on main before opening the PR.** Resolve conflicts in the branch, never in the merge.
+3. **Squash-merge everything** — one commit per PR onto main.
+4. **Delete the branch on merge.** Never branch from or reference already-merged branches.
+5. **Serialize tasks that touch the same package.** Two parallel sessions editing the same package (e.g. `packages/sdk`) will conflict; queue them instead.
+6. **No direct pushes to main.** All changes go through a PR with passing checks.
+
 ## Testing & Conformance
 
 - **Run the full conformance gate:** `npm run conformance` from the repo root.
-  It runs the W3C conformance suites for the four ATP core items and prints a
+  It runs the W3C conformance suites for the five ATP core items and prints a
   per-item PASS/FAIL summary, exiting non-zero on any failure (so it doubles as
   a CI / release gate). Per-item: `conformance:did`, `conformance:sigs`,
-  `conformance:policy`, `conformance:audit`.
+  `conformance:policy`, `conformance:audit`, `conformance:privacy`.
 - **Use the repo-root Jest config for package suites.** Running `npm test`
   *inside* some packages (e.g. `packages/audit-logger`) fails to start because
   the package-level setup does not transpile TypeScript. Run from the repo root

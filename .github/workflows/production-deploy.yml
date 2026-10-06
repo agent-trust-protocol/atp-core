@@ -225,19 +225,12 @@ jobs:
       run: |
         PGPASSWORD=test_password psql -h localhost -U atp_test -d atp_test -f scripts/init-db.sql
 
-    - name: Run integration tests
+    - name: Run conformance suite
       env:
         DATABASE_URL: postgresql://atp_test:test_password@localhost:5432/atp_test
         REDIS_URL: redis://localhost:6379
         NODE_ENV: test
-      run: npm run test:integration
-
-    - name: Run end-to-end tests
-      env:
-        DATABASE_URL: postgresql://atp_test:test_password@localhost:5432/atp_test
-        REDIS_URL: redis://localhost:6379
-        NODE_ENV: test
-      run: npm run test:e2e
+      run: npm run conformance
 
   # Deploy to Staging
   deploy-staging:
