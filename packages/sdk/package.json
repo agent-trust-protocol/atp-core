@@ -1,6 +1,6 @@
 {
   "name": "atp-sdk",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Official TypeScript SDK for Agent Trust Protocol™ - Build secure, verifiable, and trustworthy applications with decentralized identity, verifiable credentials, payment protocols (AP2/ACP), and robust access control",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -77,7 +77,8 @@
     "eventemitter3": "^5.0.0",
     "jose": "^5.1.0",
     "ws": "^8.14.0",
-    "zod": "^3.22.0"
+    "zod": "^3.22.0",
+    "atp-profiles": "^1.1.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",

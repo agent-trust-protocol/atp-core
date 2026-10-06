@@ -4,7 +4,7 @@ import { CredentialsClient } from './credentials.js';
 import { PermissionsClient } from './permissions.js';
 import { AuditClient } from './audit.js';
 import { GatewayClient } from './gateway.js';
-import { BUILTIN_PROFILES, AtpSecurityProfile } from '../profiles/index.js';
+import { BUILTIN_PROFILES, evaluateActionWithProfile, type AtpSecurityProfile, type ProfileEvaluationContext } from 'atp-profiles';
 
 /**
  * Main ATP™ SDK Client
@@ -28,7 +28,7 @@ export class ATPClient {
     this.gateway = new GatewayClient(config);
 
     if (config.profileId) {
-      this.profile = BUILTIN_PROFILES[config.profileId];
+      this.setProfile(config.profileId);
     }
   }
 
@@ -118,7 +118,7 @@ export class ATPClient {
    * Set a security profile by ID
    */
   setProfile(profileId: string): void {
-    const profile = BUILTIN_PROFILES[profileId];
+    const profile = Object.prototype.hasOwnProperty.call(BUILTIN_PROFILES, profileId) ? BUILTIN_PROFILES[profileId] : undefined;
     if (!profile) throw new Error(`Unknown ATP profile: ${profileId}`);
     this.profile = profile;
   }
@@ -134,39 +134,13 @@ export class ATPClient {
    * Evaluate whether an action is allowed under the active profile.
    * Returns "allow", "deny", or "require_approval".
    */
-  evaluateActionWithProfile(params: {
-    profileId?: string;
-    state?: string;
-    actionType: string;
-    metadata?: Record<string, unknown>;
-  }): "allow" | "deny" | "require_approval" {
+  evaluateActionWithProfile(params: ProfileEvaluationContext & { profileId?: string }): "allow" | "deny" | "require_approval" {
     const profile = params.profileId
-      ? BUILTIN_PROFILES[params.profileId]
+      ? (Object.prototype.hasOwnProperty.call(BUILTIN_PROFILES, params.profileId) ? BUILTIN_PROFILES[params.profileId] : undefined)
       : this.profile;
-
-    if (!profile) return "allow";
-
-    const { controls, state_policies } = profile;
-    const { actionType, state } = params;
-
-    // Basic control-level check
-    const control = (controls as Record<string, any>)[actionType];
-    if (control && control.allowed === false) {
-      return control.require_approval ? "require_approval" : "deny";
-    }
-
-    // State-based overrides
-    if (state && state_policies?.[state]) {
-      const policy = state_policies[state];
-      if (policy.restricted_tools?.includes(actionType)) {
-        return "deny";
-      }
-      if (policy.require_approval_for?.includes(actionType)) {
-        return "require_approval";
-      }
-    }
-
-    return "allow";
+    // An explicitly unknown profile must not silently disable policy enforcement.
+    if (!profile) return params.profileId ? "deny" : "allow";
+    return evaluateActionWithProfile(profile, params).decision;
   }
 
   /**

@@ -230,6 +230,9 @@ export {
 export type {
   AtpSecurityProfile,
   RuntimeTarget,
+  ProfileEvaluationContext,
+  ProfileEvaluationResult,
+  ProfileDecision,
 } from './profiles/index.js';
 
 // Version information

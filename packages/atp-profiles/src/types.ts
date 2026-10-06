@@ -3,7 +3,7 @@
  *
  * Runtime-agnostic security profile schema for Agent Trust Protocol.
  * Profiles define what actions an agent can take, under what conditions,
- * and how those actions are logged and scored.
+ * and how those actions are logged. Trust and authority are evaluated externally.
  */
 
 export type RuntimeTarget = "openclaw" | "mcp" | "langchain" | "custom";
@@ -58,6 +58,15 @@ export interface AtpSecurityProfile {
     log_sensitive_inputs?: boolean;
     redact_fields?: string[];
   };
+  trust_requirements?: {
+    /** Minimum externally verified score, on the normalized 0..1 scale. */
+    min_score: number;
+  };
+  authority_requirements?: {
+    /** Require an externally verified, current mandate for this action. */
+    require_mandate: boolean;
+  };
+  /** @deprecated Compatibility metadata only; profiles do not compute trust scores. */
   trust_scoring?: {
     start_score: number;
     max_score: number;

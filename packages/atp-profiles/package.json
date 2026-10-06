@@ -1,6 +1,6 @@
 {
   "name": "atp-profiles",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Built-in ATP security profiles and profile schema for Agent Trust Protocol",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -9,8 +9,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -18,8 +17,9 @@
     "build": "tsc --skipLibCheck",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
-    "test": "jest",
-    "lint": "eslint src --fix"
+    "test": "npm run build && node --test test/*.test.mjs",
+    "lint": "eslint src --fix",
+    "prepublishOnly": "npm test"
   },
   "keywords": [
     "atp",
@@ -43,5 +43,8 @@
   ],
   "engines": {
     "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

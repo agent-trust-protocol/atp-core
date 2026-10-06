@@ -1,0 +1,48 @@
+name: Publish ATP Profiles
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact atp-profiles version
+        required: true
+        default: '1.1.0'
+        type: string
+      dry_run:
+        description: Validate without publishing
+        required: true
+        default: true
+        type: boolean
+jobs:
+  profiles:
+    if: github.ref == 'refs/heads/main' || inputs.dry_run == true
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org/'
+      - name: Validate version
+        working-directory: packages/atp-profiles
+        env:
+          EXPECTED_VERSION: ${{ inputs.version }}
+        run: |
+          test "$(node -p "require('./package.json').version")" = "$EXPECTED_VERSION"
+          if npm view "atp-profiles@$EXPECTED_VERSION" version >/dev/null 2>&1; then
+            echo "Version already published"
+            exit 1
+          fi
+      - run: npm ci --include=dev
+        working-directory: packages/atp-profiles
+      - run: npm test
+        working-directory: packages/atp-profiles
+      - run: npm pack --dry-run
+        working-directory: packages/atp-profiles
+      - name: Publish with trusted identity
+        if: inputs.dry_run != true
+        working-directory: packages/atp-profiles
+        run: npm publish --access public --provenance

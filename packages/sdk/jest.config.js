@@ -24,6 +24,7 @@ export default {
     '^@/(.*)$': '<rootDir>/src/$1',
     // Resolve the published DID dependency and sibling workspace packages to
     // their TypeScript sources. <rootDir> here is packages/sdk.
+    '^atp-profiles$': '<rootDir>/../atp-profiles/src',
     '^@atpdeveloper/did-atp$': '<rootDir>/../did-atp/src',
     '^@atp/(.*)$': '<rootDir>/../$1/src'
   },
