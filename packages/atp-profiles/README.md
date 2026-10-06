@@ -1,6 +1,6 @@
 # atp-profiles
 
-Built-in **Agent Trust Protocol™** security profiles and a runtime-agnostic profile schema. Profiles define what actions an agent can take, under what conditions, and how those actions are logged and scored. Use with [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) and runtime adapters (OpenClaw, MCP, LangChain, etc.) so tool and session actions are evaluated through `evaluateActionWithProfile` rather than hardcoded policies.
+Built-in **Agent Trust Protocol™** security profiles and a runtime-agnostic profile schema. Profiles define what actions an agent can take, under what conditions, and how those actions are logged. This package is the canonical schema and built-in source consumed by the SDK. Use with [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) and runtime adapters (OpenClaw, MCP, LangChain, etc.) so tool and session actions are evaluated through `evaluateActionWithProfile` rather than hardcoded policies.
 
 ## Install
 
@@ -49,7 +49,7 @@ Conservative profile for most agents.
 - **Network**: internal domains only; external requires approval
 - **Credentials**: blocked (requires approval)
 - **Messaging**: allowed; external requires approval
-- **Trust score**: starts at 0.5, max 1.0
+- Legacy scoring metadata is retained for compatibility; no score is computed.
 
 ### `dev-mode`
 
@@ -70,7 +70,7 @@ Maximum restriction for regulated environments.
 - **Network**: explicit domain allow-list; all external requires approval
 - **Credentials**: blocked; requires approval plus audit log
 - **Messaging**: all external messaging requires approval
-- **Trust score**: starts at 0.3; violations are heavily penalized
+- Legacy scoring metadata is retained for compatibility; no score is computed.
 
 ### `openclaw-sandbox`
 
@@ -138,3 +138,36 @@ const allProfiles = { ...BUILTIN_PROFILES, 'my-custom-profile': myProfile };
 ## License
 
 Apache-2.0 © 2026 Sovr Labs
+
+## Evaluation boundary and migration (1.1)
+
+`evaluateActionWithProfile(profile, context)` returns `{ allowed, decision, reason? }`.
+The SDK method delegates to this function and retains its string decision API.
+The four built-ins and their category/state decisions are preserved. An explicit
+unknown SDK profile ID now denies instead of silently allowing.
+
+This is a category/state gate, not a sandbox. Runtime adapters must enforce
+`allowed_commands`, filesystem modes and paths, network domains, external-action
+approval flags, and `allowed_tools`. These fields are not enforced by this helper.
+Approval results are not authorization to execute; a separate approval flow is required.
+
+Custom profiles may add `trust_requirements: { min_score: 0.7 }` (normalized 0..1)
+and `authority_requirements: { require_mandate: true }`. Missing or invalid evidence
+denies. Supply `trustScore` and `mandateVerified` only from trusted, current verification
+results for the agent and action. Never copy them from untrusted request metadata.
+The helper does not verify signatures, status, revocation, scope, or mandate expiry.
+Mandates remain separate authority objects, not embedded profiles.
+
+`trust_scoring` is deprecated compatibility metadata; it is not read by the evaluator.
+Migrate scoring configuration to your trust evaluator. Built-ins do not gain new
+trust thresholds or mandate requirements in this compatible release.
+OpenClaw remains an optional runtime target with no adapter dependency.
+
+## Release
+
+Publish `atp-profiles@1.1.0` before `atp-sdk@2.2.0`, which depends on `^1.1.0`.
+Configure npm Trusted Publishing for this repository, workflow
+`npm-publish-profiles.yml`, environment `npm-publish`. For the SDK configure `npm-publish-sdk.yml` in the same environment. The workflow uses OIDC
+with provenance and defaults to a dry run; it has no npm token fallback.
+The package is ESM-only; the old CommonJS export referenced a nonexistent file.
+CommonJS applications should use dynamic `import('atp-profiles')`.

@@ -32,7 +32,12 @@ jobs:
 
       - name: Build atp-sdk
         working-directory: packages/sdk
-        run: npm ci --include=dev && npm run build
+        run: |
+          npm ci --include=dev --prefix ../atp-profiles
+          npm test --prefix ../atp-profiles
+          cd ../atp-profiles && npm pack --pack-destination "$RUNNER_TEMP"
+          cd ../sdk && npm install --no-save --package-lock=false --include=dev "$RUNNER_TEMP/atp-profiles-1.1.0.tgz"
+          npm run build
 
       - name: Test atp-sdk
         working-directory: packages/sdk
@@ -65,7 +70,7 @@ jobs:
   publish-sdk:
     name: Publish atp-sdk
     runs-on: ubuntu-latest
-    needs: build-and-test
+    needs: [build-and-test, publish-atp-profiles]
     environment: npm-publish
     permissions:
       id-token: write   # required for npm provenance attestation (OIDC)

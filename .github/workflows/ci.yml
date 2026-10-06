@@ -41,7 +41,10 @@ jobs:
 
       - name: Build public packages
         run: |
-          cd packages/sdk && npm ci --include=dev && npm run build
+          npm ci --include=dev --prefix packages/atp-profiles
+          npm test --prefix packages/atp-profiles
+          cd packages/atp-profiles && npm pack --pack-destination "$RUNNER_TEMP"
+          cd ../sdk && npm install --no-save --package-lock=false --include=dev "$RUNNER_TEMP/atp-profiles-1.1.0.tgz" && npm run build
           cd ../../packages/openclaw-atp && npm ci --include=dev && npm run build
 
       - name: Package tests (sdk + openclaw-atp)
