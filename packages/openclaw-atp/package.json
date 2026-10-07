@@ -1,7 +1,7 @@
 {
   "name": "@atpdevelopment/openclaw-atp",
   "version": "1.0.0",
-  "description": "ATP (Agent Trust Protocol) security integration for OpenClaw agents",
+  "description": "Legacy ATP compatibility adapter for existing OpenClaw agent integrations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -50,7 +50,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/agent-trust-protocol/core",
+    "url": "https://github.com/agent-trust-protocol/atp-core.git",
     "directory": "packages/openclaw-atp"
   },
   "publishConfig": {
