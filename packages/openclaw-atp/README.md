@@ -5,9 +5,11 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 
-**Quantum-safe security layer for OpenClaw AI agents**
+**Legacy compatibility adapter for OpenClaw AI agents**
 
-This package provides seamless integration between the Agent Trust Protocol™ (ATP) and OpenClaw, enabling enterprise-grade security, trust scoring, and policy enforcement for multi-agent AI systems.
+> **Maintenance status:** This adapter remains available for existing OpenClaw integrations, but it is no longer a first-class ATP Core package. New integrations should build on `atp-sdk` + `atp-profiles` and keep runtime-specific enforcement inside an adapter. No new OpenClaw release should block or define the ATP Core release train.
+
+This package connects Agent Trust Protocol™ (ATP) to OpenClaw for existing deployments.
 
 ##  Features
 
@@ -374,7 +376,7 @@ The CLI scaffolds an **ESM** project (Node 18+), then opens an embedded onboardi
 
 ##  Releasing
 
-Publishing is automated via the [npm-publish workflow](https://github.com/agent-trust-protocol/atp-core/actions/workflows/npm-publish.yml). Both `atp-sdk` and `@atpdevelopment/openclaw-atp` are published together on every version tag.
+This adapter is maintained separately from the canonical ATP Core package release train. Do not assume an SDK release implies an OpenClaw adapter release.
 
 ```bash
 # Bump version in package.json, then:
