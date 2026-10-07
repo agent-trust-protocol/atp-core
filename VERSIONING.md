@@ -15,7 +15,7 @@ This document defines the versioning strategy and package status for the Agent T
 
 ## Production Packages
 
-### `atp-sdk` (v1.2.1) - PRIMARY SDK
+### `atp-sdk` (npm: v2.1.0; `main`: v2.2.0) - PRIMARY SDK
 
 **Status:** ![Stable](https://img.shields.io/badge/status-stable-green)
 
@@ -40,19 +40,15 @@ npm install atp-sdk
 
 ---
 
-### `@atpdevelopment/openclaw-atp` (v1.0.1)
+## Legacy Packages
 
-**Status:** ![Stable](https://img.shields.io/badge/status-stable-green)
+### `@atpdevelopment/openclaw-atp`
 
-Official OpenClaw integration for multi-agent systems.
+**Status:** ![Legacy](https://img.shields.io/badge/status-legacy-orange) — optional compatibility adapter
 
-```bash
-npm install @atpdevelopment/openclaw-atp atp-sdk
-```
+The OpenClaw adapter is retained for existing integrations, but it is not part of ATP Core's canonical package surface or release train. New runtime integrations should consume `atp-sdk` and `atp-profiles` through runtime-specific adapters rather than embedding framework policy into the core SDK.
 
 ---
-
-## Legacy Packages
 
 ### `atp-core` (v1.0.0)
 
@@ -105,10 +101,7 @@ All packages at version `0.x` are in active development. APIs may change without
 npm install atp-sdk
 ```
 
-**For OpenClaw Multi-Agent Systems:**
-```bash
-npm install atp-sdk @atpdevelopment/openclaw-atp
-```
+**For existing OpenClaw integrations:** keep the legacy adapter pinned and migrate policy logic toward the canonical `atp-sdk` + `atp-profiles` interfaces.
 
 **For ATP Infrastructure Development:**
 - Clone the monorepo
