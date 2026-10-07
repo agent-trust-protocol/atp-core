@@ -40,7 +40,7 @@ console.log('Standalone:', agent.isStandalone());
 |Package                       |Version                                                          |Status                             |Install                                   |
 |------------------------------|-----------------------------------------------------------------|-----------------------------------|------------------------------------------|
 |`atp-sdk`                     |![npm](https://img.shields.io/npm/v/atp-sdk)                     |**Beta**                           |`npm install atp-sdk`                     |
-|`@atpdevelopment/openclaw-atp`|![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp)|**Beta**                           |`npm install @atpdevelopment/openclaw-atp`|
+|`@atpdevelopment/openclaw-atp`|![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp)|**Legacy adapter** — maintenance only     |Existing integrations only                 |
 |`create-atp-agent`            |![npm](https://img.shields.io/npm/v/create-atp-agent)            |**Beta**                           |`npx create-atp-agent`                    |
 |`atp-core`                    |v1.0.0                                                           |**Legacy**  Superseded by `atp-sdk`|                                          |
 |Services (`@atp/*`)           |0.1.0                                                            |**Development**                    |Monorepo only                             |
@@ -57,7 +57,7 @@ Follow the GitHub docs and examples below to get started with ATP, or use the ho
 - Create quantum-safe agents
 - See trust scoring in action
 - Test quantum-safe signatures
-- Run OpenClaw multi-agent workflows
+- Test runtime adapters without making any one framework part of ATP Core
 - Explore the policy engine
 - Verify blockchain audit trails
 
