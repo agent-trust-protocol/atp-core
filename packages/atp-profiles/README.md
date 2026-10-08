@@ -1,6 +1,6 @@
 # atp-profiles
 
-Built-in **Agent Trust Protocol™** security profiles and a runtime-agnostic profile schema. Profiles define what actions an agent can take, under what conditions, and how those actions are logged. This package is the canonical schema and built-in source consumed by the SDK. Use with [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) and runtime adapters (OpenClaw, MCP, LangChain, etc.) so tool and session actions are evaluated through `evaluateActionWithProfile` rather than hardcoded policies.
+Built-in **Agent Trust Protocol™** security profiles and a runtime-agnostic profile schema. Profiles describe action gates and conditions. The evaluator returns a decision; the host runtime must enforce it and handle its own audit logging. This package is the canonical schema and built-in source consumed by the SDK. Use with [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) and runtime adapters (OpenClaw, MCP, LangChain, etc.) so tool and session actions are evaluated through `evaluateActionWithProfile` rather than hardcoded policies.
 
 ## Install
 
@@ -163,11 +163,8 @@ Migrate scoring configuration to your trust evaluator. Built-ins do not gain new
 trust thresholds or mandate requirements in this compatible release.
 OpenClaw remains an optional runtime target with no adapter dependency.
 
-## Release
+## Participate
 
-Publish `atp-profiles@1.1.0` before `atp-sdk@2.2.0`, which depends on `^1.1.0`.
-Configure npm Trusted Publishing for this repository, workflow
-`npm-publish-profiles.yml`, environment `npm-publish`. For the SDK configure `npm-publish-sdk.yml` in the same environment. The workflow uses OIDC
-with provenance and defaults to a dry run; it has no npm token fallback.
-The package is ESM-only; the old CommonJS export referenced a nonexistent file.
-CommonJS applications should use dynamic `import('atp-profiles')`.
+Try a built-in profile with your agent framework and contribute a focused test case for an action or session state we have missed. The profile package is runtime-agnostic; adapters must enforce its decisions. See [CONTRIBUTING.md](../../CONTRIBUTING.md), the [ATP Core README](../../README.md), and [Community Group drafts](https://w3c-cg.github.io/atp/specs/). Drafts are not W3C Standards.
+
+This package is ESM-only. CommonJS applications can use dynamic `import('atp-profiles')`.

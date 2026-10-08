@@ -1,45 +1,43 @@
 # create-atp-agent
+### From idea to a running ATP starter
 
-The Agent Trust Protocol (ATP) CLI scaffolds a JavaScript ESM project using the published `atp-sdk`. The optional local browser UI saves configuration metadata. It does **not** mint a DID, generate keys, register an issuer, or enforce a security profile. The SDK creates a local, ephemeral identity when the generated agent runs without ATP services; a locally generated identifier is not publicly resolvable.
-
-## New project
+Use the ATP CLI to scaffold a small JavaScript ESM agent project with the published `atp-sdk`. Node.js 18 or newer is required.
 
 ```bash
 npx create-atp-agent my-agent
-# The CLI installs dependencies and opens the local configuration UI.
-# After closing it:
 cd my-agent
 npm start
 ```
 
-For a terminal-only flow:
+The CLI installs dependencies and opens an optional local configuration screen at `127.0.0.1:3456` (or the next available port). You can explore the generated `agent.mjs` and add ATP to the tools and protocols your agent already uses.
 
-```bash
-npx create-atp-agent my-agent --no-dashboard
-cd my-agent
-npm start
-```
+## Pick your flow
 
-Use `--skip-install` to scaffold without installing. If installation fails, the CLI leaves the generated project in place, prints the npm error, and exits unsuccessfully. Run `npm install` in that directory to retry. `--no-open` runs the UI without opening a browser. `--dashboard-only` starts the UI without scaffolding.
+| Goal | Command |
+| --- | --- |
+| New project with local UI | `npx create-atp-agent my-agent` |
+| Terminal-only scaffold | `npx create-atp-agent my-agent --no-dashboard` |
+| Scaffold without installing | `npx create-atp-agent my-agent --skip-install` |
+| Open the UI without scaffolding | `npx create-atp-agent --dashboard-only` |
+| Add metadata to an existing project | `npx -p create-atp-agent atp-stamp-agent` |
 
-## Existing project
+Use `--no-open` to start the UI without launching a browser. If dependency installation fails, the generated folder remains; run `npm install` inside it to retry.
 
-```bash
-npm install atp-sdk
-npx -p create-atp-agent atp-stamp-agent
-```
+## What it creates
 
-The stamping UI saves `.atp.json` in the current directory. It does not modify your application code or install a policy engine. Review the file and integrate the SDK and policy evaluation yourself. `atp-stamp-agent --no-dashboard` makes no changes. The UI is bound to `127.0.0.1`, default port 3456 (or the next available port); pass `--port` with `atp-stamp-agent` or `atp-onboard-agent`.
+- `agent.mjs` calls `Agent.quickstart` from `atp-sdk` when you run the starter.
+- `package.json` declares the SDK dependency and a `start` script.
+- `.atp.json` can hold metadata saved by the local UI.
 
-## What the files do
+The local UI is a configuration demo. It does **not** mint a DID, generate or persist keys, register an issuer, connect a production ATP service, or enforce a security profile. The generated agent's standalone identity is ephemeral and not remotely resolvable by default. Review key storage, service connections, and policy enforcement before cross-system or consequential use.
 
-- `agent.mjs`: imports `Agent` from `atp-sdk` and creates an agent on each run.
-- `.atp.json`: optional metadata saved by the local UI. The starter code does not read or enforce it.
-- `package.json`: pins a compatible range of the currently published SDK; it does not depend on the unreleased SDK version in this repository. The published SDK 1.2.5 omits `dist/index.d.ts`, so the CLI scaffolds JavaScript until a typed SDK release is available.
+For an existing application, install the [SDK](../sdk/README.md) directly. For canonical profiles, see [`atp-profiles`](../atp-profiles/README.md).
 
-For production identity, persist key material securely and integrate a resolvable DID and managed ATP services. The public specification work is distinct from the released SDK.
+## Try it and contribute
 
-## Verify this package locally
+Run the scaffold, inspect the output, and tell us where onboarding is confusing. Reproducible issues, starter templates, and tests for new agent ecosystems are welcome in [ATP Core](https://github.com/agent-trust-protocol/atp-core/issues). See [CONTRIBUTING.md](../../CONTRIBUTING.md).
+
+To verify a CLI change locally:
 
 ```bash
 cd packages/create-atp-agent
@@ -47,3 +45,5 @@ npm ci
 npm test
 npm pack --dry-run
 ```
+
+ATP specifications are Community Group drafts, not W3C Standards. The CLI is an implementation tool, not a conformance certificate.

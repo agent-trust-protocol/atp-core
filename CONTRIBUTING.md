@@ -1,60 +1,34 @@
-# Contributing to Agent Trust Protocol
+# Contribute to Agent Trust Protocol™
 
-Thank you for your interest in contributing to the Agent Trust Protocol! We're excited to have you join our community of developers building the future of secure AI agent interactions.
+ATP is an open trust layer for AI agents. You can help by trying a package, testing an integration boundary, reviewing a specification draft, or improving a guide. You do not need to adopt the whole stack to participate.
 
-## How to Contribute
+## Find a place to start
 
-### Reporting Issues
-- Check existing issues before creating a new one
-- Use clear, descriptive titles
-- Include steps to reproduce bugs
-- Specify your environment (OS, Node version, etc.)
+- **Developer experience:** Try [`atp-sdk`](packages/sdk/README.md) or [`create-atp-agent`](packages/create-atp-agent/README.md). File an issue with the command, expected result, actual result, Node version, and a small reproduction.
+- **Identity:** Add `did:atp` vectors and edge cases for [`@atpdeveloper/did-atp`](packages/did-atp/README.md).
+- **Policy:** Add action and session-state cases for [`atp-profiles`](packages/atp-profiles/README.md), including how a runtime enforces the returned decision.
+- **Interop:** Propose a concrete MCP, A2A, ANP, ADK, or framework binding and an executable test. ATP complements those systems.
+- **Specifications:** Review the [Community Group drafts](https://w3c-cg.github.io/atp/specs/) and discuss normative wording in [w3c-cg/atp](https://github.com/w3c-cg/atp). Community Group drafts are not W3C Standards.
 
-### Pull Requests
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## Work in the repository
 
-### Development Setup
 ```bash
-# Clone the repository
-git clone https://github.com/agent-trust-protocol/core.git
-cd agent-trust-protocol
-
-# Install dependencies
+git clone https://github.com/agent-trust-protocol/atp-core.git
+cd atp-core
 npm install
-
-# Copy environment template
-cp .env.example .env
-
-# Start development services
-npm run dev
+npm run conformance
 ```
 
-### Code Style
-- Follow existing code patterns
-- Use TypeScript for new code
-- Include tests for new features
-- Keep commits focused and atomic
+For package-specific changes, follow that package's README and run its relevant tests. Keep changes focused and include tests where behavior changes. Never commit secrets, production connection strings, or ATP Studio data.
 
-### Testing
-```bash
-# Run all tests
-npm test
+1. Check existing issues and pull requests.
+2. Create a branch in your fork.
+3. Explain the behavior or draft text you are changing and why.
+4. Include a test vector or reproduction when applicable.
+5. Open a pull request with the commands you ran and any known limitations.
 
-# Run specific service tests
-npm run test:identity
-npm run test:quantum
-```
+Please describe released code, experimental work, and specification proposals separately. A passing conformance test is evidence for its covered case, not certification of every draft capability.
 
-## Community
+## Project boundaries and license
 
-- **Discord**: Join our developer community (coming soon)
-- **GitHub Discussions**: Ask questions and share ideas
-- **Documentation**: [docs.agenttrustprotocol.com](https://docs.agenttrustprotocol.com)
-
-## License
-
-By contributing, you agree that your contributions will be licensed under the Apache 2.0 License.
+This repo is ATP Core. The [website](https://github.com/agent-trust-protocol/atp-website) and [ATP Studio](https://studio.agenttrustprotocol.com/) are separate projects. Contributions to this repository follow its [Apache-2.0 license](LICENSE). Agent Trust Protocol™ is a trademark of Sovr INC.

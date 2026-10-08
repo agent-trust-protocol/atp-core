@@ -1,4 +1,11 @@
 # @atpdeveloper/did-atp
+### Canonical identifier primitives for the open trust layer
+
+```bash
+npm install @atpdeveloper/did-atp
+```
+
+Use this package when you need to construct or inspect a `did:atp` identifier from already available public keys. It provides identifier and fingerprint primitives; it does not generate keys, host a resolver, issue credentials, or establish trust by itself.
 
 Canonical **did:atp v2** identifier and key-fingerprint primitives — the single
 source of truth for the did:atp method across all ATP packages.
@@ -28,6 +35,10 @@ key. Only SHA-256 (from `@noble/hashes`) is used — no new crypto primitives.
 | `buildAtpV2Did(domain, path, edPub, mlPub)` | construct a path-type did:atp v2 identifier |
 | `ATP_E1_RE` / `ATP_PQ1_RE` / `ATP_PATH_SEGMENT_RE` / `ATP_DOMAIN_RE` | identifier ABNF anchors |
 | `ATP_THUMBPRINT_LENGTH` / `ATP_ED25519_PUBLIC_KEY_BYTES` / `ATP_ML_DSA_65_PUBLIC_KEY_BYTES` | size constants |
+
+## Build with us
+
+Help test cross-package compatibility by contributing identifier vectors, parser edge cases, or draft feedback. See the [ATP Core contribution guide](../../CONTRIBUTING.md) and the [Community Group drafts](https://w3c-cg.github.io/atp/specs/). Community Group drafts are not W3C Standards.
 
 ## License
 
