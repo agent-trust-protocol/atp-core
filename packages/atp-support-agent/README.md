@@ -1,21 +1,23 @@
 # ATP Support Agent 
 
+> **Prototype, not a support offer:** Features and metrics below describe an example concept and are not production guarantees, service commitments, or claims about ATP Core. ATP Studio owns enterprise support arrangements. Start new projects with [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) or [`create-atp-agent`](https://www.npmjs.com/package/create-atp-agent).
+
 ## Overview
 The ATP Support Agent is an AI-powered customer support system built on the Agent Trust Protocol itself, demonstrating real-world ATP usage while providing enterprise-grade support capabilities.
 
 ## Key Features
 
 ###  Core Capabilities
-- **24/7 Automated Support** - Handles 80% of support queries automatically
+- **Automated Support Concept** - Illustrates automated responses
 - **Multi-Channel Integration** - Slack, Discord, Email, Web Portal
 - **Intelligent Escalation** - Routes complex issues to human agents
 - **Trust-Based Prioritization** - Uses ATP trust scores for queue management
 - **Self-Learning** - Improves responses based on resolution feedback
 
 ###  Support Metrics
-- **<30 second initial response** for automated queries
-- **<4 hour SLA** for enterprise customers
-- **95% first-contact resolution** target
+- **Illustrative initial response target** for automated queries
+- **Illustrative escalation target** for enterprise customers
+- **Illustrative first-contact resolution** target
 - **Trust Score: 0.95+** for verified responses
 
 ## Architecture
@@ -120,7 +122,7 @@ This positions ATP as:
 
 ## Marketing Value
 
-"The world's first trust-protocol-powered support system"
+"The early trust-protocol-powered support system"
 
 - Demonstrates ATP in production
 - Validates enterprise readiness
