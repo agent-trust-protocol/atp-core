@@ -1,6 +1,8 @@
 # ATP™ SDK Documentation
 
-Official TypeScript SDK for the Agent Trust Protocol™
+Historical service-client documentation for an earlier SDK layout. For the current published API, use the [package README](../README.md).
+
+> **Historical examples:** Some `ATPClient` and service calls below require a local service implementation and may not match the current package exports. Start with the verified `Agent.quickstart` example in the [current SDK README](../README.md). ATP complements other protocols and does not require a hosted ATP service for the standalone quickstart.
 
 ## Table of Contents
 
@@ -17,11 +19,11 @@ Official TypeScript SDK for the Agent Trust Protocol™
 ## Quick Start
 
 ```bash
-npm install @atp/sdk
+npm install atp-sdk
 ```
 
 ```javascript
-import { ATPClient, createQuickConfig } from '@atp/sdk';
+import { ATPClient, createQuickConfig } from 'atp-sdk';
 
 // Initialize client
 const config = createQuickConfig('http://localhost');
@@ -43,17 +45,17 @@ client.cleanup();
 
 ### NPM
 ```bash
-npm install @atp/sdk
+npm install atp-sdk
 ```
 
 ### Yarn
 ```bash
-yarn add @atp/sdk
+yarn add atp-sdk
 ```
 
 ### PNPM
 ```bash
-pnpm add @atp/sdk
+pnpm add atp-sdk
 ```
 
 ## Basic Usage
@@ -61,7 +63,7 @@ pnpm add @atp/sdk
 ### Initialize Client
 
 ```javascript
-import { ATPClient, createQuickConfig } from '@atp/sdk';
+import { ATPClient, createQuickConfig } from 'atp-sdk';
 
 // Quick configuration for local development
 const config = createQuickConfig('http://localhost');
@@ -119,7 +121,7 @@ The ATP SDK provides dedicated clients for each service:
 DIDs are globally unique identifiers that enable verifiable, self-sovereign digital identity.
 
 ```javascript
-import { DIDUtils } from '@atp/sdk';
+import { DIDUtils } from 'atp-sdk';
 
 // Generate a new DID
 const { did, document, keyPair } = await DIDUtils.generateDID({
@@ -255,7 +257,7 @@ The SDK includes utility classes for common operations:
 ### Cryptographic Operations
 
 ```javascript
-import { CryptoUtils } from '@atp/sdk';
+import { CryptoUtils } from 'atp-sdk';
 
 // Generate key pair
 const keyPair = await CryptoUtils.generateKeyPair();
@@ -270,7 +272,7 @@ const isValid = await CryptoUtils.verifySignature('message', signature, publicKe
 ### JWT Operations
 
 ```javascript
-import { JWTUtils } from '@atp/sdk';
+import { JWTUtils } from 'atp-sdk';
 
 // Create DID-JWT
 const token = await JWTUtils.createDIDJWT(
@@ -295,7 +297,7 @@ import {
   ATPAuthenticationError,
   ATPAuthorizationError,
   ATPValidationError 
-} from '@atp/sdk';
+} from 'atp-sdk';
 
 try {
   await client.identity.resolve('invalid-did');
@@ -315,7 +317,7 @@ try {
 The SDK is written in TypeScript and provides comprehensive type definitions:
 
 ```typescript
-import { ATPClient, ATPConfig, DIDDocument, VerifiableCredential } from '@atp/sdk';
+import { ATPClient, ATPConfig, DIDDocument, VerifiableCredential } from 'atp-sdk';
 
 const config: ATPConfig = {
   baseUrl: 'http://localhost',
