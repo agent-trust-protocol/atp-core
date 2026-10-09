@@ -2,6 +2,8 @@
 
 This case study demonstrates the full capabilities of the Agent Trust Protocol™ (ATP™) through comprehensive testing of all agent types and their interactions.
 
+> **Example scope:** These local scenarios illustrate integration patterns; they do not establish production readiness, a hosted ATP service, or compliance. ATP complements MCP, A2A, ANP, and other agent protocols. For maintained package entry points, see [ATP Core](https://github.com/agent-trust-protocol/atp-core#packages).
+
 ## Overview
 
 The ATP Case Study includes two main test suites:
