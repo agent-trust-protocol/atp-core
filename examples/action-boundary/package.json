@@ -1,0 +1,8 @@
+{
+  "name": "atp-action-boundary-example",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "node demo.mjs", "test": "node --test demo.test.mjs" },
+  "dependencies": { "atp-profiles": "1.1.0" },
+  "engines": { "node": ">=18" }
+}
