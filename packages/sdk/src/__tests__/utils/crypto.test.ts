@@ -261,8 +261,11 @@ describe('CryptoUtils', () => {
       const plaintext = 'Secret message';
       const encrypted = CryptoUtils.encrypt(plaintext, key);
 
-      // Tamper with the ciphertext (last byte)
-      const tampered = encrypted.slice(0, -2) + 'ff';
+      // Flip a bit so the last ciphertext byte always changes. Replacing it
+      // with a fixed value can leave random ciphertext unchanged.
+      const lastByte = parseInt(encrypted.slice(-2), 16);
+      const tamperedByte = (lastByte ^ 1).toString(16).padStart(2, '0');
+      const tampered = encrypted.slice(0, -2) + tamperedByte;
 
       expect(() => {
         CryptoUtils.decrypt(tampered, key);

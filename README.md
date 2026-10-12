@@ -31,6 +31,10 @@ The package READMEs are the source for APIs, limitations, and examples. Install 
 
 OpenClaw remains a legacy optional adapter example, not a required ATP dependency. Use the SDK and canonical packages as the starting point for new integrations.
 
+## See a protected action work
+
+[Run the local action-boundary demo](examples/action-boundary/README.md): a permitted read runs, an approval-required callback stays blocked, and completing the session blocks further reads. It uses the published profile evaluator and needs no hosted ATP service or model API key.
+
 ## Start with the SDK
 
 Node.js 18 or newer is supported by the published package metadata.

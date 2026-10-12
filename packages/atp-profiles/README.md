@@ -17,6 +17,10 @@ npm install atp-profiles
 | `enterprise-locked` | Enterprise Locked | Maximally restrictive for regulated industries (finance, healthcare) |
 | `openclaw-sandbox` | OpenClaw Sandbox | Sandboxed profile for OpenClaw/NemoClaw multi-agent workflows |
 
+## Run a complete local example
+
+[Action-boundary demo](../../examples/action-boundary/README.md) shows the host enforcing a permitted read, holding an approval-required callback, and denying a read after session completion. It runs against the published package without a service account or model key.
+
 ## Quick Start
 
 ```typescript
