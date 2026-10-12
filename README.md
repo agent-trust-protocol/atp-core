@@ -35,6 +35,8 @@ OpenClaw remains a legacy optional adapter example, not a required ATP dependenc
 
 [Run the local action-boundary demo](examples/action-boundary/README.md): a permitted read runs, an approval-required callback stays blocked, and completing the session blocks further reads. It uses the published profile evaluator and needs no hosted ATP service or model API key.
 
+[Try the Hermes Agent hook](examples/hermes-hook/README.md): connect the same published evaluator to Hermes' `pre_tool_call` boundary, allowing a fixed read while blocking terminal and write tools. The adapter documents its exact scope and Hermes consent setup.
+
 ## Start with the SDK
 
 Node.js 18 or newer is supported by the published package metadata.
