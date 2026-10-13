@@ -1,0 +1,56 @@
+name: Developer entry points
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - scripts/verify-published-entry-points.mjs
+      - .github/workflows/developer-entry-points.yml
+      - scripts/conformance.mjs
+      - examples/action-boundary/**
+      - packages/create-atp-agent/**
+      - packages/sdk/**
+      - packages/did-atp/**
+  push:
+    branches: [main]
+    paths:
+      - scripts/verify-published-entry-points.mjs
+      - .github/workflows/developer-entry-points.yml
+      - scripts/conformance.mjs
+      - examples/action-boundary/**
+
+permissions:
+  contents: read
+
+jobs:
+  published:
+    name: Published SDK, DID and CLI first run
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node scripts/verify-published-entry-points.mjs
+
+  repository:
+    name: Action-boundary demo and conformance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Run the documented action-boundary flow
+        working-directory: examples/action-boundary
+        run: |
+          npm ci
+          npm start
+          npm test
+      - name: Install conformance dependencies
+        run: npm ci --include=dev
+      - name: Run all available conformance items
+        run: npm run conformance
