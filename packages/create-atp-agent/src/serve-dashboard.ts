@@ -23,6 +23,7 @@ function contentType(filePath: string): string {
   if (ext === '.css') return 'text/css; charset=utf-8';
   if (ext === '.js') return 'application/javascript; charset=utf-8';
   if (ext === '.svg') return 'image/svg+xml';
+  if (ext === '.png') return 'image/png';
   if (ext === '.ico') return 'image/x-icon';
   return 'application/octet-stream';
 }
