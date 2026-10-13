@@ -12,12 +12,13 @@ let dashboard;
 let dashboardOutput = '';
 try {
   writeFileSync(join(consumer, 'package.json'), JSON.stringify({ private: true, type: 'module' }));
-  console.log(run('npm', ['install', '--ignore-scripts', 'atp-sdk@2.2.1', '@atpdeveloper/did-atp@0.1.1', 'create-atp-agent@1.3.3']));
+  console.log(run('npm', ['install', '--ignore-scripts', 'atp-sdk@2.2.1', '@atpdeveloper/did-atp@0.1.1', 'create-atp-agent@1.3.3', 'atp-profiles@1.1.0']));
   console.log(run('npm', ['ls', '--depth=0']));
   writeFileSync(join(consumer, 'identity.mjs'), `
     import assert from 'node:assert/strict';
     import { Agent } from 'atp-sdk';
     import { atpE1Fingerprint, buildAtpV2Did } from '@atpdeveloper/did-atp';
+    import { BUILTIN_PROFILES, evaluateActionWithProfile } from 'atp-profiles';
     const agent = await Agent.quickstart('EntryPointCheck');
     assert.equal(agent.isStandalone(), true);
     assert.match(agent.getDID(), /^did:atp:/);
@@ -26,6 +27,14 @@ try {
     assert.match(atpE1Fingerprint(ed), /^e1_/);
     assert.match(buildAtpV2Did('example.com', ['agent'], ed, pq), /^did:atp:example.com:agent:e1_/);
     console.log('PASS published SDK quickstart and scoped DID primitives');
+    const profile = BUILTIN_PROFILES['safe-default'];
+    const decisions = [
+      { actionType: 'filesystem', sessionState: 'executing' },
+      { actionType: 'shell', sessionState: 'executing' },
+      { actionType: 'filesystem', sessionState: 'completed' }
+    ].map(context => evaluateActionWithProfile(profile, { agentDid: agent.getDID(), trustScore: 0.8, ...context }).decision);
+    assert.deepEqual(decisions, ['allow', 'require_approval', 'deny']);
+    console.log('PASS published Profiles allow, approval-required and deny decisions');
   `);
   console.log(run(process.execPath, ['identity.mjs']));
 
