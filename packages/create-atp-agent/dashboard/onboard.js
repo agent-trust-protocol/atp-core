@@ -116,7 +116,7 @@ function renderHeader({ agentLabel, progressText, badge }) {
   const header = document.getElementById('app-header');
   header.innerHTML = `
     <div class="logo-wrap">
-      <img src="/atp-logo.svg" width="48" height="48" alt="Agent Trust Protocol logo" />
+      <img src="/atp-hat-mark-transparent.png" width="48" height="48" alt="Agent Trust Protocol logo" />
     </div>
     ${agentLabel ? `<div class="agent-label">${escapeHtml(agentLabel)}</div>` : ''}
     ${badge ? `<span class="badge-new">${escapeHtml(badge)}</span>` : ''}
