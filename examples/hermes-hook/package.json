@@ -2,7 +2,14 @@
   "name": "atp-hermes-hook-example",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=18" },
-  "scripts": { "test": "node --test" },
-  "dependencies": { "atp-profiles": "1.1.0" }
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test",
+    "demo": "node walkthrough.mjs"
+  },
+  "dependencies": {
+    "atp-profiles": "1.1.0"
+  }
 }

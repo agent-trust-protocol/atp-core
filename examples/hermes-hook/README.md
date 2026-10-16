@@ -9,6 +9,21 @@ npm test
 printf '{"hook_event_name":"pre_tool_call","tool_name":"terminal","tool_input":{"command":"echo hi"}}' | node atp-hook.mjs
 ```
 
+## Reproduce the hook decisions
+
+After `npm ci`, run `npm run demo`. It sends four events through the actual hook subprocess and asserts the returned JSON:
+
+| Event | Expected hook response |
+| --- | --- |
+| Read the fixed fixture | `{}` (pass through) |
+| Attempt terminal execution | `action: block` |
+| Attempt a file write | `action: block` |
+| Read outside the fixed fixture | `action: block` |
+
+The walkthrough does not execute any of these tools or start Hermes. A nonzero exit means an expected response failed. This is an integration-contract reproduction, not evidence of live Hermes activation or signed mandate verification.
+
+## Connect a live Hermes profile
+
 To try it in a Hermes profile, put an **absolute path** to this installed script in the profile's `config.yaml`. Hermes requires first-use consent for shell hooks; approve this exact local hook after reviewing its code. Keep `fail_closed: true` so a failed, missing or timed-out script blocks the matched tool.
 
 ```yaml

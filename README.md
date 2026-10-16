@@ -1,11 +1,28 @@
 # Agent Trust Protocol™
 ### The Open Trust Layer for AI Agents
 
+**Put a policy check immediately before an AI agent acts.** Try a local read that runs, a shell attempt held for approval, and a read denied after the session ends.
+
 AI agents move between tools, organizations, and protocols. ATP is an open effort to make identity, trust evidence, and privacy controls portable across those boundaries. It complements MCP, A2A, ANP, ADK, and agent frameworks; it does not replace how agents communicate.
 
 **Start building:** [SDK quickstart](#start-with-the-sdk) · [Scaffold an agent](#scaffold-a-project) · [Explore packages](#packages) · [Read specification drafts](https://w3c-cg.github.io/atp/specs/) · [Contribute](#help-shape-atp)
 
 > ATP specifications are developed in the [W3C Agent Trust Protocol Community Group](https://www.w3.org/groups/cg/atp/). Community Group drafts are not endorsed by W3C and are not W3C Standards. Implementation support varies by capability; the repository and package READMEs describe what exists today.
+
+## Try it in five minutes
+
+No account, model API key, or hosted ATP service is needed. With Node.js 18+ and npm:
+
+```bash
+git clone https://github.com/agent-trust-protocol/atp-core.git
+cd atp-core/examples/action-boundary
+npm ci --ignore-scripts
+npm start
+```
+
+![Animated walkthrough: a fixed read runs, a shell callback stays blocked, and a completed session denies the next read.](docs/launch/action-boundary.gif)
+
+Only the first callback runs. [Read the full walkthrough and text transcript](examples/action-boundary/README.md), or [try the Hermes hook walkthrough](examples/hermes-hook/README.md#reproduce-the-hook-decisions). This demo checks action category and session state; session completion is not mandate revocation.
 
 ## What is here
 
@@ -88,6 +105,8 @@ You can participate without adopting the whole stack:
 2. **Review a draft** and comment on identity, issuer authority, credential status, privacy, or conformance behavior in [the Community Group repository](https://github.com/w3c-cg/atp).
 3. **Add an interoperability case** for an agent system you use, including expected behavior and a test vector where possible.
 4. **Contribute code or docs** through a focused pull request. Start with [CONTRIBUTING.md](CONTRIBUTING.md).
+
+**If ATP is useful to your agent project, [star this repository](https://github.com/agent-trust-protocol/atp-core) to follow its development.** Sharing a reproducible integration or reporting an onboarding problem also helps the project improve.
 
 Issues and pull requests are welcome. Clearly distinguish implemented behavior from draft design and experimental work so other developers can make informed choices.
 

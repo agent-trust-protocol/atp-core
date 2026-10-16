@@ -26,3 +26,5 @@ jobs:
         working-directory: examples/hermes-hook
       - run: npm test
         working-directory: examples/hermes-hook
+      - run: npm run demo
+        working-directory: examples/hermes-hook
