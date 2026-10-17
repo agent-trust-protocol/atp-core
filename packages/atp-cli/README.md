@@ -68,6 +68,19 @@ node src/cli.mjs
 
 Never commit, paste, or share a session credential. Studio Core and Studio infrastructure must remain isolated. This preview uses an existing operator session and no login automation. Requests are GET-only, no redirects. The response is labeled historical/unverified until full cryptographic receipt verification is implemented. A previous ALLOW must never be treated as permission for a subsequent action.
 
+## Existing-agent discovery: safe first pass
+
+Run `/inspect [relative-directory]` within the ATP interactive terminal to inspect an existing **JavaScript package manifest**. For example, from a directory containing an existing agent:
+
+```bash
+node /path/to/atp-core/packages/atp-cli/src/cli.mjs
+# atp ❯ /inspect .
+```
+
+The preview detects declared LangChain JavaScript packages, OpenAI Agents SDK, or CrewAI JS integration hints. Detection is limited to `package.json`, without executing scripts, importing modules, walking source files, or making network requests. Python agents and runtime tool discovery are not yet supported. A declared dependency is an unverified hint, **not** evidence of a functioning runtime, agent identity, scopes, authorization, or pairing.
+
+The preview emits a human-review onboarding sequence: verify runtime capabilities, register a pending agent in ATP Studio, pair the actual runtime with a signed challenge, inspect requested scopes, approve only narrow authority, and test Guardian allow/deny/revocation. **It performs none of those actions.** Keep all onboarding and Studio data isolated from ATP Core.
+
 ## Release gates
 
 1. Preserve existing published CLI command contracts and their tests.
