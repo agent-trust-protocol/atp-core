@@ -56,7 +56,7 @@ export async function main(args = process.argv.slice(2), input = process.stdin, 
     const trimmed = line.trim();
     const lookup = /^\/(agents|trust|grants)(?:\s+(.*))?$/.exec(trimmed);
     if (lookup) {
-      try { output.write(await inspectCore(lookup[1], lookup[2]) + '\\n'); }
+      try { output.write(await inspectCore(lookup[1], lookup[2]) + '\n'); }
       catch (error) { output.write('ATP inspection unavailable: ' + error.message + '\\n'); }
       rl.prompt();
       continue;
