@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { createInterface } from 'node:readline';
+import { describePlan } from './intent.mjs';
 import { pathToFileURL } from 'node:url';
 
 export const COMMANDS = Object.freeze({
@@ -24,7 +25,8 @@ export function respond(raw) {
   if (command === 'guardian') return 'Guardian is not connected. No policy decision has been requested or issued.';
   if (command === 'mandates') return 'Mandate management is not connected. No mandate has been created or modified.';
   if (command === 'audit') return 'Audit backend is not connected. No verified audit records have been read.';
-  return 'Unsupported preview input. Type /help to see available commands. No action was executed.';
+  if (input.startsWith('/')) return 'Unknown slash command. Type /help. No action was executed.';
+  return describePlan(input);
 }
 
 export async function main(args = process.argv.slice(2), input = process.stdin, output = process.stdout) {
@@ -38,7 +40,7 @@ export async function main(args = process.argv.slice(2), input = process.stdin, 
     output.write('Interactive mode requires a TTY. Use atp --help for usage.\n');
     return 2;
   }
-  output.write('◆ ATP CLI · Interactive Developer Preview\nRead-only local shell. No identity, mandate, or authorization is implied.\nType /help for commands.\n');
+  output.write('◆ ATP CLI · Interactive Developer Preview\nRead-only local shell. No identity, mandate, or authorization is implied.\nType /help or describe an agent trust task.\n');
   const rl = createInterface({ input, output, prompt: 'atp ❯ ' });
   rl.prompt();
   for await (const line of rl) {
