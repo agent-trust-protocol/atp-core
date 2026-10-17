@@ -38,6 +38,23 @@ Paid inference is **disabled** unless you explicitly configure *both* `ATP_ALLOW
 
 `/ask` is a read-only explanation path. LLM output is untrusted text and is not an ATP trust decision, authorization token, agent pairing proof or audit evidence.
 
+## Read-only ATP Core registry inspection
+
+ATP SDK's \`IdentityClient.listIdentities()\`, \`getTrustLevel()\`, and \`PermissionsClient.getPermissionsForSubject()\` correspond to existing ATP identity/permission service GET endpoints. The preview connects only to loopback services and makes only GET requests. No auto-discovery, Studio credential handling, or remote service access.
+
+Run the locally trusted ATP services independently and deliberately opt in:
+
+\`\`\`bash
+export ATP_CORE_READ_ONLY=1
+# Optional local ports: ATP_CORE_IDENTITY_PORT=3001 ATP_CORE_PERMISSIONS_PORT=3003
+# Optional scoped token: ATP_CORE_READ_TOKEN (enter privately)
+node src/cli.mjs
+\`\`\`
+
+Inside the terminal: \`/agents\` (registry list), \`/trust <did>\` (registry-reported trust level), \`/grants <did>\` (stored permission grants). Results are limited to 20 records per request. All results are **unverified registry evidence**; there is no cryptographic DID resolution, Guardian enforcement evaluation or authoritative permission-to-act determination. No data is uploaded to an LLM by these commands.
+
+This read adapter is deliberately more constrained than the general-purpose SDK. It must not become an alternate Guardian authorization path. Real identity verification and Guardian decisions require separate validated implementations.
+
 ## Release gates
 
 1. Preserve existing published CLI command contracts and their tests.
