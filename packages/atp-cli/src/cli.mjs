@@ -4,6 +4,7 @@ import { describePlan } from './intent.mjs';
 import { askModel, providerConfig } from './providers.mjs';
 import { inspectCore } from './core-readonly.mjs';
 import { inspectDecision } from './studio-readonly.mjs';
+import { inspectAgentManifest, renderAgentPlan } from './agent-inspection.mjs';
 import { pathToFileURL } from 'node:url';
 
 export const COMMANDS = Object.freeze({
@@ -12,6 +13,7 @@ export const COMMANDS = Object.freeze({
   ask: 'Ask configured model for read-only assistance (network opt-in for hosted)',
   status: 'Display local session status',
   decision: 'Inspect a local Studio historical audit event by ID',
+  inspect: 'Inspect an existing local agent package without executing code',
   trust: 'Read local ATP registry trust record for DID',
   grants: 'Read local ATP permission grants for DID',
   agents: 'Describe agent discovery availability',
@@ -29,6 +31,7 @@ export function respond(raw) {
   if (command === 'exit' || command === 'quit') return null;
   if (command === 'model') { try { const p = providerConfig(); return `Selected model: ${p.model} (${p.category}). No inference request sent.`; } catch (error) { return `Provider configuration error: ${error.message}`; } }
   if (command === 'ask') return 'Usage: /ask <read-only question>. Model output is untrusted and cannot execute actions.';
+  if (command === 'inspect') return 'Usage: /inspect [directory]. Manifest only; no agent code is executed.';
   if (command === 'decision') return 'Usage: /decision <evt_id>. Requires explicit local Studio read-only opt-in and operator session.';
   if (command === 'trust' || command === 'grants') return `Usage: /${command} <DID>. Local read-only connection requires ATP_CORE_READ_ONLY=1.`;
   if (command === 'status') return 'ATP CLI preview · local/read-only · no Studio session · no agent credentials loaded';
@@ -57,6 +60,13 @@ export async function main(args = process.argv.slice(2), input = process.stdin, 
   rl.prompt();
   for await (const line of rl) {
     const trimmed = line.trim();
+    const inspection = /^\/inspect(?:\s+(.*))?$/.exec(trimmed);
+    if (inspection) {
+      try { output.write(renderAgentPlan(await inspectAgentManifest(inspection[1] || '.')) + '\n'); }
+      catch (error) { output.write('Agent inspection unavailable: ' + error.message + '\n'); }
+      rl.prompt();
+      continue;
+    }
     const lookup = /^\/(agents|trust|grants|decision)(?:\s+(.*))?$/.exec(trimmed);
     if (lookup) {
       try { output.write((lookup[1] === 'decision' ? await inspectDecision(lookup[2]) : await inspectCore(lookup[1], lookup[2])) + '\n'); }
