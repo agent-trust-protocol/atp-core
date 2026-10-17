@@ -17,7 +17,7 @@ test('status and integration commands do not claim authorization', () => {
   }
 });
 test('arbitrary natural language cannot execute work in preview', () => {
-  assert.match(respond('approve all agents'), /No action was executed/);
+  assert.match(respond('approve all agents'), /No tools were called, no identities were verified, and no changes were made/);
   assert.equal(respond('/exit'), null);
 });
 test('help works noninteractively and shell refuses non-TTY', () => {
