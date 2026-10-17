@@ -1,0 +1,29 @@
+name: ATP CLI interactive preview
+on:
+  pull_request:
+    paths:
+      - 'packages/atp-cli/**'
+      - 'packages/create-atp-agent/**'
+      - '.github/workflows/atp-cli-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Test new interactive CLI (no API credentials)
+        run: npm test
+        working-directory: packages/atp-cli
+      - name: Test existing create-atp-agent compatibility
+        run: |
+          npm ci --ignore-scripts
+          npm test
+        working-directory: packages/create-atp-agent
