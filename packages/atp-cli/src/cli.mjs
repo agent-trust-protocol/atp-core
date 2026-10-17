@@ -2,6 +2,7 @@
 import { createInterface } from 'node:readline';
 import { describePlan } from './intent.mjs';
 import { askModel, providerConfig } from './providers.mjs';
+import { inspectCore } from './core-readonly.mjs';
 import { pathToFileURL } from 'node:url';
 
 export const COMMANDS = Object.freeze({
@@ -9,6 +10,8 @@ export const COMMANDS = Object.freeze({
   model: 'Show selected LLM provider without a network request',
   ask: 'Ask configured model for read-only assistance (network opt-in for hosted)',
   status: 'Display local session status',
+  trust: 'Read local ATP registry trust record for DID',
+  grants: 'Read local ATP permission grants for DID',
   agents: 'Describe agent discovery availability',
   connect: 'Explain connection requirements',
   guardian: 'Explain Guardian integration status',
@@ -24,8 +27,9 @@ export function respond(raw) {
   if (command === 'exit' || command === 'quit') return null;
   if (command === 'model') { try { const p = providerConfig(); return `Selected model: ${p.model} (${p.category}). No inference request sent.`; } catch (error) { return `Provider configuration error: ${error.message}`; } }
   if (command === 'ask') return 'Usage: /ask <read-only question>. Model output is untrusted and cannot execute actions.';
+  if (command === 'trust' || command === 'grants') return `Usage: /${command} <DID>. Local read-only connection requires ATP_CORE_READ_ONLY=1.`;
   if (command === 'status') return 'ATP CLI preview · local/read-only · no Studio session · no agent credentials loaded';
-  if (command === 'agents') return 'Agent discovery is not connected in this preview. No agents have been inspected.';
+  if (command === 'agents') return 'Local registry lookup available in interactive mode when ATP_CORE_READ_ONLY=1; no identities are cryptographically verified by registry lookup.';
   if (command === 'connect') return 'Connection planning is not yet implemented. No pairing, identity proof, or authorization has been performed.';
   if (command === 'guardian') return 'Guardian is not connected. No policy decision has been requested or issued.';
   if (command === 'mandates') return 'Mandate management is not connected. No mandate has been created or modified.';
@@ -49,6 +53,14 @@ export async function main(args = process.argv.slice(2), input = process.stdin, 
   const rl = createInterface({ input, output, prompt: 'atp ❯ ' });
   rl.prompt();
   for await (const line of rl) {
+    const trimmed = line.trim();
+    const lookup = /^\/(agents|trust|grants)(?:\s+(.*))?$/.exec(trimmed);
+    if (lookup) {
+      try { output.write(await inspectCore(lookup[1], lookup[2]) + '\\n'); }
+      catch (error) { output.write('ATP inspection unavailable: ' + error.message + '\\n'); }
+      rl.prompt();
+      continue;
+    }
     if (line.trim().startsWith('/ask ')) {
       const question = line.trim().slice(5).trim();
       try {
