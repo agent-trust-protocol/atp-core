@@ -40,7 +40,7 @@ export async function askModel(prompt, { env = process.env, fetchImpl = fetch, t
     : { model: config.model, messages, stream: false, max_tokens: 700 };
   let response;
   try {
-    response = await fetchImpl(config.endpoint, { method: 'POST', headers, body: JSON.stringify(body), signal: AbortSignal.timeout(timeoutMs) });
+    response = await fetchImpl(config.endpoint, { method: 'POST', headers, body: JSON.stringify(body), redirect: 'error', signal: AbortSignal.timeout(timeoutMs) });
   } catch {
     failure(config.provider === 'local' ? 'Local Ollama is unavailable. Start Ollama and download your chosen local model. No hosted fallback was attempted.' : 'Hosted model request failed. No paid fallback was attempted.');
   }
