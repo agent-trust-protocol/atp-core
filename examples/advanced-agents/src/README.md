@@ -2,6 +2,8 @@
 
 This directory contains working examples demonstrating sophisticated agent-to-agent communication using the Agent Trust Protocol™.
 
+> **Example scope:** These local scenarios illustrate integration patterns; they do not establish production readiness, a hosted ATP service, or compliance. ATP complements MCP, A2A, ANP, and other agent protocols. For maintained package entry points, see [ATP Core](https://github.com/agent-trust-protocol/atp-core#packages).
+
 ## Quick Demo
 
 ```bash

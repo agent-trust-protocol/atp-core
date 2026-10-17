@@ -2,6 +2,8 @@
 
 Complete API reference for the Agent Trust Protocol™ SDK.
 
+> **Historical API notes:** This reference describes an earlier service-client design and has not been verified against the current `atp-sdk` export surface. For supported usage, start with the [current SDK README](../../README.md). Local service examples are not a public hosted ATP Core API.
+
 ## Table of Contents
 
 1. [Core Classes](#core-classes)

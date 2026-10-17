@@ -1,6 +1,8 @@
 # Agent Trust Protocol™ — API Reference
 
-This document provides a comprehensive reference for all ATP services and their APIs.
+This document records APIs from an earlier local ATP services prototype.
+
+> **Legacy local service reference:** The routes and ports below describe an earlier service prototype. They are not a public hosted ATP Core API or a guarantee that every route is supported by the current npm packages. For maintained package APIs, see [`atp-sdk`](../../packages/sdk/README.md), [`@atpdeveloper/did-atp`](../../packages/did-atp/README.md), and [`atp-profiles`](../../packages/atp-profiles/README.md). ATP Studio is separate.
 
 ## Service Overview
 

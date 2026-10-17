@@ -2,6 +2,8 @@
 
 This directory contains sophisticated examples demonstrating advanced agent-to-agent communication patterns, trust management, and integration with emerging protocols like MCP (Model Context Protocol).
 
+> **Example scope:** These local scenarios illustrate integration patterns; they do not establish production readiness, a hosted ATP service, or compliance. ATP complements MCP, A2A, ANP, and other agent protocols. For maintained package entry points, see [ATP Core](https://github.com/agent-trust-protocol/atp-core#packages).
+
 ##  Architecture Overview
 
 The Agent Trust Protocol™ enables:

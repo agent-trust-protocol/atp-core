@@ -2,6 +2,8 @@
 
 This directory contains comprehensive examples demonstrating the capabilities of the Agent Trust Protocol™ SDK.
 
+> **Historical examples:** These scripts describe an older service-client API and may need local services or code changes. For a current, standalone starting point, use the [SDK quickstart](../README.md) or [`create-atp-agent`](https://www.npmjs.com/package/create-atp-agent).
+
 ## Quick Start
 
 Run all examples:
@@ -165,7 +167,7 @@ To create custom examples:
 5. Clean up resources in finally blocks
 
 ```javascript
-import { ATPClient, createQuickConfig } from '@atp/sdk';
+import { ATPClient, createQuickConfig } from 'atp-sdk';
 
 async function myCustomExample() {
   const client = new ATPClient(createQuickConfig('http://localhost'));

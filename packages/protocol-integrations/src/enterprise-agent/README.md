@@ -2,6 +2,8 @@
 
 **Agent Specialization**: IBM ACP/Cisco AGP Enterprise Compatibility Bridges
 
+> **Integration workspace notes:** This document records an exploratory adapter plan, not a claim of complete interoperability or a public hosted service. ATP adds identity, trust evidence, policy, and audit around existing agent protocols; it does not replace their transports. For current packages, see [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) and [`atp-profiles`](https://www.npmjs.com/package/atp-profiles).
+
 ## Overview
 
 This workspace is dedicated to the Enterprise integration agent, responsible for:

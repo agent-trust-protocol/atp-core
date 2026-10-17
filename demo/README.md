@@ -1,5 +1,7 @@
 #  Agent Trust Protocol™ - Interactive Demo Environment
 
+> **Historical demonstration:** Screens, simulated metrics, and compliance labels in this demo are illustrative. They do not establish certification, availability, or enterprise support. For a current integration, start with the [ATP Core README](../README.md) and published npm packages. ATP Studio is a separate enterprise product.
+
 ## Overview
 
 This interactive demo environment showcases the key features and capabilities of Agent Trust Protocol™ (ATP) for Fortune 500 prospects and enterprise decision-makers. The demo provides hands-on experience with quantum-safe cryptography, trust level systems, and enterprise-grade security features.
@@ -31,7 +33,7 @@ This interactive demo environment showcases the key features and capabilities of
 - **Multiple endpoint examples** (health, agents, trust, signatures)
 
 ###  Enterprise Features
-- **Compliance dashboard** showing SOC 2, ISO 27001, NIST status
+- **Compliance dashboard** showing SOC 2 example, ISO 27001, NIST status
 - **Security feature checklist** highlighting enterprise capabilities
 - **Compliance report generation** with downloadable reports
 - **Enterprise-grade security visualization**
@@ -82,7 +84,7 @@ node server.js --port 3010
 
 1. **Introduction** - Show ATP overview and quantum-safe positioning
 2. **Trust Level Demo** - Register enterprise agent, show trust evaluation
-3. **Compliance Dashboard** - Highlight SOC 2, ISO 27001 compliance
+3. **Compliance Dashboard** - Highlight SOC 2 example, ISO 27001 compliance
 4. **Performance Metrics** - Show real-time monitoring capabilities
 
 ### Scenario 2: Technical Deep Dive (15 minutes)
@@ -249,7 +251,7 @@ npm --version
 ### Demo Support
 - **Email**: dev@agenttrustprotocol.com
 - **Documentation**: https://github.com/agent-trust-protocol/atp-core/tree/main/docs/demo
-- **Issues**: https://github.com/atp-protocol/agent-trust-protocol/issues
+- **Issues**: https://github.com/agent-trust-protocol/atp-core/issues
 
 ### Sales Support
 - **Sales Team**: sales@atp.dev
