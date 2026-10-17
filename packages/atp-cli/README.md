@@ -55,6 +55,19 @@ Inside the terminal: \`/agents\` (registry list), \`/trust <did>\` (registry-rep
 
 This read adapter is deliberately more constrained than the general-purpose SDK. It must not become an alternate Guardian authorization path. Real identity verification and Guardian decisions require separate validated implementations.
 
+## Historical Guardian decisions from ATP Studio
+
+The `/decision evt_...` command uses Studio's documented `GET /v1/audit/events/:id` detail endpoint, **not** the ATP Core permissions service. It is limited to an explicitly configured local Studio server and an operator session. The CLI does not request or issue an authorization decision.
+
+```bash
+export ATP_STUDIO_READ_ONLY=1
+export ATP_STUDIO_LOCAL_PORT=3000
+# Provide ATP_STUDIO_SESSION securely from an already authenticated local test session.
+node src/cli.mjs
+```
+
+Never commit, paste, or share a session credential. Studio Core and Studio infrastructure must remain isolated. This preview uses an existing operator session and no login automation. Requests are GET-only, no redirects. The response is labeled historical/unverified until full cryptographic receipt verification is implemented. A previous ALLOW must never be treated as permission for a subsequent action.
+
 ## Release gates
 
 1. Preserve existing published CLI command contracts and their tests.
