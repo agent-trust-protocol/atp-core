@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 import { createInterface } from 'node:readline';
 import { describePlan } from './intent.mjs';
+import { askModel, providerConfig } from './providers.mjs';
 import { pathToFileURL } from 'node:url';
 
 export const COMMANDS = Object.freeze({
   help: 'Show supported preview commands',
+  model: 'Show selected LLM provider without a network request',
+  ask: 'Ask configured model for read-only assistance (network opt-in for hosted)',
   status: 'Display local session status',
   agents: 'Describe agent discovery availability',
   connect: 'Explain connection requirements',
@@ -19,6 +22,8 @@ export function respond(raw) {
   const command = input.replace(/^\//, '').toLowerCase();
   if (!command || command === 'help') return Object.entries(COMMANDS).map(([k,v]) => `/${k.padEnd(10)} ${v}`).join('\n');
   if (command === 'exit' || command === 'quit') return null;
+  if (command === 'model') { try { const p = providerConfig(); return `Selected model: ${p.model} (${p.category}). No inference request sent.`; } catch (error) { return `Provider configuration error: ${error.message}`; } }
+  if (command === 'ask') return 'Usage: /ask <read-only question>. Model output is untrusted and cannot execute actions.';
   if (command === 'status') return 'ATP CLI preview · local/read-only · no Studio session · no agent credentials loaded';
   if (command === 'agents') return 'Agent discovery is not connected in this preview. No agents have been inspected.';
   if (command === 'connect') return 'Connection planning is not yet implemented. No pairing, identity proof, or authorization has been performed.';
@@ -44,6 +49,17 @@ export async function main(args = process.argv.slice(2), input = process.stdin, 
   const rl = createInterface({ input, output, prompt: 'atp ❯ ' });
   rl.prompt();
   for await (const line of rl) {
+    if (line.trim().startsWith('/ask ')) {
+      const question = line.trim().slice(5).trim();
+      try {
+        const answer = await askModel(question);
+        output.write(`[${answer.category} · ${answer.model} · unverified model response]\n${answer.content}\n`);
+      } catch (error) {
+        output.write(`Model unavailable: ${error.message}\n`);
+      }
+      rl.prompt();
+      continue;
+    }
     const response = respond(line);
     if (response === null) break;
     output.write(response + '\n');
