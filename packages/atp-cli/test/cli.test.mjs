@@ -12,7 +12,8 @@ test('help advertises only defined preview commands', () => {
 });
 test('status and integration commands do not claim authorization', () => {
   assert.match(respond('status'), /read-only/);
-  for (const command of ['agents','connect','guardian','mandates','audit']) {
+  assert.match(respond('/agents'), /Local registry lookup available/);
+  for (const command of ['connect','guardian','mandates','audit']) {
     assert.match(respond('/' + command), /not connected|not yet implemented/);
   }
 });
