@@ -11,7 +11,32 @@ node src/cli.mjs
 npm test
 ```
 
-The interactive session accepts `/help`, `/status`, `/agents`, `/connect`, `/guardian`, `/mandates`, `/audit`, and `/exit`. Commands currently provide read-only descriptions and **do not connect** to remote systems. The CLI has no LLM integration yet and does not execute natural-language requests.
+The interactive session accepts `/help`, `/status`, `/agents`, `/connect`, `/guardian`, `/mandates`, `/audit`, and `/exit`. Commands currently provide read-only descriptions and **do not connect** to remote systems. The CLI now has optional, read-only LLM responses via `/ask`, but it cannot execute tools or take action from generated text.
+
+## Free-first LLM policy
+
+By default the CLI uses a local Ollama runtime on `127.0.0.1:11434` with model `qwen3:4b`. Local inference requires installing Ollama and pulling the model separately. It never falls back to a hosted service.
+
+```bash
+ollama pull qwen3:4b
+ollama serve                   # only if Ollama is not already running
+node src/cli.mjs               # then type: /model or /ask Explain ATP Guardian
+```
+
+To select the hosted **free** OpenRouter router, explicitly configure networking and a key:
+
+```bash
+export ATP_LLM_PROVIDER=free
+export ATP_ALLOW_NETWORK=1
+export OPENROUTER_API_KEY=...  # enter privately; never commit keys
+node src/cli.mjs
+```
+
+This only requests `openrouter/free`. Free tiers can have rate limits, availability restrictions, and privacy implications. No silent fallback to paid inference occurs.
+
+Paid inference is **disabled** unless you explicitly configure *both* `ATP_ALLOW_NETWORK=1` and `ATP_ALLOW_PAID=1`, plus `ATP_LLM_PROVIDER=paid`, `ATP_PAID_MODEL` and `OPENROUTER_API_KEY`. This is an expert-only opt-in; it is **not** automatic. No endpoint customization, agent tool execution, credential loading, or transcript upload is implemented. All hosted prompts are transmitted to the chosen provider, so do not enter secrets or sensitive operational data.
+
+`/ask` is a read-only explanation path. LLM output is untrusted text and is not an ATP trust decision, authorization token, agent pairing proof or audit evidence.
 
 ## Release gates
 
