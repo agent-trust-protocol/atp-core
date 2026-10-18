@@ -1,6 +1,6 @@
 /**
  * Adapter boundary for a pre-existing LangChain-style JS tool.
- * Does not import LangChain or hold ATP credentials. The caller must inject an
+ * PROTOTYPE ONLY: shape-checks a gate result but cannot independently verify\n * signatures, nonces, mandate state, or bind authorization to invocation input.\n * DO NOT USE TO ENFORCE PRODUCTION TOOLS.\n * Does not import LangChain or hold ATP credentials. The caller must inject an
  * authoritative Guardian gate that performs signed runtime authentication and
  * mandate enforcement through ATP Studio. A string "ALLOW" is NOT sufficient.
  */
@@ -38,21 +38,3 @@ export function wrapExistingTool({ name, invoke, requiredScope, guard }) {
   };
 }
 
-/**
- * Non-authoritative unit fixture ONLY. This helper is intentionally isolated
- * from production implementation and is NOT a security authority.
- */
-export function makeIllustrativeGuard({ allowed = [] } = {}) {
-  const permitted = new Set(allowed);
-  return async ({ tool, requiredScope, actionKind }) => ({
-    source: 'guardian',
-    status: 'verified',
-    decision: permitted.has(tool) ? 'ALLOW' : 'DENY',
-    action: tool,
-    requiredScope,
-    actionKind,
-    authority: 'enforced',
-    executionBound: true,
-    reasonCode: permitted.has(tool) ? undefined : 'scope_missing'
-  });
-}
