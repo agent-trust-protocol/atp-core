@@ -81,6 +81,16 @@ The preview detects declared LangChain JavaScript packages, OpenAI Agents SDK, o
 
 The preview emits a human-review onboarding sequence: verify runtime capabilities, register a pending agent in ATP Studio, pair the actual runtime with a signed challenge, inspect requested scopes, approve only narrow authority, and test Guardian allow/deny/revocation. **It performs none of those actions.** Keep all onboarding and Studio data isolated from ATP Core.
 
+## Existing-agent tool boundary prototype (not production enforcement)
+
+The initial `src/agent-tool-boundary.mjs` wrapper demonstrates a **simulated** allow/deny integration around an existing JavaScript tool function. Tests cover allow, deny, malformed responses, and unavailable gate behavior without invoking real LangChain runtimes or making paid model calls.
+
+**Security limitation:** this wrapper only checks an injected callback's response shape. It **cannot** independently authenticate that the response came from Guardian, bind the decision to the exact invocation arguments, verify ML-DSA signatures, nonce uniqueness, mandate revocation, or a short-lived execution token. Never install this module as a production security enforcement gate. A caller-controlled response that mimics the expected shape could bypass this prototype.
+
+ATP Studio's real `POST /v1/agent-authorize` uses an agent runtime action assertion covering tenant, agent DID, key ID, timestamp, nonce, action, action kind, and required scope. Real adoption requires a vetted runtime signer and a trusted enforcement connector, plus the mandate controls currently under Studio, before a guarded tool may execute. A historical `/decision` audit event is not a substitute for that live authorization.
+
+The next real proof must run against an isolated Studio test harness and verify a genuine signed ALLOW, a genuine DENY, replay denial, revoked/paused mandate denial, and no tool side effects on refusal. Not yet completed in this CLI branch.
+
 ## Release gates
 
 1. Preserve existing published CLI command contracts and their tests.
