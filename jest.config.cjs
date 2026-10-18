@@ -86,6 +86,8 @@ module.exports = {
   
   // Ignore patterns
   testPathIgnorePatterns: [
+    // Separate Vitest project: requires an isolated private Studio checkout.
+    '<rootDir>/packages/atp-cli/proof/',
     '/node_modules/',
     '/dist/',
     '/build/',
