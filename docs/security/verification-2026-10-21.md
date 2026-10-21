@@ -40,3 +40,9 @@ or Studio access performed.
 - Diagnostic counts are local observations, not organization-wide adoption. Recurring
   users and top failure points are unobserved; no telemetry is sent to a server.
 - Cross-product central register update and independent approvals remain pending.
+
+## GitHub CI evidence — first PR commit
+
+[Developer entry points run 39687801436](https://github.com/agent-trust-protocol/atp-core/actions/runs/39687801436): Node 20 and 24 pass; Node 18.20.8 fails in SDK Agent.initialize with missing getRandomValues. This is a genuine published-runtime incompatibility, not a download failure. Source SDK/CLI/starter engines and developer instructions now require Node 20+, but correcting published metadata needs an approved release. Node 18 remains in the probe matrix to expose the published-package regression.
+
+[Audit run 39687801503](https://github.com/agent-trust-protocol/atp-core/actions/runs/39687801503): 14 package critical gates pass; monitoring-service fails on the known critical dependency. Action-boundary and Hermes example workflows pass. Root CI and Code Analysis were still running at this checkpoint. Snyk external status reports failure; details are not independently reviewed here.

@@ -45,7 +45,7 @@
     "policy-decisions",
     "post-quantum"
   ],
-  "author": "ATP™ Development Team",
+  "author": "ATP\u2122 Development Team",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -103,7 +103,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "directories": {
     "doc": "docs",

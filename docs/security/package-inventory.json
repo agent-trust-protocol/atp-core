@@ -29,7 +29,7 @@
     "kind": "publishable library/CLI/adapter",
     "independentInstall": true,
     "lockfile": "packages/create-atp-agent/package-lock.json",
-    "nodeClaim": ">=18.0.0"
+    "nodeClaim": ">=20.0.0"
   },
   {
     "directory": "packages/did-atp",
@@ -93,7 +93,7 @@
     "kind": "publishable library/CLI/adapter",
     "independentInstall": true,
     "lockfile": "packages/sdk/package-lock.json",
-    "nodeClaim": ">=18.0.0"
+    "nodeClaim": ">=20.0.0"
   },
   {
     "directory": "packages/session-sync-mcp",

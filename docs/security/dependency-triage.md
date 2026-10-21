@@ -39,8 +39,7 @@ inventory and are not claimed to be covered by its matrix.
 
 The existing published entry-point check pins SDK 2.2.1, CLI 1.3.3, Profiles 1.1.0
 and DID 0.1.1. It installs registry packages into a temporary consumer without
-repository imports. Node 24 passed locally. CI now requests Node 18/20/24; added
-matrix jobs are not evidence until they pass. Node 18 testing is compatibility
+repository imports. Node 24 passed locally. GitHub run 39687801436 confirms Node 20 and 24 pass, while Node 18 fails with missing Web Crypto getRandomValues. Source SDK/CLI/starter engines and primary developer instructions now require Node 20+; published metadata still needs a separately approved release. Node 18 testing is compatibility
 coverage, not a recommendation to deploy an unsupported runtime.
 
 CodeQL/Semgrep alert review and production serving revision checks are still
