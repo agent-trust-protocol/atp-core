@@ -1,0 +1,27 @@
+{
+  "resolvedAt": "2026-10-21",
+  "method": "git ls-remote against upstream tag/branch; annotated tags peeled",
+  "pins": {
+    "8398a7/action-slack@v3": "77eaa4f1c608a7d68b38af4e3f739dcd8cba273e",
+    "actions/checkout@v4": "11d5960a326750d5838078e36cf38b85af677262",
+    "actions/configure-pages@v5": "983d7736d9b0ae728b81ab479565c72886d7745b",
+    "actions/deploy-pages@v4": "d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e",
+    "actions/download-artifact@v4": "d3f86a106a0bac45b974a628896c90dbdf5c8093",
+    "actions/setup-node@v4": "49933ea5288caeca8642d1e84afbd3f7d6820020",
+    "actions/upload-artifact@v4": "ea165f8d65b6e75b540449e92b4886f43607fa02",
+    "actions/upload-pages-artifact@v3": "56afc609e74202658d3ffba0e8f6dda462b719fa",
+    "aquasecurity/trivy-action@master": "8f28faec26515256b6d22074d1d2a8986f4cbd87",
+    "aws-actions/amazon-ecr-login@v2": "03f1aad4c6c7ffd436567f42f9384779290529bd",
+    "aws-actions/configure-aws-credentials@v4": "7474bc4690e29a8392af63c5b98e7449536d5c3a",
+    "azure/setup-helm@v3": "5119fcb9089d432beecbf79bb2c7915207344b78",
+    "azure/setup-kubectl@v3": "901a10e89ea615cf61f57ac05cecdf23e7de06d8",
+    "bobheadxi/deployments@v1": "648679e8e4915b27893bd7dbc35cb504dc915bc8",
+    "docker/build-push-action@v5": "ca052bb54ab0790a636c9b5f226502c73d547a25",
+    "docker/login-action@v3": "c94ce9fb468520275223c153574b00df6fe4bcc9",
+    "docker/metadata-action@v5": "c299e40c65443455700f0fdfc63efafe5b349051",
+    "docker/setup-buildx-action@v3": "8d2750c68a42422c14e847fe6c8ac0403b4cbd6f",
+    "github/codeql-action/upload-sarif@v3": "4bfa242aa49c5f7c6770b98670d354a7dfac05f8",
+    "snyk/actions/node@master": "11b673cfb4b0dc0d860a1323caa199d54950dcce",
+    "softprops/action-gh-release@v2": "3bb12739c298aeb8a4eeaf626c5b8d85266b0e65"
+  }
+}

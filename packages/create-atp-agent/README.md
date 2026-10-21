@@ -1,7 +1,7 @@
 # create-atp-agent
 ### From idea to a running ATP starter
 
-Use the ATP CLI to scaffold a small JavaScript ESM agent project with the published `atp-sdk`. Node.js 18 or newer is required.
+Use the ATP CLI to scaffold a small JavaScript ESM agent project with the published `atp-sdk`. Use Node.js 20 or 24; the published Node 18 first-run path fails its Web Crypto initialization check.
 
 ```bash
 npx create-atp-agent my-agent

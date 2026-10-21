@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./.test-dist",
+    "module": "Node16",
+    "moduleResolution": "Node16"
+  },
+  "include": [
+    "src/services/metrics-storage.ts",
+    "src/types/metrics.ts"
+  ]
+}

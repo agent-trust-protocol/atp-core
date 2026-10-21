@@ -11,7 +11,7 @@ AI agents move between tools, organizations, and protocols. ATP is an open effor
 
 ## Try it in five minutes
 
-No account, model API key, or hosted ATP service is needed. With Node.js 18+ and npm:
+No account, model API key, or hosted ATP service is needed. With Node.js 20 or 24 and npm:
 
 ```bash
 git clone https://github.com/agent-trust-protocol/atp-core.git
@@ -56,7 +56,7 @@ OpenClaw remains a legacy optional adapter example, not a required ATP dependenc
 
 ## Start with the SDK
 
-Node.js 18 or newer is supported by the published package metadata.
+The pinned published first-run path is verified on Node.js 20 and 24. Although published metadata permits Node 18, that path fails there because Web Crypto is unavailable in the expected form; use Node 20 or 24.
 
 ```bash
 npm install atp-sdk
