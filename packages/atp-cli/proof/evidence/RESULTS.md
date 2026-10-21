@@ -1,14 +1,121 @@
-# ATP CLI 3.0 existing-agent proof: incomplete / release blocked
+# ATP CLI 3.0 existing-agent proof: bounded SQL proof shown locally / release blocked
 
-Updated 2026-10-20 (UTC). **Completion gate: still unmet.** No successful ALLOW from a free local
-model has been shown. This file has two parts:
+Updated 2026-10-20 (UTC).
 
-1. **Developer-Mac local-model attempts (2026-10-18 UTC, recorded 2026-10-20):** new below.
+- **Bounded Chinook SQL live proof: shown on a local harness.** A free local model on the
+  developer Mac drove the existing agent to a real, structured `sql_db_query` call that the
+  mandate route ALLOWED, with a receipt, one SQL execution, an intact audit chain and an
+  unchanged database. This held with harness-coerced tool selection and with autonomous selection,
+  on two locally installed models. Read the disclosures in part 0 before citing it.
+- **ATP CLI 3.0 release: still blocked.** Open items: the mandate bridge for arbitrary tools
+  (blocker 3), a security review and CI for the cross-repository fixture, and operator approval
+  through the console route rather than in the harness.
+
+This file has three parts:
+
+0. **Bounded Chinook SQL proof (2026-10-20):** new below.
+1. **Developer-Mac local-model attempts (2026-10-18 UTC, recorded 2026-10-20):** no free-local
+   ALLOW on those models. Kept as recorded.
 2. **Isolated workspace run (recorded 2026-10-18 UTC):** the original record, kept unchanged as
-   historical context. That environment had no Ollama service or model. The Mac runs below took
-   place afterwards, on a different machine where Ollama was available.
+   historical context. That environment had no Ollama service or model.
 
-## 1. Developer-Mac local-model attempts
+## 0. Bounded Chinook SQL proof on the developer Mac (2026-10-20)
+
+### What ran
+
+- **Studio implementation:** private repository, draft PR #90, branch
+  `integrate/chinook-sql-proof` (from Studio `main`). Commits: `9b420c3` for the first run and
+  `f38b3ec` for the others; the only difference between them is a `run.sh` exit-status fix. Studio
+  source is **not** included here.
+- **Existing agent:** the LangChain Deep Agents Text-to-SQL example (upstream `e80fd67d`) on the
+  ATP demo fork's boundary branch (`e0e5b1c`). `agent.py` is unmodified. Before `agent.py` loads,
+  the harness replaces the `ChatAnthropic` name with a local `ChatOllama` on loopback.
+- **Environment:** an isolated local harness — disposable Docker PostgreSQL and a loopback
+  Fastify listener mounting the Studio mandate SQL route and the neighbouring atp.trust route. It
+  is **not** a Studio deployment. There was no paid or hosted inference and no model download.
+  The harness refuses cloud models, models not already installed, and models without tool
+  support.
+- **Pairing:** the agent starts Pending with no key and proves possession of its key by signing
+  a challenge verified by the server's runtime proof path (`proveRegisteredAgent`). **Operator
+  approval (Pending → Active, `read` granted) is applied directly in the harness database, not
+  through the operator console route.**
+- **SQL bound:** the product default approved set, which is the single pinned statement. The
+  mandate pins the exact signed SQL bytes. **Nothing was widened or normalized.**
+- **Selection modes, recorded per run:**
+  - `harness-coerced`: whenever the agent binds tools, the set is narrowed to `sql_db_query` and
+    `tool_choice` is forced.
+  - `autonomous`: no coercion.
+
+  In both modes the **model generated the SQL argument**. The harness never writes, edits,
+  normalizes or fabricates a call.
+
+### Disclosure: the agent's instructions contain the statement
+
+The demo fork's `AGENTS.md` (an addition to the upstream example) tells the model, when ATP is
+enabled, to emit the pinned statement verbatim for this question. These runs therefore show
+**faithful reproduction of an operator-supplied statement inside a real structured tool call**,
+not independent SQL authorship. The 2026-10-18 `llama3.2:3b` and `qwen2.5-coder:7b` attempts
+(part 1) ran with the same instructions and did not succeed.
+
+### Results
+
+| Model (local Ollama, digest) | Selection | Structured calls | Outcome | Evidence |
+| --- | --- | --- | --- | --- |
+| `ornith:latest` (`a75697c14589`, 9B Q4_K_M) | harness-coerced | 1 × `sql_db_query` | **ALLOW**: SUCCEEDED, 8 rows, 1 SQL callback, receipt `mrx_01M5E4RC…`, audit `authorized → started → succeeded`, chain OK, Chinook unchanged; 19.5 s | [L-ornith-latest-coerced](mac-local-ollama-20261020/L-ornith-latest-coerced.json) |
+| `ornith:latest` | autonomous | `sql_db_schema`, then 1 × `sql_db_query` | **ALLOW**, same properties; 33.7 s | [L-ornith-latest-autonomous](mac-local-ollama-20261020/L-ornith-latest-autonomous.json) |
+| `hrbrmstr/ornith-9b-fixed:latest` (`e0736e04f077`) | harness-coerced | 1 × `sql_db_query` | **ALLOW**, same properties; 19.9 s | [L-ornith9bfixed-coerced](mac-local-ollama-20261020/L-ornith9bfixed-coerced.json) |
+| `hrbrmstr/ornith-9b-fixed:latest` | autonomous | 1 × `sql_db_query` | **ALLOW**, same properties; 31.3 s | [L-ornith9bfixed-autonomous](mac-local-ollama-20261020/L-ornith9bfixed-autonomous.json) |
+
+Each run used a freshly started harness and a 240-second wall-clock bound. Each produced exactly
+one SQL callback and one new `SUCCEEDED` receipt.
+
+### Enforcement matrix (no model), same harness, commit `f38b3ec`
+
+**14/14 PASS**, audit chain OK, Chinook unchanged
+([M2](mac-local-ollama-20261020/M2-enforcement-matrix.json)):
+- **allow:** 1 callback, with receipt.
+- **replay:** `origin_unverified`, unaudited.
+- **unapproved SQL:** `sql_not_approved`, audited, no receipt — never `UNCERTAIN`.
+- **truncated SQL from the verified agent:** `invalid_payload`, audited, nonce spent.
+- **tampered payload:** `payload_digest_mismatch`, audited; the original envelope is then unusable.
+- **expired origin:** `origin_unverified`, unaudited.
+- **wrong audience:** `origin_unverified`, unaudited.
+- **cross-route, both directions:** `origin_unverified`. An envelope sent to the wrong route does
+  not consume its nonce, and it later succeeds on its own route.
+- **pause → resume:** `mandate_paused`, then ALLOW.
+- **revoke:** `mandate_revoked`.
+- **server-side outage:** HTTP 500 `application/problem+json`, with no decision envelope.
+- **unreachable verifier:** the agent tool returns `verifier_unavailable`, with no direct-database
+  fallback.
+
+No refusal executed SQL.
+
+`resource_out_of_scope` and the ordering cases are covered by the Studio integration suite
+(521/521 tests pass on the PR branch) rather than widened into the harness:
+- a revocation or pause committed after authorization cancels the call without executing it;
+- one committed after execution starts lets that single call finish, and blocks every later
+  request.
+
+### Changes since the 2026-10-18 record that affect these results
+
+- Refusals from verified callers are now audited. Previously `invalid_payload` and
+  `action_payload_mismatch` returned `auditEventId: null`.
+- Unapproved SQL is refused before execution starts.
+- Signatures are bound to their route.
+- The harness now returns the product's RFC 9457 error shape, where it previously returned a bare
+  HTTP 500.
+
+All of these are in Studio draft PR #90.
+
+### Gaps
+
+- Operator approval is harness-applied. The console approval route is not exercised.
+- One agent and one bounded action. Nothing here covers arbitrary tools.
+- The `AGENTS.md` disclosure above.
+- Raw outputs, server logs and handshakes are held privately. The sanitized files above cite the
+  SHA-256 of each raw file.
+
+## 1. Developer-Mac local-model attempts (2026-10-18)
 
 ### Scope and honesty notes
 
@@ -89,17 +196,26 @@ These do not satisfy the free-local requirement. They are recorded so the state 
 - Ollama model digests at run time were not captured in the run records.
 - Nothing here was re-run in order to produce this update.
 
-## Updated completion-gate status
+## Completion-gate status (as of 2026-10-20)
 
 | Gate element | Status |
 | --- | --- |
-| Pre-existing agent selected and pinned | Done on the Mac path (Deep Agents Text-to-SQL, upstream `e80fd67d`) |
+| Pre-existing agent selected and pinned | Done (Deep Agents Text-to-SQL, upstream `e80fd67d`) |
 | Free local model available | Done on the Mac (Ollama). Not available in the workspace (part 2) |
-| Real structured tool invocation reaching ATP, free local model | Shown **only under harness coercion** (llama3.2:3b, F8). Never autonomously |
-| Live signed ALLOW with receipt, free local model | **Not met** |
-| Refusal without side effects under enforcement | Shown on the isolated harness (M1, F8) |
-| Mandate bridge for arbitrary LangChain tools (blocker 3) | **Open.** The Mac path uses a SQL-specific dispatch route |
+| Real structured tool invocation reaching ATP, free local model | **Shown**, harness-coerced and autonomous (part 0). On 2026-10-18 it was shown only under coercion, and was denied |
+| Live signed ALLOW with receipt, free local model | **Shown for the bounded Chinook SQL action**, on a local harness, with the `AGENTS.md` disclosure |
+| Refusal without side effects under enforcement | Shown (M2, plus the Studio integration suite) |
+| Operator approval through the console route | **Open.** Harness-applied in these runs |
+| Mandate bridge for arbitrary LangChain tools (blocker 3) | **Open.** The proof uses a SQL-specific dispatch route |
 | Security review and CI for the cross-repository fixture | **Open** |
+
+### CI status of this PR (recorded honestly)
+
+- Semgrep OSS code-scanning alert #453 (`react-insecure-request` on the loopback Ollama preflight
+  request in `proof/preflight.mjs`) is **open** and is being left open for now.
+- The `Semgrep OSS` check therefore **fails**. It is advisory, not a required check, and an inline
+  suppression (honored in the SARIF) does not close a GitHub alert.
+- Do not read this PR's checks as all green while that check fails.
 
 ---
 
