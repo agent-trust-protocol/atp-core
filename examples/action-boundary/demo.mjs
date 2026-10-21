@@ -1,3 +1,4 @@
+import { recordDiagnostic } from '../../packages/create-atp-agent/template/diagnostics.mjs';
 import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { createBoundary } from './boundary.mjs';
@@ -23,3 +24,5 @@ assert.equal(unknown.decision, 'deny');
 assert.equal(shellCallbackRuns, 0);
 for (const row of boundary.history) console.log(JSON.stringify(row));
 console.log('PASS: permitted read ran; shell, completed-session read and unknown tool did not run.');
+
+recordDiagnostic('example_completion');

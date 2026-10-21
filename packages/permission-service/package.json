@@ -21,7 +21,7 @@
     "zod": "^3.21.0",
     "winston": "^3.8.0",
     "cors": "^2.8.5",
-    "@atp/shared": "^0.1.0"
+    "@atp/shared": "file:../shared"
   },
   "devDependencies": {
     "@types/express": "^4.17.0",

@@ -1,0 +1,122 @@
+[
+  {
+    "directory": "packages/atp-profiles",
+    "name": "atp-profiles",
+    "kind": "publishable library/CLI/adapter",
+    "independentInstall": true,
+    "lockfile": "packages/atp-profiles/package-lock.json",
+    "nodeClaim": ">=18.0.0"
+  },
+  {
+    "directory": "packages/atp-support-agent",
+    "name": "@atp/support-agent",
+    "kind": "private service/internal",
+    "independentInstall": true,
+    "lockfile": "packages/atp-support-agent/package-lock.json",
+    "nodeClaim": "not declared"
+  },
+  {
+    "directory": "packages/audit-logger",
+    "name": "@atp/audit-logger",
+    "kind": "private service/internal",
+    "independentInstall": true,
+    "lockfile": "packages/audit-logger/package-lock.json",
+    "nodeClaim": "not declared"
+  },
+  {
+    "directory": "packages/create-atp-agent",
+    "name": "create-atp-agent",
+    "kind": "publishable library/CLI/adapter",
+    "independentInstall": true,
+    "lockfile": "packages/create-atp-agent/package-lock.json",
+    "nodeClaim": ">=18.0.0"
+  },
+  {
+    "directory": "packages/did-atp",
+    "name": "@atpdeveloper/did-atp",
+    "kind": "publishable library/CLI/adapter",
+    "independentInstall": true,
+    "lockfile": "packages/did-atp/package-lock.json",
+    "nodeClaim": ">=18.0.0"
+  },
+  {
+    "directory": "packages/identity-service",
+    "name": "@atp/identity-service",
+    "kind": "private service/internal",
+    "independentInstall": true,
+    "lockfile": "packages/identity-service/package-lock.json",
+    "nodeClaim": "not declared"
+  },
+  {
+    "directory": "packages/monitoring-service",
+    "name": "@atp/monitoring-service",
+    "kind": "private service/internal",
+    "independentInstall": true,
+    "lockfile": "packages/monitoring-service/package-lock.json",
+    "nodeClaim": "not declared"
+  },
+  {
+    "directory": "packages/openclaw-atp",
+    "name": "@atpdevelopment/openclaw-atp",
+    "kind": "publishable library/CLI/adapter",
+    "independentInstall": true,
+    "lockfile": "packages/openclaw-atp/package-lock.json",
+    "nodeClaim": "not declared"
+  },
+  {
+    "directory": "packages/permission-service",
+    "name": "@atp/permission-service",
+    "kind": "private service/internal",
+    "independentInstall": true,
+    "lockfile": "packages/permission-service/package-lock.json",
+    "nodeClaim": "not declared"
+  },
+  {
+    "directory": "packages/protocol-integrations",
+    "name": "@atp/protocol-integrations",
+    "kind": "private service/internal",
+    "independentInstall": true,
+    "lockfile": "packages/protocol-integrations/package-lock.json",
+    "nodeClaim": "not declared"
+  },
+  {
+    "directory": "packages/rpc-gateway",
+    "name": "@atp/rpc-gateway",
+    "kind": "private service/internal",
+    "independentInstall": true,
+    "lockfile": "packages/rpc-gateway/package-lock.json",
+    "nodeClaim": "not declared"
+  },
+  {
+    "directory": "packages/sdk",
+    "name": "atp-sdk",
+    "kind": "publishable library/CLI/adapter",
+    "independentInstall": true,
+    "lockfile": "packages/sdk/package-lock.json",
+    "nodeClaim": ">=18.0.0"
+  },
+  {
+    "directory": "packages/session-sync-mcp",
+    "name": "@atp/session-sync-mcp",
+    "kind": "private service/internal",
+    "independentInstall": true,
+    "lockfile": "packages/session-sync-mcp/package-lock.json",
+    "nodeClaim": "not declared"
+  },
+  {
+    "directory": "packages/shared",
+    "name": "@atp/shared",
+    "kind": "private service/internal",
+    "independentInstall": true,
+    "lockfile": "packages/shared/package-lock.json",
+    "nodeClaim": "not declared"
+  },
+  {
+    "directory": "packages/vc-service",
+    "name": "@atp/vc-service",
+    "kind": "private service/internal",
+    "independentInstall": true,
+    "lockfile": "packages/vc-service/package-lock.json",
+    "nodeClaim": "not declared"
+  }
+]
