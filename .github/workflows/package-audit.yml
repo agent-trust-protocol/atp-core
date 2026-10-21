@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '20'
-      - name: Production dependencies (critical gate)
-        run: npm audit --prefix packages/${{ matrix.package }} --omit=dev --audit-level=critical
-      - name: Full dependencies (critical gate)
-        run: npm audit --prefix packages/${{ matrix.package }} --audit-level=critical
+      - name: Production dependencies (all severities gate)
+        run: npm audit --prefix packages/${{ matrix.package }} --omit=dev --audit-level=low
+      - name: Full dependencies (all severities gate)
+        run: npm audit --prefix packages/${{ matrix.package }} --audit-level=low

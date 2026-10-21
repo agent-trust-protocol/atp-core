@@ -31,8 +31,13 @@
     "@types/express": "^4.17.0",
     "@types/cors": "^2.8.0",
     "@types/pg": "^8.10.0",
-    "jest": "^29.0.0",
-    "@types/jest": "^29.0.0",
-    "ts-jest": "^29.0.0"
+    "jest": "30.5.2",
+    "@types/jest": "30.0.0",
+    "ts-jest": "29.4.15"
+  },
+  "overrides": {
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "4.3.2"
+    }
   }
 }

@@ -86,7 +86,7 @@ function runItem(item) {
         '--ci',
         '--json',
         `--outputFile=${outFile}`,
-        '--testPathPattern', item.pattern,
+        '--testPathPatterns', item.pattern,
       ],
       { stdio: ['ignore', 'ignore', 'ignore'] }
     );
@@ -103,7 +103,7 @@ function runItem(item) {
     console.error(
       `\n  [${item.id}] jest did not produce a JSON report — it likely failed to start.\n` +
       `  Re-run to see the error:\n` +
-      `    npx jest --config jest.config.cjs --testPathPattern "${item.pattern}"\n`
+      `    npx jest --config jest.config.cjs --testPathPatterns "${item.pattern}"\n`
     );
     process.exit(1);
   }

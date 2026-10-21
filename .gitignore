@@ -239,3 +239,6 @@ sbom.json
 
 # W3C CG upload staging area (manual copy-out; not tracked source)
 w3c-cg-upload/
+
+# Monitoring native storage test build
+packages/monitoring-service/.test-dist/

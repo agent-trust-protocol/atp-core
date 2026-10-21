@@ -53,7 +53,7 @@
     "kind": "private service/internal",
     "independentInstall": true,
     "lockfile": "packages/monitoring-service/package-lock.json",
-    "nodeClaim": "not declared"
+    "nodeClaim": ">=20.17.0"
   },
   {
     "directory": "packages/openclaw-atp",

@@ -1,48 +1,43 @@
-# Dependency review — #156
+# Dependency remediation — #156
 
-All 15 immediate `packages/*/package.json` install units are classified in
-`package-inventory.json` and now have lockfiles. Six private services previously
-referenced nonexistent public `@atp/shared@^0.1.0`; they now reference `file:../shared`.
-Service-local `npm ci` must be run with the sibling packages present. Lockfiles
-reproduce resolution; they do not establish native-addon build compatibility.
+All 15 immediate package units have reproducible lockfiles and **zero npm audit
+findings in both full and production graphs** at the 2026-10-21 check. See
+`dependency-audit.json`. These are dated advisory results, not a guarantee that
+packages have no vulnerabilities. The package matrix now blocks all severities.
 
-`dependency-audit.json` contains the dated full/production npm audit counts and
-primary advisory links. Counts are affected graph nodes, not unique vulnerabilities.
-The root app, nested templates and examples are separate from this 15-package
-inventory and are not claimed to be covered by its matrix.
+## Changes and compatibility evidence
 
-## Applied scoped changes
+- Monitoring: sqlite3 6.0.1 replaces the vulnerable sqlite3 5/tar chain. Native
+  SQLite 3.52.0 runs locally; immediate write, latest/history, retention and reopen
+  test passes. Fixed a schema-initialization race by awaiting readiness. Full
+  monitoring TypeScript build passes. Added native-install CI on Node 20 and 24.
+  node-cron 4.2.1 removes its vulnerable uuid dependency; schedule lifecycle tested.
+- Jest 30.5.2 / ts-jest 29.4.15 remove old glob/micromatch chains. Root 1,094,
+  SDK 584, Shared 284 and OpenClaw 27 tests pass; conformance 510 passes. Updated
+  Jest's `--testPathPatterns` spelling in conformance commands.
+- Scoped `@istanbuljs/load-nyc-config` → js-yaml 4.3.2 removes argparse/sprintf-js.
+  Source uses the supported `.load` API; a real YAML coverage configuration test
+  passes. No global YAML override is applied to unrelated consumers.
+- SDK/OpenClaw TypeScript ESLint tools upgraded to 8.72.0; vulnerable old globby
+  chains removed. minimatch updated within declared compatible ranges.
+- Shared's development-only Express parser uses a same-major qs 6.16.0 override.
+- Support agent's TypeScript runner updated to tsx 4.23.15. Loader smoke test passes;
+  the CLI IPC pipe is prohibited in this environment, so that CLI mode is not
+  claimed verified locally.
+- Removed unused vulnerable RPC `http-proxy-middleware`; no tracked source imports
+  or route behavior use it. Previously removed unused Zendesk/Jest/XML dependencies
+  remain removed. Six private services use sibling `file:../shared` links.
 
-- SDK, Shared, OpenClaw: compatible lockfile-only `npm audit fix`, without `--force`.
-  SDK production graph changed from 3 high affected nodes to zero findings.
-- Support agent: removed unused `node-zendesk` (no imports in tracked source).
-  Its legacy request/form-data chain accounted for two critical production nodes;
-  its new production graph has zero findings. No Zendesk integration is implemented.
-- DID: committed reproducible lock and verified known-answer vectors. Removed no
-  compatibility constraints merely to make audit output green.
-- All 15 graphs now enter blocking critical production and full audit gates. A
-  known critical finding is expected to block the new matrix; no exception or
-  continue-on-error is used to hide it.
+## Runtime and release boundaries
 
-## Unresolved and scoped next actions
+Published SDK/CLI first runs pass Node 20/24; Node 18 fails Web Crypto initialization.
+Source SDK/CLI/starter requirements now say Node 20+. CI's Node 18 job is explicitly
+an unsupported-runtime negative probe: it must observe that exact known error;
+other errors still fail. This does not claim Node 18 support or alter published npm
+metadata. Package publication and production serving-revision checks require a
+separately approved release.
 
-| Area | Finding / boundary | Required next step |
-| --- | --- | --- |
-| Monitoring service | sqlite3 5.x brings vulnerable tar; one critical production node remains | Evaluate sqlite3 6.x with actual native install plus metrics-storage write/read/retention tests; no forced major upgrade in this branch. Keep service release blocked. |
-| SDK / Shared / OpenClaw | Remaining high/moderate dev toolchain nodes, including Jest/micromatch/braces, minimatch and parser chains | Review primary advisories in JSON; test scoped overrides or supported toolchain upgrades with full package suites. Some audit recommendations require breaking upgrades or have no compatible fix. No blanket risk acceptance. |
-| Shared | fast-xml-parser moderate development advisory requires major upgrade | Removed unused development dependency after source search; no XML parser imports exist in Shared. |
-| RPC gateway | Production high findings remain in proxy dependency graph | Evaluate supported http-proxy-middleware upgrade with routing and auth-header regression checks. |
-| DID | @types/jest transitively brings high development nodes | Removed unused Jest types; DID tsconfig uses only Node types and vector/build checks pass. |
-| Other private services | High/moderate development chains newly visible | Use per-package findings; avoid treating zero critical as zero vulnerabilities. |
-
-## Support verification and release gates
-
-The existing published entry-point check pins SDK 2.2.1, CLI 1.3.3, Profiles 1.1.0
-and DID 0.1.1. It installs registry packages into a temporary consumer without
-repository imports. Node 24 passed locally. GitHub run 39687801436 confirms Node 20 and 24 pass, while Node 18 fails with missing Web Crypto getRandomValues. Source SDK/CLI/starter engines and primary developer instructions now require Node 20+; published metadata still needs a separately approved release. Node 18 testing is compatibility
-coverage, not a recommendation to deploy an unsupported runtime.
-
-CodeQL/Semgrep alert review and production serving revision checks are still
-pending. PR #164 contains separate adapter hardening and PR #166 contains the CLI
-preview; neither is silently merged into this branch. Published packages do not
-contain the changes in this branch until a separately approved release.
+The separate root Next.js website graph is **not** included in the clean 15-package
+claim; its existing advisory debt and external Snyk status require their own app
+remediation/review. Root conformance tooling was updated for the supported Jest
+upgrade, but no website runtime release is performed.

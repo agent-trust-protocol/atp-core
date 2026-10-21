@@ -46,3 +46,23 @@ or Studio access performed.
 [Developer entry points run 39687801436](https://github.com/agent-trust-protocol/atp-core/actions/runs/39687801436): Node 20 and 24 pass; Node 18.20.8 fails in SDK Agent.initialize with missing getRandomValues. This is a genuine published-runtime incompatibility, not a download failure. Source SDK/CLI/starter engines and developer instructions now require Node 20+, but correcting published metadata needs an approved release. Node 18 remains in the probe matrix to expose the published-package regression.
 
 [Audit run 39687801503](https://github.com/agent-trust-protocol/atp-core/actions/runs/39687801503): 14 package critical gates pass; monitoring-service fails on the known critical dependency. Action-boundary and Hermes example workflows pass. Root CI and Code Analysis were still running at this checkpoint. Snyk external status reports failure; details are not independently reviewed here.
+
+## Remediation follow-through
+
+The historical blockers above are superseded for the 15 independent package
+units: all now have zero full/production npm audit findings. Root tests 1,094,
+SDK 584, Shared 284, OpenClaw 27, conformance 510, coverage-YAML compatibility,
+monitoring native persistence/retention, monitoring full build and cron schedule
+lifecycle pass. The root website dependency graph is a separate scope and is not
+claimed clean. Monitoring's upstream prebuilt native archive downloaded normally;
+this environment rejects tar ownership syscalls, so Python extracted the same
+unmodified cached upstream archive for the local test. Standard npm native-install
+CI on Node 20/24 verifies installation independently of that local workaround.
+
+Actual Hermes runtime evidence and a reproducible session script are now checked
+in. The provider emits deterministic tool calls locally; actual Hermes dispatch,
+consent registration and hook subprocess enforcement are exercised. The CLI
+gateway control listener cannot start here, and autonomous model reasoning was
+not exercised. Independent reviewer approval remains the final human gate; see
+completion-review.md. No merge, deployment, package release or external register
+update occurred.
