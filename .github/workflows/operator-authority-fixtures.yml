@@ -1,0 +1,23 @@
+name: Operator authority fixture tests
+
+on:
+  pull_request:
+    paths:
+      - 'examples/operator-authority/**'
+      - '.github/workflows/operator-authority-fixtures.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  operator-authority:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run isolated operator authority test suites
+        run: node --test examples/operator-authority/*.test.mjs
