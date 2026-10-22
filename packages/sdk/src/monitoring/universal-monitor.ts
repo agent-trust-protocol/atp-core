@@ -5,7 +5,6 @@
  * with ATP security, trust scoring, and audit capabilities.
  */
 
-import { createHash } from 'crypto';
 import { ProtocolAdapter } from '../protocols/base/adapter.js';
 import {
   Protocol,
@@ -25,7 +24,7 @@ import { ProtocolDetector } from '../protocols/base/detector.js';
 export interface UniversalMonitorConfig {
   /** Minimum trust level required for events (0-100) */
   minTrustLevel?: number;
-  /** Enable automatic event signing */
+  /** Require event signing; fails closed until a trusted signer is implemented. */
   enableSigning?: boolean;
   /** Enable audit trail recording */
   enableAudit?: boolean;
@@ -173,16 +172,16 @@ export class UniversalMonitor {
    * Apply ATP security layer to event
    */
   private async securitize(event: AgentEvent, adapter: ProtocolAdapter): Promise<AgentEvent> {
-    // Add quantum-safe signature if enabled
+    // Never represent an unkeyed digest as a cryptographic signature.
     if (this.config.enableSigning) {
       const signature = await this.signEvent(event);
       event.signature = signature;
     }
 
-    // Add trust score if not present
-    if (event.trustScore === undefined) {
-      event.trustScore = await this.calculateTrustScore(event);
-    }
+    // This helper has no trusted evidence provider. Do not propagate a sender's
+    // self-reported score as the monitoring layer's assessed trust, and do not
+    // substitute 0: absent evidence is unscored, which is not the same as a score of 0.
+    delete event.trustScore;
 
     // Record in audit trail if enabled
     if (this.config.enableAudit) {
@@ -192,36 +191,9 @@ export class UniversalMonitor {
     return event;
   }
 
-  /**
-   * Sign event with quantum-safe signature
-   */
-  private async signEvent(event: AgentEvent): Promise<string> {
-    const canonical = JSON.stringify({
-      id: event.id,
-      protocol: event.protocol,
-      type: event.type,
-      timestamp: event.timestamp,
-      source: event.source,
-      data: event.data
-    });
-    return createHash('sha256').update(canonical).digest('hex');
-  }
-
-  /**
-   * Calculate trust score for event (0-100)
-   */
-  private async calculateTrustScore(event: AgentEvent): Promise<number> {
-    if (event.trustScore !== undefined) {
-      return Math.min(100, Math.max(0, event.trustScore));
-    }
-    // Protocol-aware defaults: known protocols score higher
-    const protocolDefaults: Partial<Record<Protocol, number>> = {
-      'mcp': 70,
-      'swarm': 65,
-      'adk': 65,
-      'a2a': 60
-    };
-    return protocolDefaults[event.protocol] ?? 50;
+  /** No signer is wired here. A digest proves neither sender identity nor authority. */
+  private async signEvent(_event: AgentEvent): Promise<string> {
+    throw new Error('Monitoring event signing is not implemented');
   }
 
   /**
@@ -312,62 +284,25 @@ export class SecurityEnforcer {
   }
 
   /**
-   * Enforce security policy on event
+   * Diagnostic filtering only, never an authorization grant. There are no trusted
+   * signature, permission or trust-evidence providers wired into this legacy helper.
+   * Required verification therefore denies, even for a syntactically valid claim.
    */
-  enforcePolicy(event: AgentEvent): PolicyResult {
-    // Check trust level
-    if (event.trustScore !== undefined && event.trustScore < this.config.minTrustLevel) {
+  enforcePolicy(_event: AgentEvent): PolicyResult {
+    if (
+      // Any threshold other than exactly 0 (positive, negative, NaN or Infinity) needs
+      // trust evidence this helper cannot obtain, or is malformed.
+      this.config.minTrustLevel !== 0 ||
+      this.config.requireSignatures !== false ||
+      this.config.requirePermissions !== false ||
+      this.config.quantumSafe !== false
+    ) {
       return 'DENY';
     }
 
-    // Verify signature if required
-    if (this.config.requireSignatures && !event.signature) {
-      return 'DENY';
-    }
-
-    if (this.config.requireSignatures && event.signature) {
-      const signatureValid = this.verifySignature(event);
-      if (!signatureValid) {
-        return 'DENY';
-      }
-    }
-
-    // Check permissions if required
-    if (this.config.requirePermissions) {
-      const hasPermission = this.checkPermission(event);
-      if (!hasPermission) {
-        return 'DENY';
-      }
-    }
-
+    // All verification requirements were explicitly disabled. This is a local
+    // monitoring-filter result, not permission to execute a protected action.
     return 'ALLOW';
-  }
-
-  /**
-   * Verify event signature
-   */
-  private verifySignature(event: AgentEvent): boolean {
-    if (!event.signature) return false;
-    const canonical = JSON.stringify({
-      id: event.id,
-      protocol: event.protocol,
-      type: event.type,
-      timestamp: event.timestamp,
-      source: event.source,
-      data: event.data
-    });
-    const expected = createHash('sha256').update(canonical).digest('hex');
-    return event.signature === expected;
-  }
-
-  /**
-   * Check event permissions
-   * Note: full enforcement requires a PermissionsClient wired at construction time.
-   * Without one, all events are permitted at the monitoring layer — enforce at the
-   * application layer via PermissionsClient.checkPermission() instead.
-   */
-  private checkPermission(_event: AgentEvent): boolean {
-    return true;
   }
 
   /**

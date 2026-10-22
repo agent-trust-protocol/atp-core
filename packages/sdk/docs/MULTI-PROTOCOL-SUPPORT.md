@@ -78,8 +78,11 @@ interface ProtocolAdapter {
 The `UniversalMonitor` class provides unified monitoring across all protocols:
 
 - **Automatic Protocol Detection**: Detects which protocol an agent uses
-- **Security Layer**: Adds quantum-safe signatures and encryption
-- **Trust Scoring**: Calculates and tracks agent trust levels
+- **Diagnostic only**: Monitoring output is never an authorization grant. Event signing
+  is not implemented and fails closed (the default, `enableSigning: true`, errors each
+  event); use `enableSigning: false` for unsigned diagnostics. Events are unscored: no
+  `trustScore` is assigned, and sender-supplied scores are dropped. See
+  [`docs/MONITORING-SECURITY-BOUNDARY.md`](../../../docs/MONITORING-SECURITY-BOUNDARY.md).
 - **Event Filtering**: Filters events based on custom criteria
 - **Audit Trail**: Records all events in tamper-proof audit log
 
@@ -132,9 +135,9 @@ await mcpAdapter.initialize({
 });
 
 // Create universal monitor
+// Unsigned diagnostic mode: signing is not implemented and fails closed by default.
 const monitor = new UniversalMonitor({
-  minTrustLevel: 50,
-  enableSigning: true,
+  enableSigning: false,
   enableAudit: true
 });
 
@@ -155,7 +158,6 @@ const stream = await monitor.monitor(agent);
 stream.subscribe({
   next: (event) => {
     console.log('Event:', event.type);
-    console.log('Trust Score:', event.trustScore);
   },
   error: (error) => console.error('Error:', error),
   complete: () => console.log('Complete')
@@ -200,17 +202,12 @@ console.log('Trust Score:', verification.trustScore);
 import { UniversalMonitor } from '@atp/sdk';
 
 const monitor = new UniversalMonitor({
-  minTrustLevel: 70,
+  enableSigning: false,
   filters: [
     {
       field: 'type',
       operator: 'eq',
       value: 'mcp.context.update'
-    },
-    {
-      field: 'trustScore',
-      operator: 'gt',
-      value: 80
     }
   ]
 });
@@ -243,11 +240,9 @@ All protocols support quantum-safe security measures:
 
 ### Trust Scoring
 
-Each event and message receives a trust score (0-100) based on:
-- Agent reputation
-- Historical behavior
-- Credential verification
-- Network consensus
+`UniversalMonitor` and `SecurityEnforcer` have no trust-evidence provider. Monitoring
+events are unscored, and `SecurityEnforcer` denies any non-zero `minTrustLevel`. Query
+trust through the ATP trust service for the decision that actually gates an action.
 
 ### Audit Trail
 
