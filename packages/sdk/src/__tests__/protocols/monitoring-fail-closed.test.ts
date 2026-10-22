@@ -29,7 +29,7 @@ describe('legacy monitoring requirements fail closed', () => {
   it.each([
     { requirePermissions: true }, { quantumSafe: true }, { minTrustLevel: 1 },
     { minTrustLevel: NaN }, { minTrustLevel: Infinity }, { minTrustLevel: -1 },
-    { minTrustLevel: 101 },
+    { minTrustLevel: 101 }, { minTrustLevel: -0.5 }, { minTrustLevel: 0.5 },
   ])('denies unavailable or invalid required evidence: %j', (requirement) => {
     expect(new SecurityEnforcer({ ...diagnostic, ...requirement }).enforcePolicy(event()))
       .toBe('DENY');
@@ -87,12 +87,13 @@ describe('monitoring never fabricates security evidence', () => {
     delete input.trustScore;
     const output = await observe(input, false);
     expect(output.error).toBeUndefined();
-    expect(output.value?.trustScore).toBe(0);
+    expect(output.value?.trustScore).toBeUndefined();
     expect(output.value?.signature).toBeUndefined();
   });
 
   it('does not promote a sender-supplied reputation claim into assessed trust', async () => {
     const output = await observe(event(), false);
-    expect(output.value?.trustScore).toBe(0);
+    expect(output.value).toBeDefined();
+    expect(output.value?.trustScore).toBeUndefined();
   });
 });

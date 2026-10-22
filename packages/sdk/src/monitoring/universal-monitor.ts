@@ -179,8 +179,9 @@ export class UniversalMonitor {
     }
 
     // This helper has no trusted evidence provider. Do not propagate a sender's
-    // self-reported score as the monitoring layer's assessed trust.
-    event.trustScore = await this.calculateTrustScore(event);
+    // self-reported score as the monitoring layer's assessed trust, and do not
+    // substitute 0: absent evidence is unscored, which is not the same as a score of 0.
+    delete event.trustScore;
 
     // Record in audit trail if enabled
     if (this.config.enableAudit) {
@@ -193,11 +194,6 @@ export class UniversalMonitor {
   /** No signer is wired here. A digest proves neither sender identity nor authority. */
   private async signEvent(_event: AgentEvent): Promise<string> {
     throw new Error('Monitoring event signing is not implemented');
-  }
-
-  /** Unknown trust evidence must not receive a protocol-based reputation. */
-  private async calculateTrustScore(_event: AgentEvent): Promise<number> {
-    return 0;
   }
 
   /**
@@ -294,10 +290,9 @@ export class SecurityEnforcer {
    */
   enforcePolicy(_event: AgentEvent): PolicyResult {
     if (
-      !Number.isFinite(this.config.minTrustLevel) ||
-      this.config.minTrustLevel < 0 ||
-      this.config.minTrustLevel > 100 ||
-      this.config.minTrustLevel > 0 ||
+      // Any threshold other than exactly 0 (positive, negative, NaN or Infinity) needs
+      // trust evidence this helper cannot obtain, or is malformed.
+      this.config.minTrustLevel !== 0 ||
       this.config.requireSignatures !== false ||
       this.config.requirePermissions !== false ||
       this.config.quantumSafe !== false

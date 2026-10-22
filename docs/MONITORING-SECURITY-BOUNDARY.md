@@ -13,8 +13,9 @@ Until trusted providers are implemented:
 - `UniversalMonitor` fails an event through its error channel when signing is enabled.
   It emits no purported signed event. Its default still requires signing, so callers
   cannot silently downgrade to unsigned telemetry.
-- Explicit unsigned diagnostic mode (`enableSigning: false`) assigns no positive
-  trust evidence. The legacy numeric score is zero even for a self-reported high score.
+- Explicit unsigned diagnostic mode (`enableSigning: false`) assigns no trust evidence.
+  Emitted events carry no `trustScore` (unscored), even when the sender self-reported a
+  high score. Unscored is deliberately not reported as `0`, which would read as a score.
 - `SecurityEnforcer` denies when signatures, permissions, quantum-safe verification,
   or a positive trust threshold are required. Invalid thresholds also deny.
 - With every verification requirement explicitly disabled and threshold zero, its
@@ -32,5 +33,5 @@ ANP authorization interoperability, nor changes ATP Studio behavior or infrastru
 
 Regression coverage: `packages/sdk/src/__tests__/protocols/monitoring-fail-closed.test.ts`.
 It exercises the former hash-forgery acceptance path, required permissions and
-quantum-safe checks, self-reported trust, malformed thresholds, configuration updates,
+quantum-safe checks, self-reported trust, malformed and fractional thresholds, configuration updates,
 unavailable signing, and explicit unsigned diagnostic mode.

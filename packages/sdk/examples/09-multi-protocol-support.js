@@ -67,10 +67,11 @@ async function monitorMCPAgent() {
     securityLevel: 'quantum-safe'
   });
 
-  // Create universal monitor
+  // Create universal monitor in explicit unsigned diagnostic mode. Event signing is
+  // not implemented and fails closed (the default), and events are unscored.
+  // See docs/MONITORING-SECURITY-BOUNDARY.md in the repository root.
   const monitor = new UniversalMonitor({
-    minTrustLevel: 50,
-    enableSigning: true,
+    enableSigning: false,
     enableAudit: true
   });
 
@@ -97,7 +98,6 @@ async function monitorMCPAgent() {
       console.log('Event received:');
       console.log(`  Type: ${event.type}`);
       console.log(`  Timestamp: ${event.timestamp}`);
-      console.log(`  Trust Score: ${event.trustScore}`);
       console.log(`  Data:`, JSON.stringify(event.data, null, 2));
       console.log('---');
     },
@@ -268,18 +268,15 @@ async function filterEvents() {
   console.log('\n=== Example 6: Event Filtering ===\n');
 
   // Create monitor with event filters
+  // Unsigned diagnostic mode; monitoring events are unscored, so filter on event
+  // fields rather than on trust.
   const monitor = new UniversalMonitor({
-    minTrustLevel: 50,
+    enableSigning: false,
     filters: [
       {
         field: 'type',
         operator: 'eq',
         value: 'mcp.context.update'
-      },
-      {
-        field: 'trustScore',
-        operator: 'gt',
-        value: 70
       }
     ]
   });
@@ -303,14 +300,12 @@ async function filterEvents() {
 
   console.log('Monitoring with filters:');
   console.log('  - Only context.update events');
-  console.log('  - Trust score > 70');
   console.log('\nWaiting for matching events...\n');
 
   stream.subscribe({
     next: (event) => {
       console.log('Filtered event received:');
       console.log(`  Type: ${event.type}`);
-      console.log(`  Trust Score: ${event.trustScore}`);
     }
   });
 }
