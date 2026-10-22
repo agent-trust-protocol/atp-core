@@ -40,6 +40,8 @@ test('approval is nonexecutable until exact action authorized',()=>{
   x.request.approval={actionDigest:'different',used:false};
   assert.equal(protectedBoundary(x,()=>calls++).decision,'REQUIRE_APPROVAL');
   x.request.approval={actionDigest:'digest-1',used:false};
+  assert.equal(protectedBoundary(x,()=>calls++).decision,'REQUIRE_APPROVAL');
+  x.request.approval={actionDigest:'digest-1',used:false,verifiedByTrustedOperator:true};
   assert.equal(protectedBoundary(x,()=>calls++).decision,'ALLOW');
   assert.equal(calls,1);
 });
@@ -51,8 +53,7 @@ test('unreachable or stale live status cannot authorize',()=>{
   for(const now of [30,60,119]){const x=base();x.now=now;x.status={available:false,checkedAt:0,revokedAt:null};
   assert.equal(decide(x).reason,'status_not_current');}
 });
-test('cached lease can report freshness without proving action authority',()=>{
-  const x=base();x.now=119;x.requireLiveStatus=false;x.status={available:false,checkedAt:0,revokedAt:null};
-  // A cached result only models the specified trade-off; never infer real-time revocation.
-  assert.equal(decide(x).decision,'ALLOW');
+test('cached evidence cannot itself grant action authority',()=>{
+  const x=base();x.now=119;x.status={available:false,checkedAt:0,revokedAt:null};
+  assert.equal(decide(x).reason,'status_not_current');
 });
