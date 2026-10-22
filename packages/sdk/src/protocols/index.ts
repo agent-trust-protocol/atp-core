@@ -3,11 +3,9 @@
  *
  * Multi-protocol support for AI agents with ATP security
  *
- * Supported Protocols:
- * - MCP: Model Context Protocol (Anthropic)
- * - Swarm: OpenAI Swarm (multi-agent orchestration)
- * - ADK: Google Agent Development Kit
- * - A2A: Agent2Agent Protocol (vendor-neutral)
+ * Experimental infrastructure: detection does not establish interoperability.
+ * MCP monitoring emits synthetic events; security defaults fail closed.
+ * See repository docs/PROTOCOL-SUPPORT.md, including planned ANP integration.
  */
 
 // Base protocol abstractions

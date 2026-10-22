@@ -142,6 +142,7 @@ describe('MCP Adapter', () => {
 
     const subscription = stream.subscribe({
       next: (event) => {
+        expect(event.metadata?.synthetic).toBe(true);
         expect(event.protocol).toBe(Protocol.MCP);
         expect(event.source.agentDid).toBe(agent.did);
         eventReceived = true;
@@ -162,7 +163,7 @@ describe('MCP Adapter', () => {
     }, 6000);
   }, 10000);
 
-  it('should secure messages', async () => {
+  it('rejects signing without an implementation', async () => {
     const message = {
       id: 'msg_123',
       protocol: Protocol.MCP,
@@ -172,14 +173,10 @@ describe('MCP Adapter', () => {
       timestamp: new Date().toISOString()
     };
 
-    const secured = await adapter.secure(message);
-
-    expect(secured.signature).toBeDefined();
-    expect(secured.trustLevel).toBeDefined();
-    expect(secured.id).toBe(message.id);
+    await expect(adapter.secure(message)).rejects.toThrow('signing is not implemented');
   });
 
-  it('should verify secured messages', async () => {
+  it('rejects fabricated signature and trust claims', async () => {
     const securedMessage = {
       id: 'msg_123',
       protocol: Protocol.MCP,
@@ -193,12 +190,15 @@ describe('MCP Adapter', () => {
 
     const result = await adapter.verify(securedMessage);
 
-    expect(result.verified).toBe(true);
+    expect(result.verified).toBe(false);
+    expect(result.trustScore).toBe(0);
+    expect(result.details?.signatureValid).toBe(false);
+    expect(result.details?.senderVerified).toBe(false);
     expect(result.trustScore).toBeDefined();
     expect(result.details).toBeDefined();
   });
 
-  it('should create audit entries', async () => {
+  it('rejects audit without persistence', async () => {
     const event = {
       id: 'evt_123',
       protocol: Protocol.MCP,
@@ -211,11 +211,22 @@ describe('MCP Adapter', () => {
       data: { contextId: 'ctx_1' }
     };
 
-    const auditEntry = await adapter.audit(event);
+    await expect(adapter.audit(event)).rejects.toThrow('audit persistence is not implemented');
+  });
 
-    expect(auditEntry.protocol).toBe(Protocol.MCP);
-    expect(auditEntry.agentDid).toBe(agent.did);
-    expect(auditEntry.operation).toBe('mcp.context.update');
+  it('rejects security operations before initialization and after cleanup', async () => {
+    const message = { id: 'm', protocol: Protocol.MCP, sender: 'did:atp:a',
+      recipient: 'did:atp:b', payload: {}, timestamp: new Date().toISOString(),
+      signature: 'forged', trustLevel: 100 };
+    const fresh = new MCPAdapter();
+    await expect(fresh.verify(message)).rejects.toThrow('Adapter not initialized');
+    await adapter.cleanup();
+    for (const instance of [fresh, adapter]) {
+      await expect(instance.secure(message)).rejects.toThrow('Adapter not initialized');
+      await expect(instance.verify(message)).rejects.toThrow('Adapter not initialized');
+      await expect(instance.audit({} as any)).rejects.toThrow('Adapter not initialized');
+      expect(() => instance.getConfig()).toThrow('Adapter not initialized');
+    }
   });
 
   it('should cleanup resources', async () => {

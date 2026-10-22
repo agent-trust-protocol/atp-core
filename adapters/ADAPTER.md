@@ -1,8 +1,8 @@
 # ATP Adapter Specification
 
 An ATP adapter bridges a third-party agent framework to the ATP security layer,
-adding quantum-safe identity, trust scoring, and audit trails without changing
-the underlying framework's code.
+mapping explicitly verified identity, policy decisions and audit services to protected
+execution boundaries. Its guarantees depend on the implementation and enforcement tests.
 
 ## Directory Structure
 
@@ -48,17 +48,14 @@ interface ATPAgent {
 }
 ```
 
-## Available Adapters
+## Adapter status
 
-| Framework | Package | Status |
-|-----------|---------|--------|
-| OpenClaw | `packages/openclaw-atp` | Stable (v1.1.0) |
-| LangChain | `packages/sdk/langchain` | Stable |
-| MCP | `packages/sdk/mcp` | Stable |
-| A2A | `adapters/a2a` | Planned |
-| AutoGPT | `adapters/autogpt` | Planned |
-| CrewAI | `adapters/crewai` | Planned |
-| ADK (Google) | `adapters/adk` | Planned |
+See the [verified source inventory and roadmap](../docs/PROTOCOL-SUPPORT.md).
+It explicitly includes **ANP (Agent Network Protocol)** as a planned adaptation.
+The existing ANP workspace is a planning document, not an executable adapter.
+
+MCP monitoring is experimental/synthetic; OpenClaw is an optional legacy example.
+No custom wrapper automatically secures every tool or establishes protocol conformance.
 
 ## Implementation Guide
 
