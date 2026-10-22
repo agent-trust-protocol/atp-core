@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {fixtureKeys, issueFixtureMandate, verifyFixtureMandate} from './signed-mandate.mjs';
+const issuer = fixtureKeys();
+const another = fixtureKeys();
+const issuerId='did:atp:operator-fixture';
+const trust = new Map([[issuerId, issuer.publicKey]]);
+const request = {agentDid:'did:atp:agent-a',audience:'service-a',resource:'fixed-fixture',action:'fixture.read'};
+const payload = {id:'grant-1',issuer:issuerId,agentDid:request.agentDid,audience:request.audience,resource:request.resource,actions:[request.action],notBefore:0,expiresAt:120};
+function evaluate(opts={}) {return verifyFixtureMandate({signedMandate:issueFixtureMandate(payload,issuer.privateKey),expectedIssuer:issuerId,trustedIssuers:trust,request,now:30,status:{available:true,checkedAt:30,revokedIds:new Set()},...opts});}
+test('valid signed bounded mandate',()=>assert.equal(evaluate().decision,'ALLOW'));
+test('tampered payload invalidates signature',()=> {const signedMandate=issueFixtureMandate(payload,issuer.privateKey);signedMandate.payload={...payload,resource:'other'};assert.equal(evaluate({signedMandate}).reason,'signature_invalid');});
+test('signature from untrusted actor is rejected',()=>assert.equal(evaluate({signedMandate:issueFixtureMandate(payload,another.privateKey)}).reason,'signature_invalid'));
+test('untrusted issuer is rejected',()=>assert.equal(evaluate({trustedIssuers:new Map()}).reason,'issuer_untrusted'));
+test('unexpected issuer is rejected',()=>assert.equal(evaluate({expectedIssuer:'did:atp:unknown'}).reason,'issuer_not_expected'));
+test('expired grant denied',()=>assert.equal(evaluate({now:120}).reason,'mandate_expired'));
+test('future grant denied',()=>assert.equal(evaluate({now:-1}).reason,'mandate_expired'));
+test('wrong audience, resource, action or agent denied',()=> {for(const key of ['agentDid','audience','resource','action'])assert.equal(evaluate({request:{...request,[key]:'other'}}).reason,'scope_mismatch');});
+test('mid-lease revocation denies at 30,60,119',()=> {for(const now of [30,60,119])assert.equal(evaluate({now,status:{available:true,checkedAt:now,revokedIds:new Set(['grant-1'])}}).reason,'mandate_revoked');});
+test('unavailable or stale revocation status denies',()=> {assert.equal(evaluate({status:null}).reason,'status_unavailable'); assert.equal(evaluate({status:{available:true,checkedAt:0,revokedIds:new Set()}}).reason,'status_unavailable');});
