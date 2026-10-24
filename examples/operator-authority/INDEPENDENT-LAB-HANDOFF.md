@@ -36,7 +36,7 @@ These fixtures have **not** established a normative ATP mandate encoding, real D
 - Do not replace or delete attributed run records; record disagreements and repairs explicitly.
 
 ## Suggested neutral lab intake
-The lab's CONTRIBUTING.md requires an issue before developing a new external family; maintainer acceptance is discretionary. Suggested candidate `fixtures/cross-stack/trust-freshness-revocation/` is **not an approved path**. Seek guidance on naming, schemas and owner, and obtain an independent run for claims requiring it. The connected GitHub integration has read-only access to the lab and received 403 on issue creation. A Gmail draft to the participants was prepared; do not infer it was sent.
+As of the current lab `CONTRIBUTING.md` and `docs/CANDIDATES.md`, **candidates may be submitted without an independent run** under `candidates/<submitter>-<name>/` plus an index row, with `CANDIDATE.md`, vectors/expectations, pinned source commit, declared license allowing Apache-2.0 redistribution, accurate limits, and a DCO sign-off. Publication is an initial scope/safety/provenance review, not technical admission. For **reviewed external-system family admission**, maintainers distinguish origin claims requiring independent recomputation from other attributed author-produced layers; discuss new scope early in an issue. Candidate-only PRs must not modify runner, workflow, or package paths. The connected GitHub integration previously received 403 attempting to create an external issue; this does not prevent proposing the candidate through a fork/manual maintainer coordination. Do not claim external acceptance. The earlier planned cross-stack path was unapproved.
 
 ## Candidate independent reproduction steps
 ```sh
@@ -55,3 +55,21 @@ These commands **replay ATP-authored tests**. By themselves they do not qualify 
 - Link request proof, operator authorization, approval, replay state and status revalidation to the protected execution gate; prove under independent processes.
 - Run same semantic tests against ATP Studio's actual mandate/Guardian enforcement in its own isolated environment.
 - Receive the external lab's scoping/admission guidance; submit the smallest attributed family and obtain genuinely independent recomputation.
+
+## PRE-SUBMISSION HOLD — 2026-10-24 independent readiness review
+
+**Decision: NOT READY for external candidate submission or scored ATP conformance claims.** An accurate synthetic-research candidate would be permitted by lab policy, but the group's first ATP contribution should demonstrate more than author-produced policy assertions. This is an internal quality threshold, not a lab requirement.
+
+Blocking gaps to close or explicitly exclude:
+1. The fixture's issuer/operator verification flags are injected and not proven from an independent trust root; experimental Ed25519 signatures use noncanonical JSON and ephemeral directly trusted keys.
+2. The fixture's revocation status is injected, not authenticated from a source and not exercised with an actual network outage; no real current-authority guarantee or measured propagation bound.
+3. Two-agent test is within one Node process; replay state is in-memory and cannot prove cross-worker/atomic enforcement or crash recovery.
+4. Actual production Guardian/Studio resource-side execution is not exercised in ATP Core; separate Studio integration evidence cannot be substituted as ATP Core proof.
+5. No pinned translation of lab revision-2 vectors to ATP per-axis claims and P1 policy, and no refused-reason/grant-reference revision-3 schema agreement yet.
+6. No independent signer/key-control and DID verification fixtures; no canonical signed message version, durable action idempotency, or authoritative operator-role proof.
+7. No complete per-vector machine output, digest-checked corpus inventory, falsification controls, alternate independent recomputation, and clear RUN-REPORT provenance package yet.
+8. General Core CI at commit 6801dcd had a blocking critical Next.js dependency audit, although the dedicated operator-fixture workflow passed. Do not bypass the security audit or merge the code on a false green claim.
+
+A safe minimal first candidate should pick *one* proved layer (e.g. policy response to authenticated status) and state precisely which external inputs are assumptions; it should not imply the real resource is protected until a concrete independent boundary actually exercises it. For each denial, capture distinct `confirmed_revoked` versus `status_unavailable` reasoning and the exact mandate/grant reference, tenant, version/digest, and observation timestamp, with privacy redaction.
+
+**Release gate:** Internal security review, falsification/mutation checks, frozen input digests, clean CI including critical audit, reproducible clean-room run, truthful axis and provenance labels, reviewer signoff, and explicit approval to publish external materials. Keep proprietary AAP R&D entirely out of public contribution materials.
