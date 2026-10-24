@@ -23,6 +23,6 @@ export function verifyFixtureMandate({signedMandate, expectedIssuer, trustedIssu
   if (!Number.isFinite(payload.notBefore) || !Number.isFinite(payload.expiresAt) || now < payload.notBefore || now >= payload.expiresAt) return deny('mandate_expired');
   if (!status?.available || status.checkedAt !== now || !(status.revokedIds instanceof Set)) return deny('status_unavailable');
   if (!payload.id || status.revokedIds.has(payload.id)) return deny('mandate_revoked');
-  if (!request || payload.agentDid !== request.agentDid || payload.audience !== request.audience || payload.resource !== request.resource || !Array.isArray(payload.actions) || !payload.actions.includes(request.action)) return deny('scope_mismatch');
+  if (!request || ![payload.agentDid,payload.audience,payload.resource,request.agentDid,request.audience,request.resource,request.action].every(v => typeof v === 'string' && v.trim().length > 0) || payload.agentDid !== request.agentDid || payload.audience !== request.audience || payload.resource !== request.resource || !Array.isArray(payload.actions) || !payload.actions.includes(request.action)) return deny('scope_mismatch');
   return {decision:'ALLOW', reason:'fixture_signature_and_scope_valid'};
 }
