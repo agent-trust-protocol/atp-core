@@ -57,3 +57,20 @@ test('cached evidence cannot itself grant action authority',()=>{
   const x=base();x.now=119;x.status={available:false,checkedAt:0,revokedAt:null};
   assert.equal(decide(x).reason,'status_not_current');
 });
+
+test('incomplete validity windows fail closed and never dispatch',()=>{
+  for (const missing of ['notBefore','expiresAt']) {
+    const x=base();delete x.grant[missing];let calls=0;
+    assert.notEqual(protectedBoundary(x,()=>calls++).decision,'ALLOW');assert.equal(calls,0);
+  }
+  for (const invalid of [undefined,NaN,Infinity]) {
+    const x=base();x.now=invalid;let calls=0;
+    assert.notEqual(protectedBoundary(x,()=>calls++).decision,'ALLOW');assert.equal(calls,0);
+  }
+});
+test('omitted action digests cannot satisfy approval',()=>{
+  const x=base();x.grant.requiresApproval=true;delete x.request.actionDigest;
+  x.request.approval={verifiedByTrustedOperator:true,used:false};
+  let calls=0;
+  assert.equal(protectedBoundary(x,()=>calls++).decision,'REQUIRE_APPROVAL');assert.equal(calls,0);
+});
