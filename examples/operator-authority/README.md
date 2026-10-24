@@ -1,5 +1,27 @@
 # Operator-authority reference fixtures (Issue #169)
 
+## Current local readiness work — October 24, 2026
+
+Run the complete suite with Node 24 after installing the locked SDK dependencies:
+
+```sh
+npm ci --include=dev --ignore-scripts --prefix packages/sdk
+ATP_LAB_REVISION2_VECTORS=/path/to/aps-conformance-suite/fixtures/lease-revocation-axes/revision-2/vectors.json \
+  node --test examples/operator-authority/*.test.mjs
+```
+
+The signed fixture and two-key request tests now use `CryptoUtils` from the existing SDK source for key generation, signing and verification. This removes their separate signing implementation; it does not establish a normative signed-mandate profile. The SDK key generator creates a hybrid pair; these fixtures deliberately use only its Ed25519 member and make no post-quantum mandate claim. Private keys exist only in memory.
+
+`lab-revision2.mjs` checks the exact revision-2 SHA-256 before parsing, translates timeline inputs into the synthetic policy evaluator, invokes its callback, then compares the decision and callback outcome with the live-standing-read / exclusive-endpoint oracle. It does not derive a decision from expected answers. It does not implement cached mode, inclusive expiry, authenticated status, real workers, or Guardian runtime. The three lab axes remain unclaimed; this is a narrow policy projection. Local refusal and grant-reference metadata are proposed additions, not an adopted revision-3 schema.
+
+```sh
+node examples/operator-authority/lab-revision2.mjs /path/to/revision-2/vectors.json
+```
+
+The matching test exercises all 12 cases / 44 calls, the altered-byte digest gate, a deny-everything mutation and a deny-but-dispatch mutation. When no corpus path is supplied it reports an explicit skip. The dedicated CI workflow supplies the corpus from a pinned lab commit so CI cannot silently skip it.
+
+Earlier run descriptions below are historical. They do not establish the status of this local patch or a later commit. External submission remains on hold pending real-runtime gap closure and independent review.
+
 Run: `node --test examples/operator-authority/fixture-policy.test.mjs` (Node 20+).
 
 This is a **synthetic reference policy evaluator**, not ATP Guardian, an ATP mandate verifier, a DID implementation, or an independent APS/RTTP/IQA adapter. Boolean fields named `proofVerified` and `issuerVerified` are **trusted fixture inputs only**. They do not perform cryptographic verification; do not pass agent-supplied claims into them. This example does not claim real revocation freshness or production authorization.
