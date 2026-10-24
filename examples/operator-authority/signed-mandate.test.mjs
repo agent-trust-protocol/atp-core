@@ -18,3 +18,11 @@ test('future grant denied',()=>assert.equal(evaluate({now:-1}).reason,'mandate_e
 test('wrong audience, resource, action or agent denied',()=> {for(const key of ['agentDid','audience','resource','action'])assert.equal(evaluate({request:{...request,[key]:'other'}}).reason,'scope_mismatch');});
 test('mid-lease revocation denies at 30,60,119',()=> {for(const now of [30,60,119])assert.equal(evaluate({now,status:{available:true,checkedAt:now,revokedIds:new Set(['grant-1'])}}).reason,'mandate_revoked');});
 test('unavailable or stale revocation status denies',()=> {assert.equal(evaluate({status:null}).reason,'status_unavailable'); assert.equal(evaluate({status:{available:true,checkedAt:0,revokedIds:new Set()}}).reason,'status_unavailable');});
+
+test('missing scope fields on both grant and request fail closed',()=>{
+  for(const key of ['agentDid','audience','resource']){
+    const incomplete={...payload};delete incomplete[key];
+    const incompleteRequest={...request};delete incompleteRequest[key];
+    assert.equal(evaluate({signedMandate:issueFixtureMandate(incomplete,issuer.privateKey),request:incompleteRequest}).reason,'scope_mismatch');
+  }
+});
