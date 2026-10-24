@@ -7,11 +7,11 @@ export function decide(input) {
   if (!grant?.issuerVerified || !grant?.proofVerified) return {decision:'DENY',reason:'mandate_unverified'};
   if (grant.issuedBy !== operator.id || grant.issuer !== operator.issuer) return {decision:'DENY',reason:'issuer_mismatch'};
   if (!grant.actions?.includes(request.action) || grant.resource !== request.resource || grant.audience !== request.audience) return {decision:'DENY',reason:'out_of_scope'};
-  if (now < grant.notBefore || now >= grant.expiresAt) return {decision:'DENY',reason:'mandate_expired'};
+  if (![now,grant.notBefore,grant.expiresAt].every(Number.isFinite) || grant.notBefore >= grant.expiresAt || now < grant.notBefore || now >= grant.expiresAt) return {decision:'DENY',reason:'mandate_expired'};
   // Even when evidence is cacheable, this protected action requires current authority.
   if (!status?.available || status.checkedAt !== now) return {decision:'DENY',reason:'status_not_current'};
   if (status?.revokedAt !== null && status?.revokedAt !== undefined && now >= status.revokedAt) return {decision:'DENY',reason:'mandate_revoked'};
-  if (grant.requiresApproval && (!request.approval?.verifiedByTrustedOperator || request.approval.actionDigest !== request.actionDigest || request.approval.used)) return {decision:'REQUIRE_APPROVAL',reason:'approval_required'};
+  if (grant.requiresApproval && (!request.approval?.verifiedByTrustedOperator || typeof request.actionDigest !== 'string' || !request.actionDigest.trim() || typeof request.approval?.actionDigest !== 'string' || !request.approval.actionDigest.trim() || request.approval.actionDigest !== request.actionDigest || request.approval.used)) return {decision:'REQUIRE_APPROVAL',reason:'approval_required'};
   return {decision:'ALLOW', reason:'authorized'};
 }
 
