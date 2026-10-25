@@ -15,7 +15,9 @@ test('corpus variables are present when the lab corpus is required', { skip: !re
   assert.ok(path2, 'ATP_LAB_REVISION2_VECTORS must be set when ATP_REQUIRE_LAB_CORPUS=1');
 });
 
-test('revision-3 mapping: decisions, declared refusal reasons, grant references, tamper gate and falsification', { skip: skipUnless(path3, 'ATP_LAB_REVISION3_VECTORS') }, () => {
+// This is a regression test on the comparison's output. It passes while the comparison still
+// disagrees with the lab on two grant references; it is not a revision-3 conformance pass.
+test('revision-3 comparison regression: 44/44 actions, 44/44 reasons, 42/44 grant_ref with LRA-09-r1/-r2 disclosed, tamper gate, falsification', { skip: skipUnless(path3, 'ATP_LAB_REVISION3_VECTORS') }, () => {
   const bytes = readFileSync(path3);
   assert.equal(createHash('sha256').update(bytes).digest('hex'), CORPUS_SHA256);
   const result = runRevision3(bytes);

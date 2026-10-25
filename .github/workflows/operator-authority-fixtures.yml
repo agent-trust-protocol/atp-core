@@ -43,3 +43,10 @@ jobs:
           ATP_LAB_REVISION2_VECTORS: ${{ github.workspace }}/.lab-reference/fixtures/lease-revocation-axes/revision-2/vectors.json
           ATP_LAB_REVISION3_VECTORS: ${{ github.workspace }}/.lab-reference-r3/fixtures/lease-revocation-axes/revision-3/vectors.json
         run: node --test examples/operator-authority/*.test.mjs examples/operator-authority/revision-3/*.test.mjs
+      # Separate from the regression tests above. The comparison still disagrees with the lab on two
+      # grant references (LRA-09-r1, LRA-09-r2); this step checks that the disagreement set is
+      # unchanged. A green step is not a revision-3 conformance pass.
+      - name: Revision-3 comparison, disclosed disagreements unchanged (not a conformance pass)
+        env:
+          ATP_LAB_REVISION3_VECTORS: ${{ github.workspace }}/.lab-reference-r3/fixtures/lease-revocation-axes/revision-3/vectors.json
+        run: node examples/operator-authority/revision-3/check-known-disagreements.mjs "$ATP_LAB_REVISION3_VECTORS"

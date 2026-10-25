@@ -73,8 +73,18 @@ the lab's README describes.
 ## 4. Results
 
 Command: `node examples/operator-authority/revision-3/lab-revision3.mjs <revision-3/vectors.json>`.
-Node v22.22.3, macOS arm64, 2026-10-25. The CLI exits 1 because not every field agrees; that is the
+Run on Node v22.22.3 and again on Node v24.4.0 (the workflow's version), macOS arm64, 2026-10-25;
+the two reports are byte-identical. The CLI exits 1 because not every field agrees; that is the
 honest result, not a defect in the runner.
+
+Two different things are checked, and they are kept apart on purpose:
+
+- **The comparison** (`lab-revision3.mjs`) measures agreement with the lab contract. It disagrees on
+  two records and exits 1. Nothing relabels that as a pass.
+- **The regression tests** (`lab-revision3.test.mjs`) pin the comparison's output, including the two
+  disagreements, so that any change in either direction fails the suite. A green suite means the
+  output is unchanged, not that the comparison agrees. `check-known-disagreements.mjs` does the same
+  for CI as its own workflow step, named to say so.
 
 | Comparison | Matched | Of |
 |---|---|---|
@@ -184,7 +194,8 @@ which have no revision-3 class. None of this was scored, because Studio was not 
 | 44/44 refusal reasons under the declared mapping | `REASON_MAP`, `mapRefusalReason` | same, plus `fold-undetermined-into-revoked` mutant | same |
 | 42/44 grant references, exactly LRA-09-r1 and -r2 differing in `observation_as_of_ms` | `observationUsed` in `lab-revision3.mjs` | same, pinned mismatch set, plus `name-requested-grant` mutant | same |
 | Revision 2 unchanged, report digest `f6110feb…` reproduced | `lab-revision2.mjs` at `219d68f` | `lab-revision3.test.mjs` third test | `node lab-revision2.mjs <revision-2/vectors.json> \| shasum -a 256` |
-| CI cannot silently skip either corpus | `.github/workflows/operator-authority-fixtures.yml` (`ATP_REQUIRE_LAB_CORPUS=1`, both pins) | `lab-revision3.test.mjs` first test; log `05` | `ATP_REQUIRE_LAB_CORPUS=1 node --test …` without the variable set → exit 1 |
+| CI cannot silently skip either corpus | `.github/workflows/operator-authority-fixtures.yml` (`ATP_REQUIRE_LAB_CORPUS=1`, both pins) | `lab-revision3.test.mjs` first test; logs `05`, `13` | `ATP_REQUIRE_LAB_CORPUS=1 node --test …` without the variable set → exit 1 |
+| The disagreement set is exactly LRA-09-r1/-r2, checked apart from the regression tests and not called a pass | `check-known-disagreements.mjs`; its own workflow step | logs `10` (exit 0, prints "NOT a conformance pass"), `12` (tampered corpus → exit 1) | `node revision-3/check-known-disagreements.mjs <revision-3/vectors.json>` |
 | Studio enforcement evidence (separate) | Studio `6192a27`…`4141fd8` | Studio integration suites | `pnpm test` in Studio; CI run 40244229594 |
 
 Reproduce locally, from the Core repository root with Node 22 or 24:
@@ -199,9 +210,10 @@ ATP_LAB_REVISION3_VECTORS=$L/revision-3/vectors.json \
 node examples/operator-authority/revision-3/lab-revision3.mjs $L/revision-3/vectors.json
 ```
 
-Local run on this branch: 38 tests, 38 passed, 0 skipped (35 existing, 3 new). Without the corpus
-variables the three new tests report explicit skips; with `ATP_REQUIRE_LAB_CORPUS=1` and no corpus
-they fail.
+Local runs on this branch, Node v22.22.3 and Node v24.4.0: 38 tests, 38 passed, 0 skipped (35
+existing, 3 new) on both. Without the corpus variables the three new tests report explicit skips;
+with `ATP_REQUIRE_LAB_CORPUS=1` and no corpus they fail. The workflow's Node 24 path has been run
+locally only; it has not run on GitHub.
 
 ## 8. What this does not establish
 
@@ -214,9 +226,13 @@ they fail.
   separately and was not run on lab vectors.
 - Independent reproduction. Everything here was produced by the people who wrote it.
 - Lab adoption of ATP's reason names, or ATP adoption of the lab's.
+- A green fixture workflow. Its tests and its comparison step pass while the comparison still
+  disagrees with the lab on two grant references. Green means "unchanged from this record".
 
 ## 9. Evidence
 
 Raw outputs are kept outside the repository, in `ATP_Revision3_Evidence_Mapping_2026-10-25/`, with
-`environment.txt`, `corpus/` (the pinned lab inputs and manifest), `logs/01`–`06` and a `SHA256SUMS`
-over every file. The commit hash of this branch is recorded there once the commit exists.
+`environment.txt` and `environment-node24.txt`, `corpus/` (the pinned lab inputs and manifest),
+`logs/01`–`06` (Node 22), `logs/07`–`13` (Node 24: install, suite, comparison CLI, disagreement
+check, revision-2 CLI, tampered-corpus and missing-corpus controls), `COMMANDS.md` and a
+`SHA256SUMS` over every file. The commit hashes of this branch are recorded there.
