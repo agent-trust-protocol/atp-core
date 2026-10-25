@@ -35,8 +35,31 @@ hooks:
       fail_closed: true
 ```
 
-The matcher only covers these four Hermes tool names. Other tools are outside this example's scope; expand the matcher and map them explicitly before treating it as a wider gate. Run `hermes hooks test pre_tool_call --for-tool terminal` and a real Hermes session to confirm consent and blocking in your installed version. This repository test verifies Hermes' documented wire format with a subprocess; it does **not** exercise a live Hermes runtime.
+The matcher only covers these four Hermes tool names. Other tools are outside this example's scope; expand the matcher and map them explicitly before treating it as a wider gate. Run `hermes hooks test pre_tool_call --for-tool terminal` and a real Hermes session to confirm consent and blocking in your installed version. The JavaScript example tests verify the wire format. For an actual Hermes runtime session, use the Python verification below.
 
 The ATP profile is a category and state gate. The adapter adds the fixed file restriction; it does not provide a general filesystem sandbox, signed audit, identity or mandate verification, nor does it implement an approval workflow. Hermes shell hooks are trusted local code and a separate hook or plugin may affect execution. Preserve Hermes' native permissions and sandbox. This demonstration is for ATP Core, the open developer foundation; ATP Studio is a separate enterprise product.
 
 Hermes protocol reference: [Event Hooks](https://github.com/NousResearch/hermes-agent/blob/main/website/docs/user-guide/features/hooks.md#shell-hooks).
+
+## Reproduce the actual Hermes runtime session
+
+The checked evidence in `docs/security/hermes-runtime-evidence.json` was generated
+with upstream Hermes commit `55ee4acdd822b73fb9573a2321531ae3a9d0b3e0`
+(Hermes reports `vgit.55ee4ac (2026.9.24)`), Python 3.14.8.
+Install that checkout into an isolated Python environment following upstream setup,
+run `npm ci` in this example, then run:
+
+```sh
+/path/to/hermes-environment/bin/python verify-live-hermes.py
+```
+
+This starts a loopback-only deterministic OpenAI-compatible provider and runs the
+actual Hermes `AIAgent.run_conversation` tool dispatcher. It uses the documented
+`accept_hooks` consent path in a temporary profile, verifies the persisted
+allowlist, records the actual hook replies, checks a real fixture read, and checks
+that a denied terminal call never creates its sentinel. The temporary profile is
+removed afterward. No model download, real provider credentials, or paid API is used.
+
+This is runtime integration evidence with scripted tool selection, not autonomous
+model reasoning. The CLI gateway attempt in this environment failed to start its
+control listener; this result does not claim a successful CLI gateway session.

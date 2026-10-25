@@ -8,10 +8,11 @@ import { promisify } from 'util';
 
 export class MetricsStorage {
   private db: sqlite3.Database;
+  private ready: Promise<void>;
 
   constructor(dbPath = 'monitoring.db') {
     this.db = new sqlite3.Database(dbPath);
-    this.initializeDatabase();
+    this.ready = this.initializeDatabase();
   }
 
   private async initializeDatabase() {
@@ -36,11 +37,12 @@ export class MetricsStorage {
 
       console.log('✓ Monitoring database initialized');
     } catch (error) {
-      console.error('Failed to initialize monitoring database:', error);
+      throw error;
     }
   }
 
   async storeMetrics(metrics: SystemMetrics): Promise<void> {
+    await this.ready;
     return new Promise((resolve, reject) => {
       this.db.run(
         'INSERT INTO metrics (timestamp, data) VALUES (?, ?)',
@@ -58,6 +60,7 @@ export class MetricsStorage {
   }
 
   async getMetricsHistory(query: MetricsQuery): Promise<SystemMetrics[]> {
+    await this.ready;
     return new Promise((resolve, reject) => {
       // Calculate time range
       const now = new Date();
@@ -102,6 +105,7 @@ export class MetricsStorage {
   }
 
   async getLatestMetrics(): Promise<SystemMetrics | null> {
+    await this.ready;
     const get = promisify(this.db.get.bind(this.db));
     
     try {
@@ -117,6 +121,7 @@ export class MetricsStorage {
   }
 
   async cleanup(): Promise<void> {
+    await this.ready;
     return new Promise((resolve) => {
       // Keep only last 30 days of data
       const cutoffDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);

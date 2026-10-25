@@ -7,7 +7,7 @@
 
 ## Quickstart
 
-Node.js 18 or newer.
+Use Node.js 20 or 24. The published Node 18 first-run path fails its Web Crypto initialization check.
 
 ```bash
 npm install atp-sdk

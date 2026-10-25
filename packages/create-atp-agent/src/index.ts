@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import { Command } from 'commander';
 import fs from 'fs-extra';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { startOnboardingDashboard } from './serve-dashboard.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -34,6 +34,9 @@ program
       await startOnboardingDashboard({ openBrowser });
       return;
     }
+
+    const diagnosticsPath = path.join(__dirname, '../template/diagnostics.mjs');
+    const { recordDiagnostic } = await import(pathToFileURL(diagnosticsPath).href);
 
     const finalName = projectName;
     if (!/^[a-z0-9][a-z0-9-_]*$/.test(finalName)) {
@@ -71,9 +74,11 @@ program
       const result = spawnSync('npm', ['install'], { cwd: targetDir, stdio: 'inherit' });
       if (result.error || result.status !== 0) {
         console.error(chalk.yellow('Dependencies were not installed. Run npm install inside the new project.'));
+        recordDiagnostic('error');
         process.exitCode = 1;
         return;
       }
+      recordDiagnostic('install');
       console.log(chalk.green('✓ Dependencies installed'));
     }
 
