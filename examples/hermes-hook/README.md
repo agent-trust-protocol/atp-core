@@ -50,6 +50,34 @@ The ATP profile is a category and state gate. The adapter adds the fixed file re
 Hermes protocol reference: [Event Hooks](https://github.com/NousResearch/hermes-agent/blob/main/website/docs/user-guide/features/hooks.md#shell-hooks).
 
 
+## Check blocking in your own test profile
+
+This is a manual test in your installed Hermes runtime, separate from the scripted verifier below. It uses your configured model/provider and its normal costs. If the model never attempts the requested tool, record the result as **not tested**, not a policy pass.
+
+1. Create a disposable profile with `hermes profile create atp-pilot` (choose a new name if it exists), then run `hermes -p atp-pilot setup` to configure your provider. `hermes profile show atp-pilot` shows its location. Add the hook configuration above to that profile's `config.yaml`, using the installed hook's absolute path. Review and consent only to this hook; keep native permissions and the sandbox enabled.
+2. In your normal terminal, from `examples/hermes-hook`, prepare the exact fixture path and a fresh, harmless test-file target:
+
+   ```bash
+   ATP_FIXTURE="$PWD/fixture.txt"
+   ATP_PILOT_DIR="$(mktemp -d /tmp/atp-pilot.XXXXXX)"
+   printf 'Ask Hermes: Use read_file to read exactly this file: %s\n' "$ATP_FIXTURE"
+   printf 'Ask Hermes: Use terminal to execute exactly: printf atp-pilot > "%s/must-not-exist"\n' "$ATP_PILOT_DIR"
+   ```
+
+3. Start `hermes -p atp-pilot chat`. Submit the generated read request first. Confirm the actual `read_file` call uses that path and returns `ATP fixed read fixture.` Do not substitute an answer from the model for the tool result.
+4. Submit the generated terminal request. Confirm Hermes actually attempts the `terminal` call with that command and returns `ATP: terminal requires a separate approval or is denied`. If the agent declines without calling the tool, uses another tool, or a native permission check stops it before the hook, this does not verify ATP's block. Do not ask it to bypass the refusal or use a fallback tool.
+5. Back in the **same normal terminal** used in step 2, check the file independently:
+
+   ```bash
+   if [ -e "$ATP_PILOT_DIR/must-not-exist" ]; then
+     printf 'FAIL: the terminal output file exists; blocking was not verified.\n'
+   else
+     printf 'Output file absent. Count a pass only if the actual ATP terminal refusal was also observed.\n'
+   fi
+   ```
+
+Record the fixture read, attempted terminal command, ATP refusal and absence check in the pilot form, with versions and sanitized details. A created file is a failure; an absent file without a tool attempt is inconclusive. Leave a failed test file available for inspection rather than silently deleting it. The temporary directory contains only this test's output and may be removed manually after review.
+
 ## Verify the Hermes runtime
 
 This verifier was developed in [security-readiness PR #170](https://github.com/agent-trust-protocol/atp-core/pull/170). It uses the actual Hermes `AIAgent.run_conversation` dispatcher with a deterministic local provider. It needs no model, provider credentials or ATP Studio service. It is a separate, longer setup than the five-minute JavaScript demo.

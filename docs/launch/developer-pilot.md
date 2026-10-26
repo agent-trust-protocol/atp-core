@@ -9,7 +9,7 @@ Start with Hermes users who already want to restrict file or terminal access. We
 1. Use Node.js 20 or 24. [Run the five-minute local demo](../../examples/action-boundary/README.md).
 2. [Run the Hermes hook walkthrough](../../examples/hermes-hook/README.md#reproduce-the-hook-decisions). This checks subprocess decisions, not Hermes execution.
 3. [Run the pinned Hermes runtime verifier](../../examples/hermes-hook/README.md#verify-the-hermes-runtime). Confirm a real read and a blocked terminal call. Its provider selects scripted calls; it does not test autonomous model reasoning.
-4. If useful, [configure a disposable Hermes profile](../../examples/hermes-hook/README.md#connect-a-live-hermes-profile), review and consent to the hook, and repeat the fixed read and terminal attempt. Keep your existing sandbox and permissions. Use test data.
+4. If useful, [follow the own-profile read, terminal and absence checks](../../examples/hermes-hook/README.md#check-blocking-in-your-own-test-profile), review and consent to the hook, and repeat the fixed read and terminal attempt. Keep your existing sandbox and permissions. Use test data.
 5. [Report the result](https://github.com/agent-trust-protocol/atp-core/issues/new?template=developer-pilot.yml). A failed install is useful; do not wait until everything works.
 
 The script is a demonstration of a fixed-file boundary. It does not authorize arbitrary paths or commands, verify signed mandates, implement remote revocation, or issue signed receipts. Closing the local demo session is not revoking a mandate.

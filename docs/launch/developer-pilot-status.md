@@ -4,7 +4,7 @@
 
 ATP Core's proposed entry path now explains a concrete tool boundary, links a real Hermes runtime verifier, and invites five developers to test it. This is an onboarding change, not an npm release or public campaign.
 
-The verifier was brought forward from PR #170 so adoption work does not depend on merging the entire security-readiness change set. It adds assertion-optimization refusal and shell quoting for temporary paths. The existing hook and the published `atp-profiles@1.1.0` dependency are unchanged. Existing security review and release decisions remain separate.
+The verifier was brought forward from PR #170 so adoption work does not depend on merging the entire security-readiness change set. It adds assertion-optimization refusal and shell quoting for temporary paths. The existing hook and the published `atp-profiles@1.1.0` dependency are unchanged. Existing security review and release decisions remain separate. The final CI gate also required the root Next.js and matching ESLint configuration patch from 15.5.24 to 15.5.28; their exact pins and lockfile are updated without suppressing the critical audit gate. Remaining high/moderate dependency debt is not claimed fixed. The own-profile walkthrough now specifies exact read and terminal requests plus an independent absence check.
 
 ## Local verification
 
@@ -40,3 +40,9 @@ Do not market this example as “allow, deny, revoke” yet. It currently demons
 A future revocation proof needs an authentic operator grant and trusted verification path, a permission/status change while the same agent session remains active, and a repeat of the previously allowed protected action. The next tool callback must not run; record grant identity/version, status observation, denial and execution outcome. Test stale/unavailable status handling and disclose the race between checking permission and committing a side effect. Do not claim atomic revocation without an atomic enforcement mechanism.
 
 Synthetic fixtures in #172/#173 do not satisfy that runtime gate. They can continue as research while the narrow Hermes pilot tests developer demand. Keep ATP Core and ATP Studio infrastructure, credentials and evidence boundaries separate.
+
+## Final readiness follow-up
+
+The first full CI run failed its critical-audit gate on the existing root Next.js 15.5.24 dependency. Updated Next.js and eslint-config-next to exact 15.5.28 pins with their lockfile. The critical audit now passes locally (zero critical; 11 high and 3 moderate findings remain). Typecheck passes; lint has zero errors and 288 existing warnings; all 51 root test suites pass (1,095 tests). This does not claim the remaining advisory debt is resolved.
+
+Added the own-profile walkthrough requested by review: exact fixture request, a fresh temporary terminal target, the ATP refusal to observe, and an independent file-absence check. An absent file without an actual hook refusal is explicitly inconclusive. The manual participant session still needs participant execution.
