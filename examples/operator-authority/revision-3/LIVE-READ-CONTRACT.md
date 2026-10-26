@@ -1,6 +1,7 @@
 # Clarified synthetic live-read adapter
 
-Maintainer ruling: https://github.com/Agent-Authority-Conformance/aps-conformance-suite/issues/192#issuecomment-6420938886
+Source: [clarification by @aeoess in #192](https://github.com/Agent-Authority-Conformance/aps-conformance-suite/issues/192#issuecomment-6420938886). This is that contributor's clarification on the issue, not an adopted
+revision of the lab corpus.
 
 For live_standing_read, every unexpired correctly bound call must attempt one source read before
 returning, even if operation scope already fails. Under P1, refusal precedence is binding, expiry,
@@ -16,6 +17,8 @@ presented grant, evaluation instant, purpose, outcome, and consulted observation
 the requested instant for a stale observation. Missing, malformed, unavailable, stale or throwing
 sources deny. Errors are reduced to a local error outcome without source messages. Approval checks
 remain after authority and operation checks. Binding and validity refusals do not read the source.
+A stale or unavailable observation outranks any revocation it reports, as P1 orders
+`authority_not_determined` before `authority_revoked`.
 
 `lab-revision3-live.mjs` translates only the pinned lab events into inputs and invokes the callback
 through a separately instrumented source. `source-read-contract.mjs` checks that local log against
@@ -38,8 +41,9 @@ or local read-contract mismatch. CI keeps the historical disagreement check and 
 
 This is author-produced synthetic evidence for live_standing_read, exclusive end, P1 only.
 The source callback reads in-memory fixture state, not a network, authenticated status source or
-database. Local attempt records are not durable audit receipts. The adapter is synchronous; async
-sources are unsupported. Its source-error handling also catches programming errors within the
+database. Local attempt records are not durable audit receipts. The adapter is synchronous; a source
+that returns a promise is refused as an `error` attempt, and the promise's rejection is absorbed so
+it cannot surface as an unhandled rejection. Its source-error handling also catches programming errors within the
 callback, so it must not be reused as production error classification. Caller preconditions are
 synthetic assertions, not cryptographic proofs. There is no independent reproduction or claim of
 full lab conformance, separately scored axes, composite verification, diagnostic reads, cached
@@ -51,8 +55,16 @@ The new adapter converts source exceptions to local refusals instead of propagat
 added reads and status-dependent reasons can reveal grant status to its holder through a forbidden
 operation. Latency, rate limits and real-source failure behavior remain unmeasured.
 
-The pinned lab corpus remains unchanged. Synthetic overlap tests exercise the precedence clarified
-by the maintainer; they are not new adopted lab vectors. No public comment, submission, merge,
+**Unconfirmed profile boundary: not-yet-valid grants.** A grant presented before its validity
+window opens (`now < notBefore`) is refused without a source read, and the mapping reports it as
+`evidence_expired`. Neither half of that is confirmed. The clarification covers unexpired calls,
+and a not-yet-valid grant is arguably unexpired, so the profile may require a read there; the
+revision-3 vocabulary also has no distinct not-yet-valid reason. Revision 3 contains no such call,
+so the pinned corpus does not decide it, and the question has not been raised with the lab. Treat
+this behaviour as ATP's current choice, not as conforming.
+
+The pinned lab corpus remains unchanged. Synthetic overlap tests exercise the precedence in the
+clarification by @aeoess in #192; they are not new adopted lab vectors. No public comment, submission, merge,
 deployment or endorsement follows from this change.
 
 ## Local verification
@@ -64,3 +76,15 @@ The new CLI returned exit 0 with 44/44 actions, reasons, grant references and lo
 All four legacy mapper mutants reduced matches. Targeted tests rejected skipped, duplicated,
 wrong-grant and fabricated read traces. No root Jest/build/conformance gate, remote CI, Mac
 reproduction, live source or staging run was performed for this fixture-only change.
+
+Second local run, 2026-10-26, Node v24.4.0 on macOS, AI-assisted and by the same author side, so
+additional reproduction evidence, not an independent run. Corpora were extracted at the CI pins
+(revision 2 at 7141c616, digest a0a07ea5…; revision 3 at 7774daee, digest 3b7b3fb9…). The adapter
+patch as received passed 48/48; with the proposed combined-failure cases it passed 54/54. Review
+fixes then added three adapter tests: 57/57 pass, zero skips, both corpora required. The new CLI still returns 44/44 on every comparison and on local read contracts. The
+historical check still reports exactly LRA-09-r1 and -r2. Ten evaluator mutations, including
+skipping the read on a forbidden operation, substituting the call instant for the observation,
+swapping undetermined and revoked precedence, and dispatching on denial or approval, are each
+caught by the suite. On the same machine the repository gate, `npm run conformance`, passed all
+510 tests across its five items; that gate does not exercise these fixtures. Remote CI results
+belong to the pull request, not to this record.

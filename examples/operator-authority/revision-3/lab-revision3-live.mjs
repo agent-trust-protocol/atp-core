@@ -1,7 +1,7 @@
-// ATP-authored mapping of synthetic policy to lab revision 3; not a production adapter.
-// Author-produced (Mode A). The revision-2 mapping in ../lab-revision2.mjs is frozen and untouched;
-// this file repeats its timeline translation rather than importing it, because that function gates
-// on the revision-2 digest and must keep doing so.
+// ATP-authored mapping of the separate live-read synthetic adapter (live-read-policy.mjs) to lab
+// revision 3, live_standing_read only; not a production adapter. Author-produced (Mode A).
+// The frozen fixture-policy.mjs, ../lab-revision2.mjs and the historical lab-revision3.mjs mapping
+// are not imported or changed; this file repeats the timeline translation for that reason.
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
@@ -123,9 +123,6 @@ export function runLiveRevision3(bytes, mutation = null) {
         protected_callback_count: calls, expected: projection, observed,
         action_match: actionMatch, reason_match: reasonMatch, grant_ref_match: grantRefMatch,
         grant_ref_differing_fields: differing,
-        note: !grantRefMatch && result.reason === 'out_of_scope' && differing.join() === 'observation_as_of_ms'
-          ? 'ATP evaluator refuses an out-of-scope operation before consulting status; the lab model reads status first and checks the operation last'
-          : null,
       });
     }
   }
@@ -153,7 +150,7 @@ export function runLiveRevision3(bytes, mutation = null) {
         ...(r.observed.downstream_reached === r.expected.downstream_reached ? [] : ['downstream_reached']),
         ...(r.reason_match ? [] : ['refusal_reason']),
         ...r.grant_ref_differing_fields.map(f => `grant_ref.${f}`)],
-        observed: r.observed, expected: r.expected, note: r.note })),
+        observed: r.observed, expected: r.expected })),
     records,
   };
 }

@@ -1,9 +1,9 @@
 # ATP evidence mapping to lease-revocation-axes revision 3
 
-**Historical baseline:** the #192 maintainer ruling now confirms that the skipped pre-scope reads
+**Historical baseline:** the [clarification by @aeoess in #192](https://github.com/Agent-Authority-Conformance/aps-conformance-suite/issues/192#issuecomment-6420938886) states that the skipped pre-scope reads
 described below do not satisfy live_standing_read. See [the separate clarified adapter](LIVE-READ-CONTRACT.md).
 The 42/44 baseline and frozen revision-2 evaluator are retained for reproducibility; the ordering
-question below is resolved by that ruling, not still awaiting a lab answer.
+question below is answered by that clarification, not still awaiting a lab answer.
 
 October 25, 2026. Internal record prepared for local review. **Not submitted to the lab, not posted,
 not a conformance verdict.** Every result below is ATP-authored and author-produced (Mode A). No one
@@ -145,8 +145,13 @@ These are stated, not repaired. No evaluator or product code was changed to rais
    decision used none") as permitting `null` when no observation was used. That is ATP's
    interpretation; the expected `0` and `30000` follow from the reference model reading the source
    before it checks the operation, and whether the family requires that order of an implementation
-   is unresolved. The lab has not been asked. ATP keeps its order for now. Two design
-   considerations inform that choice, neither measured by this investigation: a status read for a
+   was unresolved when this was written. ATP kept its order at that point. **Superseded on
+   2026-10-26** by the [clarification by @aeoess in #192](https://github.com/Agent-Authority-Conformance/aps-conformance-suite/issues/192#issuecomment-6420938886): `live_standing_read` requires one status read for
+   every unexpired, correctly bound call, including an out-of-scope operation, so the skipped reads
+   do not satisfy that profile. The baseline above is kept unchanged as historical evidence; the
+   separate adapter in [LIVE-READ-CONTRACT.md](LIVE-READ-CONTRACT.md) implements the clarified rule.
+   The two design considerations below still describe real costs of that rule; neither was measured
+   by this investigation: a status read for a
    request that scope alone refuses would add a read on the enforcement path, and it would let a
    grant holder learn revocation or source availability by sending an out-of-scope operation.
    Counterfactuals show the ordering difference would also change the reason when an out-of-scope

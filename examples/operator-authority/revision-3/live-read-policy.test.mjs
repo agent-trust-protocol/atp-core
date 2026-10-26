@@ -15,11 +15,11 @@ test('clarified profile: 44 decisions, reasons, references and local source cont
   for (const mutant of ['deny-everything','deny-but-dispatch','fold-undetermined-into-revoked','name-requested-grant']) assert.ok(runLiveRevision3(bytes,mutant).all_matched<44,mutant);
 });
 test('forbidden operation still reads exactly once; overlap precedence is binding, expiry, status, revocation, operation', () => {
-  for(const bound of [true,false])for(const expired of [true,false])for(const state of ['active','revoked','stale','unavailable']) {
+  for(const bound of [true,false])for(const expired of [true,false])for(const state of ['active','revoked','stale','unavailable','stale-revoked','unavailable-revoked']) {
     const i=input();if(!bound)i.request.resource='g2';if(expired)i.now=120000;
     let reads=0,calls=0;
-    const r=liveReadBoundary(i,q=>{reads++;assert.deepEqual(q,{grant:'g1',at_ms:i.now});return {available:state!=='unavailable',checkedAt:state==='stale'?0:i.now,revokedAt:state==='revoked'?10000:null};},()=>calls++);
-    assert.equal(r.reason,!bound?'out_of_scope':expired?'mandate_expired':['stale','unavailable'].includes(state)?'status_not_current':state==='revoked'?'mandate_revoked':'out_of_scope');
+    const r=liveReadBoundary(i,q=>{reads++;assert.deepEqual(q,{grant:'g1',at_ms:i.now});return {available:!state.startsWith('unavailable'),checkedAt:state.startsWith('stale')?0:i.now,revokedAt:state.endsWith('revoked')?10000:null};},()=>calls++);
+    assert.equal(r.reason,!bound?'out_of_scope':expired?'mandate_expired':/^(stale|unavailable)/.test(state)?'status_not_current':state==='revoked'?'mandate_revoked':'out_of_scope');
     assert.equal(reads,bound&&!expired?1:0);assert.equal(calls,0);
   }
 });
@@ -48,4 +48,27 @@ test('approval remains required, exact-action bound and unused; valid request di
     const valid=approval?.actionDigest==='d'&&!approval.used;
     assert.equal(r.decision,valid?'ALLOW':'REQUIRE_APPROVAL');assert.equal(calls,valid?1:0);assert.equal(r.sourceReads.length,1);
   }
+});
+test('a stale or unavailable observation outranks a revocation it reports (P1: not determined before revoked)', () => {
+  for(const status of [{available:true,checkedAt:0,revokedAt:10000},{available:false,checkedAt:30000,revokedAt:10000}]){
+    const i=input();i.request.action='read';
+    const r=liveReadBoundary(i,()=>status,()=>assert.fail('executed'));
+    assert.equal(r.reason,'status_not_current');assert.equal(r.sourceReads.length,1);
+  }
+});
+test('local source checker accepts a throwing source as the one attempt, recorded as error with no observation', () => {
+  const i=input(),actual=[];
+  const r=liveReadBoundary(i,q=>{actual.push({...q,status:undefined,threw:true});throw Error('down');},()=>assert.fail('executed'));
+  assert.equal(checkSourceReads(i,r,actual),true);
+  assert.equal(checkSourceReads(i,{...r,sourceReads:[{...r.sourceReads[0],outcome:'unavailable'}]},actual),false);
+  assert.equal(checkSourceReads(i,r,[{...actual[0],threw:false}]),false);
+});
+test('a rejecting asynchronous source fails closed without an unhandled rejection', async () => {
+  let unhandled=null;const onUnhandled=e=>{unhandled=e;};process.on('unhandledRejection',onUnhandled);
+  try{
+    const r=liveReadBoundary(input(),()=>Promise.reject(Error('async down')),()=>assert.fail('executed'));
+    assert.equal(r.decision,'DENY');assert.equal(r.reason,'status_not_current');assert.equal(r.sourceReads[0].outcome,'error');
+    await new Promise(res=>setTimeout(res,20));
+    assert.equal(unhandled,null);
+  }finally{process.off('unhandledRejection',onUnhandled);}
 });

@@ -21,8 +21,13 @@ export function liveReadBoundary(input, readStatus, resource) {
   let status;
   try {
     status = readStatus({ grant: grant.resource, at_ms: now });
-    // Copy source values once. A Promise is unsupported by this synchronous fixture adapter.
-    if (status?.then) throw new TypeError('Asynchronous source unsupported');
+    // Copy source values once. A Promise is unsupported by this synchronous fixture adapter; absorb
+    // its eventual rejection so an unsupported source fails closed without an unhandled rejection.
+    const then = status?.then;
+    if (typeof then === 'function') {
+      try { then.call(status, undefined, () => {}); } catch { /* the denial below still applies */ }
+      throw new TypeError('Asynchronous source unsupported');
+    }
     status = { available: status?.available === true, checkedAt: status?.checkedAt, revokedAt: status?.revokedAt };
   } catch {
     read.outcome = 'error';

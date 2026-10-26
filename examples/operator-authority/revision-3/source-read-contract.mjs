@@ -1,4 +1,6 @@
 // Local instrumentation check, not the external lab runner or authenticated provenance.
+// actualReads entries: { grant, at_ms, status, threw? }. A source that threw still counts as the one
+// required attempt; the adapter must record it as `error` with no observation.
 export function checkSourceReads(input, result, actualReads) {
   const { grant, request, now } = input;
   const eligible = grant.resource === request.resource && grant.audience === request.audience
@@ -13,6 +15,9 @@ export function checkSourceReads(input, result, actualReads) {
   const status = actual.status;
   const observed = status?.available === true && Number.isFinite(status.checkedAt)
     && (status.revokedAt == null || Number.isFinite(status.revokedAt));
+  if (actual.threw === true) {
+    return record.outcome === 'error' && record.observation === null && result.observationAsOf === null;
+  }
   return observed
     ? record.outcome === 'observed' && record.observation?.as_of_ms === status.checkedAt
       && record.observation.revoked_at_ms === (status.revokedAt ?? null) && result.observationAsOf === status.checkedAt
