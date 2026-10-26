@@ -25,12 +25,18 @@ export const REASON_MAP = Object.freeze({
   mandate_revoked: 'authority_revoked',
 });
 
+// Lab precedence puts binding first and operation last; ATP's `out_of_scope` is checked before
+// expiry and status. The split below follows the lab's order between the two classes it can name.
+// It does not re-check lease or authority, so an out-of-scope operation on an expired or
+// unobservable grant would map to `operation_not_permitted` where the lab would say
+// `evidence_expired` or `authority_not_determined`. No call in the mapped profile combines them.
+// An audience mismatch has no lab class and is reported as unmapped rather than guessed.
 export function mapRefusalReason(result, input, mutation = null) {
   if (result.decision === 'ALLOW') return null;
   if (result.reason === 'out_of_scope') {
-    return input.grant.resource !== input.request.resource
-      ? 'evidence_binding_mismatch'
-      : 'operation_not_permitted';
+    if (input.grant.resource !== input.request.resource) return 'evidence_binding_mismatch';
+    if (input.grant.audience !== input.request.audience) return 'unmapped:out_of_scope(audience)';
+    return 'operation_not_permitted';
   }
   if (mutation === 'fold-undetermined-into-revoked' && result.reason === 'status_not_current') {
     return 'authority_revoked';
@@ -39,10 +45,13 @@ export function mapRefusalReason(result, input, mutation = null) {
 }
 
 // The observation the ATP decision used, derived from the decision's own path. `decide()` consults
-// status only after scope and expiry pass, so a scope or expiry refusal used no observation.
-function observationUsed(result, input) {
+// status only after scope and expiry pass, so a scope or expiry refusal used no observation. When
+// status was consulted and available, the instant is the status's own `checkedAt`, never the call
+// time: a status dated earlier than the call is refused as `status_not_current`, and the record
+// must name the instant that was observed, not the one that was wanted.
+export function observationUsed(result, input) {
   const consulted = result.decision === 'ALLOW' || ['status_not_current', 'mandate_revoked'].includes(result.reason);
-  return consulted && input.status.available ? input.now : null;
+  return consulted && input.status.available ? input.status.checkedAt : null;
 }
 
 const canonical = (value) => JSON.stringify(value, Object.keys(value ?? {}).sort());

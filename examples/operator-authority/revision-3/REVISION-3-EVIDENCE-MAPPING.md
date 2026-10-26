@@ -58,15 +58,20 @@ and their precedence are proposals for this family (PR #191); the lab maintainer
 |---|---|---|
 | `ALLOW` | `null` | |
 | `out_of_scope`, resource bound to another grant | `evidence_binding_mismatch` | compares the grant's resource with the request's resource, both inputs the mapping built |
-| `out_of_scope`, operation outside the grant | `operation_not_permitted` | the remaining `out_of_scope` case |
+| `out_of_scope`, operation outside the grant | `operation_not_permitted` | the remaining `out_of_scope` case, after the audience check below |
+| `out_of_scope`, audience mismatch | `unmapped:out_of_scope(audience)` | no lab class exists; reported as unmapped rather than guessed. The translation never varies audience, so it cannot occur in this corpus |
 | `mandate_expired` | `evidence_expired` | |
 | `status_not_current` | `authority_not_determined` | |
 | `mandate_revoked` | `authority_revoked` | |
 
 `grant_ref` is built from the evidence entry the call presented (`grant`, `evidence_id`,
-`issued_at_ms`, `expires_at_ms`) and from the decision's own path: `observation_as_of_ms` is the call
-instant when the decision consulted an available status, and `null` when it refused before consulting
-status or the status was unavailable. The report carries `vectors_sha256`, so the pair
+`issued_at_ms`, `expires_at_ms`) and from the decision's own path: `observation_as_of_ms` is the
+consulted status's own `checkedAt` when the decision reached the status check and the status was
+available, and `null` when it refused before consulting status or the status was unavailable. It is
+never the call time by assumption: a status dated before the call is refused as `status_not_current`
+and the record names the instant that was observed. In this corpus `checkedAt` always equals the call
+instant, so the two coincide. `mapping-rules.test.mjs` checks these rules on synthetic inputs without
+the corpus. The report carries `vectors_sha256`, so the pair
 (`vectors_sha256`, `evidence_id`) resolves a record to one `profile.initial_evidence` entry exactly as
 the lab's README describes.
 
@@ -130,7 +135,13 @@ These are stated, not repaired. No evaluator or product code was changed to rais
    to match would change behaviour only to score, so it was not done.
 2. **One ATP reason, two lab classes.** `out_of_scope` covers resource, audience and operation. The
    mapping splits it into `evidence_binding_mismatch` and `operation_not_permitted` using only the
-   inputs it built. That split is a mapping-layer judgment, not something the evaluator states.
+   inputs it built, binding first as the lab orders it, and audience left unmapped. That split is a
+   mapping-layer judgment, not something the evaluator states. The lab's `operation_not_permitted`
+   also presupposes that lease and current authority hold; ATP's `out_of_scope` is checked before
+   expiry and status, so an out-of-scope operation on an expired or unobservable grant would map to
+   `operation_not_permitted` where the lab would say `evidence_expired` or
+   `authority_not_determined`. No call in the mapped profile combines these conditions, so the corpus
+   does not exercise the difference; a synthetic test records it.
 3. **`status_not_current` is wider than `authority_not_determined` as exercised here.** ATP's reason
    fires for an unavailable status or a status not checked at the call instant. In this profile the
    translation always sets `checkedAt` to the call instant, so only unavailability triggers it. The
@@ -195,7 +206,8 @@ which have no revision-3 class. None of this was scored, because Studio was not 
 | 42/44 grant references, exactly LRA-09-r1 and -r2 differing in `observation_as_of_ms` | `observationUsed` in `lab-revision3.mjs` | same, pinned mismatch set, plus `name-requested-grant` mutant | same |
 | Revision 2 unchanged, report digest `f6110feb…` reproduced | `lab-revision2.mjs` at `219d68f` | `lab-revision3.test.mjs` third test | `node lab-revision2.mjs <revision-2/vectors.json> \| shasum -a 256` |
 | CI cannot silently skip either corpus | `.github/workflows/operator-authority-fixtures.yml` (`ATP_REQUIRE_LAB_CORPUS=1`, both pins) | `lab-revision3.test.mjs` first test; logs `05`, `13` | `ATP_REQUIRE_LAB_CORPUS=1 node --test …` without the variable set → exit 1 |
-| The disagreement set is exactly LRA-09-r1/-r2, checked apart from the regression tests and not called a pass | `check-known-disagreements.mjs`; its own workflow step | logs `10` (exit 0, prints "NOT a conformance pass"), `12` (tampered corpus → exit 1) | `node revision-3/check-known-disagreements.mjs <revision-3/vectors.json>` |
+| The disagreement set is exactly LRA-09-r1/-r2 with observed `null` and expected `0`/`30000`, checked apart from the regression tests and not called a pass; added, removed, reordered or value-altered disagreements are rejected | `check-known-disagreements.mjs`; its own workflow step | `mapping-rules.test.mjs`; logs `10`, `16` (exit 0, prints "NOT a conformance pass"), `12` (tampered corpus → exit 1) | `node revision-3/check-known-disagreements.mjs <revision-3/vectors.json>` |
+| Mapping rules hold on synthetic inputs: binding before operation, audience unmapped, observation instant is the consulted `checkedAt` or `null`, and the untested precedence difference is recorded | `mapRefusalReason`, `observationUsed` | `mapping-rules.test.mjs` (no corpus needed) | `node --test examples/operator-authority/revision-3/mapping-rules.test.mjs` |
 | Studio enforcement evidence (separate) | Studio `6192a27`…`4141fd8` | Studio integration suites | `pnpm test` in Studio; CI run 40244229594 |
 
 Reproduce locally, from the Core repository root with Node 22 or 24:
