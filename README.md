@@ -1,7 +1,9 @@
 # Agent Trust Protocol™
-### The Open Trust Layer for AI Agents
+### Check permission before your AI agent uses a tool
 
-**Put a policy check immediately before an AI agent acts.** Try a local read that runs, a shell attempt held for approval, and a read denied after the session ends.
+**Let a permitted tool action run. Block the next one when the policy says stop.** ATP Core gives developers policy-evaluation tools and examples of enforcing those decisions immediately before execution.
+
+Start with a local demo, then connect the [Hermes tool hook](examples/hermes-hook/README.md). You can try both without a model API key. The examples have deliberately narrow permissions so you can inspect exactly what runs.
 
 AI agents move between tools, organizations, and protocols. ATP is an open effort to make identity, trust evidence, and privacy controls portable across those boundaries. It complements MCP, A2A, ANP, ADK, and agent frameworks; it does not replace how agents communicate.
 
@@ -11,7 +13,7 @@ AI agents move between tools, organizations, and protocols. ATP is an open effor
 
 ## Try it in five minutes
 
-No account, model API key, or hosted ATP service is needed. With Node.js 18+ and npm:
+No account, model API key, or hosted ATP service is needed. Use **Node.js 20 or 24** and npm for this walkthrough:
 
 ```bash
 git clone https://github.com/agent-trust-protocol/atp-core.git
@@ -23,6 +25,20 @@ npm start
 ![Animated walkthrough: a fixed read runs, a shell callback stays blocked, and a completed session denies the next read.](docs/launch/action-boundary.gif)
 
 Only the first callback runs. [Read the full walkthrough and text transcript](examples/action-boundary/README.md), or [try the Hermes hook walkthrough](examples/hermes-hook/README.md#reproduce-the-hook-decisions). This demo checks action category and session state; session completion is not mandate revocation.
+
+## Protect one tool in Hermes
+
+Already using Hermes Agent? [Start with the Hermes walkthrough](examples/hermes-hook/README.md): allow a read of one fixed file and block terminal, write and patch calls. The hook checks the action before Hermes dispatches the matched tool.
+
+| Try | What you can verify |
+| --- | --- |
+| `npm run demo` in `examples/hermes-hook` | Four decisions through the real hook subprocess; Hermes is not started. |
+| [Run the Hermes runtime verifier](examples/hermes-hook/README.md#verify-the-hermes-runtime) | A real Hermes tool read returns the fixture; a denied terminal call creates no sentinel file. Tool selection comes from a scripted local provider. |
+| [Try it in your own Hermes profile](examples/hermes-hook/README.md#connect-a-live-hermes-profile) | Check consent and execution in your installed runtime, keeping its native permissions and sandbox. |
+
+**Can you withdraw permission?** The local demo stops further reads when its session completes. That is not signed-mandate revocation. The Hermes example does not yet implement that revocation path; do not deploy it as a general agent authorization system.
+
+We are looking for **five developers to try one protected tool** and tell us where setup breaks or the boundary falls short. [Join the developer pilot](docs/launch/developer-pilot.md). A failed setup is useful feedback too.
 
 ## What is here
 
@@ -56,7 +72,7 @@ OpenClaw remains a legacy optional adapter example, not a required ATP dependenc
 
 ## Start with the SDK
 
-Node.js 18 or newer is supported by the published package metadata.
+Use Node.js 20 or 24 for the SDK quickstart. Some published package metadata still advertises Node.js 18; the first-run probe in [security-readiness PR #170](https://github.com/agent-trust-protocol/atp-core/pull/170) records a Web Crypto failure there. Metadata correction awaits a versioned release.
 
 ```bash
 npm install atp-sdk

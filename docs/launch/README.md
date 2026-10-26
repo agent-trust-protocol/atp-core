@@ -1,5 +1,11 @@
 # ATP Core developer launch
 
+## Current developer pilot
+
+[Protect one tool: five-developer pilot](developer-pilot.md) is the next adoption milestone. It includes onboarding, a feedback form, a recruitment draft and activation/return criteria. No independent pilot outcomes have been collected.
+
+The [Hermes runtime verifier](../../examples/hermes-hook/README.md#verify-the-hermes-runtime), originally developed in PR #170, has a [recorded run](hermes-runtime-evidence.json). It exercises real dispatch using scripted local tool selection; it is not autonomous reasoning or signed-mandate revocation. See [implementation and verification status](developer-pilot-status.md).
+
 ## Message and evidence
 
 **The Open Trust Layer for AI Agents. Put a policy check immediately before an AI agent acts.**
@@ -8,11 +14,11 @@ Start with the local action-boundary demo, then the Hermes hook. These demonstra
 
 ## Launch checklist
 
-- [ ] Merge the launch PR after its required checks pass.
+- [x] Original launch PR #165 merged. Onboarding follow-up changes still need review.
 - [ ] Confirm the README animation and five-minute command sequence render on main.
 - [ ] Upload `social-preview.png` in repository Settings → General → Social preview (1280 × 640).
 - [ ] Review existing topics; add only accurate topics from: `ai-agents`, `agent-security`, `authorization`, `decentralized-identity`, `verifiable-credentials`, `typescript`, `policy-enforcement`. Add runtime/protocol topics only where the documented integration warrants them.
-- [ ] Record a live Hermes session with the exact Hermes version, hook consent, matched read and terminal attempts, returned decisions and execution outcome. Keep it separate from the wire-format demo.
+- [x] Record a Hermes AIAgent runtime session with the exact commit, temporary-profile hook consent, actual hook replies, real read, terminal denial and absent sentinel. Scripted local provider; autonomous model and CLI gateway behavior remain unverified.
 - [ ] Publish the approved announcement on the maintainer's channels and relevant communities where project sharing is welcome.
 - [ ] Invite a small number of independent developers to try the documented commands and report friction. Obtain permission before using names or testimonials.
 
