@@ -30,7 +30,23 @@ jobs:
           ref: 7141c6167acfdd5288ec7cc1ca8d2ba9207b3390
           path: .lab-reference
           persist-credentials: false
+      - name: Read pinned external revision-3 corpus
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: Agent-Authority-Conformance/aps-conformance-suite
+          ref: 7774daee77a7766f737c6da71265c9e214b47ff5
+          path: .lab-reference-r3
+          persist-credentials: false
       - name: Run isolated operator authority test suites
         env:
+          ATP_REQUIRE_LAB_CORPUS: '1'
           ATP_LAB_REVISION2_VECTORS: ${{ github.workspace }}/.lab-reference/fixtures/lease-revocation-axes/revision-2/vectors.json
-        run: node --test examples/operator-authority/*.test.mjs
+          ATP_LAB_REVISION3_VECTORS: ${{ github.workspace }}/.lab-reference-r3/fixtures/lease-revocation-axes/revision-3/vectors.json
+        run: node --test examples/operator-authority/*.test.mjs examples/operator-authority/revision-3/*.test.mjs
+      # Separate from the regression tests above. The comparison still disagrees with the lab on two
+      # grant references (LRA-09-r1, LRA-09-r2); this step checks that the disagreement set is
+      # unchanged. A green step is not a revision-3 conformance pass.
+      - name: Revision-3 comparison, disclosed disagreements unchanged (not a conformance pass)
+        env:
+          ATP_LAB_REVISION3_VECTORS: ${{ github.workspace }}/.lab-reference-r3/fixtures/lease-revocation-axes/revision-3/vectors.json
+        run: node examples/operator-authority/revision-3/check-known-disagreements.mjs "$ATP_LAB_REVISION3_VECTORS"
