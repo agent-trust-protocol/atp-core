@@ -148,7 +148,8 @@ export function runRevision3(bytes, mutation = null) {
     all_matched: records.filter(r => r.action_match && r.reason_match && r.grant_ref_match).length,
     mismatches: records.filter(r => !(r.action_match && r.reason_match && r.grant_ref_match))
       .map(r => ({ id: r.id, atp_reason: r.atp_reason, fields: [
-        ...(r.action_match ? [] : ['action_decision/downstream_reached']),
+        ...(r.observed.action_decision === r.expected.action_decision ? [] : ['action_decision']),
+        ...(r.observed.downstream_reached === r.expected.downstream_reached ? [] : ['downstream_reached']),
         ...(r.reason_match ? [] : ['refusal_reason']),
         ...r.grant_ref_differing_fields.map(f => `grant_ref.${f}`)],
         observed: r.observed, expected: r.expected, note: r.note })),

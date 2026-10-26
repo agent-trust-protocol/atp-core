@@ -222,10 +222,12 @@ ATP_LAB_REVISION3_VECTORS=$L/revision-3/vectors.json \
 node examples/operator-authority/revision-3/lab-revision3.mjs $L/revision-3/vectors.json
 ```
 
-Local runs on this branch, Node v22.22.3 and Node v24.4.0: 38 tests, 38 passed, 0 skipped (35
-existing, 3 new) on both. Without the corpus variables the three new tests report explicit skips;
-with `ATP_REQUIRE_LAB_CORPUS=1` and no corpus they fail. The workflow's Node 24 path has been run
-locally only; it has not run on GitHub.
+Local run of that command on this branch, Node v24.4.0: 43 tests, 43 passed, 0 skipped (35
+existing, 8 added: 4 corpus-gated in `lab-revision3.test.mjs`, 4 corpus-free in
+`mapping-rules.test.mjs`). An earlier, narrower run before the mapping-rules tests existed recorded
+38. Without the corpus variables the four corpus-gated tests report explicit skips and the four
+corpus-free tests still run; with `ATP_REQUIRE_LAB_CORPUS=1` and no corpus the suite fails. The same
+workflow ran on GitHub for PR #173 (Node 24) with the same result.
 
 ## 8. What this does not establish
 

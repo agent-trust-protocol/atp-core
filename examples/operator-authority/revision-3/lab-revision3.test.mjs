@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { runRevision3, CORPUS_SHA256 } from './lab-revision3.mjs';
 import { runRevision2, CORPUS_SHA256 as REVISION2_SHA256 } from '../lab-revision2.mjs';
+import { disagreements, unchanged } from './check-known-disagreements.mjs';
 
 const path3 = process.env.ATP_LAB_REVISION3_VECTORS;
 const path2 = process.env.ATP_LAB_REVISION2_VECTORS;
@@ -54,6 +55,26 @@ test('revision-3 comparison regression: 44/44 actions, 44/44 reasons, 42/44 gran
   const renamed = runRevision3(bytes, 'name-requested-grant');
   assert.ok(renamed.grant_ref_matched < 42);
   assert.ok(!renamed.records.find(r => r.id === 'LRA-12-r2').grant_ref_match);
+});
+
+test('action and callback mismatches are reported as separate fields with their real values', { skip: skipUnless(path3, 'ATP_LAB_REVISION3_VECTORS') }, () => {
+  const bytes = readFileSync(path3);
+  // A deny that still reaches the callback: only downstream_reached differs.
+  const dispatched = disagreements(runRevision3(bytes, 'deny-but-dispatch'));
+  const reached = dispatched.filter(d => d.field === 'downstream_reached');
+  assert.ok(reached.length > 0);
+  assert.ok(reached.every(d => d.observed === true && d.expected === false));
+  assert.ok(!dispatched.some(d => d.field.includes('/')));
+  // Every permit turned into a deny: action_decision differs with its real values.
+  const denied = disagreements(runRevision3(bytes, 'deny-everything'));
+  const decisions = denied.filter(d => d.field === 'action_decision');
+  assert.equal(decisions.length, 20);
+  assert.ok(decisions.every(d => d.observed === 'deny' && d.expected === 'permit'));
+  assert.ok(denied.filter(d => d.field === 'downstream_reached').every(d => d.observed === false && d.expected === true));
+  // Both change the disagreement set, so the checker would exit 1.
+  assert.ok(!unchanged(runRevision3(bytes, 'deny-but-dispatch')));
+  assert.ok(!unchanged(runRevision3(bytes, 'deny-everything')));
+  assert.ok(unchanged(runRevision3(bytes)));
 });
 
 test('revision-2 mapping and its report are unchanged', { skip: skipUnless(path2, 'ATP_LAB_REVISION2_VECTORS') }, () => {
