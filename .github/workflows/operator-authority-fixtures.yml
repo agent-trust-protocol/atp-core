@@ -50,3 +50,7 @@ jobs:
         env:
           ATP_LAB_REVISION3_VECTORS: ${{ github.workspace }}/.lab-reference-r3/fixtures/lease-revocation-axes/revision-3/vectors.json
         run: node examples/operator-authority/revision-3/check-known-disagreements.mjs "$ATP_LAB_REVISION3_VECTORS"
+      - name: Clarified live-read profile comparison (synthetic, not full conformance)
+        env:
+          ATP_LAB_REVISION3_VECTORS: ${{ github.workspace }}/.lab-reference-r3/fixtures/lease-revocation-axes/revision-3/vectors.json
+        run: node examples/operator-authority/revision-3/lab-revision3-live.mjs "$ATP_LAB_REVISION3_VECTORS"

@@ -1,5 +1,10 @@
 # ATP evidence mapping to lease-revocation-axes revision 3
 
+**Historical baseline:** the #192 maintainer ruling now confirms that the skipped pre-scope reads
+described below do not satisfy live_standing_read. See [the separate clarified adapter](LIVE-READ-CONTRACT.md).
+The 42/44 baseline and frozen revision-2 evaluator are retained for reproducibility; the ordering
+question below is resolved by that ruling, not still awaiting a lab answer.
+
 October 25, 2026. Internal record prepared for local review. **Not submitted to the lab, not posted,
 not a conformance verdict.** Every result below is ATP-authored and author-produced (Mode A). No one
 who did not write the inputs or the implementation has recomputed anything here.
