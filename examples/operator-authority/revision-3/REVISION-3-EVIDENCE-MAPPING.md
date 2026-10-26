@@ -135,16 +135,17 @@ These are stated, not repaired. No evaluator or product code was changed to rais
    to match would change behaviour only to score, so it was not done.
 
    Investigated on 2026-10-25 with a property spy on the status object: on both calls `decide()`
-   reads no status property at all, so the supplied observation was never consulted. The lab's
-   definition (README, "the instant of the observation the decision used, or null when the decision
-   used none") permits `null`; the expected `0` and `30000` follow from the reference model reading
-   the source before it checks the operation, which the revision-3 text does not require of an
-   implementation. ATP's position is to keep its order: consulting status for a request that scope
-   alone refuses would add a status read on the enforcement path and would let a grant holder learn
-   revocation or source availability by sending an out-of-scope operation. Counterfactuals show the
-   ordering difference would also change the reason when an out-of-scope operation meets a revoked,
-   unavailable or expired grant; the corpus contains no such call. The question of whether the
-   pre-scope read is required is one for the lab, and has not been raised there.
+   reads no status property at all, so the supplied observation was never consulted. ATP reads the
+   lab's definition (README, "the instant of the observation the decision used, or null when the
+   decision used none") as permitting `null` when no observation was used. That is ATP's
+   interpretation; the expected `0` and `30000` follow from the reference model reading the source
+   before it checks the operation, and whether the family requires that order of an implementation
+   is unresolved. The lab has not been asked. ATP keeps its order for now. Two design
+   considerations inform that choice, neither measured by this investigation: a status read for a
+   request that scope alone refuses would add a read on the enforcement path, and it would let a
+   grant holder learn revocation or source availability by sending an out-of-scope operation.
+   Counterfactuals show the ordering difference would also change the reason when an out-of-scope
+   operation meets a revoked, unavailable or expired grant; the corpus contains no such call.
 2. **One ATP reason, two lab classes.** `out_of_scope` covers resource, audience and operation. The
    mapping splits it into `evidence_binding_mismatch` and `operation_not_permitted` using only the
    inputs it built, binding first as the lab orders it, and audience left unmapped. That split is a
