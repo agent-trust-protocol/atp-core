@@ -4,6 +4,8 @@ import {
 } from '../session/enforce';
 import type { ATPClient } from 'atp-sdk';
 import type { ClawSessionContext, SessionState } from '../session/types';
+// Real canonical evaluator (from source) so profile decisions are not mocked.
+import { BUILTIN_PROFILES, evaluateActionWithProfile } from '../../../atp-profiles/src/index';
 
 function makeMockClient(checkAccessAllowed = true, profileDecision?: 'allow' | 'deny' | 'require_approval'): ATPClient {
   return {
@@ -175,6 +177,17 @@ describe('enforceAtpPoliciesForClawSession', () => {
 
       expect(result.allowedTools).toHaveLength(0);
       expect(result.requiresApproval).toEqual(expect.arrayContaining(['http', 'fs']));
+    });
+
+    it('keeps every default tool reachable under the real openclaw-sandbox profile', async () => {
+      const client = makeMockClient(true);
+      (client as any).evaluateActionWithProfile = ({ profileId, ...context }: any) =>
+        evaluateActionWithProfile(BUILTIN_PROFILES[profileId], context).decision;
+      for (const state of ['planning', 'executing', 'communicating', 'completed'] as SessionState[]) {
+        const result = await enforceAtpPoliciesForClawSession(makeCtx(state), client, { profileId: 'openclaw-sandbox' });
+        // Every default allowed tool must map to an action the profile recognizes and allows.
+        expect(result.allowedTools).toEqual(defaultClawStatePolicy[state].allowedTools);
+      }
     });
 
     it('does not invoke profile evaluation when profileId is omitted', async () => {

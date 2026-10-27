@@ -94,6 +94,7 @@
     "dist/**/*",
     "docs/**/*",
     "examples/**/*",
+    "scripts/run-offline-examples.mjs",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"

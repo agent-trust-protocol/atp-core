@@ -23,6 +23,7 @@ const TOOL_TO_ACTION_TYPE: Record<string, string> = {
   http: 'network',
   messaging: 'messaging',
   credentials: 'credentials',
+  'read-only-logs': 'logs-read',
 };
 
 /**
