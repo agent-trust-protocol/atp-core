@@ -1,0 +1,10 @@
+{
+  "checks": {
+    "docker": false,
+    "postgres": false,
+    "localModel": false
+  },
+  "status": "BLOCKED",
+  "liveProofRun": false,
+  "paidApiCalls": 0
+}

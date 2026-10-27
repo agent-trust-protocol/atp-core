@@ -1,0 +1,34 @@
+{
+  "id": "F7-direct-probe-llama3.2-3b-quotes",
+  "title": "Direct probe (no ATP), llama3.2:3b: structured calls with typographic (curly) quotes around Canada",
+  "evidence_class": "session-log-recovery",
+  "environment": "Developer Mac (darwin), local Ollama at loopback; isolated local harness: disposable Docker PostgreSQL + Fastify listener mounting the Studio mandate SQL route. Not a Studio deployment.",
+  "paid_or_hosted_inference": false,
+  "observed": {
+    "output": [
+      "try 0: tool_calls=[{'name': 'sql_db_query', 'args': {'query': 'SELECT COUNT(*) AS CanadianCustomers FROM Customer WHERE Country = “Canada”'}, 'id': 'd8c7d991-566b-47ec-b950-75d90a7cb4e9', 'type': 'tool_call'}]",
+      "try 1: tool_calls=[{'name': 'sql_db_query', 'args': {'query': 'SELECT COUNT(*) AS CanadianCustomers FROM Customer WHERE Country = “Canada”'}, 'id': '2c78a607-3375-4339-8e2f-b9151f3531c3', 'type': 'tool_call'}]",
+      "try 2: tool_calls=[{'name': 'sql_db_query', 'args': {'query': 'SELECT COUNT(*) AS CanadianCustomers FROM Customer WHERE Country = “Canada”'}, 'id': '33dceb9c-21ea-40fb-a4b7-f984749da3ee', 'type': 'tool_call'}]"
+    ]
+  },
+  "sources": [
+    {
+      "session_id": "5e15d028-c516-40da-be90-359f6628bb47",
+      "jsonl_line_0based": 272,
+      "timestamp": "2026-10-18T05:18:00.513Z",
+      "tool_use_id": "toolu_01LvBWiL4cQiz5SEiEp88usH",
+      "private_record": "private/transcript-records/5e15d028-L00272-tool_result.json",
+      "private_record_sha256": "6148835ace9c8a00a6222c43349182dab38680d9749fb2757b9f0780473efe07",
+      "invoked_at": "2026-10-18T05:14:53.280Z"
+    },
+    {
+      "session_id": "5e15d028-c516-40da-be90-359f6628bb47",
+      "jsonl_line_0based": 270,
+      "timestamp": "2026-10-18T05:14:53.280Z",
+      "tool_use_id": "toolu_01LvBWiL4cQiz5SEiEp88usH",
+      "private_record": "private/transcript-records/5e15d028-L00270-tool_use.json",
+      "private_record_sha256": "ebc908b53a3f3c1412f807ec9e364ccf046188c11924cc6fddd8035658117261"
+    }
+  ],
+  "notes": "Model-capability probe only; explains why the pinned-SQL digest would not match even when the literal is not truncated."
+}

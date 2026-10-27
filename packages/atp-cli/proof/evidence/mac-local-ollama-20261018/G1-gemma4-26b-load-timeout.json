@@ -1,0 +1,80 @@
+{
+  "id": "G1-gemma4-26b-load-timeout",
+  "title": "gemma4:26b: did not load; ornith models queued behind it were never evaluated",
+  "evidence_class": "session-log-recovery",
+  "environment": "Developer Mac (darwin), local Ollama at loopback; isolated local harness: disposable Docker PostgreSQL + Fastify listener mounting the Studio mandate SQL route. Not a Studio deployment.",
+  "paid_or_hosted_inference": false,
+  "observed": {
+    "background_probe": {
+      "models_in_order": [
+        "gemma4:26b",
+        "ornith:latest",
+        "hrbrmstr/ornith-9b-fixed:latest"
+      ],
+      "watcher_result": [
+        "Exit code 143",
+        "Command timed out after 4m 20s"
+      ],
+      "probe_output_bytes": 0
+    },
+    "warm_load_attempt": {
+      "timeout_seconds": 120,
+      "final_line": "gemma4:26b did NOT load within 120s"
+    }
+  },
+  "sources": [
+    {
+      "session_id": "5e15d028-c516-40da-be90-359f6628bb47",
+      "jsonl_line_0based": 249,
+      "timestamp": "2026-10-18T05:02:15.162Z",
+      "tool_use_id": "toolu_018iqtb322VStfT7tsS8jrHY",
+      "private_record": "private/transcript-records/5e15d028-L00249-tool_result.json",
+      "private_record_sha256": "6d91cff159b2479431d70be72792843434369b6da3bda66f0ec37f66b38119bd",
+      "invoked_at": "2026-10-18T04:56:21.276Z"
+    },
+    {
+      "session_id": "5e15d028-c516-40da-be90-359f6628bb47",
+      "jsonl_line_0based": 254,
+      "timestamp": "2026-10-18T05:07:55.609Z",
+      "tool_use_id": "toolu_01SMxDwkbD6JHAKu9Rz8ihaX",
+      "private_record": "private/transcript-records/5e15d028-L00254-tool_result.json",
+      "private_record_sha256": "675ce9a8f7ab1f914176004a038e37fbc3c904cfd780c4ead9606ca226c200a2",
+      "invoked_at": "2026-10-18T05:03:10.212Z"
+    },
+    {
+      "session_id": "5e15d028-c516-40da-be90-359f6628bb47",
+      "jsonl_line_0based": 260,
+      "timestamp": "2026-10-18T05:10:42.612Z",
+      "tool_use_id": "toolu_01GtMPUc6gbVJEBX1an2pXrF",
+      "private_record": "private/transcript-records/5e15d028-L00260-tool_result.json",
+      "private_record_sha256": "de2780cb1b6754fbb83fc2601e786ba6956721702b0c0ad53d11c58537a06a81",
+      "invoked_at": "2026-10-18T05:10:41.611Z"
+    },
+    {
+      "session_id": "5e15d028-c516-40da-be90-359f6628bb47",
+      "jsonl_line_0based": 267,
+      "timestamp": "2026-10-18T05:13:53.050Z",
+      "tool_use_id": "toolu_01JkFZktud4FapMBCQKYGhty",
+      "private_record": "private/transcript-records/5e15d028-L00267-tool_result.json",
+      "private_record_sha256": "c32593ebe2e6c8ddb0e8c9c6b8d5c66fbbf37d35416746eed5fa606523fd6ba4",
+      "invoked_at": "2026-10-18T05:10:49.975Z"
+    },
+    {
+      "session_id": "5e15d028-c516-40da-be90-359f6628bb47",
+      "jsonl_line_0based": 248,
+      "timestamp": "2026-10-18T04:56:21.276Z",
+      "tool_use_id": "toolu_018iqtb322VStfT7tsS8jrHY",
+      "private_record": "private/transcript-records/5e15d028-L00248-tool_use.json",
+      "private_record_sha256": "19db16f725f148cb2747be45a4e2b0210bc0484bc8f4d827f0e404ed53113e80"
+    },
+    {
+      "session_id": "5e15d028-c516-40da-be90-359f6628bb47",
+      "jsonl_line_0based": 266,
+      "timestamp": "2026-10-18T05:10:49.975Z",
+      "tool_use_id": "toolu_01JkFZktud4FapMBCQKYGhty",
+      "private_record": "private/transcript-records/5e15d028-L00266-tool_use.json",
+      "private_record_sha256": "7d3769e968666a2dde474fba579e228b021ab24010c70e87f2ef686e06f372b4"
+    }
+  ],
+  "notes": "Probe was killed with zero output, so neither ornith model produced any result. Treat ornith as NOT TESTED."
+}

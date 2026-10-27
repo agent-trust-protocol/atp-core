@@ -1,0 +1,43 @@
+{
+  "id": "A1-autonomous-llama3.2-3b",
+  "title": "Autonomous llama3.2:3b: no structured tool invocation",
+  "evidence_class": "session-log-recovery",
+  "environment": "Developer Mac (darwin), local Ollama at loopback; isolated local harness: disposable Docker PostgreSQL + Fastify listener mounting the Studio mandate SQL route. Not a Studio deployment.",
+  "paid_or_hosted_inference": false,
+  "observed": {
+    "question": "How many customers are from Canada?",
+    "model": "ollama:llama3.2:3b",
+    "atpEnabled": true,
+    "elapsedSeconds": 23.03,
+    "timedOut": false,
+    "error": null,
+    "agentToolCallSequence": [],
+    "atpToolResults": [],
+    "finalAnswer": "{\"name\":\"sql_db_query\",\"parameters\":{\"query\":\"SELECT COUNT(*) AS CanadianCustomers FROM Customer WHERE Country = \"Canada\"\"}}",
+    "server": {
+      "sqlCallbackDelta": 0,
+      "successReceipt": null,
+      "chainOk": true,
+      "chinookBefore": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15",
+      "chinookAfter": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15"
+    }
+  },
+  "sources": [
+    {
+      "session_id": "61f8c86b-1fde-479c-ac94-14baa103a23e",
+      "jsonl_line_0based": 2841,
+      "timestamp": "2026-10-18T02:57:20.901Z",
+      "tool_use_id": "toolu_013f1mZaBMWXcJkjGUA1TUDE",
+      "private_record": "private/transcript-records/61f8c86b-L02841-tool_result.json",
+      "private_record_sha256": "8493394a380145c7335e1d0a34bcf50e66882bc5ec754d071ffe87189becb90a",
+      "invoked_at": "2026-10-18T02:56:55.222Z"
+    }
+  ],
+  "runner_recovered_source_sha256": {
+    "ollama_agent_runner.llama.py.recovered": "515445a101309f8de9d62a573fbc8a80d30189034b98b780ecc41e19bd886c2f"
+  },
+  "server_recovered_source_sha256": {
+    "_liveserver.tmp.mjs.recovered": "b1e99eccd7d01b616859cba58c92ae8277a340dd309279d03b8e2f6d9e995929"
+  },
+  "notes": "Original JSON file was overwritten by the next run (same filename); only the session-log copy survives."
+}
