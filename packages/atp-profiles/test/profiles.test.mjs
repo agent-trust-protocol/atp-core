@@ -10,17 +10,48 @@ function legacy(profile, { actionType, state }) {
   if (policy?.require_approval_for?.includes(actionType)) return 'require_approval';
   return 'allow';
 }
-test('all four built-ins preserve SDK 2.1 decisions', () => {
+function recognized(profile, { actionType, state }) {
+  const policy = Object.hasOwn(profile.state_policies ?? {}, state ?? '') ? profile.state_policies[state] : undefined;
+  return Object.hasOwn(profile.controls, actionType) ||
+    [policy?.allowed_tools, policy?.restricted_tools, policy?.require_approval_for].some(n => n?.includes(actionType));
+}
+test('built-ins keep SDK 2.1 decisions for recognized actions and fail closed otherwise', () => {
   assert.deepEqual(Object.keys(BUILTIN_PROFILES), ['safe-default', 'dev-mode', 'enterprise-locked', 'openclaw-sandbox']);
   for (const profile of Object.values(BUILTIN_PROFILES))
     for (const state of [undefined, 'planning', 'executing', 'communicating', 'completed', 'unknown'])
-      for (const actionType of ['shell', 'filesystem', 'network', 'credentials', 'messaging', 'logs-read', 'unknown']) {
+      for (const actionType of ['shell', 'filesystem', 'network', 'credentials', 'messaging', 'logs-read', 'external-messaging', 'unknown']) {
         const context = { state, actionType };
         const actual = evaluateActionWithProfile(profile, context);
-        assert.equal(actual.decision, legacy(profile, context));
+        const expected = recognized(profile, context) ? legacy(profile, context) : (profile.unknown_action ?? 'deny');
+        assert.equal(actual.decision, expected, `${profile.id}/${state}/${actionType}`);
         assert.equal(actual.allowed, actual.decision === 'allow');
         assert.equal(evaluateActionWithProfile(profile, { sessionState: state, actionType }).decision, actual.decision);
       }
+});
+test('unrecognized action types fail closed in restrictive profiles', () => {
+  for (const id of ['safe-default', 'enterprise-locked', 'openclaw-sandbox'])
+    for (const actionType of ['Shell', 'shell_exec', 'exec', 'credential', 'constructor', '__proto__', 'toString'])
+      assert.deepEqual(evaluateActionWithProfile(BUILTIN_PROFILES[id], { actionType, state: 'executing' }),
+        { allowed: false, decision: 'deny', reason: 'unknown_action_type' }, `${id}/${actionType}`);
+});
+test('recognition is scoped to the active state policy', () => {
+  const sandbox = BUILTIN_PROFILES['openclaw-sandbox'];
+  assert.equal(evaluateActionWithProfile(sandbox, { actionType: 'logs-read', state: 'completed' }).decision, 'allow');
+  assert.equal(evaluateActionWithProfile(sandbox, { actionType: 'logs-read', state: 'executing' }).decision, 'deny');
+  assert.equal(evaluateActionWithProfile(sandbox, { actionType: 'external-messaging', state: 'communicating' }).decision, 'require_approval');
+  assert.equal(evaluateActionWithProfile(sandbox, { actionType: 'external-messaging', state: 'executing' }).decision, 'deny');
+});
+test('missing or non-string action types deny even when unknown actions are allowed', () => {
+  for (const actionType of [undefined, null, '', 0, ['shell'], { toString: () => 'shell' }])
+    assert.equal(evaluateActionWithProfile(BUILTIN_PROFILES['dev-mode'], { actionType }).decision, 'deny');
+});
+test('unknown_action opts a profile into a different fallback; invalid values deny', () => {
+  const base = BUILTIN_PROFILES['safe-default'];
+  assert.equal(evaluateActionWithProfile({ ...base, unknown_action: 'require_approval' }, { actionType: 'exec' }).decision, 'require_approval');
+  assert.equal(evaluateActionWithProfile({ ...base, unknown_action: 'allow' }, { actionType: 'exec' }).decision, 'allow');
+  for (const unknown_action of ['ALLOW', true, 1, null])
+    assert.equal(evaluateActionWithProfile({ ...base, unknown_action }, { actionType: 'exec' }).decision, 'deny');
+  assert.equal(evaluateActionWithProfile(BUILTIN_PROFILES['dev-mode'], { actionType: 'exec' }).decision, 'allow');
 });
 test('trust requirements fail closed without computing scores', () => {
   const profile = { ...BUILTIN_PROFILES['dev-mode'], trust_requirements: { min_score: 0.7 } };

@@ -1,6 +1,6 @@
 {
   "name": "atp-sdk",
-  "version": "2.2.1",
+  "version": "3.0.0",
   "description": "Open TypeScript SDK for Agent Trust Protocol: agent identity, credential utilities, trust evidence, and security profile decisions.",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -27,8 +27,9 @@
     "format:check": "prettier --check \"src/**/*.ts\"",
     "clean": "rm -rf dist coverage",
     "docs": "typedoc src/index.ts --out docs/api-generated",
-    "examples": "node examples/index.js",
-    "prepublishOnly": "node scripts/check-publishable.mjs && npm run test && npm run build",
+    "examples": "node scripts/run-offline-examples.mjs",
+    "prepack": "npm run build",
+    "prepublishOnly": "node scripts/check-publishable.mjs && npm run test && npm run build && npm run examples",
     "release": "npm run prepublishOnly && npm publish",
     "release:beta": "npm run prepublishOnly && npm publish --tag beta",
     "release:alpha": "npm run prepublishOnly && npm publish --tag alpha"
@@ -69,8 +70,7 @@
     "eventemitter3": "^5.0.0",
     "jose": "^5.1.0",
     "ws": "^8.14.0",
-    "zod": "^3.22.0",
-    "atp-profiles": "^1.1.0"
+    "atp-profiles": "^2.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",
@@ -94,6 +94,7 @@
     "dist/**/*",
     "docs/**/*",
     "examples/**/*",
+    "scripts/run-offline-examples.mjs",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"

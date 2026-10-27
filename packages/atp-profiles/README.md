@@ -53,6 +53,7 @@ Conservative profile for most agents.
 - **Network**: internal domains only; external requires approval
 - **Credentials**: blocked (requires approval)
 - **Messaging**: allowed; external requires approval
+- **Unrecognized actions**: denied
 - Legacy scoring metadata is retained for compatibility; no score is computed.
 
 ### `dev-mode`
@@ -64,6 +65,7 @@ Permissive for local development. **Do not use in production.**
 - **Network**: all domains allowed
 - **Credentials**: allowed
 - **Messaging**: allowed without approval
+- **Unrecognized actions**: allowed (`unknown_action: 'allow'`)
 
 ### `enterprise-locked`
 
@@ -142,6 +144,23 @@ const allProfiles = { ...BUILTIN_PROFILES, 'my-custom-profile': myProfile };
 ## License
 
 Apache-2.0 © 2026 Sovr Labs
+
+## Migrating to 2.0: unknown actions fail closed
+
+In 1.x, an `actionType` the profile did not recognize returned `allow`, so a typo
+(`Shell`, `exec`, `credential`) or a raw tool name bypassed every control. In 2.0:
+
+- An action is recognized if it is a control category (`shell`, `filesystem`,
+  `network`, `credentials`, `messaging`) or is named by the active state's
+  `allowed_tools`, `restricted_tools`, or `require_approval_for`.
+- Anything else returns `{ allowed: false, decision: 'deny', reason: 'unknown_action_type' }`.
+  A missing, empty, or non-string `actionType` always denies.
+- Profiles may set `unknown_action: 'allow' | 'deny' | 'require_approval'` to choose
+  a different fallback. Any other value denies. Only `dev-mode` sets `'allow'`.
+- Recognized actions keep their 1.x decisions.
+
+Adapters should map host tool names to a category before evaluating, for example
+`{ terminal: 'shell', read_file: 'filesystem' }`, rather than passing tool names through.
 
 ## Evaluation boundary and migration (1.1)
 

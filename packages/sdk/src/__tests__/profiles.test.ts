@@ -16,6 +16,17 @@ describe('canonical profiles integration', () => {
       }
     }
   });
+  test('unrecognized action types deny through the SDK', () => {
+    for (const profileId of ['safe-default', 'enterprise-locked', 'openclaw-sandbox']) {
+      client.setProfile(profileId);
+      for (const actionType of ['Shell', 'exec', 'credential'])
+        expect(client.evaluateActionWithProfile({ actionType, state: 'executing' })).toBe('deny');
+    }
+  });
+  test('no configured profile denies', () => {
+    const bare = Object.create(ATPClient.prototype) as ATPClient;
+    expect(bare.evaluateActionWithProfile({ actionType: 'filesystem' })).toBe('deny');
+  });
   test('unknown explicit profiles deny', () => {
     expect(client.evaluateActionWithProfile({ profileId: 'missing', actionType: 'shell' })).toBe('deny');
   });

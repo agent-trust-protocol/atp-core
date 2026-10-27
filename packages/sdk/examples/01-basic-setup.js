@@ -5,7 +5,7 @@
  * and test connectivity to all services.
  */
 
-import { ATPClient, createQuickConfig } from '@atp/sdk';
+import { ATPClient, createQuickConfig } from 'atp-sdk';
 
 async function basicSetupExample() {
   console.log('🚀 ATP™ SDK Basic Setup Example\n');

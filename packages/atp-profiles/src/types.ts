@@ -53,6 +53,11 @@ export interface AtpSecurityProfile {
       require_approval_for?: string[];
     };
   };
+  /**
+   * Decision for an action that is neither a control category nor named by the
+   * active state's policy. Defaults to "deny"; any unrecognized value also denies.
+   */
+  unknown_action?: "allow" | "deny" | "require_approval";
   logging?: {
     log_all_actions: boolean;
     log_sensitive_inputs?: boolean;

@@ -1,5 +1,10 @@
 # Authentication Guide
 
+> **Written for the v1 API.** Some identity and crypto calls here (`DIDUtils`,
+> `CryptoUtils.generateKeyPair`, `signData`) were removed in 2.0. See
+> [MIGRATION.md](../MIGRATION.md#v2x--v30) for the current equivalents.
+
+
 This guide covers all authentication methods and patterns supported by the ATP™ SDK.
 
 ## Table of Contents
@@ -29,7 +34,7 @@ The ATP™ SDK supports multiple authentication methods:
 The primary authentication method uses Decentralized Identifiers (DIDs) with cryptographic key pairs:
 
 ```javascript
-import { ATPClient, DIDUtils } from '@atp/sdk';
+import { ATPClient, DIDUtils } from 'atp-sdk';
 
 // Generate a new DID and key pair
 const { did, keyPair } = await DIDUtils.generateDID({
@@ -140,7 +145,7 @@ const client = new ATPClient({
 Create JWT tokens programmatically:
 
 ```javascript
-import { JWTUtils } from '@atp/sdk';
+import { JWTUtils } from 'atp-sdk';
 
 // Create authentication token
 const token = await JWTUtils.createAuthToken(

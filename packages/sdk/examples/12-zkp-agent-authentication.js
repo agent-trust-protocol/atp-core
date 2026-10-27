@@ -77,28 +77,18 @@ async function main() {
   });
 
   // Bob responds with a zero-knowledge proof
-  log('Bob generating ZK proof (proves trust >= 0.5 without revealing exact score)...');
-  const response = await bob.respondToChallenge(challenge);
-
-  log('Proof generated:', {
-    proofCount: response.proofs.length,
-    proofTypes: response.proofs.map(p => p.type),
-    timestamp: response.timestamp
-  });
-
-  // Alice verifies Bob's proof
-  log('Alice verifying proof...');
-  const result = await alice.verifyAuthResponse(response);
-
-  log('Verification result:', {
-    verified: result.verified,
-    prover: result.proverDid,
-    timestamp: result.timestamp
-  });
-
-  console.log('\n✅ Bob authenticated successfully!');
-  console.log('   Alice knows: Bob\'s trust level >= 0.5');
-  console.log('   Alice does NOT know: Bob\'s exact trust score');
+  // Bob is a fresh standalone agent with no audit history, so his trust score is 0.
+  // The SDK refuses to produce a trust proof it cannot back with evidence.
+  log('Bob attempting a trust-level proof with no trust evidence...');
+  try {
+    await bob.respondToChallenge(challenge);
+    console.log('\n❌ Unexpected: proof generated without trust evidence');
+    process.exitCode = 1;
+  } catch (error) {
+    log('Bob cannot prove trust >= 0.5: ' + error.message);
+    console.log('\n✅ Correctly refused. Trust evidence comes from ATP audit/credential services,');
+    console.log('   which standalone agents do not have. Connect services to build trust history.');
+  }
 
   // ==========================================
   // SECTION 3: Identity Verification
@@ -217,25 +207,26 @@ async function main() {
   console.log('Both agents authenticate each other simultaneously.\n');
 
   log('Alice and Bob performing mutual authentication...');
-  log('Alice requires: trust level >= 0.5 from Bob');
-  log('Bob requires: trust level >= 0.6 from Alice\n');
+  log('Alice requires: proof of DID ownership from Bob');
+  log('Bob requires: proof of DID ownership from Alice\n');
 
-  const mutualResult = await alice.mutualAuth(
-    bob.getDID(),
-    // What Alice requires from Bob
-    [{ type: ZKProofType.TRUST_LEVEL, params: { minTrustLevel: 0.5 } }],
-    // What Bob requires from Alice
-    [{ type: ZKProofType.TRUST_LEVEL, params: { minTrustLevel: 0.6 } }]
-  );
+  // Mutual authentication is two independent exchanges: each agent issues its
+  // own challenge and verifies the other's response against it.
+  const challengeForBob = await alice.requestAuth(bob.getDID(), [{ type: ZKProofType.IDENTITY, params: {} }]);
+  const challengeForAlice = await bob.requestAuth(alice.getDID(), [{ type: ZKProofType.IDENTITY, params: {} }]);
+  const aliceVerifiedBob = await alice.verifyAuthResponse(await bob.respondToChallenge(challengeForBob));
+  const bobVerifiedAlice = await bob.verifyAuthResponse(await alice.respondToChallenge(challengeForAlice));
 
   log('Mutual authentication results:', {
-    aliceVerifiedBob: mutualResult.myResult.verified,
-    bobVerifiedAlice: mutualResult.theirResult.verified
+    aliceVerifiedBob: aliceVerifiedBob.verified,
+    bobVerifiedAlice: bobVerifiedAlice.verified
   });
 
-  if (mutualResult.myResult.verified && mutualResult.theirResult.verified) {
+  if (aliceVerifiedBob.verified && bobVerifiedAlice.verified) {
     console.log('\n✅ Mutual authentication successful!');
-    console.log('   Both agents verified each other cryptographically');
+  } else {
+    console.log('\n❌ Mutual authentication failed');
+    process.exitCode = 1;
   }
 
   // ==========================================
@@ -243,11 +234,11 @@ async function main() {
   // ==========================================
   section('6. Combined Requirements');
 
-  console.log('Alice requires BOTH trust level AND identity proof.\n');
+  console.log('Alice requires BOTH an identity proof AND a clean behavior record.\n');
 
   const combinedChallenge = await alice.requestAuth(bob.getDID(), [
-    { type: ZKProofType.TRUST_LEVEL, params: { minTrustLevel: 0.5 } },
-    { type: ZKProofType.IDENTITY, params: {} }
+    { type: ZKProofType.IDENTITY, params: {} },
+    { type: ZKProofType.BEHAVIOR, params: { behaviorType: 'no_violations' } }
   ]);
 
   log('Challenge with multiple requirements:', {
@@ -263,7 +254,7 @@ async function main() {
     proofCount: combinedResponse.proofs.length
   });
 
-  console.log('\n✅ Bob proved both trust level AND identity!');
+  console.log('\n✅ Bob proved identity AND a clean behavior record!');
 
   // ==========================================
   // SUMMARY
@@ -289,11 +280,9 @@ async function main() {
   console.log('  5. Credential Proofs (with selective disclosure)');
   console.log('     - Prove credential possession without revealing all claims');
   console.log('');
-  console.log('All proofs are cryptographically verifiable and reveal');
-  console.log('ONLY the minimum information necessary for verification.');
-  console.log('');
-  console.log('🔐 Privacy-Preserving • 🛡️ Cryptographically Secure • ⚡ Fast');
+  console.log('Note: these privacy proofs are experimental. Structural checks here are');
+  console.log('not cryptographic range-proof verification; see the SDK README limits.');
 }
 
 // Run the demo
-main().catch(console.error);
+main().catch((error) => { console.error(error); process.exitCode = 1; });
