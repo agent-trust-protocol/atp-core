@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   verifying anything. Both results are now unverified, and the method returns
   the `challenge` and `response` it created. It is deprecated; run two explicit
   `requestAuth` / `respondToChallenge` / `verifyAuthResponse` exchanges instead.
+- **`ATPClient.evaluateActionWithProfile()` denies when no profile is set.** It
+  previously returned `allow` when neither `config.profileId`, `setProfile()`
+  nor a `profileId` argument supplied a profile.
 
 ### Fixed
 
@@ -36,8 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed (BREAKING)
 
 - **did:atp v2 identifier format**: `did:atp:<host>[:<path>…]:e1_…:pq1_…`
-  replaces v1 `did:atp:<network>:<fingerprint>`, aligning with the finalized
-  did:atp specification. No conversion from v1 exists — see
+  replaces v1 `did:atp:<network>:<fingerprint>`, aligning with the did:atp
+  Community Group draft. No conversion from v1 exists — see
   [MIGRATION.md](./MIGRATION.md).
 - **Split hybrid key pairs**: `HybridKeyPair` is now `{ ed25519, mlDsa65 }`
   (independent key pairs) instead of a composite blob.

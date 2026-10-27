@@ -11,6 +11,9 @@ This guide documents notable changes and safe upgrade steps.
   - Action: map host tool names to categories before evaluating, e.g.
     `{ terminal: 'shell', read_file: 'filesystem' }`. For a custom profile that
     must stay permissive, set `unknown_action: 'allow'` or `'require_approval'`.
+- **No profile means deny.** `ATPClient.evaluateActionWithProfile()` returns
+  `deny` when no profile is configured (it returned `allow`).
+  - Action: pass `profileId` in the config or call `setProfile()` first.
 - **`mutualAuth()` results start unverified** and the method is deprecated.
   - Action: replace with two exchanges:
     ```js

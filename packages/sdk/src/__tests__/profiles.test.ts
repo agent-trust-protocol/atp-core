@@ -23,6 +23,10 @@ describe('canonical profiles integration', () => {
         expect(client.evaluateActionWithProfile({ actionType, state: 'executing' })).toBe('deny');
     }
   });
+  test('no configured profile denies', () => {
+    const bare = Object.create(ATPClient.prototype) as ATPClient;
+    expect(bare.evaluateActionWithProfile({ actionType: 'filesystem' })).toBe('deny');
+  });
   test('unknown explicit profiles deny', () => {
     expect(client.evaluateActionWithProfile({ profileId: 'missing', actionType: 'shell' })).toBe('deny');
   });
