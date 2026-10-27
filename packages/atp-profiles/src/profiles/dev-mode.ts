@@ -46,6 +46,8 @@ export const DEV_MODE_PROFILE: AtpSecurityProfile = {
       restricted_tools: [],
     },
   },
+  // Local development only: keep unrecognized actions permissive.
+  unknown_action: "allow",
   logging: {
     log_all_actions: true,
     log_sensitive_inputs: false,

@@ -5,6 +5,32 @@ All notable changes to the ATP™ SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-10-26
+
+### Changed (BREAKING)
+
+- **Security profiles fail closed** (requires `atp-profiles@^2.0.0`). An
+  `actionType` that is not a control category or named by the active state's
+  policy now returns `deny` with reason `unknown_action_type`, instead of
+  `allow`. Typos such as `Shell` or raw tool names no longer bypass controls.
+  Profiles can opt out with `unknown_action`; only `dev-mode` does.
+- **`Agent.mutualAuth()` no longer reports unverified success.** It previously
+  returned `theyVerified: { verified: true, trustEstablished: true }` without
+  verifying anything. Both results are now unverified, and the method returns
+  the `challenge` and `response` it created. It is deprecated; run two explicit
+  `requestAuth` / `respondToChallenge` / `verifyAuthResponse` exchanges instead.
+
+### Fixed
+
+- `Protocol` is exported as a runtime enum. It was type-only, so
+  `import { Protocol } from 'atp-sdk'` failed.
+- `VERSION` and `SDK_INFO.version` report the package version (were `2.0.0`).
+- Removed the unused `zod` dependency, which carried GHSA-mrhx-c7xc-m3w5.
+- Offline examples (00, 09, 11, 12) run against the v2+ API and are checked
+  before publish by `npm run examples`. Service-backed v1 examples moved to
+  `examples-legacy-v1/` and are no longer published.
+- Docs use the `atp-sdk` package name and current `DidAtp` / `CryptoUtils` APIs.
+
 ## [2.0.0] - 2026-06-11
 
 ### Changed (BREAKING)

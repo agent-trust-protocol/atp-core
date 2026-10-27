@@ -14,9 +14,11 @@ export * from './base/index.js';
 // Protocol implementations
 export * from './mcp/index.js';
 
+// Protocol is an enum, so it must be exported as a value for runtime use.
+export { Protocol } from './base/types.js';
+
 // Re-export commonly used types
 export type {
-  Protocol,
   ProtocolInfo,
   Agent,
   AgentEvent,

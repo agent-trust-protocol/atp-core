@@ -1,77 +1,53 @@
-// Quantum-Safe Crypto Demo
+// Hybrid Ed25519 + ML-DSA-65 Signature Demo
 // Run with: node packages/sdk/examples/11-quantum-safe-demo.js
 //
-// This example demonstrates quantum-safe cryptography in action
+// ATP identities carry two independent key pairs. A hybrid signature is one
+// signature from each; a verifier should require both to validate.
 
 import { CryptoUtils } from '../dist/index.js';
 
 async function main() {
-  console.log('🔐 ATP SDK - Quantum-Safe Cryptography Demo\n');
+  console.log('🔐 ATP SDK - Hybrid Signature Demo (Ed25519 + ML-DSA-65)\n');
 
   try {
-    // 1. Generate hybrid quantum-safe key pair (Ed25519 + ML-DSA)
-    console.log('1️⃣ Generating hybrid quantum-safe key pair (Ed25519 + ML-DSA)...');
-    const keyPair = await CryptoUtils.generateKeyPair(true); // quantumSafe = true
-    
-    console.log(`\n✅ Key pair generated:`);
-    console.log(`   Quantum-Safe: ${keyPair.quantumSafe ? '✅ Yes' : '❌ No'}`);
-    console.log(`   Public Key Length: ${keyPair.publicKey.length} hex chars (${keyPair.publicKey.length / 2} bytes)`);
-    console.log(`   Private Key Length: ${keyPair.privateKey.length} hex chars (${keyPair.privateKey.length / 2} bytes)`);
-    console.log(`   Algorithm: Hybrid Ed25519 + ML-DSA65`);
+    console.log('1️⃣ Generating hybrid key pair...');
+    const { ed25519, mlDsa65 } = await CryptoUtils.generateHybridKeyPair();
+    console.log(`   Ed25519 public key:   ${ed25519.publicKey.length} bytes`);
+    console.log(`   ML-DSA-65 public key: ${mlDsa65.publicKey.length} bytes`);
+    console.log(`   e1 fingerprint:  ${CryptoUtils.e1Fingerprint(ed25519.publicKey)}`);
+    console.log(`   pq1 fingerprint: ${CryptoUtils.pq1Fingerprint(mlDsa65.publicKey)}`);
 
-    // 2. Sign a message with hybrid signature
-    console.log('\n2️⃣ Signing message with hybrid quantum-safe signature...');
+    console.log('\n2️⃣ Signing a message with both algorithms...');
     const message = 'Hello, quantum-safe world!';
-    const signature = await CryptoUtils.signData(message, keyPair.privateKey, true);
-    
-    console.log(`\n✅ Message signed:`);
-    console.log(`   Message: "${message}"`);
-    console.log(`   Signature Length: ${signature.length} hex chars (${signature.length / 2} bytes)`);
-    console.log(`   Signature Preview: ${signature.substring(0, 64)}...`);
+    const edSig = await CryptoUtils.signEd25519(message, ed25519.secretKey);
+    const pqSig = CryptoUtils.signMlDsa65(message, mlDsa65.secretKey);
+    console.log(`   Ed25519 signature:   ${edSig.length} bytes`);
+    console.log(`   ML-DSA-65 signature: ${pqSig.length} bytes`);
 
-    // 3. Verify the signature
-    console.log('\n3️⃣ Verifying hybrid signature...');
-    const isValid = await CryptoUtils.verifySignature(message, signature, keyPair.publicKey, true);
-    
-    console.log(`\n${isValid ? '✅' : '❌'} Signature verification: ${isValid ? 'VALID' : 'INVALID'}`);
+    const verifyHybrid = async (msg) =>
+      (await CryptoUtils.verifyEd25519(msg, edSig, ed25519.publicKey)) &&
+      CryptoUtils.verifyMlDsa65(msg, pqSig, mlDsa65.publicKey);
 
-    // 4. Test with tampered message (should fail)
-    console.log('\n4️⃣ Testing signature verification with tampered message...');
-    const tamperedMessage = 'Hello, tampered world!';
-    const isValidTampered = await CryptoUtils.verifySignature(tamperedMessage, signature, keyPair.publicKey, true);
-    
-    console.log(`\n${isValidTampered ? '❌' : '✅'} Tampered message verification: ${isValidTampered ? 'VALID (ERROR!)' : 'INVALID (correctly rejected)'}`);
+    console.log('\n3️⃣ Verifying both signatures...');
+    const isValid = await verifyHybrid(message);
+    console.log(`   ${isValid ? '✅ VALID' : '❌ INVALID'}`);
 
-    // 5. Compare with Ed25519-only (for reference)
-    console.log('\n5️⃣ Generating Ed25519-only key pair for comparison...');
-    const ed25519KeyPair = await CryptoUtils.generateKeyPair(false); // quantumSafe = false
-    
-    console.log(`\n   Ed25519-Only Key Pair:`);
-    console.log(`   Public Key Length: ${ed25519KeyPair.publicKey.length} hex chars (${ed25519KeyPair.publicKey.length / 2} bytes)`);
-    console.log(`   Private Key Length: ${ed25519KeyPair.privateKey.length} hex chars (${ed25519KeyPair.privateKey.length / 2} bytes)`);
-    console.log(`   Quantum-Safe: ${ed25519KeyPair.quantumSafe ? 'Yes' : 'No'}`);
+    console.log('\n4️⃣ Verifying against a tampered message...');
+    const isValidTampered = await verifyHybrid('Hello, tampered world!');
+    console.log(`   ${isValidTampered ? '❌ VALID (ERROR!)' : '✅ INVALID (correctly rejected)'}`);
 
-    const ed25519Sig = await CryptoUtils.signData(message, ed25519KeyPair.privateKey, false);
-    console.log(`   Signature Length: ${ed25519Sig.length} hex chars (${ed25519Sig.length / 2} bytes)`);
+    if (!isValid || isValidTampered) throw new Error('hybrid verification behaved unexpectedly');
 
-    console.log('\n📊 Size Comparison:');
-    console.log(`   Hybrid Public Key: ${(keyPair.publicKey.length / 2).toLocaleString()} bytes (${((keyPair.publicKey.length / 2) / (ed25519KeyPair.publicKey.length / 2)).toFixed(1)}x larger)`);
-    console.log(`   Hybrid Signature: ${(signature.length / 2).toLocaleString()} bytes (${((signature.length / 2) / (ed25519Sig.length / 2)).toFixed(1)}x larger)`);
-    console.log(`   Overhead: ~${((signature.length / 2) / (ed25519Sig.length / 2) - 1) * 100}%`);
+    console.log('\n📊 Size comparison:');
+    console.log(`   Public keys: ${ed25519.publicKey.length + mlDsa65.publicKey.length} bytes hybrid vs ${ed25519.publicKey.length} bytes Ed25519-only`);
+    console.log(`   Signatures:  ${edSig.length + pqSig.length} bytes hybrid vs ${edSig.length} bytes Ed25519-only`);
 
-    console.log('\n✅ Quantum-safe cryptography demo completed!');
-    console.log('\n💡 Key Takeaways:');
-    console.log('   - Hybrid mode provides protection against both classical and quantum attacks');
-    console.log('   - Slightly larger keys/signatures are a small price for quantum-safe security');
-    console.log('   - All new ATP agents use quantum-safe cryptography by default');
-
+    console.log('\n✅ Hybrid signature demo completed.');
+    console.log('   Security still depends on key storage and on verifiers checking both signatures.');
   } catch (error) {
     console.error('\n❌ Demo failed:', error.message);
-    console.error('\nHint: Ensure @noble/post-quantum is installed:');
-    console.error('   cd packages/sdk && npm install');
     process.exitCode = 1;
   }
 }
 
 main();
-

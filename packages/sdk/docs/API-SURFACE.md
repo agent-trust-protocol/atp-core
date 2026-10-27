@@ -1,4 +1,4 @@
-# ATP SDK Public API Surface (v1.1.x)
+# ATP SDK Public API Surface (v3.x)
 
 This document lists the primary exports intended for application developers. Import from `atp-sdk`.
 
@@ -6,20 +6,23 @@ This document lists the primary exports intended for application developers. Imp
 
 - Classes
   - `Agent` (default and named): simplified quickstart agent
-  - `ATPClient`: main client for Identity, Credentials, Permissions, Audit, Gateway, Payments
+  - `ATPClient`: main client for Identity, Credentials, Permissions, Audit, Gateway
 - Service clients
-  - `IdentityClient`, `CredentialsClient`, `PermissionsClient`, `AuditClient`, `GatewayClient`, `PaymentsClient`
+  - `IdentityClient`, `CredentialsClient`, `PermissionsClient`, `AuditClient`, `GatewayClient`
 - Monitoring
   - `UniversalMonitor`, `SecurityEnforcer`
 - Protocols
   - `Protocol`, `ProtocolDetector`, `BaseProtocolAdapter`, `MCPAdapter`
 - Utilities
-  - `CryptoUtils`, `DIDUtils`, `JWTUtils`
+  - `CryptoUtils` (hybrid Ed25519 + ML-DSA-65 keys and signatures), `JWTUtils`
+  - `DidAtp` (generate, parse, validate did:atp v2), `DidAtpDocument`, `DidAtpResolver`, `jcsCanonicalize`
+- Security profiles
+  - `BUILTIN_PROFILES` and the four built-in profile constants (from `atp-profiles`)
 - Types (partial list)
   - `ATPConfig`, `ATPResponse`, `ATPError`, `AccessDecision`
   - Identity types: `DIDDocument`, `VerificationMethod`, `TrustLevel`, `MFAMethod`
   - Credential types: `VerifiableCredential`, `VerifiablePresentation`, `CredentialSchema`
-  - Payments: `PaymentMandate`, `IntentMandate`, `CartMandate`, `PaymentTransaction`, `PaymentPolicy`
+  - Payments (types only; there is no payments client): `PaymentMandate`, `IntentMandate`, `CartMandate`, `PaymentTransaction`, `PaymentPolicy`
   - Protocol types: `ProtocolInfo`, `ProtocolAdapter`, `AgentEvent`, `SecuredMessage`, `VerificationResult`
 
 ## Helper Functions
@@ -38,5 +41,5 @@ This document lists the primary exports intended for application developers. Imp
 
 ## Semantic Stability
 
-- Methods and types above are considered stable in v1.1.x.
+- Methods and types above are considered stable in v3.x.
 - New protocol adapters may be added in minor versions; existing names will not change without deprecation.

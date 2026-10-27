@@ -1,5 +1,10 @@
 # Best Practices Guide
 
+> **Written for the v1 API.** Some identity and crypto calls here (`DIDUtils`,
+> `CryptoUtils.generateKeyPair`, `signData`) were removed in 2.0. See
+> [MIGRATION.md](../MIGRATION.md#v2x--v30) for the current equivalents.
+
+
 This guide outlines best practices for building secure, reliable, and performant applications with the ATP™ SDK.
 
 ## Table of Contents
@@ -570,7 +575,7 @@ const config = {
 **DO:**
 ```javascript
 // Mock ATP client for unit tests
-jest.mock('@atp/sdk');
+jest.mock('atp-sdk');
 
 describe('UserService', () => {
   let userService, mockClient;
@@ -887,7 +892,7 @@ function someFunction() {
   "name": "my-atp-app",
   "version": "1.2.3",
   "dependencies": {
-    "@atp/sdk": "^1.0.0" // Pin major version
+    "atp-sdk": "^1.0.0" // Pin major version
   }
 }
 
@@ -906,7 +911,7 @@ function someFunction() {
 // Don't use loose version constraints
 {
   "dependencies": {
-    "@atp/sdk": "*" // ❌ Too loose
+    "atp-sdk": "*" // ❌ Too loose
   }
 }
 
