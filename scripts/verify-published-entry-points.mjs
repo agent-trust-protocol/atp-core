@@ -36,7 +36,7 @@ try {
     assert.deepEqual(decisions, ['allow', 'require_approval', 'deny']);
     console.log('PASS published Profiles allow, approval-required and deny decisions');
     for (const actionType of ['Shell', 'exec', 'credential'])
-      assert.equal(evaluateActionWithProfile(BUILTIN_PROFILES['enterprise-locked'], { actionType, state: 'executing' }).reason, 'unknown_action_type');
+      assert.deepEqual(evaluateActionWithProfile(BUILTIN_PROFILES['enterprise-locked'], { actionType, state: 'executing' }), { allowed: false, decision: 'deny', reason: 'unknown_action_type' });
     console.log('PASS published Profiles fail closed on unrecognized actions');
   `);
   console.log(run(process.execPath, ['identity.mjs']));
