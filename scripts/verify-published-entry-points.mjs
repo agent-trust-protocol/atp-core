@@ -12,7 +12,7 @@ let dashboard;
 let dashboardOutput = '';
 try {
   writeFileSync(join(consumer, 'package.json'), JSON.stringify({ private: true, type: 'module' }));
-  console.log(run('npm', ['install', '--ignore-scripts', 'atp-sdk@3.0.0', '@atpdeveloper/did-atp@0.1.1', 'create-atp-agent@1.4.0', 'atp-profiles@2.0.0']));
+  console.log(run('npm', ['install', '--ignore-scripts', 'atp-sdk@4.0.0', '@atpdeveloper/did-atp@0.1.1', 'create-atp-agent@1.4.0', 'atp-profiles@3.0.0']));
   console.log(run('npm', ['ls', '--depth=0']));
   writeFileSync(join(consumer, 'identity.mjs'), `
     import assert from 'node:assert/strict';
@@ -37,7 +37,14 @@ try {
     console.log('PASS published Profiles allow, approval-required and deny decisions');
     for (const actionType of ['Shell', 'exec', 'credential'])
       assert.deepEqual(evaluateActionWithProfile(BUILTIN_PROFILES['enterprise-locked'], { actionType, state: 'executing' }), { allowed: false, decision: 'deny', reason: 'unknown_action_type' });
-    console.log('PASS published Profiles fail closed on unrecognized actions');
+    assert.deepEqual(evaluateActionWithProfile(BUILTIN_PROFILES['dev-mode'], { actionType: 'exec', state: 'executing' }), { allowed: false, decision: 'require_approval', reason: 'unknown_action_type' });
+    for (const missing of [undefined, BUILTIN_PROFILES['typo'], BUILTIN_PROFILES['__proto__']])
+      assert.deepEqual(evaluateActionWithProfile(missing, { actionType: 'filesystem' }), { allowed: false, decision: 'deny', reason: 'unknown_profile' });
+    console.log('PASS published Profiles fail closed on unrecognized actions and missing profiles');
+    const sdk = await import('atp-sdk');
+    assert.equal(sdk.evaluateActionWithProfile, evaluateActionWithProfile);
+    assert.equal(new sdk.ATPClient({ baseUrl: 'http://127.0.0.1:9' }).evaluateActionWithProfile({ profileId: 'typo', actionType: 'filesystem' }), 'deny');
+    console.log('PASS published SDK exports the canonical evaluator and denies unknown profiles');
   `);
   console.log(run(process.execPath, ['identity.mjs']));
 
