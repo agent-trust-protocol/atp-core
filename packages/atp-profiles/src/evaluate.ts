@@ -21,11 +21,15 @@ export interface ProfileEvaluationResult {
 
 /** Category/state gate shared by SDK and adapters; not a runtime sandbox. */
 export function evaluateActionWithProfile(
-  profile: AtpSecurityProfile,
+  profile: AtpSecurityProfile | null | undefined,
   context: ProfileEvaluationContext,
 ): ProfileEvaluationResult {
   const result = (decision: ProfileDecision, reason?: string): ProfileEvaluationResult =>
     ({ allowed: decision === 'allow', decision, ...(reason ? { reason } : {}) });
+  // A missing or malformed profile (e.g. BUILTIN_PROFILES['typo']) denies instead of
+  // throwing, so callers that only act on a returned decision still fail closed.
+  if (!profile || typeof profile !== 'object' || !profile.controls || typeof profile.controls !== 'object')
+    return result('deny', 'unknown_profile');
   const minimum = profile.trust_requirements?.min_score;
   if (minimum !== undefined && (
     !Number.isFinite(minimum) || minimum < 0 || minimum > 1 ||

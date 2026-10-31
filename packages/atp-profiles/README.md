@@ -1,6 +1,16 @@
 # atp-profiles
 
-Built-in **Agent Trust Protocol™** security profiles and a runtime-agnostic profile schema. Profiles describe action gates and conditions. The evaluator returns a decision; the host runtime must enforce it and handle its own audit logging. This package is the canonical schema and built-in source consumed by the SDK. Use with [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) and runtime adapters (OpenClaw, MCP, LangChain, etc.) so tool and session actions are evaluated through `evaluateActionWithProfile` rather than hardcoded policies.
+### Fail-closed security profiles for AI agent actions
+
+[![npm](https://img.shields.io/npm/v/atp-profiles)](https://www.npmjs.com/package/atp-profiles) [![license](https://img.shields.io/npm/l/atp-profiles)](https://github.com/agent-trust-protocol/atp-core/blob/main/LICENSE)
+
+An agent that can run shell commands, read files, call APIs and send messages needs a clear answer, before each action, to one question: **should this run?**
+
+`atp-profiles` provides the security profiles for **Agent Trust Protocol™ (ATP)**. A profile describes which action categories an agent may use, in which session states, and which actions need a human in the loop. One function, `evaluateActionWithProfile`, turns a profile and an action into a decision: `allow`, `require_approval` or `deny`.
+
+- **Runtime-agnostic.** The same profile works with MCP servers, LangChain, OpenClaw or your own runtime. Adapters map tool names to categories; policy stays in the profile.
+- **Fail-closed.** Unknown actions, missing actions and missing profiles never quietly pass.
+- **Small and dependency-free.** One evaluator and four built-in profiles. `atp-sdk` uses the same evaluator.
 
 ## Install
 
@@ -8,89 +18,98 @@ Built-in **Agent Trust Protocol™** security profiles and a runtime-agnostic pr
 npm install atp-profiles
 ```
 
-## Built-in Profiles
+The package is ESM-only. CommonJS applications can use `await import('atp-profiles')`.
 
-| Profile ID | Name | Use Case |
-|---|---|---|
-| `safe-default` | Safe Default | Conservative baseline for most agents — limited tools, strong auditing |
-| `dev-mode` | Dev Mode | Permissive settings for local development; never use in production |
-| `enterprise-locked` | Enterprise Locked | Maximally restrictive for regulated industries (finance, healthcare) |
-| `openclaw-sandbox` | OpenClaw Sandbox | Sandboxed profile for OpenClaw/NemoClaw multi-agent workflows |
+## Quick start
 
-## Run a complete local example
-
-[Action-boundary demo](../../examples/action-boundary/README.md) shows the host enforcing a permitted read, holding an approval-required callback, and denying a read after session completion. It runs against the published package without a service account or model key.
-
-## Quick Start
-
-```typescript
+```js
 import { BUILTIN_PROFILES, evaluateActionWithProfile } from 'atp-profiles';
 
-const profile = BUILTIN_PROFILES['safe-default'];
-
-const result = evaluateActionWithProfile(profile, {
-  actionType: 'filesystem',
-  agentDid: 'did:atp:abc123',
-  trustScore: 0.8,
-  sessionState: 'executing',
+const result = evaluateActionWithProfile(BUILTIN_PROFILES['safe-default'], {
+  actionType: 'filesystem',  // a category, not a raw tool name
+  state: 'executing',        // optional session state
 });
 
-if (result.allowed) {
-  // proceed with action
-} else {
-  console.log('Blocked:', result.reason);
+switch (result.decision) {
+  case 'allow':            /* run the action */ break;
+  case 'require_approval': /* pause for your approval flow */ break;
+  default:                 /* deny: do not run it */ console.log('Denied:', result.reason);
 }
 ```
 
-## Profile Reference
+The result is `{ allowed, decision, reason? }`. `allowed` is `true` only for `allow`, so a `require_approval` result is not permission to run.
+
+To see a host enforce all three outcomes end to end, run the [action-boundary demo](https://github.com/agent-trust-protocol/atp-core/tree/main/examples/action-boundary). It needs no service account or model key.
+
+## How a decision is made
+
+The checks run in this order, and the first one that matches decides:
+
+1. **Profile**: a missing or malformed profile is a `deny` (`unknown_profile`).
+2. **Trust and authority requirements**, if the profile sets them: unmet or invalid evidence is a `deny`.
+3. **Action**: a missing, empty or non-string `actionType` is a `deny` (`unknown_action_type`).
+4. **Recognition**: an action is recognized if it is a control category (`shell`, `filesystem`, `network`, `credentials`, `messaging`) or is named by the active state's policy. Anything else gets the profile's `unknown_action` fallback, which is `deny` unless the profile says otherwise.
+5. **Controls and state policy**: blocked controls, state restrictions and approval lists apply.
+6. Otherwise the result is `allow`.
+
+Map host tools to categories before evaluating, for example `{ terminal: 'shell', read_file: 'filesystem' }`. Passing raw tool names through means they will be treated as unrecognized.
+
+## Built-in profiles
+
+| Profile | Use it for | Unrecognized actions |
+| --- | --- | --- |
+| `safe-default` | A conservative baseline for most agents | `deny` |
+| `dev-mode` | Local development only, never production | `require_approval` |
+| `enterprise-locked` | Regulated environments such as finance and healthcare | `deny` |
+| `openclaw-sandbox` | OpenClaw/NemoClaw multi-agent workflows | `deny` |
 
 ### `safe-default`
 
-Conservative profile for most agents.
-
-- **Shell**: blocked (requires explicit approval)
+- **Shell**: requires approval
 - **Filesystem**: read-only from `/workspace/read-only`
 - **Network**: internal domains only; external requires approval
-- **Credentials**: blocked (requires approval)
+- **Credentials**: requires approval
 - **Messaging**: allowed; external requires approval
-- **Unrecognized actions**: denied
-- Legacy scoring metadata is retained for compatibility; no score is computed.
 
 ### `dev-mode`
 
-Permissive for local development. **Do not use in production.**
+Broad access for local development. **Do not use in production.**
 
-- **Shell**: allowed with no approval
-- **Filesystem**: read/write anywhere in the project
-- **Network**: all domains allowed
-- **Credentials**: allowed
-- **Messaging**: allowed without approval
-- **Unrecognized actions**: allowed (`unknown_action: 'allow'`)
+- **Shell, filesystem, network, credentials, messaging**: allowed without approval
+- **Unrecognized actions**: require approval, so a typo or raw tool name never runs silently
 
 ### `enterprise-locked`
 
-Maximum restriction for regulated environments.
-
 - **Shell**: blocked, no exceptions
 - **Filesystem**: read-only, explicit allow-list only
-- **Network**: explicit domain allow-list; all external requires approval
-- **Credentials**: blocked; requires approval plus audit log
+- **Network**: explicit domain allow-list; all external requests require approval
+- **Credentials**: blocked, no exceptions
 - **Messaging**: all external messaging requires approval
-- Legacy scoring metadata is retained for compatibility; no score is computed.
 
 ### `openclaw-sandbox`
 
-Sandboxed execution for OpenClaw/NemoClaw crews.
+- Mirrors `safe-default` controls
+- State policies follow the `planning → executing → communicating → completed` lifecycle
 
-- Mirrors `safe-default` controls with OpenClaw session-state mapping
-- State policies enforce `planning → executing → communicating → completed` lifecycle
+## Custom profiles
 
-## Custom Profiles
+Start from a built-in profile:
 
-Extend a built-in profile or define one from scratch:
+```js
+import { SAFE_DEFAULT_PROFILE } from 'atp-profiles';
 
-```typescript
-import { AtpSecurityProfile } from 'atp-profiles';
+const myProfile = {
+  ...SAFE_DEFAULT_PROFILE,
+  id: 'my-profile',
+  name: 'My Profile',
+  unknown_action: 'require_approval', // 'deny' (default), 'require_approval' or 'allow'
+};
+```
+
+Or define one from scratch with the `AtpSecurityProfile` type:
+
+```ts
+import type { AtpSecurityProfile } from 'atp-profiles';
 
 const myProfile: AtpSecurityProfile = {
   id: 'my-custom-profile',
@@ -111,83 +130,45 @@ const myProfile: AtpSecurityProfile = {
     communicating: { allowed_tools: ['messaging'] },
     completed:     { allowed_tools: ['logs-read'], restricted_tools: ['shell', 'filesystem', 'network'] },
   },
-  logging: {
-    log_all_actions: true,
-    log_sensitive_inputs: false,
-    redact_fields: ['password', 'token'],
-  },
-  trust_scoring: {
-    start_score: 0.5,
-    max_score: 1.0,
-    min_score: 0.0,
-    increase_on: ['successful_safe_actions'],
-    decrease_on: ['policy_violations'],
-  },
+  logging: { log_all_actions: true, log_sensitive_inputs: false, redact_fields: ['password', 'token'] },
+  trust_scoring: { start_score: 0.5, max_score: 1.0, min_score: 0.0, increase_on: [], decrease_on: [] },
 };
 ```
 
-Register it in your app alongside the built-ins:
+Keep your profiles next to the built-ins: `{ ...BUILTIN_PROFILES, 'my-custom-profile': myProfile }`.
 
-```typescript
-import { BUILTIN_PROFILES } from 'atp-profiles';
+### Trust and authority requirements
 
-const allProfiles = { ...BUILTIN_PROFILES, 'my-custom-profile': myProfile };
-```
+Custom profiles may add `trust_requirements: { min_score: 0.7 }` (normalized 0 to 1) and `authority_requirements: { require_mandate: true }`. Missing or invalid evidence denies. Supply `trustScore` and `mandateVerified` only from trusted, current verification results for this agent and action, never from untrusted request metadata. The evaluator does not verify signatures, status, revocation, scope or mandate expiry. Mandates remain separate authority objects, not embedded profiles.
 
-## Documentation
+`trust_scoring` is deprecated compatibility metadata. The evaluator does not read it.
 
-- [Agent Trust Protocol™](https://agenttrustprotocol.com)
-- [atp-sdk on npm](https://www.npmjs.com/package/atp-sdk)
-- [Adding a new security profile](https://github.com/agent-trust-protocol/atp-core/blob/main/CLAUDE.md#adding-a-new-security-profile)
-- Source in this monorepo: `packages/atp-profiles/src/`
+## What this is not
 
-## License
+This is a category and state gate, not a sandbox. The evaluator returns a decision; your runtime must enforce it, keep its own audit log and run its own approval flow. Fields such as `allowed_commands`, filesystem modes and paths, network domains, external-action approval flags and `allowed_tools` describe intent, and runtime adapters must enforce them. A `require_approval` result is not authorization to run.
 
-Apache-2.0 © 2026 Sovr Labs
+## Migration
 
-## Migrating to 2.0: unknown actions fail closed
+### 2.x → 3.0
 
-In 1.x, an `actionType` the profile did not recognize returned `allow`, so a typo
-(`Shell`, `exec`, `credential`) or a raw tool name bypassed every control. In 2.0:
+- A missing or malformed profile (`undefined`, `null`, or an object without `controls`, such as the result of `BUILTIN_PROFILES['typo']`) returns `{ allowed: false, decision: 'deny', reason: 'unknown_profile' }`. In 2.x it threw a `TypeError`, which failed closed only if the caller treated errors as denial.
+- **Breaking:** `dev-mode` sets `unknown_action: 'require_approval'` (it was `'allow'`), so no built-in profile now allows an unrecognized action. To keep the old behaviour in a local profile, use `{ ...DEV_MODE_PROFILE, unknown_action: 'allow' }`.
+- The `profile` parameter type accepts `null | undefined`.
 
-- An action is recognized if it is a control category (`shell`, `filesystem`,
-  `network`, `credentials`, `messaging`) or is named by the active state's
-  `allowed_tools`, `restricted_tools`, or `require_approval_for`.
-- Anything else returns `{ allowed: false, decision: 'deny', reason: 'unknown_action_type' }`.
-  A missing, empty, or non-string `actionType` always denies.
-- Profiles may set `unknown_action: 'allow' | 'deny' | 'require_approval'` to choose
-  a different fallback. Any other value denies. Only `dev-mode` sets `'allow'`.
-- Recognized actions keep their 1.x decisions.
+### 1.x → 2.0
 
-Adapters should map host tool names to a category before evaluating, for example
-`{ terminal: 'shell', read_file: 'filesystem' }`, rather than passing tool names through.
+In 1.x, an `actionType` the profile did not recognize returned `allow`, so a typo (`Shell`, `exec`, `credential`) or a raw tool name bypassed every control. From 2.0, unrecognized actions get the profile's `unknown_action` fallback, which defaults to `deny`; any value other than `'allow'` or `'require_approval'` also denies. Recognized actions keep their 1.x decisions.
 
-## Evaluation boundary and migration (1.1)
+### 1.1
 
-`evaluateActionWithProfile(profile, context)` returns `{ allowed, decision, reason? }`.
-The SDK method delegates to this function and retains its string decision API.
-The four built-ins and their category/state decisions are preserved. An explicit
-unknown SDK profile ID now denies instead of silently allowing.
-
-This is a category/state gate, not a sandbox. Runtime adapters must enforce
-`allowed_commands`, filesystem modes and paths, network domains, external-action
-approval flags, and `allowed_tools`. These fields are not enforced by this helper.
-Approval results are not authorization to execute; a separate approval flow is required.
-
-Custom profiles may add `trust_requirements: { min_score: 0.7 }` (normalized 0..1)
-and `authority_requirements: { require_mandate: true }`. Missing or invalid evidence
-denies. Supply `trustScore` and `mandateVerified` only from trusted, current verification
-results for the agent and action. Never copy them from untrusted request metadata.
-The helper does not verify signatures, status, revocation, scope, or mandate expiry.
-Mandates remain separate authority objects, not embedded profiles.
-
-`trust_scoring` is deprecated compatibility metadata; it is not read by the evaluator.
-Migrate scoring configuration to your trust evaluator. Built-ins do not gain new
-trust thresholds or mandate requirements in this compatible release.
-OpenClaw remains an optional runtime target with no adapter dependency.
+The SDK's `ATPClient.evaluateActionWithProfile` delegates to this package and keeps its string decision API. An unknown SDK profile ID denies instead of silently allowing.
 
 ## Participate
 
-Try a built-in profile with your agent framework and contribute a focused test case for an action or session state we have missed. The profile package is runtime-agnostic; adapters must enforce its decisions. See [CONTRIBUTING.md](../../CONTRIBUTING.md), the [ATP Core README](../../README.md), and [Community Group drafts](https://w3c-cg.github.io/atp/specs/). Drafts are not W3C Standards.
+Try a built-in profile with your agent framework, and contribute a focused test case for an action or session state we have missed. See the [contribution guide](https://github.com/agent-trust-protocol/atp-core/blob/main/CONTRIBUTING.md), the [ATP Core repository](https://github.com/agent-trust-protocol/atp-core) and the [W3C ATP Community Group drafts](https://w3c-cg.github.io/atp/specs/). The drafts are Community Group work, not W3C Standards.
 
-This package is ESM-only. CommonJS applications can use dynamic `import('atp-profiles')`.
+- [Agent Trust Protocol™](https://agenttrustprotocol.com)
+- [`atp-sdk` on npm](https://www.npmjs.com/package/atp-sdk)
+- [Source](https://github.com/agent-trust-protocol/atp-core/tree/main/packages/atp-profiles)
+
+Agent Trust Protocol™ is a trademark of Sovr Inc. Licensed under Apache-2.0.
