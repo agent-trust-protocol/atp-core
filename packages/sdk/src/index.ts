@@ -12,7 +12,7 @@
  * - Policy-based access control
  * - Blockchain-anchored audit trails
  *
- * @version 3.0.0
+ * @version 3.1.0
  * @author Agent Trust Protocol™ Team
  * @license Apache-2.0
  */
@@ -225,6 +225,7 @@ export {
   DEV_MODE_PROFILE,
   ENTERPRISE_LOCKED_PROFILE,
   OPENCLAW_SANDBOX_PROFILE,
+  evaluateActionWithProfile,
 } from './profiles/index.js';
 
 export type {
@@ -236,7 +237,7 @@ export type {
 } from './profiles/index.js';
 
 // Version information
-export const VERSION = '3.0.0';
+export const VERSION = '3.1.0';
 export const PROTOCOL_VERSION = '1.0';
 
 // Constants

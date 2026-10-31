@@ -2,6 +2,17 @@
 
 This guide documents notable changes and safe upgrade steps.
 
+## v3.0 → v3.1
+
+- **`dev-mode` requires approval for unrecognized actions** (it allowed them).
+  - Action: map host tool names to categories, or for a local-only profile use
+    `{ ...DEV_MODE_PROFILE, unknown_action: 'allow' }`.
+- **Missing profiles deny.** `evaluateActionWithProfile(undefined, ctx)` and
+  lookups such as `BUILTIN_PROFILES['typo']` return `deny` with reason
+  `unknown_profile` instead of throwing.
+  - Action: none, unless you relied on catching the `TypeError`.
+- `evaluateActionWithProfile` can be imported from `atp-sdk` directly.
+
 ## v2.x → v3.0
 
 - **Unknown profile actions deny.** `evaluateActionWithProfile` returns `deny`
