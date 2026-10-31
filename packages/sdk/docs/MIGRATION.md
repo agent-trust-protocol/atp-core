@@ -4,6 +4,9 @@ This guide documents notable changes and safe upgrade steps.
 
 ## v3.x → v4.0
 
+- **Node.js 20 or newer is required.** Identity and key generation already
+  failed on Node.js 18; `engines` now says so.
+  - Action: run on Node.js 20 or 24.
 - **`dev-mode` requires approval for unrecognized actions** (it allowed them).
   - Action: map host tool names to categories, or for a local-only profile use
     `{ ...DEV_MODE_PROFILE, unknown_action: 'allow' }`.
