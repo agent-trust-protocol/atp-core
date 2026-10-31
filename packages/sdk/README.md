@@ -16,7 +16,7 @@ ATP is designed to work alongside MCP, A2A, ANP, ADK and agent frameworks rather
 
 ## Quickstart
 
-Requires Node.js 18 or newer. The package is ESM-only.
+Requires Node.js 20 or newer. The package is ESM-only.
 
 ```bash
 npm install atp-sdk
@@ -110,6 +110,7 @@ They cover the standalone quickstart, local DID generation, multi-protocol detec
 - `evaluateActionWithProfile` is exported from `atp-sdk` directly.
 - A missing or unknown profile returns `deny` instead of throwing.
 - **Breaking:** `dev-mode` returns `require_approval` for unrecognized actions instead of `allow`, so no built-in profile now lets an unrecognized action through. To restore the old behaviour in local development, use `{ ...DEV_MODE_PROFILE, unknown_action: 'allow' }`.
+- **Breaking:** Node.js 20 or newer is required. On Node.js 18 the identity code fails because `globalThis.crypto` is not available.
 - `@atpdeveloper/did-atp` is pinned to `0.1.1`.
 
 ## Status and limits

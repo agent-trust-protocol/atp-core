@@ -20,6 +20,10 @@ Requires `atp-profiles@^3.0.0`.
   `require_approval` (reason `unknown_action_type`) instead of `allow`. No
   built-in profile now allows an unrecognized action. To keep the old
   behaviour locally, use `{ ...DEV_MODE_PROFILE, unknown_action: 'allow' }`.
+- **Node.js 20 or newer is required** (`engines` was `>=18.0.0`). On Node.js 18,
+  `Agent.quickstart()` and `DidAtp.generate()` fail with
+  `Cannot read properties of undefined (reading 'getRandomValues')` because
+  `globalThis.crypto` is not available there.
 
 ### Changed
 
