@@ -1,6 +1,6 @@
 {
   "name": "atp-sdk",
-  "version": "3.1.0",
+  "version": "4.0.0",
   "description": "Open TypeScript SDK for Agent Trust Protocol: agent identity, credential utilities, trust evidence, and security profile decisions.",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -70,7 +70,7 @@
     "eventemitter3": "^5.0.0",
     "jose": "^5.1.0",
     "ws": "^8.14.0",
-    "atp-profiles": "^2.1.0"
+    "atp-profiles": "^3.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",

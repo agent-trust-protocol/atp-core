@@ -5,21 +5,24 @@ All notable changes to the ATP™ SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.1.0] - Unreleased
+## [4.0.0] - 2026-10-31
 
-Requires `atp-profiles@^2.1.0`. Publish `atp-profiles@2.1.0` first, then refresh
-`package-lock.json`.
+Requires `atp-profiles@^3.0.0`.
 
 ### Added
 
 - `evaluateActionWithProfile` is exported from `atp-sdk`, so the documented
   profile evaluator no longer needs a separate `atp-profiles` import.
 
-### Changed
+### Changed (BREAKING)
 
 - **`dev-mode` no longer allows unrecognized actions.** They return
   `require_approval` (reason `unknown_action_type`) instead of `allow`. No
-  built-in profile now allows an unrecognized action.
+  built-in profile now allows an unrecognized action. To keep the old
+  behaviour locally, use `{ ...DEV_MODE_PROFILE, unknown_action: 'allow' }`.
+
+### Changed
+
 - `@atpdeveloper/did-atp` is pinned to `0.1.1` (was `0.1.0`). 0.1.1 changes only
   its README and raises the `@noble/hashes` floor to `^1.8.0`.
 

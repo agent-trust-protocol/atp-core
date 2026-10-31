@@ -145,7 +145,7 @@ const allProfiles = { ...BUILTIN_PROFILES, 'my-custom-profile': myProfile };
 
 Apache-2.0 © 2026 Sovr Labs
 
-## Changes in 2.1: missing profiles deny; dev-mode no longer allows unknown actions
+## Migrating to 3.0: missing profiles deny; dev-mode no longer allows unknown actions
 
 - A missing or malformed profile (`undefined`, `null`, or an object without
   `controls`, as returned by `BUILTIN_PROFILES['typo']`) now returns
@@ -154,6 +154,7 @@ Apache-2.0 © 2026 Sovr Labs
 - `dev-mode` sets `unknown_action: 'require_approval'` (was `'allow'`). No built-in
   profile now allows an unrecognized action. To keep the 2.0 behaviour in a local
   profile, spread `DEV_MODE_PROFILE` and set `unknown_action: 'allow'`.
+- The evaluator's `profile` parameter now accepts `null | undefined`.
 
 ## Migrating to 2.0: unknown actions fail closed
 
@@ -167,7 +168,7 @@ In 1.x, an `actionType` the profile did not recognize returned `allow`, so a typ
   A missing, empty, or non-string `actionType` always denies.
 - Profiles may set `unknown_action: 'allow' | 'deny' | 'require_approval'` to choose
   a different fallback. Any other value denies. In 2.0 only `dev-mode` set `'allow'`;
-  from 2.1 it sets `'require_approval'`.
+  from 3.0 it sets `'require_approval'`.
 - Recognized actions keep their 1.x decisions.
 
 Adapters should map host tool names to a category before evaluating, for example

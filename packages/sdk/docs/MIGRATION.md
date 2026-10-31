@@ -2,7 +2,7 @@
 
 This guide documents notable changes and safe upgrade steps.
 
-## v3.0 → v3.1
+## v3.x → v4.0
 
 - **`dev-mode` requires approval for unrecognized actions** (it allowed them).
   - Action: map host tool names to categories, or for a local-only profile use
