@@ -1,7 +1,9 @@
 # create-atp-agent
 ### From idea to a running ATP starter
 
-Use the ATP CLI to scaffold a small JavaScript ESM agent project with the published `atp-sdk`. Use Node.js 20 or newer: the generated starter calls the SDK's identity code, which fails on Node.js 18.
+[![npm](https://img.shields.io/npm/v/create-atp-agent)](https://www.npmjs.com/package/create-atp-agent) [![license](https://img.shields.io/npm/l/create-atp-agent)](https://github.com/agent-trust-protocol/atp-core/blob/main/LICENSE)
+
+Scaffold a small JavaScript ESM agent with an identity from **Agent Trust Protocol™ (ATP)** in one command. The starter uses the published [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) 4.x. Requires Node.js 20 or newer.
 
 ```bash
 npx create-atp-agent my-agent
@@ -31,11 +33,16 @@ Use `--no-open` to start the UI without launching a browser. If dependency insta
 
 The local UI is a configuration demo. It does **not** mint a DID, generate or persist keys, register an issuer, connect a production ATP service, or enforce a security profile. The generated agent's standalone identity is ephemeral and not remotely resolvable by default. Review key storage, service connections, and policy enforcement before cross-system or consequential use.
 
-For an existing application, install the [SDK](../sdk/README.md) directly. For canonical profiles, see [`atp-profiles`](../atp-profiles/README.md).
+For an existing application, install [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) directly. To check each tool call against a security profile (`allow`, `require_approval` or `deny`), see the SDK's ["Decide before an agent acts"](https://www.npmjs.com/package/atp-sdk#decide-before-an-agent-acts) section and [`atp-profiles`](https://www.npmjs.com/package/atp-profiles).
+
+## What's new in 1.5
+
+- New projects depend on `atp-sdk@^4.0.0`, which exports `evaluateActionWithProfile` and denies missing or unknown profiles.
+- Node.js 20 or newer is required, for both the CLI and the generated project. The SDK's identity code fails on Node.js 18.
 
 ## Try it and contribute
 
-Run the scaffold, inspect the output, and tell us where onboarding is confusing. Reproducible issues, starter templates, and tests for new agent ecosystems are welcome in [ATP Core](https://github.com/agent-trust-protocol/atp-core/issues). See [CONTRIBUTING.md](../../CONTRIBUTING.md).
+Run the scaffold, inspect the output, and tell us where onboarding is confusing. Reproducible issues, starter templates, and tests for new agent ecosystems are welcome in [ATP Core](https://github.com/agent-trust-protocol/atp-core/issues). See the [contribution guide](https://github.com/agent-trust-protocol/atp-core/blob/main/CONTRIBUTING.md).
 
 To verify a CLI change locally:
 
