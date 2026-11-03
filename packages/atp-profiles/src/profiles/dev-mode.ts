@@ -46,6 +46,8 @@ export const DEV_MODE_PROFILE: AtpSecurityProfile = {
       restricted_tools: [],
     },
   },
+  // Unrecognized actions never run silently, but local development is not hard-blocked.
+  unknown_action: "require_approval",
   logging: {
     log_all_actions: true,
     log_sensitive_inputs: false,

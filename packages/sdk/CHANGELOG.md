@@ -5,13 +5,73 @@ All notable changes to the ATP™ SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-10-31
+
+Requires `atp-profiles@^3.0.0`.
+
+### Added
+
+- `evaluateActionWithProfile` is exported from `atp-sdk`, so the documented
+  profile evaluator no longer needs a separate `atp-profiles` import.
+
+### Changed (BREAKING)
+
+- **`dev-mode` no longer allows unrecognized actions.** They return
+  `require_approval` (reason `unknown_action_type`) instead of `allow`. No
+  built-in profile now allows an unrecognized action. To keep the old
+  behaviour locally, use `{ ...DEV_MODE_PROFILE, unknown_action: 'allow' }`.
+- **Node.js 20 or newer is required** (`engines` was `>=18.0.0`). On Node.js 18,
+  `Agent.quickstart()` and `DidAtp.generate()` fail with
+  `Cannot read properties of undefined (reading 'getRandomValues')` because
+  `globalThis.crypto` is not available there.
+
+### Changed
+
+- `@atpdeveloper/did-atp` is pinned to `0.1.1` (was `0.1.0`). 0.1.1 changes only
+  its README and raises the `@noble/hashes` floor to `^1.8.0`.
+
+### Fixed
+
+- `evaluateActionWithProfile` denies a missing, unknown or malformed profile
+  (reason `unknown_profile`). It threw a `TypeError` before, for example for
+  `evaluateActionWithProfile(BUILTIN_PROFILES['typo'], context)`.
+
+## [3.0.0] - 2026-10-26
+
+### Changed (BREAKING)
+
+- **Security profiles fail closed** (requires `atp-profiles@^2.0.0`). An
+  `actionType` that is not a control category or named by the active state's
+  policy now returns `deny` with reason `unknown_action_type`, instead of
+  `allow`. Typos such as `Shell` or raw tool names no longer bypass controls.
+  Profiles can opt out with `unknown_action`; only `dev-mode` does.
+- **`Agent.mutualAuth()` no longer reports unverified success.** It previously
+  returned `theyVerified: { verified: true, trustEstablished: true }` without
+  verifying anything. Both results are now unverified, and the method returns
+  the `challenge` and `response` it created. It is deprecated; run two explicit
+  `requestAuth` / `respondToChallenge` / `verifyAuthResponse` exchanges instead.
+- **`ATPClient.evaluateActionWithProfile()` denies when no profile is set.** It
+  previously returned `allow` when neither `config.profileId`, `setProfile()`
+  nor a `profileId` argument supplied a profile.
+
+### Fixed
+
+- `Protocol` is exported as a runtime enum. It was type-only, so
+  `import { Protocol } from 'atp-sdk'` failed.
+- `VERSION` and `SDK_INFO.version` report the package version (were `2.0.0`).
+- Removed the unused `zod` dependency, which carried GHSA-mrhx-c7xc-m3w5.
+- Offline examples (00, 09, 11, 12) run against the v2+ API and are checked
+  before publish by `npm run examples`. Service-backed v1 examples moved to
+  `examples-legacy-v1/` and are no longer published.
+- Docs use the `atp-sdk` package name and current `DidAtp` / `CryptoUtils` APIs.
+
 ## [2.0.0] - 2026-06-11
 
 ### Changed (BREAKING)
 
 - **did:atp v2 identifier format**: `did:atp:<host>[:<path>…]:e1_…:pq1_…`
-  replaces v1 `did:atp:<network>:<fingerprint>`, aligning with the finalized
-  did:atp specification. No conversion from v1 exists — see
+  replaces v1 `did:atp:<network>:<fingerprint>`, aligning with the did:atp
+  Community Group draft. No conversion from v1 exists — see
   [MIGRATION.md](./MIGRATION.md).
 - **Split hybrid key pairs**: `HybridKeyPair` is now `{ ed25519, mlDsa65 }`
   (independent key pairs) instead of a composite blob.

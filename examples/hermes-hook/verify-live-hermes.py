@@ -8,12 +8,18 @@ import contextlib
 import io
 import json
 import os
+import shlex
+import sys
 from pathlib import Path
 import subprocess
 import tempfile
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
+
+# Assertions below are evidence checks, so never allow Python to optimize them away.
+if sys.flags.optimize:
+    raise SystemExit('Run without -O or PYTHONOPTIMIZE: verification requires assertions.')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--output')
@@ -31,7 +37,7 @@ with tempfile.TemporaryDirectory(prefix='atp-hermes-') as directory:
         "if(r.error||r.status!==0)process.exit(2);\n"
         f"appendFileSync({json.dumps(str(trace))},JSON.stringify({{tool:JSON.parse(input).tool_name,response:JSON.parse(r.stdout)}})+'\\n');\n"
         "process.stdout.write(r.stdout);\n")
-    command = f'node {wrapper}'
+    command = f'node {shlex.quote(str(wrapper))}'
     config = {'hooks': {'pre_tool_call': [{'matcher': '^(read_file|terminal|write_file|patch)$', 'command': command, 'timeout': 10, 'fail_closed': True}]}}
     (home / 'config.yaml').write_text(json.dumps(config))
     os.environ.update(HERMES_HOME=str(home), TERMINAL_ENV='local', NO_PROXY='127.0.0.1,localhost', no_proxy='127.0.0.1,localhost')
@@ -43,7 +49,7 @@ with tempfile.TemporaryDirectory(prefix='atp-hermes-') as directory:
             results = [m for m in request.get('messages', []) if m.get('role') == 'tool']
             calls = [
                 ('read_file', {'path': str(example / 'fixture.txt')}),
-                ('terminal', {'command': f'printf should-not-run > {sentinel}'})]
+                ('terminal', {'command': f'printf should-not-run > {shlex.quote(str(sentinel))}'})]
             tool = None
             if len(results) < len(calls):
                 name, arguments = calls[len(results)]

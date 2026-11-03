@@ -1,7 +1,9 @@
 # Agent Trust Protocol™
-### The Open Trust Layer for AI Agents
+### Check permission before your AI agent uses a tool
 
-**Put a policy check immediately before an AI agent acts.** Try a local read that runs, a shell attempt held for approval, and a read denied after the session ends.
+**Let a permitted tool action run. Block the next one when the policy says stop.** ATP Core gives developers policy-evaluation tools and examples of enforcing those decisions immediately before execution.
+
+Start with a local demo, then connect the [Hermes tool hook](examples/hermes-hook/README.md). You can try both without a model API key. The examples have deliberately narrow permissions so you can inspect exactly what runs.
 
 AI agents move between tools, organizations, and protocols. ATP is an open effort to make identity, trust evidence, and privacy controls portable across those boundaries. It complements MCP, A2A, ANP, ADK, and agent frameworks; it does not replace how agents communicate.
 
@@ -11,7 +13,7 @@ AI agents move between tools, organizations, and protocols. ATP is an open effor
 
 ## Try it in five minutes
 
-No account, model API key, or hosted ATP service is needed. With Node.js 20 or 24 and npm:
+No account, model API key, or hosted ATP service is needed. Use **Node.js 20 or 24** and npm for this walkthrough:
 
 ```bash
 git clone https://github.com/agent-trust-protocol/atp-core.git
@@ -24,13 +26,27 @@ npm start
 
 Only the first callback runs. [Read the full walkthrough and text transcript](examples/action-boundary/README.md), or [try the Hermes hook walkthrough](examples/hermes-hook/README.md#reproduce-the-hook-decisions). This demo checks action category and session state; session completion is not mandate revocation.
 
+## Protect one tool in Hermes
+
+Already using Hermes Agent? [Start with the Hermes walkthrough](examples/hermes-hook/README.md): allow a read of one fixed file and block terminal, write and patch calls. The hook checks the action before Hermes dispatches the matched tool.
+
+| Try | What you can verify |
+| --- | --- |
+| `npm run demo` in `examples/hermes-hook` | Four decisions through the real hook subprocess; Hermes is not started. |
+| [Run the Hermes runtime verifier](examples/hermes-hook/README.md#verify-the-hermes-runtime) | A real Hermes tool read returns the fixture; a denied terminal call creates no sentinel file. Tool selection comes from a scripted local provider. |
+| [Try it in your own Hermes profile](examples/hermes-hook/README.md#connect-a-live-hermes-profile) | Check consent and execution in your installed runtime, keeping its native permissions and sandbox. |
+
+**Can you withdraw permission?** The local demo stops further reads when its session completes. That is not signed-mandate revocation. The Hermes example does not yet implement that revocation path; do not deploy it as a general agent authorization system.
+
+We are looking for **five developers to try one protected tool** and tell us where setup breaks or the boundary falls short. [Join the developer pilot](docs/launch/developer-pilot.md). A failed setup is useful feedback too.
+
 ## What is here
 
 | Area | Purpose | Current entry point |
 | --- | --- | --- |
 | Identity | `did:atp` identifiers and hybrid Ed25519/ML-DSA-65 key material | [DID package](packages/did-atp/README.md) |
 | Trust | Evidence, credentials, scoring, and issuer/status work | [SDK](packages/sdk/README.md) and [drafts](https://w3c-cg.github.io/atp/specs/) |
-| Policy | Reusable profile schema and action evaluation | [Profiles](packages/atp-profiles/README.md) |
+| Policy | Fail-closed profiles that return `allow`, `require_approval` or `deny` for each action | [Profiles](packages/atp-profiles/README.md) |
 | Interoperability | Conformance suites and work across agent systems | [Conformance runner](scripts/conformance.mjs) |
 
 A passing test covers the behavior exercised by that test; it is not certification of every draft feature. Zero-knowledge range claims and some cross-protocol work remain experimental or in development.
@@ -41,10 +57,10 @@ The package READMEs are the source for APIs, limitations, and examples. Install 
 
 | Package | Use it for | Install |
 | --- | --- | --- |
-| [`atp-sdk`](packages/sdk/README.md) | Start an agent and use identity, credential, and trust utilities | `npm install atp-sdk` |
+| [`atp-sdk`](packages/sdk/README.md) | Start an agent, use identity and trust utilities, and check actions against a profile | `npm install atp-sdk` |
 | [`create-atp-agent`](packages/create-atp-agent/README.md) | Scaffold a JavaScript ESM starter | `npx create-atp-agent my-agent` |
 | [`@atpdeveloper/did-atp`](packages/did-atp/README.md) | Build and inspect canonical `did:atp` identifier primitives | `npm install @atpdeveloper/did-atp` |
-| [`atp-profiles`](packages/atp-profiles/README.md) | Define and evaluate built-in security profiles | `npm install atp-profiles` |
+| [`atp-profiles`](packages/atp-profiles/README.md) | Built-in and custom security profiles with a dependency-free evaluator | `npm install atp-profiles` |
 
 OpenClaw remains a legacy optional adapter example, not a required ATP dependency. Use the SDK and canonical packages as the starting point for new integrations.
 
@@ -56,7 +72,7 @@ OpenClaw remains a legacy optional adapter example, not a required ATP dependenc
 
 ## Start with the SDK
 
-The pinned published first-run path is verified on Node.js 20 and 24. Although published metadata permits Node 18, that path fails there because Web Crypto is unavailable in the expected form; use Node 20 or 24.
+`atp-sdk` 4.0 requires Node.js 20 or newer; its identity code needs Web Crypto, which Node.js 18 does not provide globally. Earlier SDK releases advertised Node.js 18 but failed there in the same way.
 
 ```bash
 npm install atp-sdk
@@ -68,6 +84,20 @@ import { Agent } from 'atp-sdk';
 const agent = await Agent.quickstart('MyBot');
 console.log(agent.getDID());
 ```
+
+Then check an action before your agent runs it:
+
+```ts
+import { BUILTIN_PROFILES, evaluateActionWithProfile } from 'atp-sdk';
+
+const { decision } = evaluateActionWithProfile(BUILTIN_PROFILES['safe-default'], {
+  actionType: 'shell', // map host tools to categories: terminal → shell, read_file → filesystem
+  state: 'executing',
+});
+// 'allow' → run it · 'require_approval' → ask a person first · 'deny' → do not run it
+```
+
+Unrecognized actions, missing actions and missing or misspelled profiles never come back as `allow`. Your runtime must still enforce the decision.
 
 The standalone quickstart creates local identity material. A local identifier is not automatically publicly resolvable, and this snippet does not configure an issuer, external policy enforcement, or a production key store. See the [SDK guide](packages/sdk/README.md) before connecting real services.
 
@@ -114,4 +144,4 @@ Issues and pull requests are welcome. Clearly distinguish implemented behavior f
 
 This repository is the open ATP Core implementation and developer tooling. The [website source](https://github.com/agent-trust-protocol/atp-website) is separate. [ATP Studio](https://studio.agenttrustprotocol.com/) is a separate enterprise product with its own infrastructure and data. Do not put Studio credentials, databases, or deployment configuration in ATP Core.
 
-Agent Trust Protocol™ is a trademark of Sovr INC. See [LICENSE](LICENSE) for the repository license and the relevant package license metadata.
+Agent Trust Protocol™ is a trademark of Sovr Inc. See [LICENSE](LICENSE) for the repository license and the relevant package license metadata.

@@ -15,7 +15,7 @@ import {
   UniversalMonitor,
   MCPAdapter,
   Protocol
-} from '@atp/sdk';
+} from 'atp-sdk';
 
 /**
  * Example 1: Automatic Protocol Detection
@@ -157,22 +157,16 @@ async function secureMessageExchange() {
   console.log('Original Message:');
   console.log(JSON.stringify(message, null, 2));
 
-  // Apply ATP security layer
-  const securedMessage = await mcpAdapter.secure(message);
-
-  console.log('\nSecured Message:');
-  console.log(`  Signature: ${securedMessage.signature.substring(0, 50)}...`);
-  console.log(`  Trust Level: ${securedMessage.trustLevel}`);
-  console.log(`  Timestamp: ${securedMessage.timestamp}`);
-
-  // Verify the secured message
-  const verification = await mcpAdapter.verify(securedMessage);
-
-  console.log('\nVerification Result:');
-  console.log(`  Verified: ${verification.verified}`);
-  console.log(`  Trust Score: ${verification.trustScore}`);
-  console.log(`  Signature Valid: ${verification.details?.signatureValid}`);
-  console.log(`  Sender Verified: ${verification.details?.senderVerified}`);
+  // Adapter-level message signing is not implemented yet. secure() fails closed
+  // rather than returning an unsigned "secured" message.
+  try {
+    await mcpAdapter.secure(message);
+    console.log('\n❌ Unexpected: secure() returned without a signing implementation');
+    process.exitCode = 1;
+  } catch (error) {
+    console.log(`\n✅ secure() fails closed: ${error.message}`);
+    console.log('   Sign messages with CryptoUtils.signEd25519 / signMlDsa65 until adapter signing ships.');
+  }
 
   await mcpAdapter.cleanup();
 }
@@ -359,7 +353,7 @@ async function main() {
 
 // Run if executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch(console.error);
+  main().catch((error) => { console.error(error); process.exitCode = 1; });
 }
 
 export {
