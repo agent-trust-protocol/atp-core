@@ -26,3 +26,9 @@ Run the workflow with version 1.5.0 and dry_run=true. Require package tests, a g
 - Pending release owner: workflow fix, reviewed validation, npm publication.
 - Pending participants: five independent own-profile outcomes and eligible seven-day returns. Maintainer or scripted runtime results never substitute.
 - Pending application history: whether three prior attempts submitted, failed, or were rejected; no fourth submission is authorized by this plan.
+
+## Starter validation — November 3, 2026
+
+At main adc9b9b, applied the two SDK 4 checks in a detached local worktree. Node 24.22.1 and npm 11.9.0 validated the starter version and SDK range. The registry returned SDK 4.0.0. The clean install, two starter tests, and package dry run passed. A fresh generated project installed SDK 4.0.0 and reported `Standalone: true` on startup.
+
+At the time of validation, #170 head 201b482 still targeted SDK 2.1 in its workflow and main targeted SDK 3. The release owner should reconcile the workflow against the SDK 4 starter on current main and run the GitHub Actions dry run before publication. These results cover the local build, package inspection and generated consumer, with hosted CI and publication pending.
