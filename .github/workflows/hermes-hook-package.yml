@@ -1,0 +1,89 @@
+name: atp-hermes-hook package
+on:
+  pull_request:
+    paths:
+      - 'packages/hermes-hook/**'
+      - '.github/workflows/hermes-hook-package.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/hermes-hook/**'
+      - '.github/workflows/hermes-hook-package.yml'
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['20', '24']
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm ci --ignore-scripts
+        working-directory: packages/hermes-hook
+      - run: npm test
+        working-directory: packages/hermes-hook
+      - name: Packed tarball installs and decides from a clean consumer
+        working-directory: packages/hermes-hook
+        run: |
+          npm pack --pack-destination "$RUNNER_TEMP"
+          consumer="$RUNNER_TEMP/consumer"
+          mkdir -p "$consumer/docs"
+          echo ok > "$consumer/docs/readme.txt"
+          cd "$consumer"
+          npm init -y >/dev/null
+          npm install --ignore-scripts "$RUNNER_TEMP"/atp-hermes-hook-*.tgz
+          printf '{"paths":{"read":["docs"]}}' > atp-hermes.json
+          hook=./node_modules/.bin/atp-hermes-hook
+          $hook --check --config atp-hermes.json
+          printf '{"hook_event_name":"pre_tool_call","tool_name":"read_file","tool_input":{"path":"docs/readme.txt"},"cwd":"%s"}' "$PWD" \
+            | $hook --config atp-hermes.json | tee allow.json
+          test "$(cat allow.json)" = '{}'
+          set +e
+          printf '{"hook_event_name":"pre_tool_call","tool_name":"terminal","tool_input":{"command":"id"}}' \
+            | $hook --config atp-hermes.json > block.json
+          status=$?
+          set -e
+          cat block.json
+          test "$status" = 2
+          node -e "if (JSON.parse(require('fs').readFileSync('block.json','utf8')).action !== 'block') process.exit(1)"
+          npm audit --omit=dev --audit-level=low
+
+  runtime-integration:
+    name: Hermes runtime against the packed tarball (scripted local provider)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: atp-core
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: NousResearch/hermes-agent
+          ref: 55ee4acdd822b73fb9573a2321531ae3a9d0b3e0
+          path: hermes-atp-pilot
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          version: '0.13.4'
+          enable-cache: false
+      - name: Install the hook from its packed tarball
+        run: |
+          cd atp-core/packages/hermes-hook
+          npm pack --pack-destination "$RUNNER_TEMP"
+          mkdir -p "$RUNNER_TEMP/installed" && cd "$RUNNER_TEMP/installed"
+          npm init -y >/dev/null
+          npm install --ignore-scripts "$RUNNER_TEMP"/atp-hermes-hook-*.tgz
+      - run: uv sync --frozen --python 3.14 --no-dev
+        working-directory: hermes-atp-pilot
+      - name: Verify scoped read runs; terminal, write and out-of-scope read are blocked
+        run: >-
+          .venv/bin/python ../atp-core/packages/hermes-hook/test/verify-live-hermes.py
+          --hook "$RUNNER_TEMP/installed/node_modules/atp-hermes-hook/bin/atp-hermes-hook.mjs"
+        working-directory: hermes-atp-pilot

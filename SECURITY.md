@@ -13,8 +13,9 @@ references, executable checks, limitations, and remaining review requirements.
 - `atp-profiles` evaluates explicit action types and lifecycle states and returns
   `allow`, `deny`, or `require_approval`. A runtime must call the evaluator at every
   tool boundary and block both deny and pending approval before execution.
-- The SDK and OpenClaw wrapper contain profile integration. Missing action metadata
-  can skip profile evaluation; a profile is not an operating-system sandbox.
+- The SDK and `atp-hermes-hook` contain profile integration (the OpenClaw wrapper is
+  deprecated and archived). Missing action metadata can skip SDK profile evaluation;
+  a profile is not an operating-system sandbox.
 - DID and signature helpers have reference-vector and conformance tests. Local
   quickstart identities are ephemeral and non-resolvable until configured with
   persistence and a published DID document.

@@ -1,5 +1,8 @@
 # 🤖 OpenClaw + ATP Integration Guide
 
+> **Deprecated.** `@atpdevelopment/openclaw-atp` is no longer maintained and has been moved to `archive/`. The last published release (1.1.3) depends on `atp-sdk@^1.2.4`, which fails open when no profile is configured and pulls in a zod release affected by GHSA-mrhx-c7xc-m3w5. Do not use it for new work. Use [`atp-sdk`](../packages/sdk) 4.x with [`atp-profiles`](../packages/atp-profiles); for enforcing decisions at a real tool boundary, see [`examples/hermes-hook`](../examples/hermes-hook) and [`examples/action-boundary`](../examples/action-boundary).
+
+
 Comprehensive guide for securing [OpenClaw](https://openclaw.dev) multi-agent systems with Agent Trust Protocol™.
 
 ## Overview
@@ -647,19 +650,19 @@ const securedTools = secureTools(agentDid, tools, atpClient, {
 ## API Reference
 
 Full API documentation:
-- [`OpenClawATPClient`](../packages/openclaw-atp/README.md#openclaw-atp-client)
-- [`registerAgentWithAtp()`](../packages/openclaw-atp/README.md#register-agent)
-- [`secureTools()`](../packages/openclaw-atp/README.md#secure-tools)
-- [`ATPGraphValidator`](../packages/openclaw-atp/README.md#graph-validator)
-- [`ATPPolicyProfile`](../packages/openclaw-atp/README.md#policy-profiles)
-- [`ATPMonitor`](../packages/openclaw-atp/README.md#monitoring)
+- [`OpenClawATPClient`](../archive/openclaw-atp/README.md#openclaw-atp-client)
+- [`registerAgentWithAtp()`](../archive/openclaw-atp/README.md#register-agent)
+- [`secureTools()`](../archive/openclaw-atp/README.md#secure-tools)
+- [`ATPGraphValidator`](../archive/openclaw-atp/README.md#graph-validator)
+- [`ATPPolicyProfile`](../archive/openclaw-atp/README.md#policy-profiles)
+- [`ATPMonitor`](../archive/openclaw-atp/README.md#monitoring)
 
 ## Examples
 
 Explore complete working examples:
-- [Finance Trading Workflow](../packages/openclaw-atp/examples/finance-workflow.ts)
-- [Research Crew](../packages/openclaw-atp/examples/research-crew.ts) (coming soon)
-- [Customer Service](../packages/openclaw-atp/examples/customer-service.ts) (coming soon)
+- [Finance Trading Workflow](../archive/openclaw-atp/examples/finance-workflow.ts)
+- [Research Crew](../archive/openclaw-atp/examples/research-crew.ts) (coming soon)
+- [Customer Service](../archive/openclaw-atp/examples/customer-service.ts) (coming soon)
 
 ## Migration Guide
 
@@ -706,7 +709,7 @@ agent = await client.register_agent(motley_agent,
 ## Resources
 
 - **Documentation**: [https://github.com/agent-trust-protocol/atp-core/tree/main/docs/openclaw](https://github.com/agent-trust-protocol/atp-core/tree/main/docs/openclaw)
-- **Examples**: [/packages/openclaw-atp/examples](../packages/openclaw-atp/examples/)
+- **Examples**: [/packages/openclaw-atp/examples](../archive/openclaw-atp/examples/)
 - **GitHub**: [https://github.com/agent-trust-protocol/atp](https://github.com/agent-trust-protocol/atp)
 - **Discord**: [https://discord.gg/atp-dev](https://discord.gg/atp-dev)
 - **OpenClaw Docs**: [https://openclaw.dev](https://openclaw.dev)
@@ -720,6 +723,6 @@ Apache 2.0 - See [LICENSE](../LICENSE)
 **Next Steps:**
 1. [Install the package](#installation)
 2. [Try the quick start](#quick-start-5-minutes)
-3. [Explore the finance example](../packages/openclaw-atp/examples/finance-workflow.ts)
+3. [Explore the finance example](../archive/openclaw-atp/examples/finance-workflow.ts)
 4. [Read security best practices](#security-best-practices)
 5. [Join our Discord](https://discord.gg/atp-dev) for support

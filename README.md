@@ -28,7 +28,7 @@ Only the first callback runs. [Read the full walkthrough and text transcript](ex
 
 ## Protect one tool in Hermes
 
-Already using Hermes Agent? [Start with the Hermes walkthrough](examples/hermes-hook/README.md): allow a read of one fixed file and block terminal, write and patch calls. The hook checks the action before Hermes dispatches the matched tool.
+Already using Hermes Agent? [Start with the Hermes walkthrough](examples/hermes-hook/README.md): allow a read of one fixed file and block terminal, write and patch calls. The hook checks the action before Hermes dispatches the matched tool. To use your own profile, directories and approval mode, install the configurable [`atp-hermes-hook`](packages/hermes-hook/README.md) package (first npm release pending).
 
 | Try | What you can verify |
 | --- | --- |
@@ -61,8 +61,9 @@ The package READMEs are the source for APIs, limitations, and examples. Install 
 | [`create-atp-agent`](packages/create-atp-agent/README.md) | Scaffold a JavaScript ESM starter | `npx create-atp-agent my-agent` |
 | [`@atpdeveloper/did-atp`](packages/did-atp/README.md) | Build and inspect canonical `did:atp` identifier primitives | `npm install @atpdeveloper/did-atp` |
 | [`atp-profiles`](packages/atp-profiles/README.md) | Built-in and custom security profiles with a dependency-free evaluator | `npm install atp-profiles` |
+| [`atp-hermes-hook`](packages/hermes-hook/README.md) | Enforce an ATP profile and a path scope at Hermes Agent's `pre_tool_call` boundary | `npm install atp-hermes-hook` (first npm release pending) |
 
-OpenClaw remains a legacy optional adapter example, not a required ATP dependency. Use the SDK and canonical packages as the starting point for new integrations.
+The OpenClaw adapter (`@atpdevelopment/openclaw-atp`) is deprecated and archived in `archive/openclaw-atp`. Use the SDK and canonical packages as the starting point for new integrations; [`atp-hermes-hook`](packages/hermes-hook/README.md) enforces ATP profiles at Hermes Agent's tool boundary.
 
 ## See a protected action work
 

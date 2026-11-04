@@ -14,7 +14,7 @@ Core code does not establish Studio support.
 | IBM/BeeAI ACP | `packages/protocol-integrations/src/acp` | Legacy integration source; ACP incorporated into A2A | No verified coverage claim |
 | ANP (Agent Network Protocol) | `packages/protocol-integrations/src/anp-agent/README.md` | Explicit planned adaptation; directory is a planning document, not an executable ANP adapter | Planned after Core wire and enforcement tests |
 | AGP | `packages/protocol-integrations/src/agp` | Source labels Agent Gateway Protocol; not proof of Agent Governance Protocol compatibility | Unverified |
-| OpenClaw | `packages/openclaw-atp` | Optional legacy example; review individual modules/tests | Separate integration required |
+| OpenClaw | `archive/openclaw-atp` | **Deprecated** and archived; not built, tested or published | Separate integration required |
 | LangChain, CrewAI, AutoGPT, ADK | Framework integration targets | Frameworks are not wire protocols; no blanket stable support claim | Planned per-runtime validation |
 | WebMCP | Browser tool API | Future candidate; separate from MCP transport | Planned evaluation |
 | AG-UI, A2UI | Interaction/rendering targets | Future candidates; UI compatibility does not establish authorization enforcement | Coordinate with Vento Core separately |
