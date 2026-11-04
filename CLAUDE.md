@@ -100,7 +100,7 @@ You `MUST` always use this tool when:
 
 This repo implements **Agent Trust Protocol (ATP)**, a quantum-safe identity, trust, and policy layer for AI agents. ATP is consumed via the `atp-sdk` TypeScript package and is used to secure agents running on platforms like OpenClaw/NemoClaw, Motleycrew, LangChain, and custom runtimes.
 
-The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `packages/`. Scripts and utilities live in `scripts/`.
+The public website lives in the separate `atp-website` repository; this repo no longer contains a web app. Backend logic lives in `packages/`. Scripts and utilities live in `scripts/`.
 
 ---
 
@@ -139,9 +139,6 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
 - `packages/protocol-integrations`: Adapters for other runtimes (LangChain, Motleycrew, etc.).
 - `packages/rpc-gateway`: RPC layer for inter-service communication.
 - `packages/atp-cloud`: Cloud deployment and managed service utilities.
-- `src/app/`: Next.js pages — marketing site, playground, policy editor, monitoring dashboard, docs.
-- `src/app/onboard/agent/`: Agent onboarding wizard — multi-step form (runtime, name, profile, confirm) that registers an agent with ATP and assigns a security profile.
-- `src/app/integrations/`: Per-integration pages (`openclaw/` main page and `openclaw/agents/` live agent dashboard).
 - `scripts/`: Server scripts, deployment utilities, dev helpers.
 - `scripts/tests/`: End-to-end and integration test scripts.
 
@@ -179,18 +176,16 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
 2. Register it in `packages/atp-profiles/src/index.ts` by adding to `BUILTIN_PROFILES` and re-exporting.
 3. Profiles must be runtime-agnostic. Adapters do the mapping from runtime → actionType → policy.
 4. Do not hardcode policies in adapters; always go through profiles and `evaluateActionWithProfile`.
-5. Optionally expose the profile in the onboarding wizard (`src/app/onboard/agent/client-page.tsx`) and the CLI (`packages/create-atp-agent/src/index.ts`).
+5. Optionally expose the profile in the CLI (`packages/create-atp-agent/src/index.ts`).
 
 ### Adding a new policy preset
 
 1. Add the preset definition in `packages/sdk/src/policies/`.
 2. Register it in the policy evaluation engine.
-3. Optionally expose it in the policy editor UI at `src/app/policy-editor/`.
 
 ### Adding a new integration page to the site
 
-1. Create `src/app/integrations/<name>/page.tsx`.
-2. Follow the structure of `src/app/integrations/openclaw/page.tsx` — hero, features, code samples, use cases, "Why ATP + X" differentiator section, resources.
+Integration pages live in the separate `atp-website` repository, not in atp-core.
 
 ---
 
