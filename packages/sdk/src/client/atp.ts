@@ -132,14 +132,15 @@ export class ATPClient {
 
   /**
    * Evaluate whether an action is allowed under the active profile.
-   * Returns "allow", "deny", or "require_approval".
+   * Returns "allow", "deny", or "require_approval". Denies when no profile is
+   * configured or `profileId` names an unknown profile.
    */
   evaluateActionWithProfile(params: ProfileEvaluationContext & { profileId?: string }): "allow" | "deny" | "require_approval" {
     const profile = params.profileId
       ? (Object.prototype.hasOwnProperty.call(BUILTIN_PROFILES, params.profileId) ? BUILTIN_PROFILES[params.profileId] : undefined)
       : this.profile;
-    // An explicitly unknown profile must not silently disable policy enforcement.
-    if (!profile) return params.profileId ? "deny" : "allow";
+    // A missing or unknown profile must not silently disable policy enforcement.
+    if (!profile) return "deny";
     return evaluateActionWithProfile(profile, params).decision;
   }
 

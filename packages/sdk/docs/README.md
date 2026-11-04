@@ -1,8 +1,6 @@
 # ATP™ SDK Documentation
 
-Historical service-client documentation for an earlier SDK layout. For the current published API, use the [package README](../README.md).
-
-> **Historical examples:** Some `ATPClient` and service calls below require a local service implementation and may not match the current package exports. Start with the verified `Agent.quickstart` example in the [current SDK README](../README.md). ATP complements other protocols and does not require a hosted ATP service for the standalone quickstart.
+Official TypeScript SDK for the Agent Trust Protocol™
 
 ## Table of Contents
 
@@ -121,17 +119,15 @@ The ATP SDK provides dedicated clients for each service:
 DIDs are globally unique identifiers that enable verifiable, self-sovereign digital identity.
 
 ```javascript
-import { DIDUtils } from 'atp-sdk';
+import { DidAtp } from 'atp-sdk';
 
-// Generate a new DID
-const { did, document, keyPair } = await DIDUtils.generateDID({
-  network: 'testnet',
-  method: 'atp'
-});
+// Generate a hybrid (Ed25519 + ML-DSA-65) key pair and the did:atp v2 bound to it
+const { did, keyPair } = await DidAtp.generate('example.com', ['agents', 'bot']);
+// did:atp:example.com:agents:bot:e1_…:pq1_…
 
-// Parse DID components
-const parsed = DIDUtils.parseDID(did);
-console.log(parsed); // { method: 'atp', network: 'testnet', identifier: '...' }
+// Parse DID components (returns null for an invalid DID)
+const parsed = DidAtp.parse(did);
+console.log(parsed); // { type: 'path', domain: 'example.com', path: ['agents', 'bot'], e1: 'e1_…', pq1: 'pq1_…' }
 ```
 
 ### Verifiable Credentials
@@ -259,14 +255,17 @@ The SDK includes utility classes for common operations:
 ```javascript
 import { CryptoUtils } from 'atp-sdk';
 
-// Generate key pair
-const keyPair = await CryptoUtils.generateKeyPair();
+// Generate independent Ed25519 and ML-DSA-65 key pairs
+const { ed25519, mlDsa65 } = await CryptoUtils.generateHybridKeyPair();
 
-// Sign data
-const signature = await CryptoUtils.signData('message', privateKey);
+// A hybrid signature is one signature per algorithm
+const edSig = await CryptoUtils.signEd25519('message', ed25519.secretKey);
+const pqSig = CryptoUtils.signMlDsa65('message', mlDsa65.secretKey);
 
-// Verify signature
-const isValid = await CryptoUtils.verifySignature('message', signature, publicKey);
+// Verifiers should require both to validate
+const isValid =
+  (await CryptoUtils.verifyEd25519('message', edSig, ed25519.publicKey)) &&
+  CryptoUtils.verifyMlDsa65('message', pqSig, mlDsa65.publicKey);
 ```
 
 ### JWT Operations
