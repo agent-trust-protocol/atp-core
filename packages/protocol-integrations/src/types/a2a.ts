@@ -7,7 +7,7 @@ export const A2AAgentCapabilitySchema = z.object({
   name: z.string(),
   description: z.string(),
   version: z.string(),
-  parameters: z.record(z.any()).optional(),
+  parameters: z.record(z.string(), z.any()).optional(),
   // ATP™ Security Extensions
   trustLevelRequired: z.string().optional(),
   permissions: z.array(z.string()).optional(),
@@ -97,7 +97,7 @@ export const A2ACommunicationRequestSchema = z.object({
   from: z.string(), // Sender DID
   to: z.string(),   // Recipient DID
   messageType: z.enum(['handshake', 'task-request', 'task-response', 'status-update', 'error', 'custom']),
-  content: z.record(z.any()),
+  content: z.record(z.string(), z.any()),
   metadata: z.object({
     messageId: z.string(),
     timestamp: z.string(),
@@ -118,11 +118,11 @@ export const A2ACommunicationResponseSchema = z.object({
   success: z.boolean(),
   messageId: z.string(),
   timestamp: z.string(),
-  response: z.record(z.any()).optional(),
+  response: z.record(z.string(), z.any()).optional(),
   error: z.object({
     code: z.string(),
     message: z.string(),
-    details: z.record(z.any()).optional(),
+    details: z.record(z.string(), z.any()).optional(),
   }).optional(),
 });
 

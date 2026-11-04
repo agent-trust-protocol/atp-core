@@ -28,7 +28,7 @@
     "cors": "^2.8.5",
     "@atp/shared": "file:../shared",
     "ws": "^8.13.0",
-    "zod": "^3.21.0",
+    "zod": "^4.6.6",
     "axios": "^1.7.4",
     "jsonrpc-lite": "^2.2.0"
   },

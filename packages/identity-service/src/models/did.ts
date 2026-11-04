@@ -10,7 +10,7 @@ export const VerificationMethodSchema = z.object({
   // vc-service issuer-key lookup → verifySignatureCompat) can use it directly
   // without decoding multibase.
   publicKeyHex: z.string().optional(),
-  publicKeyJwk: z.record(z.any()).optional(),
+  publicKeyJwk: z.record(z.string(), z.any()).optional(),
 });
 
 export const ServiceSchema = z.object({
@@ -23,7 +23,7 @@ export const MetadataSchema = z.object({
   protocol: z.string(),
   version: z.string(),
   trustLevel: z.string(),
-  additionalInfo: z.record(z.any()).optional(),
+  additionalInfo: z.record(z.string(), z.any()).optional(),
 });
 
 export const DIDDocumentSchema = z.object({
