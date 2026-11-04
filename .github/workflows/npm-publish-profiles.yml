@@ -5,7 +5,6 @@ on:
       version:
         description: Exact atp-profiles version
         required: true
-        default: '2.0.0'
         type: string
       dry_run:
         description: Validate without publishing
@@ -26,6 +25,10 @@ jobs:
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org/'
+      - name: Require npm 11.5.1+ (trusted publishing)
+        run: |
+          npm --version
+          node -e "const v=process.argv[1].split('.').map(Number); const ok=v[0]>11||(v[0]===11&&(v[1]>5||(v[1]===5&&v[2]>=1))); if(!ok){console.error('npm '+process.argv[1]+' cannot use npm trusted publishing; need 11.5.1 or newer');process.exit(1)}" "$(npm --version)"
       - name: Validate version
         working-directory: packages/atp-profiles
         env:
@@ -45,4 +48,5 @@ jobs:
       - name: Publish with trusted identity
         if: inputs.dry_run != true
         working-directory: packages/atp-profiles
+        # Authenticates with GitHub's OIDC token via npm trusted publishing; no stored npm token.
         run: npm publish --access public --provenance

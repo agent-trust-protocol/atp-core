@@ -3,7 +3,7 @@
 echo "Testing ATP Example Agents..."
 
 # Build the example agents first
-cd examples/simple-agent
+cd archive/examples-legacy/simple-agent
 echo "Building example agents..."
 npm run build
 

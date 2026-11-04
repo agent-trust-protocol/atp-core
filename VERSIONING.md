@@ -54,7 +54,7 @@ Release channels: `latest` (`X.Y.Z`) for production, `beta` (`X.Y.Z-beta.N`) and
 ## Releases and tags
 
 - Each release gets a Git tag and a GitHub Release named **`<package>@<version>`**, for example `atp-sdk@4.0.0`, on the commit it was published from.
-- Do not use `v*` tags for package releases. Pushing a `v*` tag triggers the `npm-publish.yml` and `production-deploy.yml` workflows.
+- Do not use `v*` tags for package releases. Pushing a `v*` tag triggers `production-deploy.yml`.
 - The repository-wide releases `v1.0.0` and `v1.2.5` predate per-package versioning and are kept as history.
 
 ### Release order
@@ -67,7 +67,17 @@ When packages depend on each other, release them in dependency order and refresh
 
 Before each publish, run the package's own gates. For the SDK, those are `check-publishable`, the tests, the build, `npm run examples` and `npm pack --dry-run`. Then verify the published result with `scripts/verify-published-entry-points.mjs`.
 
-**Publishing.** Prefer the `npm-publish-*` workflows, which publish from `main` with npm provenance. If you must publish locally, do it from a clean checkout of `main`. Local publishes carry no provenance attestation, so note that in the GitHub Release.
+**Publishing.** Publish only through the per-package workflows, dispatched from `main`. They authenticate with [npm trusted publishing](https://docs.npmjs.com/trusted-publishers): GitHub's short-lived OIDC identity, no stored npm token. npm attaches provenance automatically. Run each workflow with `dry_run=true` first. A real publish from any branch other than `main` is refused.
+
+| Package | Workflow file | GitHub environment |
+| --- | --- | --- |
+| `atp-sdk` | `npm-publish-sdk.yml` | `npm-publish` |
+| `atp-profiles` | `npm-publish-profiles.yml` | `npm-publish` |
+| `create-atp-agent` | `npm-publish-cli.yml` | `npm-publish` |
+| `atp-hermes-hook` | `npm-publish-hermes-hook.yml` | `npm-publish` |
+| `@atpdeveloper/did-atp` | `npm-publish-did-atp.yml` | `npm-publish` |
+
+Each package's npm settings (**Settings → Trusted publishing → GitHub Actions**) must name organization `agent-trust-protocol`, repository `atp-core`, the workflow file above and environment `npm-publish`. All fields are case-sensitive. After the first trusted publish succeeds, set **Settings → Publishing access** to *Require two-factor authentication and disallow tokens*. Local publishing is a last resort. A local publish needs interactive 2FA and carries no provenance, so record that in the GitHub Release.
 
 ## Deprecation policy
 
