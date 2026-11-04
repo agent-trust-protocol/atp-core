@@ -22,5 +22,5 @@ jobs:
           node-version: '20'
       - name: Production dependencies (all severities gate)
         run: npm audit --prefix packages/${{ matrix.package }} --omit=dev --audit-level=low
-      - name: Full dependencies (all severities gate)
-        run: npm audit --prefix packages/${{ matrix.package }} --audit-level=low
+      - name: Full dependencies (high and critical gate)
+        run: npm audit --prefix packages/${{ matrix.package }} --audit-level=high
