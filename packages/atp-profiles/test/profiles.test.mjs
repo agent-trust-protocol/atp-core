@@ -42,8 +42,24 @@ test('recognition is scoped to the active state policy', () => {
   assert.equal(evaluateActionWithProfile(sandbox, { actionType: 'external-messaging', state: 'executing' }).decision, 'deny');
 });
 test('missing or non-string action types deny even when unknown actions are allowed', () => {
+  const permissive = { ...BUILTIN_PROFILES['dev-mode'], unknown_action: 'allow' };
   for (const actionType of [undefined, null, '', 0, ['shell'], { toString: () => 'shell' }])
-    assert.equal(evaluateActionWithProfile(BUILTIN_PROFILES['dev-mode'], { actionType }).decision, 'deny');
+    for (const profile of [BUILTIN_PROFILES['dev-mode'], permissive])
+      assert.equal(evaluateActionWithProfile(profile, { actionType }).decision, 'deny');
+});
+test('missing, unknown or malformed profiles deny instead of throwing', () => {
+  const profiles = [undefined, null, 0, '', 'safe-default', {}, { controls: null }, { controls: 'shell' },
+    BUILTIN_PROFILES['does-not-exist'], BUILTIN_PROFILES['__proto__'], BUILTIN_PROFILES['constructor'], BUILTIN_PROFILES['toString']];
+  for (const profile of profiles)
+    assert.deepEqual(evaluateActionWithProfile(profile, { actionType: 'filesystem', state: 'executing', trustScore: 1, mandateVerified: true }),
+      { allowed: false, decision: 'deny', reason: 'unknown_profile' }, String(profile));
+});
+test('no built-in profile allows an unrecognized action', () => {
+  for (const [id, profile] of Object.entries(BUILTIN_PROFILES))
+    for (const actionType of ['Shell', 'exec', 'credential', 'rm -rf', '__proto__', 'toString'])
+      assert.notEqual(evaluateActionWithProfile(profile, { actionType, state: 'executing' }).decision, 'allow', `${id}/${actionType}`);
+  assert.deepEqual(evaluateActionWithProfile(BUILTIN_PROFILES['dev-mode'], { actionType: 'exec', state: 'executing' }),
+    { allowed: false, decision: 'require_approval', reason: 'unknown_action_type' });
 });
 test('unknown_action opts a profile into a different fallback; invalid values deny', () => {
   const base = BUILTIN_PROFILES['safe-default'];
@@ -51,7 +67,7 @@ test('unknown_action opts a profile into a different fallback; invalid values de
   assert.equal(evaluateActionWithProfile({ ...base, unknown_action: 'allow' }, { actionType: 'exec' }).decision, 'allow');
   for (const unknown_action of ['ALLOW', true, 1, null])
     assert.equal(evaluateActionWithProfile({ ...base, unknown_action }, { actionType: 'exec' }).decision, 'deny');
-  assert.equal(evaluateActionWithProfile(BUILTIN_PROFILES['dev-mode'], { actionType: 'exec' }).decision, 'allow');
+  assert.equal(evaluateActionWithProfile(BUILTIN_PROFILES['dev-mode'], { actionType: 'exec' }).decision, 'require_approval');
 });
 test('trust requirements fail closed without computing scores', () => {
   const profile = { ...BUILTIN_PROFILES['dev-mode'], trust_requirements: { min_score: 0.7 } };

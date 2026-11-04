@@ -46,7 +46,7 @@ We are looking for **five developers to try one protected tool** and tell us whe
 | --- | --- | --- |
 | Identity | `did:atp` identifiers and hybrid Ed25519/ML-DSA-65 key material | [DID package](packages/did-atp/README.md) |
 | Trust | Evidence, credentials, scoring, and issuer/status work | [SDK](packages/sdk/README.md) and [drafts](https://w3c-cg.github.io/atp/specs/) |
-| Policy | Reusable profile schema and action evaluation | [Profiles](packages/atp-profiles/README.md) |
+| Policy | Fail-closed profiles that return `allow`, `require_approval` or `deny` for each action | [Profiles](packages/atp-profiles/README.md) |
 | Interoperability | Conformance suites and work across agent systems | [Conformance runner](scripts/conformance.mjs) |
 
 A passing test covers the behavior exercised by that test; it is not certification of every draft feature. Zero-knowledge range claims and some cross-protocol work remain experimental or in development.
@@ -57,10 +57,10 @@ The package READMEs are the source for APIs, limitations, and examples. Install 
 
 | Package | Use it for | Install |
 | --- | --- | --- |
-| [`atp-sdk`](packages/sdk/README.md) | Start an agent and use identity, credential, and trust utilities | `npm install atp-sdk` |
+| [`atp-sdk`](packages/sdk/README.md) | Start an agent, use identity and trust utilities, and check actions against a profile | `npm install atp-sdk` |
 | [`create-atp-agent`](packages/create-atp-agent/README.md) | Scaffold a JavaScript ESM starter | `npx create-atp-agent my-agent` |
 | [`@atpdeveloper/did-atp`](packages/did-atp/README.md) | Build and inspect canonical `did:atp` identifier primitives | `npm install @atpdeveloper/did-atp` |
-| [`atp-profiles`](packages/atp-profiles/README.md) | Define and evaluate built-in security profiles | `npm install atp-profiles` |
+| [`atp-profiles`](packages/atp-profiles/README.md) | Built-in and custom security profiles with a dependency-free evaluator | `npm install atp-profiles` |
 
 OpenClaw remains a legacy optional adapter example, not a required ATP dependency. Use the SDK and canonical packages as the starting point for new integrations.
 
@@ -72,7 +72,7 @@ OpenClaw remains a legacy optional adapter example, not a required ATP dependenc
 
 ## Start with the SDK
 
-Use Node.js 20 or 24 for the SDK quickstart. Some published package metadata still advertises Node.js 18; the first-run probe in [security-readiness PR #170](https://github.com/agent-trust-protocol/atp-core/pull/170) records a Web Crypto failure there. Metadata correction awaits a versioned release.
+`atp-sdk` 4.0 requires Node.js 20 or newer; its identity code needs Web Crypto, which Node.js 18 does not provide globally. Earlier SDK releases advertised Node.js 18 but failed there in the same way.
 
 ```bash
 npm install atp-sdk
@@ -84,6 +84,20 @@ import { Agent } from 'atp-sdk';
 const agent = await Agent.quickstart('MyBot');
 console.log(agent.getDID());
 ```
+
+Then check an action before your agent runs it:
+
+```ts
+import { BUILTIN_PROFILES, evaluateActionWithProfile } from 'atp-sdk';
+
+const { decision } = evaluateActionWithProfile(BUILTIN_PROFILES['safe-default'], {
+  actionType: 'shell', // map host tools to categories: terminal → shell, read_file → filesystem
+  state: 'executing',
+});
+// 'allow' → run it · 'require_approval' → ask a person first · 'deny' → do not run it
+```
+
+Unrecognized actions, missing actions and missing or misspelled profiles never come back as `allow`. Your runtime must still enforce the decision.
 
 The standalone quickstart creates local identity material. A local identifier is not automatically publicly resolvable, and this snippet does not configure an issuer, external policy enforcement, or a production key store. See the [SDK guide](packages/sdk/README.md) before connecting real services.
 
@@ -130,4 +144,4 @@ Issues and pull requests are welcome. Clearly distinguish implemented behavior f
 
 This repository is the open ATP Core implementation and developer tooling. The [website source](https://github.com/agent-trust-protocol/atp-website) is separate. [ATP Studio](https://studio.agenttrustprotocol.com/) is a separate enterprise product with its own infrastructure and data. Do not put Studio credentials, databases, or deployment configuration in ATP Core.
 
-Agent Trust Protocol™ is a trademark of Sovr INC. See [LICENSE](LICENSE) for the repository license and the relevant package license metadata.
+Agent Trust Protocol™ is a trademark of Sovr Inc. See [LICENSE](LICENSE) for the repository license and the relevant package license metadata.

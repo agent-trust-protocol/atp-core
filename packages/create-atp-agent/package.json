@@ -1,6 +1,6 @@
 {
   "name": "create-atp-agent",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Create Agent Trust Protocol agents",
   "type": "module",
   "bin": {
@@ -30,7 +30,7 @@
     "typescript": "^5.4.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "repository": {
     "type": "git",

@@ -1,6 +1,6 @@
 # See an ATP action boundary work
 
-Run a permitted fixture read, hold an approval-required callback, then deny a read after completing the session. The example uses the **published `atp-profiles@1.1.0` evaluator**, with a host wrapper that enforces its decision. No account, ATP server, model key or paid service is required.
+Run a permitted fixture read, hold an approval-required callback, then deny a read after completing the session. The example uses the **published `atp-profiles@3.0.0` evaluator**, with a host wrapper that enforces its decision. No account, ATP server, model key or paid service is required.
 
 ```bash
 git clone https://github.com/agent-trust-protocol/atp-core.git

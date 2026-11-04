@@ -1,6 +1,6 @@
 # atp-sdk examples
 
-Build the SDK first (`npm run build` in `packages/sdk`), then run any example with `node`.
+From an installed package, run `npm run examples` in `node_modules/atp-sdk`. From a repository checkout, build the SDK first (`npm run build` in `packages/sdk`), then run any example with `node`.
 
 ## Run without ATP services
 
@@ -29,5 +29,5 @@ Point them at your services with `ATP_GATEWAY_URL`, `ATP_IDENTITY_URL`, `ATP_CRE
 ## Security profiles
 
 For enforcing `atp-profiles` decisions around real tool calls, see the repository's
-[`examples/action-boundary`](../../../examples/action-boundary) and
-[`examples/hermes-hook`](../../../examples/hermes-hook).
+[`examples/action-boundary`](https://github.com/agent-trust-protocol/atp-core/tree/main/examples/action-boundary) and
+[`examples/hermes-hook`](https://github.com/agent-trust-protocol/atp-core/tree/main/examples/hermes-hook).
