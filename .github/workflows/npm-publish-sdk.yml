@@ -6,7 +6,7 @@ on:
       version:
         description: Exact atp-sdk version to release
         required: true
-        default: '2.2.0'
+        default: '3.0.0'
         type: string
       dry_run:
         description: Validate and pack without publishing
@@ -36,7 +36,7 @@ jobs:
           test "$(node -p "require('./package.json').version")" = "$EXPECTED_VERSION"
           test "$(node -p "require('./package.json').dependencies['@atpdeveloper/did-atp']")" = "0.1.0"
           npm view @atpdeveloper/did-atp@0.1.0 version
-          npm view atp-profiles@1.1.0 version
+          npm view atp-profiles@2.0.0 version
           if npm view "atp-sdk@$EXPECTED_VERSION" version >/dev/null 2>&1; then
             echo "Version already published; refusing to republish"
             exit 1

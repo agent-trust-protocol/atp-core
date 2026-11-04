@@ -44,7 +44,7 @@ jobs:
           npm ci --include=dev --prefix packages/atp-profiles
           npm test --prefix packages/atp-profiles
           cd packages/atp-profiles && npm pack --pack-destination "$RUNNER_TEMP"
-          cd ../sdk && npm install --no-save --package-lock=false --include=dev "$RUNNER_TEMP/atp-profiles-1.1.0.tgz" && npm run build
+          cd ../sdk && npm install --no-save --package-lock=false --include=dev "$RUNNER_TEMP/atp-profiles-2.0.0.tgz" && npm run build
           cd ../../packages/openclaw-atp && npm ci --include=dev && npm run build
 
       - name: did-atp tests and clean consumer install
@@ -62,7 +62,7 @@ jobs:
 
       - name: Package tests (sdk + openclaw-atp)
         run: |
-          cd packages/sdk && npm test -- --ci
+          cd packages/sdk && npm test -- --ci && npm run examples
           cd ../../packages/openclaw-atp && npm test -- --ci
 
       # Hard gate: no critical advisories may ship.

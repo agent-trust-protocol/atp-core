@@ -1,0 +1,24 @@
+{
+  "hermesCommit": "55ee4acdd822b73fb9573a2321531ae3a9d0b3e0",
+  "python": "3.14.8",
+  "mode": "actual Hermes AIAgent session; deterministic local provider; no autonomous model reasoning; no CLI gateway claim",
+  "consent": "register_from_config accept_hooks=True in an isolated temporary profile; allowlist persisted",
+  "hookOutputs": [
+    {
+      "tool": "read_file",
+      "response": {}
+    },
+    {
+      "tool": "terminal",
+      "response": {
+        "action": "block",
+        "message": "ATP: terminal requires a separate approval or is denied"
+      }
+    }
+  ],
+  "allowedReadExecuted": true,
+  "terminalBlocked": true,
+  "sentinelAbsent": true,
+  "sessionCompleted": true,
+  "providerRequests": 3
+}

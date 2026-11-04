@@ -1,7 +1,7 @@
 /**
  * Model Context Protocol (MCP) Adapter
  *
- * Implements ATP security and monitoring for Model Context Protocol agents
+ * Experimental synthetic monitoring; inherited security defaults fail closed
  */
 
 import { BaseProtocolAdapter } from '../base/adapter.js';
@@ -62,6 +62,8 @@ export class MCPAdapter extends BaseProtocolAdapter {
       ],
       metadata: {
         vendor: 'Anthropic',
+        implementationStatus: 'experimental',
+        monitoringSource: 'synthetic',
         documentation: 'https://modelcontextprotocol.io'
       }
     };
@@ -106,6 +108,7 @@ export class MCPAdapter extends BaseProtocolAdapter {
             protocol: Protocol.MCP,
             timestamp: new Date().toISOString(),
             type: 'mcp.context.update',
+            metadata: { synthetic: true, source: 'sdk-demo-monitor' },
             source: {
               agentDid: agent.did,
               agentName: agent.name

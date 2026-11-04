@@ -4,7 +4,7 @@
  * This demonstrates the simplified API for creating quantum-safe AI agents
  */
 
-import { Agent } from '../src/index.js';
+import { Agent } from 'atp-sdk';
 
 async function main() {
   console.log('🚀 ATP Simple Agent Demo - 3 Lines of Code!\n');

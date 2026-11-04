@@ -1,12 +1,13 @@
 // Local smoke test: build SDK first, then run with `node packages/sdk/examples/00-quickstart-local.js`
-import { DIDUtils } from '../dist/index.js';
-import { createQuickConfig } from '../dist/index.js';
+import { DidAtp, createQuickConfig } from '../dist/index.js';
 
 (async () => {
   try {
-    const { did, document, keyPair } = await DIDUtils.generateDID({ network: 'local', method: 'atp' });
+    const { did, keyPair } = await DidAtp.generate('localhost', ['agents', 'quickstart']);
     console.log('✅ DID generated (local):', did);
-    console.log('Public key length:', keyPair.publicKey?.length || 'n/a');
+    console.log('Ed25519 public key bytes:', keyPair.ed25519.publicKey.length);
+    console.log('ML-DSA-65 public key bytes:', keyPair.mlDsa65.publicKey.length);
+    if (!DidAtp.isValid(did)) throw new Error('generated DID failed validation');
 
     const cfg = createQuickConfig('http://localhost');
     console.log('Config services:', cfg.services);

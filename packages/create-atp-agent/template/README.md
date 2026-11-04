@@ -1,6 +1,6 @@
 # Agent Trust Protocol starter
 
-Run `npm start` after installing dependencies. This calls `Agent.quickstart` from `atp-sdk` and prints the identity created at runtime.
+Run `npm start` after installing dependencies (Node.js 20 or newer). This calls `Agent.quickstart` from `atp-sdk` and prints the identity created at runtime.
 
 Without ATP services, the SDK generates ephemeral local keys. That identifier is not publicly resolvable and will change on the next run. Persist keys securely and configure DID resolution before relying on it across systems.
 
