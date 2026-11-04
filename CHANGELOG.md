@@ -5,6 +5,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **`atp-hermes-hook` 0.1.0 (unreleased).** A configurable, fail-closed Hermes Agent
+  `pre_tool_call` hook in `packages/hermes-hook`. It evaluates each mapped tool
+  against an `atp-profiles` profile and state, scopes filesystem tools to
+  configured directories (following symlinks), blocks with exit code 2, and can
+  escalate `require_approval` to Hermes' approval gate. CI runs a real Hermes
+  session against the packed tarball; publishing uses a provenance-enabled
+  workflow.
+
 ### Changed
 - **BREAKING (audit-logger): audit integrity hash redefined.** The per-event
   SHA-256 integrity hash and HMAC signature are now computed over a stable,

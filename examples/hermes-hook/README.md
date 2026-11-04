@@ -1,5 +1,7 @@
 # Let Hermes read one file. Block terminal and write tools.
 
+> This is a fixed, single-file walkthrough. For a configurable hook (profile, read/write directories, approval escalation), use the [`atp-hermes-hook`](../../packages/hermes-hook/README.md) package.
+
 This example connects the published `atp-profiles@3.0.0` evaluator to Hermes Agent's documented **shell `pre_tool_call`** protocol. Hermes sends JSON on stdin; the hook replies with a block directive or `{}`. A `read_file` of this directory's fixed `fixture.txt` proceeds. `terminal`, `write_file` and `patch` are blocked, as are unknown events. The hook never runs those tools itself.
 
 Use Node.js 20 or 24. From the ATP Core checkout:

@@ -1,0 +1,53 @@
+{
+  "name": "atp-hermes-hook",
+  "version": "0.1.0",
+  "description": "Fail-closed Hermes Agent pre_tool_call hook that enforces Agent Trust Protocol (ATP) security profiles at the tool boundary",
+  "type": "module",
+  "main": "./src/index.mjs",
+  "exports": {
+    ".": "./src/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "atp-hermes-hook": "bin/atp-hermes-hook.mjs"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "keywords": [
+    "atp",
+    "agent-trust-protocol",
+    "hermes",
+    "hermes-agent",
+    "pre_tool_call",
+    "hook",
+    "ai-agents",
+    "policy"
+  ],
+  "author": "ATP Development Team",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agent-trust-protocol/atp-core.git",
+    "directory": "packages/hermes-hook"
+  },
+  "homepage": "https://github.com/agent-trust-protocol/atp-core/tree/main/packages/hermes-hook#readme",
+  "bugs": {
+    "url": "https://github.com/agent-trust-protocol/atp-core/issues"
+  },
+  "dependencies": {
+    "atp-profiles": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
