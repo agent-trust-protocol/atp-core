@@ -38,7 +38,7 @@ This document outlines the comprehensive security testing framework implemented 
 - **Built-in Profiles**: Four runtime-agnostic security profiles (`safe-default`, `dev-mode`, `enterprise-locked`, `openclaw-sandbox`) that define granular controls for shell, filesystem, network, credentials, and messaging
 - **State-Based Enforcement**: Lifecycle-aware policy evaluation across agent states (`planning`, `executing`, `communicating`, `completed`) — each state restricts or allows specific tool categories
 - **Profile-Based Action Evaluation**: `evaluateActionWithProfile()` returns `allow`, `deny`, or `require_approval` decisions based on the active profile's controls and state policies
-- **Adapter Integration**: Runtime adapters (OpenClaw, MCP, LangChain) call profile evaluation before every tool execution via `ATPToolWrapper.checkPermissions` and `enforceAtpPoliciesForClawSession`
+- **Adapter Integration**: Runtime adapters and hooks (for example `examples/hermes-hook`) call profile evaluation before tool execution. The former OpenClaw adapter is deprecated and archived in `archive/openclaw-atp`
 - **Approval Workflows**: Sensitive actions (e.g., shell in `openclaw-sandbox`, credentials in `executing` state) require explicit approval rather than silent denial
 
 #### Built-in Profile Summary
@@ -283,7 +283,7 @@ RUN npm run security:test
 - [ ] No critical penetration test failures
 - [ ] All IP protection measures active
 - [ ] Security profile assigned to all agents (never deploy without a profile)
-- [ ] Profile enforcement tests pass (27/27 in openclaw-atp)
+- [ ] Profile enforcement tests pass (`atp-profiles` and `atp-sdk`)
 - [ ] Production agents use `enterprise-locked` or `safe-default` profile (never `dev-mode`)
 
 ### Post-Deployment

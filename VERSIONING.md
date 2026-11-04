@@ -12,11 +12,12 @@ Each published package has **its own version** (Lerna independent mode). There i
 | [`atp-profiles`](packages/atp-profiles/README.md) | [![npm](https://img.shields.io/npm/v/atp-profiles)](https://www.npmjs.com/package/atp-profiles) | Stable | 18+ | Fail-closed security profiles and the `allow` / `require_approval` / `deny` evaluator |
 | [`create-atp-agent`](packages/create-atp-agent/README.md) | [![npm](https://img.shields.io/npm/v/create-atp-agent)](https://www.npmjs.com/package/create-atp-agent) | Stable | 20+ from 1.5.0 | Scaffolding a starter project (`npx create-atp-agent my-agent`) |
 | [`@atpdeveloper/did-atp`](packages/did-atp/README.md) | [![npm](https://img.shields.io/npm/v/@atpdeveloper/did-atp)](https://www.npmjs.com/package/@atpdeveloper/did-atp) | Development (0.x) | 18+ declared | Canonical `did:atp` identifier primitives |
-| [`@atpdevelopment/openclaw-atp`](packages/openclaw-atp/README.md) | [![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp)](https://www.npmjs.com/package/@atpdevelopment/openclaw-atp) | Legacy, optional | See package | OpenClaw adapter example. Not recommended for new integrations |
+| [`atp-hermes-hook`](packages/hermes-hook/README.md) | [![npm](https://img.shields.io/npm/v/atp-hermes-hook)](https://www.npmjs.com/package/atp-hermes-hook) | Development (0.x), first release pending | 20+ | Fail-closed Hermes Agent `pre_tool_call` hook that enforces an ATP profile and path scope |
+| [`@atpdevelopment/openclaw-atp`](archive/openclaw-atp/README.md) | [![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp)](https://www.npmjs.com/package/@atpdevelopment/openclaw-atp) | **Deprecated** | See package | Archived OpenClaw adapter; not built, tested or published. Do not use for new work |
 
 **Start with `atp-sdk`.** It includes the profile evaluator, so most applications need no other package.
 
-The published `@atpdevelopment/openclaw-atp` 1.1.x depends on `atp-sdk@^1.2.4`. In that SDK line, `ATPClient.evaluateActionWithProfile()` returns `allow` when no profile, or an unknown profile, is configured. Use `atp-sdk` 4.x directly for new work.
+The published `@atpdevelopment/openclaw-atp` 1.1.x depends on `atp-sdk@^1.2.4`. In that SDK line, `ATPClient.evaluateActionWithProfile()` returns `allow` when no profile, or an unknown profile, is configured. The package is deprecated and archived in `archive/openclaw-atp`. Use `atp-sdk` 4.x directly for new work, and `atp-hermes-hook` for Hermes Agent tool-boundary enforcement.
 
 > The npm package named `atp-core` is **not** an ATP package. It belongs to an unrelated project. Do not install it for ATP.
 

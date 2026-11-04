@@ -1,4 +1,6 @@
-# ATP OpenClaw adapter (legacy example)
+# ATP OpenClaw adapter (deprecated)
+
+> **Deprecated.** `@atpdevelopment/openclaw-atp` is no longer maintained and has been moved to `archive/`. The last published release (1.1.3) depends on `atp-sdk@^1.2.4`, which fails open when no profile is configured and pulls in a zod release affected by GHSA-mrhx-c7xc-m3w5. Do not use it for new work. Use [`atp-sdk`](../../packages/sdk) 4.x with [`atp-profiles`](../../packages/atp-profiles); for enforcing decisions at a real tool boundary, use [`atp-hermes-hook`](../../packages/hermes-hook) or see [`examples/hermes-hook`](../../examples/hermes-hook) and [`examples/action-boundary`](../../examples/action-boundary).
 
 This package explores how an OpenClaw runtime can call ATP identity, policy, and audit utilities. It is an **optional legacy adapter**, not an architectural dependency of ATP Core. Start new integrations with [`atp-sdk`](https://github.com/agent-trust-protocol/atp-core/tree/main/packages/sdk), [`@atpdeveloper/did-atp`](https://github.com/agent-trust-protocol/atp-core/tree/main/packages/did-atp), and [`atp-profiles`](https://github.com/agent-trust-protocol/atp-core/tree/main/packages/atp-profiles).
 

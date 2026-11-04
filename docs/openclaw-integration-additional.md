@@ -1,5 +1,8 @@
 # OpenClaw Integration Guide
 
+> **Deprecated.** `@atpdevelopment/openclaw-atp` is no longer maintained and has been moved to `archive/`. The last published release (1.1.3) depends on `atp-sdk@^1.2.4`, which fails open when no profile is configured and pulls in a zod release affected by GHSA-mrhx-c7xc-m3w5. Do not use it for new work. Use [`atp-sdk`](../packages/sdk) 4.x with [`atp-profiles`](../packages/atp-profiles); for enforcing decisions at a real tool boundary, see [`examples/hermes-hook`](../examples/hermes-hook) and [`examples/action-boundary`](../examples/action-boundary).
+
+
 *Secure your OpenClaw multi-agent workflows with ATP's quantum-safe security layer*
 
 ---

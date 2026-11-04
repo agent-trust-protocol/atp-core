@@ -63,7 +63,7 @@ The package READMEs are the source for APIs, limitations, and examples. Install 
 | [`atp-profiles`](packages/atp-profiles/README.md) | Built-in and custom security profiles with a dependency-free evaluator | `npm install atp-profiles` |
 | [`atp-hermes-hook`](packages/hermes-hook/README.md) | Enforce an ATP profile and a path scope at Hermes Agent's `pre_tool_call` boundary | `npm install atp-hermes-hook` (first npm release pending) |
 
-OpenClaw remains a legacy optional adapter example, not a required ATP dependency. Use the SDK and canonical packages as the starting point for new integrations.
+The OpenClaw adapter (`@atpdevelopment/openclaw-atp`) is deprecated and archived in `archive/openclaw-atp`. Use the SDK and canonical packages as the starting point for new integrations; [`atp-hermes-hook`](packages/hermes-hook/README.md) enforces ATP profiles at Hermes Agent's tool boundary.
 
 ## See a protected action work
 

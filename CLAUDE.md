@@ -123,7 +123,7 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
 - `packages/audit-logger`: Blockchain-anchored immutable audit trail.
 - `packages/permission-service`: RBAC with hierarchical role inheritance and multi-tenant support.
 - `packages/monitoring-service`: Real-time metrics and performance monitoring.
-- `packages/openclaw-atp`: Integration adapter for OpenClaw/NemoClaw agents.
+- `archive/openclaw-atp`: **Deprecated** OpenClaw/NemoClaw adapter (`@atpdevelopment/openclaw-atp`), archived and no longer built, tested or published. Kept for reference only; do not extend it.
   - `src/agent/` — DID registration, trust scoring (`registerAgentWithAtp`, `updateAgentTrust`)
   - `src/tools/` — `ATPToolWrapper`, `secureTools` (per-call auth + audit + rate-limit)
   - `src/session/` — State-machine policy enforcement (`enforceAtpPoliciesForClawSession`, `defaultClawStatePolicy`); states: planning | executing | communicating | completed
@@ -165,12 +165,12 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
 
 ### Adding a new agent runtime adapter
 
-1. Create a new package under `packages/<runtime>-atp/`.
+1. Create a new package under `packages/<runtime>-atp/`. (The archived OpenClaw adapter below is a reference for the export shape only.)
 2. Add `atp-sdk` and the target runtime's types as dependencies.
 3. Export at minimum:
-   - `register<Runtime>AgentWithAtp(config)` → see `registerClawWithAtp` in `packages/openclaw-atp/src/claw-api.ts`
-   - `wrap<Runtime>ToolWithAtp(tool, options)` → see `wrapSkillWithAtp` in `packages/openclaw-atp/src/claw-api.ts`
-   - `enforce<Runtime>SessionPolicies(context)` → see `enforceAtpPoliciesForClawSession` in `packages/openclaw-atp/src/session/enforce.ts`
+   - `register<Runtime>AgentWithAtp(config)` → see `registerClawWithAtp` in `archive/openclaw-atp/src/claw-api.ts`
+   - `wrap<Runtime>ToolWithAtp(tool, options)` → see `wrapSkillWithAtp` in `archive/openclaw-atp/src/claw-api.ts`
+   - `enforce<Runtime>SessionPolicies(context)` → see `enforceAtpPoliciesForClawSession` in `archive/openclaw-atp/src/session/enforce.ts`
 4. Do not duplicate trust or crypto logic — call existing SDK methods.
 
 ### Adding a new security profile
@@ -194,7 +194,7 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
 
 ---
 
-## packages/openclaw-atp — Public API
+## archive/openclaw-atp — Public API (deprecated, reference only)
 
 | Export | File | Purpose |
 |---|---|---|
@@ -212,7 +212,7 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
 - `communicating`: messaging allowed; external-send requires approval
 - `completed`: read-only-logs only; shell/fs/http restricted
 
-To run the unit tests: `cd packages/openclaw-atp && npm test` — covers registration, tool wrapping, and all four session states.
+The package is archived and excluded from CI. To run its old unit tests locally: `cd archive/openclaw-atp && npm test` — covers registration, tool wrapping, and all four session states.
 
 ---
 
@@ -263,9 +263,8 @@ To run the unit tests: `cd packages/openclaw-atp && npm test` — covers registr
 - `README.md` — SDK quick start and integration examples.
 - `SECURITY.md` — Security model and responsible disclosure.
 - `.cursor/rules/` — Additional Cursor-specific coding rules; read relevant files before making changes.
-- `packages/openclaw-atp/README.md` — Full OpenClaw integration guide, quick-start, and all config options.
-- `packages/openclaw-atp/INTEGRATION-GUIDE.md` — Step-by-step setup for production deployments.
-- `packages/openclaw-atp/examples/` — Runnable examples: `finance-workflow.ts` (trading crew), `stateful-session.ts` (state machine walk-through).
+- `archive/openclaw-atp/` — Deprecated OpenClaw adapter, kept for reference only.
+- `examples/hermes-hook/` — Current reference for enforcing ATP decisions at an agent tool boundary.
 
 $END$
 

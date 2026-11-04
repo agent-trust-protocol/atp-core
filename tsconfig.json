@@ -45,6 +45,7 @@
     "**/*.old",
     "**/*.old/**",
     "packages",
+    "archive",
     "workflow-engine",
     "src/workflow-engine/**",
     "atp-core",
