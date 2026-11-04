@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import nodemailer, { type Mail } from 'nodemailer';
 import { Resend } from 'resend';
 
 interface EmailOptions {
@@ -9,7 +9,7 @@ interface EmailOptions {
 }
 
 class EmailService {
-  private transporter: nodemailer.Transporter | null = null;
+  private transporter: Mail | null = null;
   private resend: Resend | null = null;
   private fromEmail: string;
   private fromName: string;
