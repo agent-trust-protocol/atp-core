@@ -101,5 +101,5 @@ export async function atpWrap(agent: any, options: ATPAdapterOptions) {
 
 - [OpenClaw adapter source (deprecated)](../archive/openclaw-atp/)
 - [SDK API reference](../packages/sdk/README.md)
-- [Quick Start](../QUICK_START.md)
+- [Getting started](../docs/getting-started.md)
 - [Discord](https://discord.gg/agenttrustprotocol)

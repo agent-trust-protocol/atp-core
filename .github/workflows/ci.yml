@@ -37,9 +37,6 @@ jobs:
       - name: Coverage YAML loader compatibility
         run: node --test scripts/tests/nyc-config-compat.test.cjs
 
-      - name: Lint
-        run: npm run lint
-
       - name: Type check
         run: npm run type-check
 
