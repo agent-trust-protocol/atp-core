@@ -7,7 +7,7 @@ Start with a local demo, then connect the [Hermes tool hook](examples/hermes-hoo
 
 AI agents move between tools, organizations, and protocols. ATP is an open effort to make identity, trust evidence, and privacy controls portable across those boundaries. It complements MCP, A2A, ANP, ADK, and agent frameworks; it does not replace how agents communicate.
 
-**Start building:** [SDK quickstart](#start-with-the-sdk) · [Scaffold an agent](#scaffold-a-project) · [Explore packages](#packages) · [Read specification drafts](https://w3c-cg.github.io/atp/specs/) · [Contribute](#help-shape-atp)
+**New: [ATP Research & Insights — technical whitepaper, article, and five-minute guide](docs/publications/README.md).** Learn the current capabilities and limitations before integrating them into your agent.\n\n**Start building:** [SDK quickstart](#start-with-the-sdk) · [Scaffold an agent](#scaffold-a-project) · [Explore packages](#packages) · [Read specification drafts](https://w3c-cg.github.io/atp/specs/) · [Contribute](#help-shape-atp)
 
 > ATP specifications are developed in the [W3C Agent Trust Protocol Community Group](https://www.w3.org/groups/cg/atp/). Community Group drafts are not endorsed by W3C and are not W3C Standards. Implementation support varies by capability; the repository and package READMEs describe what exists today.
 
