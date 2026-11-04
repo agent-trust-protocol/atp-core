@@ -254,20 +254,17 @@ The OpenClaw adapter (`@atpdevelopment/openclaw-atp`) is deprecated. To enforce 
 
 ## Running Examples
 
-ATP includes ready-to-run example agents:
+Two maintained examples run locally without a model API key:
 
 ```bash
-# Start weather agent
-cd examples/simple-agent
-npm run dev weather
+# Allow, approval-required and deny decisions at a tool boundary
+cd examples/action-boundary && npm ci && npm start
 
-# Start calculator agent (in another terminal)
-npm run dev calculator
-
-# Run interactive demo
-cd ../demo-workflow
-npm run demo
+# The same profile evaluator behind Hermes Agent's pre_tool_call hook
+cd ../hermes-hook && npm ci && npm run demo
 ```
+
+For your own Hermes profile, install the configurable [`atp-hermes-hook`](../packages/hermes-hook/README.md) package. Older service-client examples are archived in [`archive/examples-legacy`](../archive/examples-legacy/README.md).
 
 ## Next Steps
 

@@ -169,4 +169,4 @@ console.log('\n🔗 To see the full implementation:');
 console.log('1. Review the source code in packages/');
 console.log('2. Check the API documentation in docs/api/README.md');
 console.log('3. Run: docker-compose up (once dependencies are fixed)');
-console.log('4. Explore examples in examples/simple-agent/');
+console.log('4. Explore examples in archive/examples-legacy/simple-agent/');
