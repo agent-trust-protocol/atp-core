@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [atp-profiles, create-atp-agent, sdk, shared]
+        package: [atp-profiles, create-atp-agent, hermes-hook, sdk, shared]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
