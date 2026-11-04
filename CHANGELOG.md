@@ -5,6 +5,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Deprecated
+- **`@atpdevelopment/openclaw-atp` is deprecated.** The adapter moved to
+  `archive/openclaw-atp` and is no longer built, tested, audited or published.
+  Its last release (1.1.3) depends on `atp-sdk@^1.2.4`. Use `atp-sdk` 4.x with
+  `atp-profiles`, and see `examples/hermes-hook` for tool-boundary enforcement.
+  The `openclaw-sandbox` profile and `RuntimeTarget "openclaw"` remain in
+  `atp-profiles` and `atp-sdk` until the next planned major release.
+
 ### Changed
 - **BREAKING (audit-logger): audit integrity hash redefined.** The per-event
   SHA-256 integrity hash and HMAC signature are now computed over a stable,

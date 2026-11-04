@@ -62,7 +62,7 @@ The package READMEs are the source for APIs, limitations, and examples. Install 
 | [`@atpdeveloper/did-atp`](packages/did-atp/README.md) | Build and inspect canonical `did:atp` identifier primitives | `npm install @atpdeveloper/did-atp` |
 | [`atp-profiles`](packages/atp-profiles/README.md) | Built-in and custom security profiles with a dependency-free evaluator | `npm install atp-profiles` |
 
-OpenClaw remains a legacy optional adapter example, not a required ATP dependency. Use the SDK and canonical packages as the starting point for new integrations.
+The OpenClaw adapter (`@atpdevelopment/openclaw-atp`) is deprecated and archived in `archive/openclaw-atp`. Use the SDK and canonical packages as the starting point for new integrations; `examples/hermes-hook` shows enforcement at a real agent tool boundary.
 
 ## See a protected action work
 

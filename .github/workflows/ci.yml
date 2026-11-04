@@ -45,7 +45,6 @@ jobs:
           npm test --prefix packages/atp-profiles
           cd packages/atp-profiles && npm pack --pack-destination "$RUNNER_TEMP"
           cd ../sdk && npm install --no-save --package-lock=false --include=dev "$RUNNER_TEMP/atp-profiles-2.0.0.tgz" && npm run build
-          cd ../../packages/openclaw-atp && npm ci --include=dev && npm run build
 
       - name: did-atp tests and clean consumer install
         run: |
@@ -60,10 +59,9 @@ jobs:
           node --input-type=module -e "import { atpE1Fingerprint, buildAtpV2Did } from '@atpdeveloper/did-atp'; const ed = new Uint8Array(32); const pq = new Uint8Array(1952); if (!atpE1Fingerprint(ed).startsWith('e1_') || !buildAtpV2Did('example.com', ['agent'], ed, pq).startsWith('did:atp:example.com:agent:')) process.exit(1)"
           npm audit --omit=dev --audit-level=high
 
-      - name: Package tests (sdk + openclaw-atp)
+      - name: Package tests (sdk)
         run: |
           cd packages/sdk && npm test -- --ci && npm run examples
-          cd ../../packages/openclaw-atp && npm test -- --ci
 
       # Hard gate: no critical advisories may ship.
       - name: Security audit (critical — blocking)
