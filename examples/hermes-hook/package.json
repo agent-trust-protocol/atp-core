@@ -1,0 +1,15 @@
+{
+  "name": "atp-hermes-hook-example",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test",
+    "demo": "node walkthrough.mjs"
+  },
+  "dependencies": {
+    "atp-profiles": "3.0.0"
+  }
+}

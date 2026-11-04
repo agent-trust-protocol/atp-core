@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { QuantumSafeSignatureDemoGated } from '@/components/atp/quantum-safe-signature-demo-gated';
-import { VisualPolicyEditorDemo } from '@/components/atp/visual-policy-editor-demo';
 import { TrustLevelManagementDemo } from '@/components/atp/trust-level-management-demo';
 import { PerformanceMetricsPreview } from '@/components/atp/performance-metrics-preview';
 
@@ -57,16 +56,11 @@ export default function DemosPage() {
 
         {/* Demo Tabs */}
         <Tabs defaultValue="signatures" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto sm:h-12 gap-1 p-1">
+          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 h-auto sm:h-12 gap-1 p-1">
             <TabsTrigger value="signatures" className="flex items-center gap-2">
               <Atom className="h-4 w-4" />
               <span className="hidden sm:inline">Quantum Signatures</span>
               <span className="sm:hidden">Signatures</span>
-            </TabsTrigger>
-            <TabsTrigger value="policies" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              <span className="hidden sm:inline">Policy Editor</span>
-              <span className="sm:hidden">Policies</span>
             </TabsTrigger>
             <TabsTrigger value="trust" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -82,10 +76,6 @@ export default function DemosPage() {
 
           <TabsContent value="signatures">
             <QuantumSafeSignatureDemoGated showPreview={true} />
-          </TabsContent>
-
-          <TabsContent value="policies">
-            <VisualPolicyEditorDemo />
           </TabsContent>
 
           <TabsContent value="trust">

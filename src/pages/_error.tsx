@@ -1,4 +1,6 @@
-// Custom error page - no imports needed
+import Link from 'next/link';
+
+// Custom error page
 function Error({ statusCode }: { statusCode?: number }) {
   return (
     <div style={{
@@ -22,14 +24,14 @@ function Error({ statusCode }: { statusCode?: number }) {
         <p style={{ color: '#6c757d' }}>
           {statusCode === 404 ? 'Page not found' : 'An error occurred'}
         </p>
-        <a href="/" style={{
+        <Link href="/" style={{
           display: 'inline-block',
           padding: '0.5rem 1rem',
           backgroundColor: '#0d6efd',
           color: 'white',
           textDecoration: 'none',
           borderRadius: '4px'
-        }}>Go Home</a>
+        }}>Go Home</Link>
       </div>
     </div>
   );

@@ -1,5 +1,9 @@
 # ANP-Agent Workspace
 
+> **Planned adaptation, not implemented protocol support.** This directory contains a
+> historical planning document, not an executable ANP wire adapter. Architecture, commands
+> and guarantees below are proposals. See [ANP acceptance criteria](../../../../docs/PROTOCOL-SUPPORT.md).
+
 **Agent Specialization**: ANP Federation for Cross-Domain Agents
 
 ## Overview

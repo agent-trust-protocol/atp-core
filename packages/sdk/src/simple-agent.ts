@@ -8,6 +8,7 @@
 import { EventEmitter } from 'events';
 import { ATPClient } from './client/atp.js';
 import { CryptoUtils } from './utils/crypto.js';
+import { DidAtp } from './utils/did.js';
 import { TrustScoring, TrustScoreResult, TrustLevel, InteractionEvent } from './utils/trust.js';
 import {
   BehaviorMerkleTree,
@@ -211,13 +212,19 @@ export class Agent extends EventEmitter {
             throw new Error('No DID returned from identity service');
           }
         } catch {
-          // Standalone mode: no ATP services available — generate DID locally
-          const pubKeyShort = publicKeyHex.slice(0, 16);
-          this.did = `did:atp:${pubKeyShort}`;
+          // A syntactically valid v2 local identifier, bound to both public keys.
+          // localhost has no published DID document; this identity is not
+          // remotely resolvable and keys are ephemeral unless the app persists them.
+          this.did = DidAtp.fromPublicKeys(
+            'localhost',
+            ['local'],
+            keyPair.ed25519.publicKey,
+            keyPair.mlDsa65.publicKey
+          );
           this.privateKey = privateKeyHex;
           this._quantumSafe = true;
           this._standalone = true;
-          console.log('\u26A1 Running in standalone mode (no ATP services detected). DID generated locally.');
+          console.log('⚡ Standalone mode: local keys and a non-resolvable did:atp identifier. Persist keys and publish a DID document for cross-system verification.');
         }
       }
 
@@ -931,62 +938,51 @@ export class Agent extends EventEmitter {
   }
 
   /**
-   * One-shot mutual authentication between two agents
-   * Both agents prove to each other simultaneously
+   * Start mutual authentication with another agent.
+   *
+   * Creates the challenge for the peer and this agent's response to the peer's
+   * requirements. Nothing is verified here: send `challenge` and `response` to
+   * the peer, then call `verifyAuthResponse` on the peer's response. Both result
+   * fields stay unverified until those verifications actually run.
+   *
+   * @deprecated The returned `response` answers a challenge the peer never
+   * issued, so the peer cannot verify it. Run two explicit exchanges instead:
+   * each agent calls `requestAuth`, the other `respondToChallenge`, and the
+   * issuer `verifyAuthResponse`.
    *
    * @example
    * ```typescript
-   * // Mutual authentication with another agent
-   * const result = await agentA.mutualAuth(
+   * const { challenge, response } = await agentA.mutualAuth(
    *   agentB.getDID(),
-   *   // What I require from them
-   *   [{ type: ZKProofType.TRUST_LEVEL, params: { minTrustLevel: 0.5 } }],
-   *   // What they require from me
-   *   [{ type: ZKProofType.IDENTITY, params: {} }]
+   *   [{ type: ZKProofType.IDENTITY, params: {} }], // what A requires from B
+   *   [{ type: ZKProofType.IDENTITY, params: {} }]  // what B requires from A
    * );
-   *
-   * if (result.iVerified.verified && result.theyVerified.verified) {
-   *   console.log('Mutual trust established!');
-   * }
+   * const bResponse = await agentB.respondToChallenge(challenge);
+   * const aVerifiedB = await agentA.verifyAuthResponse(bResponse);
    * ```
    */
   async mutualAuth(
     targetDid: string,
     myRequirements: ZKPRequirement[],
     theirRequirements: ZKPRequirement[]
-  ): Promise<{ iVerified: ZKPAuthResult; theyVerified: ZKPAuthResult }> {
+  ): Promise<{
+    challenge: ZKPChallenge;
+    response: ZKPAuthRequest;
+    iVerified: ZKPAuthResult;
+    theyVerified: ZKPAuthResult;
+  }> {
     if (!this.initialized || !this.did) {
       throw new Error('Agent not initialized');
     }
 
-    // Create challenge for the other agent (stored for later verification)
-    await this.requestAuth(targetDid, myRequirements);
-
-    // Create our response to their requirements (simulated challenge from them)
+    const challenge = await this.requestAuth(targetDid, myRequirements);
     const challengeFromThem = createChallenge(targetDid, this.did, theirRequirements);
-    const myResponse = await this.respondToChallenge(challengeFromThem);
+    const response = await this.respondToChallenge(challengeFromThem);
 
-    // In a real implementation, these would be exchanged over the network
-    // For now, we return placeholders for the mutual verification results
-    return {
-      iVerified: {
-        verified: false, // Will be verified when they respond
-        proverDid: targetDid,
-        verifiedProofs: [],
-        trustEstablished: false
-      },
-      theyVerified: {
-        // This would be their verification of our response
-        verified: true, // Optimistic for now
-        proverDid: this.did,
-        verifiedProofs: myResponse.proofs.map(p => ({
-          type: p.type,
-          verified: true,
-          timestamp: p.timestamp
-        })),
-        trustEstablished: true
-      }
-    };
+    // Neither side has verified anything yet; never report optimistic success.
+    const pending = (proverDid: string): ZKPAuthResult =>
+      ({ verified: false, proverDid, verifiedProofs: [], trustEstablished: false });
+    return { challenge, response, iVerified: pending(targetDid), theyVerified: pending(this.did) };
   }
 
   /**

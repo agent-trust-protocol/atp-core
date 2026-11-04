@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Agent Trust Protocol — Specifications</title>
   <meta name="description"
-    content="Agent Trust Protocol (ATP) specifications: the did:atp DID method, agent trust scoring & credentials, privacy-first interaction, and conformance & interoperability." />
+    content="Agent Trust Protocol (ATP) specifications: the did:atp DID method, agent trust scoring & credentials, capability request & policy decision envelopes, interop profiles, privacy-first interaction, and conformance & interoperability." />
   <style>
     :root {
       --bg: #0f1226;
@@ -69,7 +69,7 @@
       <p class="lede">
         ATP extends the W3C <a href="https://www.w3.org/TR/did-core/" style="color:var(--accent-2)">Decentralized
         Identifiers</a> and <a href="https://www.w3.org/TR/vc-data-model/" style="color:var(--accent-2)">Verifiable
-        Credentials</a> data models for autonomous agents. The four drafts below are
+        Credentials</a> data models for autonomous agents. The six drafts below are
         <a href="https://respec.org/" style="color:var(--accent-2)">ReSpec</a> documents — click any to read the
         rendered specification. They cross-reference one another and are backed by a runnable reference
         implementation and conformance suite.
@@ -90,6 +90,22 @@
         <h2>Agent Trust Scoring &amp; Credentials</h2>
         <p>A deterministic, bounded, fail-closed trust model whose levels are expressible as signed, presentable
            W3C Verifiable Credentials (the ATP Trust Credential).</p>
+        <span class="badge early">Early draft · seeking CG review</span>
+      </a>
+
+      <a class="card" href="./atp-capability/">
+        <div class="pillar">Authorization</div>
+        <h2>Capability Request &amp; Policy Decision</h2>
+        <p>The standard request envelope for tool calls, A2A invocations, resource access, and delegation — and the
+           normalized allow / deny / throttle / require-approval decision with reason codes and obligations.</p>
+        <span class="badge early">Early draft · seeking CG review</span>
+      </a>
+
+      <a class="card" href="./atp-interop/">
+        <div class="pillar">Interop</div>
+        <h2>Interop Profiles</h2>
+        <p>Normative bindings of the ATP trust plane to MCP servers, agent-to-agent (A2A) invocation, local agent
+           frameworks, and multi-agent orchestration with stateful session policies.</p>
         <span class="badge early">Early draft · seeking CG review</span>
       </a>
 

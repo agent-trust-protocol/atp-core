@@ -125,10 +125,14 @@
           credited zero.</dd>
       </dl>
       <p>
-        The reference evidence factors are: identity verification, the count of
-        <em>verified</em> credentials, the success/failure ratio of recorded
-        interactions, and net reputation (endorsements minus violations, each
-        term capped).
+        The concrete evidence factors, their weights, and any tuning heuristics
+        are <strong>implementation-defined</strong> and out of scope for this
+        specification: ATP standardizes the score's <em>interface</em> (range,
+        levels, and the four properties above), not its computation. An
+        implementation MAY use any evidence model — e.g. identity verification,
+        verified-credential counts, interaction outcomes, or reputation — so
+        long as the properties above hold and are demonstrated against the
+        conformance vectors.
       </p>
       <pre class="example" title="Evidence fixture → level (illustrative vector)">
 {

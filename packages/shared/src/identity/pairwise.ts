@@ -28,7 +28,7 @@ import { ml_dsa65 } from '@noble/post-quantum/ml-dsa.js';
 import {
   ATP_ED25519_PUBLIC_KEY_BYTES as ED25519_PUBLIC_KEY_BYTES,
   ATP_ML_DSA_65_PUBLIC_KEY_BYTES as ML_DSA_65_PUBLIC_KEY_BYTES,
-} from '@atp/did-atp';
+} from '@atpdeveloper/did-atp';
 
 /** Raw-bytes hybrid keypair (Ed25519 classical + ML-DSA-65 post-quantum). */
 export interface PairwiseHybridKeyPair {

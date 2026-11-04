@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ATP Conformance &amp; Interoperability</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      window.specConfig = {
+        shortName: "atp-conformance",
+        title: "ATP Conformance & Interoperability",
+        subtitle: "A Vendor-Neutral Test-Vector Suite for the ATP Core Specifications",
+      };
+    </script>
+    <script src="../common/biblio.js" class="remove"></script>
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove" defer></script>
+    <script src="../common/respec-config.js" class="remove" defer></script>
+  </head>
+  <body>
+    <section id="abstract">
+      <p>
+        This document defines the <strong>conformance and interoperability</strong>
+        framework for the Agent Trust Protocol (ATP) core specifications. It
+        describes the per-item conformance suites, the structure of the
+        vendor-neutral test vectors, and the <strong>audit-store integrity</strong>
+        contract that an ATP audit/trust-registry implementation MUST satisfy.
+        Its purpose is to let independent implementations demonstrate
+        interoperability against the same deterministic vectors.
+      </p>
+    </section>
+
+    <section id="sotd">
+      <p>
+        This document is an <strong>early draft</strong> work product of the
+        Agent Trust Protocol (ATP) Community Group. It is <strong>not</strong> a
+        W3C Standard nor on the W3C Recommendation track. It is published to seek
+        review and contribution from Community Group members.
+      </p>
+      <p class="ednote" title="From internal harness to vendor-neutral suite">
+        The reference implementation ships a strong <em>internal</em> conformance
+        harness. The work this document tracks is publishing
+        <strong>vendor-neutral, spec-bound</strong> vectors any implementation
+        can run. Where a vector below is drawn from the reference harness it is
+        marked as such; CG members are invited to contribute independent vectors.
+      </p>
+    </section>
+
+    <section id="conformance">
+      <p>
+        As well as sections marked as non-normative, all authoring guidelines,
+        diagrams, examples, and notes in this specification are non-normative.
+        Everything else is normative.
+      </p>
+      <p>
+        The key words <em>MUST</em>, <em>MUST NOT</em>, <em>SHOULD</em>, and
+        <em>MAY</em> are to be interpreted as described in BCP 14 [[RFC2119]]
+        [[RFC8174]] when, and only when, they appear in all capitals.
+      </p>
+    </section>
+
+    <section id="items" class="normative">
+      <h2>Conformance Items</h2>
+      <p>
+        The ATP core surface is partitioned into the following conformance
+        items. A conforming implementation MUST pass the suite for each item it
+        claims to implement.
+      </p>
+      <table class="simple">
+        <thead>
+          <tr><th>#</th><th>Item</th><th>Defining specification</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>did:atp — create / parse / resolve</td><td><a href="../did-atp/">did:atp DID Method</a></td></tr>
+          <tr><td>2</td><td>Hybrid signatures — Ed25519 + ML-DSA-65</td><td><a href="../did-atp/">did:atp DID Method</a></td></tr>
+          <tr><td>3</td><td>Policy assertion — allow/deny, deny-by-default</td><td><a href="../atp-trust/#policy-assertion">ATP Trust</a></td></tr>
+          <tr><td>4</td><td>Audit store / trust registry — integrity</td><td>This document, §<a href="#audit-integrity">Audit Integrity</a></td></tr>
+          <tr><td>5</td><td>Privacy — selective disclosure (Merkle membership)</td><td><a href="../atp-privacy/">ATP Privacy</a></td></tr>
+        </tbody>
+      </table>
+      <p class="note" title="Reference runner">
+        The reference implementation runs all items from a single entry point and
+        exits non-zero on any failure, so it doubles as a release gate. Each item
+        is a table-driven suite into which external vectors drop in as new rows.
+      </p>
+    </section>
+
+    <section id="vectors" class="normative">
+      <h2>Test-Vector Format</h2>
+      <p>
+        Vectors are published as JSON keyed by conformance item. Each vector is a
+        deterministic known-answer test: a fixed input and the exact expected
+        output (an identifier, a hash, a decision, or a boolean), computed
+        independently of any one implementation. A conforming implementation MUST
+        reproduce the expected output for every published vector for the items it
+        claims.
+      </p>
+      <p class="ednote" title="Open issue: canonical vector packaging">
+        The packaging of the vendor-neutral vector file (single bundle vs.
+        per-item files, and the exact JSON schema) is open for CG discussion.
+      </p>
+    </section>
+
+    <section id="audit-integrity" class="normative">
+      <h2>Audit-Store Integrity</h2>
+      <p>
+        An ATP audit store is an <strong>append-only hash chain</strong>. A
+        conforming implementation MUST guarantee two properties:
+      </p>
+      <ol>
+        <li>an intact chain verifies as valid; and</li>
+        <li>
+          <strong>any</strong> tamper — mutating an entry's content, reordering
+          entries, or breaking the <code>previousHash</code> linkage — is
+          detected (verification returns false).
+        </li>
+      </ol>
+      <p>
+        Integrity verification MUST recompute each event's SHA-256 hash over the
+        canonical, storage-independent field set and check
+        <code>previousHash</code> continuity from a genesis value of 64 zero hex
+        characters. The hash MUST be computed over exactly these fields, in
+        canonical (recursively key-sorted) JSON:
+      </p>
+      <pre class="example" title="Canonical integrity field set">
+{
+  "id":           "...",
+  "timestamp":    "...",
+  "source":       "...",
+  "action":       "...",
+  "resource":     "...",
+  "actor":        "...",
+  "details":      { /* ... */ },
+  "previousHash": "&lt;hex sha256 of prior event, or 64×'0' for genesis&gt;"
+}
+      </pre>
+      <p>
+        Storage-managed metadata such as a <code>nonce</code> or a backend-assigned
+        block number MUST NOT be part of the integrity hash: backends do not
+        round-trip these fields uniformly, so including them would make recomputed
+        hashes diverge and falsely report tampering. Event ordering is bound
+        cryptographically by <code>previousHash</code>.
+      </p>
+      <p>
+        Integrity verification MUST perform its own content verification and MUST
+        NOT trust a storage-supplied "chain valid" verdict, which typically
+        checks linkage only and would miss content tampering.
+      </p>
+    </section>
+
+    <section id="claims" class="normative">
+      <h2>Conformance Claims</h2>
+      <p>
+        An implementation claiming ATP conformance MUST state which items
+        (1–5) it implements and MUST pass every published vector for those items.
+        A claim of "ATP Core" conformance requires items 1, 2, and 4.
+      </p>
+      <p class="ednote" title="Open issue: profiles">
+        Whether to define named conformance profiles (e.g. "Identity-only" vs.
+        "Full ATP") is open for CG discussion.
+      </p>
+    </section>
+  </body>
+</html>

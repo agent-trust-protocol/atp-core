@@ -1,0 +1,28 @@
+name: Action boundary example
+on:
+  pull_request:
+    paths:
+      - 'examples/action-boundary/**'
+      - '.github/workflows/action-boundary-example.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'examples/action-boundary/**'
+      - '.github/workflows/action-boundary-example.yml'
+permissions:
+  contents: read
+jobs:
+  public-consumer:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['20', '24']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm ci --ignore-scripts
+        working-directory: examples/action-boundary
+      - run: npm start && npm test
+        working-directory: examples/action-boundary

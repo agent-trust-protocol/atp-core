@@ -1,8 +1,7 @@
 name: Deploy
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 # Frontend (Next.js) is deployed automatically via Vercel's GitHub integration.
 # This workflow only handles backend service deployments to Railway.

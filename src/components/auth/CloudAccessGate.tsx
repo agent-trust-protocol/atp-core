@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   Cloud,
   Shield,
@@ -99,7 +100,7 @@ export function CloudAccessGate({ feature: _feature = 'cloud-platform', tier: _t
               </div>
             </div>
             <Button className="mt-6" asChild>
-              <a href="/">Return to Homepage</a>
+              <Link href="/">Return to Homepage</Link>
             </Button>
           </CardContent>
         </Card>

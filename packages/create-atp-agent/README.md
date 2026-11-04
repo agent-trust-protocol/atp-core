@@ -1,137 +1,56 @@
 # create-atp-agent
+### From idea to a running ATP starter
 
-Scaffold a new [Agent Trust Protocol](https://agenttrustprotocol.com) agent with an **ESM-first** template (`"type": "module"`), including a top-level `await` quickstart that runs on Node 18+.
+[![npm](https://img.shields.io/npm/v/create-atp-agent)](https://www.npmjs.com/package/create-atp-agent) [![license](https://img.shields.io/npm/l/create-atp-agent)](https://github.com/agent-trust-protocol/atp-core/blob/main/LICENSE)
 
-The CLI supports three onboarding paths. Choose the one that fits your situation:
-
-| Path | Command | When to use |
-|---|---|---|
-| **New project** | `npx create-atp-agent my-agent` | Starting fresh — scaffold + install + guided setup |
-| **Existing project** | `npx create-atp-agent --dashboard-only` | Already have a project; add ATP via `npm install atp-sdk` |
-| **Dashboard only** | `npx atp-onboard-agent` | Browse profiles and generate config without touching code |
-
-**New project flow:**
-
-1. `npx create-atp-agent my-agent` — scaffold + install
-2. The onboarding dashboard launches automatically at `http://127.0.0.1:3456`
-3. The dashboard runs preflight checks (Node version, npm, port availability)
-4. Pick a runtime, protection level, and JS/TS format; preview the equivalent CLI command
-5. Confirm — the dashboard writes `.atp.json` and prints `cd my-agent && npm start`
-
-Use `--no-dashboard` to skip the browser launch, or `--dashboard-only` to run the UI without scaffolding a project.
-
-## Usage
+Scaffold a small JavaScript ESM agent with an identity from **Agent Trust Protocol™ (ATP)** in one command. The starter uses the published [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) 4.x. Requires Node.js 20 or newer.
 
 ```bash
-# Full flow: scaffold + install + dashboard
 npx create-atp-agent my-agent
-
-# Dashboard only — pick a profile for an existing project
-npx atp-onboard-agent
-
-# Scaffold only — no dashboard, no install
-npx create-atp-agent my-agent --no-dashboard --skip-install
+cd my-agent
+npm start
 ```
 
-### Flags (`create-atp-agent`)
+The CLI installs dependencies and opens an optional local configuration screen at `127.0.0.1:3456` (or the next available port). You can explore the generated `agent.mjs` and add ATP to the tools and protocols your agent already uses.
 
-| Flag | Purpose |
+## Pick your flow
+
+| Goal | Command |
 | --- | --- |
-| `--dashboard-only` | Serve only the local onboarding UI (no scaffold). |
-| `--no-dashboard` | After scaffold, do not start the onboarding server. |
-| `--no-open` | Start the server but do not launch the system browser. |
-| `--skip-install` | Skip `npm install` after scaffolding. |
+| New project with local UI | `npx create-atp-agent my-agent` |
+| Terminal-only scaffold | `npx create-atp-agent my-agent --no-dashboard` |
+| Scaffold without installing | `npx create-atp-agent my-agent --skip-install` |
+| Open the UI without scaffolding | `npx create-atp-agent --dashboard-only` |
+| Add metadata to an existing project | `npx -p create-atp-agent atp-stamp-agent` |
 
-Set `CREATE_ATP_AGENT_NO_OPEN=1` for the same effect as `--no-open` (useful in CI or SSH sessions).
+Use `--no-open` to start the UI without launching a browser. If dependency installation fails, the generated folder remains; run `npm install` inside it to retry.
 
-### Flags (`atp-onboard-agent`)
+## What it creates
 
-| Flag | Purpose |
-| --- | --- |
-| `--no-open` | Start the server but do not launch the system browser. |
-| `-p, --port <port>` | Port to serve on (default `3456`). |
+- `agent.mjs` calls `Agent.quickstart` from `atp-sdk` when you run the starter.
+- `package.json` declares the SDK dependency and a `start` script.
+- `.atp.json` can hold metadata saved by the local UI.
 
-## Flow
+The local UI is a configuration demo. It does **not** mint a DID, generate or persist keys, register an issuer, connect a production ATP service, or enforce a security profile. The generated agent's standalone identity is ephemeral and not remotely resolvable by default. Review key storage, service connections, and policy enforcement before cross-system or consequential use.
 
-```
-Terminal                              Browser
-────────                              ───────
-npx create-atp-agent my-agent
-  ├─ prompt: project name (if omitted)
-  ├─ prompt: language (TS/JS)
-  ├─ copy template/
-  ├─ npm install
-  └─ launch dashboard ─────────────►  Welcome → Runtime → Agent → Profile → Review
-                                      └─ POST /api/agents/onboard
-                                         └─ writes .atp.json into my-agent/
-                                      └─ Success: cd my-agent && npm start
-```
+For an existing application, install [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) directly. To check each tool call against a security profile (`allow`, `require_approval` or `deny`), see the SDK's ["Decide before an agent acts"](https://www.npmjs.com/package/atp-sdk#decide-before-an-agent-acts) section and [`atp-profiles`](https://www.npmjs.com/package/atp-profiles).
 
-The browser success screen shows the DID, quantum-safe status, and a copy-paste `cd <project> && npm start` command. For users who launched via `atp-onboard-agent` (no scaffolded project), the success screen shows an SDK starter snippet instead.
+## What's new in 1.5
 
-## Test before production
+- New projects depend on `atp-sdk@^4.0.0`, which exports `evaluateActionWithProfile` and denies missing or unknown profiles.
+- Node.js 20 or newer is required, for both the CLI and the generated project. The SDK's identity code fails on Node.js 18.
 
-From this repo:
+## Try it and contribute
+
+Run the scaffold, inspect the output, and tell us where onboarding is confusing. Reproducible issues, starter templates, and tests for new agent ecosystems are welcome in [ATP Core](https://github.com/agent-trust-protocol/atp-core/issues). See the [contribution guide](https://github.com/agent-trust-protocol/atp-core/blob/main/CONTRIBUTING.md).
+
+To verify a CLI change locally:
 
 ```bash
 cd packages/create-atp-agent
-npm install
-npm run build
+npm ci
+npm test
+npm pack --dry-run
 ```
 
-**1. Dashboard only (smoke test, no browser)**
-
-```bash
-CREATE_ATP_AGENT_NO_OPEN=1 node dist/onboard.js
-# or equivalently
-CREATE_ATP_AGENT_NO_OPEN=1 node dist/index.js --dashboard-only
-```
-
-In another terminal:
-
-```bash
-curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:3456/
-curl -s http://127.0.0.1:3456/api/context
-curl -s -X POST http://127.0.0.1:3456/api/agents/onboard \
-  -H "Content-Type: application/json" \
-  -d '{"runtime":"mcp","name":"SmokeBot","environment":"dev","profileId":"safe-default"}'
-```
-
-Expect `200` for both. Stop the server with Ctrl+C.
-
-**2. End-to-end CLI (interactive)**
-
-```bash
-npm link
-cd "$(mktemp -d)"
-create-atp-agent e2e-test-agent
-```
-
-Confirm a project folder is created, dependencies install, and the browser opens to the Welcome screen. After finishing the wizard, `e2e-test-agent/.atp.json` should contain the selected profile, runtime, DID, and agent ID.
-
-**3. Published package (pre-release)**
-
-```bash
-npm pack
-npm install -g ./create-atp-agent-*.tgz
-atp-onboard-agent --no-open
-```
-
-Verify the dashboard loads and onboarding completes.
-
-## Development
-
-```bash
-cd packages/create-atp-agent
-npm install
-npm run build
-npm link
-create-atp-agent test-bot
-```
-
-The CLI copies `template/` into the target directory, adjusts `package.json` for TypeScript vs JavaScript, writes a placeholder `.atp.json`, and serves `dashboard/` for the embedded wizard. When the wizard completes, the mock `POST /api/agents/onboard` handler updates `.atp.json` in the scaffolded project with the selected profile.
-
-## Related
-
-- **[atp-sdk](https://www.npmjs.com/package/atp-sdk)** — runtime dependency added to generated projects
-- **[Agent Trust Protocol site](https://agenttrustprotocol.com)** — product and docs; production onboarding may use the full Next.js flow (`/onboard/agent`), while this CLI ships a **local** wizard with a mock `POST /api/agents/onboard` for quick demos
+ATP specifications are Community Group drafts, not W3C Standards. The CLI is an implementation tool, not a conformance certificate.

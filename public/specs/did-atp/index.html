@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>The did:atp DID Method — Quantum-Safe Agent Identity</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      window.specConfig = {
+        shortName: "did-atp",
+        title: "The did:atp DID Method",
+        subtitle: "A Quantum-Safe, Hybrid-Signature Profile Extending did:wba",
+      };
+    </script>
+    <script src="../common/biblio.js" class="remove"></script>
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove" defer></script>
+    <script src="../common/respec-config.js" class="remove" defer></script>
+  </head>
+  <body>
+    <section id="abstract">
+      <p>
+        This specification defines <code>did:atp</code>, a Decentralized
+        Identifier (DID) method for AI agents that adds
+        <strong>quantum-safe identity</strong> on top of an existing,
+        web-native agent identity model. A <code>did:atp</code> identifier
+        carries two cryptographic bindings: a classical Ed25519 binding,
+        identical to the one defined by <code>did:wba</code> [[DID-WBA]], and a
+        post-quantum ML-DSA-65 binding [[ML-DSA]] expressed using the finalized
+        JOSE/COSE serialization for ML-DSA [[RFC9964]].
+      </p>
+      <p>
+        <code>did:atp</code> does not invent a new resolution or authentication
+        model. It adopts, by normative reference, the resolution,
+        DID Document processing, classical integrity-proof, and HTTP Message
+        Signature mechanisms defined by <code>did:wba</code>, and adds exactly
+        one capability: a post-quantum binding key and a post-quantum signature
+        path. Stripping the post-quantum segment from a <code>did:atp</code>
+        identifier yields a syntactically valid <code>did:wba</code> identifier.
+      </p>
+      <p class="note" title="This design has a runnable proof">
+        The hybrid construction defined here has been demonstrated end-to-end
+        with real cryptography (FIPS 204 ML-DSA-65 + Ed25519), including
+        dual-binding resolution, defense-in-depth against a forged classical
+        signature, and a method-agnostic trust credential. See
+        <a href="#proof-of-concept">Proof of Concept</a>.
+      </p>
+    </section>
+
+    <section id="sotd">
+      <p>
+        This document is a draft work product of the Agent Trust Protocol (ATP)
+        Community Group. It is <strong>not</strong> a W3C Standard nor on the W3C
+        Recommendation track. Publication as a Community Group Report does not
+        imply endorsement by W3C or its Membership.
+      </p>
+      <p>
+        The ATP Community Group coordinates with the W3C AI Agent Protocol
+        Community Group [[AI-AGENT-PROTOCOL]] and accepts that group's invitation
+        to collaborate. This specification is designed to be a compatible
+        <em>extension</em> of that group's <code>did:wba</code> work, not an
+        alternative to it. See
+        <a href="#relationship-to-did-wba">Relationship to did:wba</a>.
+      </p>
+      <p class="ednote" title="Maturity of the post-quantum profile">
+        The classical portion of this method rests on stable W3C
+        Recommendations. The post-quantum portion is deliberately scoped to
+        rest only on <strong>finalized</strong> standards: FIPS 204 [[ML-DSA]]
+        and RFC 9964 [[RFC9964]]. It intentionally does <em>not</em> depend on a
+        W3C Data Integrity cryptosuite for the post-quantum proof: the finalized
+        W3C Quantum-Safe Cryptosuites CG Report [[DI-QUANTUM-SAFE]] defines
+        usable ML-DSA cryptosuites only at <strong>ML-DSA-44 (security category
+        2)</strong>, whereas did:atp targets <strong>ML-DSA-65 (category
+        3)</strong>. See
+        <a href="#pq-rationale">Why JOSE/COSE for the post-quantum path</a> and
+        <a href="#reelevation">Re-Elevation Triggers</a>.
+      </p>
+    </section>
+
+    <section id="conformance">
+      <p>
+        As well as sections marked as non-normative, all authoring guidelines,
+        diagrams, examples, and notes in this specification are non-normative.
+        Everything else is normative.
+      </p>
+      <p>
+        The key words <em>MUST</em>, <em>MUST NOT</em>, <em>SHOULD</em>, and
+        <em>MAY</em> are to be interpreted as described in BCP 14 [[RFC2119]]
+        [[RFC8174]] when, and only when, they appear in all capitals.
+      </p>
+    </section>
+
+    <section id="relationship-to-did-wba" class="normative">
+      <h2>Relationship to did:wba</h2>
+      <p>
+        This specification is defined as a delta over the <code>did:wba</code>
+        method [[DID-WBA]]. The following mechanisms are adopted
+        <strong>unchanged by normative reference</strong>:
+      </p>
+      <ul>
+        <li>DID resolution (path-to-URL transformation, <code>did.json</code> retrieval).</li>
+        <li>DID Document processing rules.</li>
+        <li>The classical Ed25519 binding profile (<code>e1_</code>) and its RFC 7638 [[RFC7638]] thumbprint.</li>
+        <li>Cross-platform HTTP authentication via HTTP Message Signatures [[RFC9421]] and Digest Fields [[RFC9530]].</li>
+        <li>The classical Data Integrity proof (<code>eddsa-jcs-2022</code>).</li>
+      </ul>
+      <p>
+        This specification adds <strong>one</strong> capability absent from
+        <code>did:wba</code>: a post-quantum binding key and a post-quantum
+        signature path, so that an agent's identity remains verifiable against
+        an adversary able to break elliptic-curve cryptography.
+      </p>
+      <div class="note" title="Lineage">
+        <p>
+          <code>did:web</code> &rarr; <code>did:wba</code> (adds agent path
+          binding + Ed25519 <code>e1_</code>) &rarr; <code>did:atp</code> (adds
+          hybrid post-quantum binding). Each layer preserves the prior layer's
+          machinery and adds exactly one concern.
+        </p>
+      </div>
+      <div class="note" title="Future convergence">
+        <p>
+          Should the AI Agent Protocol CG adopt a post-quantum binding profile
+          directly into <code>did:wba</code>, or should a W3C Data Integrity
+          ML-DSA-65 cryptosuite reach maturity, the ATP CG intends to align this
+          specification with that work. See <a href="#reelevation">Re-Elevation
+          Triggers</a>.
+        </p>
+      </div>
+    </section>
+
+    <section id="method-name" class="normative">
+      <h2>Method Name</h2>
+      <p>
+        The method name that identifies this DID method is <code>atp</code>.
+        DIDs using this method MUST begin with the prefix <code>did:atp:</code>.
+        Per DID Core [[DID-CORE]], this string MUST be lowercase.
+      </p>
+    </section>
+
+    <section id="identifier-syntax" class="normative">
+      <h2>Method-Specific Identifier Syntax</h2>
+      <p>
+        The method-specific identifier follows <code>did:wba</code> syntax with
+        one addition: a path-type <code>did:atp</code> identifier carries
+        <strong>two</strong> trailing binding-key fingerprint segments — the
+        classical <code>e1_</code> segment defined by <code>did:wba</code>,
+        followed by a post-quantum <code>pq1_</code> segment defined here.
+      </p>
+      <pre class="abnf">
+base64url-char  = ALPHA / DIGIT / "-" / "_"
+path-segment    = 1*(ALPHA / DIGIT / "-" / "_" / ".")
+e1-fingerprint  = "e1_" 43base64url-char        ; Ed25519, per did:wba
+pq1-fingerprint = "pq1_" 43base64url-char       ; ML-DSA-65, this spec
+
+atp-root-did = "did:atp:" domain-name
+atp-path-did = "did:atp:" domain-name 1*(":" path-segment)
+                 ":" e1-fingerprint ":" pq1-fingerprint
+atp-did      = atp-root-did / atp-path-did
+      </pre>
+      <p>Example (from the proof-of-concept, abbreviated):</p>
+      <pre>
+did:atp:agents.example.com:billing:e1_vW7u8CVMklXkz...:pq1_-MT7q-QasC380...
+      </pre>
+      <p class="note">
+        The <code>e1_</code> segment is byte-identical to a <code>did:wba</code>
+        <code>e1_</code> segment and is independently verifiable. Two separate
+        segments (rather than one composite hash) are used precisely to preserve
+        that independent verifiability and the <code>did:wba</code> lineage.
+      </p>
+    </section>
+
+    <section id="pq1-fingerprint" class="normative">
+      <h2>The <code>pq1_</code> Post-Quantum Binding Fingerprint</h2>
+      <p>
+        The <code>pq1_</code> segment binds the path-type DID to an ML-DSA-65
+        [[ML-DSA]] public key. The key is represented as a JSON Web Key using
+        the <code>AKP</code> (Algorithm Key Pair) key type defined for ML-DSA by
+        RFC 9964 [[RFC9964]]:
+      </p>
+      <pre class="example">
+{
+  "kty": "AKP",
+  "alg": "ML-DSA-65",
+  "pub": "&lt;base64url of the 1952-byte ML-DSA-65 public key&gt;"
+}
+      </pre>
+      <p>The fingerprint is generated as follows:</p>
+      <ol>
+        <li>Construct the <code>AKP</code> JWK above for the ML-DSA-65 binding key.</li>
+        <li>
+          Compute the RFC 7638 [[RFC7638]] JWK thumbprint over that JWK
+          (lexicographically sorted member names, no whitespace, UTF-8),
+          producing a 32-byte SHA-256 digest.
+        </li>
+        <li>Base64url-encode the digest without padding (43 characters).</li>
+        <li>Prepend the <code>pq1_</code> profile prefix.</li>
+      </ol>
+      <p>
+        The binding key MUST be authorized by the <code>authentication</code>
+        relationship of the DID Document, and the RFC 7638 thumbprint of its
+        <code>AKP</code> JWK MUST equal the <code>pq1_</code> segment of the DID
+        path.
+      </p>
+    </section>
+
+    <section id="pq-rationale" class="informative">
+      <h2>Why JOSE/COSE for the post-quantum path</h2>
+      <p>
+        <code>did:wba</code> secures its DID Document with a W3C Data Integrity
+        proof (<code>eddsa-jcs-2022</code>). The natural symmetry would be a Data
+        Integrity ML-DSA cryptosuite. The W3C Quantum-Safe Cryptosuites CG
+        Report [[DI-QUANTUM-SAFE]], finalized 22 April 2026, defines such
+        cryptosuites — but only at <strong>ML-DSA-44</strong>
+        (<code>mldsa44-rdfc-2024</code> / <code>mldsa44-jcs-2024</code>),
+        explicitly capping support at security category 2. It tabulates the
+        ML-DSA-65 and ML-DSA-87 parameters for reference but defines
+        <strong>no usable cryptosuite</strong> for them.
+      </p>
+      <p>
+        <code>did:atp</code> targets <strong>ML-DSA-65 (category 3)</strong> for
+        a stronger post-quantum security margin. Using the W3C Data Integrity
+        path would therefore require <em>downgrading</em> to ML-DSA-44. Instead,
+        <code>did:atp</code> takes the post-quantum signature path through the
+        <strong>finalized</strong> JOSE/COSE serialization for ML-DSA-65
+        [[RFC9964]] (published 2026). This means:
+      </p>
+      <ul>
+        <li>
+          The classical binding is verified via did:wba's Data Integrity proof;
+        </li>
+        <li>
+          The post-quantum binding is verified via an ML-DSA-65 JOSE/COSE
+          signature over the same DID Document.
+        </li>
+      </ul>
+      <p>
+        This is a deliberately <em>hybrid, two-mechanism</em> architecture. It
+        is the trade that lets <code>did:atp</code> be specified against
+        entirely finalized standards today, at the cost of using two proof
+        formats rather than one. <a href="#reelevation">Re-Elevation
+        Triggers</a> defines when the post-quantum path SHOULD migrate to a Data
+        Integrity cryptosuite.
+      </p>
+    </section>
+
+    <section id="did-document" class="normative">
+      <h2>DID Document Requirements</h2>
+      <p>
+        A <code>did:atp</code> path-type DID Document MUST contain, in addition
+        to all <code>did:wba</code> <code>e1_</code> requirements:
+      </p>
+      <ul>
+        <li>
+          One verification method carrying the ML-DSA-65 public key as an
+          <code>AKP</code> JWK [[RFC9964]], whose RFC 7638 thumbprint equals the
+          <code>pq1_</code> segment of the DID path, authorized by
+          <code>authentication</code>.
+        </li>
+        <li>
+          A post-quantum integrity signature over the DID Document, produced
+          with the ML-DSA-65 key and serialized per [[RFC9964]], in addition to
+          the <code>eddsa-jcs-2022</code> Data Integrity proof required by
+          <code>did:wba</code>.
+        </li>
+      </ul>
+      <p class="example">
+        Example verification method (post-quantum), as validated in the proof-of-concept:
+      </p>
+      <pre class="example">
+{
+  "id": "did:atp:agents.example.com:billing:e1_...:pq1_...#key-mldsa65",
+  "type": "JsonWebKey",
+  "controller": "did:atp:agents.example.com:billing:e1_...:pq1_...",
+  "publicKeyJwk": { "kty": "AKP", "alg": "ML-DSA-65", "pub": "..." }
+}
+      </pre>
+    </section>
+
+    <section id="operations" class="normative">
+      <h2>Method Operations</h2>
+      <ul>
+        <li>
+          <strong>Create</strong>: generate both an Ed25519 and an ML-DSA-65
+          binding key; compute both fingerprint segments; include both
+          verification methods and both proofs in <code>did.json</code>.
+        </li>
+        <li>
+          <strong>Resolve</strong>: perform all <code>did:wba</code> verification
+          steps for the <code>e1_</code> segment (including the
+          <code>eddsa-jcs-2022</code> proof), then additionally (a) recompute the
+          <code>pq1_</code> thumbprint from the <code>AKP</code> JWK and confirm
+          it matches the path, and (b) verify the ML-DSA-65 [[RFC9964]] signature
+          over the document. Resolution MUST fail if <em>either</em> the
+          classical or the post-quantum binding fails to verify.
+        </li>
+        <li>
+          <strong>Update / Deactivate</strong>: as in <code>did:wba</code>.
+          Rotating <em>either</em> binding key changes the DID, since both
+          fingerprints are part of the path.
+        </li>
+      </ul>
+    </section>
+
+    <section id="pairwise" class="normative">
+      <h2>Pairwise (Per-Peer, Unlinkable) Identifiers</h2>
+      <p>
+        An agent MAY present a <strong>different</strong> <code>did:atp</code>
+        identifier to each peer (relying party) so that its interactions cannot
+        be correlated across peers by the identifiers alone. Such a
+        <dfn>pairwise</dfn> identifier is an ordinary path-type
+        <code>did:atp</code> whose single path segment is a
+        <strong>pseudonym</strong> rather than a human-meaningful label, and
+        whose <code>e1_</code> / <code>pq1_</code> bindings are a per-peer
+        hybrid keypair. No new identifier syntax, resolution rule, or proof
+        mechanism is introduced: a pairwise DID is created, parsed, resolved,
+        and control-proved exactly as any other path-type <code>did:atp</code>.
+      </p>
+      <p>
+        A conforming pairwise identifier MUST be derived such that, without the
+        agent's master secret, no two pairwise identifiers of the same agent
+        (nor a pairwise identifier and the agent's canonical DID) are
+        correlatable — i.e. the pseudonym segment, the <code>e1_</code>
+        fingerprint, and the <code>pq1_</code> fingerprint MUST each be
+        independent across peers. Because both binding fingerprints are part of
+        the path, distinct per-peer keypairs already yield distinct
+        <code>e1_</code> and <code>pq1_</code> segments; the pseudonym segment
+        MUST likewise be a per-peer value and MUST NOT be a plain function of
+        the peer identifier alone (which would be linkable by any party that
+        learns the peer identifier).
+      </p>
+
+      <section id="pairwise-pseudonym" class="normative">
+        <h3>The <code>p_</code> Pseudonym Path Segment</h3>
+        <p>
+          A pairwise identifier uses a single path segment of the form
+          <code>p_</code> followed by a lowercase-hex pseudonym. It is a
+          well-formed <code>path-segment</code> under the
+          <a href="#identifier-syntax">syntax</a> above; the <code>p_</code>
+          prefix is a profile convention that distinguishes the pseudonym from
+          the trailing <code>e1_</code> / <code>pq1_</code> binding segments and
+          from human-meaningful labels.
+        </p>
+        <pre class="abnf">
+pairwise-segment = "p_" 32HEXDIG-lower      ; 16-byte pseudonym, lowercase hex
+        </pre>
+        <p>Example pairwise identifier (one path segment, both bindings):</p>
+        <pre>
+did:atp:agents.example.com:p_fad4fe7b41096f53e62fc34133eab6e7:e1_lmymt0Be…:pq1_YQm0BqWx…
+        </pre>
+      </section>
+
+      <section id="pairwise-derivation" class="normative">
+        <h3>Recommended Derivation</h3>
+        <p>
+          To make pairwise identifiers reproducible (so the agent can recompute
+          a peer's keypair on demand rather than storing one per peer) while
+          keeping them unlinkable, an implementation SHOULD derive all per-peer
+          material from a single high-entropy master secret using
+          HKDF-SHA256 [[RFC5869]] with domain-separated <code>info</code>
+          labels. The master secret MUST be at least 32 bytes and MUST NOT be
+          shared with any peer.
+        </p>
+        <p>
+          For a master secret <var>MS</var>, a peer identifier <var>peerId</var>,
+          and an OPTIONAL <var>salt</var>, derive three independent outputs:
+        </p>
+        <pre class="example">
+info(label)   = "atp-pairwise:v1:" label ":" peerId
+ed25519_seed  = HKDF-SHA256(IKM = MS, salt, info("ed25519"),   L = 32)
+mldsa65_seed  = HKDF-SHA256(IKM = MS, salt, info("ml-dsa-65"), L = 32)
+pseudonym     = HKDF-SHA256(IKM = MS, salt, info("path"),      L = 16)
+pairwise-seg  = "p_" lowerhex(pseudonym)
+        </pre>
+        <p>
+          The Ed25519 binding key is generated from <code>ed25519_seed</code>
+          and the ML-DSA-65 binding key from <code>mldsa65_seed</code>; both
+          algorithms are deterministic functions of a 32-byte seed, so the same
+          <code>(MS, peerId, salt)</code> always yields the same keypair and the
+          same identifier. The <code>e1_</code> and <code>pq1_</code> segments
+          are then computed from those public keys exactly as in
+          <a href="#pq1-fingerprint">the binding-fingerprint rules</a>. No new
+          cryptographic primitive is introduced; the construction composes
+          HKDF, Ed25519, and ML-DSA-65 only.
+        </p>
+        <p class="note">
+          The domain-separating labels (<code>ed25519</code>,
+          <code>ml-dsa-65</code>, <code>path</code>) make the three outputs
+          mutually independent for a given peer, and binding <var>peerId</var>
+          into <code>info</code> makes outputs independent across peers. The
+          OPTIONAL <var>salt</var> permits rotating an agent's entire set of
+          pairwise identifiers without changing the master secret.
+        </p>
+      </section>
+
+      <section id="pairwise-privacy" class="informative">
+        <h3>Privacy Properties and Limits</h3>
+        <p>
+          Pairwise identifiers remove <em>identifier-level</em> correlation:
+          the DID string, both binding keys, and the pseudonym segment differ
+          per peer and are not correlatable without the master secret. They do
+          <strong>not</strong> by themselves defeat correlation through other
+          channels — network metadata, timing, the <code>domain-name</code>
+          component (which is shared across an agent's pairwise DIDs at the same
+          domain), or application-layer content. Agents requiring stronger
+          unlinkability SHOULD additionally vary or proxy those channels.
+        </p>
+        <p>
+          Control of a pairwise identifier is proved exactly as for any
+          path-type <code>did:atp</code>: the agent signs a challenge with the
+          per-peer hybrid keypair whose <code>e1_</code> / <code>pq1_</code>
+          fingerprints are bound into the DID. A keypair derived for one peer
+          cannot satisfy another peer's bindings, so pairwise identifiers are
+          unforgeable across peers as well as unlinkable.
+        </p>
+      </section>
+    </section>
+
+    <section id="security" class="normative">
+      <h2>Security and Privacy Considerations</h2>
+      <p>
+        All <code>did:wba</code> security and privacy considerations apply.
+        Additionally, the hybrid construction provides defense in depth: an
+        identity remains authentic so long as the post-quantum binding holds,
+        protecting against a future adversary who can forge Ed25519 signatures.
+        Implementers MUST verify both bindings and MUST NOT treat a valid
+        classical proof as sufficient on its own for a <code>did:atp</code>
+        identifier. This property is demonstrated by the forged-classical-
+        signature test in the <a href="#proof-of-concept">Proof of Concept</a>.
+      </p>
+      <p>
+        For agents that must avoid cross-peer correlation of their identifiers,
+        <a href="#pairwise">Pairwise Identifiers</a> defines per-peer,
+        unlinkable <code>did:atp</code> values and states the privacy properties
+        they do and do not provide.
+      </p>
+    </section>
+
+    <section id="proof-of-concept" class="informative">
+      <h2>Proof of Concept</h2>
+      <p>
+        A runnable reference proof accompanies this specification (see the
+        <code>/proof</code> directory of the repository). Using FIPS 204
+        ML-DSA-65 and Ed25519, it demonstrates, with all checks passing:
+      </p>
+      <ul>
+        <li>ML-DSA-65 keys and signatures at exact FIPS 204 sizes (1952-byte key, 3309-byte signature).</li>
+        <li>A hybrid <code>did:atp</code> identifier whose classical view is a valid <code>did:wba</code> identifier.</li>
+        <li>Dual-binding resolution: both fingerprints recomputed from the DID Document and both signatures verified.</li>
+        <li>Defense in depth: a forged classical signature is caught by the post-quantum binding.</li>
+        <li>A method-agnostic trust credential verified over a <code>did:atp</code> subject and a <code>did:web</code> subject, with tampering detected.</li>
+      </ul>
+      <p class="note">
+        The proof is a self-contained TypeScript program
+        (<code>npx tsx proof/index.ts</code>) that uses the audited
+        <code>@noble/post-quantum</code> ML-DSA-65 and <code>@noble/ed25519</code>
+        libraries and reuses the production ATP SDK for the identifier syntax,
+        DID-Document construction, dual proofs, and resolution — so it validates
+        the protocol design against real standards and against the production
+        implementation. Every check is asserted; the program exits non-zero on
+        any failure.
+      </p>
+    </section>
+
+    <section id="reelevation" class="informative">
+      <h2>Re-Elevation Triggers</h2>
+      <p>
+        The post-quantum path SHOULD migrate from the JOSE/COSE proof to a W3C
+        Data Integrity proof (restoring single-mechanism symmetry with
+        <code>did:wba</code>) when <strong>both</strong> of the following hold:
+      </p>
+      <ol>
+        <li>
+          The W3C Quantum-Safe Cryptosuites work [[DI-QUANTUM-SAFE]] defines a
+          usable Data Integrity cryptosuite at <strong>ML-DSA-65 (category
+          3)</strong> — e.g. an <code>mldsa65-jcs-*</code> /
+          <code>mldsa65-rdfc-*</code> identifier. As of its 22 April 2026 Final
+          Report, the defined ML-DSA cryptosuites stop at ML-DSA-44 (category
+          2); and
+        </li>
+        <li>
+          A corresponding ML-DSA-65 Multikey / multicodec prefix is registered
+          (the Final Report's Multikey table lists only ML-DSA-44 at
+          <code>0x1210</code>).
+        </li>
+      </ol>
+      <p>
+        Until both hold, the JOSE/COSE post-quantum path defined here is the
+        normative mechanism for <code>did:atp</code>. Downgrading to ML-DSA-44
+        solely to use the existing Data Integrity cryptosuite is NOT an
+        acceptable substitute, as it lowers the post-quantum security category.
+      </p>
+    </section>
+
+    <section id="open-items" class="informative">
+      <h2>Open Items</h2>
+      <ul>
+        <li>Canonical serialization choice for the post-quantum DID-Document signature (JWS vs. COSE) — to be fixed in the next draft.</li>
+        <li>Liaison sign-off with the AI Agent Protocol CG on the two-segment binding approach.</li>
+        <li>Monitoring of the W3C quantum-safe cryptosuite work against the <a href="#reelevation">re-elevation triggers</a>.</li>
+      </ul>
+    </section>
+  </body>
+</html>

@@ -2,7 +2,7 @@
  * ATP Profiles - Built-in Security Profiles for Agent Trust Protocol
  *
  * Runtime-agnostic security profiles that define what actions an agent
- * can take, under what conditions, and how those actions are logged and scored.
+ * can take, under what conditions, and how those actions are logged.
  *
  * Profiles are used by atp-sdk and runtime adapters (OpenClaw, MCP, LangChain, etc.)
  * to enforce consistent security policies across any agentic ecosystem.
@@ -29,3 +29,5 @@ export {
 };
 
 export * from "./types.js";
+
+export * from "./evaluate.js";

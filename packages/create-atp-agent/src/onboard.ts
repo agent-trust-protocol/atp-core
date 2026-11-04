@@ -7,13 +7,13 @@ const program = new Command();
 
 program
   .name('atp-onboard-agent')
-  .description('Launch the ATP onboarding dashboard in your browser')
+  .description('Launch the local ATP configuration UI')
   .option('--no-open', 'Do not launch the system browser')
   .option('-p, --port <port>', 'Port to serve on (default 3456)', (v) => Number.parseInt(v, 10))
   .action(async function (this: Command) {
-    const opts = this.opts<{ noOpen?: boolean; port?: number }>();
+    const opts = this.opts<{ open: boolean; port?: number }>();
     const openBrowser =
-      !opts.noOpen && process.env.CREATE_ATP_AGENT_NO_OPEN !== '1';
+      opts.open && process.env.CREATE_ATP_AGENT_NO_OPEN !== '1';
 
     console.log(chalk.blue('🛡️  Agent Trust Protocol — onboard-agent\n'));
     await startOnboardingDashboard({ openBrowser, port: opts.port });

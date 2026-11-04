@@ -764,19 +764,6 @@ const token = await secretManager.getSecret('api-key', {
               </Card>
             </Link>
 
-            <Link href="/integrations/openclaw/agents">
-              <Card className="glass border-0 hover:border-primary/20 transition-all cursor-pointer h-full">
-                <CardHeader>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Activity className="text-primary" size={20} />
-                    <CardTitle className="font-display text-base">Live Agents</CardTitle>
-                  </div>
-                  <CardDescription className="text-xs">
-                    View registered agents, trust scores, and session policy
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
           </div>
         </section>
 

@@ -4,8 +4,7 @@ import { CredentialsClient } from './credentials.js';
 import { PermissionsClient } from './permissions.js';
 import { AuditClient } from './audit.js';
 import { GatewayClient } from './gateway.js';
-import { PaymentsClient } from './payments.js';
-import { BUILTIN_PROFILES, AtpSecurityProfile } from '../profiles/index.js';
+import { BUILTIN_PROFILES, evaluateActionWithProfile, type AtpSecurityProfile, type ProfileEvaluationContext } from 'atp-profiles';
 
 /**
  * Main ATP™ SDK Client
@@ -19,7 +18,6 @@ export class ATPClient {
   public readonly permissions: PermissionsClient;
   public readonly audit: AuditClient;
   public readonly gateway: GatewayClient;
-  public readonly payments: PaymentsClient;
   private profile?: AtpSecurityProfile;
 
   constructor(private config: ATPConfig) {
@@ -28,10 +26,9 @@ export class ATPClient {
     this.permissions = new PermissionsClient(config);
     this.audit = new AuditClient(config);
     this.gateway = new GatewayClient(config);
-    this.payments = new PaymentsClient(config);
 
     if (config.profileId) {
-      this.profile = BUILTIN_PROFILES[config.profileId];
+      this.setProfile(config.profileId);
     }
   }
 
@@ -51,7 +48,6 @@ export class ATPClient {
     this.permissions.updateAuth(auth);
     this.audit.updateAuth(auth);
     this.gateway.updateAuth(auth);
-    this.payments.updateAuth(auth);
   }
 
   /**
@@ -122,7 +118,7 @@ export class ATPClient {
    * Set a security profile by ID
    */
   setProfile(profileId: string): void {
-    const profile = BUILTIN_PROFILES[profileId];
+    const profile = Object.prototype.hasOwnProperty.call(BUILTIN_PROFILES, profileId) ? BUILTIN_PROFILES[profileId] : undefined;
     if (!profile) throw new Error(`Unknown ATP profile: ${profileId}`);
     this.profile = profile;
   }
@@ -136,41 +132,16 @@ export class ATPClient {
 
   /**
    * Evaluate whether an action is allowed under the active profile.
-   * Returns "allow", "deny", or "require_approval".
+   * Returns "allow", "deny", or "require_approval". Denies when no profile is
+   * configured or `profileId` names an unknown profile.
    */
-  evaluateActionWithProfile(params: {
-    profileId?: string;
-    state?: string;
-    actionType: string;
-    metadata?: Record<string, unknown>;
-  }): "allow" | "deny" | "require_approval" {
+  evaluateActionWithProfile(params: ProfileEvaluationContext & { profileId?: string }): "allow" | "deny" | "require_approval" {
     const profile = params.profileId
-      ? BUILTIN_PROFILES[params.profileId]
+      ? (Object.prototype.hasOwnProperty.call(BUILTIN_PROFILES, params.profileId) ? BUILTIN_PROFILES[params.profileId] : undefined)
       : this.profile;
-
-    if (!profile) return "allow";
-
-    const { controls, state_policies } = profile;
-    const { actionType, state } = params;
-
-    // Basic control-level check
-    const control = (controls as Record<string, any>)[actionType];
-    if (control && control.allowed === false) {
-      return control.require_approval ? "require_approval" : "deny";
-    }
-
-    // State-based overrides
-    if (state && state_policies?.[state]) {
-      const policy = state_policies[state];
-      if (policy.restricted_tools?.includes(actionType)) {
-        return "deny";
-      }
-      if (policy.require_approval_for?.includes(actionType)) {
-        return "require_approval";
-      }
-    }
-
-    return "allow";
+    // A missing or unknown profile must not silently disable policy enforcement.
+    if (!profile) return "deny";
+    return evaluateActionWithProfile(profile, params).decision;
   }
 
   /**

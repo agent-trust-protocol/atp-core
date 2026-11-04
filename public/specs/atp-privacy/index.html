@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ATP Privacy-First Interaction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      window.specConfig = {
+        shortName: "atp-privacy",
+        title: "ATP Privacy-First Interaction",
+        subtitle: "Pairwise Identifiers, Selective Disclosure, and Zero-Knowledge Proofs for AI Agents",
+      };
+    </script>
+    <script src="../common/biblio.js" class="remove"></script>
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove" defer></script>
+    <script src="../common/respec-config.js" class="remove" defer></script>
+  </head>
+  <body>
+    <section id="abstract">
+      <p>
+        This specification defines privacy-preserving interaction mechanisms for
+        AI agents identified with <a href="../did-atp/">did:atp</a>. It has three
+        parts: <strong>pairwise identifiers</strong> that prevent cross-relying-party
+        correlation, <strong>selective disclosure</strong> of credential
+        attributes via Merkle membership, and <strong>zero-knowledge range
+        proofs</strong> that prove a numeric attribute lies in a range without
+        revealing it.
+      </p>
+      <p>
+        These mechanisms let an agent prove what a relying party needs — that an
+        attribute is a member of an issuer-attested credential, or that a value
+        is within bounds — while disclosing nothing further.
+      </p>
+    </section>
+
+    <section id="sotd">
+      <p>
+        This document is an <strong>early draft</strong> work product of the
+        Agent Trust Protocol (ATP) Community Group. It is <strong>not</strong> a
+        W3C Standard nor on the W3C Recommendation track. It is published to seek
+        review and contribution from Community Group members.
+      </p>
+      <p class="ednote" title="Maturity of the three mechanisms">
+        The three mechanisms are at different maturities and are labelled
+        accordingly below. <strong>Selective disclosure</strong> (Merkle
+        membership) is implemented with deterministic known-answer vectors.
+        <strong>Pairwise identifiers</strong> are implemented as an HKDF
+        derivation. <strong>Zero-knowledge range proofs</strong> are implemented
+        over Ristretto255 Pedersen commitments but are marked
+        <em>experimental</em>; their construction and security review are an
+        explicit ask to CG members.
+      </p>
+    </section>
+
+    <section id="conformance">
+      <p>
+        As well as sections marked as non-normative, all authoring guidelines,
+        diagrams, examples, and notes in this specification are non-normative.
+        Everything else is normative.
+      </p>
+      <p>
+        The key words <em>MUST</em>, <em>MUST NOT</em>, <em>SHOULD</em>, and
+        <em>MAY</em> are to be interpreted as described in BCP 14 [[RFC2119]]
+        [[RFC8174]] when, and only when, they appear in all capitals.
+      </p>
+    </section>
+
+    <section id="pairwise" class="normative">
+      <h2>Pairwise Identifiers</h2>
+      <p>
+        A <dfn>pairwise identifier</dfn> is a per-peer, unlinkable identifier an
+        agent presents to a specific relying party so that two relying parties
+        cannot correlate the agent across contexts. A conforming implementation
+        MUST derive the pairwise pseudonym deterministically from the agent's
+        long-term secret and a peer-specific salt using HKDF [[RFC5869]], and the
+        derivation MUST be one-way: the pseudonym MUST NOT reveal the agent's
+        canonical identifier.
+      </p>
+      <p>
+        The pairwise pseudonym is carried as a dedicated segment of the
+        <code>did:atp</code> identifier; its syntax and binding rules are defined
+        in the <a href="../did-atp/#pairwise">did:atp Pairwise Identifiers</a>
+        section. This specification defines the privacy contract; did:atp defines
+        the on-the-wire form.
+      </p>
+      <p class="ednote" title="Open issue: rotation & limits">
+        Pairwise identifiers limit but do not eliminate correlation (timing,
+        traffic analysis, and colluding peers remain out of scope). CG input is
+        sought on rotation cadence and on stating these limits normatively.
+      </p>
+    </section>
+
+    <section id="selective-disclosure" class="normative">
+      <h2>Selective Disclosure (Merkle Membership)</h2>
+      <p>
+        Selective disclosure lets an agent reveal a subset of a credential's
+        attributes while committing to the whole credential. A conforming
+        implementation MUST commit to the full credential as a domain-separated
+        SHA-256 Merkle root, computed over the credential's attributes in key
+        order, and MUST produce, for each revealed attribute, an authentication
+        path to that root.
+      </p>
+      <p>The Merkle construction is domain-separated to prevent second-preimage
+        and type-confusion attacks:</p>
+      <ul>
+        <li>leaf nodes are tagged with the byte <code>0x00</code>;</li>
+        <li>interior nodes are tagged with the byte <code>0x01</code>;</li>
+        <li>an orphan (odd) node is paired with a fixed
+          <code>ATP-merkle-empty</code> placeholder.</li>
+      </ul>
+      <p>
+        Verification MUST establish that each disclosed attribute is a member of
+        the committed root and, when an issuer-attested root is supplied, that
+        the committed root matches it. The issuer's signature over the root is
+        verified out-of-band by the credential service and is out of scope here.
+      </p>
+      <pre class="example" title="Known-answer vector (selective disclosure)">
+credential = {
+  id:        "urn:cred:atp:conformance:1",
+  name:      "Ada Lovelace",
+  role:      "engineer",
+  clearance: "secret",
+  org:       "did:atp:agents.example.com"
+}
+merkleRoot = e22c3d1565d0a4fdf85286018145138a60146bba89d59e6e44cdbe7f568e5213
+// disclose ["name","org"] → revealedIndices [1,4], one path per revealed attr
+      </pre>
+    </section>
+
+    <section id="range-proofs" class="normative">
+      <h2>Zero-Knowledge Range Proofs <span class="ednote">(experimental)</span></h2>
+      <p>
+        A range proof lets an agent prove a numeric attribute lies in
+        [0, 2<sup>n</sup>) without revealing it. The reference construction is a
+        bit-decomposition with a Chaum–Pedersen OR proof per bit over Ristretto255
+        [[!RFC9496]] Pedersen commitments; no new cryptographic primitive is
+        introduced.
+      </p>
+      <p class="ednote" title="Experimental — security review requested">
+        This construction is <strong>experimental</strong>. It MUST NOT be relied
+        upon for production confidentiality until it has received independent
+        cryptographic review. CG members with applied-cryptography expertise are
+        explicitly invited to review the bit-decomposition + OR construction, the
+        Fiat–Shamir transcript, and the choice of generators.
+      </p>
+    </section>
+
+    <section id="conformance-vectors" class="normative">
+      <h2>Conformance Vectors</h2>
+      <p>
+        Selective-disclosure vectors are deterministic known-answer tests (the
+        Merkle root above is fixed by the credential and computed independently
+        of the implementation). They are maintained alongside the
+        <a href="../atp-conformance/">ATP Conformance &amp; Interoperability</a>
+        suite. CG members may contribute additional vectors as table rows.
+      </p>
+    </section>
+
+    <section id="security" class="normative">
+      <h2>Security &amp; Privacy Considerations</h2>
+      <p>
+        Domain separation in the Merkle construction is mandatory: omitting the
+        leaf/node tags enables second-preimage attacks that forge membership.
+        Selective disclosure hides unrevealed <em>values</em> but not the
+        <em>set of attribute names</em> in the credential schema; implementations
+        SHOULD consider schema-level metadata leakage. The experimental range
+        proof's guarantees are unverified pending review (see above).
+      </p>
+    </section>
+  </body>
+</html>

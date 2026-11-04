@@ -1,8 +1,7 @@
 import { Agent } from 'atp-sdk';
 
-const agent = await Agent.quickstart('MyBot');
+const agent = await Agent.quickstart('__AGENT_NAME__');
 
-console.log('⚡ MyBot ready!');
-console.log('  DID:          ', agent.getDID());
-console.log('  Quantum-safe: ', agent.isQuantumSafe());
-console.log('  Standalone:   ', agent.isStandalone());
+// Standalone identity is ephemeral and not remotely resolvable.
+// Persist keys securely and connect ATP services before cross-system use.
+console.log('Standalone:', agent.isStandalone());

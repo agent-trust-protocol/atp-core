@@ -1,0 +1,26 @@
+name: Package dependency audit
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [atp-profiles, create-atp-agent, openclaw-atp, sdk, shared]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Production dependencies (critical gate)
+        run: npm audit --prefix packages/${{ matrix.package }} --omit=dev --audit-level=critical
+      - name: Full dependencies (critical gate)
+        run: npm audit --prefix packages/${{ matrix.package }} --audit-level=critical

@@ -35,23 +35,13 @@ export function Footer() {
             <h3 className="font-semibold text-sm">Product</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Dashboard
+                <Link href="/playground" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Playground
                 </Link>
               </li>
               <li>
-                <Link href="/policy-editor" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Policy Editor
-                </Link>
-              </li>
-              <li>
-                <Link href="/monitoring" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Monitoring
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Pricing
+                <Link href="/demos" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Demos
                 </Link>
               </li>
             </ul>
@@ -62,11 +52,6 @@ export function Footer() {
             <h3 className="font-semibold text-sm">Enterprise</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/enterprise" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Enterprise Features
-                </Link>
-              </li>
-              <li>
                 <Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
                   Contact Sales
                 </Link>
@@ -76,11 +61,6 @@ export function Footer() {
                   Policy Library
                 </Link>
               </li>
-              <li>
-                <Link href="/policy-testing" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Policy Testing
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -88,6 +68,11 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="font-semibold text-sm">Resources</h3>
             <ul className="space-y-2 text-sm">
+              <li>
+                <a href="/specs/" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Specifications
+                </a>
+              </li>
               <li>
                 <Link href="/docs" className="text-muted-foreground hover:text-foreground transition-colors">
                   Documentation

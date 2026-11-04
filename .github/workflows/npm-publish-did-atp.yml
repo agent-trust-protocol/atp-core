@@ -1,0 +1,57 @@
+name: Publish did-atp dependency
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Exact @atpdeveloper/did-atp version to publish'
+        required: true
+        default: '0.1.0'
+        type: string
+      dry_run:
+        description: 'Validate and pack without publishing'
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  did-atp:
+    if: github.ref == 'refs/heads/main' || inputs.dry_run == true
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org/'
+      - name: Check exact version
+        working-directory: packages/did-atp
+        env:
+          EXPECTED_VERSION: ${{ inputs.version }}
+        run: |
+          test "$(node -p "require('./package.json').version")" = "$EXPECTED_VERSION"
+          if npm view "@atpdeveloper/did-atp@$EXPECTED_VERSION" version >/dev/null 2>&1; then
+            echo "Version already exists on npm; refusing to republish"
+            exit 1
+          fi
+      - name: Install toolchain
+        run: npm ci --include=dev
+      - name: Run known-answer tests and build
+        working-directory: packages/did-atp
+        run: npm test
+      - name: Inspect tarball
+        working-directory: packages/did-atp
+        run: npm pack --dry-run
+      - name: Publish public dependency
+        if: inputs.dry_run != true
+        working-directory: packages/did-atp
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance

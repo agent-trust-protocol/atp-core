@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ATP Interop Profiles</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      window.specConfig = {
+        shortName: "atp-interop",
+        title: "ATP Interop Profiles",
+        subtitle: "Bindings of the ATP Trust Plane to MCP, A2A, Local Agents, and Multi-Agent Orchestration",
+      };
+    </script>
+    <script src="../common/biblio.js" class="remove"></script>
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove" defer></script>
+    <script src="../common/respec-config.js" class="remove" defer></script>
+  </head>
+  <body>
+    <section id="abstract">
+      <p>
+        This specification defines <strong>interop profiles</strong>: normative
+        bindings that map concrete agent runtimes and agent protocols onto the
+        Agent Trust Protocol's runtime-agnostic trust plane. Four profiles are
+        defined — <a href="#profile-mcp">MCP</a> (Model Context Protocol tool
+        servers), <a href="#profile-a2a">A2A</a> (agent-to-agent invocation),
+        <a href="#profile-local">Local Agents</a> (in-process runtimes and
+        frameworks), and <a href="#profile-orchestration">Multi-Agent
+        Orchestration</a> (crews, graphs, and stateful sessions). Each profile
+        specifies how the runtime's native operations are expressed as
+        <a href="../atp-capability/">Capability Requests</a>, how
+        <a href="../atp-capability/">Policy Decisions</a> are enforced in that
+        runtime, and what evidence is emitted.
+      </p>
+      <p>
+        The design rule shared by all profiles is:
+        <em>adapters map, profiles decide</em>. An adapter translates
+        runtime-native operations into the standard envelope; it MUST NOT embed
+        policy of its own.
+      </p>
+      <p class="note" title="Companion specifications">
+        Identity: <a href="../did-atp/">did:atp</a>. Trust:
+        <a href="../atp-trust/">ATP Agent Trust</a>. Envelopes:
+        <a href="../atp-capability/">Capability Request &amp; Policy
+        Decision</a>. Vectors: <a href="../atp-conformance/">ATP Conformance
+        &amp; Interoperability</a>.
+      </p>
+    </section>
+
+    <section id="sotd">
+      <p>
+        This document is an <strong>early draft</strong> work product of the
+        Agent Trust Protocol (ATP) Community Group. It is <strong>not</strong> a
+        W3C Standard nor on the W3C Recommendation track. The profiles are
+        seeded from running reference adapters (MCP server wrapper, A2A bridge,
+        and framework integrations); their bindings are <em>provisional</em>.
+      </p>
+    </section>
+
+    <section id="conformance">
+      <p>
+        As well as sections marked as non-normative, all authoring guidelines,
+        diagrams, examples, and notes in this specification are non-normative.
+        Everything else is normative.
+      </p>
+      <p>
+        The key words <em>MUST</em>, <em>MUST NOT</em>, <em>SHOULD</em>, and
+        <em>MAY</em> are to be interpreted as described in BCP 14 [[RFC2119]]
+        [[RFC8174]] when, and only when, they appear in all capitals.
+      </p>
+    </section>
+
+    <section id="common" class="normative">
+      <h2>Requirements Common to All Profiles</h2>
+      <p>A conforming adapter, in any profile, MUST:</p>
+      <ol>
+        <li><strong>Bind identity:</strong> resolve the acting agent to a
+          <a href="../did-atp/">did:atp</a> identifier before any guarded
+          operation; unidentifiable callers are treated as trust level
+          <code>UNKNOWN</code>.</li>
+        <li><strong>Envelope every guarded operation:</strong> express it as a
+          Capability Request with <code>target.kind</code> and
+          <code>target.sensitivity</code> populated per the profile's mapping
+          table.</li>
+        <li><strong>Enforce the decision:</strong> execute only on
+          <code>allow</code> (discharging obligations), rate-limit on
+          <code>throttle</code>, park on <code>require_approval</code>, and
+          block on <code>deny</code>. The adapter MUST NOT reinterpret or
+          soften a decision.</li>
+        <li><strong>Emit evidence:</strong> record the request, decision, and
+          outcome to an audit store conforming to
+          <a href="../atp-conformance/">Audit-Store Integrity</a>, correlated
+          by <code>requestId</code>.</li>
+        <li><strong>Stay policy-free:</strong> all authorization logic lives in
+          profiles and the policy decision point; a hard-coded allow/deny in
+          adapter code is non-conformant.</li>
+      </ol>
+    </section>
+
+    <section id="profile-mcp" class="normative">
+      <h2>Profile: MCP</h2>
+      <p>
+        This profile binds ATP to Model Context Protocol servers and clients.
+        An <dfn>ATP-secured MCP server</dfn> interposes the trust plane between
+        tool discovery/invocation and tool execution.
+      </p>
+      <table class="simple">
+        <thead>
+          <tr><th>MCP operation</th><th>Capability Request mapping</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>tools/list</code></td>
+            <td><code>action: "read"</code>,
+              <code>target: {kind: "resource", type: "mcp-tool-catalog"}</code>.
+              The server SHOULD filter the returned catalog to tools the caller
+              could be allowed to invoke.</td></tr>
+          <tr><td><code>tools/call</code></td>
+            <td><code>action: "execute"</code>,
+              <code>target: {kind: "tool", id: &lt;tool name&gt;,
+              type: &lt;tool category&gt;}</code>, with tool arguments (or their
+              digest) as <code>arguments</code>.</td></tr>
+          <tr><td><code>resources/read</code></td>
+            <td><code>action: "read"</code>,
+              <code>target: {kind: "resource", id: &lt;uri&gt;}</code>.</td></tr>
+        </tbody>
+      </table>
+      <p>
+        The caller's DID MUST be established at session setup (e.g. a signed
+        handshake carrying the client's did:atp identifier) and pinned for the
+        session's lifetime. A <code>deny</code> MUST surface as an MCP error
+        result — not a silent empty result — with the decision's
+        <code>reason</code> in the error message and no partial tool output.
+      </p>
+    </section>
+
+    <section id="profile-a2a" class="normative">
+      <h2>Profile: A2A</h2>
+      <p>
+        This profile binds ATP to agent-to-agent invocation: one agent
+        (the caller) requesting work from another (the callee), directly or via
+        a discovery/bridge layer.
+      </p>
+      <ul>
+        <li>An invocation MUST be enveloped as
+          <code>action: "execute"</code>,
+          <code>target: {kind: "agent", id: &lt;callee DID&gt;,
+          type: "a2a-invocation"}</code>.</li>
+        <li><strong>Both sides evaluate.</strong> The caller's runtime evaluates
+          whether the caller may delegate to the callee; the callee's runtime
+          independently evaluates whether to accept work from the caller.
+          Either side's <code>deny</code> blocks the invocation.</li>
+        <li>Trust is presented, not asserted: the caller SHOULD present an
+          <a href="../atp-trust/">ATP Trust Credential</a>; the callee MUST
+          verify it before using its trust level.</li>
+        <li>Message payloads exchanged after an <code>allow</code> SHOULD be
+          signed with the sender's did:atp keys; discovery listings SHOULD carry
+          each agent's DID so trust can be checked before first contact.</li>
+        <li>Delegation depth is part of context: a request made <em>on behalf
+          of</em> another agent MUST identify the originating subject so the
+          PDP can bound transitive delegation.</li>
+      </ul>
+    </section>
+
+    <section id="profile-local" class="normative">
+      <h2>Profile: Local Agents</h2>
+      <p>
+        This profile binds ATP to in-process runtimes — agent frameworks and
+        SDKs where tools are plain functions (e.g. LangChain-style tools,
+        OpenClaw/NemoClaw skills, or custom runtimes). The binding is a
+        <dfn>tool wrapper</dfn>: a higher-order function that envelopes each
+        call of the wrapped tool.
+      </p>
+      <ul>
+        <li>Registration: the runtime registers each agent with the trust plane
+          at startup, obtaining a did:atp identifier bound to the runtime
+          instance (<em>runtime binding</em>).</li>
+        <li>Every wrapped-tool invocation MUST produce a Capability Request
+          with <code>target.kind: "tool"</code> and a profile-declared
+          <code>type</code> (e.g. <code>shell</code>, <code>http</code>,
+          <code>filesystem</code>, <code>database</code>,
+          <code>messaging</code>) so policies can be written against action
+          classes rather than tool names.</li>
+        <li>Wrapping MUST be fail-closed: if the trust plane is unreachable,
+          the wrapper MUST deny (or queue for approval), never fall through to
+          raw execution.</li>
+        <li>Batch wrapping (securing a whole toolset at once) MUST be
+          semantically identical to wrapping each tool individually.</li>
+      </ul>
+    </section>
+
+    <section id="profile-orchestration" class="normative">
+      <h2>Profile: Multi-Agent Orchestration</h2>
+      <p>
+        This profile binds ATP to orchestrated collections of agents — crews,
+        graphs, and stateful sessions — where <em>which</em> actions are
+        permitted depends on <em>where</em> the workflow currently is.
+      </p>
+      <ul>
+        <li><strong>Session states:</strong> an orchestration session moves
+          through declared lifecycle states; the reference state machine is
+          <code>planning → executing → communicating → completed</code>.
+          The current state MUST be supplied to the PDP as
+          <code>context.sessionState</code>, and state transitions MUST
+          themselves be evidenced events.</li>
+        <li><strong>State policies:</strong> a state policy maps each state to
+          the action classes permitted in it (e.g. no tool execution during
+          <code>planning</code>; messaging only during
+          <code>communicating</code>; read-only during
+          <code>completed</code>). State policies are profile data consumed by
+          the PDP — never hard-coded in the orchestrator.</li>
+        <li><strong>Topology validation:</strong> before a crew or graph runs,
+          the orchestrator SHOULD validate the agent topology (who may hand off
+          to whom) against policy, so disallowed edges fail at plan time rather
+          than mid-run.</li>
+        <li><strong>Per-member identity:</strong> every member agent holds its
+          own DID and trust level; a crew MUST NOT act under a single shared
+          identity.</li>
+      </ul>
+    </section>
+
+    <section id="registry" class="normative">
+      <h2>Profile Registry and Extensions</h2>
+      <p>
+        New runtimes are supported by authoring a new profile, not by extending
+        adapters ad hoc. A registered profile MUST provide: (1) a mapping table
+        from runtime-native operations to Capability Request fields, (2) the
+        enforcement semantics for each decision kind in that runtime, and
+        (3) the identity-binding mechanism. Profiles MAY register additional
+        <code>target.type</code> values and scope strings per
+        <a href="../atp-capability/">the scope vocabulary rules</a>.
+      </p>
+      <p class="ednote" title="Open issue: profile registry venue">
+        Whether profile registration lives in this document, a CG registry
+        page, or an IANA-style registry is open for discussion.
+      </p>
+    </section>
+
+    <section id="security" class="normative">
+      <h2>Security &amp; Privacy Considerations</h2>
+      <p>
+        Adapters are the trust plane's attack surface: a bypassed wrapper is a
+        bypassed protocol. Runtimes SHOULD make the wrapped path the only path
+        to tool execution. In A2A, mutual evaluation prevents a compromised
+        caller from relying on the callee's laxity (and vice versa). In
+        orchestration, per-member identity keeps audit evidence attributable
+        when one member of a crew misbehaves.
+      </p>
+    </section>
+  </body>
+</html>
