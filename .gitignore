@@ -231,6 +231,9 @@ packages/create-atp-agent/.create-atp-agent/
 *-security/
 security-*/
 agent-*/
+# First-party Python umbrella package; keep it tracked despite agent-*/
+!packages/agent-trust-protocol-python/
+!packages/agent-trust-protocol-python/**
 .*.agent.md
 .env*.local
 
@@ -242,3 +245,9 @@ w3c-cg-upload/
 
 # Monitoring native storage test build
 packages/monitoring-service/.test-dist/
+
+# Python build and cache artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/

@@ -20,7 +20,9 @@
     "test": "npm run build && node --test test/*.test.mjs",
     "prepack": "npm run build",
     "lint": "eslint src --fix",
-    "prepublishOnly": "npm test"
+    "prepublishOnly": "npm test",
+    "conformance": "node scripts/gen-conformance.mjs",
+    "conformance:check": "node scripts/gen-conformance.mjs --check"
   },
   "keywords": [
     "atp",
