@@ -1,6 +1,6 @@
 {
   "name": "atp-sdk",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "description": "Open TypeScript SDK for Agent Trust Protocol: agent identity, credential utilities, trust evidence, and security profile decisions.",
   "main": "dist/index.js",
   "module": "dist/index.js",

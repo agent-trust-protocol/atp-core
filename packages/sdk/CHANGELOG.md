@@ -5,7 +5,7 @@ All notable changes to the ATP™ SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [5.0.0] - Unreleased
 
 ### Changed (BREAKING)
 
@@ -21,6 +21,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   quantum-safe verification are required, or `minTrustLevel` is anything other than `0`.
   Its `ALLOW` is a diagnostic-filter result only, never an authorization grant.
 - See `docs/MONITORING-SECURITY-BOUNDARY.md` in the repository root.
+
+### Removed (BREAKING)
+
+- `Agent.mutualAuth()`, deprecated since 3.0. Its `response` answered a
+  challenge the peer never issued, so it could not be verified. Use
+  `requestAuth` / `respondToChallenge` / `verifyAuthResponse` in both directions.
+- `IdentityClient.resolveDID()`, which returned the registry's unverified record.
+  Use `DidAtpResolver.resolve()` for did:atp resolution, or `getRegistryRecord()`
+  for the registry record.
+- `IdentityClient.rotateKeys()`. did:atp rotation changes the DID; use
+  `DidAtpDocument.rotate()`.
+
+See `docs/MIGRATION.md` (v4.x → v5.0).
 
 ## [4.0.0] - 2026-10-31
 

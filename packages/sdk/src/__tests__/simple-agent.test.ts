@@ -803,3 +803,12 @@ describe('Agent', () => {
     });
   });
 });
+
+describe('Agent 5.0 API removals', () => {
+  it('no longer exposes mutualAuth(); use requestAuth / respondToChallenge / verifyAuthResponse', () => {
+    expect((Agent.prototype as unknown as Record<string, unknown>).mutualAuth).toBeUndefined();
+    expect(typeof Agent.prototype.requestAuth).toBe('function');
+    expect(typeof Agent.prototype.respondToChallenge).toBe('function');
+    expect(typeof Agent.prototype.verifyAuthResponse).toBe('function');
+  });
+});

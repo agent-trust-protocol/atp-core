@@ -80,8 +80,8 @@ describe('IdentityClient', () => {
     });
   });
 
-  describe('resolveDID', () => {
-    it('should resolve a DID', async () => {
+  describe('getRegistryRecord', () => {
+    it('should fetch the registry record for a DID', async () => {
       const mockAgent = {
         did: 'did:atp:test123',
         trustLevel: 'VERIFIED',
@@ -91,7 +91,7 @@ describe('IdentityClient', () => {
         data: { success: true, data: mockAgent }
       });
 
-      const result = await client.resolveDID('did:atp:test123');
+      const result = await client.getRegistryRecord('did:atp:test123');
 
       expect(mockAxiosInstance.request).toHaveBeenCalledWith({
         method: 'GET',
@@ -104,13 +104,18 @@ describe('IdentityClient', () => {
     it('should properly encode special characters in DID', async () => {
       mockAxiosInstance.request.mockResolvedValue({ data: { success: true } });
 
-      await client.resolveDID('did:atp:special/chars:here');
+      await client.getRegistryRecord('did:atp:special/chars:here');
 
       expect(mockAxiosInstance.request).toHaveBeenCalledWith(
         expect.objectContaining({
           url: '/identity/did%3Aatp%3Aspecial%2Fchars%3Ahere'
         })
       );
+    });
+
+    it('no longer exposes the removed resolveDID / rotateKeys methods', () => {
+      expect((client as unknown as Record<string, unknown>).resolveDID).toBeUndefined();
+      expect((client as unknown as Record<string, unknown>).rotateKeys).toBeUndefined();
     });
   });
 
@@ -195,23 +200,6 @@ describe('IdentityClient', () => {
         data: undefined
       });
       expect(result.data).toEqual(mockTrustLevel);
-    });
-  });
-
-  describe('rotateKeys', () => {
-    it('should rotate keys for a DID', async () => {
-      const newKey = 'new-public-key';
-      mockAxiosInstance.request.mockResolvedValue({
-        data: { success: true, data: { id: 'did:atp:test123' } }
-      });
-
-      await client.rotateKeys('did:atp:test123', newKey);
-
-      expect(mockAxiosInstance.request).toHaveBeenCalledWith({
-        method: 'POST',
-        url: '/identity/did%3Aatp%3Atest123/rotate-keys',
-        data: { newPublicKey: newKey }
-      });
     });
   });
 
