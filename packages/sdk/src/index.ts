@@ -237,7 +237,7 @@ export type {
 } from './profiles/index.js';
 
 // Version information
-export const VERSION = '4.0.0';
+export const VERSION = '5.0.0';
 export const PROTOCOL_VERSION = '1.0';
 
 // Constants

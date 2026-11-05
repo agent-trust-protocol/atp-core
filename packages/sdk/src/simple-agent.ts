@@ -938,54 +938,6 @@ export class Agent extends EventEmitter {
   }
 
   /**
-   * Start mutual authentication with another agent.
-   *
-   * Creates the challenge for the peer and this agent's response to the peer's
-   * requirements. Nothing is verified here: send `challenge` and `response` to
-   * the peer, then call `verifyAuthResponse` on the peer's response. Both result
-   * fields stay unverified until those verifications actually run.
-   *
-   * @deprecated The returned `response` answers a challenge the peer never
-   * issued, so the peer cannot verify it. Run two explicit exchanges instead:
-   * each agent calls `requestAuth`, the other `respondToChallenge`, and the
-   * issuer `verifyAuthResponse`.
-   *
-   * @example
-   * ```typescript
-   * const { challenge, response } = await agentA.mutualAuth(
-   *   agentB.getDID(),
-   *   [{ type: ZKProofType.IDENTITY, params: {} }], // what A requires from B
-   *   [{ type: ZKProofType.IDENTITY, params: {} }]  // what B requires from A
-   * );
-   * const bResponse = await agentB.respondToChallenge(challenge);
-   * const aVerifiedB = await agentA.verifyAuthResponse(bResponse);
-   * ```
-   */
-  async mutualAuth(
-    targetDid: string,
-    myRequirements: ZKPRequirement[],
-    theirRequirements: ZKPRequirement[]
-  ): Promise<{
-    challenge: ZKPChallenge;
-    response: ZKPAuthRequest;
-    iVerified: ZKPAuthResult;
-    theyVerified: ZKPAuthResult;
-  }> {
-    if (!this.initialized || !this.did) {
-      throw new Error('Agent not initialized');
-    }
-
-    const challenge = await this.requestAuth(targetDid, myRequirements);
-    const challengeFromThem = createChallenge(targetDid, this.did, theirRequirements);
-    const response = await this.respondToChallenge(challengeFromThem);
-
-    // Neither side has verified anything yet; never report optimistic success.
-    const pending = (proverDid: string): ZKPAuthResult =>
-      ({ verified: false, proverDid, verifiedProofs: [], trustEstablished: false });
-    return { challenge, response, iVerified: pending(targetDid), theyVerified: pending(this.did) };
-  }
-
-  /**
    * Generate a behavior proof to demonstrate compliance
    * Proves behavioral integrity without revealing interaction history
    *

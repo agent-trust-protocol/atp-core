@@ -5,6 +5,36 @@ All notable changes to the ATP™ SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.0] - Unreleased
+
+### Changed (BREAKING)
+
+- **`UniversalMonitor` / `SecurityEnforcer` fail closed.** The former event "signature"
+  was an unkeyed SHA-256 digest that anyone could recompute, and it was accepted as
+  proof. It is removed. With `enableSigning: true` (still the default) every event is
+  delivered to the error channel with `Monitoring event signing is not implemented`; use
+  `enableSigning: false` for unsigned diagnostics.
+- Monitoring events are unscored: the protocol-name defaults (MCP 70, Swarm/ADK 65,
+  A2A 60, other 50) are gone, and a sender-supplied `trustScore` is removed rather than
+  passed through.
+- `SecurityEnforcer.enforcePolicy` returns `DENY` whenever signatures, permissions or
+  quantum-safe verification are required, or `minTrustLevel` is anything other than `0`.
+  Its `ALLOW` is a diagnostic-filter result only, never an authorization grant.
+- See `docs/MONITORING-SECURITY-BOUNDARY.md` in the repository root.
+
+### Removed (BREAKING)
+
+- `Agent.mutualAuth()`, deprecated since 3.0. Its `response` answered a
+  challenge the peer never issued, so it could not be verified. Use
+  `requestAuth` / `respondToChallenge` / `verifyAuthResponse` in both directions.
+- `IdentityClient.resolveDID()`, which returned the registry's unverified record.
+  Use `DidAtpResolver.resolve()` for did:atp resolution, or `getRegistryRecord()`
+  for the registry record.
+- `IdentityClient.rotateKeys()`. did:atp rotation changes the DID; use
+  `DidAtpDocument.rotate()`.
+
+See `docs/MIGRATION.md` (v4.x → v5.0).
+
 ## [4.0.0] - 2026-10-31
 
 Requires `atp-profiles@^3.0.0`.

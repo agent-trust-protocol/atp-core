@@ -2,6 +2,32 @@
 
 This guide documents notable changes and safe upgrade steps.
 
+## v4.x → v5.0
+
+- **`UniversalMonitor` / `SecurityEnforcer` fail closed.** The former event
+  "signature" was an unkeyed SHA-256 digest that anyone could recompute; it is
+  gone. With `enableSigning: true` (still the default) every event goes to the
+  error channel with `Monitoring event signing is not implemented`.
+  - Action: for unsigned diagnostics set `enableSigning: false`, and do not
+    treat monitor events as signed or authenticated.
+- **Monitoring events are unscored.** Protocol-name trust defaults are gone and
+  a sender-supplied `trustScore` is dropped.
+  - Action: compute trust from verified evidence outside the monitor.
+- **`SecurityEnforcer.enforcePolicy` denies** whenever signatures, permissions or
+  quantum-safe verification are required, or `minTrustLevel` is not `0`. Its
+  `ALLOW` is a diagnostic-filter result, never an authorization grant.
+  - Action: authorize with `evaluateActionWithProfile` and your own verifiers.
+- **`Agent.mutualAuth()` is removed** (deprecated since 3.0).
+  - Action: run the two explicit exchanges shown under v2.x → v3.0 below.
+- **`IdentityClient.resolveDID()` is removed.** It returned the registry's
+  unverified record, not DID resolution.
+  - Action: use `DidAtpResolver.resolve()` for did:atp resolution, or
+    `getRegistryRecord()` if you only want the registry's record.
+- **`IdentityClient.rotateKeys()` is removed.** did:atp key rotation changes the
+  DID, so it cannot be done in place through the registry.
+  - Action: use `DidAtpDocument.rotate()` to produce the new DID and its
+    dual-signed `did.json`, then register the new DID.
+
 ## v3.x → v4.0
 
 - **Node.js 20 or newer is required.** Identity and key generation already
@@ -28,7 +54,8 @@ This guide documents notable changes and safe upgrade steps.
 - **No profile means deny.** `ATPClient.evaluateActionWithProfile()` returns
   `deny` when no profile is configured (it returned `allow`).
   - Action: pass `profileId` in the config or call `setProfile()` first.
-- **`mutualAuth()` results start unverified** and the method is deprecated.
+- **`mutualAuth()` results start unverified** and the method is deprecated
+  (removed in 5.0).
   - Action: replace with two exchanges:
     ```js
     const forBob = await alice.requestAuth(bob.getDID(), reqs);
