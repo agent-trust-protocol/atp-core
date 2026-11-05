@@ -19,7 +19,7 @@ updates:
       production-dependencies:
         dependency-type: "production"
 
-  # Keep CI/release actions patched (pin-by-SHA is still recommended).
+  # Keep CI/release actions patched (immutable SHA pins are required).
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

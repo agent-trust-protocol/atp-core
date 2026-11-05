@@ -15,17 +15,8 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
       "@atpdeveloper/did-atp": [
         "./packages/did-atp/src"
       ],
@@ -35,18 +26,16 @@
     }
   },
   "include": [
-    "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
+    "**/*.tsx"
   ],
   "exclude": [
     "node_modules",
     "**/*.old",
     "**/*.old/**",
     "packages",
+    "archive",
     "workflow-engine",
-    "src/workflow-engine/**",
     "atp-core",
     "examples",
     "scripts",

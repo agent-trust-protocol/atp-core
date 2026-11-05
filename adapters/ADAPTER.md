@@ -1,8 +1,8 @@
 # ATP Adapter Specification
 
 An ATP adapter bridges a third-party agent framework to the ATP security layer,
-adding quantum-safe identity, trust scoring, and audit trails without changing
-the underlying framework's code.
+mapping explicitly verified identity, policy decisions and audit services to protected
+execution boundaries. Its guarantees depend on the implementation and enforcement tests.
 
 ## Directory Structure
 
@@ -48,22 +48,19 @@ interface ATPAgent {
 }
 ```
 
-## Available Adapters
+## Adapter status
 
-| Framework | Package | Status |
-|-----------|---------|--------|
-| OpenClaw | `packages/openclaw-atp` | Stable (v1.1.0) |
-| LangChain | `packages/sdk/langchain` | Stable |
-| MCP | `packages/sdk/mcp` | Stable |
-| A2A | `adapters/a2a` | Planned |
-| AutoGPT | `adapters/autogpt` | Planned |
-| CrewAI | `adapters/crewai` | Planned |
-| ADK (Google) | `adapters/adk` | Planned |
+See the [verified source inventory and roadmap](../docs/PROTOCOL-SUPPORT.md).
+It explicitly includes **ANP (Agent Network Protocol)** as a planned adaptation.
+The existing ANP workspace is a planning document, not an executable adapter.
+
+MCP monitoring is experimental/synthetic; OpenClaw is an optional legacy example.
+No custom wrapper automatically secures every tool or establishes protocol conformance.
 
 ## Implementation Guide
 
 1. Use the existing SDK methods from `atp-sdk` — do not duplicate trust or crypto logic
-2. Follow the pattern in `packages/openclaw-atp/src/claw-api.ts`
+2. Follow the pattern in `archive/openclaw-atp/src/claw-api.ts` (deprecated, reference only)
 3. Your adapter must:
    - Check agent identity via the SDK
    - Evaluate the relevant policy before executing sensitive actions
@@ -96,13 +93,13 @@ export async function atpWrap(agent: any, options: ATPAdapterOptions) {
 
 1. Fork the repo
 2. Copy this template to `adapters/your-framework/`
-3. Implement `atpWrap()` following the pattern in `packages/openclaw-atp/`
+3. Implement `atpWrap()` following the pattern in `archive/openclaw-atp/` (deprecated, reference only)
 4. Add tests in `adapters/your-framework/tests/`
 5. Open a PR using the template in `.github/pull_request_template.md`
 
 ## Resources
 
-- [OpenClaw adapter source](../packages/openclaw-atp/)
+- [OpenClaw adapter source (deprecated)](../archive/openclaw-atp/)
 - [SDK API reference](../packages/sdk/README.md)
-- [Quick Start](../QUICK_START.md)
+- [Getting started](../docs/getting-started.md)
 - [Discord](https://discord.gg/agenttrustprotocol)

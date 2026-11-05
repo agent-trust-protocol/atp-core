@@ -1,6 +1,13 @@
 # ATP™ SDK API Reference
 
+> **Written for the v1 API.** Some identity and crypto calls here (`DIDUtils`,
+> `CryptoUtils.generateKeyPair`, `signData`) were removed in 2.0. See
+> [MIGRATION.md](../MIGRATION.md#v2x--v30) for the current equivalents.
+
+
 Complete API reference for the Agent Trust Protocol™ SDK.
+
+> **Historical API notes:** This reference describes an earlier service-client design and has not been verified against the current `atp-sdk` export surface. For supported usage, start with the [current SDK README](../../README.md). Local service examples are not a public hosted ATP Core API.
 
 ## Table of Contents
 

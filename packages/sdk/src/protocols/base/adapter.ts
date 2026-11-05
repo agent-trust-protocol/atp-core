@@ -54,7 +54,7 @@ export interface ProtocolAdapter {
 
   /**
    * Create audit entry for an event
-   * Records event in ATP's tamper-proof audit trail
+   * Requires an implementation backed by a persistent audit service
    */
   audit(event: AgentEvent): Promise<ProtocolAuditEntry>;
 
@@ -131,60 +131,38 @@ export abstract class BaseProtocolAdapter implements ProtocolAdapter {
     this.ready = true;
   }
 
-  async secure(message: Message): Promise<SecuredMessage> {
-    if (!this.config) {
+  async secure(_message: Message): Promise<SecuredMessage> {
+    if (!this.config || !this.ready) {
       throw new Error('Adapter not initialized');
     }
 
-    // Default implementation - can be overridden by specific adapters
-    return {
-      ...message,
-      signature: '', // To be implemented with actual crypto
-      trustLevel: 0,
-      timestamp: message.timestamp || new Date().toISOString()
-    } as SecuredMessage;
+    throw new Error('Protocol adapter signing is not implemented');
   }
 
-  async verify(message: SecuredMessage): Promise<VerificationResult> {
-    if (!this.config) {
-      throw new Error('Adapter not initialized');
-    }
-
-    // Default implementation - can be overridden by specific adapters
+  async verify(_message: SecuredMessage): Promise<VerificationResult> {
+    if (!this.config || !this.ready) throw new Error('Adapter not initialized');
+    // Incoming claims are not verified identity or trust evidence.
     return {
-      verified: true,
-      trustScore: message.trustLevel,
+      verified: false,
+      trustScore: 0,
       verifiedAt: new Date().toISOString(),
       details: {
-        signatureValid: true,
-        senderVerified: true,
-        trustLevel: 'BASIC'
+        signatureValid: false,
+        senderVerified: false,
+        trustLevel: 'UNVERIFIED',
+        issues: ['Protocol adapter verification is not implemented']
       }
     };
   }
 
-  async audit(event: AgentEvent): Promise<ProtocolAuditEntry> {
-    if (!this.config) {
-      throw new Error('Adapter not initialized');
-    }
-
-    return {
-      id: event.id,
-      timestamp: event.timestamp,
-      source: event.source.agentDid,
-      action: event.type,
-      resource: event.protocol,
-      protocol: event.protocol,
-      operation: event.type,
-      agentDid: event.source.agentDid,
-      result: 'success',
-      hash: '', // To be implemented with actual crypto
-      details: event.data
-    };
+  async audit(_event: AgentEvent): Promise<ProtocolAuditEntry> {
+    if (!this.config || !this.ready) throw new Error('Adapter not initialized');
+    throw new Error('Protocol adapter audit persistence is not implemented');
   }
 
   async cleanup(): Promise<void> {
     this.ready = false;
+    this.config = undefined;
   }
 
   isReady(): boolean {
@@ -192,7 +170,7 @@ export abstract class BaseProtocolAdapter implements ProtocolAdapter {
   }
 
   getConfig(): ProtocolAdapterConfig {
-    if (!this.config) {
+    if (!this.config || !this.ready) {
       throw new Error('Adapter not initialized');
     }
     return this.config;

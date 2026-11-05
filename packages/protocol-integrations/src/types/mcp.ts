@@ -6,7 +6,7 @@ import { z } from 'zod';
 export const MCPRequestSchema = z.object({
   jsonrpc: z.literal('2.0'),
   method: z.string(),
-  params: z.record(z.any()).optional(),
+  params: z.record(z.string(), z.any()).optional(),
   id: z.union([z.string(), z.number()]),
 });
 
@@ -24,15 +24,15 @@ export const MCPResponseSchema = z.object({
 export const MCPNotificationSchema = z.object({
   jsonrpc: z.literal('2.0'),
   method: z.string(),
-  params: z.record(z.any()).optional(),
+  params: z.record(z.string(), z.any()).optional(),
 });
 
 // ATP™ Enhanced MCP Tool Definition
 export const ATPMCPToolSchema = z.object({
   name: z.string(),
   description: z.string(),
-  inputSchema: z.record(z.any()),
-  outputSchema: z.record(z.any()).optional(),
+  inputSchema: z.record(z.string(), z.any()),
+  outputSchema: z.record(z.string(), z.any()).optional(),
   // ATP™ Security Extensions
   trustLevelRequired: z.string().optional(),
   capabilities: z.array(z.string()).optional(),

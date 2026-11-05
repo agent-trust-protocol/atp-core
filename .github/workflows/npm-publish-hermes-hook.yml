@@ -1,0 +1,76 @@
+name: Publish atp-hermes-hook
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact atp-hermes-hook version to release
+        required: true
+        default: '0.1.0'
+        type: string
+      dry_run:
+        description: Validate and pack without publishing
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  hermes-hook:
+    if: github.ref == 'refs/heads/main' || inputs.dry_run == true
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org/'
+      - name: Require npm 11.5.1+ (trusted publishing)
+        run: |
+          npm --version
+          node -e "const v=process.argv[1].split('.').map(Number); const ok=v[0]>11||(v[0]===11&&(v[1]>5||(v[1]===5&&v[2]>=1))); if(!ok){console.error('npm '+process.argv[1]+' cannot use npm trusted publishing; need 11.5.1 or newer');process.exit(1)}" "$(npm --version)"
+      - name: Check exact versions
+        working-directory: packages/hermes-hook
+        env:
+          EXPECTED_VERSION: ${{ inputs.version }}
+        run: |
+          test "$(node -p "require('./package.json').version")" = "$EXPECTED_VERSION"
+          test "$(node -p "require('./package.json').dependencies['atp-profiles']")" = "^3.0.0"
+          node -e "const p=require('./package.json'); if (!p.repository?.url?.includes('agent-trust-protocol/atp-core') || p.repository?.directory !== 'packages/hermes-hook' || Object.values(p.bin).some(v=>v.startsWith('./'))) process.exit(1)"
+          npm view atp-profiles@3.0.0 version
+          if npm view "atp-hermes-hook@$EXPECTED_VERSION" version >/dev/null 2>&1; then
+            echo "Version already published; refusing to republish"
+            exit 1
+          fi
+      - name: Install dependencies
+        working-directory: packages/hermes-hook
+        run: npm ci --ignore-scripts
+      - name: Test
+        working-directory: packages/hermes-hook
+        run: npm test
+      - name: Inspect package
+        working-directory: packages/hermes-hook
+        run: npm pack --dry-run
+      - name: Smoke test the packed tarball
+        working-directory: packages/hermes-hook
+        run: |
+          npm pack --pack-destination "$RUNNER_TEMP"
+          consumer="$RUNNER_TEMP/consumer" && mkdir -p "$consumer" && cd "$consumer"
+          npm init -y >/dev/null
+          npm install --ignore-scripts "$RUNNER_TEMP"/atp-hermes-hook-*.tgz
+          printf '{}' > atp-hermes.json
+          ./node_modules/.bin/atp-hermes-hook --check --config atp-hermes.json
+          set +e
+          printf '{"hook_event_name":"pre_tool_call","tool_name":"terminal","tool_input":{"command":"id"}}' \
+            | ./node_modules/.bin/atp-hermes-hook --config atp-hermes.json
+          status=$?
+          set -e
+          test "$status" = 2
+      - name: Publish atp-hermes-hook
+        if: inputs.dry_run != true
+        working-directory: packages/hermes-hook
+        # Authenticates with GitHub's OIDC token via npm trusted publishing; no stored npm token.
+        run: npm publish --access public --provenance

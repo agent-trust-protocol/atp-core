@@ -100,7 +100,7 @@ You `MUST` always use this tool when:
 
 This repo implements **Agent Trust Protocol (ATP)**, a quantum-safe identity, trust, and policy layer for AI agents. ATP is consumed via the `atp-sdk` TypeScript package and is used to secure agents running on platforms like OpenClaw/NemoClaw, Motleycrew, LangChain, and custom runtimes.
 
-The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `packages/`. Scripts and utilities live in `scripts/`.
+The public website lives in the separate `atp-website` repository; this repo no longer contains a web app. Backend logic lives in `packages/`. Scripts and utilities live in `scripts/`.
 
 ---
 
@@ -123,7 +123,7 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
 - `packages/audit-logger`: Blockchain-anchored immutable audit trail.
 - `packages/permission-service`: RBAC with hierarchical role inheritance and multi-tenant support.
 - `packages/monitoring-service`: Real-time metrics and performance monitoring.
-- `packages/openclaw-atp`: Integration adapter for OpenClaw/NemoClaw agents.
+- `archive/openclaw-atp`: **Deprecated** OpenClaw/NemoClaw adapter (`@atpdevelopment/openclaw-atp`), archived and no longer built, tested or published. Kept for reference only; do not extend it.
   - `src/agent/` — DID registration, trust scoring (`registerAgentWithAtp`, `updateAgentTrust`)
   - `src/tools/` — `ATPToolWrapper`, `secureTools` (per-call auth + audit + rate-limit)
   - `src/session/` — State-machine policy enforcement (`enforceAtpPoliciesForClawSession`, `defaultClawStatePolicy`); states: planning | executing | communicating | completed
@@ -139,9 +139,6 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
 - `packages/protocol-integrations`: Adapters for other runtimes (LangChain, Motleycrew, etc.).
 - `packages/rpc-gateway`: RPC layer for inter-service communication.
 - `packages/atp-cloud`: Cloud deployment and managed service utilities.
-- `src/app/`: Next.js pages — marketing site, playground, policy editor, monitoring dashboard, docs.
-- `src/app/onboard/agent/`: Agent onboarding wizard — multi-step form (runtime, name, profile, confirm) that registers an agent with ATP and assigns a security profile.
-- `src/app/integrations/`: Per-integration pages (`openclaw/` main page and `openclaw/agents/` live agent dashboard).
 - `scripts/`: Server scripts, deployment utilities, dev helpers.
 - `scripts/tests/`: End-to-end and integration test scripts.
 
@@ -165,12 +162,12 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
 
 ### Adding a new agent runtime adapter
 
-1. Create a new package under `packages/<runtime>-atp/`.
+1. Create a new package under `packages/<runtime>-atp/`. (The archived OpenClaw adapter below is a reference for the export shape only.)
 2. Add `atp-sdk` and the target runtime's types as dependencies.
 3. Export at minimum:
-   - `register<Runtime>AgentWithAtp(config)` → see `registerClawWithAtp` in `packages/openclaw-atp/src/claw-api.ts`
-   - `wrap<Runtime>ToolWithAtp(tool, options)` → see `wrapSkillWithAtp` in `packages/openclaw-atp/src/claw-api.ts`
-   - `enforce<Runtime>SessionPolicies(context)` → see `enforceAtpPoliciesForClawSession` in `packages/openclaw-atp/src/session/enforce.ts`
+   - `register<Runtime>AgentWithAtp(config)` → see `registerClawWithAtp` in `archive/openclaw-atp/src/claw-api.ts`
+   - `wrap<Runtime>ToolWithAtp(tool, options)` → see `wrapSkillWithAtp` in `archive/openclaw-atp/src/claw-api.ts`
+   - `enforce<Runtime>SessionPolicies(context)` → see `enforceAtpPoliciesForClawSession` in `archive/openclaw-atp/src/session/enforce.ts`
 4. Do not duplicate trust or crypto logic — call existing SDK methods.
 
 ### Adding a new security profile
@@ -179,22 +176,20 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
 2. Register it in `packages/atp-profiles/src/index.ts` by adding to `BUILTIN_PROFILES` and re-exporting.
 3. Profiles must be runtime-agnostic. Adapters do the mapping from runtime → actionType → policy.
 4. Do not hardcode policies in adapters; always go through profiles and `evaluateActionWithProfile`.
-5. Optionally expose the profile in the onboarding wizard (`src/app/onboard/agent/client-page.tsx`) and the CLI (`packages/create-atp-agent/src/index.ts`).
+5. Optionally expose the profile in the CLI (`packages/create-atp-agent/src/index.ts`).
 
 ### Adding a new policy preset
 
 1. Add the preset definition in `packages/sdk/src/policies/`.
 2. Register it in the policy evaluation engine.
-3. Optionally expose it in the policy editor UI at `src/app/policy-editor/`.
 
 ### Adding a new integration page to the site
 
-1. Create `src/app/integrations/<name>/page.tsx`.
-2. Follow the structure of `src/app/integrations/openclaw/page.tsx` — hero, features, code samples, use cases, "Why ATP + X" differentiator section, resources.
+Integration pages live in the separate `atp-website` repository, not in atp-core.
 
 ---
 
-## packages/openclaw-atp — Public API
+## archive/openclaw-atp — Public API (deprecated, reference only)
 
 | Export | File | Purpose |
 |---|---|---|
@@ -212,7 +207,7 @@ The marketing/docs site is a Next.js app in `src/`. Backend logic lives in `pack
 - `communicating`: messaging allowed; external-send requires approval
 - `completed`: read-only-logs only; shell/fs/http restricted
 
-To run the unit tests: `cd packages/openclaw-atp && npm test` — covers registration, tool wrapping, and all four session states.
+The package is archived and excluded from CI. To run its old unit tests locally: `cd archive/openclaw-atp && npm test` — covers registration, tool wrapping, and all four session states.
 
 ---
 
@@ -263,9 +258,8 @@ To run the unit tests: `cd packages/openclaw-atp && npm test` — covers registr
 - `README.md` — SDK quick start and integration examples.
 - `SECURITY.md` — Security model and responsible disclosure.
 - `.cursor/rules/` — Additional Cursor-specific coding rules; read relevant files before making changes.
-- `packages/openclaw-atp/README.md` — Full OpenClaw integration guide, quick-start, and all config options.
-- `packages/openclaw-atp/INTEGRATION-GUIDE.md` — Step-by-step setup for production deployments.
-- `packages/openclaw-atp/examples/` — Runnable examples: `finance-workflow.ts` (trading crew), `stateful-session.ts` (state machine walk-through).
+- `archive/openclaw-atp/` — Deprecated OpenClaw adapter, kept for reference only.
+- `examples/hermes-hook/` — Current reference for enforcing ATP decisions at an agent tool boundary.
 
 $END$
 

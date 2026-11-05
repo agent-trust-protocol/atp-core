@@ -1,6 +1,6 @@
 {
   "name": "atp-sdk",
-  "version": "2.2.1",
+  "version": "4.0.0",
   "description": "Open TypeScript SDK for Agent Trust Protocol: agent identity, credential utilities, trust evidence, and security profile decisions.",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -27,8 +27,9 @@
     "format:check": "prettier --check \"src/**/*.ts\"",
     "clean": "rm -rf dist coverage",
     "docs": "typedoc src/index.ts --out docs/api-generated",
-    "examples": "node examples/index.js",
-    "prepublishOnly": "node scripts/check-publishable.mjs && npm run test && npm run build",
+    "examples": "node scripts/run-offline-examples.mjs",
+    "prepack": "npm run build",
+    "prepublishOnly": "node scripts/check-publishable.mjs && npm run test && npm run build && npm run examples",
     "release": "npm run prepublishOnly && npm publish",
     "release:beta": "npm run prepublishOnly && npm publish --tag beta",
     "release:alpha": "npm run prepublishOnly && npm publish --tag alpha"
@@ -45,7 +46,7 @@
     "policy-decisions",
     "post-quantum"
   ],
-  "author": "ATP™ Development Team",
+  "author": "ATP\u2122 Development Team",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -57,7 +58,7 @@
     "url": "https://github.com/agent-trust-protocol/atp-core/issues"
   },
   "dependencies": {
-    "@atpdeveloper/did-atp": "0.1.0",
+    "@atpdeveloper/did-atp": "0.1.1",
     "@noble/curves": "^1.4.0",
     "@noble/ed25519": "^2.0.0",
     "@noble/hashes": "^1.3.0",
@@ -69,24 +70,23 @@
     "eventemitter3": "^5.0.0",
     "jose": "^5.1.0",
     "ws": "^8.14.0",
-    "zod": "^3.22.0",
-    "atp-profiles": "^1.1.0"
+    "atp-profiles": "^3.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-typescript": "^11.0.0",
-    "@types/jest": "^29.0.0",
+    "@types/jest": "30.0.0",
     "@types/node": "^18.0.0",
     "@types/ws": "^8.5.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "8.72.0",
+    "@typescript-eslint/parser": "8.72.0",
     "eslint": "^8.0.0",
-    "jest": "^29.0.0",
+    "jest": "30.5.2",
     "prettier": "^3.0.0",
     "rimraf": "^5.0.0",
     "rollup": "^4.0.0",
-    "ts-jest": "^29.0.0",
+    "ts-jest": "29.4.15",
     "typedoc": "^0.25.0",
     "typescript": "^5.0.0"
   },
@@ -94,6 +94,7 @@
     "dist/**/*",
     "docs/**/*",
     "examples/**/*",
+    "scripts/run-offline-examples.mjs",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"
@@ -103,10 +104,15 @@
     "registry": "https://registry.npmjs.org/"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "directories": {
     "doc": "docs",
     "example": "examples"
+  },
+  "overrides": {
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "4.3.2"
+    }
   }
 }
