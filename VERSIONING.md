@@ -12,15 +12,15 @@ Each published package has **its own version** (Lerna independent mode). There i
 | [`atp-profiles`](packages/atp-profiles/README.md) | [![npm](https://img.shields.io/npm/v/atp-profiles)](https://www.npmjs.com/package/atp-profiles) | Stable | 18+ | Fail-closed security profiles and the `allow` / `require_approval` / `deny` evaluator |
 | [`create-atp-agent`](packages/create-atp-agent/README.md) | [![npm](https://img.shields.io/npm/v/create-atp-agent)](https://www.npmjs.com/package/create-atp-agent) | Stable | 20+ from 1.5.0 | Scaffolding a starter project (`npx create-atp-agent my-agent`) |
 | [`@atpdeveloper/did-atp`](packages/did-atp/README.md) | [![npm](https://img.shields.io/npm/v/@atpdeveloper/did-atp)](https://www.npmjs.com/package/@atpdeveloper/did-atp) | Development (0.x) | 18+ declared | Canonical `did:atp` identifier primitives |
-| [`atp-hermes-hook`](packages/hermes-hook/README.md) | [![npm](https://img.shields.io/npm/v/atp-hermes-hook)](https://www.npmjs.com/package/atp-hermes-hook) | Development (0.x), first release pending | 20+ | Fail-closed Hermes Agent `pre_tool_call` hook that enforces an ATP profile and path scope |
+| [`atp-hermes-hook`](packages/hermes-hook/README.md) | [![npm](https://img.shields.io/npm/v/atp-hermes-hook)](https://www.npmjs.com/package/atp-hermes-hook) | Development (0.x) | 20+ | Fail-closed Hermes Agent `pre_tool_call` hook that enforces an ATP profile and path scope |
 | [`@atpdevelopment/openclaw-atp`](archive/openclaw-atp/README.md) | [![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp)](https://www.npmjs.com/package/@atpdevelopment/openclaw-atp) | **Deprecated** | See package | Archived OpenClaw adapter; not built, tested or published. Do not use for new work |
 
 ### Python packages (PyPI)
 
 | Package | Status | Python | Use it for |
 | --- | --- | --- | --- |
-| [`atp-profiles`](packages/atp-profiles-python/README.md) | First release pending | 3.9+ | Python port of `atp-profiles`. Versions track the npm package; shared conformance vectors keep the two evaluators identical |
-| [`agent-trust-protocol`](packages/agent-trust-protocol-python/README.md) | First release pending | 3.9+ | Umbrella that installs the ATP Python packages |
+| [`atp-profiles`](packages/atp-profiles-python/README.md) | [![PyPI](https://img.shields.io/pypi/v/atp-profiles)](https://pypi.org/project/atp-profiles/) Stable | 3.9+ | Python port of `atp-profiles`. Versions track the npm package; shared conformance vectors keep the two evaluators identical |
+| [`agent-trust-protocol`](packages/agent-trust-protocol-python/README.md) | [![PyPI](https://img.shields.io/pypi/v/agent-trust-protocol)](https://pypi.org/project/agent-trust-protocol/) Development (0.x) | 3.9+ | Umbrella that installs the ATP Python packages |
 
 The PyPI name `atp-core` belongs to an unrelated project ("Attested Transport Protocol"). Python releases go through `pypi-publish.yml` (PyPI trusted publishing, environment `pypi`).
 
