@@ -10,7 +10,7 @@ evaluator is checked against shared conformance vectors.
 from __future__ import annotations
 
 import json
-from importlib import resources
+from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Mapping
 
@@ -41,7 +41,7 @@ def _freeze(value: Any) -> Any:
 
 
 def _load_builtin_profiles() -> Mapping[str, Mapping[str, Any]]:
-    text = resources.files(__package__).joinpath("builtin_profiles.json").read_text(encoding="utf-8")
+    text = Path(__file__).with_name("builtin_profiles.json").read_text(encoding="utf-8")
     return _freeze(json.loads(text))
 
 
