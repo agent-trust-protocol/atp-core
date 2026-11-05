@@ -1,0 +1,290 @@
+{
+  "id": "M2-enforcement-matrix",
+  "studioCommit": "f38b3ec",
+  "recordedAt": "2026-10-20",
+  "environment": "Developer Mac (darwin); local Ollama on loopback; isolated local harness (disposable Docker PostgreSQL, loopback Fastify listener mounting the Studio mandate SQL and atp.trust routes). Not a Studio deployment.",
+  "paidOrHostedInference": false,
+  "modelDownloads": false,
+  "studioSourceIncluded": false,
+  "deepagentsForkCommit": "e0e5b1ced",
+  "agentInstructionsDisclosure": "The ATP demo fork's AGENTS.md (an addition to the upstream example) instructs the model, when ATP is enabled, to emit the pinned statement verbatim for this question. A successful run therefore shows faithful reproduction of an operator-supplied statement inside a real structured tool call, not independent SQL authorship. The 2026-10-18 llama3.2:3b / qwen2.5-coder:7b attempts ran with the same AGENTS.md.",
+  "noModel": true,
+  "pairing": {
+    "keyEstablishedBy": "ChallengeStore challenge signed by the agent key, verified by proveRegisteredAgent",
+    "approvalAppliedBy": "harness direct update in the disposable database (not the operator console route)"
+  },
+  "approvedSql": "product default (single pinned statement)",
+  "checks": {
+    "allow": "PASS",
+    "replay": "PASS",
+    "unapproved": "PASS",
+    "malformedSql": "PASS",
+    "tamper": "PASS",
+    "expiredOrigin": "PASS",
+    "wrongAudience": "PASS",
+    "crossRouteToTrust": "PASS",
+    "crossRouteToSql": "PASS",
+    "paused": "PASS",
+    "resumed": "PASS",
+    "revoked": "PASS",
+    "verificationFail": "PASS",
+    "unreachable": "PASS"
+  },
+  "allPassed": true,
+  "finalChainOk": true,
+  "finalChinookUnchanged": true,
+  "baselineSha": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15",
+  "finalSqlCallbackCount": 4,
+  "finalReceipts": [
+    {
+      "id": "mrx_01M5E4Z4TKVVMWW7DN5A9S6P50",
+      "state": "SUCCEEDED",
+      "reasonCode": null
+    },
+    {
+      "id": "mrx_01M5E4Z5GB9M8JTXBHRGRM43M2",
+      "state": "SUCCEEDED",
+      "reasonCode": null
+    },
+    {
+      "id": "mrx_01M5E4Z98YBVT98GZ225MZHFCM",
+      "state": "SUCCEEDED",
+      "reasonCode": null
+    },
+    {
+      "id": "mrx_01M5E4ZB4ZVJFTC5Q6C9R0PHGV",
+      "state": "SUCCEEDED",
+      "reasonCode": null
+    }
+  ],
+  "cases": {
+    "allow": {
+      "toolResult": {
+        "atp": "SUCCEEDED",
+        "receiptId": "mrx_01M5E4Z4TKVVMWW7DN5A9S6P50",
+        "rows": [
+          {
+            "CanadianCustomers": 8
+          }
+        ],
+        "rowCount": 1,
+        "truncated": false
+      },
+      "callbackDelta": 1,
+      "auditDelta": 4,
+      "chinookUnchanged": true,
+      "chainOk": true
+    },
+    "replay": {
+      "first": {
+        "state": "SUCCEEDED",
+        "receiptId": "mrx_01M5E4Z5GB9M8JTXBHRGRM43M2",
+        "auditEventId": "evt_01M5E4Z5GSS6H1G128FPD2EKJ2",
+        "result": {
+          "rows": [
+            {
+              "CanadianCustomers": 8
+            }
+          ],
+          "rowCount": 1,
+          "truncated": false
+        }
+      },
+      "replay": {
+        "state": "DENIED",
+        "reasonCode": "origin_unverified",
+        "auditEventId": null
+      },
+      "callbackDelta": 1,
+      "auditDelta": 4,
+      "chinookUnchanged": true
+    },
+    "unapproved": {
+      "result": {
+        "state": "DENIED",
+        "reasonCode": "sql_not_approved",
+        "auditEventId": "evt_01M5E4Z63RP1W7SX0NBBFMFPEH"
+      },
+      "replayAfter": {
+        "state": "DENIED",
+        "reasonCode": "origin_unverified",
+        "auditEventId": null
+      },
+      "auditEvent": {
+        "id": "evt_01M5E4Z63RP1W7SX0NBBFMFPEH",
+        "actorDid": "did:atp:chinookhttp_agent",
+        "action": "mandate.dispatch.denied",
+        "result": "DENY",
+        "reasonCode": "sql_not_approved"
+      },
+      "receipts": [],
+      "callbackDelta": 0,
+      "auditDelta": 1,
+      "chinookUnchanged": true
+    },
+    "malformedSql": {
+      "result": {
+        "state": "DENIED",
+        "reasonCode": "invalid_payload",
+        "auditEventId": "evt_01M5E4Z6QSHC0D36X23Q43X11K"
+      },
+      "replayAfter": {
+        "state": "DENIED",
+        "reasonCode": "origin_unverified",
+        "auditEventId": null
+      },
+      "auditEvent": {
+        "id": "evt_01M5E4Z6QSHC0D36X23Q43X11K",
+        "actorDid": "did:atp:chinookhttp_agent",
+        "action": "mandate.dispatch.denied",
+        "result": "DENY",
+        "reasonCode": "invalid_payload"
+      },
+      "callbackDelta": 0,
+      "auditDelta": 1,
+      "chinookUnchanged": true
+    },
+    "tamper": {
+      "result": {
+        "state": "DENIED",
+        "reasonCode": "payload_digest_mismatch",
+        "auditEventId": "evt_01M5E4Z7C3EDDGBBPXAFMBY5AW"
+      },
+      "originalAfter": {
+        "state": "DENIED",
+        "reasonCode": "origin_unverified",
+        "auditEventId": null
+      },
+      "auditEvent": {
+        "id": "evt_01M5E4Z7C3EDDGBBPXAFMBY5AW",
+        "actorDid": "did:atp:chinookhttp_agent",
+        "action": "mandate.dispatch.denied",
+        "result": "DENY",
+        "reasonCode": "payload_digest_mismatch"
+      },
+      "callbackDelta": 0,
+      "auditDelta": 1,
+      "chinookUnchanged": true
+    },
+    "expiredOrigin": {
+      "result": {
+        "state": "DENIED",
+        "reasonCode": "origin_unverified",
+        "auditEventId": null
+      },
+      "callbackDelta": 0,
+      "auditDelta": 0,
+      "chinookUnchanged": true
+    },
+    "wrongAudience": {
+      "result": {
+        "state": "DENIED",
+        "reasonCode": "origin_unverified",
+        "auditEventId": null
+      },
+      "callbackDelta": 0,
+      "auditDelta": 0,
+      "chinookUnchanged": true
+    },
+    "crossRouteToTrust": {
+      "atTrustRoute": {
+        "state": "DENIED",
+        "reasonCode": "origin_unverified",
+        "auditEventId": null
+      },
+      "thenAtSqlRoute": {
+        "state": "SUCCEEDED",
+        "receiptId": "mrx_01M5E4Z98YBVT98GZ225MZHFCM",
+        "auditEventId": "evt_01M5E4Z99BHPC0FH4AMJA0VH80",
+        "result": {
+          "rows": [
+            {
+              "CanadianCustomers": 8
+            }
+          ],
+          "rowCount": 1,
+          "truncated": false
+        }
+      },
+      "callbackDelta": 1,
+      "auditDelta": 4,
+      "chinookUnchanged": true
+    },
+    "crossRouteToSql": {
+      "result": {
+        "state": "DENIED",
+        "reasonCode": "origin_unverified",
+        "auditEventId": null
+      },
+      "callbackDelta": 0,
+      "auditDelta": 0,
+      "chinookUnchanged": true
+    },
+    "paused": {
+      "toolResult": {
+        "atp": "DENIED",
+        "reasonCode": "mandate_paused",
+        "auditEventId": "evt_01M5E4ZAH3TNNSJTZ81RFJ1BHQ"
+      },
+      "callbackDelta": 0,
+      "auditDelta": 1,
+      "chinookUnchanged": true
+    },
+    "resumed": {
+      "toolResult": {
+        "atp": "SUCCEEDED",
+        "receiptId": "mrx_01M5E4ZB4ZVJFTC5Q6C9R0PHGV",
+        "rows": [
+          {
+            "CanadianCustomers": 8
+          }
+        ],
+        "rowCount": 1,
+        "truncated": false
+      },
+      "callbackDelta": 1,
+      "auditDelta": 4,
+      "chinookUnchanged": true
+    },
+    "revoked": {
+      "toolResult": {
+        "atp": "DENIED",
+        "reasonCode": "mandate_revoked",
+        "auditEventId": "evt_01M5E4ZBSX11BG1K5D60KJCQYB"
+      },
+      "callbackDelta": 0,
+      "auditDelta": 1,
+      "chinookUnchanged": true
+    },
+    "verificationFail": {
+      "httpStatus": 500,
+      "contentType": "application/problem+json; charset=utf-8",
+      "problem": {
+        "type": "urn:atp:problem:internal",
+        "title": "Unexpected error",
+        "status": 500,
+        "detail": "The server failed to complete this request.",
+        "instance": "/v1/mandate-sql-query",
+        "code": "internal"
+      },
+      "toolResult": {
+        "atp": "DENIED",
+        "reasonCode": null,
+        "auditEventId": null
+      },
+      "serverCallbackDelta": 0,
+      "chinookUnchanged": true
+    },
+    "unreachable": {
+      "toolResult": {
+        "atp": "DENIED",
+        "reasonCode": "verifier_unavailable",
+        "auditEventId": null
+      },
+      "callbackDelta": 0,
+      "auditDelta": 0,
+      "chinookUnchanged": true
+    }
+  },
+  "rawSha256": "89af3dc3c5ff382c56cbd66c457b9ae33bf61cc83ffa7b58dc11593420ab74dc"
+}

@@ -1,0 +1,60 @@
+{
+  "id": "F8-forced-llama3.2-3b-v3-final",
+  "title": "Coerced runner v3, llama3.2:3b, repeat run with full captured evidence: two structured calls, both DENIED invalid_payload, zero SQL callbacks, Chinook unchanged",
+  "evidence_class": "session-log-recovery",
+  "environment": "Developer Mac (darwin), local Ollama at loopback; isolated local harness: disposable Docker PostgreSQL + Fastify listener mounting the Studio mandate SQL route. Not a Studio deployment.",
+  "paid_or_hosted_inference": false,
+  "observed": {
+    "proofType": "HARNESS-COERCED tool invocation (tool_choice forced); NOT autonomous tool selection",
+    "question": "How many customers are from Canada?",
+    "model": "ollama:llama3.2:3b",
+    "atpEnabled": true,
+    "elapsedSeconds": 38.16,
+    "timedOut": false,
+    "error": null,
+    "agentToolCallSequence": [
+      {
+        "name": "sql_db_query",
+        "args": {
+          "query": "SELECT COUNT(*) AS CanadianCustomers FROM Customer WHERE Country = "
+        }
+      },
+      {
+        "name": "sql_db_query",
+        "args": {
+          "query": "SELECT COUNT(*) AS CanadianCustomers FROM Customer WHERE Country = "
+        }
+      }
+    ],
+    "atpToolResults": [
+      "{\"atp\": \"DENIED\", \"reasonCode\": \"invalid_payload\", \"auditEventId\": null}",
+      "{\"atp\": \"DENIED\", \"reasonCode\": \"invalid_payload\", \"auditEventId\": null}"
+    ],
+    "finalAnswer": "I will try again with a different query.\n\n{\"name\": \"sql_db_query\", \"parameters\": {\"query\":\"SELECT COUNT(*) AS CanadianCustomers FROM Customer WHERE Country = \\\"Canada\\\"\"}}",
+    "server": {
+      "sqlCallbackDelta": 0,
+      "successReceipt": null,
+      "chainOk": true,
+      "chinookBefore": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15",
+      "chinookAfter": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15"
+    }
+  },
+  "sources": [
+    {
+      "session_id": "5e15d028-c516-40da-be90-359f6628bb47",
+      "jsonl_line_0based": 290,
+      "timestamp": "2026-10-18T05:20:39.801Z",
+      "tool_use_id": "toolu_014xoDP2oBDjdoiRgwRcvpzS",
+      "private_record": "private/transcript-records/5e15d028-L00290-tool_result.json",
+      "private_record_sha256": "c578f7a1491070edbedb1ed796c3ac0349c79073ea3f81d597e036ec5a0c5572",
+      "invoked_at": "2026-10-18T05:19:50.471Z"
+    }
+  ],
+  "runner_recovered_source_sha256": {
+    "ollama_coerced_runner.v3.py.recovered": "cb43cd351e7c09dfb4aaeacfa687662ea611ba963ac44f63457f987f445ea9b0"
+  },
+  "server_recovered_source_sha256": {
+    "_liveproof_persistent.tmp.mjs.recovered": "3adf498d3f05947f0922e2d7a67f1fc9bcb9a6653e829f903df065ab558da484"
+  },
+  "notes": "tool_choice forced to sql_db_query AND bound tools narrowed to sql_db_query only. This was saved as live-proof-coerced-agent.json in a temporary directory that no longer exists; this is the verbatim session-log copy of that file's printed contents."
+}
