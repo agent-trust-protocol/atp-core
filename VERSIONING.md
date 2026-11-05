@@ -15,6 +15,15 @@ Each published package has **its own version** (Lerna independent mode). There i
 | [`atp-hermes-hook`](packages/hermes-hook/README.md) | [![npm](https://img.shields.io/npm/v/atp-hermes-hook)](https://www.npmjs.com/package/atp-hermes-hook) | Development (0.x), first release pending | 20+ | Fail-closed Hermes Agent `pre_tool_call` hook that enforces an ATP profile and path scope |
 | [`@atpdevelopment/openclaw-atp`](archive/openclaw-atp/README.md) | [![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp)](https://www.npmjs.com/package/@atpdevelopment/openclaw-atp) | **Deprecated** | See package | Archived OpenClaw adapter; not built, tested or published. Do not use for new work |
 
+### Python packages (PyPI)
+
+| Package | Status | Python | Use it for |
+| --- | --- | --- | --- |
+| [`atp-profiles`](packages/atp-profiles-python/README.md) | First release pending | 3.9+ | Python port of `atp-profiles`. Versions track the npm package; shared conformance vectors keep the two evaluators identical |
+| [`agent-trust-protocol`](packages/agent-trust-protocol-python/README.md) | First release pending | 3.9+ | Umbrella that installs the ATP Python packages |
+
+The PyPI name `atp-core` belongs to an unrelated project ("Attested Transport Protocol"). Python releases go through `pypi-publish.yml` (PyPI trusted publishing, environment `pypi`).
+
 **Start with `atp-sdk`.** It includes the profile evaluator, so most applications need no other package.
 
 The published `@atpdevelopment/openclaw-atp` 1.1.x depends on `atp-sdk@^1.2.4`. In that SDK line, `ATPClient.evaluateActionWithProfile()` returns `allow` when no profile, or an unknown profile, is configured. The package is deprecated and archived in `archive/openclaw-atp`. Use `atp-sdk` 4.x directly for new work, and `atp-hermes-hook` for Hermes Agent tool-boundary enforcement.

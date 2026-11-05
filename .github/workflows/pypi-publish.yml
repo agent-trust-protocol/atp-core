@@ -1,0 +1,74 @@
+name: Publish Python package
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Python package to release
+        required: true
+        type: choice
+        options: [atp-profiles, agent-trust-protocol]
+      version:
+        description: Exact version to release
+        required: true
+        type: string
+      dry_run:
+        description: Build and check without publishing
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  pypi:
+    if: github.ref == 'refs/heads/main' || inputs.dry_run == true
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.13'
+      - name: Select package directory
+        id: pkg
+        env:
+          PACKAGE: ${{ inputs.package }}
+        run: |
+          case "$PACKAGE" in
+            atp-profiles) echo "dir=packages/atp-profiles-python" >> "$GITHUB_OUTPUT" ;;
+            agent-trust-protocol) echo "dir=packages/agent-trust-protocol-python" >> "$GITHUB_OUTPUT" ;;
+            *) echo "unknown package $PACKAGE"; exit 1 ;;
+          esac
+      - name: Check exact version and refuse to republish
+        env:
+          PACKAGE: ${{ inputs.package }}
+          EXPECTED_VERSION: ${{ inputs.version }}
+          DIR: ${{ steps.pkg.outputs.dir }}
+        run: |
+          python - <<'PY'
+          import os, tomllib
+          with open(os.path.join(os.environ["DIR"], "pyproject.toml"), "rb") as f:
+              project = tomllib.load(f)["project"]
+          assert project["name"] == os.environ["PACKAGE"], project["name"]
+          assert project["version"] == os.environ["EXPECTED_VERSION"], project["version"]
+          PY
+          status=$(curl -s -o /dev/null -w '%{http_code}' "https://pypi.org/pypi/$PACKAGE/$EXPECTED_VERSION/json")
+          if [ "$status" = 200 ]; then echo "Version already published; refusing to republish"; exit 1; fi
+      - name: Test (atp-profiles)
+        if: inputs.package == 'atp-profiles'
+        working-directory: packages/atp-profiles-python
+        run: PYTHONPATH=src python -m unittest discover -s tests -v
+      - name: Build and check distributions
+        env:
+          DIR: ${{ steps.pkg.outputs.dir }}
+        run: |
+          python -m pip install --upgrade build twine
+          python -m build "$DIR" --outdir dist
+          python -m twine check dist/*
+          ls -l dist
+      - name: Publish to PyPI
+        if: inputs.dry_run != true
+        # PyPI trusted publishing (OIDC); no stored token. Attestations are generated automatically.
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3

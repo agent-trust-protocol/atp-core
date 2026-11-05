@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "atp-profiles"
+version = "3.0.0"
+description = "Agent Trust Protocol (ATP) security profiles and fail-closed evaluator for Python agents"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+authors = [{ name = "ATP Development Team" }]
+keywords = ["agent-trust-protocol", "atp", "ai-agents", "security-profiles", "policy", "langchain", "crewai", "hermes"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Security",
+  "Typing :: Typed",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/agent-trust-protocol/atp-core/tree/main/packages/atp-profiles-python"
+Source = "https://github.com/agent-trust-protocol/atp-core"
+Issues = "https://github.com/agent-trust-protocol/atp-core/issues"
+"npm package" = "https://www.npmjs.com/package/atp-profiles"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/atp_profiles"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/atp_profiles", "tests", "README.md", "LICENSE", "pyproject.toml"]

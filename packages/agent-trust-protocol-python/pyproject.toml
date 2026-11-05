@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agent-trust-protocol"
+version = "0.1.0"
+description = "Agent Trust Protocol (ATP) for Python: installs the ATP Python packages"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+authors = [{ name = "ATP Development Team" }]
+keywords = ["agent-trust-protocol", "atp", "ai-agents", "security-profiles", "agent-identity"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Security",
+]
+dependencies = ["atp-profiles==3.0.0"]
+
+[project.urls]
+Homepage = "https://github.com/agent-trust-protocol/atp-core"
+Source = "https://github.com/agent-trust-protocol/atp-core"
+Issues = "https://github.com/agent-trust-protocol/atp-core/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agent_trust_protocol"]
