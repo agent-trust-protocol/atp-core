@@ -19,8 +19,8 @@ Each published package has **its own version** (Lerna independent mode). There i
 
 | Package | Status | Python | Use it for |
 | --- | --- | --- | --- |
-| [`atp-profiles`](packages/atp-profiles-python/README.md) | First release pending | 3.9+ | Python port of `atp-profiles`. Versions track the npm package; shared conformance vectors keep the two evaluators identical |
-| [`agent-trust-protocol`](packages/agent-trust-protocol-python/README.md) | First release pending | 3.9+ | Umbrella that installs the ATP Python packages |
+| [`atp-profiles`](packages/atp-profiles-python/README.md) | [![PyPI](https://img.shields.io/pypi/v/atp-profiles)](https://pypi.org/project/atp-profiles/) Stable | 3.9+ | Python port of `atp-profiles`. Versions track the npm package; shared conformance vectors keep the two evaluators identical |
+| [`agent-trust-protocol`](packages/agent-trust-protocol-python/README.md) | [![PyPI](https://img.shields.io/pypi/v/agent-trust-protocol)](https://pypi.org/project/agent-trust-protocol/) Development (0.x) | 3.9+ | Umbrella that installs the ATP Python packages |
 
 The PyPI name `atp-core` belongs to an unrelated project ("Attested Transport Protocol"). Python releases go through `pypi-publish.yml` (PyPI trusted publishing, environment `pypi`).
 

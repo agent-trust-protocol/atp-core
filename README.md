@@ -61,7 +61,7 @@ The package READMEs are the source for APIs, limitations, and examples. Install 
 | [`create-atp-agent`](packages/create-atp-agent/README.md) | Scaffold a JavaScript ESM starter | `npx create-atp-agent my-agent` |
 | [`@atpdeveloper/did-atp`](packages/did-atp/README.md) | Build and inspect canonical `did:atp` identifier primitives | `npm install @atpdeveloper/did-atp` |
 | [`atp-profiles`](packages/atp-profiles/README.md) | Built-in and custom security profiles with a dependency-free evaluator | `npm install atp-profiles` |
-| [`atp-profiles` (Python)](packages/atp-profiles-python/README.md) | The same profiles and fail-closed evaluator for Python agents (LangChain, CrewAI, Hermes plugins) | `pip install atp-profiles` (first PyPI release pending) |
+| [`atp-profiles` (Python)](packages/atp-profiles-python/README.md) | The same profiles and fail-closed evaluator for Python agents (LangChain, CrewAI, Hermes plugins) | `pip install atp-profiles` |
 | [`atp-hermes-hook`](packages/hermes-hook/README.md) | Enforce an ATP profile and a path scope at Hermes Agent's `pre_tool_call` boundary | `npm install atp-hermes-hook` (first npm release pending) |
 
 The OpenClaw adapter (`@atpdevelopment/openclaw-atp`) is deprecated and archived in `archive/openclaw-atp`. Use the SDK and canonical packages as the starting point for new integrations; [`atp-hermes-hook`](packages/hermes-hook/README.md) enforces ATP profiles at Hermes Agent's tool boundary.
