@@ -1,41 +1,44 @@
-// The ATP shield mark (navy shield, agent with fedora and sunglasses, orange
-// "ATP" badge) drawn as terminal pixel art. Two pixel rows share one text line
-// using half-block characters; the badge's text band prints real letters.
+// The ATP hat mark (the repaired logo used by create-atp-agent's onboarding:
+// navy shield, agent with fedora, sunglasses and trench coat, red "ATP" badge)
+// drawn as terminal pixel art. Two pixel rows share one text line using
+// half-block characters; the badge's text band prints real letters.
 //
-// Legend: . transparent  N navy  W white  O orange  T badge text band
+// Legend: . transparent  N navy  C cream  R red  T badge text band
 export const LOGO = Object.freeze([
   '..........NN..........',
   '........NNNNNN........',
-  '.....NNNNWWWWNNNN.....',
-  '..NNNNWWWWWWWWWWNNNN..',
-  '..NWWWWWWNNNNWWWWWWN..',
-  '..NWWWWWNNNNNNWWWWWN..',
-  '..NWWWWWNNNNNNWWWWWN..',
-  '..NWWNNNNNNNNNNNNWWN..',
-  '..NWWWWWNWWWWNWWWWWN..',
-  '..NWWWWNNNNWNNNNWWWN..',
-  '..NWWWWWNNWWWNNWWWWN..',
-  '..NWWWWWNWWWWWNWWWWN..',
-  '..NWWWNNNNWWWWNNNNWN..',
-  '..NWNNNNNNNWWNNNNNNN..',
-  '..NNNNNNNNNWWNNNNNNN..',
-  '..NNNNNNNNNNNNNNNNNN..',
-  '...NNNNOOOOOOOONNNN...',
-  '...NNNNOOOOOOOONNNN...',
-  '...NNNNTTTTTTTTNNNN...',
-  '...NNNNTTTTTTTTNNNN...',
-  '.....NNNOOOOOONNN.....',
-  '......NNNNOONNNN......',
-  '........NNNNNN........',
-  '..........NN..........',
+  '.....NNNNCCCCNNNN.....',
+  '..NNNNCCCCCCCCCCNNNN..',
+  '.NNCCCCCCCNNCCCCCCCNN.',
+  '.NCCCCCCCNNNNCCCCCCCN.',
+  '.NCCCCCCNNNNNNCCCCCCN.',
+  '.NCCCNNNNNNNNNNNNCCCN.',
+  '.NCCCCCNCCCCCCNCCCCCN.',
+  '.NCCCCCNNNNNNNNCCCCCN.',
+  '.NCCCCCNNNCCNNNCCCCCN.',
+  '.NCCCCCCNCCCCNCCCCCCN.',
+  '.NCCCNNNNNCCNNNNNCCCN.',
+  '.NCNNNNNNNCCNNNNNNNCN.',
+  '.NNNNNNNNNCCNNNNNNNNN.',
+  '.NNNNNNNRRRRRRNNNNNNN.',
+  '.NNNNNNNTTTTTTNNNNNNN.',
+  '..NNNNNNTTTTTTNNNNNN..',
+  '..NNNNNNNRRRRNNNNNNN..',
+  '...NNNNNNNRRNNNNNNN...',
+  '....NNNNNNNNNNNNNN....',
+  '.....NNNNNNNNNNNN.....',
+  '.......NNNNNNNN.......',
+  '.........NNNN.........',
+
 ]);
 
 export const LOGO_WIDTH = LOGO[0].length;
 const BADGE_TEXT = 'ATP';
 
-// Brand colours: navy is lifted slightly so the outline stays visible on dark terminals.
-const TRUE = { N: [27, 58, 107], W: [240, 243, 248], O: [226, 74, 30] };
-const C256 = { N: 25, W: 255, O: 166 };
+// Colours sampled from atp-hat-mark-transparent.png; navy is lifted slightly so the
+// outline stays visible on dark terminals.
+const TRUE = { N: [16, 52, 92], C: [248, 240, 224], R: [216, 40, 8] };
+const C256 = { N: 24, C: 230, R: 160 };
 
 export function colorMode(env = process.env, stream = process.stdout) {
   if (env.NO_COLOR || !(env.FORCE_COLOR || stream.isTTY)) return null;
@@ -64,7 +67,7 @@ export function renderLogo(mode = colorMode()) {
       if (t === 'T' || b === 'T') {
         const ch = text[textIndex] ?? ' ';
         textIndex += 1;
-        line += sgr(['1', fg(mode, 'W'), bg(mode, 'O')], ch);
+        line += sgr(['1', fg(mode, 'C'), bg(mode, 'R')], ch);
       } else if (t === '.' && b === '.') {
         line += ' ';
       } else if (t === '.') {
