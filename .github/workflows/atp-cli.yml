@@ -1,0 +1,50 @@
+name: atp-cli package
+on:
+  pull_request:
+    paths:
+      - 'packages/cli/**'
+      - '.github/workflows/atp-cli.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/cli/**'
+      - '.github/workflows/atp-cli.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['20', '24']
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm ci --ignore-scripts
+        working-directory: packages/cli
+      - run: npm test
+        working-directory: packages/cli
+      - name: Packed tarball works for a global install
+        working-directory: packages/cli
+        run: |
+          npm pack --pack-destination "$RUNNER_TEMP"
+          npm install --global --prefix "$RUNNER_TEMP/global" --ignore-scripts "$RUNNER_TEMP"/atp-cli-*.tgz
+          export PATH="$RUNNER_TEMP/global/bin:$PATH" ATP_HOME="$RUNNER_TEMP/atp-home" CLAUDE_CONFIG_DIR="$RUNNER_TEMP/claude" NO_COLOR=1
+          atp --version
+          atp status
+          atp identity create --name ci-agent
+          atp guard install claude-code
+          printf '{"hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"ls"}}' | atp guard hook claude-code | tee ask.json
+          node -e "if (JSON.parse(require('fs').readFileSync('ask.json','utf8')).hookSpecificOutput.permissionDecision !== 'ask') process.exit(1)"
+          set +e
+          printf 'not json' | atp guard hook claude-code
+          status=$?
+          set -e
+          test "$status" = 2
+          atp audit verify
+          mkdir "$RUNNER_TEMP/consumer" && cd "$RUNNER_TEMP/consumer"
+          npm init -y >/dev/null
+          npm install --ignore-scripts "$RUNNER_TEMP"/atp-cli-*.tgz
+          npm audit --omit=dev --audit-level=low
