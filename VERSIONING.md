@@ -12,6 +12,7 @@ Each published package has **its own version** (Lerna independent mode). There i
 | [`atp-profiles`](packages/atp-profiles/README.md) | [![npm](https://img.shields.io/npm/v/atp-profiles)](https://www.npmjs.com/package/atp-profiles) | Stable | 18+ | Fail-closed security profiles and the `allow` / `require_approval` / `deny` evaluator |
 | [`create-atp-agent`](packages/create-atp-agent/README.md) | [![npm](https://img.shields.io/npm/v/create-atp-agent)](https://www.npmjs.com/package/create-atp-agent) | Stable | 20+ from 1.5.0 | Scaffolding a starter project (`npx create-atp-agent my-agent`) |
 | [`@atpdeveloper/did-atp`](packages/did-atp/README.md) | [![npm](https://img.shields.io/npm/v/@atpdeveloper/did-atp)](https://www.npmjs.com/package/@atpdeveloper/did-atp) | Development (0.x) | 18+ declared | Canonical `did:atp` identifier primitives |
+| [`atp-cli`](packages/cli/README.md) | [![npm](https://img.shields.io/npm/v/atp-cli)](https://www.npmjs.com/package/atp-cli) | Development (0.x), first release pending | 20+ | The `atp` terminal tool: Claude Code and Hermes guards, local identity, signed audit trail |
 | [`atp-hermes-hook`](packages/hermes-hook/README.md) | [![npm](https://img.shields.io/npm/v/atp-hermes-hook)](https://www.npmjs.com/package/atp-hermes-hook) | Development (0.x) | 20+ | Fail-closed Hermes Agent `pre_tool_call` hook that enforces an ATP profile and path scope |
 | [`@atpdevelopment/openclaw-atp`](archive/openclaw-atp/README.md) | [![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp)](https://www.npmjs.com/package/@atpdevelopment/openclaw-atp) | **Deprecated** | See package | Archived OpenClaw adapter; not built, tested or published. Do not use for new work |
 
@@ -84,6 +85,7 @@ Before each publish, run the package's own gates. For the SDK, those are `check-
 | `atp-profiles` | `npm-publish-profiles.yml` | `npm-publish` |
 | `create-atp-agent` | `npm-publish-cli.yml` | `npm-publish` |
 | `atp-hermes-hook` | `npm-publish-hermes-hook.yml` | `npm-publish` |
+| `atp-cli` | `npm-publish-atp-cli.yml` | `npm-publish` |
 | `@atpdeveloper/did-atp` | `npm-publish-did-atp.yml` | `npm-publish` |
 
 Each package's npm settings (**Settings → Trusted publishing → GitHub Actions**) must name organization `agent-trust-protocol`, repository `atp-core`, the workflow file above and environment `npm-publish`. All fields are case-sensitive. After the first trusted publish succeeds, set **Settings → Publishing access** to *Require two-factor authentication and disallow tokens*. Local publishing is a last resort. A local publish needs interactive 2FA and carries no provenance, so record that in the GitHub Release.
