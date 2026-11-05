@@ -242,3 +242,27 @@ test('interactive shell: welcome panel, slash commands, completion and status li
     s.cleanup();
   }
 });
+
+test('the ATP shield logo renders 12 aligned lines with ATP on the badge, and degrades without colour', async () => {
+  const { LOGO, LOGO_WIDTH, renderLogo, colorMode } = await import('../src/logo.mjs');
+  const { welcome } = await import('../src/shell.mjs');
+  const strip = (s) => s.replace(/\u001b\[[0-9;]*m/g, '');
+  assert.ok(LOGO.every((row) => row.length === LOGO_WIDTH));
+  for (const mode of ['truecolor', '256']) {
+    const lines = renderLogo(mode);
+    assert.equal(lines.length, LOGO.length / 2);
+    assert.ok(lines.every((line) => strip(line).length === LOGO_WIDTH), mode);
+    assert.equal(lines.filter((line) => strip(line).includes('ATP')).length, 1, mode);
+  }
+  assert.equal(renderLogo(null), null);
+  assert.equal(colorMode({ NO_COLOR: '1' }, { isTTY: true }), null);
+  assert.equal(colorMode({}, { isTTY: false }), null);
+  assert.equal(colorMode({ COLORTERM: 'truecolor' }, { isTTY: true }), 'truecolor');
+  assert.equal(colorMode({}, { isTTY: true }), '256');
+  const wide = strip(welcome('/p', { columns: 100, isTTY: true }, { COLORTERM: 'truecolor' }));
+  assert.match(wide, /█.*Agent Trust Protocol™/);
+  assert.match(wide, /ATP/);
+  const narrow = strip(welcome('/p', { columns: 40, isTTY: true }, {}));
+  assert.doesNotMatch(narrow, /█/);
+  assert.match(narrow, /Agent Trust Protocol™/);
+});

@@ -11,19 +11,12 @@ Requires Node.js 20 or newer.
 
 ## The interactive shell
 
-Run `atp` with no arguments for an interactive session, in the spirit of Claude Code. You get a welcome panel, `/` commands with Tab completion, persistent history, and a status line showing your profile, identity and audit count after every command.
+Run `atp` with no arguments for an interactive session, in the spirit of Claude Code. The welcome screen shows the ATP shield logo in colour beside your working directory, profile and identity. Narrow terminals, `NO_COLOR` and piped output get a plain text panel. Then you get `/` commands with Tab completion, persistent history, and a status line showing your profile, identity and audit count after every command.
 
 ```
-╭─ ✻ ATP ──────────────────────────────────────────────────────────────╮
-│ Agent Trust Protocol atp-cli v0.1.0                                  │
-│                                                                      │
-│ cwd  /home/me/project                                                │
-│ try  /status · /guard install claude-code · /profile check Bash      │
-╰──────────────────────────────────────────────────────────────────────╯
-  safe-default · did:atp:localhost:agent · 12 audited
-
 ❯ /profile check Bash
 ● ask  Bash → shell under safe-default (executing) · control_blocked
+  safe-default · did:atp:localhost:agent · 12 audited
 ```
 
 Every command also works directly (`atp profile check Bash`), as a one-shot (`atp -p "/profile check Bash"`), and with `--json` for scripts and CI.
