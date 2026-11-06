@@ -25,7 +25,7 @@
   },
   {
     "directory": "packages/cli",
-    "name": "atp-cli",
+    "name": "@atpdeveloper/atp-cli",
     "kind": "publishable library/CLI/adapter",
     "independentInstall": true,
     "lockfile": "packages/cli/package-lock.json",

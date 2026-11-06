@@ -30,7 +30,7 @@ jobs:
         working-directory: packages/cli
         run: |
           npm pack --pack-destination "$RUNNER_TEMP"
-          npm install --global --prefix "$RUNNER_TEMP/global" --ignore-scripts "$RUNNER_TEMP"/atp-cli-*.tgz
+          npm install --global --prefix "$RUNNER_TEMP/global" --ignore-scripts "$RUNNER_TEMP"/atpdeveloper-atp-cli-*.tgz
           export PATH="$RUNNER_TEMP/global/bin:$PATH" ATP_HOME="$RUNNER_TEMP/atp-home" CLAUDE_CONFIG_DIR="$RUNNER_TEMP/claude" NO_COLOR=1
           atp --version
           atp status
@@ -46,5 +46,5 @@ jobs:
           atp audit verify
           mkdir "$RUNNER_TEMP/consumer" && cd "$RUNNER_TEMP/consumer"
           npm init -y >/dev/null
-          npm install --ignore-scripts "$RUNNER_TEMP"/atp-cli-*.tgz
+          npm install --ignore-scripts "$RUNNER_TEMP"/atpdeveloper-atp-cli-*.tgz
           npm audit --omit=dev --audit-level=low
