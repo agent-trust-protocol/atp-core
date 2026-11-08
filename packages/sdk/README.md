@@ -125,3 +125,29 @@ They cover the standalone quickstart, local DID generation, multi-protocol detec
 Try the quickstart, report a reproducible issue, improve an example or propose a conformance vector. See the [contribution guide](https://github.com/agent-trust-protocol/atp-core/blob/main/CONTRIBUTING.md) and the [ATP Core repository](https://github.com/agent-trust-protocol/atp-core). Implementation changes should include tests for the behaviour they add.
 
 Agent Trust Protocol™ is a trademark of Sovr Inc. Licensed under Apache-2.0.
+
+### DID resolver transport bounds (unreleased source)
+
+`DidAtpResolver.resolve(did, options)` and `fetchDidJson(url, options)` use
+manual HTTPS redirects (at most five by default), a total 10-second transport
+deadline, and a streaming 256 KiB response limit. The deadline covers redirects,
+headers, and body delivery; it does not bound subsequent cryptographic document
+verification. A response exceeding the cap is cancelled without retaining its
+full body. Transport buffers and the chunk currently delivered can exceed the
+retained-byte cap.
+
+Options include `timeoutMs` (positive integer up to 2,147,483,647),
+`maxRedirects` (integer 0–20), and a caller `signal: AbortSignal`. New stable
+`DidResolutionError.code` values are `timeout`, `aborted`, and `redirectLimit`.
+Existing error codes remain available. A custom `fetch` must honor manual
+redirect mode and should honor the supplied signal; the resolver can bound its
+own wait but cannot stop arbitrary external work in an override that ignores
+cancellation. Its response must provide a standards-compatible byte stream.
+Text-only response doubles need updating.
+
+The resolver does not supply a private-address allowlist or connection-level
+DNS-rebinding protection. Server-side deployments must enforce their own egress
+policy. Cross-origin manual redirect behavior differs in browsers; the controlled
+TLS fixture uses a Node HTTPS adapter and is not browser or native-fetch
+interoperability certification. Path normalization and deployment egress remain
+open acceptance cases in the specialization evidence report.
