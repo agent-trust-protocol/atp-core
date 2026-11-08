@@ -1,6 +1,6 @@
 {
   "name": "@atpdeveloper/did-atp",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "type": "module",
   "description": "Canonical did:atp v2 identifier and key-fingerprint primitives (single source of truth for the did:atp method across ATP packages)",
   "main": "dist/index.js",
@@ -14,7 +14,8 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
