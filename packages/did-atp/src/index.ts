@@ -33,17 +33,46 @@ export const ATP_DOMAIN_RE =
 
 /** base64url without padding (RFC 4648 §5). */
 export function atpBase64Url(bytes: Uint8Array): string {
-  return Buffer.from(bytes).toString('base64url');
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  let result = '';
+  for (let i = 0; i < bytes.length; i += 3) {
+    const a = bytes[i];
+    const b = bytes[i + 1];
+    const c = bytes[i + 2];
+    result += alphabet[a >>> 2] + alphabet[((a & 3) << 4) | ((b ?? 0) >>> 4)];
+    if (i + 1 < bytes.length) result += alphabet[((b & 15) << 2) | ((c ?? 0) >>> 6)];
+    if (i + 2 < bytes.length) result += alphabet[c & 63];
+  }
+  return result;
 }
 
 /**
  * RFC 7638 JWK thumbprint: members sorted lexicographically, serialized as JSON
  * with no whitespace, UTF-8 encoded, SHA-256 hashed, base64url encoded. The JWK
- * must contain exactly the required members for its key type.
+ * must contain the required public members for its key type. Optional metadata
+ * and private members do not participate in the thumbprint.
  */
 export function atpJwkThumbprint(jwk: Record<string, string>): string {
-  const sortedKeys = Object.keys(jwk).sort();
-  const canonical = JSON.stringify(jwk, sortedKeys);
+  if (!jwk || typeof jwk !== 'object' || Array.isArray(jwk)) {
+    throw new Error('Invalid JWK: expected an object');
+  }
+  const members: Record<string, string[]> = {
+    OKP: ['crv', 'kty', 'x'],
+    AKP: ['alg', 'kty', 'pub'],
+    EC: ['crv', 'kty', 'x', 'y'],
+    RSA: ['e', 'kty', 'n'],
+  };
+  const required = Object.prototype.hasOwnProperty.call(members, jwk.kty) ? members[jwk.kty] : undefined;
+  if (!required) throw new Error('Unsupported JWK key type');
+  const publicJwk: Record<string, string> = {};
+  for (const member of required) {
+    if (!Object.prototype.hasOwnProperty.call(jwk, member) ||
+        typeof jwk[member] !== 'string' || jwk[member].length === 0) {
+      throw new Error(`Invalid JWK: missing or invalid ${member}`);
+    }
+    publicJwk[member] = jwk[member];
+  }
+  const canonical = JSON.stringify(publicJwk);
   const digest = sha256(new TextEncoder().encode(canonical));
   return atpBase64Url(digest);
 }
@@ -101,4 +130,73 @@ export function buildAtpV2Did(
   const e1 = atpE1Fingerprint(ed25519PublicKey);
   const pq1 = atpPq1Fingerprint(mlDsa65PublicKey);
   return `did:atp:${domain}:${path.join(':')}:${e1}:${pq1}`;
+}
+
+/** Stable syntax errors for path-type identifiers; no network resolution occurs. */
+export type AtpDidErrorCode = 'invalid_format' | 'invalid_domain' | 'invalid_path' | 'invalid_bindings';
+
+export class AtpDidParseError extends Error {
+  constructor(public readonly code: AtpDidErrorCode, message: string) {
+    super(message);
+    this.name = 'AtpDidParseError';
+  }
+}
+
+export interface AtpV2PathDid {
+  domain: string;
+  path: string[];
+  e1: string;
+  pq1: string;
+}
+
+/** Parse a bare path-type v2 DID. DID URLs and other identifier forms are rejected. */
+export function parseAtpV2PathDid(did: string): AtpV2PathDid {
+  if (typeof did !== 'string' || !did.startsWith('did:atp:')) {
+    throw new AtpDidParseError('invalid_format', 'Expected a bare did:atp path identifier');
+  }
+  const parts = did.slice(8).split(':');
+  if (parts.length < 4) {
+    throw new AtpDidParseError('invalid_format', 'Expected a domain, path, and both binding fingerprints');
+  }
+  const domain = parts[0];
+  const e1 = parts[parts.length - 2];
+  const pq1 = parts[parts.length - 1];
+  const path = parts.slice(1, -2);
+  if (!ATP_DOMAIN_RE.test(domain)) {
+    throw new AtpDidParseError('invalid_domain', 'Invalid did:atp domain');
+  }
+  if (!ATP_E1_RE.test(e1) || !ATP_PQ1_RE.test(pq1)) {
+    throw new AtpDidParseError('invalid_bindings', 'Expected trailing e1_ and pq1_ fingerprints');
+  }
+  if (path.some(segment => !ATP_PATH_SEGMENT_RE.test(segment) ||
+      ATP_E1_RE.test(segment) || ATP_PQ1_RE.test(segment))) {
+    throw new AtpDidParseError('invalid_path', 'Invalid or ambiguous did:atp path');
+  }
+  return { domain, path, e1, pq1 };
+}
+
+/** Syntax only: does not establish resolution, key possession, or authority. */
+export function isAtpV2PathDid(value: unknown): value is string {
+  if (typeof value !== 'string') return false;
+  try {
+    parseAtpV2PathDid(value);
+    return true;
+  } catch (error) {
+    if (error instanceof AtpDidParseError) return false;
+    throw error;
+  }
+}
+
+/** Check both public-key bindings. Throws on malformed identifiers or key sizes.
+ * A match does not prove possession, signature validity, status, or permission.
+ */
+export function verifyAtpV2KeyBindings(
+  did: string,
+  ed25519PublicKey: Uint8Array,
+  mlDsa65PublicKey: Uint8Array
+): boolean {
+  const parsed = parseAtpV2PathDid(did);
+  const e1 = atpE1Fingerprint(ed25519PublicKey);
+  const pq1 = atpPq1Fingerprint(mlDsa65PublicKey);
+  return parsed.e1 === e1 && parsed.pq1 === pq1;
 }

@@ -43,3 +43,42 @@ Help test cross-package compatibility by contributing identifier vectors, parser
 ## License
 
 Apache-2.0
+
+## Inspect and check a path identifier
+
+```ts
+import {
+  parseAtpV2PathDid,
+  isAtpV2PathDid,
+  verifyAtpV2KeyBindings,
+} from '@atpdeveloper/did-atp';
+
+if (isAtpV2PathDid(candidate)) {
+  const { domain, path } = parseAtpV2PathDid(candidate);
+  const matches = verifyAtpV2KeyBindings(candidate, edPublicKey, mlPublicKey);
+}
+```
+
+`parseAtpV2PathDid` accepts bare path-type v2 identifiers, including pairwise
+path identifiers. It rejects root DIDs and DID URLs (fragments, queries, or
+resource paths). It throws `AtpDidParseError` with a stable `code`:
+`invalid_format`, `invalid_domain`, `invalid_path`, or `invalid_bindings`.
+`isAtpV2PathDid` is a syntax-only type guard accepting unknown input.
+
+`verifyAtpV2KeyBindings` returns false if either key differs. Malformed
+identifiers and incorrect key sizes throw. Matching fingerprints does not
+prove possession of private keys, validate signatures, establish current
+credential or mandate status, or authorize execution. Those checks belong to
+verifiers and enforcing runtimes.
+
+The thumbprint helper selects only the required public members for OKP, AKP,
+EC, and RSA keys, in lexicographic order. Optional metadata and private
+members are ignored; missing or empty required members and unsupported key
+types are rejected. This helper computes a thumbprint, not cryptographic key
+validity. Existing ATP fingerprint vectors are unchanged. The base64url
+implementation does not require Node's global `Buffer`.
+
+These APIs are source additions pending a package release. SDK parser migration
+must follow publication of a version containing them, with root-DID and
+fragment behavior preserved. This change does not modify the DID method syntax,
+add network resolution, or publish a package.
