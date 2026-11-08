@@ -6,7 +6,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
-- **`atp-cli` 0.1.0 (unreleased).** The `atp` terminal tool in `packages/cli`, modelled on
+- **`@atpdeveloper/atp-cli` 0.1.0 (published to npm 2026-11-06 under the `@atpdeveloper` scope; first release was a local publish, so it carries no provenance).** The `atp` terminal tool in `packages/cli`, modelled on
   Claude Code's interactive CLI: slash commands, Tab completion, history and a status
   line; `atp -p` one-shot and `--json` output. `atp guard install claude-code` adds a
   PreToolUse hook that can only tighten Claude Code (ATP allow defers to Claude Code's

@@ -1,9 +1,9 @@
-# atp-cli
+# @atpdeveloper/atp-cli
 
 **Agent Trust Protocol (ATP) in your terminal.** Put ATP security profiles in front of the tools your AI agents call, starting with **Claude Code** and **Hermes Agent**. Manage a local `did:atp` identity and keep a signed audit trail of every decision.
 
 ```bash
-npm install -g atp-cli
+npm install -g @atpdeveloper/atp-cli
 atp
 ```
 
