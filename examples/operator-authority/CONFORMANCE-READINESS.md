@@ -12,6 +12,9 @@ Internal engineering record for PR #172 (issue #169). **NO-GO for external submi
 | PR #173 (revision-3 mapping, including the live-read adapter from #175) | squash-merged into this branch as `c23d39a` |
 | Live-read note linking the open lab question | `2d7b80f` |
 | `main` merged in | `package.json` and `package-lock.json` taken from `main` unchanged |
+| PR #172 merged into `main` | squash commit `3856db0` (2026-11-08 00:58 UTC), at head `0e55055` |
+
+Merging into `main` is not an external submission; the NO-GO above still applies to sending this work to the lab.
 
 `main` removed the legacy Next.js site from atp-core in #200. That removed `src/` (including `src/lib/email.ts` and the `/api/request-access` route) and the root dependencies `next`, `eslint-config-next`, `nodemailer`, `kysely`, `lucide-react`, `postcss` and `tailwindcss`. This branch's only change to the root package files was the `next` / `eslint-config-next` 15.5.28 bump (`4f7bb5c`), which no longer has anything to apply to. After the merge, the branch differs from `main` only in `examples/operator-authority/` and `.github/workflows/operator-authority-fixtures.yml`.
 
