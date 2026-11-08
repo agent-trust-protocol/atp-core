@@ -46,17 +46,16 @@ The nodemailer, postcss and Tailwind findings in the October 24 table below no l
 
 ### Review threads (GitHub, November 7)
 
-Six threads are resolved and outdated: both Semgrep mutable-tag findings, and the four Greptile findings on `fixture-policy.mjs` and `signed-mandate.mjs`. One is open: a code-quality note that `revision-3/lab-revision3-live.mjs` line 105 passes a superfluous second argument to its own `observationUsed(result)`. The extra argument is ignored, so behaviour is unaffected; it is a one-line cleanup.
+Six threads are resolved and outdated: both Semgrep mutable-tag findings, and the four Greptile findings on `fixture-policy.mjs` and `signed-mandate.mjs`. A seventh, a code-quality note that `revision-3/lab-revision3-live.mjs` line 105 passed a superfluous second argument to its own `observationUsed(result)`, is fixed in the same commit as this note. The argument was ignored, so behaviour is unchanged; fixtures re-ran at 57/57 and the live-read comparison at 44/44.
 
 ### Remaining gates before any external submission
 
-1. Clear the open code-quality thread (one-line cleanup).
-2. Complete Studio real-runtime tests in a Docker-capable environment: authenticated status, revocation timing, concurrent replay, audit-failure rollback.
-3. Define canonical, authenticated, versioned mandate proofs using the shared utilities.
-4. Independent reproduction by someone who authored neither the inputs nor the implementation.
-5. Final provenance, secrets and claims review, then founder approval.
+1. Complete Studio real-runtime tests in a Docker-capable environment: authenticated status, revocation timing, concurrent replay, audit-failure rollback.
+2. Define canonical, authenticated, versioned mandate proofs using the shared utilities.
+3. Independent reproduction by someone who authored neither the inputs nor the implementation.
+4. Final provenance, secrets and claims review, then founder approval.
 
-Closed since October 24: the old gate 1 (push and fresh CI, Semgrep and Greptile review; the threads it named are resolved) and the old gate 2 (nodemailer and postcss/Tailwind; removed with the legacy site). The `axios` / `follow-redirects` / `browserslist` findings are a `main` maintenance item, not a gate for this PR. The not-yet-valid question on #192 is not a gate for the revision-3 vectors, which contain no such call.
+Closed since October 24: the old gate 1 (push and fresh CI, Semgrep and Greptile review; the threads it named are resolved), the old gate 2 (nodemailer and postcss/Tailwind; removed with the legacy site), and the code-quality thread above. The `axios` / `follow-redirects` / `browserslist` findings are a `main` maintenance item, not a gate for this PR. The not-yet-valid question on #192 is not a gate for the revision-3 vectors, which contain no such call.
 
 The scope limits under "What this does not establish" still apply, with one addition: revision-3 refusal reasons and grant references are now compared against the pinned revision-3 corpus in `revision-3/`, still as ATP-authored, author-produced evidence (Mode A) and not as a conformance claim. The October 24 statement that "no revision-3 schema is adopted or claimed" remains true.
 
