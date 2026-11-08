@@ -39,7 +39,8 @@ export type DidResolutionErrorCode =
   | 'verificationFailed'
   | 'redirectLimit'
   | 'timeout'
-  | 'aborted';
+  | 'aborted'
+  | 'destinationNotAllowed';
 
 export class DidResolutionError extends Error {
   constructor(
@@ -60,6 +61,10 @@ export interface ResolveOptions {
   maxRedirects?: number;
   /** Optional caller cancellation, combined with the transport deadline. */
   signal?: AbortSignal;
+  /** Additional HTTPS origins allowed for redirects; default is initial origin only.
+   * This is not a private-network or DNS-rebinding policy.
+   */
+  allowedRedirectOrigins?: readonly string[];
 }
 
 export interface DidResolutionResult {
@@ -94,10 +99,19 @@ export class DidAtpResolver {
     // did:web rule: a percent-encoded "%3A<port>" in the domain becomes the
     // URL authority's ":<port>".
     const authority = parsed.domain.replace(/%3[aA]/, ':');
-    if (parsed.type === 'root') {
-      return `https://${authority}/.well-known/did.json`;
+    const path = parsed.type === 'root' ? '/.well-known/did.json' : `/${parsed.path.join('/')}/did.json`;
+    const result = `https://${authority}${path}`;
+    let target: URL;
+    try { target = new URL(result); } catch {
+      throw new DidResolutionError('invalidDid', 'DID domain or port cannot map to an HTTPS URL');
     }
-    return `https://${authority}/${parsed.path.join('/')}/did.json`;
+    // Keep the identifier grammar unchanged, but refuse transport mappings
+    // that WHATWG URL processing would rewrite to a different host or path.
+    const hostname = parsed.domain.split(/%3[aA]/)[0];
+    if (target.pathname !== path || target.hostname !== hostname) {
+      throw new DidResolutionError('invalidDid', 'DID host or path changes during URL normalization');
+    }
+    return result;
   }
 
   /**
@@ -162,9 +176,31 @@ export class DidAtpResolver {
       if (target.protocol !== 'https:' || target.username || target.password) {
         throw new DidResolutionError('insecureUrl', 'did:atp resolution requires HTTPS without URL credentials');
       }
+      // Fragments are not part of the HTTP resource or its destination policy.
+      target.hash = '';
       return target;
     };
     let current = checkedUrl(url);
+    const allowedOrigins = new Set([current.origin]);
+    const configuredOrigins = options.allowedRedirectOrigins ?? [];
+    if (!Array.isArray(configuredOrigins)) {
+      throw new RangeError('allowedRedirectOrigins must be an array of HTTPS origins');
+    }
+    // Snapshot the allowlist once: caller mutations cannot widen it mid-flight.
+    for (const origin of configuredOrigins) {
+      let parsed: URL;
+      try {
+        if (typeof origin !== 'string' || !/^https:\/\/[^/?#\\]+\/?$/i.test(origin)) {
+          throw new Error('Not an HTTPS origin');
+        }
+        parsed = checkedUrl(origin);
+        const original = new URL(origin);
+        if (parsed.pathname !== '/' || original.search || original.hash) throw new Error('Not an origin');
+      } catch {
+        throw new RangeError('allowedRedirectOrigins entries must be HTTPS origins without paths, queries, or fragments');
+      }
+      allowedOrigins.add(parsed.origin);
+    }
     const controller = new AbortController();
     let timedOut = false;
     let response: Response | undefined;
@@ -211,6 +247,9 @@ export class DidAtpResolver {
           const location = response.headers.get('location');
           if (!location) throw new DidResolutionError('notFound', 'Redirect has no Location header');
           const target = checkedUrl(location, current);
+          if (!allowedOrigins.has(target.origin)) {
+            throw new DidResolutionError('destinationNotAllowed', 'Redirect origin is not allowed');
+          }
           if (hops >= maxRedirects) {
             throw new DidResolutionError('redirectLimit', 'did.json redirect limit exceeded');
           }

@@ -167,3 +167,39 @@ dependency lifecycle scripts disabled. The focused root identity/transport run
 separately passed 10 suites / 167 tests. These overlap and must not be added
 together. The SDK TypeScript build passed. This is local candidate evidence;
 GitHub CI and main-branch merge remain separate checkpoints.
+
+## Follow-up: NET-05 path and destination implementation candidate
+
+Building on merged PR #215, the next candidate checks the DID-to-URL mapping
+before I/O and rejects hostname/pathname rewriting and invalid ports. Literal
+dot segments can still be valid identifier syntax but are not resolved; no DID
+grammar or key-fingerprint algorithm changes. Canonical IPv4, dev ports, and
+ordinary dot-containing segment names remain usable.
+
+Redirects default to the initial HTTPS origin. Additional origins require
+`allowedRedirectOrigins`; the resolver snapshots the validated configuration
+and checks each redirect target before issuing its request. Same-origin path
+redirects remain possible; this is an origin policy, not a path allowlist or a
+private-address filter. URL fragments are not sent. Full `resolve` still checks
+that the returned document ID equals the requested DID before hybrid verification.
+
+Evidence: `packages/sdk/src/__tests__/utils/resolver-destinations.test.ts` covers
+normalization rejection with zero fetch calls, preserved valid mapping,
+per-hop origin enforcement, configuration validation, an immutable in-flight
+policy, and document mismatch after an approved origin redirect. The controlled
+TLS fixture in `resolver-https.test.ts` counts requests at a second HTTPS origin:
+zero when unlisted, one when explicitly allowed. It also checks an ordinary
+relative same-origin redirect. Certificate verification remains enabled through
+the test-only adapter described above.
+
+This is local candidate evidence, not native-fetch/browser or independent
+implementation certification. NET-06 egress/address binding, lifecycle/privacy,
+and independent specialization comparison remain open. NET-05 implementation
+requires successful PR review and CI before its main-branch checkpoint closes.
+
+NET-05 local validation checkpoint (Node 24): clean SDK lockfile installation
+with lifecycle scripts disabled; SDK TypeScript build; all 28 SDK suites / 670
+tests; all five offline examples. The focused root identity/transport run
+separately passed 11 suites / 200 tests; these overlap the SDK tests. The HTTPS
+request counters and byte-stream cases are same-project evidence, not independent
+certification. No package release or deployment is part of this candidate.
