@@ -18,6 +18,8 @@ The signed fixture and two-key request tests now use `CryptoUtils` from the exis
 node examples/operator-authority/lab-revision2.mjs /path/to/revision-2/vectors.json
 ```
 
+`revision-3/lab-revision3.mjs` maps the same synthetic evaluator onto the lab's revision-3 contract (refusal reason and grant reference), pinned to lab commit `7774daee7`. Revision 2 above is unchanged, and a test re-derives its frozen report digest. The declared reason mapping, the results and the disclosed disagreements are in `revision-3/REVISION-3-EVIDENCE-MAPPING.md`.
+
 The matching test exercises all 12 cases / 44 calls, the altered-byte digest gate, a deny-everything mutation and a deny-but-dispatch mutation. When no corpus path is supplied it reports an explicit skip. The dedicated CI workflow supplies the corpus from a pinned lab commit so CI cannot silently skip it.
 
 Earlier run descriptions below are historical. They do not establish the status of this local patch or a later commit. External submission remains on hold pending real-runtime gap closure and independent review.
