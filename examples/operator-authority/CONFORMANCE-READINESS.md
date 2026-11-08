@@ -53,7 +53,7 @@ Six threads are resolved and outdated: both Semgrep mutable-tag findings, and th
 
 ### Remaining gates before any external submission
 
-1. Complete Studio real-runtime tests in a Docker-capable environment: authenticated status, revocation timing, concurrent replay, audit-failure rollback.
+1. Close or explicitly accept the open gaps in the Studio runtime tests. The tests exist and run (atp-studio#94, #95): on 2026-11-07 they passed 66/66 locally with Docker, including 13 integration tests against a disposable PostgreSQL container, and the same 13 passed in Studio CI. They cover revocation timing, concurrent replay and audit-failure handling with effects measured on a protected resource. Some matrix items are covered at the decision level only, and some known gaps remain; both are tracked in atp-studio#94. Studio results are separate evidence and are not substituted for ATP Core proof.
 2. Define canonical, authenticated, versioned mandate proofs using the shared utilities.
 3. Independent reproduction by someone who authored neither the inputs nor the implementation.
 4. Final provenance, secrets and claims review, then founder approval.
