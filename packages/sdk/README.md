@@ -188,3 +188,79 @@ checks in `resolve`. The lower-level `fetchDidJson` only fetches/parses a docume
 and should not be treated as identity verification. This origin policy also
 does not validate resolved IP addresses or stop DNS rebinding; NET-06 remains
 open and deployments must retain their own egress controls.
+
+### Node server egress protection (NET-06, unreleased source)
+
+For server-side resolution of untrusted DIDs, select the Node-specific entry
+point. It enables address checks and connection pinning by default:
+
+```ts
+import { resolveDidWithNodeEgress } from 'atp-sdk/node';
+
+const result = await resolveDidWithNodeEgress(did, {
+  timeoutMs: 10_000,
+  allowedRedirectOrigins: ['https://identity-cdn.example'],
+});
+```
+
+This is a new opt-in entry point. `DidAtpResolver.resolve` with its ordinary
+fetch remains unchanged and does **not** gain address filtering automatically.
+The new Node transport is not exported through the SDK's default root entry.
+`createNodeDidFetch` is also available from `atp-sdk/node` for callers explicitly
+composing it with the resolver; it is a GET-only adapter requiring manual
+redirect mode, not a general-purpose replacement for fetch.
+
+On every hop the transport resolves all final A/AAAA answers, rejects the entire
+answer set if any address is disallowed, and selects one validated address. It
+connects directly to that IP without a second hostname lookup, fallback, proxy,
+or pooled socket. Certificate-chain verification stays enabled; TLS hostname
+verification and the HTTP Host header use the original requested hostname.
+Changed DNS answers on a later redirect are evaluated again before a connection.
+The resolver's deadline covers DNS waiting, headers, and body delivery. A timed
+out OS DNS lookup can finish in the background but cannot dispatch a late request.
+
+The default address policy blocks private, loopback, link-local, shared,
+multicast, reserved, documentation, and other special-purpose IPv4 space. IPv6
+is restricted to 2000::/3 excluding the reviewed special-purpose ranges;
+IPv4-mapped, NAT64, 6to4, and other transition/special prefixes are denied. The
+policy is deliberately conservative and also excludes some globally reachable
+special-purpose services. Azure's platform virtual IP 168.63.129.16 is denied.
+This is a static reviewed policy, not a live routability or ownership service.
+
+A private deployment can supply an explicit exception for an exact HTTPS origin
+and individual IP addresses, together with its trust roots when required:
+
+```ts
+const result = await resolveDidWithNodeEgress(did, {
+  egress: {
+    privateAddressAllowlist: [
+      { origin: 'https://identity.internal.example', addresses: ['10.20.30.40'] },
+    ],
+    ca: organizationCaPem,
+  },
+});
+```
+
+Exceptions are snapshotted, are empty by default, and do not allow other hosts,
+ports, or addresses. Origin approval for redirects is separate from private-IP
+permission. `ca`, when supplied, replaces Node's default trust roots; it never
+disables verification. A trusted `resolveAddresses` override can be used for
+controlled DNS environments; returned addresses are still checked and pinned.
+The transport requests identity encoding and rejects compressed responses rather
+than silently applying the body cap to compressed bytes. It limits response
+headers to 16 KiB and does not follow redirects itself.
+
+Production egress firewalls remain useful: an application cannot determine how
+a network routes or translates even a public IP, and a static policy needs
+maintenance as assignments change. Platform endpoints beyond the reviewed list,
+DNS authenticity/availability, operating-system compromise, proxy-based routing,
+native browser interoperability, and independent implementation conformance are
+outside this candidate's evidence. The tests use controlled local TLS with
+explicit per-origin loopback exceptions; those exceptions never become defaults.
+
+Policy references reviewed 2026-11-08:
+
+- [IANA IPv4 special-purpose registry](https://www.iana.org/assignments/iana-ipv4-special-registry/)
+- [IANA IPv6 special-purpose registry](https://www.iana.org/assignments/iana-ipv6-special-registry/)
+- [Azure platform virtual IP](https://learn.microsoft.com/en-us/azure/virtual-network/what-is-ip-address-168-63-129-16)
+- [Node 20 HTTPS request and TLS options](https://nodejs.org/docs/latest-v20.x/api/https.html#httpsrequestoptions-callback)
