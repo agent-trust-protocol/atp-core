@@ -78,7 +78,6 @@ types are rejected. This helper computes a thumbprint, not cryptographic key
 validity. Existing ATP fingerprint vectors are unchanged. The base64url
 implementation does not require Node's global `Buffer`.
 
-These APIs are source additions pending a package release. SDK parser migration
-must follow publication of a version containing them, with root-DID and
-fragment behavior preserved. This change does not modify the DID method syntax,
+These APIs are included in the 0.2.0 release candidate. SDK parser migration
+must follow publication of 0.2.0, with root-DID and fragment behavior preserved. This change does not modify the DID method syntax,
 add network resolution, or publish a package.

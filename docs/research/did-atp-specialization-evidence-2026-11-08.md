@@ -1,7 +1,7 @@
 # did:atp specialization: evidence and next gates
 
 Review date: 2026-11-08. Implementation baseline: ATP Core commit
-`2639c0f7dfe303328e1350b7bd3b00de88a10834` (merged PR #212).
+`f73be0fdf0eb40c45feab54157721769431cb2b5` (merged PR #213, including #212).
 
 ## Decision
 
@@ -43,20 +43,24 @@ Paths below are relative to the reviewed repository baseline.
 
 ### Verification performed for this review
 
-Eight existing suites passed, 142 tests total, on Node 24 using an existing local
-root dependency installation. No tests or production code were changed in this
-review. Reproduction with the repository's current CI Jest version:
+Eight existing suites passed, 142 tests total, on Node 24 after a clean root
+lockfile installation using `npm ci --include=dev --ignore-scripts --no-audit
+--no-fund`. Dependency lifecycle scripts were disabled; the focused suites do
+not require native build outputs. No tests or production code were changed in
+this review. Reproduction with the repository's current Jest version:
 
 ```bash
-npm ci --include=dev
+npm ci --include=dev --ignore-scripts --no-audit --no-fund
 npm test -- --runInBand --testPathPatterns '(did-atp-equivalence|did-v2|crypto-v2|did-vectors|did-pairwise|operations|resolver|did)\.test\.ts$'
 ```
 
-The local cached Jest version used singular `--testPathPattern`; this is a
-focused local result, not a new clean-install or full-repository CI run. PR #212's
-merged commit separately passed all five recorded GitHub workflow runs. PR #213,
-which prepares package 0.2.0, separately passed all six recorded PR workflow runs
-at review time and remained open.
+This clean-install run replaces the earlier cached-dependency qualification.
+It is a focused result, not a full-repository local test run. The five GitHub
+workflow runs on the #213 merge separately passed. At the review checkpoint,
+#214 had five successful workflow runs and no review submissions, conversation
+comments, or inline review threads. Passing automation is not independent human
+review. npm's latest-version query still returned 0.1.1; merge of #213 did not
+publish 0.2.0. These are timestamped observations, not continuously updated status.
 
 ## Is a specialized method necessary?
 
@@ -79,7 +83,7 @@ baseline. Define both configurations and publish fixtures before claiming a win.
 
 | Gate | Work | Evidence required to close |
 | --- | --- | --- |
-| G1: release | Merge PR #213 after review, pass main CI, publish 0.2.0 using trusted publishing. | Registry version, provenance, exact tarball integrity, and clean-consumer checks against the downloaded registry artifact. Currently pending. |
+| G1: release | PR #213 is merged and main CI passed; publish 0.2.0 using trusted publishing. | Registry version, provenance, exact tarball integrity, and clean-consumer checks against the downloaded registry artifact. Publication and registry verification remain pending. |
 | G2: SDK adoption | Pin released 0.2.0 and delegate path parsing while preserving the SDK's root-DID, fragment, and null-on-invalid behavior. | Lockfile and package build plus positive/negative compatibility tests; malformed input cannot gain acceptance silently. |
 | G3: network boundary | Review resolver transport and run controlled real-HTTP/TLS fixtures. | Reject unsafe redirect targets before following them; test hop limits, timeout/abort, incremental body limits, private-address/egress policy, and URL path normalization. These are evaluation requirements, not implemented claims. |
 | G4: independent interoperability | Have a separately maintained implementation consume the fixed identifiers and signed documents. | Versioned producer/verifier matrix, exact fixture bytes, expected failures, tool versions, and independently posted output. Until then the result is same-project compatibility. |
@@ -103,3 +107,31 @@ small, and authorization remains separate. We are preparing a versioned release
 and seeking independent interoperability and lifecycle evidence before making
 broader claims about specialization. Discussion of these properties does not
 imply W3C standardization or endorsement.
+
+## Concrete acceptance cases for the next implementation work
+
+These are planned fixtures, not tests executed by this documentation review.
+Use controlled loopback servers and generated test keys; no production service
+or credential is required for the transport cases. Transport/privacy work can
+proceed alongside release; SDK dependency adoption waits for the registry artifact.
+
+| Case | Input or event | Required observable outcome |
+| --- | --- | --- |
+| SDK-01 | Existing root, path, pairwise, fragment-bearing, and invalid SDK input corpus | New delegation preserves old return values and errors at the public SDK boundary; a bare-path parser is not substituted for the whole SDK parser. |
+| SDK-02 | Clean SDK install after pinning the published package | Installed dependency integrity matches the lockfile; package build resolves all new exports without monorepo source aliases. |
+| NET-01 | HTTPS server redirects to HTTP | Resolver rejects the redirect before any request reaches the HTTP target; assert the target request counter remains zero. |
+| NET-02 | Redirect loop or redirect chain beyond the configured hop limit | Resolver stops within its limit, reports a stable failure, and releases response resources. |
+| NET-03 | Missing or false Content-Length with a response exceeding the byte cap | Resolver cancels the body while receiving it when the cap is exceeded; measure bytes consumed rather than only final rejection. |
+| NET-04 | Server stalls before headers or during body delivery | Configured deadline aborts the operation and cleans up streams/listeners. Test both phases. |
+| NET-05 | Identifier path contains dot segments or a redirect changes destination | Resolve URL normalization and destination policy explicitly before dispatch; tests demonstrate the approved resource is fetched. Do not silently change DID syntax in a transport fix. |
+| NET-06 | A server-side caller resolves an attacker-selected host or redirect | Deployment egress policy is enforced on every hop, including resolved addresses; a localhost-enabled test policy must not become a production default. DNS rebinding resistance needs a connection-level design, not only hostname parsing. |
+| LIFE-01 | Old DID, replacement keys, cached old document, or unavailable host | Keep key mismatch, current resolution, and historical verification distinct. Do not infer a signed migration or confirmed revocation from a replacement or 404. |
+| PRIV-01 | Two peer-specific identifiers share a domain, service endpoint, or credential | Report those observable links; distinct keys alone cannot close the privacy gate. |
+| INT-01 | Independent verifier consumes exact valid, tampered, and proof-stripped fixtures | Publish verifier identity/version and raw outcomes. A second wrapper around the same ATP implementation does not count as independent evidence. |
+| CMP-01 | ATP and an existing method with an explicit hybrid profile face the same key-substitution and proof-stripping inputs | State both profiles, measure security outcomes and integration costs, and publish disagreements. A benefit or disadvantage remains an observation until reproduced. |
+
+For each implemented fixture, record the case ID, commit, environment, command,
+expected outcome, actual outcome, and evidence location. A gate closes only when
+its required cases and evidence are complete. Do not convert this matrix into a
+pass score based on how many rows have tests; an untested mandatory failure path
+remains open.

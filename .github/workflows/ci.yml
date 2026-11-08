@@ -60,8 +60,21 @@ jobs:
           mkdir "$RUNNER_TEMP/did-atp-consumer"
           cd "$RUNNER_TEMP/did-atp-consumer"
           npm init -y
-          npm install "$RUNNER_TEMP/atpdeveloper-did-atp-0.1.1.tgz"
-          node --input-type=module -e "import { atpE1Fingerprint, buildAtpV2Did } from '@atpdeveloper/did-atp'; const ed = new Uint8Array(32); const pq = new Uint8Array(1952); if (!atpE1Fingerprint(ed).startsWith('e1_') || !buildAtpV2Did('example.com', ['agent'], ed, pq).startsWith('did:atp:example.com:agent:')) process.exit(1)"
+          npm install "$RUNNER_TEMP/atpdeveloper-did-atp-0.2.0.tgz"
+          node --input-type=module <<'JS'
+          import { buildAtpV2Did, parseAtpV2PathDid, isAtpV2PathDid, verifyAtpV2KeyBindings, atpJwkThumbprint } from '@atpdeveloper/did-atp';
+          import assert from 'node:assert/strict';
+          const ed = new Uint8Array(32), pq = new Uint8Array(1952);
+          const did = buildAtpV2Did('example.com', ['agent'], ed, pq);
+          assert.deepEqual(parseAtpV2PathDid(did).path, ['agent']);
+          assert.equal(isAtpV2PathDid(did), true);
+          assert.equal(isAtpV2PathDid(did + '#key'), false);
+          assert.equal(verifyAtpV2KeyBindings(did, ed, pq), true);
+          const wrongPq = new Uint8Array(pq); wrongPq[0] = 1;
+          assert.equal(verifyAtpV2KeyBindings(did, ed, wrongPq), false);
+          const jwk = { crv: 'Ed25519', kty: 'OKP', x: '11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo' };
+          assert.equal(atpJwkThumbprint({ ...jwk, kid: 'metadata' }), 'kPrK_qmxVWaYVA9wwBF6Iuo3vVzz7TxHCTwXBygrS4k');
+          JS
           npm audit --omit=dev --audit-level=high
 
       - name: Package tests (sdk)
