@@ -135,3 +135,35 @@ expected outcome, actual outcome, and evidence location. A gate closes only when
 its required cases and evidence are complete. Do not convert this matrix into a
 pass score based on how many rows have tests; an untested mandatory failure path
 remains open.
+
+## Follow-up: NET-01 through NET-04 implementation candidate
+
+The resolver transport follow-up adds manual HTTPS redirects with a configurable
+hop cap, a single transport deadline and caller abort signal, and incremental
+byte accounting/cancellation at 256 KiB. The deadline covers transport, not the
+subsequent cryptographic verification step. It rejects URL credentials and
+cancels redirect/error bodies. New error codes are `redirectLimit`, `timeout`,
+and `aborted`. Fetch overrides must support Response byte streams; text-only
+doubles are no longer sufficient.
+
+Evidence is in `packages/sdk/src/__tests__/utils/resolver-transport.test.ts` and
+`resolver-https.test.ts`. The HTTPS suite generates a temporary certificate,
+verifies it through a test-only Node HTTPS fetch adapter, uses loopback ports,
+and checks that the HTTP downgrade target receives zero requests. It also
+covers a redirect loop, a real chunked oversized body, and stalls before headers
+and during the body. Test-only certificate trust is scoped to the fixture client;
+TLS verification is not globally disabled. Deterministic byte-stream tests count
+bytes consumed beyond the cap and confirm cancellation and reader-lock release.
+
+These tests are same-project controlled transport evidence. They do not close
+G3 as a whole: NET-05 path/destination policy and NET-06 deployment egress remain
+open, as do native-fetch/browser interoperability, independent verification,
+and the lifecycle/privacy/comparison gates. No package publication is performed
+by the transport change.
+
+Validation checkpoint for this implementation candidate (Node 24): the full SDK
+suite passed 27 suites / 636 tests after a clean SDK lockfile installation with
+dependency lifecycle scripts disabled. The focused root identity/transport run
+separately passed 10 suites / 167 tests. These overlap and must not be added
+together. The SDK TypeScript build passed. This is local candidate evidence;
+GitHub CI and main-branch merge remain separate checkpoints.

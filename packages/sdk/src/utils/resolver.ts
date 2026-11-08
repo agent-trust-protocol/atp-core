@@ -36,7 +36,10 @@ export type DidResolutionErrorCode =
   | 'notFound'
   | 'invalidDidDocument'
   | 'didMismatch'
-  | 'verificationFailed';
+  | 'verificationFailed'
+  | 'redirectLimit'
+  | 'timeout'
+  | 'aborted';
 
 export class DidResolutionError extends Error {
   constructor(
@@ -51,6 +54,12 @@ export class DidResolutionError extends Error {
 export interface ResolveOptions {
   /** Fetch implementation override (e.g. for tests). Defaults to global fetch. */
   fetch?: typeof fetch;
+  /** Total transport deadline including redirects and body reads (default 10s). */
+  timeoutMs?: number;
+  /** Maximum redirects followed after the initial request (default 5). */
+  maxRedirects?: number;
+  /** Optional caller cancellation, combined with the transport deadline. */
+  signal?: AbortSignal;
 }
 
 export interface DidResolutionResult {
@@ -63,7 +72,8 @@ export interface DidResolutionResult {
 /**
  * Maximum accepted size of a fetched did.json. A conformant DID document with
  * two verification methods and dual proofs is a few KB; 256 KiB is a generous
- * ceiling that still defends against memory-exhaustion via oversized payloads.
+ * ceiling on retained response bytes (transport buffers and the current chunk
+ * are allocated by the fetch implementation).
  */
 const MAX_DID_JSON_BYTES = 256 * 1024;
 
@@ -132,79 +142,137 @@ export class DidAtpResolver {
   }
 
   /**
-   * Fetch a did.json URL. HTTPS only — http:// (or any other scheme) is
-   * rejected before any network I/O, and an https→http redirect is rejected
-   * after the fact via the response's final URL.
+   * Fetch a did.json using manual HTTPS redirects, a total deadline and a
+   * streaming 256 KiB body cap. Deployment egress policy remains the caller's
+   * responsibility; HTTPS alone does not prevent private-network access.
+   * Fetch overrides must honor manual redirects and should honor AbortSignal.
    */
   static async fetchDidJson(url: string, options: ResolveOptions = {}): Promise<AtpDidDocument> {
-    let parsedUrl: URL;
+    const timeoutMs = options.timeoutMs ?? 10_000;
+    const maxRedirects = options.maxRedirects ?? 5;
+    if (!Number.isSafeInteger(timeoutMs) || timeoutMs <= 0 || timeoutMs > 2_147_483_647 ||
+        !Number.isSafeInteger(maxRedirects) || maxRedirects < 0 || maxRedirects > 20) {
+      throw new RangeError('timeoutMs must be a positive timer-safe integer and maxRedirects must be 0..20');
+    }
+    const checkedUrl = (input: string, base?: URL): URL => {
+      let target: URL;
+      try { target = new URL(input, base); } catch {
+        throw new DidResolutionError('insecureUrl', 'Invalid did.json URL');
+      }
+      if (target.protocol !== 'https:' || target.username || target.password) {
+        throw new DidResolutionError('insecureUrl', 'did:atp resolution requires HTTPS without URL credentials');
+      }
+      return target;
+    };
+    let current = checkedUrl(url);
+    const controller = new AbortController();
+    let timedOut = false;
+    let response: Response | undefined;
+    let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+    const cancelBody = (): void => {
+      // Never let a misbehaving transport's cancellation block the deadline.
+      const cancellation = reader ? reader.cancel() : response?.body?.cancel();
+      void cancellation?.catch(() => {});
+    };
+    const abortError = () => new DidResolutionError(
+      timedOut ? 'timeout' : 'aborted',
+      timedOut ? 'did.json transport deadline exceeded' : 'did.json request aborted'
+    );
+    const checkAbort = () => {
+      if (controller.signal.aborted) throw abortError();
+    };
+    let onAbort: () => void;
+    const aborted = new Promise<never>((_resolve, reject) => {
+      onAbort = () => { cancelBody(); reject(abortError()); };
+      controller.signal.addEventListener('abort', onAbort, { once: true });
+    });
+    const forwardAbort = () => controller.abort();
+    options.signal?.addEventListener('abort', forwardAbort, { once: true });
+    const timer = setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
+    if (options.signal?.aborted) controller.abort();
+
+    const run = async (): Promise<AtpDidDocument> => {
+      const fetchImpl = options.fetch ?? fetch;
+      for (let hops = 0; ; hops++) {
+        checkAbort();
+        response = await fetchImpl(current.toString(), {
+          headers: { accept: 'application/did+json, application/json' },
+          redirect: 'manual', signal: controller.signal
+        });
+        // A late response from an override that ignored abort must be closed.
+        if (controller.signal.aborted) { cancelBody(); checkAbort(); }
+        if (response.url) {
+          const actual = checkedUrl(response.url);
+          if (actual.href !== current.href) {
+            throw new DidResolutionError('insecureUrl', 'Fetch override followed a redirect despite manual mode');
+          }
+        }
+        if ([301, 302, 303, 307, 308].includes(response.status)) {
+          const location = response.headers.get('location');
+          if (!location) throw new DidResolutionError('notFound', 'Redirect has no Location header');
+          const target = checkedUrl(location, current);
+          if (hops >= maxRedirects) {
+            throw new DidResolutionError('redirectLimit', 'did.json redirect limit exceeded');
+          }
+          await response.body?.cancel();
+          current = target;
+          continue;
+        }
+        if (!response.ok) {
+          throw new DidResolutionError('notFound', `did.json fetch returned HTTP ${response.status}`);
+        }
+        const advertised = Number(response.headers.get('content-length'));
+        if (Number.isFinite(advertised) && advertised > MAX_DID_JSON_BYTES) {
+          throw new DidResolutionError('invalidDidDocument', `did.json exceeds the ${MAX_DID_JSON_BYTES}-byte limit`);
+        }
+        if (!response.body) {
+          throw new DidResolutionError('invalidDidDocument', 'did.json has no response body');
+        }
+        reader = response.body.getReader();
+        const chunks: Uint8Array[] = [];
+        let size = 0;
+        try {
+          while (true) {
+            const { value, done } = await reader.read();
+            checkAbort();
+            if (done) break;
+            size += value.byteLength;
+            if (size > MAX_DID_JSON_BYTES) {
+              throw new DidResolutionError('invalidDidDocument', `did.json exceeds the ${MAX_DID_JSON_BYTES}-byte limit`);
+            }
+            chunks.push(value.slice());
+          }
+        } finally {
+          // Cancel before releasing the reader on incomplete or failed reads.
+          if (size > MAX_DID_JSON_BYTES || controller.signal.aborted) cancelBody();
+          reader.releaseLock();
+          reader = undefined;
+        }
+        const bytes = new Uint8Array(size);
+        let offset = 0;
+        for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length; }
+        let document: unknown;
+        try { document = JSON.parse(new TextDecoder().decode(bytes)); } catch {
+          throw new DidResolutionError('invalidDidDocument', 'did.json is not valid JSON');
+        }
+        if (typeof document !== 'object' || document === null ||
+            typeof (document as { id?: unknown }).id !== 'string') {
+          throw new DidResolutionError('invalidDidDocument', 'Response is not a DID Document');
+        }
+        return document as AtpDidDocument;
+      }
+    };
     try {
-      parsedUrl = new URL(url);
-    } catch {
-      throw new DidResolutionError('insecureUrl', `Invalid URL: "${url}"`);
+      return await Promise.race([run(), aborted]);
+    } catch (error) {
+      if (controller.signal.aborted) throw abortError();
+      if (error instanceof DidResolutionError) throw error;
+      throw new DidResolutionError('notFound', `Failed to fetch/read did.json: ${(error as Error).message}`);
+    } finally {
+      clearTimeout(timer);
+      options.signal?.removeEventListener('abort', forwardAbort);
+      controller.signal.removeEventListener('abort', onAbort!);
+      cancelBody();
     }
-    if (parsedUrl.protocol !== 'https:') {
-      throw new DidResolutionError(
-        'insecureUrl',
-        `did:atp resolution requires HTTPS; refusing to fetch "${url}"`
-      );
-    }
-
-    const fetchImpl = options.fetch ?? fetch;
-    let response: Response;
-    try {
-      response = await fetchImpl(parsedUrl.toString(), {
-        headers: { accept: 'application/did+json, application/json' },
-        redirect: 'follow'
-      });
-    } catch (e) {
-      throw new DidResolutionError('notFound', `Failed to fetch ${url}: ${(e as Error).message}`);
-    }
-
-    if (response.url && !response.url.startsWith('https:')) {
-      throw new DidResolutionError(
-        'insecureUrl',
-        `did.json fetch was redirected to a non-HTTPS URL: "${response.url}"`
-      );
-    }
-    if (!response.ok) {
-      throw new DidResolutionError('notFound', `did.json fetch returned HTTP ${response.status} for ${url}`);
-    }
-
-    // DoS guard: a did.json is a small document. Reject oversized responses
-    // before buffering them into memory. Check the advertised Content-Length
-    // first (cheap), then enforce the same cap on the actual bytes read, since
-    // a hostile server can lie about or omit Content-Length.
-    const advertised = Number(response.headers.get('content-length'));
-    if (Number.isFinite(advertised) && advertised > MAX_DID_JSON_BYTES) {
-      throw new DidResolutionError(
-        'invalidDidDocument',
-        `did.json at ${url} exceeds the ${MAX_DID_JSON_BYTES}-byte limit (Content-Length ${advertised}).`
-      );
-    }
-
-    let body: string;
-    try {
-      body = await response.text();
-    } catch (e) {
-      throw new DidResolutionError('notFound', `Failed to read did.json body from ${url}: ${(e as Error).message}`);
-    }
-    if (Buffer.byteLength(body, 'utf8') > MAX_DID_JSON_BYTES) {
-      throw new DidResolutionError(
-        'invalidDidDocument',
-        `did.json at ${url} exceeds the ${MAX_DID_JSON_BYTES}-byte limit.`
-      );
-    }
-
-    let document: unknown;
-    try {
-      document = JSON.parse(body);
-    } catch {
-      throw new DidResolutionError('invalidDidDocument', `did.json at ${url} is not valid JSON`);
-    }
-    if (typeof document !== 'object' || document === null || typeof (document as { id?: unknown }).id !== 'string') {
-      throw new DidResolutionError('invalidDidDocument', `did.json at ${url} is not a DID Document`);
-    }
-    return document as AtpDidDocument;
   }
 }

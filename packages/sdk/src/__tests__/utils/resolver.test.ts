@@ -21,17 +21,12 @@ function mockFetch(
   return jest.fn(async (input: any) => {
     const status = init.status ?? 200;
     const bodyText = typeof body === 'string' ? body : JSON.stringify(body);
-    return {
-      ok: status >= 200 && status < 300,
+    const response = new Response(bodyText, {
       status,
-      url: init.url ?? String(input),
-      headers: new Headers({ 'content-length': String(Buffer.byteLength(bodyText, 'utf8')) }),
-      text: async () => bodyText,
-      json: async () => {
-        if (typeof body === 'string') return JSON.parse(body);
-        return body;
-      }
-    } as Response;
+      headers: { 'content-length': String(Buffer.byteLength(bodyText, 'utf8')) }
+    });
+    Object.defineProperty(response, 'url', { value: init.url ?? String(input) });
+    return response;
   }) as unknown as typeof fetch;
 }
 
@@ -139,6 +134,7 @@ describe('DidAtpResolver.fetchDidJson', () => {
       url: 'https://example.com/did.json',
       // Lie: claim the body is tiny.
       headers: new Headers({ 'content-length': '10' }),
+      body: new Response(huge).body,
       text: async () => huge,
       json: async () => JSON.parse(huge)
     })) as unknown as typeof fetch;
