@@ -60,7 +60,9 @@ window opens (`now < notBefore`) is refused without a source read, and the mappi
 `evidence_expired`. Neither half of that is confirmed. The clarification covers unexpired calls,
 and a not-yet-valid grant is arguably unexpired, so the profile may require a read there; the
 revision-3 vocabulary also has no distinct not-yet-valid reason. Revision 3 contains no such call,
-so the pinned corpus does not decide it, and the question has not been raised with the lab. Treat
+so the pinned corpus does not decide it. The question was raised with the lab on 2026-11-07
+([#192 comment](https://github.com/Agent-Authority-Conformance/aps-conformance-suite/issues/192#issuecomment-6715292825))
+and is unanswered as of that date. Treat
 this behaviour as ATP's current choice, not as conforming.
 
 The pinned lab corpus remains unchanged. Synthetic overlap tests exercise the precedence in the
