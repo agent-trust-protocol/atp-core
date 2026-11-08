@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const CredentialSubjectSchema = z.record(z.any());
+export const CredentialSubjectSchema = z.record(z.string(), z.any());
 
 export const CredentialStatusSchema = z.object({
   id: z.string(),
@@ -37,7 +37,7 @@ export const CredentialSchemaDefinition = z.object({
   name: z.string(),
   description: z.string(),
   version: z.string(),
-  properties: z.record(z.object({
+  properties: z.record(z.string(), z.object({
     type: z.string(),
     description: z.string(),
     required: z.boolean().optional(),
@@ -48,7 +48,7 @@ export const CredentialSchemaDefinition = z.object({
 export const CredentialIssuanceRequest = z.object({
   schemaId: z.string(),
   subject: z.string(),
-  claims: z.record(z.any()),
+  claims: z.record(z.string(), z.any()),
   expirationDate: z.string().optional(),
   issuerDid: z.string(),
   issuerPrivateKey: z.string(),

@@ -60,7 +60,7 @@ No custom wrapper automatically secures every tool or establishes protocol confo
 ## Implementation Guide
 
 1. Use the existing SDK methods from `atp-sdk` — do not duplicate trust or crypto logic
-2. Follow the pattern in `packages/openclaw-atp/src/claw-api.ts`
+2. Follow the pattern in `archive/openclaw-atp/src/claw-api.ts` (deprecated, reference only)
 3. Your adapter must:
    - Check agent identity via the SDK
    - Evaluate the relevant policy before executing sensitive actions
@@ -93,13 +93,13 @@ export async function atpWrap(agent: any, options: ATPAdapterOptions) {
 
 1. Fork the repo
 2. Copy this template to `adapters/your-framework/`
-3. Implement `atpWrap()` following the pattern in `packages/openclaw-atp/`
+3. Implement `atpWrap()` following the pattern in `archive/openclaw-atp/` (deprecated, reference only)
 4. Add tests in `adapters/your-framework/tests/`
 5. Open a PR using the template in `.github/pull_request_template.md`
 
 ## Resources
 
-- [OpenClaw adapter source](../packages/openclaw-atp/)
+- [OpenClaw adapter source (deprecated)](../archive/openclaw-atp/)
 - [SDK API reference](../packages/sdk/README.md)
-- [Quick Start](../QUICK_START.md)
+- [Getting started](../docs/getting-started.md)
 - [Discord](https://discord.gg/agenttrustprotocol)

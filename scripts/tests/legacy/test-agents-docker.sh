@@ -6,7 +6,7 @@ echo "Testing example agents with Docker services..."
 export ATP_GATEWAY="ws://localhost:8081/rpc"
 
 # Build the example agent
-cd examples/simple-agent
+cd archive/examples-legacy/simple-agent
 echo "Building example agent..."
 npm run build
 

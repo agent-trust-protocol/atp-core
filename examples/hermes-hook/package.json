@@ -10,6 +10,6 @@
     "demo": "node walkthrough.mjs"
   },
   "dependencies": {
-    "atp-profiles": "1.1.0"
+    "atp-profiles": "3.0.0"
   }
 }

@@ -15,7 +15,7 @@ export const CapabilityTokenSchema = z.object({
   audience: z.string(),
   scopes: z.array(ScopeSchema),
   resource: z.string().optional(),
-  conditions: z.record(z.any()).optional(),
+  conditions: z.record(z.string(), z.any()).optional(),
   issuedAt: z.number(),
   expiresAt: z.number(),
   notBefore: z.number().optional(),
@@ -27,7 +27,7 @@ export const PermissionGrantSchema = z.object({
   grantee: z.string(),
   scopes: z.array(ScopeSchema),
   resource: z.string().optional(),
-  conditions: z.record(z.any()).optional(),
+  conditions: z.record(z.string(), z.any()).optional(),
   expiresAt: z.number().optional(),
   createdAt: z.number(),
   revokedAt: z.number().optional(),
@@ -38,7 +38,7 @@ export const PermissionRequestSchema = z.object({
   grantee: z.string(),
   scopes: z.array(ScopeSchema),
   resource: z.string().optional(),
-  conditions: z.record(z.any()).optional(),
+  conditions: z.record(z.string(), z.any()).optional(),
   expiresAt: z.number().optional(),
   justification: z.string().optional(),
 });
@@ -47,7 +47,7 @@ export const PermissionCheckSchema = z.object({
   subject: z.string(),
   action: ScopeSchema,
   resource: z.string().optional(),
-  context: z.record(z.any()).optional(),
+  context: z.record(z.string(), z.any()).optional(),
 });
 
 // Sandboxed expressions: only allow alphanumerics, whitespace, basic

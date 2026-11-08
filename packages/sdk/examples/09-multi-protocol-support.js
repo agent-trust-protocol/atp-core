@@ -15,7 +15,7 @@ import {
   UniversalMonitor,
   MCPAdapter,
   Protocol
-} from '@atp/sdk';
+} from 'atp-sdk';
 
 /**
  * Example 1: Automatic Protocol Detection
@@ -67,10 +67,11 @@ async function monitorMCPAgent() {
     securityLevel: 'quantum-safe'
   });
 
-  // Create universal monitor
+  // Create universal monitor in explicit unsigned diagnostic mode. Event signing is
+  // not implemented and fails closed (the default), and events are unscored.
+  // See docs/MONITORING-SECURITY-BOUNDARY.md in the repository root.
   const monitor = new UniversalMonitor({
-    minTrustLevel: 50,
-    enableSigning: true,
+    enableSigning: false,
     enableAudit: true
   });
 
@@ -97,7 +98,6 @@ async function monitorMCPAgent() {
       console.log('Event received:');
       console.log(`  Type: ${event.type}`);
       console.log(`  Timestamp: ${event.timestamp}`);
-      console.log(`  Trust Score: ${event.trustScore}`);
       console.log(`  Data:`, JSON.stringify(event.data, null, 2));
       console.log('---');
     },
@@ -157,22 +157,16 @@ async function secureMessageExchange() {
   console.log('Original Message:');
   console.log(JSON.stringify(message, null, 2));
 
-  // Apply ATP security layer
-  const securedMessage = await mcpAdapter.secure(message);
-
-  console.log('\nSecured Message:');
-  console.log(`  Signature: ${securedMessage.signature.substring(0, 50)}...`);
-  console.log(`  Trust Level: ${securedMessage.trustLevel}`);
-  console.log(`  Timestamp: ${securedMessage.timestamp}`);
-
-  // Verify the secured message
-  const verification = await mcpAdapter.verify(securedMessage);
-
-  console.log('\nVerification Result:');
-  console.log(`  Verified: ${verification.verified}`);
-  console.log(`  Trust Score: ${verification.trustScore}`);
-  console.log(`  Signature Valid: ${verification.details?.signatureValid}`);
-  console.log(`  Sender Verified: ${verification.details?.senderVerified}`);
+  // Adapter-level message signing is not implemented yet. secure() fails closed
+  // rather than returning an unsigned "secured" message.
+  try {
+    await mcpAdapter.secure(message);
+    console.log('\n❌ Unexpected: secure() returned without a signing implementation');
+    process.exitCode = 1;
+  } catch (error) {
+    console.log(`\n✅ secure() fails closed: ${error.message}`);
+    console.log('   Sign messages with CryptoUtils.signEd25519 / signMlDsa65 until adapter signing ships.');
+  }
 
   await mcpAdapter.cleanup();
 }
@@ -268,18 +262,15 @@ async function filterEvents() {
   console.log('\n=== Example 6: Event Filtering ===\n');
 
   // Create monitor with event filters
+  // Unsigned diagnostic mode; monitoring events are unscored, so filter on event
+  // fields rather than on trust.
   const monitor = new UniversalMonitor({
-    minTrustLevel: 50,
+    enableSigning: false,
     filters: [
       {
         field: 'type',
         operator: 'eq',
         value: 'mcp.context.update'
-      },
-      {
-        field: 'trustScore',
-        operator: 'gt',
-        value: 70
       }
     ]
   });
@@ -303,14 +294,12 @@ async function filterEvents() {
 
   console.log('Monitoring with filters:');
   console.log('  - Only context.update events');
-  console.log('  - Trust score > 70');
   console.log('\nWaiting for matching events...\n');
 
   stream.subscribe({
     next: (event) => {
       console.log('Filtered event received:');
       console.log(`  Type: ${event.type}`);
-      console.log(`  Trust Score: ${event.trustScore}`);
     }
   });
 }
@@ -359,7 +348,7 @@ async function main() {
 
 // Run if executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch(console.error);
+  main().catch((error) => { console.error(error); process.exitCode = 1; });
 }
 
 export {

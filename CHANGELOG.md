@@ -5,6 +5,31 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **`atp-cli` 0.1.0 (unreleased).** The `atp` terminal tool in `packages/cli`, modelled on
+  Claude Code's interactive CLI: slash commands, Tab completion, history and a status
+  line; `atp -p` one-shot and `--json` output. `atp guard install claude-code` adds a
+  PreToolUse hook that can only tighten Claude Code (ATP allow defers to Claude Code's
+  own permissions; require_approval asks; deny blocks; errors exit 2). `atp guard install
+  hermes` uses atp-hermes-hook. `atp identity` creates a hybrid did:atp key pair
+  (owner-only keystore) and `atp audit` keeps a hash-chained, Ed25519-signed decision log.
+- **`atp-hermes-hook` 0.1.0 (unreleased).** A configurable, fail-closed Hermes Agent
+  `pre_tool_call` hook in `packages/hermes-hook`. It evaluates each mapped tool
+  against an `atp-profiles` profile and state, scopes filesystem tools to
+  configured directories (following symlinks), blocks with exit code 2, and can
+  escalate `require_approval` to Hermes' approval gate. CI runs a real Hermes
+  session against the packed tarball; publishing uses a provenance-enabled
+  workflow.
+
+### Deprecated
+- **`@atpdevelopment/openclaw-atp` is deprecated.** The adapter moved to
+  `archive/openclaw-atp` and is no longer built, tested, audited or published.
+  Its last release (1.1.3) depends on `atp-sdk@^1.2.4`. Use `atp-sdk` 4.x with
+  `atp-profiles`, and see `atp-hermes-hook` (`packages/hermes-hook`) for tool-boundary
+  enforcement in Hermes Agent.
+  The `openclaw-sandbox` profile and `RuntimeTarget "openclaw"` remain in
+  `atp-profiles` and `atp-sdk` until the next planned major release.
+
 ### Changed
 - **BREAKING (audit-logger): audit integrity hash redefined.** The per-event
   SHA-256 integrity hash and HMAC signature are now computed over a stable,

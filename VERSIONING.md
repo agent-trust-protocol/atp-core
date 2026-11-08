@@ -1,151 +1,104 @@
 # ATP Versioning Policy
 
-This document defines the versioning strategy and package status for the Agent Trust Protocol ecosystem.
+How the Agent Trust Protocol™ (ATP) packages in this repository are versioned, released and retired.
 
-## Package Status Overview
+Each published package has **its own version** (Lerna independent mode). There is no single repository-wide version. The badges below read live from npm, so they always show the current release.
 
-| Status | Badge | Description |
-|--------|-------|-------------|
-| **Production** | ![Stable](https://img.shields.io/badge/status-stable-green) | Ready for production use. Follows semver. API stability guaranteed. |
-| **Legacy** | ![Legacy](https://img.shields.io/badge/status-legacy-orange) | Superseded by newer packages. Maintenance mode only. Migration recommended. |
-| **Development** | ![Development](https://img.shields.io/badge/status-development-yellow) | Actively developed. APIs may change. Not recommended for production. |
-| **Experimental** | ![Experimental](https://img.shields.io/badge/status-experimental-red) | Early stage. Unstable. For testing only. |
+## Published packages
 
----
+| Package | Latest on npm | Status | Node.js | Use it for |
+| --- | --- | --- | --- | --- |
+| [`atp-sdk`](packages/sdk/README.md) | [![npm](https://img.shields.io/npm/v/atp-sdk)](https://www.npmjs.com/package/atp-sdk) | Stable | 20+ | The primary SDK: agent identity, trust utilities and profile decisions |
+| [`atp-profiles`](packages/atp-profiles/README.md) | [![npm](https://img.shields.io/npm/v/atp-profiles)](https://www.npmjs.com/package/atp-profiles) | Stable | 18+ | Fail-closed security profiles and the `allow` / `require_approval` / `deny` evaluator |
+| [`create-atp-agent`](packages/create-atp-agent/README.md) | [![npm](https://img.shields.io/npm/v/create-atp-agent)](https://www.npmjs.com/package/create-atp-agent) | Stable | 20+ from 1.5.0 | Scaffolding a starter project (`npx create-atp-agent my-agent`) |
+| [`@atpdeveloper/did-atp`](packages/did-atp/README.md) | [![npm](https://img.shields.io/npm/v/@atpdeveloper/did-atp)](https://www.npmjs.com/package/@atpdeveloper/did-atp) | Development (0.x) | 18+ declared | Canonical `did:atp` identifier primitives |
+| [`atp-cli`](packages/cli/README.md) | [![npm](https://img.shields.io/npm/v/atp-cli)](https://www.npmjs.com/package/atp-cli) | Development (0.x), first release pending | 20+ | The `atp` terminal tool: Claude Code and Hermes guards, local identity, signed audit trail |
+| [`atp-hermes-hook`](packages/hermes-hook/README.md) | [![npm](https://img.shields.io/npm/v/atp-hermes-hook)](https://www.npmjs.com/package/atp-hermes-hook) | Development (0.x) | 20+ | Fail-closed Hermes Agent `pre_tool_call` hook that enforces an ATP profile and path scope |
+| [`@atpdevelopment/openclaw-atp`](archive/openclaw-atp/README.md) | [![npm](https://img.shields.io/npm/v/@atpdevelopment/openclaw-atp)](https://www.npmjs.com/package/@atpdevelopment/openclaw-atp) | **Deprecated** | See package | Archived OpenClaw adapter; not built, tested or published. Do not use for new work |
 
-## Production Packages
+### Python packages (PyPI)
 
-### `atp-sdk` (v1.2.1) - PRIMARY SDK
+| Package | Status | Python | Use it for |
+| --- | --- | --- | --- |
+| [`atp-profiles`](packages/atp-profiles-python/README.md) | [![PyPI](https://img.shields.io/pypi/v/atp-profiles)](https://pypi.org/project/atp-profiles/) Stable | 3.9+ | Python port of `atp-profiles`. Versions track the npm package; shared conformance vectors keep the two evaluators identical |
+| [`agent-trust-protocol`](packages/agent-trust-protocol-python/README.md) | [![PyPI](https://img.shields.io/pypi/v/agent-trust-protocol)](https://pypi.org/project/agent-trust-protocol/) Development (0.x) | 3.9+ | Umbrella that installs the ATP Python packages |
 
-**Status:** ![Stable](https://img.shields.io/badge/status-stable-green)
+The PyPI name `atp-core` belongs to an unrelated project ("Attested Transport Protocol"). Python releases go through `pypi-publish.yml` (PyPI trusted publishing, environment `pypi`).
 
-The official ATP SDK for TypeScript/JavaScript. This is the **only recommended package** for building ATP-enabled applications.
+**Start with `atp-sdk`.** It includes the profile evaluator, so most applications need no other package.
 
-```bash
-npm install atp-sdk
-```
+The published `@atpdevelopment/openclaw-atp` 1.1.x depends on `atp-sdk@^1.2.4`. In that SDK line, `ATPClient.evaluateActionWithProfile()` returns `allow` when no profile, or an unknown profile, is configured. The package is deprecated and archived in `archive/openclaw-atp`. Use `atp-sdk` 4.x directly for new work, and `atp-hermes-hook` for Hermes Agent tool-boundary enforcement.
 
-**Features:**
-- Quantum-safe cryptography (ML-DSA + Ed25519)
-- Decentralized Identity (DID)
-- Trust scoring
-- Verifiable credentials
-- Payment protocols (AP2/ACP)
-- Zero-knowledge authentication
+> The npm package named `atp-core` is **not** an ATP package. It belongs to an unrelated project. Do not install it for ATP.
 
-**Semver Policy:**
-- MAJOR: Breaking API changes
-- MINOR: New features, backward compatible
-- PATCH: Bug fixes, security patches
+### Version history at a glance
 
----
+| Package | Current major | Previous majors |
+| --- | --- | --- |
+| `atp-sdk` | 4.x: fail-closed profile decisions, Node.js 20+ | 3.x (raw evaluator threw on missing profiles), 2.x and 1.x (no or unknown profile and unrecognized actions returned `allow`) |
+| `atp-profiles` | 3.x: missing profiles deny; `dev-mode` requires approval for unknown actions | 2.x (missing profiles threw), 1.x (unrecognized actions allowed) |
+| `create-atp-agent` | 1.5.x scaffolds `atp-sdk@^4` | 1.4.x and earlier scaffold older SDKs |
 
-### `@atpdevelopment/openclaw-atp` (v1.0.1)
+Upgrade notes: [SDK migration guide](packages/sdk/docs/MIGRATION.md), [SDK changelog](packages/sdk/CHANGELOG.md) and the [`atp-profiles` migration section](packages/atp-profiles/README.md#migration).
 
-**Status:** ![Stable](https://img.shields.io/badge/status-stable-green)
+## Workspace packages (not published)
 
-Official OpenClaw integration for multi-agent systems.
+These are `private` in their `package.json` and are not on npm. They support ATP infrastructure development in this monorepo and may change without notice.
 
-```bash
-npm install @atpdevelopment/openclaw-atp atp-sdk
-```
+`@atp/audit-logger`, `@atp/identity-service`, `@atp/monitoring-service`, `@atp/permission-service`, `@atp/protocol-integrations`, `@atp/rpc-gateway`, `@atp/session-sync-mcp`, `@atp/shared`, `@atp/support-agent`, `@atp/vc-service`.
 
----
+The repository root (`atp-ui-modern`) is a legacy Next.js app. The public website is maintained in a separate repository.
 
-## Legacy Packages
+## Semantic versioning
 
-### `atp-core` (v1.0.0)
+Published packages follow [Semantic Versioning 2.0.0](https://semver.org/):
 
-**Status:** ![Legacy](https://img.shields.io/badge/status-legacy-orange) - **Superseded by `atp-sdk`**
+- **Major:** incompatible API or behaviour changes. A stricter security default (for example, a decision that was `allow` becoming `require_approval` or `deny`) and a raised Node.js minimum count as major.
+- **Minor:** new, backward-compatible functionality.
+- **Patch:** backward-compatible fixes.
 
-**⚠️ DEPRECATED:** This package is no longer maintained. Use `atp-sdk` instead.
+Packages at `0.x` may make breaking changes in minor versions.
 
-`atp-core` was the initial minimal implementation. All functionality has been migrated to the more complete `atp-sdk`.
+Release channels: `latest` (`X.Y.Z`) for production, `beta` (`X.Y.Z-beta.N`) and `alpha` (`X.Y.Z-alpha.N`) for pre-releases.
 
-**Migration:**
-```diff
-- import { Agent } from 'atp-core';
-+ import { Agent } from 'atp-sdk';
-```
+## Releases and tags
 
----
+- Each release gets a Git tag and a GitHub Release named **`<package>@<version>`**, for example `atp-sdk@4.0.0`, on the commit it was published from.
+- Do not use `v*` tags for package releases. Pushing a `v*` tag triggers `production-deploy.yml`.
+- The repository-wide releases `v1.0.0` and `v1.2.5` predate per-package versioning and are kept as history.
 
-## Development Packages (0.x)
+### Release order
 
-All packages at version `0.x` are in active development. APIs may change without notice.
+When packages depend on each other, release them in dependency order and refresh lockfiles in between:
 
-| Package | Version | Description |
-|---------|---------|-------------|
-| `@atp/identity-service` | 0.1.0 | DID-based identity service |
-| `@atp/audit-logger` | 0.1.0 | Audit logging service |
-| `@atp/monitoring-service` | 0.1.0 | Metrics and monitoring |
-| `@atp/payment-service` | 0.1.0 | Payment protocol service |
-| `@atp/permission-service` | 0.1.0 | Access control service |
-| `@atp/rpc-gateway` | 0.1.0 | RPC gateway |
-| `@atp/vc-service` | 0.1.0 | Verifiable credentials |
-| `@atp/session-sync-mcp` | 0.1.0 | MCP session synchronization |
-| `@atp/shared` | 0.1.0 | Shared utilities |
-| `atp-ui-modern` | 0.1.0 | Next.js UI (monorepo root) |
+1. `atp-profiles`
+2. Refresh `packages/sdk/package-lock.json`, then `atp-sdk`
+3. `create-atp-agent`, if its template's SDK range changes
 
-**These packages:**
-- Are **not** published to npm (private)
-- Are intended for ATP infrastructure development
-- May have breaking changes
-- Should only be used if you're contributing to ATP core infrastructure
+Before each publish, run the package's own gates. For the SDK, those are `check-publishable`, the tests, the build, `npm run examples` and `npm pack --dry-run`. Then verify the published result with `scripts/verify-published-entry-points.mjs`.
 
----
+**Publishing.** Publish only through the per-package workflows, dispatched from `main`. They authenticate with [npm trusted publishing](https://docs.npmjs.com/trusted-publishers): GitHub's short-lived OIDC identity, no stored npm token. npm attaches provenance automatically. Run each workflow with `dry_run=true` first. A real publish from any branch other than `main` is refused.
 
-## Version Guidelines
+| Package | Workflow file | GitHub environment |
+| --- | --- | --- |
+| `atp-sdk` | `npm-publish-sdk.yml` | `npm-publish` |
+| `atp-profiles` | `npm-publish-profiles.yml` | `npm-publish` |
+| `create-atp-agent` | `npm-publish-cli.yml` | `npm-publish` |
+| `atp-hermes-hook` | `npm-publish-hermes-hook.yml` | `npm-publish` |
+| `atp-cli` | `npm-publish-atp-cli.yml` | `npm-publish` |
+| `@atpdeveloper/did-atp` | `npm-publish-did-atp.yml` | `npm-publish` |
 
-### Choosing the Right Package
+Each package's npm settings (**Settings → Trusted publishing → GitHub Actions**) must name organization `agent-trust-protocol`, repository `atp-core`, the workflow file above and environment `npm-publish`. All fields are case-sensitive. After the first trusted publish succeeds, set **Settings → Publishing access** to *Require two-factor authentication and disallow tokens*. Local publishing is a last resort. A local publish needs interactive 2FA and carries no provenance, so record that in the GitHub Release.
 
-**For Application Developers:**
-```bash
-# Use this - the only production SDK
-npm install atp-sdk
-```
+## Deprecation policy
 
-**For OpenClaw Multi-Agent Systems:**
-```bash
-npm install atp-sdk @atpdevelopment/openclaw-atp
-```
+1. Superseded versions stay installable. Mark them with `npm deprecate` and a message naming the replacement version, so installs show an upgrade path instead of breaking.
+2. Versions with a security-relevant flaw, such as failing open on policy decisions, say so in the deprecation message.
+3. Every breaking release ships migration notes.
+4. Before deprecating a version, check published packages that depend on it, so their users are not left with a warning they cannot act on.
 
-**For ATP Infrastructure Development:**
-- Clone the monorepo
-- Use workspace commands
-- Expect breaking changes
+## Questions
 
-### Semantic Versioning
-
-We follow [Semantic Versioning 2.0.0](https://semver.org/):
-
-- **MAJOR (X.y.z):** Incompatible API changes
-- **MINOR (x.Y.z):** New functionality, backward compatible
-- **PATCH (x.y.Z):** Bug fixes, backward compatible
-
-**Pre-1.0 packages (0.x):** Minor versions may include breaking changes.
-
-### Release Channels
-
-| Channel | Version Format | Use Case |
-|---------|---------------|----------|
-| Latest | `X.Y.Z` | Production use |
-| Beta | `X.Y.Z-beta.N` | Pre-release testing |
-| Alpha | `X.Y.Z-alpha.N` | Early access, experimental |
-
----
-
-## Deprecation Policy
-
-1. **Legacy packages** receive security patches only
-2. **Deprecation notices** are posted 6 months before removal
-3. **Migration guides** are provided for all breaking changes
-4. **Old packages** remain on npm but are marked deprecated
-
----
-
-## Questions?
-
-- [GitHub Discussions](https://github.com/agent-trust-protocol/core/discussions)
-- [Issues](https://github.com/agent-trust-protocol/core/issues)
-- Email: dev@agenttrustprotocol.com
+- [GitHub Discussions](https://github.com/agent-trust-protocol/atp-core/discussions)
+- [Issues](https://github.com/agent-trust-protocol/atp-core/issues)
+- [Contribution guide](CONTRIBUTING.md)

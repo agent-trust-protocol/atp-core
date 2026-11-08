@@ -1,0 +1,59 @@
+name: Publish atp-cli
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact atp-cli version to release
+        required: true
+        type: string
+      dry_run:
+        description: Validate and pack without publishing
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  atp-cli:
+    if: github.ref == 'refs/heads/main' || inputs.dry_run == true
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org/'
+      - name: Require npm 11.5.1+ (trusted publishing)
+        run: |
+          npm --version
+          node -e "const v=process.argv[1].split('.').map(Number); const ok=v[0]>11||(v[0]===11&&(v[1]>5||(v[1]===5&&v[2]>=1))); if(!ok){console.error('npm '+process.argv[1]+' cannot use npm trusted publishing; need 11.5.1 or newer');process.exit(1)}" "$(npm --version)"
+      - name: Check exact version and dependencies
+        working-directory: packages/cli
+        env:
+          EXPECTED_VERSION: ${{ inputs.version }}
+        run: |
+          test "$(node -p "require('./package.json').version")" = "$EXPECTED_VERSION"
+          node -e "const p=require('./package.json'); if (!p.repository?.url?.includes('agent-trust-protocol/atp-core') || p.repository?.directory !== 'packages/cli' || Object.values(p.bin).some(v=>v.startsWith('./'))) process.exit(1)"
+          for dep in atp-sdk atp-profiles atp-hermes-hook; do npm view "$dep@$(node -p "require('./package.json').dependencies['$dep']")" version; done
+          if npm view "atp-cli@$EXPECTED_VERSION" version >/dev/null 2>&1; then
+            echo "Version already published; refusing to republish"
+            exit 1
+          fi
+      - name: Install dependencies
+        working-directory: packages/cli
+        run: npm ci --ignore-scripts
+      - name: Test
+        working-directory: packages/cli
+        run: npm test
+      - name: Inspect package
+        working-directory: packages/cli
+        run: npm pack --dry-run
+      - name: Publish atp-cli
+        if: inputs.dry_run != true
+        working-directory: packages/cli
+        # Authenticates with GitHub's OIDC token via npm trusted publishing; no stored npm token.
+        run: npm publish --access public --provenance

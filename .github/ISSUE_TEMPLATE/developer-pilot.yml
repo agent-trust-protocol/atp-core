@@ -1,0 +1,57 @@
+name: Developer pilot feedback
+description: Tell us whether you could protect one Hermes tool, or where setup stopped.
+title: '[Pilot] '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Failed setups are useful feedback. Share only sanitized details. Do not post credentials, prompts, customer data, raw conversations, personal contact details or local paths. Report suspected vulnerabilities using SECURITY.md, not this public form.
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node/npm versions, Hermes commit/version, and ATP Core commit. No local paths.
+    validations:
+      required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Furthest stage reached
+      options:
+        - Setup stopped before dependencies installed
+        - Dependencies installed
+        - Hook subprocess walkthrough passed
+        - Pinned Hermes runtime verifier passed
+        - Protected action verified in my own Hermes test profile
+    validations:
+      required: true
+  - type: textarea
+    id: execution
+    attributes:
+      label: What executed and what was blocked?
+      description: Distinguish hook JSON from real tool results. For your own profile, confirm the fixed read, terminal denial, and absence of the attempted output file. If untested, say so.
+    validations:
+      required: true
+  - type: input
+    id: setup-time
+    attributes:
+      label: Approximate setup minutes and help needed
+      placeholder: '12 minutes; needed help with hook consent'
+  - type: textarea
+    id: friction
+    attributes:
+      label: First confusing step or failure
+      description: A short sanitized error excerpt is enough. Please remove personal paths and secrets.
+  - type: textarea
+    id: next-use
+    attributes:
+      label: Would you use it again? Which tool would you protect next?
+      description: Describe the use case without confidential information.
+  - type: dropdown
+    id: return-use
+    attributes:
+      label: Have you run another protected action at least seven days after your first success?
+      options:
+        - Not yet eligible or not tested
+        - Yes
+        - No

@@ -16,7 +16,7 @@ export const AuthMessageSchema = z.object({
 export const SubscriptionSchema = z.object({
   id: z.string(),
   event: z.string(),
-  filter: z.record(z.any()).optional(),
+  filter: z.record(z.string(), z.any()).optional(),
 });
 
 export const NotificationSchema = z.object({

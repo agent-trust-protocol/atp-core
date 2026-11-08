@@ -938,65 +938,6 @@ export class Agent extends EventEmitter {
   }
 
   /**
-   * One-shot mutual authentication between two agents
-   * Both agents prove to each other simultaneously
-   *
-   * @example
-   * ```typescript
-   * // Mutual authentication with another agent
-   * const result = await agentA.mutualAuth(
-   *   agentB.getDID(),
-   *   // What I require from them
-   *   [{ type: ZKProofType.TRUST_LEVEL, params: { minTrustLevel: 0.5 } }],
-   *   // What they require from me
-   *   [{ type: ZKProofType.IDENTITY, params: {} }]
-   * );
-   *
-   * if (result.iVerified.verified && result.theyVerified.verified) {
-   *   console.log('Mutual trust established!');
-   * }
-   * ```
-   */
-  async mutualAuth(
-    targetDid: string,
-    myRequirements: ZKPRequirement[],
-    theirRequirements: ZKPRequirement[]
-  ): Promise<{ iVerified: ZKPAuthResult; theyVerified: ZKPAuthResult }> {
-    if (!this.initialized || !this.did) {
-      throw new Error('Agent not initialized');
-    }
-
-    // Create challenge for the other agent (stored for later verification)
-    await this.requestAuth(targetDid, myRequirements);
-
-    // Create our response to their requirements (simulated challenge from them)
-    const challengeFromThem = createChallenge(targetDid, this.did, theirRequirements);
-    const myResponse = await this.respondToChallenge(challengeFromThem);
-
-    // In a real implementation, these would be exchanged over the network
-    // For now, we return placeholders for the mutual verification results
-    return {
-      iVerified: {
-        verified: false, // Will be verified when they respond
-        proverDid: targetDid,
-        verifiedProofs: [],
-        trustEstablished: false
-      },
-      theyVerified: {
-        // This would be their verification of our response
-        verified: true, // Optimistic for now
-        proverDid: this.did,
-        verifiedProofs: myResponse.proofs.map(p => ({
-          type: p.type,
-          verified: true,
-          timestamp: p.timestamp
-        })),
-        trustEstablished: true
-      }
-    };
-  }
-
-  /**
    * Generate a behavior proof to demonstrate compliance
    * Proves behavioral integrity without revealing interaction history
    *

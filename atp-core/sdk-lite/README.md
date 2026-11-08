@@ -1,6 +1,8 @@
 # @atp/sdk-lite
 
-**Ultra-lightweight SDK for the world's first quantum-safe AI agent protocol**
+**Ultra-lightweight SDK for the early quantum-safe AI agent protocol**
+
+> **Historical prototype:** The commands and APIs below describe an earlier local experiment and may not match a published package. For current work, use [`atp-sdk`](https://www.npmjs.com/package/atp-sdk), [`@atpdeveloper/did-atp`](https://www.npmjs.com/package/@atpdeveloper/did-atp), and [`atp-profiles`](https://www.npmjs.com/package/atp-profiles). This example is not evidence of hosted trust or security guarantees.
 
 ##  3-Line Quick Start
 
@@ -25,7 +27,8 @@ console.log('Trust Score:', await alice.getTrustScore(bob));
 ##  Installation
 
 ```bash
-npm install @atp/sdk-lite
+# Historical package: install atp-sdk for new projects
+npm install atp-sdk
 ```
 
 ##  Examples
@@ -143,5 +146,5 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-** World's First Quantum-Safe AI Agent Protocol**  
+** early Quantum-Safe AI Agent Protocol**  
 Ready for quantum computers. Available today.

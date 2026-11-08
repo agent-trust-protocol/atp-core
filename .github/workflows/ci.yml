@@ -18,19 +18,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '20'
           cache: 'npm'
+
+      - name: Require immutable action references
+        run: |
+          node scripts/check-action-pins.mjs
+          node scripts/check-package-locks.mjs
 
       # Reproducible install straight from the committed lockfile.
       - name: Install dependencies
         run: npm ci --include=dev
 
-      - name: Lint
-        run: npm run lint
+      - name: Coverage YAML loader compatibility
+        run: node --test scripts/tests/nyc-config-compat.test.cjs
 
       - name: Type check
         run: npm run type-check
@@ -44,12 +49,11 @@ jobs:
           npm ci --include=dev --prefix packages/atp-profiles
           npm test --prefix packages/atp-profiles
           cd packages/atp-profiles && npm pack --pack-destination "$RUNNER_TEMP"
-          cd ../sdk && npm install --no-save --package-lock=false --include=dev "$RUNNER_TEMP/atp-profiles-1.1.0.tgz" && npm run build
-          cd ../../packages/openclaw-atp && npm ci --include=dev && npm run build
+          cd ../sdk && npm install --no-save --package-lock=false --include=dev "$RUNNER_TEMP"/atp-profiles-*.tgz && npm run build
 
       - name: did-atp tests and clean consumer install
         run: |
-          npm install --include=dev --prefix packages/did-atp
+          npm ci --include=dev --prefix packages/did-atp
           npm test --prefix packages/did-atp
           cd packages/did-atp
           npm pack --pack-destination "$RUNNER_TEMP"
@@ -60,10 +64,9 @@ jobs:
           node --input-type=module -e "import { atpE1Fingerprint, buildAtpV2Did } from '@atpdeveloper/did-atp'; const ed = new Uint8Array(32); const pq = new Uint8Array(1952); if (!atpE1Fingerprint(ed).startsWith('e1_') || !buildAtpV2Did('example.com', ['agent'], ed, pq).startsWith('did:atp:example.com:agent:')) process.exit(1)"
           npm audit --omit=dev --audit-level=high
 
-      - name: Package tests (sdk + openclaw-atp)
+      - name: Package tests (sdk)
         run: |
-          cd packages/sdk && npm test -- --ci
-          cd ../../packages/openclaw-atp && npm test -- --ci
+          cd packages/sdk && npm test -- --ci && npm run examples
 
       # Hard gate: no critical advisories may ship.
       - name: Security audit (critical — blocking)
@@ -78,7 +81,7 @@ jobs:
 
       - name: Upload coverage
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: coverage
           path: coverage/

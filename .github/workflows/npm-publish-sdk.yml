@@ -6,7 +6,6 @@ on:
       version:
         description: Exact atp-sdk version to release
         required: true
-        default: '2.2.0'
         type: string
       dry_run:
         description: Validate and pack without publishing
@@ -23,20 +22,24 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org/'
+      - name: Require npm 11.5.1+ (trusted publishing)
+        run: |
+          npm --version
+          node -e "const v=process.argv[1].split('.').map(Number); const ok=v[0]>11||(v[0]===11&&(v[1]>5||(v[1]===5&&v[2]>=1))); if(!ok){console.error('npm '+process.argv[1]+' cannot use npm trusted publishing; need 11.5.1 or newer');process.exit(1)}" "$(npm --version)"
       - name: Check exact version and DID dependency
         working-directory: packages/sdk
         env:
           EXPECTED_VERSION: ${{ inputs.version }}
         run: |
           test "$(node -p "require('./package.json').version")" = "$EXPECTED_VERSION"
-          test "$(node -p "require('./package.json').dependencies['@atpdeveloper/did-atp']")" = "0.1.0"
-          npm view @atpdeveloper/did-atp@0.1.0 version
-          npm view atp-profiles@1.1.0 version
+          # The declared dependency versions must already be on npm.
+          npm view "@atpdeveloper/did-atp@$(node -p "require('./package.json').dependencies['@atpdeveloper/did-atp']")" version
+          npm view "atp-profiles@$(node -p "require('./package.json').dependencies['atp-profiles']")" version
           if npm view "atp-sdk@$EXPECTED_VERSION" version >/dev/null 2>&1; then
             echo "Version already published; refusing to republish"
             exit 1
@@ -58,4 +61,5 @@ jobs:
       - name: Publish SDK
         if: inputs.dry_run != true
         working-directory: packages/sdk
+        # Authenticates with GitHub's OIDC token via npm trusted publishing; no stored npm token.
         run: npm publish --access public --provenance

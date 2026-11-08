@@ -248,91 +248,28 @@ if (permCheck.result.data.allowed) {
 }
 ```
 
-## Multi-Agent Workflows with OpenClaw
+## Enforcing decisions at a tool boundary
 
-ATP now supports [OpenClaw](https://openclaw.dev) multi-agent systems with quantum-safe security:
-
-### Quick Start with OpenClaw
-
-```bash
-# Install OpenClaw integration
-npm install @atpdevelopment/openclaw-atp
-```
-
-```typescript
-import { OpenClawATPClient } from '@atpdevelopment/openclaw-atp';
-import { OpenClaw, ReActToolCallingClawAgent } from '@atpdevelopment/openclaw-atp';
-
-// 1. Initialize ATP client
-const atpClient = new OpenClawATPClient({
-  atpServiceUrl: 'http://localhost:3000',
-  profile: 'strictDev', // Pre-configured security profile
-  enableMonitoring: true
-});
-
-await atpClient.initialize();
-
-// 2. Create and register agent
-const researcher = new ReActToolCallingClawAgent({
-  name: 'Researcher',
-  description: 'Analyzes market data',
-  tools: researchTools
-});
-
-const { agent, registration } = await atpClient.registerAgent(researcher, {
-  name: 'market-researcher',
-  capabilities: ['research', 'analysis'],
-  trustLevel: 'standard'
-});
-
-console.log(`✅ Agent registered with DID: ${registration.did}`);
-
-// 3. Create crew and validate
-const crew = new OpenClaw();
-crew.add_agent(agent);
-
-const validation = await atpClient.validateCrew(crew);
-if (!validation.isValid) {
-  console.error('❌ Validation failed:', validation.errors);
-  process.exit(1);
-}
-
-// 4. Run secured workflow
-const result = await crew.run('Analyze market trends');
-```
-
-Your OpenClaw agents now have:
-- 🔐 Quantum-safe identities (hybrid Ed25519 + Dilithium3)
-- 🛡️ Tool-level security validation
-- 📊 Policy-based graph constraints
-- 🎯 Dynamic trust scoring
-- 📈 Lunary observability integration
-
-**Learn more:** [OpenClaw Integration Guide](./openclaw-integration.md)
-
----
+The OpenClaw adapter (`@atpdevelopment/openclaw-atp`) is deprecated. To enforce ATP profile decisions around real agent tool calls, start from [`examples/hermes-hook`](../examples/hermes-hook) (a fail-closed Hermes pre-tool hook) or [`examples/action-boundary`](../examples/action-boundary).
 
 ## Running Examples
 
-ATP includes ready-to-run example agents:
+Two maintained examples run locally without a model API key:
 
 ```bash
-# Start weather agent
-cd examples/simple-agent
-npm run dev weather
+# Allow, approval-required and deny decisions at a tool boundary
+cd examples/action-boundary && npm ci && npm start
 
-# Start calculator agent (in another terminal)
-npm run dev calculator
-
-# Run interactive demo
-cd ../demo-workflow
-npm run demo
+# The same profile evaluator behind Hermes Agent's pre_tool_call hook
+cd ../hermes-hook && npm ci && npm run demo
 ```
+
+For your own Hermes profile, install the configurable [`atp-hermes-hook`](../packages/hermes-hook/README.md) package. Older service-client examples are archived in [`archive/examples-legacy`](../archive/examples-legacy/README.md).
 
 ## Next Steps
 
 - **Explore the API**: Read the [API Reference](api/README.md)
-- **Secure Multi-Agent Systems**: See [OpenClaw Integration](./openclaw-integration.md)
+- **Enforce at a tool boundary**: See [`examples/hermes-hook`](../examples/hermes-hook)
 - **Build Multi-Agent Workflows**: See [Integration Guide](integration.md)
 - **Understand Security**: Review [Security Model](security.md)
 - **Deploy to Production**: Check [Deployment Guide](deployment.md)

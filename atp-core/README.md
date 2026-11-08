@@ -4,6 +4,8 @@
 >
 > **Migration:** See [Migration Guide](../packages/sdk/docs/MIGRATION.md)
 
+> This historical package is not the current public API. The maintained packages are [`atp-sdk`](https://www.npmjs.com/package/atp-sdk), [`@atpdeveloper/did-atp`](https://www.npmjs.com/package/@atpdeveloper/did-atp), [`atp-profiles`](https://www.npmjs.com/package/atp-profiles), and [`create-atp-agent`](https://www.npmjs.com/package/create-atp-agent). ATP complements MCP and other agent protocols. W3C Community Group drafts are not W3C Standards.
+
 ---
 
 A minimal implementation of the Agent Trust Protocol™ with quantum-safe cryptography and MCP security wrapper.
@@ -18,7 +20,7 @@ A minimal implementation of the Agent Trust Protocol™ with quantum-safe crypto
 - Backward compatibility with classical signatures
 
  **MCP Security Layer**
-- First security wrapper for Model Context Protocol
+- Experimental wrapper for Model Context Protocol
 - Signature verification for all MCP tool requests
 - Trust scoring and audit logging
 - Enhanced responses with ATP metadata
@@ -38,7 +40,7 @@ npm start
 
 ##  Live Demo
 
-Experience the world's first quantum-safe agent protocol:
+Experience the early quantum-safe agent protocol:
 
 ```bash
 npm run demo
