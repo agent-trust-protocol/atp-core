@@ -102,7 +102,7 @@ export function runLiveRevision3(bytes, mutation = null) {
           evidence_id: evidence.id,
           issued_at_ms: evidence.issued_at_ms,
           expires_at_ms: evidence.expires_at_ms,
-          observation_as_of_ms: observationUsed(result, input),
+          observation_as_of_ms: observationUsed(result),
         },
       };
       const projection = {
