@@ -5,6 +5,34 @@ All notable changes to the ATP™ SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.0] - 2026-11-08
+
+### Changed (BREAKING)
+
+- Resolver redirects stay on the initial HTTPS origin by default. Intentional
+  cross-origin hosting requires `allowedRedirectOrigins`.
+- Resolution rejects DID host/path mappings rewritten by URL normalization.
+  Literal dot segments and noncanonical numeric hosts may remain valid identifier
+  syntax but cannot be resolved.
+- Custom fetch overrides must honor manual redirects and supply Response byte
+  streams. Text-only response doubles must be updated.
+- Resolution has a default total transport deadline of 10 seconds and at most
+  five redirect hops. Configure `timeoutMs` and `maxRedirects` when needed.
+- JWK thumbprints use only required public members; metadata does not change
+  fingerprints. Unsupported key types or missing required members are rejected.
+
+### Added
+
+- Streaming 256 KiB document cap, caller cancellation, and stable transport errors.
+- `atp-sdk/node`: protected server resolution with conservative address checks,
+  per-connection DNS pinning, original-host TLS verification, and explicit
+  origin/IP exceptions for private deployments. Select
+  `resolveDidWithNodeEgress` to enable this protection.
+- SDK path parsing delegates to `@atpdeveloper/did-atp@0.2.0`, preserving SDK
+  root identifiers, fragments, and null-on-invalid behavior.
+
+See `docs/MIGRATION.md` for the 5.x to 6.0 migration.
+
 ## [5.0.0] - 2026-11-05
 
 ### Changed (BREAKING)

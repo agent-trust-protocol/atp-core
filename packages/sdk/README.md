@@ -126,7 +126,7 @@ Try the quickstart, report a reproducible issue, improve an example or propose a
 
 Agent Trust Protocol™ is a trademark of Sovr Inc. Licensed under Apache-2.0.
 
-### DID resolver transport bounds (unreleased source)
+### DID resolver transport bounds (SDK 6.0 release candidate)
 
 `DidAtpResolver.resolve(did, options)` and `fetchDidJson(url, options)` use
 manual HTTPS redirects (at most five by default), a total 10-second transport
@@ -152,7 +152,7 @@ TLS fixture uses a Node HTTPS adapter and is not browser or native-fetch
 interoperability certification. Deployment egress remains an open acceptance case in the specialization
 evidence report. The path/destination candidate below covers NET-05.
 
-### DID paths and redirect destinations (NET-05, unreleased source)
+### DID paths and redirect destinations (NET-05, SDK 6.0 release candidate)
 
 The resolver rejects a DID-to-HTTPS mapping when URL processing changes its
 hostname or pathname. This prevents literal `.` and `..` segments from silently
@@ -189,7 +189,7 @@ and should not be treated as identity verification. This origin policy also
 does not validate resolved IP addresses or stop DNS rebinding; NET-06 remains
 open and deployments must retain their own egress controls.
 
-### Node server egress protection (NET-06, unreleased source)
+### Node server egress protection (NET-06, SDK 6.0 release candidate)
 
 For server-side resolution of untrusted DIDs, select the Node-specific entry
 point. It enables address checks and connection pinning by default:

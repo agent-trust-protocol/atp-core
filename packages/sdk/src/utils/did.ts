@@ -6,6 +6,8 @@ import {
   ATP_DOMAIN_RE,
   ATP_THUMBPRINT_LENGTH,
   buildAtpV2Did,
+  parseAtpV2PathDid,
+  AtpDidParseError,
 } from '@atpdeveloper/did-atp';
 
 /**
@@ -162,21 +164,15 @@ export class DidAtp {
       return { did, type: 'root', domain, path: [], fragment };
     }
 
-    // Path-type: domain, >=1 path segment, then e1_ and pq1_ fingerprints.
-    if (segments.length < 4) return null;
-
-    const pq1 = segments[segments.length - 1];
-    const e1 = segments[segments.length - 2];
-    if (!E1_RE.test(e1) || !PQ1_RE.test(pq1)) return null;
-
-    const path = segments.slice(1, -2);
-    for (const segment of path) {
-      if (!PATH_SEGMENT_RE.test(segment)) return null;
-      // A fingerprint-shaped path segment would make the DID ambiguous.
-      if (E1_RE.test(segment) || PQ1_RE.test(segment)) return null;
+    // Root and fragment behavior remains the SDK's public contract; bare
+    // path syntax is owned by the canonical identifier package.
+    try {
+      const pathDid = parseAtpV2PathDid(did);
+      return { did, type: 'path', ...pathDid, fragment };
+    } catch (error) {
+      if (error instanceof AtpDidParseError) return null;
+      throw error;
     }
-
-    return { did, type: 'path', domain, path, e1, pq1, fragment };
   }
 
   /**
