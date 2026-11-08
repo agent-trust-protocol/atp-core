@@ -1,4 +1,4 @@
-/** Controlled TLS fixtures for NET-01/02/03/04. TLS verification stays enabled.
+/** Controlled TLS fixtures for NET-01/02/03/04/05. TLS verification stays enabled.
  * A test-only HTTPS fetch adapter trusts only the generated fixture certificate.
  * This exercises real socket I/O, not native browser/Undici interoperability.
  */
@@ -22,6 +22,9 @@ describe('DID resolver controlled HTTPS transport', () => {
   let directory: string;
   let server: https.Server;
   let target: http.Server;
+  let alternate: https.Server;
+  let alternateOrigin: string;
+  let alternateRequests = 0;
   let origin: string;
   let fetch: typeof globalThis.fetch;
   let insecureRequests = 0;
@@ -38,9 +41,19 @@ describe('DID resolver controlled HTTPS transport', () => {
     target = http.createServer((_req, res) => { insecureRequests++; res.end('{}'); });
     const targetPort = await listen(target);
     sockets = new Set();
+    alternate = https.createServer({ key: readFileSync(join(directory, 'key.pem')), cert }, (_req, res) => {
+      alternateRequests++;
+      res.end('{"id":"did:atp:example.com"}');
+    });
+    alternate.on('connection', socket => { sockets.add(socket); socket.on('close', () => sockets.delete(socket)); });
+    alternateOrigin = `https://127.0.0.1:${await listen(alternate)}`;
     server = https.createServer({ key: readFileSync(join(directory, 'key.pem')), cert }, (req, res) => {
       if (req.url === '/downgrade') {
         res.writeHead(302, { location: `http://127.0.0.1:${targetPort}/did.json` }); res.end();
+      } else if (req.url === '/cross-origin') {
+        res.writeHead(302, { location: `${alternateOrigin}/did.json` }); res.end();
+      } else if (req.url === '/relative') {
+        res.writeHead(302, { location: '/ok' }); res.end();
       } else if (req.url === '/loop') {
         res.writeHead(302, { location: '/loop' }); res.end();
       } else if (req.url === '/stall-headers') {
@@ -80,6 +93,7 @@ describe('DID resolver controlled HTTPS transport', () => {
     if (sockets) for (const socket of sockets) socket.destroy();
     if (server) await close(server);
     if (target) await close(target);
+    if (alternate) await close(alternate);
     if (directory) rmSync(directory, { recursive: true, force: true });
   });
 
@@ -111,4 +125,25 @@ describe('DID resolver controlled HTTPS transport', () => {
     await expect(DidAtpResolver.fetchDidJson(`${origin}${path}`, { fetch, timeoutMs: 150 }))
       .rejects.toMatchObject({ code: 'timeout' });
   });
+
+  it('NET-05: contacts no unlisted HTTPS redirect destination', async () => {
+    alternateRequests = 0;
+    await expect(DidAtpResolver.fetchDidJson(`${origin}/cross-origin`, { fetch }))
+      .rejects.toMatchObject({ code: 'destinationNotAllowed' });
+    expect(alternateRequests).toBe(0);
+  });
+
+  it('NET-05: contacts an explicitly allowed HTTPS destination', async () => {
+    alternateRequests = 0;
+    await expect(DidAtpResolver.fetchDidJson(`${origin}/cross-origin`, {
+      fetch, allowedRedirectOrigins: [alternateOrigin]
+    })).resolves.toHaveProperty('id');
+    expect(alternateRequests).toBe(1);
+  });
+
+  it('NET-05: preserves ordinary same-origin relative redirects', async () => {
+    await expect(DidAtpResolver.fetchDidJson(`${origin}/relative`, { fetch }))
+      .resolves.toHaveProperty('id');
+  });
+
 });

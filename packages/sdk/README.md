@@ -149,5 +149,42 @@ The resolver does not supply a private-address allowlist or connection-level
 DNS-rebinding protection. Server-side deployments must enforce their own egress
 policy. Cross-origin manual redirect behavior differs in browsers; the controlled
 TLS fixture uses a Node HTTPS adapter and is not browser or native-fetch
-interoperability certification. Path normalization and deployment egress remain
-open acceptance cases in the specialization evidence report.
+interoperability certification. Deployment egress remains an open acceptance case in the specialization
+evidence report. The path/destination candidate below covers NET-05.
+
+### DID paths and redirect destinations (NET-05, unreleased source)
+
+The resolver rejects a DID-to-HTTPS mapping when URL processing changes its
+hostname or pathname. This prevents literal `.` and `..` segments from silently
+selecting another resource, rejects noncanonical numeric host aliases, and
+reports invalid URL ports as `invalidDid`. Identifier construction and syntax
+validation are unchanged: a syntactically valid identifier is not necessarily
+safe to map to a network resource. Normal segments such as `.hidden`, `...`, and
+`v1.0` remain supported, as do canonical IPv4 addresses and explicit dev ports.
+
+Redirects now stay on the starting HTTPS origin by default. An origin means the
+scheme, hostname, and effective port. This tightens the previous behavior that
+followed arbitrary HTTPS redirects. For an intentional CDN or hosting migration,
+configure additional origins explicitly:
+
+```ts
+const result = await DidAtpResolver.resolve(did, {
+  allowedRedirectOrigins: ['https://identity-cdn.example'],
+  timeoutMs: 10_000,
+  maxRedirects: 5,
+});
+```
+
+The allowlist is validated and copied before I/O; every hop must stay on the
+initial origin or an explicitly listed origin. Entries are HTTPS origin URLs
+with an optional trailing slash, without credentials, paths, queries, fragments,
+or wildcards. An unlisted redirect fails with `destinationNotAllowed` before
+its request is sent. Relative same-origin redirects still work. URL fragments
+are removed before dispatch because they are not part of the HTTP resource.
+Paths and queries on a permitted redirect origin are not separately restricted.
+
+Origin permission does not replace the document-ID equality and hybrid-proof
+checks in `resolve`. The lower-level `fetchDidJson` only fetches/parses a document
+and should not be treated as identity verification. This origin policy also
+does not validate resolved IP addresses or stop DNS rebinding; NET-06 remains
+open and deployments must retain their own egress controls.
