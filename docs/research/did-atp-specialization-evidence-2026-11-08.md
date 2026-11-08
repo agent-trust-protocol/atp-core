@@ -203,3 +203,46 @@ tests; all five offline examples. The focused root identity/transport run
 separately passed 11 suites / 200 tests; these overlap the SDK tests. The HTTPS
 request counters and byte-stream cases are same-project evidence, not independent
 certification. No package release or deployment is part of this candidate.
+
+## Follow-up: NET-06 Node address enforcement candidate
+
+The new `atp-sdk/node` entry point exposes `resolveDidWithNodeEgress`, which
+selects a Node-only address-checking transport by default. The generic resolver's
+default fetch is unchanged. This limits the claim to callers using the protected
+Node entry point or explicitly composing `createNodeDidFetch`.
+
+The transport validates every DNS answer, rejects mixed permitted/disallowed
+sets, and pins one validated address directly into a fresh HTTPS connection.
+There is no second hostname lookup, automatic fallback, connection pooling, or
+proxy. The original hostname still controls TLS certificate verification, SNI
+for DNS names, and HTTP Host. Each redirect repeats the address check, in addition
+to NET-05's origin policy. Caller-approved private exceptions are scoped to an
+exact HTTPS origin and explicit IP addresses, snapshotted, and absent by default.
+
+`node-did-fetch.test.ts` covers the conservative address ranges and malformed
+DNS/configuration cases. `node-did-egress.test.ts` exercises the production
+transport on a local TLS server. It checks zero sockets for blocked destinations,
+connection pinning with one DNS snapshot, changed-address rejection on a later
+hop, private exception isolation, original-host certificate rejection, default
+certificate trust, DNS cancellation, and stream/deadline cleanup. The valid
+end-to-end case verifies a real hybrid-signed DID document through the protected
+Node entry point. Local TLS uses explicit loopback exceptions and a test CA;
+certificate verification is never disabled.
+
+The address policy is static and conservative; README links the reviewed IANA
+registries and Azure platform endpoint documentation. No claim is made about
+arbitrary network routing/NAT, every platform-specific endpoint, DNS authenticity,
+external interoperability, browsers, or independent review. G3's Node transport
+cases now have an implementation candidate; broader deployment and independent
+verification evidence remain separate. SDK parser migration and registry release
+are not part of this transport change.
+
+NET-06 local validation checkpoint (Node 24): clean SDK lockfile installation
+with lifecycle scripts disabled; SDK TypeScript build; 30 SDK suites / 757 tests;
+all six offline examples. The focused root identity/transport run separately
+passed 13 suites / 285 tests (overlapping the SDK count). A packed SDK installed
+in a clean consumer contained the Node JS/type exports and successfully ran the
+public-subpath offline example, which blocked loopback. Late DNS answers after
+timeout and injected fetch overrides of the protected entry point are covered.
+No new runtime dependencies were added. PR/main CI, independent review, deployment
+adoption of the protected entry point, and publication remain separate checkpoints.

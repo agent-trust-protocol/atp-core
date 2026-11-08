@@ -10,6 +10,7 @@ const examples = [
   ['09-multi-protocol-support.js', { EXAMPLE: 'all' }],
   ['11-quantum-safe-demo.js'],
   ['12-zkp-agent-authentication.js'],
+  ['13-node-did-egress.js'],
 ];
 
 let failed = 0;
