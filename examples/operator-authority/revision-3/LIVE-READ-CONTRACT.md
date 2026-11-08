@@ -69,13 +69,16 @@ deployment or endorsement follows from this change.
 
 ## Local verification
 
-On Node v24.22.1, Linux, all 48 fixture tests passed with both corpora required, zero skips.
-The corpus checkout was detached at 7774daee77a7766f737c6da71265c9e214b47ff5. The full
+Re-run on 2026-11-07 on Node v24.4.0, macOS: all 57 fixture tests passed with both corpora
+required, zero skips. The corpus checkouts were detached at the CI pins, revision 2 at
+7141c6167acfdd5288ec7cc1ca8d2ba9207b3390 and revision 3 at
+7774daee77a7766f737c6da71265c9e214b47ff5, with vectors SHA-256 matching the pins. The full
 suite includes the unchanged historical 42/44 comparison and revision-2 report digest test.
 The new CLI returned exit 0 with 44/44 actions, reasons, grant references and local read contracts.
 All four legacy mapper mutants reduced matches. Targeted tests rejected skipped, duplicated,
-wrong-grant and fabricated read traces. No root Jest/build/conformance gate, remote CI, Mac
-reproduction, live source or staging run was performed for this fixture-only change.
+wrong-grant and fabricated read traces. The root `npm run conformance` gate passed 510/510 across
+five items; it does not exercise these fixtures. No live source or staging run was performed for
+this fixture-only change.
 
 Second local run, 2026-10-26, Node v24.4.0 on macOS, AI-assisted and by the same author side, so
 additional reproduction evidence, not an independent run. Corpora were extracted at the CI pins
