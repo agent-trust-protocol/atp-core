@@ -25,7 +25,8 @@ const pre = (tool_name, tool_input = {}, extra = {}) => ({ hook_event_name: 'Pre
 test('help, version and one-shot modes', () => {
   const s = sandbox();
   try {
-    assert.match(s.run(['--version']).stdout, /^0\.1\.0/);
+    const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+    assert.equal(s.run(['--version']).stdout.trim(), version);
     assert.match(s.run(['help']).stdout, /guard install claude-code/);
     const viaP = s.run(['-p', '/profile check Bash', '--json']);
     assert.equal(viaP.status, 0);
