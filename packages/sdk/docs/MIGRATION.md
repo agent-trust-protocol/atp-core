@@ -1,3 +1,34 @@
+# Migrating from SDK 5.x to 6.0
+
+The stricter resolver defaults are intentional security boundaries.
+
+- For planned HTTPS hosting/CDN redirects, list exact additional origins in
+  `allowedRedirectOrigins`. Each redirect hop must stay on the original origin
+  or this allowlist. Scheme, hostname, and effective port define an origin.
+- Replace text/json-only fetch doubles with real Response byte streams. Fetch
+  overrides must honor `redirect: 'manual'` and should honor AbortSignal.
+- Configure `timeoutMs` (default 10,000) and `maxRedirects` (default five) for
+  your deployment. The timeout covers transport, including DNS when using the
+  protected Node entry point, not subsequent cryptographic verification.
+- Stop resolving identifiers whose hostname/path is rewritten during URL
+  processing. Identifier syntax itself has not changed.
+- For server-side untrusted DID resolution, import `resolveDidWithNodeEgress`
+  from `atp-sdk/node`. This entry point checks all DNS answers and connects to a
+  validated IP. The generic resolver/global fetch is unchanged and does not
+  automatically gain private-address filtering.
+- Private Node deployments need exact-origin, explicit-IP exceptions and valid
+  TLS trust. Review README before configuring those exceptions. TLS validation
+  remains enabled; supplied CA roots replace Node's defaults.
+- JWK thumbprints ignore optional metadata/private members and reject unsupported
+  key types or missing required public members. Canonical ATP fingerprints and
+  the SDK root/fragment/null-on-invalid parser behavior remain compatible.
+
+Document identity, hybrid signatures, mandate authorization, and runtime
+execution enforcement remain separate checks. A successful resolution alone
+never grants permission to execute an action.
+
+---
+
 # Migration Guide
 
 This guide documents notable changes and safe upgrade steps.

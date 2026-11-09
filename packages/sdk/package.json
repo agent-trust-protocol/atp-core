@@ -1,6 +1,6 @@
 {
   "name": "atp-sdk",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "Open TypeScript SDK for Agent Trust Protocol: agent identity, credential utilities, trust evidence, and security profile decisions.",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -62,7 +62,7 @@
     "url": "https://github.com/agent-trust-protocol/atp-core/issues"
   },
   "dependencies": {
-    "@atpdeveloper/did-atp": "0.1.1",
+    "@atpdeveloper/did-atp": "0.2.0",
     "@noble/curves": "^1.4.0",
     "@noble/ed25519": "^2.0.0",
     "@noble/hashes": "^1.3.0",
