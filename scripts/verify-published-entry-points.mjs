@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawn } from 'node:child_process';
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+const sdkVersion = '5.0.0';
 const consumer = mkdtempSync(join(tmpdir(), 'atp-entry-points-'));
 const run = (command, args, cwd = consumer) => execFileSync(command, args, {
   cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 180_000,
@@ -12,7 +13,7 @@ let dashboard;
 let dashboardOutput = '';
 try {
   writeFileSync(join(consumer, 'package.json'), JSON.stringify({ private: true, type: 'module' }));
-  console.log(run('npm', ['install', '--ignore-scripts', 'atp-sdk@4.0.0', '@atpdeveloper/did-atp@0.1.1', 'create-atp-agent@1.4.0', 'atp-profiles@3.0.0']));
+  console.log(run('npm', ['install', '--ignore-scripts', '--engine-strict', `atp-sdk@${sdkVersion}`, '@atpdeveloper/did-atp@0.1.1', 'create-atp-agent@1.6.1', 'atp-profiles@3.0.0']));
   console.log(run('npm', ['ls', '--depth=0']));
   writeFileSync(join(consumer, 'identity.mjs'), `
     import assert from 'node:assert/strict';
@@ -51,7 +52,12 @@ try {
   const cli = join(consumer, 'node_modules/create-atp-agent/dist/index.js');
   console.log(run(process.execPath, [cli, 'entry-point-agent', '--no-dashboard', '--skip-install']));
   const project = join(consumer, 'entry-point-agent');
-  console.log(run('npm', ['install', '--ignore-scripts'], project));
+  console.log(run('npm', ['install', '--ignore-scripts', '--engine-strict'], project));
+  // Check the SDK installed by the starter's own dependency range, not the outer test fixture.
+  const { version: starterSdkVersion } = JSON.parse(readFileSync(join(project, 'node_modules/atp-sdk/package.json'), 'utf8'));
+  assert.equal(starterSdkVersion.split('.')[0], sdkVersion.split('.')[0],
+    `Expected the generated starter to use SDK ${sdkVersion.split('.')[0]}.x, got ${starterSdkVersion}`);
+  console.log(`PASS generated starter installed atp-sdk@${starterSdkVersion}`);
   const starterOutput = run('npm', ['start'], project);
   assert.match(starterOutput, /Standalone:\s*true/);
   console.log(starterOutput);
