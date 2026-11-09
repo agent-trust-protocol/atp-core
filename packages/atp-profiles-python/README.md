@@ -9,32 +9,30 @@ Not to be confused with the unrelated `atp-core` package on PyPI ("Attested Tran
 ## Install
 
 ```bash
-pip install atp-profiles
+python -m pip install atp-profiles
 ```
 
 Python 3.9 or newer. No dependencies.
 
 ## Use
 
+Save this as `check_tool.py` and run `python check_tool.py`:
+
 ```python
 from atp_profiles import BUILTIN_PROFILES, evaluate_action_with_profile
 
 TOOL_CATEGORIES = {"terminal": "shell", "read_file": "filesystem", "http_get": "network"}
 
-def check(tool_name: str) -> None:
-    category = TOOL_CATEGORIES.get(tool_name)
+for tool_name in ("read_file", "terminal", "unmapped"):
     result = evaluate_action_with_profile(
         BUILTIN_PROFILES["safe-default"],
-        {"actionType": category, "state": "executing"},
+        {"actionType": TOOL_CATEGORIES.get(tool_name), "state": "executing"},
     )
-    if result.decision == "require_approval":
-        raise PermissionError(f"{tool_name} needs human approval ({result.reason})")
-    if not result.allowed:
-        raise PermissionError(f"{tool_name} is denied ({result.reason})")
+    print(tool_name, result.decision)
 
-check("read_file")   # passes
-check("terminal")    # PermissionError: terminal needs human approval (control_blocked)
-check("unmapped")    # PermissionError: unmapped is denied (unknown_action_type)
+# read_file allow
+# terminal require_approval
+# unmapped deny
 ```
 
 Call the check at every tool boundary. Block both `deny` and `require_approval` unless your host has a real approval flow.

@@ -1,13 +1,13 @@
 # @atpdeveloper/atp-cli
 
-**Agent Trust Protocol (ATP) in your terminal.** Put ATP security profiles in front of the tools your AI agents call, starting with **Claude Code** and **Hermes Agent**. Manage a local `did:atp` identity and keep a signed audit trail of every decision.
+**Check tool permissions from your terminal.** Use the `atp` command to preview a policy decision or install guards for Claude Code and Hermes Agent. For a new JavaScript agent project, use [`create-atp-agent`](https://www.npmjs.com/package/create-atp-agent) instead. Requires Node.js 20 or newer.
 
 ```bash
 npm install -g @atpdeveloper/atp-cli
-atp
+atp profile check Bash --profile safe-default
 ```
 
-Requires Node.js 20 or newer.
+Expect `ask`: the profile requires approval for shell commands. This previews the decision without running Bash or installing a hook. Run `atp` for the interactive shell.
 
 ## The interactive shell
 

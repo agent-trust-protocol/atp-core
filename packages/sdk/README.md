@@ -4,9 +4,7 @@
 
 [![npm](https://img.shields.io/npm/v/atp-sdk)](https://www.npmjs.com/package/atp-sdk) [![license](https://img.shields.io/npm/l/atp-sdk)](https://github.com/agent-trust-protocol/atp-core/blob/main/LICENSE) ![node](https://img.shields.io/node/v/atp-sdk)
 
-AI agents now call tools, move data and act for people. Before an agent acts, the system around it should be able to answer three questions: **who is this agent, is this action allowed, and what evidence supports that?**
-
-`atp-sdk` is the TypeScript/JavaScript SDK for **Agent Trust Protocol™ (ATP)**, an open trust layer that helps you answer them:
+Use `atp-sdk` to give your existing JavaScript or TypeScript agent an identity and check whether a tool action should run. The SDK provides three pieces:
 
 - **Identity:** `did:atp` agent identifiers backed by a hybrid **Ed25519 + ML-DSA-65** (post-quantum) key pair.
 - **Policy decisions:** built-in security profiles return `allow`, `require_approval` or `deny` for each action. Unknown actions and missing profiles never quietly pass.
@@ -16,11 +14,13 @@ ATP is designed to work alongside MCP, A2A, ANP, ADK and agent frameworks rather
 
 ## Quickstart
 
-Requires Node.js 20 or newer. The package is ESM-only.
+Use Node.js 20 or newer. The SDK uses ES modules (`import`). Run this in your project directory; if it is empty, run `npm init -y` first. No API key or hosted ATP service is needed.
 
 ```bash
 npm install atp-sdk
 ```
+
+Save this as `agent.mjs` and run `node agent.mjs`:
 
 ```js
 import { Agent } from 'atp-sdk';
@@ -32,7 +32,7 @@ console.log(agent.isStandalone()); // true: no hosted service needed
 
 This runs without a hosted ATP service. Standalone identity material is local and ephemeral by default, and the identifier is not publicly resolvable. Persist keys securely and connect the services and policies your application needs before relying on it for consequential actions.
 
-Prefer a scaffold? Run `npx create-atp-agent my-agent` (see the [CLI guide](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/create-atp-agent/README.md)).
+Prefer a scaffold? The [starter CLI](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/create-atp-agent/README.md) sets up a runnable project. Version 1.6.1 generates projects on SDK 5.x; use the migration guide if you move the generated project to SDK 6.
 
 ## Decide before an agent acts
 
@@ -93,7 +93,7 @@ The package ships examples that need no ATP services:
 cd node_modules/atp-sdk && npm run examples
 ```
 
-They cover the standalone quickstart, local DID generation, multi-protocol detection, the hybrid signature demo and zero-knowledge challenge flows.
+They cover the standalone quickstart, local DID generation, multi-protocol detection, the hybrid signature demo, zero-knowledge challenge flows, and Node DID egress protection.
 
 ## Where to go next
 
@@ -102,16 +102,16 @@ They cover the standalone quickstart, local DID generation, multi-protocol detec
 | Profile schema, built-ins and custom profiles | [`atp-profiles`](https://www.npmjs.com/package/atp-profiles) |
 | Canonical `did:atp` identifier primitives | [`@atpdeveloper/did-atp`](https://www.npmjs.com/package/@atpdeveloper/did-atp) |
 | A host that enforces allow / approval / deny end to end | [Action-boundary demo](https://github.com/agent-trust-protocol/atp-core/tree/main/examples/action-boundary) |
-| Upgrading from 3.x or earlier | [Migration guide](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/docs/MIGRATION.md) and [CHANGELOG](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/CHANGELOG.md) |
+| Upgrading from an earlier SDK | [Migration guide](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/docs/MIGRATION.md) and [CHANGELOG](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/CHANGELOG.md) |
 | Specification design and feedback | [W3C ATP Community Group drafts](https://w3c-cg.github.io/atp/specs/) |
 
-## What's new in 4.0
+## What's new in 6.0
 
-- `evaluateActionWithProfile` is exported from `atp-sdk` directly.
-- A missing or unknown profile returns `deny` instead of throwing.
-- **Breaking:** `dev-mode` returns `require_approval` for unrecognized actions instead of `allow`, so no built-in profile now lets an unrecognized action through. To restore the old behaviour in local development, use `{ ...DEV_MODE_PROFILE, unknown_action: 'allow' }`.
-- **Breaking:** Node.js 20 or newer is required. On Node.js 18 the identity code fails because `globalThis.crypto` is not available.
-- `@atpdeveloper/did-atp` is pinned to `0.1.1`.
+- The SDK uses the canonical path parser from `@atpdeveloper/did-atp@0.2.0`.
+- DID resolution now limits redirects, time, and response size. Cross-origin redirects require an explicit allowlist.
+- Node servers resolving untrusted DIDs can opt into address filtering and connection pinning through [`atp-sdk/node`](#node-server-egress-protection-net-06-sdk-60).
+
+For changes that affect existing apps, see the [migration guide](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/docs/MIGRATION.md).
 
 ## Status and limits
 
@@ -126,7 +126,7 @@ Try the quickstart, report a reproducible issue, improve an example or propose a
 
 Agent Trust Protocol™ is a trademark of Sovr Inc. Licensed under Apache-2.0.
 
-### DID resolver transport bounds (SDK 6.0 release candidate)
+### DID resolver transport bounds (SDK 6.0)
 
 `DidAtpResolver.resolve(did, options)` and `fetchDidJson(url, options)` use
 manual HTTPS redirects (at most five by default), a total 10-second transport
@@ -150,9 +150,9 @@ DNS-rebinding protection. Server-side deployments must enforce their own egress
 policy. Cross-origin manual redirect behavior differs in browsers; the controlled
 TLS fixture uses a Node HTTPS adapter and is not browser or native-fetch
 interoperability certification. Deployment egress remains an open acceptance case in the specialization
-evidence report. The path/destination candidate below covers NET-05.
+evidence report. The next section covers DID path and redirect destination checks.
 
-### DID paths and redirect destinations (NET-05, SDK 6.0 release candidate)
+### DID paths and redirect destinations (NET-05, SDK 6.0)
 
 The resolver rejects a DID-to-HTTPS mapping when URL processing changes its
 hostname or pathname. This prevents literal `.` and `..` segments from silently
@@ -186,10 +186,11 @@ Paths and queries on a permitted redirect origin are not separately restricted.
 Origin permission does not replace the document-ID equality and hybrid-proof
 checks in `resolve`. The lower-level `fetchDidJson` only fetches/parses a document
 and should not be treated as identity verification. This origin policy also
-does not validate resolved IP addresses or stop DNS rebinding; NET-06 remains
-open and deployments must retain their own egress controls.
+does not validate resolved IP addresses or stop DNS rebinding. For Node
+servers, see the opt-in protected entry point below and retain deployment
+egress controls.
 
-### Node server egress protection (NET-06, SDK 6.0 release candidate)
+### Node server egress protection (NET-06, SDK 6.0)
 
 For server-side resolution of untrusted DIDs, select the Node-specific entry
 point. It enables address checks and connection pinning by default:
@@ -255,7 +256,7 @@ a network routes or translates even a public IP, and a static policy needs
 maintenance as assignments change. Platform endpoints beyond the reviewed list,
 DNS authenticity/availability, operating-system compromise, proxy-based routing,
 native browser interoperability, and independent implementation conformance are
-outside this candidate's evidence. The tests use controlled local TLS with
+outside the release's test coverage. The tests use controlled local TLS with
 explicit per-origin loopback exceptions; those exceptions never become defaults.
 
 Policy references reviewed 2026-11-08:
