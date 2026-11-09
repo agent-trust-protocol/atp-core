@@ -18,26 +18,24 @@ An agent that can run shell commands, read files, call APIs and send messages ne
 npm install atp-profiles
 ```
 
-The package is ESM-only. CommonJS applications can use `await import('atp-profiles')`.
+Requires Node.js 18 or newer. The package uses ES modules. CommonJS applications can use `await import('atp-profiles')`. Python developers can use the [Python port](https://pypi.org/project/atp-profiles/).
 
 ## Quick start
+
+Save this as `check-tool.mjs` and run `node check-tool.mjs` after installing:
 
 ```js
 import { BUILTIN_PROFILES, evaluateActionWithProfile } from 'atp-profiles';
 
 const result = evaluateActionWithProfile(BUILTIN_PROFILES['safe-default'], {
-  actionType: 'filesystem',  // a category, not a raw tool name
+  actionType: 'shell',       // a category, not a raw tool name
   state: 'executing',        // optional session state
 });
 
-switch (result.decision) {
-  case 'allow':            /* run the action */ break;
-  case 'require_approval': /* pause for your approval flow */ break;
-  default:                 /* deny: do not run it */ console.log('Denied:', result.reason);
-}
+console.log(result.decision); // require_approval
 ```
 
-The result is `{ allowed, decision, reason? }`. `allowed` is `true` only for `allow`, so a `require_approval` result is not permission to run.
+The result is `{ allowed, decision, reason? }`. `allowed` is `true` only for `allow`. Your host should run a tool only when allowed, pause for approval when required, and block denied actions. The evaluator itself never calls a tool.
 
 To see a host enforce all three outcomes end to end, run the [action-boundary demo](https://github.com/agent-trust-protocol/atp-core/tree/main/examples/action-boundary). It needs no service account or model key.
 
@@ -55,6 +53,8 @@ The checks run in this order, and the first one that matches decides:
 Map host tools to categories before evaluating, for example `{ terminal: 'shell', read_file: 'filesystem' }`. Passing raw tool names through means they will be treated as unrecognized.
 
 ## Built-in profiles
+
+The evaluator checks categories and session state. The profiles also describe path, mode, and domain restrictions; your host or adapter must enforce those restrictions separately.
 
 | Profile | Use it for | Unrecognized actions |
 | --- | --- | --- |

@@ -2,7 +2,7 @@
 
 A fail-closed [Hermes Agent](https://github.com/NousResearch/hermes-agent) `pre_tool_call` shell hook that enforces **Agent Trust Protocol (ATP)** security profiles at the tool boundary. Before Hermes runs a matched tool, the hook evaluates it against an [`atp-profiles`](https://www.npmjs.com/package/atp-profiles) profile and a path scope you configure, then lets the call through, blocks it, or sends it to Hermes' human-approval gate.
 
-Requires Node.js 20 or newer.
+Requires Node.js 20 or newer. Want to see the decisions before changing Hermes settings? Start with the [local walkthrough](https://github.com/agent-trust-protocol/atp-core/tree/main/examples/hermes-hook), which runs the hook without starting Hermes or calling a model.
 
 ## Install
 

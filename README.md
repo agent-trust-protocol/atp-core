@@ -7,7 +7,7 @@ Start with a local demo, then connect the [Hermes tool hook](examples/hermes-hoo
 
 AI agents move between tools, organizations, and protocols. ATP is an open effort to make identity, trust evidence, and privacy controls portable across those boundaries. It complements MCP, A2A, ANP, ADK, and agent frameworks; it does not replace how agents communicate.
 
-**Start building:** [SDK quickstart](#start-with-the-sdk) · [Scaffold an agent](#scaffold-a-project) · [Explore packages](#packages) · [Read specification drafts](https://w3c-cg.github.io/atp/specs/) · [Contribute](#help-shape-atp)
+**Start building:** [Choose a package](#packages) · [Add the SDK to an existing project](#start-with-the-sdk) · [Create a starter](#scaffold-a-project) · [Read specification drafts](https://w3c-cg.github.io/atp/specs/) · [Contribute](#help-shape-atp)
 
 > ATP specifications are developed in the [W3C Agent Trust Protocol Community Group](https://www.w3.org/groups/cg/atp/). Community Group drafts are not endorsed by W3C and are not W3C Standards. Implementation support varies by capability; the repository and package READMEs describe what exists today.
 
@@ -53,7 +53,7 @@ A passing test covers the behavior exercised by that test; it is not certificati
 
 ## Packages
 
-The package READMEs are the source for APIs, limitations, and examples. Install only what your application needs.
+Starting a project? Use `create-atp-agent`. Adding ATP to an existing Node.js project? Use `atp-sdk`. If you only need tool decisions, use `atp-profiles` in JavaScript or Python. You can try these locally without an ATP account or a model API key.
 
 | Package | Use it for | Install |
 | --- | --- | --- |
@@ -61,8 +61,9 @@ The package READMEs are the source for APIs, limitations, and examples. Install 
 | [`create-atp-agent`](packages/create-atp-agent/README.md) | Scaffold a JavaScript ESM starter | `npx create-atp-agent my-agent` |
 | [`@atpdeveloper/did-atp`](packages/did-atp/README.md) | Build and inspect canonical `did:atp` identifier primitives | `npm install @atpdeveloper/did-atp` |
 | [`atp-profiles`](packages/atp-profiles/README.md) | Built-in and custom security profiles with a dependency-free evaluator | `npm install atp-profiles` |
-| [`atp-profiles` (Python)](packages/atp-profiles-python/README.md) | The same profiles and fail-closed evaluator for Python agents (LangChain, CrewAI, Hermes plugins) | `pip install atp-profiles` |
-| [`@atpdeveloper/atp-cli`](packages/cli/README.md) | `atp` in your terminal: guard Claude Code and Hermes tool calls with ATP profiles, a local did:atp identity and a signed audit trail | `npm install -g @atpdeveloper/atp-cli` |
+| [`atp-profiles` (Python)](packages/atp-profiles-python/README.md) | Evaluate the same profiles from a Python tool hook or adapter | `pip install atp-profiles` |
+| [`agent-trust-protocol` (Python)](packages/agent-trust-protocol-python/README.md) | Install the available ATP Python packages together; currently includes Profiles | `pip install agent-trust-protocol` |
+| [`@atpdeveloper/atp-cli`](packages/cli/README.md) | `atp` in your terminal: guard Claude Code and Hermes tool calls with ATP profiles, a local did:atp identity and an audit log that can be signed | `npm install -g @atpdeveloper/atp-cli` |
 | [`atp-hermes-hook`](packages/hermes-hook/README.md) | Enforce an ATP profile and a path scope at Hermes Agent's `pre_tool_call` boundary | `npm install atp-hermes-hook` |
 
 The OpenClaw adapter (`@atpdevelopment/openclaw-atp`) is deprecated and archived in `archive/openclaw-atp`. Use the SDK and canonical packages as the starting point for new integrations; [`atp-hermes-hook`](packages/hermes-hook/README.md) enforces ATP profiles at Hermes Agent's tool boundary.
@@ -75,13 +76,15 @@ The OpenClaw adapter (`@atpdevelopment/openclaw-atp`) is deprecated and archived
 
 ## Start with the SDK
 
-`atp-sdk` 4.0 requires Node.js 20 or newer; its identity code needs Web Crypto, which Node.js 18 does not provide globally. Earlier SDK releases advertised Node.js 18 but failed there in the same way.
+SDK 6 requires **Node.js 20 or newer**. From your project directory, install it with npm. In an empty directory, run `npm init -y` first. Upgrading an existing integration? See the [SDK migration guide](packages/sdk/docs/MIGRATION.md).
 
 ```bash
 npm install atp-sdk
 ```
 
-```ts
+Save this as `agent.mjs` and run `node agent.mjs`:
+
+```js
 import { Agent } from 'atp-sdk';
 
 const agent = await Agent.quickstart('MyBot');
@@ -107,12 +110,12 @@ The standalone quickstart creates local identity material. A local identifier is
 ## Scaffold a project
 
 ```bash
-npx create-atp-agent my-agent
+npx create-atp-agent my-agent --no-dashboard
 cd my-agent
 npm start
 ```
 
-The CLI creates a starter and offers a local configuration UI. That UI writes metadata; it does not mint a DID, register an issuer, or enforce the selected profile. The generated agent uses the SDK when it runs. See the [CLI guide](packages/create-atp-agent/README.md) for terminal-only and existing-project flows.
+Expect a local `did:atp:...` identifier and `Standalone: true`. The published starter CLI 1.6.1 installs **SDK 5.x**. For SDK 6 in an existing or scaffolded app, install it explicitly and follow the [migration guide](packages/sdk/docs/MIGRATION.md). Omit `--no-dashboard` to open the optional configuration UI, which writes metadata for your app to use. See the [CLI guide](packages/create-atp-agent/README.md) for terminal-only and existing-project flows.
 
 ## Explore and test
 

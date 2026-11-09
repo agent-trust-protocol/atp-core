@@ -6,12 +6,12 @@
 Scaffold a small JavaScript ESM agent with an identity from **Agent Trust Protocol™ (ATP)** in one command. The starter uses the published [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) 5.x. Requires Node.js 20 or newer.
 
 ```bash
-npx create-atp-agent my-agent
+npx create-atp-agent my-agent --no-dashboard
 cd my-agent
 npm start
 ```
 
-The CLI installs dependencies and opens an optional local configuration screen at `127.0.0.1:3456` (or the next available port). You can explore the generated `agent.mjs` and add ATP to the tools and protocols your agent already uses.
+Expect a local `did:atp:...` identifier and `Standalone: true`. Open `agent.mjs` to see the few lines that start it. No API key or ATP service is needed. Omit `--no-dashboard` to open the optional local configuration screen.
 
 ## Pick your flow
 
@@ -35,14 +35,9 @@ The local UI is a configuration demo. It does **not** mint a DID, generate or pe
 
 For an existing application, install [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) directly. To check each tool call against a security profile (`allow`, `require_approval` or `deny`), see the SDK's ["Decide before an agent acts"](https://www.npmjs.com/package/atp-sdk#decide-before-an-agent-acts) section and [`atp-profiles`](https://www.npmjs.com/package/atp-profiles).
 
-## What's new in 1.6
+## SDK version
 
-- New projects depend on `atp-sdk@^5.0.0`. SDK 5 makes its legacy monitoring fail closed and removes `Agent.mutualAuth()`, `IdentityClient.resolveDID()` and `IdentityClient.rotateKeys()`; the starter uses none of them. See the SDK [migration guide](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/docs/MIGRATION.md).
-
-## What's new in 1.5
-
-- New projects depend on `atp-sdk@^4.0.0`, which exports `evaluateActionWithProfile` and denies missing or unknown profiles.
-- Node.js 20 or newer is required, for both the CLI and the generated project. The SDK's identity code fails on Node.js 18.
+Starter CLI 1.6.1 generates projects with `atp-sdk@^5.0.0`. The starter and SDK release separately. If you need SDK 6 in that project, read the [migration guide](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/docs/MIGRATION.md), run `npm install atp-sdk@6` in the generated folder, and rerun `npm start` and your integration tests.
 
 ## Try it and contribute
 
