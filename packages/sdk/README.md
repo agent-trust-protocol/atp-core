@@ -32,6 +32,8 @@ console.log(agent.isStandalone()); // true: no hosted service needed
 
 This runs without a hosted ATP service. Standalone identity material is local and ephemeral by default, and the identifier is not publicly resolvable. Persist keys securely and connect the services and policies your application needs before relying on it for consequential actions.
 
+Got a `did:atp:...` identifier and `true` from `isStandalone()`? If the quickstart helped, [star ATP Core](https://github.com/agent-trust-protocol/atp-core) to follow the project.
+
 Prefer a scaffold? The [starter CLI](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/create-atp-agent/README.md) sets up a runnable project. Version 1.6.1 generates projects on SDK 5.x; use the migration guide if you move the generated project to SDK 6.
 
 ## Decide before an agent acts

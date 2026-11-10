@@ -58,6 +58,8 @@ hooks:
 
 Hermes asks for consent the first time it sees this hook. Review the installed code before you approve it. Hermes keys consent on the exact command string, not the script's contents, so re-review after upgrading. Keep `fail_closed: true`.
 
+Verify the hook in a test profile: [allow one test-file read and confirm that the terminal attempt is blocked](https://github.com/agent-trust-protocol/atp-core/blob/main/examples/hermes-hook/README.md#check-blocking-in-your-own-test-profile). If that helped you protect a tool action, [star ATP Core](https://github.com/agent-trust-protocol/atp-core) to follow the project. [Share your result or setup blocker](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/launch/developer-pilot.md).
+
 ## How a call is decided
 
 1. Anything that is not a `pre_tool_call` event, or a tool missing from `tools`, is **blocked**.

@@ -13,6 +13,8 @@ npm start
 
 Expect a local `did:atp:...` identifier and `Standalone: true`. Open `agent.mjs` to see the few lines that start it. No API key or ATP service is needed. Omit `--no-dashboard` to open the optional local configuration screen.
 
+Once your starter runs, [star ATP Core](https://github.com/agent-trust-protocol/atp-core) if you’d like to follow the project.
+
 ## Pick your flow
 
 | Goal | Command |
