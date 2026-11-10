@@ -43,7 +43,7 @@
   "dependencies": {
     "atp-hermes-hook": "^0.1.0",
     "atp-profiles": "^3.0.0",
-    "atp-sdk": "^5.0.0"
+    "atp-sdk": "^6.0.1"
   },
   "engines": {
     "node": ">=20.0.0"
