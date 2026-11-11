@@ -56,11 +56,12 @@ jobs:
           npm ci --include=dev --prefix packages/did-atp
           npm test --prefix packages/did-atp
           cd packages/did-atp
+          did_version="$(node -p "require('./package.json').version")"
           npm pack --pack-destination "$RUNNER_TEMP"
           mkdir "$RUNNER_TEMP/did-atp-consumer"
           cd "$RUNNER_TEMP/did-atp-consumer"
           npm init -y
-          npm install "$RUNNER_TEMP/atpdeveloper-did-atp-0.2.0.tgz"
+          npm install "$RUNNER_TEMP/atpdeveloper-did-atp-$did_version.tgz"
           node --input-type=module <<'JS'
           import { buildAtpV2Did, parseAtpV2PathDid, isAtpV2PathDid, verifyAtpV2KeyBindings, atpJwkThumbprint } from '@atpdeveloper/did-atp';
           import assert from 'node:assert/strict';
