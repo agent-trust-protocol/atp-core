@@ -60,6 +60,10 @@ Hermes asks for consent the first time it sees this hook. Review the installed c
 
 Verify the hook in a test profile: [allow one test-file read and confirm that the terminal attempt is blocked](https://github.com/agent-trust-protocol/atp-core/blob/main/examples/hermes-hook/README.md#check-blocking-in-your-own-test-profile). If that helped you protect a tool action, [star ATP Core](https://github.com/agent-trust-protocol/atp-core) to follow the project. [Share your result or setup blocker](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/launch/developer-pilot.md).
 
+## Feedback and support
+
+[Rate your setup experience](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/package-feedback.md#hermes), leave a comment, or report a reproducible issue. Include `atp-hermes-hook`, its installed version, your runtime, and what you expected to happen. Remove secrets and private data from examples and logs. For vulnerabilities, follow the [private reporting guidance](https://github.com/agent-trust-protocol/atp-core/blob/main/SECURITY.md#reporting-a-vulnerability).
+
 ## How a call is decided
 
 1. Anything that is not a `pre_tool_call` event, or a tool missing from `tools`, is **blocked**.

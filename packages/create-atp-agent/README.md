@@ -15,6 +15,10 @@ Expect a local `did:atp:...` identifier and `Standalone: true`. Open `agent.mjs`
 
 Once your starter runs, [star ATP Core](https://github.com/agent-trust-protocol/atp-core) if you’d like to follow the project.
 
+## Feedback and support
+
+[Rate your setup experience](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/package-feedback.md#starter), leave a comment, or report a reproducible issue. Include `create-atp-agent`, its installed version, your runtime, and what you expected to happen. Remove secrets and private data from examples and logs. For vulnerabilities, follow the [private reporting guidance](https://github.com/agent-trust-protocol/atp-core/blob/main/SECURITY.md#reporting-a-vulnerability).
+
 ## Pick your flow
 
 | Goal | Command |

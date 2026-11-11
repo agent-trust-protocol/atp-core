@@ -1,59 +1,43 @@
 ---
 name: Bug Report
-about: Create a report to help us improve ATP SDK
+about: Report a reproducible problem with any ATP package
 title: '[BUG] '
 labels: bug
 assignees: ''
 ---
 
-## 🐛 Bug Description
+## Package and environment
 
-A clear and concise description of what the bug is.
+- Package name and installed version
+- Node.js version and operating system
+- Package manager and version
+- Agent runtime and version, if relevant (for example Hermes or Claude Code)
+- Install command and relevant configuration, with secrets removed
+- For legacy OpenClaw migration, include the target package and version
 
-## 🔄 Steps to Reproduce
+## Bug description
 
-1. Go to '...'
-2. Run '...'
-3. See error
+Describe the problem and the task it blocks. Search existing issues and link related reports.
 
-## ✅ Expected Behavior
+## Steps to reproduce
 
-A clear and concise description of what you expected to happen.
+Include the smallest sanitized example and exact commands needed to reproduce the problem. State which quickstart or guide you followed, if any.
 
-## ❌ Actual Behavior
+## Expected behavior
 
-What actually happened instead.
+What should have happened?
 
-## 💻 Code Example
+## Actual behavior
 
-```typescript
-// Your code here
-const agent = await Agent.create('test');
-```
+What happened instead? Include the exact error and sanitized logs where possible.
 
-## 📋 Environment
+## Additional context
 
-- **SDK Version**: [e.g., 1.1.0]
-- **Node.js Version**: [e.g., 18.17.0]
-- **OS**: [e.g., macOS 14.0, Ubuntu 22.04]
-- **Package Manager**: [e.g., npm 9.0.0, yarn 1.22.0]
+Include any workaround you found and whether it happens consistently.
 
-## 📸 Screenshots/Logs
+## Before posting
 
-If applicable, add screenshots or error logs to help explain your problem.
+- [ ] I included the package name, installed version, and environment.
+- [ ] I removed credentials, private keys, personal data, and private audit material.
 
-```
-Paste error logs here
-```
-
-## 🔍 Additional Context
-
-Add any other context about the problem here.
-
-## ✅ Checklist
-
-- [ ] I've searched existing issues to avoid duplicates
-- [ ] I've included all relevant environment details
-- [ ] I've provided a minimal reproducible example
-- [ ] I've checked the documentation for similar issues
-
+For vulnerabilities, follow SECURITY.md and use a private reporting channel.

@@ -36,6 +36,10 @@ Got a `did:atp:...` identifier and `true` from `isStandalone()`? If the quicksta
 
 Prefer a scaffold? The [starter CLI](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/create-atp-agent/README.md) sets up a runnable project. Version 1.6.1 generates projects on SDK 5.x; use the migration guide if you move the generated project to SDK 6.
 
+## Feedback and support
+
+[Rate your setup experience](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/package-feedback.md#sdk), leave a comment, or report a reproducible issue. Include `atp-sdk`, its installed version, your runtime, and what you expected to happen. Remove secrets and private data from examples and logs. For vulnerabilities, follow the [private reporting guidance](https://github.com/agent-trust-protocol/atp-core/blob/main/SECURITY.md#reporting-a-vulnerability).
+
 ## Decide before an agent acts
 
 Map each host tool to an action category, ask a profile for a decision, and enforce the decision in your runtime:
