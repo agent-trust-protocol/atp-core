@@ -39,6 +39,10 @@ The result is `{ allowed, decision, reason? }`. `allowed` is `true` only for `al
 
 To see a host enforce all three outcomes end to end, run the [action-boundary demo](https://github.com/agent-trust-protocol/atp-core/tree/main/examples/action-boundary). It needs no service account or model key.
 
+## Feedback and support
+
+[Rate your setup experience](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/package-feedback.md#profiles), leave a comment, or report a reproducible issue. Include `atp-profiles`, its installed version, your runtime, and what you expected to happen. Remove secrets and private data from examples and logs. For vulnerabilities, follow the [private reporting guidance](https://github.com/agent-trust-protocol/atp-core/blob/main/SECURITY.md#reporting-a-vulnerability).
+
 ## How a decision is made
 
 The checks run in this order, and the first one that matches decides:

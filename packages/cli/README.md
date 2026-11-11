@@ -102,6 +102,10 @@ What this proves, precisely:
 
 A profile is a category and state gate, not a sandbox. It does not inspect command contents, paths (except in the Hermes guard) or domains, and it does not verify remote identities or mandates. Keep your agent's own permissions and sandbox in place.
 
+## Feedback and support
+
+[Rate your setup experience](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/package-feedback.md#cli), leave a comment, or report a reproducible issue. Include `@atpdeveloper/atp-cli`, its installed version, your runtime, and what you expected to happen. Remove secrets and private data from examples and logs. For vulnerabilities, follow the [private reporting guidance](https://github.com/agent-trust-protocol/atp-core/blob/main/SECURITY.md#reporting-a-vulnerability).
+
 ## License
 
 Apache-2.0. Part of [ATP Core](https://github.com/agent-trust-protocol/atp-core).
