@@ -3,7 +3,7 @@
 
 [![npm](https://img.shields.io/npm/v/create-atp-agent)](https://www.npmjs.com/package/create-atp-agent) [![license](https://img.shields.io/npm/l/create-atp-agent)](https://github.com/agent-trust-protocol/atp-core/blob/main/LICENSE)
 
-Scaffold a small JavaScript ESM agent with an identity from **Agent Trust Protocol™ (ATP)** in one command. The starter uses the published [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) 5.x. Requires Node.js 20 or newer.
+Scaffold a small JavaScript ESM agent with an identity from **Agent Trust Protocol™ (ATP)** in one command. The starter uses the published [`atp-sdk`](https://www.npmjs.com/package/atp-sdk) 6.x (minimum 6.0.2). Requires Node.js 20 or newer.
 
 ```bash
 npx create-atp-agent my-agent --no-dashboard
@@ -43,7 +43,9 @@ For an existing application, install [`atp-sdk`](https://www.npmjs.com/package/a
 
 ## SDK version
 
-Starter CLI 1.6.1 generates projects with `atp-sdk@^5.0.0`. The starter and SDK release separately. If you need SDK 6 in that project, read the [migration guide](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/docs/MIGRATION.md), run `npm install atp-sdk@6` in the generated folder, and rerun `npm start` and your integration tests.
+Starter CLI 1.7.0 generates projects with `atp-sdk@^6.0.2`, which installs the latest compatible SDK 6 release. The starter and SDK have separate version numbers. A new SDK major is reviewed and tested before the starter adopts it; it is not selected automatically with `@latest`.
+
+Projects created with starter 1.6.x still use SDK 5.x until you upgrade them. Read the [migration guide](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/sdk/docs/MIGRATION.md), run `npm install atp-sdk@^6.0.2` in the existing project, then rerun `npm start` and your integration tests. SDK 6 changes DID resolution and adds an opt-in Node transport; the local standalone quickstart stays available.
 
 ## Try it and contribute
 

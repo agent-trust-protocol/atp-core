@@ -6,7 +6,7 @@ on:
       version:
         description: Exact create-atp-agent version to release
         required: true
-        default: '1.6.1'
+        default: '1.7.0'
         type: string
       dry_run:
         description: Validate and pack without publishing
@@ -38,9 +38,9 @@ jobs:
           EXPECTED_VERSION: ${{ inputs.version }}
         run: |
           test "$(node -p "require('./package.json').version")" = "$EXPECTED_VERSION"
-          test "$(node -p "require('./template/package.json').dependencies['atp-sdk']")" = "^5.0.0"
+          test "$(node -p "require('./template/package.json').dependencies['atp-sdk']")" = "^6.0.2"
           node -e "const p=require('./package.json'); if (!p.repository?.url?.includes('agent-trust-protocol/atp-core') || Object.values(p.bin).some(v=>v.startsWith('./'))) process.exit(1)"
-          npm view atp-sdk@5.0.0 version
+          npm view atp-sdk@6.0.2 version
           if npm view "create-atp-agent@$EXPECTED_VERSION" version >/dev/null 2>&1; then
             echo "Version already published; refusing to republish"
             exit 1
@@ -58,7 +58,9 @@ jobs:
           node "$GITHUB_WORKSPACE/packages/create-atp-agent/dist/index.js" test-agent --no-dashboard --skip-install
           cd test-agent
           npm install
-          npm start
+          node -e "const assert=require('node:assert/strict'); const version=require('./node_modules/atp-sdk/package.json').version; assert.equal(version.split('.')[0], '6'); console.log('Generated project SDK:', version)"
+          npm start | tee starter-output.log
+          grep -q 'Standalone: true' starter-output.log
       - name: Inspect package
         working-directory: packages/create-atp-agent
         run: npm pack --dry-run

@@ -82,6 +82,11 @@ jobs:
         run: |
           cd packages/sdk && npm test -- --ci && npm run examples
 
+      - name: Starter template and SDK-major regression
+        run: |
+          npm ci --include=dev --prefix packages/create-atp-agent
+          npm test --prefix packages/create-atp-agent
+
       # Hard gate: no critical advisories may ship.
       - name: Security audit (critical — blocking)
         run: npm audit --audit-level=critical
