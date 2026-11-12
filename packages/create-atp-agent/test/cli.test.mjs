@@ -20,7 +20,7 @@ test('terminal-only scaffold creates a runnable ESM starter without an invented 
     assert.match(agent, /Agent.quickstart\('test-agent'\)/);
     assert.doesNotMatch(agent, /getTrustScore/);
     const pkg = JSON.parse(await readFile(path.join(cwd, 'test-agent/package.json'), 'utf8'));
-    assert.equal(pkg.dependencies['atp-sdk'], '^5.0.0');
+    assert.equal(pkg.dependencies['atp-sdk'], '^6.0.2');
     assert.equal(pkg.engines.node, '>=20.0.0');
     assert.deepEqual((await readdir(path.join(cwd, 'test-agent'))).filter(n => n === '.atp.json'), []);
   } finally { await rm(cwd, { recursive: true, force: true }); }
@@ -55,4 +55,13 @@ test('local configuration endpoint never claims to have issued a DID or keys', a
     child.kill();
     await rm(cwd, { recursive: true, force: true });
   }
+});
+
+
+test('starter template tracks the repository SDK major', async () => {
+  const sdk = JSON.parse(await readFile(path.join(packageRoot, '../sdk/package.json'), 'utf8'));
+  const template = JSON.parse(await readFile(path.join(packageRoot, 'template/package.json'), 'utf8'));
+  const sdkMajor = sdk.version.split('.')[0];
+  assert.ok(template.dependencies['atp-sdk'].startsWith(`^${sdkMajor}.`),
+    `Starter dependency ${template.dependencies['atp-sdk']} must track SDK major ${sdkMajor}`);
 });
