@@ -37,11 +37,13 @@ This adds a `PreToolUse` hook that runs `atp` before Claude Code's `Bash`, `Powe
 | ATP decision | What the hook returns | Effect in Claude Code |
 | --- | --- | --- |
 | `allow` | nothing | Claude Code's normal permission flow decides |
-| `require_approval` | `ask` | Claude Code asks you |
+| `require_approval` | `ask` (`deny` in a non-prompting permission mode) | Claude Code asks you, or the call is blocked |
 | `deny` | `deny` | the call is blocked |
 | invalid input, settings error | exit code 2 | the call is blocked |
 
 ATP never returns `allow`, because that would skip Claude Code's own permission prompt. When several hooks disagree, Claude Code applies the most restrictive answer, and its settings `deny` and `ask` rules still apply.
+
+**Approval needs a prompting permission mode.** A `require_approval` decision becomes `ask` only when Claude Code reports the `default` (Manual), `plan` or `acceptEdits` permission mode. In `auto`, `dontAsk`, `bypassPermissions` or an unrecognised mode, an `ask` may be resolved without showing you a prompt, so ATP denies the call instead (reason `approval_unavailable_in_<mode>_mode`). If Claude Code does not send a permission mode, ATP returns `ask` as before. To approve shell commands case by case, switch the session to a prompting mode.
 
 The installed command uses absolute paths to the current Node.js and `atp`. If you move or uninstall either, Claude Code treats the broken hook as a non-blocking error, so run `atp guard install claude-code` again after upgrading. `atp guard status` shows where the hook is installed.
 

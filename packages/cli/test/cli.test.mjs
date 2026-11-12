@@ -78,6 +78,29 @@ test('Claude Code hook never returns allow and fails closed', () => {
   } finally { s.cleanup(); }
 });
 
+test('approval requests fail closed in permission modes that may not prompt', () => {
+  const s = sandbox();
+  const out = (tool, input, mode) => s.hook('claude-code', pre(tool, input, mode === undefined ? {} : { permission_mode: mode }));
+  try {
+    for (const mode of [undefined, 'default', 'plan', 'acceptEdits']) {
+      assert.equal(JSON.parse(out('Bash', { command: 'ls' }, mode).stdout).hookSpecificOutput.permissionDecision, 'ask', String(mode));
+    }
+    for (const mode of ['auto', 'dontAsk', 'bypassPermissions', 'some-future-mode']) {
+      const result = out('Bash', { command: 'ls' }, mode);
+      assert.equal(result.status, 0, mode);
+      const hso = JSON.parse(result.stdout).hookSpecificOutput;
+      assert.equal(hso.permissionDecision, 'deny', mode);
+      assert.match(hso.permissionDecisionReason, /approval_unavailable_in_/);
+    }
+    // Allowed and denied decisions are unaffected by the mode.
+    assert.equal(out('Read', { file_path: '/tmp/x' }, 'auto').stdout, '');
+    assert.equal(JSON.parse(out('Write', { file_path: '/tmp/x', content: 'y' }, 'auto').stdout).hookSpecificOutput.permissionDecision, 'deny');
+    // The signed audit records the fail-closed denial.
+    const audit = readFileSync(join(s.env.ATP_HOME, 'audit.jsonl'), 'utf8');
+    assert.match(audit, /"decision":"deny"[^\n]*approval_unavailable_in_auto_mode/);
+  } finally { s.cleanup(); }
+});
+
 test('broken settings block every guarded call', () => {
   const s = sandbox();
   try {
