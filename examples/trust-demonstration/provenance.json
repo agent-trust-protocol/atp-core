@@ -1,0 +1,39 @@
+{
+  "schema": "atp-demonstration-reproduction/1",
+  "originalArchive": {
+    "name": "ATP_Trust_Demonstration_2026-11-12.zip",
+    "sha256": "e1cc7791442cc584d9ee880c41964214030c9691faa7f575a4c2d8b31203293f"
+  },
+  "sourceCommit": "f4ced09aaad2c10fc371fc8e7a0cde642984790f",
+  "runnerSha256": "49a6e615c9172d9d272d650af82233ef9895f2a24a559f23d389398b5b05f358",
+  "setupSha256": "b71f38ee70380a9e349fd9113e500eca5c699a19e2b921ff4e6cd9d0ce832954",
+  "originalRunAt": "2026-11-12T07:08:41.499Z",
+  "rerunAt": "2026-11-13T16:54:28.102Z",
+  "node": "v24.22.1",
+  "npm": "11.9.0",
+  "platform": "{\"platform\":\"linux\",\"arch\":\"x64\"}",
+  "sourceCheckoutInitiallyClean": true,
+  "independentReproduction": false,
+  "assessmentScenariosExactMatch": true,
+  "sourceManifestExactMatch": true,
+  "controlsExactMatch": true,
+  "suiteTotalsExactMatch": true,
+  "summary": {
+    "upstreamPassed": 40,
+    "scenariosPassed": 22,
+    "scenarioCount": 22,
+    "failures": 0
+  },
+  "notTested": [
+    "real Hermes runtime",
+    "ARIA integration or DNS/key discovery",
+    "V19 integration",
+    "authenticated remote revocation",
+    "durable replay protection",
+    "atomic revocation/execution",
+    "durable signed audit or external checkpoint",
+    "human/organization identity attribution",
+    "normative mandate conformance",
+    "post-quantum mandate signatures"
+  ]
+}
