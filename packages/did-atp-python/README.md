@@ -1,7 +1,7 @@
-# ATP DID primitives for Python (experimental, unpublished)
+# ATP DID primitives for Python (experimental)
 
-Offline Python counterpart of `@atpdeveloper/did-atp`. The proposed distribution
-name is `atp-did`; registry name availability and publication are not established.
+Offline Python counterpart of `@atpdeveloper/did-atp`. The distribution name
+is `atp-did`; check PyPI for release availability. This module is experimental.
 Python 3.9+ for base primitives; no base runtime dependencies. Optional signing
 is experimental and currently exercised on Linux/Python 3.12. This is not the
 full Python identity SDK.
@@ -47,7 +47,7 @@ npm ci --prefix packages/did-atp
 npm test --prefix packages/did-atp
 ```
 
-## Optional signing (experimental, unpublished)
+## Optional signing (experimental)
 
 ```sh
 python -m pip install './packages/did-atp-python[crypto]'
