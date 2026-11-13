@@ -1,0 +1,83 @@
+TAP version 13
+# Subtest: verified mandate permits exactly one bounded operation
+ok 1 - verified mandate permits exactly one bounded operation
+  ---
+  duration_ms: 1.379231
+  type: 'test'
+  ...
+# Subtest: positive peer trust claim cannot create operator authority
+ok 2 - positive peer trust claim cannot create operator authority
+  ---
+  duration_ms: 0.221646
+  type: 'test'
+  ...
+# Subtest: operator is inactive or unauthorized
+ok 3 - operator is inactive or unauthorized
+  ---
+  duration_ms: 0.186374
+  type: 'test'
+  ...
+# Subtest: stolen credential or substituted actor
+ok 4 - stolen credential or substituted actor
+  ---
+  duration_ms: 0.186785
+  type: 'test'
+  ...
+# Subtest: unverified mandate proof and forged issuer
+ok 5 - unverified mandate proof and forged issuer
+  ---
+  duration_ms: 0.205583
+  type: 'test'
+  ...
+# Subtest: scope, audience, and expiry constraints
+ok 6 - scope, audience, and expiry constraints
+  ---
+  duration_ms: 0.213465
+  type: 'test'
+  ...
+# Subtest: approval is nonexecutable until exact action authorized
+ok 7 - approval is nonexecutable until exact action authorized
+  ---
+  duration_ms: 0.511984
+  type: 'test'
+  ...
+# Subtest: mid-lease revocation blocks each action-time check
+ok 8 - mid-lease revocation blocks each action-time check
+  ---
+  duration_ms: 0.258601
+  type: 'test'
+  ...
+# Subtest: unreachable or stale live status cannot authorize
+ok 9 - unreachable or stale live status cannot authorize
+  ---
+  duration_ms: 0.368192
+  type: 'test'
+  ...
+# Subtest: cached evidence cannot itself grant action authority
+ok 10 - cached evidence cannot itself grant action authority
+  ---
+  duration_ms: 0.351258
+  type: 'test'
+  ...
+# Subtest: incomplete validity windows fail closed and never dispatch
+ok 11 - incomplete validity windows fail closed and never dispatch
+  ---
+  duration_ms: 0.324308
+  type: 'test'
+  ...
+# Subtest: omitted action digests cannot satisfy approval
+ok 12 - omitted action digests cannot satisfy approval
+  ---
+  duration_ms: 0.170331
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 125.110376
+
