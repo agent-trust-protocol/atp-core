@@ -10,6 +10,18 @@ readme = "README.md"
 requires-python = ">=3.9"
 license = "Apache-2.0"
 dependencies = []
+keywords = ["agent-trust-protocol", "did", "agent-identity", "hybrid-signatures"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Topic :: Security :: Cryptography",
+]
+
+[project.urls]
+Homepage = "https://agenttrustprotocol.com"
+Source = "https://github.com/agent-trust-protocol/atp-core"
+Issues = "https://github.com/agent-trust-protocol/atp-core/issues"
 
 [project.optional-dependencies]
 crypto = ["cryptography>=44,<51", "pqcrypto==0.3.4"]

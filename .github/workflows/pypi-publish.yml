@@ -7,7 +7,7 @@ on:
         description: Python package to release
         required: true
         type: choice
-        options: [atp-profiles, agent-trust-protocol]
+        options: [atp-profiles, agent-trust-protocol, atp-did]
       version:
         description: Exact version to release
         required: true
@@ -31,6 +31,10 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.13'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        if: inputs.package == 'atp-did'
+        with:
+          node-version: '20'
       - name: Select package directory
         id: pkg
         env:
@@ -39,6 +43,7 @@ jobs:
           case "$PACKAGE" in
             atp-profiles) echo "dir=packages/atp-profiles-python" >> "$GITHUB_OUTPUT" ;;
             agent-trust-protocol) echo "dir=packages/agent-trust-protocol-python" >> "$GITHUB_OUTPUT" ;;
+            atp-did) echo "dir=packages/did-atp-python" >> "$GITHUB_OUTPUT" ;;
             *) echo "unknown package $PACKAGE"; exit 1 ;;
           esac
       - name: Check exact version and refuse to republish
@@ -55,7 +60,7 @@ jobs:
           assert project["version"] == os.environ["EXPECTED_VERSION"], project["version"]
           PY
           status=$(curl -s -o /dev/null -w '%{http_code}' "https://pypi.org/pypi/$PACKAGE/$EXPECTED_VERSION/json")
-          if [ "$status" = 200 ]; then echo "Version already published; refusing to republish"; exit 1; fi
+          if [ "$status" != 404 ]; then echo "Expected missing version (404), got HTTP $status; refusing release"; exit 1; fi
       - name: Test (atp-profiles)
         if: inputs.package == 'atp-profiles'
         working-directory: packages/atp-profiles-python
@@ -68,6 +73,18 @@ jobs:
           python -m build "$DIR" --outdir dist
           python -m twine check dist/*
           ls -l dist
+      - name: Verify installed atp-did wheel and SDK interoperability
+        if: inputs.package == 'atp-did'
+        env:
+          ATP_TEST_CRYPTO: '1'
+        run: |
+          python -m venv "$RUNNER_TEMP/atp-did-release"
+          "$RUNNER_TEMP/atp-did-release/bin/python" -m pip install "dist/atp_did-${{ inputs.version }}-py3-none-any.whl[crypto]"
+          npm install --prefix "$RUNNER_TEMP/sdk-reference" --no-package-lock atp-sdk@6.0.2
+          export ATP_SDK_MODULE="file://$RUNNER_TEMP/sdk-reference/node_modules/atp-sdk/dist/index.js"
+          "$RUNNER_TEMP/atp-did-release/bin/python" -m unittest discover -s packages/did-atp-python/tests -v
+          printf 'temporary integration passphrase\n' | "$RUNNER_TEMP/atp-did-release/bin/python" packages/did-atp-python/examples/local_identity.py "$RUNNER_TEMP/release-example.keys.json"
+          "$RUNNER_TEMP/atp-did-release/bin/python" -m pip check
       - name: Publish to PyPI
         if: inputs.dry_run != true
         # PyPI trusted publishing (OIDC); no stored token. Attestations are generated automatically.
