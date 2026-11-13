@@ -1,0 +1,54 @@
+[
+  {
+    "value": null,
+    "code": "invalid_format"
+  },
+  {
+    "value": 1,
+    "code": "invalid_format"
+  },
+  {
+    "value": {},
+    "code": "invalid_format"
+  },
+  {
+    "value": "",
+    "code": "invalid_format"
+  },
+  {
+    "value": "did:web:agents.example.com:billing:e1_kjQqQ5rPyNTQOLOqRzDIXdAApgt4BxtxZ0guwMUtkBM:pq1_Xw89-ZsOxuyc6wUFSDpxy_CzM0T4x3_G4sdM0rIJpm0",
+    "code": "invalid_format"
+  },
+  {
+    "value": "did:atp:agents.example.com:e1_kjQqQ5rPyNTQOLOqRzDIXdAApgt4BxtxZ0guwMUtkBM:pq1_Xw89-ZsOxuyc6wUFSDpxy_CzM0T4x3_G4sdM0rIJpm0",
+    "code": "invalid_format"
+  },
+  {
+    "value": "did:atp:BAD.DOMAIN:billing:e1_kjQqQ5rPyNTQOLOqRzDIXdAApgt4BxtxZ0guwMUtkBM:pq1_Xw89-ZsOxuyc6wUFSDpxy_CzM0T4x3_G4sdM0rIJpm0",
+    "code": "invalid_domain"
+  },
+  {
+    "value": "did:atp:agents.example.com:agent:bad:bad",
+    "code": "invalid_bindings"
+  },
+  {
+    "value": "did:atp:agents.example.com::e1_kjQqQ5rPyNTQOLOqRzDIXdAApgt4BxtxZ0guwMUtkBM:pq1_Xw89-ZsOxuyc6wUFSDpxy_CzM0T4x3_G4sdM0rIJpm0",
+    "code": "invalid_path"
+  },
+  {
+    "value": "did:atp:agents.example.com:e1_kjQqQ5rPyNTQOLOqRzDIXdAApgt4BxtxZ0guwMUtkBM:agent:e1_kjQqQ5rPyNTQOLOqRzDIXdAApgt4BxtxZ0guwMUtkBM:pq1_Xw89-ZsOxuyc6wUFSDpxy_CzM0T4x3_G4sdM0rIJpm0",
+    "code": "invalid_path"
+  },
+  {
+    "value": "did:atp:agents.example.com:billing:e1_kjQqQ5rPyNTQOLOqRzDIXdAApgt4BxtxZ0guwMUtkBM:pq1_Xw89-ZsOxuyc6wUFSDpxy_CzM0T4x3_G4sdM0rIJpm0#key",
+    "code": "invalid_bindings"
+  },
+  {
+    "value": "did:atp:agents.example.com:billing:e1_kjQqQ5rPyNTQOLOqRzDIXdAApgt4BxtxZ0guwMUtkBM:pq1_Xw89-ZsOxuyc6wUFSDpxy_CzM0T4x3_G4sdM0rIJpm0?v=1",
+    "code": "invalid_bindings"
+  },
+  {
+    "value": "did:atp:agents.example.com:billing:e1_kjQqQ5rPyNTQOLOqRzDIXdAApgt4BxtxZ0guwMUtkBM:pq1_Xw89-ZsOxuyc6wUFSDpxy_CzM0T4x3_G4sdM0rIJpm0/resource",
+    "code": "invalid_bindings"
+  }
+]
