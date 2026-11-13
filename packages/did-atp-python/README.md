@@ -94,3 +94,33 @@ CI installs that version in an isolated temporary directory and sets
 `ATP_SDK_MODULE` to its module URL, then runs with `ATP_TEST_CRYPTO=1`.
 The base matrix still runs without optional dependencies. Broader crypto
 platform/Python support must be verified before promotion or publication.
+
+## Local encrypted key file and onboarding example
+
+From the repository root, install the optional extra and run:
+
+```sh
+python -m pip install './packages/did-atp-python[crypto]'
+python packages/did-atp-python/examples/local_identity.py ./my-agent.keys.json --domain example.com --agent demo
+```
+
+The example prompts for a passphrase (at least 16 characters), generates fresh
+Ed25519 and ML-DSA-65 keys, creates an encrypted file with exclusive creation
+and mode 0600, reloads it, builds the DID from its public keys and checks a
+local signature round trip. It refuses to overwrite an existing file. Keep the
+passphrase in a separate password manager; losing it loses access to the keys.
+The example uses `example.com` as a format placeholder and does not register
+or publish a DID, establish domain control, prove third-party trust, or grant
+permission. Never commit the key file or use the demo challenge for a real request.
+
+`atp_did.keyfile.save_key_file(path, key_pair, passphrase)` and
+`load_key_file(path, passphrase)` use scrypt (N=131072, r=8, p=1) and
+AES-256-GCM with random salt and nonce and a versioned authenticated envelope.
+Reading rejects symlinks on supported Unix systems, group/world-accessible
+files, oversized files, bad passphrases, tampering and mismatched key pairs.
+This is application-level encryption, not OS keychain or HSM protection:
+passphrases and raw secrets are present in process memory without guaranteed
+zeroization, and host compromise can expose them. There is no key rotation,
+recovery, migration, or cross-device synchronization. Use a managed keystore
+for production deployments and design scoped challenge and replay checks
+before using signatures for actions.

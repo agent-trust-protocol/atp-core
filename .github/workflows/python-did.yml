@@ -66,4 +66,6 @@ jobs:
         run: |
           export ATP_SDK_MODULE="file://$RUNNER_TEMP/sdk-reference/node_modules/atp-sdk/dist/index.js"
           "$RUNNER_TEMP/python-crypto/bin/python" -m unittest discover -s packages/did-atp-python/tests -v
+          printf 'temporary integration passphrase\n' | "$RUNNER_TEMP/python-crypto/bin/python" packages/did-atp-python/examples/local_identity.py "$RUNNER_TEMP/example.keys.json"
+          test -s "$RUNNER_TEMP/example.keys.json"
           "$RUNNER_TEMP/python-crypto/bin/python" -m pip check
