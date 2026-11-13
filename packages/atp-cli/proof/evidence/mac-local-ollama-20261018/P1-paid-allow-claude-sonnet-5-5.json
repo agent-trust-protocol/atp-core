@@ -1,0 +1,79 @@
+{
+  "id": "P1-paid-allow-claude-sonnet-5-5",
+  "title": "Prior single authorized PAID hosted-model run: real agent, structured call, ALLOW with receipt",
+  "evidence_class": "original-artifact",
+  "environment": "Developer Mac, loopback harness mounting the Studio mandate SQL route; hosted Anthropic model (paid, explicitly authorized once, 2026-10-17).",
+  "paid_or_hosted_inference": true,
+  "observed": {
+    "question": "How many customers are from Canada?",
+    "model": "claude-sonnet-5-5",
+    "atpEnabled": true,
+    "bounds": {
+      "maxRequests": 5,
+      "maxOutputTokensPerRequest": 1500,
+      "deadlineSeconds": 120
+    },
+    "elapsedSeconds": 3.94,
+    "timedOut": false,
+    "error": null,
+    "modelRequestCount": 2,
+    "toolCallSequence": [
+      {
+        "name": "sql_db_query",
+        "args": {
+          "query": "SELECT COUNT(*) AS CanadianCustomers FROM Customer WHERE Country = 'Canada'"
+        }
+      }
+    ],
+    "atpToolResults": [
+      "{\"atp\": \"SUCCEEDED\", \"receiptId\": \"mrx_01M560JGHYKVSXNAQ3JB1SP6CX\", \"rows\": [{\"CanadianCustomers\": 8}], \"rowCount\": 1, \"truncated\": false}"
+    ],
+    "finalAnswer": "8 customers are from Canada.",
+    "server": {
+      "sqlCallbackCountBefore": 0,
+      "sqlCallbackCountAfter": 1,
+      "sqlCallbackDelta": 1,
+      "successReceipt": {
+        "id": "mrx_01M560JGHYKVSXNAQ3JB1SP6CX",
+        "state": "SUCCEEDED",
+        "result_digest": "sha256:34712ecde966a274b7b039bfc186f6698bd66ebd495be0c2b21fce6b513244d6"
+      },
+      "chainOk": true,
+      "auditActions": [
+        "mandate.issued",
+        "chinook.query",
+        "mandate.dispatch.authorized",
+        "mandate.dispatch.started",
+        "mandate.dispatch.succeeded"
+      ],
+      "chinookSha256Before": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15",
+      "chinookSha256After": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15"
+    }
+  },
+  "sources": [
+    {
+      "session_id": "61f8c86b-1fde-479c-ac94-14baa103a23e",
+      "jsonl_line_0based": 2415,
+      "timestamp": "2026-10-18T01:18:27.111Z",
+      "tool_use_id": "toolu_015X6vogupVcqkbS5aSbtE6w",
+      "private_record": "private/transcript-records/61f8c86b-L02415-tool_result.json",
+      "private_record_sha256": "90eed22e5d87c2d2c22e24e0cf9c50ccb0ac6edda337d6946fd1cfc7ec5684ce",
+      "invoked_at": "2026-10-18T01:18:25.983Z"
+    }
+  ],
+  "notes": "NOT a free-local result. Does not satisfy a free-local ALLOW requirement.",
+  "original_artifact": {
+    "paid-live-agent.json": {
+      "sha256": "4064bafdffc7950e5f95f952adac4ab57de3f7cf744777f808c2cc4cda80fab8",
+      "matches_committed_summary_hash": true
+    },
+    "paid-live-agent-server-status.json": {
+      "sha256": "665c55dfbc04bc9b1189a6fbf4b2fdd9492a68baae05def9c89497d3a2e10e54",
+      "matches_committed_summary_hash": true
+    },
+    "paid-live-agent-audit.json": {
+      "sha256": "9f8cb3210835f3181ac750eb435c4812dfa8111d37005c5b07941c615e638d47",
+      "matches_committed_summary_hash": true
+    }
+  }
+}
