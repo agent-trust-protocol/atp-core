@@ -77,9 +77,10 @@ jobs:
         if: inputs.package == 'atp-did'
         env:
           ATP_TEST_CRYPTO: '1'
+          EXPECTED_VERSION: ${{ inputs.version }}
         run: |
           python -m venv "$RUNNER_TEMP/atp-did-release"
-          "$RUNNER_TEMP/atp-did-release/bin/python" -m pip install "dist/atp_did-${{ inputs.version }}-py3-none-any.whl[crypto]"
+          "$RUNNER_TEMP/atp-did-release/bin/python" -m pip install "dist/atp_did-${EXPECTED_VERSION}-py3-none-any.whl[crypto]"
           npm install --prefix "$RUNNER_TEMP/sdk-reference" --no-package-lock atp-sdk@6.0.2
           export ATP_SDK_MODULE="file://$RUNNER_TEMP/sdk-reference/node_modules/atp-sdk/dist/index.js"
           "$RUNNER_TEMP/atp-did-release/bin/python" -m unittest discover -s packages/did-atp-python/tests -v
