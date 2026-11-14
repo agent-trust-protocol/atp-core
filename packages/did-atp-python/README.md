@@ -34,7 +34,7 @@ select required public members and ignore optional/private members.
 
 A matching fingerprint does not prove key possession, cryptographic signature
 validity, trust, current status or authorization. The base module has no key generation or
-signing. There is no network resolver, keystore, mandate verifier, sandbox or
+signing. There is no network resolver, production keystore, mandate verifier, sandbox or
 host adapter. The optional crypto module below adds key generation and signing.
 No W3C certification or full SDK parity is claimed. Community Group drafts and
 implementation releases have separate lifecycles.
@@ -124,3 +124,55 @@ zeroization, and host compromise can expose them. There is no key rotation,
 recovery, migration, or cross-device synchronization. Use a managed keystore
 for production deployments and design scoped challenge and replay checks
 before using signatures for actions.
+
+## Offline DID document verification (unreleased)
+
+This source milestone adds the verification step needed before network
+resolution. It is not included in the published `atp-did==0.1.0` artifact.
+From this checkout:
+
+```sh
+python -m pip install './packages/did-atp-python[document]'
+```
+
+```python
+from pathlib import Path
+from atp_did.document import verify_did_document, DocumentVerificationError
+
+# Obtain this DID from the relying application's trusted request context.
+# Never let the document choose which DID you intended to check.
+expected_did = 'did:atp:...'  # Replace with a complete path DID.
+try:
+    public_keys = verify_did_document(expected_did, Path('did.json').read_bytes())
+except DocumentVerificationError:
+    raise SystemExit('Reject identity document')
+```
+
+The verifier accepts at most 64 KiB of UTF-8 JSON and returns immutable
+public keys only after the requested DID, both key fingerprints, authentication
+references, Ed25519 Data Integrity proof and ML-DSA-65 JWS all pass. There is no
+single-signature fallback. Duplicate JSON members, noncanonical key/signature
+encodings and unsupported JWS headers are rejected. Canonicalization uses
+RFC 8785 via `rfc8785`; JSON numbers are interpreted as IEEE-754 binary64 to
+match the JavaScript reference. Use strings for exact large-integer data.
+`base58` handles the SDK's multibase key and signature encoding.
+
+This is a deliberately narrow profile of SDK-generated path DID documents:
+exactly two methods with the SDK's `key-ed25519` and `key-mldsa65` fragments,
+both listed in authentication, and both proof timestamps equal. This is stricter
+than the SDK verifier's acceptance of arbitrary document shapes; it does not
+claim support for every DID Core document or generic JSON-LD verification.
+Contexts are checked as identifiers and never downloaded. The PQ proof's outer
+metadata is not covered by its JWS; method, purpose and timestamp are therefore
+constrained to the expected methods and classical signed timestamp.
+
+A verified saved document can be old. Signature validity does not establish
+current publication, domain control, a live agent, revocation status or action
+permission. `created` is integrity-checked, not used as a freshness policy.
+Network destination controls, HTTPS retrieval, challenge expiry/replay storage
+and mandate authorization remain separate work. No network request is made.
+
+Run the installed-wheel suite with `ATP_TEST_CRYPTO=1 ATP_TEST_DOCUMENT=1` and
+`ATP_SDK_MODULE` pointing to published `atp-sdk@6.0.2`. It uses ephemeral
+SDK-signed documents with Unicode and numeric service data, then tests tampered
+proofs, keys, metadata, document IDs, JSON and JWS headers.
