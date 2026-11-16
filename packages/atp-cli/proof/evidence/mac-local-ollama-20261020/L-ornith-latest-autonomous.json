@@ -1,0 +1,163 @@
+{
+  "id": "L-ornith-latest-autonomous",
+  "studioCommit": "f38b3ec",
+  "recordedAt": "2026-10-20",
+  "environment": "Developer Mac (darwin); local Ollama on loopback; isolated local harness (disposable Docker PostgreSQL, loopback Fastify listener mounting the Studio mandate SQL and atp.trust routes). Not a Studio deployment.",
+  "paidOrHostedInference": false,
+  "modelDownloads": false,
+  "studioSourceIncluded": false,
+  "deepagentsForkCommit": "e0e5b1ced",
+  "agentInstructionsDisclosure": "The ATP demo fork's AGENTS.md (an addition to the upstream example) instructs the model, when ATP is enabled, to emit the pinned statement verbatim for this question. A successful run therefore shows faithful reproduction of an operator-supplied statement inside a real structured tool call, not independent SQL authorship. The 2026-10-18 llama3.2:3b / qwen2.5-coder:7b attempts ran with the same AGENTS.md.",
+  "selection": "autonomous",
+  "selectionMeaning": "agent chose tools itself",
+  "modelSubstitution": "ChatAnthropic name replaced with local ChatOllama before agent.py import; agent.py unmodified",
+  "model": {
+    "name": "ornith:latest",
+    "digest": "a75697c145891910e312c95e4a9fc1ccb8653e5ef543b23b0403a4665b82fd91",
+    "family": "qwen35",
+    "parameterSize": "9.0B",
+    "quantization": "Q4_K_M",
+    "capabilities": [
+      "completion",
+      "tools",
+      "thinking"
+    ]
+  },
+  "pairing": {
+    "keyEstablishedBy": "ChallengeStore challenge signed by the agent key, verified by proveRegisteredAgent",
+    "approvalAppliedBy": "harness direct update in the disposable database (not the operator console route)"
+  },
+  "approvedSql": "product default (single pinned statement)",
+  "timeoutSeconds": 240,
+  "ran": true,
+  "elapsedSeconds": 33.67,
+  "timedOut": false,
+  "error": null,
+  "bindTools": [
+    {
+      "offered": [
+        "write_todos",
+        "ls",
+        "read_file",
+        "write_file",
+        "edit_file",
+        "glob",
+        "grep",
+        "task",
+        "sql_db_query",
+        "sql_db_schema",
+        "sql_db_list_tables",
+        "sql_db_query_checker"
+      ],
+      "bound": 12,
+      "toolChoice": null
+    },
+    {
+      "offered": [
+        "write_todos",
+        "ls",
+        "read_file",
+        "write_file",
+        "edit_file",
+        "glob",
+        "grep",
+        "task",
+        "sql_db_query",
+        "sql_db_schema",
+        "sql_db_list_tables",
+        "sql_db_query_checker"
+      ],
+      "bound": 12,
+      "toolChoice": null
+    },
+    {
+      "offered": [
+        "write_todos",
+        "ls",
+        "read_file",
+        "write_file",
+        "edit_file",
+        "glob",
+        "grep",
+        "task",
+        "sql_db_query",
+        "sql_db_schema",
+        "sql_db_list_tables",
+        "sql_db_query_checker"
+      ],
+      "bound": 12,
+      "toolChoice": null
+    }
+  ],
+  "structuredToolCalls": [
+    {
+      "name": "sql_db_schema",
+      "args": {
+        "table_names": "Customer"
+      }
+    },
+    {
+      "name": "sql_db_query",
+      "args": {
+        "query": "SELECT COUNT(*) AS CanadianCustomers FROM Customer WHERE Country = 'Canada'"
+      }
+    }
+  ],
+  "sqlDbQueryCalls": 1,
+  "atpToolResults": [
+    {
+      "atp": "SUCCEEDED",
+      "receiptId": "mrx_01M5E4W0VWYQX1W4G02G9M4RR5",
+      "rows": [
+        {
+          "CanadianCustomers": 8
+        }
+      ],
+      "rowCount": 1,
+      "truncated": false
+    }
+  ],
+  "finalAnswer": "There are **8 customers** from Canada.",
+  "server": {
+    "sqlCallbackDelta": 1,
+    "newReceipts": [
+      {
+        "id": "mrx_01M5E4W0VWYQX1W4G02G9M4RR5",
+        "state": "SUCCEEDED",
+        "reasonCode": null
+      }
+    ],
+    "newAuditEvents": [
+      {
+        "id": "evt_01M5E4W0VN7QWPAVN6TEBCPB4W",
+        "action": "chinook.query",
+        "result": "ALLOW",
+        "reasonCode": null
+      },
+      {
+        "id": "evt_01M5E4W0VVBHGBJF6GVZKHDDE1",
+        "action": "mandate.dispatch.authorized",
+        "result": "ALLOW",
+        "reasonCode": null
+      },
+      {
+        "id": "evt_01M5E4W0W6F14N5QXVWN7TF7W8",
+        "action": "mandate.dispatch.started",
+        "result": "ALLOW",
+        "reasonCode": null
+      },
+      {
+        "id": "evt_01M5E4W0WM0DNK22KGR155PQEY",
+        "action": "mandate.dispatch.succeeded",
+        "result": "ALLOW",
+        "reasonCode": null
+      }
+    ],
+    "chainOk": true,
+    "chinookBefore": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15",
+    "chinookAfter": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15",
+    "chinookUnchanged": true
+  },
+  "freeLocalAllow": true,
+  "rawSha256": "dc5ee51ddf6f1f7c7922ee4c2f3869c34b00cd35db8a9c54c40a312a57b5ccd5"
+}

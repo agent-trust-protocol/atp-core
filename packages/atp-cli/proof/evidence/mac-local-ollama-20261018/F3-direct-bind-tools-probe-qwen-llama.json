@@ -1,0 +1,37 @@
+{
+  "id": "F3-direct-bind-tools-probe-qwen-llama",
+  "title": "Direct ChatOllama.bind_tools probe (no agent, no ATP): qwen emits tool-call JSON as plain text; llama emits structured but truncated calls",
+  "evidence_class": "session-log-recovery",
+  "environment": "Developer Mac (darwin), local Ollama at loopback; isolated local harness: disposable Docker PostgreSQL + Fastify listener mounting the Studio mandate SQL route. Not a Studio deployment.",
+  "paid_or_hosted_inference": false,
+  "observed": {
+    "output": [
+      "qwen2.5-coder:7b tc=sql_db_query: tool_calls=[] content_head='{\"name\": \"sql_db_query\", \"arguments\": {\"query\": \"S'",
+      "qwen2.5-coder:7b tc=any: tool_calls=[] content_head='{\"name\": \"sql_db_query\", \"arguments\": {\"query\": \"S'",
+      "qwen2.5-coder:7b tc=required: tool_calls=[] content_head='{\"name\": \"sql_db_query\", \"arguments\": {\"query\": \"S'",
+      "llama3.2:3b tc=sql_db_query: tool_calls=[{'name': 'sql_db_query', 'args': {'query': 'SELECT COUNT(*) FROM customers WHERE country = '}, 'id': '2fd45b3d-f1e6-410d-860d-3a29167bf6e9', 'type': 'tool_call'}] content_head=''",
+      "llama3.2:3b tc=any: tool_calls=[{'name': 'sql_db_query', 'args': {'query': 'SELECT COUNT(*) FROM customers WHERE country = '}, 'id': 'a1b8d572-614f-4e40-b75d-1f0193e1af61', 'type': 'tool_call'}] content_head=''",
+      "llama3.2:3b tc=required: tool_calls=[{'name': 'sql_db_query', 'args': {'query': 'SELECT COUNT(*) FROM customers WHERE country = '}, 'id': '9f226b8e-6278-417b-9b08-f2ade7c1efff', 'type': 'tool_call'}] content_head=''"
+    ]
+  },
+  "sources": [
+    {
+      "session_id": "5e15d028-c516-40da-be90-359f6628bb47",
+      "jsonl_line_0based": 226,
+      "timestamp": "2026-10-18T04:54:21.302Z",
+      "tool_use_id": "toolu_01DgLcWCRd4gsBj8vyR3QdVm",
+      "private_record": "private/transcript-records/5e15d028-L00226-tool_result.json",
+      "private_record_sha256": "aeff2c6935bbada7b894ca79f2bd50ba5b1a9516f6510f5078e602fe1c5500c1",
+      "invoked_at": "2026-10-18T04:54:04.522Z"
+    },
+    {
+      "session_id": "5e15d028-c516-40da-be90-359f6628bb47",
+      "jsonl_line_0based": 225,
+      "timestamp": "2026-10-18T04:54:04.522Z",
+      "tool_use_id": "toolu_01DgLcWCRd4gsBj8vyR3QdVm",
+      "private_record": "private/transcript-records/5e15d028-L00225-tool_use.json",
+      "private_record_sha256": "f6860e74bb6af651f146a7d0bcc6c22985047eae32e541263852434ddf060c30"
+    }
+  ],
+  "notes": "Model-capability probe only. No ATP server involved; demonstrates qwen2.5-coder:7b returns tool_calls=[] with the call serialized as JSON in content, under tool_choice=sql_db_query/any/required."
+}
