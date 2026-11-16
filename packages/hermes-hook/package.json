@@ -1,6 +1,6 @@
 {
   "name": "atp-hermes-hook",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Fail-closed Hermes Agent pre_tool_call hook that enforces Agent Trust Protocol (ATP) security profiles at the tool boundary",
   "type": "module",
   "main": "./src/index.mjs",
@@ -42,7 +42,8 @@
     "url": "https://github.com/agent-trust-protocol/atp-core/issues"
   },
   "dependencies": {
-    "atp-profiles": "^3.0.0"
+    "atp-profiles": "^3.0.0",
+    "yaml": "^2.9.1"
   },
   "engines": {
     "node": ">=20.0.0"

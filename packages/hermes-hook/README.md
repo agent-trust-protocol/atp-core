@@ -4,7 +4,63 @@ A fail-closed [Hermes Agent](https://github.com/NousResearch/hermes-agent) `pre_
 
 Requires Node.js 20 or newer. Want to see the decisions before changing Hermes settings? Start with the [local walkthrough](https://github.com/agent-trust-protocol/atp-core/tree/main/examples/hermes-hook), which runs the hook without starting Hermes or calling a model.
 
-## Install
+## One-command setup (macOS/Linux)
+
+Requires Hermes on your PATH and Node.js 20 or newer. From any directory, run:
+
+```bash
+npx --yes atp-hermes-hook@0.2.0 setup
+```
+
+This creates an `atp-pilot` Hermes profile if needed, installs a fixed copy under
+`~/.hermes/agent-hooks/atp`, and creates a `safe-default` policy that allows reads
+only within a disposable test folder. Terminal, write and patch calls are blocked.
+It runs standalone read/terminal/write decision checks, backs up the profile's
+`config.yaml`, and merges a fail-closed hook while preserving other hooks and
+settings. It does not install packages into your current directory.
+
+Hermes runs the persistent local copy, with no `npx` network fetch per tool call.
+Setup does not restart gateways, import OpenClaw data, configure a model/provider,
+or bypass Hermes' first-use consent. If the new profile needs a provider, run
+`hermes -p atp-pilot setup` and skip unrelated migrations and messaging setup.
+
+Verify Hermes' wiring next:
+
+```bash
+hermes -p atp-pilot hooks test pre_tool_call --for-tool terminal
+hermes -p atp-pilot chat
+```
+
+Review and approve the exact local hook when Hermes asks. Expect an ATP terminal
+block in the hook test. Complete the [live tool-call check](../../examples/hermes-hook/README.md#check-blocking-in-your-own-test-profile)
+using this installation's `test-files/atp-setup-fixture.txt` as the allowed file.
+Standalone checks do not prove live enforcement or signed mandate verification.
+
+To choose another profile and read scope:
+
+```bash
+npx --yes atp-hermes-hook@0.2.0 setup --hermes-profile my-test-profile --read /absolute/path/to/docs
+```
+
+`--read` may be repeated; it replaces the default test-folder read scope on first
+setup. No write scope is granted. Custom or existing policies receive terminal and
+write checks; the fixture read check runs only when the test folder is an explicit
+read root. Profiles configured by setup share this installation's policy file;
+use manual installation for different policies per profile. `--hermes-home` selects
+a custom Hermes root. Setup rejects malformed YAML, preserves existing ATP policies,
+and refuses to replace their read scope implicitly. Rerunning setup does not add
+duplicate copies of the same command. Existing manually configured ATP commands
+are preserved with other hooks; review them separately if migrating. Other tool
+names are outside the default four-tool matcher. Use WSL on Windows.
+
+To undo the YAML change, restore the exact backup path printed by setup. This
+restores the whole pre-setup file, so preserve later configuration edits first.
+Revoke consent with `hermes -p <profile> hooks revoke '<exact command>'` if needed.
+Running gateways require a deliberate restart to pick up changes; setup never
+restarts them. Package files and the ATP policy remain available for inspection
+after a failed or undone setup.
+
+## Manual install
 
 Install it locally (not through `npx`) so Hermes runs a fixed, reviewed copy without a network fetch on every tool call:
 

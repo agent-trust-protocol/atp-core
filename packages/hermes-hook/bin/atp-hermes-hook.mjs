@@ -9,6 +9,8 @@ const BLOCK_EXIT = 2;
 const USAGE = `Usage: atp-hermes-hook --config <file>   (reads a Hermes pre_tool_call event on stdin)
        atp-hermes-hook --check --config <file>
        atp-hermes-hook --version
+       atp-hermes-hook setup [--hermes-profile atp-pilot] [--read <directory>]
+                            [--hermes-home <directory>]
 
 The configuration file can also be set with ATP_HERMES_HOOK_CONFIG.`;
 
@@ -88,4 +90,14 @@ function main() {
   }
 }
 
-main();
+if (process.argv[2] === 'setup') {
+  try {
+    const { parseSetupArgs, setupHermes } = await import('../src/setup.mjs');
+    setupHermes(parseSetupArgs(process.argv.slice(3)));
+  } catch (error) {
+    process.stderr.write(`atp-hermes-hook setup: ${error.message}\n`);
+    process.exitCode = 1;
+  }
+} else {
+  main();
+}
