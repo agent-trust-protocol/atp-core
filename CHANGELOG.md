@@ -6,6 +6,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Hermes tool coverage (`atp-hermes-hook` 0.2.1 and ATP CLI 0.1.2; release pending).**
+  Replace the four-tool hook matcher with `.*` so unmapped tools fail closed.
+  A live pilot reported terminal denial followed by successful execution through
+  `execute_code` and Python subprocess. Setup now probes unmapped execution tools;
+  runtime CI attempts the alternate subprocess path and checks its sentinel is absent.
+  Existing profile YAML must be updated and its sessions restarted; installing a
+  new package version alone does not change hook coverage. This remains a tool
+  dispatch policy gate, not an operating-system sandbox.
 - **`@atpdeveloper/atp-cli` 0.1.1 (release pending).** Documentation-only patch: the
   README on the npm page told users to run `npm install -g atp-cli`, a package name that
   does not exist on npm. It now says `npm install -g @atpdeveloper/atp-cli`. No code

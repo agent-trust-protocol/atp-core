@@ -39,13 +39,19 @@ To try it in a Hermes profile, put an **absolute path** to this installed script
 ```yaml
 hooks:
   pre_tool_call:
-    - matcher: "^(read_file|terminal|write_file|patch)$"
+    - matcher: ".*"
       command: "node /absolute/path/to/atp-core/examples/hermes-hook/atp-hook.mjs"
       timeout: 10
       fail_closed: true
 ```
 
-The matcher only covers these four Hermes tool names. Other tools are outside this example's scope; expand the matcher and map them explicitly before treating it as a wider gate. Run `hermes hooks test pre_tool_call --for-tool terminal` and a real Hermes session to confirm consent and blocking in your installed version. The JavaScript tests verify the hook wire format. Use the [runtime verifier below](#verify-the-hermes-runtime) to test actual Hermes dispatch.
+The matcher intercepts every tool name. The fixed example blocks unknown tools,
+including `execute_code`, so a general interpreter cannot skip this hook by using
+a different tool name. Run `hermes hooks test pre_tool_call --for-tool terminal`
+and `hermes hooks test pre_tool_call --for-tool execute_code`, then a real Hermes
+session to confirm consent and blocking in your installed version. The JavaScript
+tests verify the hook wire format. Use the [runtime verifier below](#verify-the-hermes-runtime)
+to test actual Hermes dispatch. This remains a tool gate, not an OS sandbox.
 
 The ATP profile is a category and state gate. The adapter adds the fixed file restriction; it does not provide a general filesystem sandbox, signed audit, identity or mandate verification, nor does it implement an approval workflow. Hermes shell hooks are trusted local code and a separate hook or plugin may affect execution. Preserve Hermes' native permissions and sandbox. This demonstration is for ATP Core, the open developer foundation; ATP Studio is a separate enterprise product.
 
@@ -125,7 +131,7 @@ flowchart TD
   C -->|block or hook failure| E["Return a refusal"]
 ```
 
-The host selects the profile, tool mapping and fixed file. The incoming event supplies the requested tool and arguments. Inspect `atp-hook.mjs` before changing these controls. Keep `fail_closed: true`; leave approval-required actions blocked until a separately verified approval flow exists. Do not broaden the tool matcher or attach a general shell without enforcing its arguments and resource limits.
+The host selects the profile, tool mapping and fixed file. The incoming event supplies the requested tool and arguments. Inspect `atp-hook.mjs` before changing these controls. Keep `fail_closed: true`; leave approval-required actions blocked until a separately verified approval flow exists. Keep the catch-all matcher. Do not broaden the permitted tool mapping or attach a general shell without enforcing its arguments and resource limits.
 
 The fixed-file comparison is not an OS sandbox and cannot prevent a concurrent file/symlink change between checking and reading. Protect the fixture directory from untrusted writes. This example does not supply remote revocation, credential checks, a signed receipt, or protection against a host/plugin that bypasses the hook.
 

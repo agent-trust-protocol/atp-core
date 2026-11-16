@@ -7,7 +7,7 @@ import { decide, loadConfig, normalizeConfig } from 'atp-hermes-hook';
 import { paths, readJson, writeJson } from './home.mjs';
 
 export const HERMES_MARKER = 'guard hook hermes';
-export const HERMES_MATCHER = '^(read_file|terminal|write_file|patch)$';
+export const HERMES_MATCHER = '.*';
 
 export function hermesHookCommand() {
   const bin = resolve(fileURLToPath(new URL('../bin/atp.mjs', import.meta.url)));

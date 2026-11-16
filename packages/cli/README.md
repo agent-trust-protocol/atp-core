@@ -55,6 +55,11 @@ atp guard install hermes --read ~/projects/docs
 
 This writes `~/.atp/hermes-hook.json` and prints the `hooks:` block to add to your Hermes profile's `config.yaml`. Decisions come from the published [`atp-hermes-hook`](https://www.npmjs.com/package/atp-hermes-hook) package: fail-closed, path-scoped, and blocking with exit code 2. Each decision is also written to the ATP audit trail.
 
+Use the generated `matcher: ".*"` so every tool call reaches ATP. Unmapped tools
+such as `execute_code`, browser automation and delegation are blocked. Earlier
+four-tool matchers left alternate execution tools outside the gate; updating
+the package alone does not update YAML already installed in a Hermes profile.
+
 ## Profiles
 
 ```bash
