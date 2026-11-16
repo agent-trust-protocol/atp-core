@@ -1,6 +1,6 @@
 {
   "name": "@atpdeveloper/atp-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Agent Trust Protocol (ATP) in your terminal: guard Claude Code and Hermes tool calls with ATP profiles, manage a did:atp identity, and keep a signed local audit trail",
   "type": "module",
   "bin": {

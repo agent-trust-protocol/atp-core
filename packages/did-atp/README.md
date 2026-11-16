@@ -40,6 +40,10 @@ where `e1_` is the RFC 7638 JWK thumbprint of the Ed25519 (OKP) binding key and
 `pq1_` is the RFC 7638 JWK thumbprint of the ML-DSA-65 (AKP, RFC 9964) binding
 key. Only SHA-256 (from `@noble/hashes`) is used — no new crypto primitives.
 
+## Feedback and support
+
+[Rate your setup experience](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/package-feedback.md#did), leave a comment, or report a reproducible issue. Include `@atpdeveloper/did-atp`, its installed version, your runtime, and what you expected to happen. Remove secrets and private data from examples and logs. For vulnerabilities, follow the [private reporting guidance](https://github.com/agent-trust-protocol/atp-core/blob/main/SECURITY.md#reporting-a-vulnerability).
+
 ## Exports
 
 | Symbol | Purpose |

@@ -31,6 +31,14 @@ export const CLAUDE_TOOLS = Object.freeze({
 export const CLAUDE_MATCHER = `^(${Object.keys(CLAUDE_TOOLS).join('|')}|mcp__.*)$`;
 export const HOOK_MARKER = 'guard hook claude-code';
 
+/**
+ * Claude Code permission modes in which a hook 'ask' reaches the user as a prompt.
+ * In other modes (auto, dontAsk, bypassPermissions, or a mode this version does not
+ * know) an 'ask' may be resolved without the user, so ATP fails closed and denies.
+ * Observed with Claude Code desktop: auto mode ran hook-'ask' Bash calls with no prompt.
+ */
+export const PROMPTING_MODES = Object.freeze(new Set(['default', 'plan', 'acceptEdits']));
+
 const MODE_OK = (profile, mode) => !mode || (profile.controls?.filesystem?.modes ?? []).includes(mode);
 
 /**
@@ -50,6 +58,11 @@ export function decideClaude(payload, settings) {
   let result = evaluateActionWithProfile(profile, { actionType: category, state: settings.state });
   if (result.decision !== 'deny' && mapped?.mode && !MODE_OK(profile, mapped.mode)) {
     result = { allowed: false, decision: 'deny', reason: `filesystem_${mapped.mode}_not_permitted` };
+  }
+  const mode = payload.permission_mode;
+  if (result.decision === 'require_approval' && mode !== undefined && !PROMPTING_MODES.has(mode)) {
+    const label = String(mode).replace(/[^A-Za-z]/g, '').slice(0, 32) || 'unknown';
+    result = { allowed: false, decision: 'deny', reason: `approval_unavailable_in_${label}_mode` };
   }
   const target = category === tool ? tool : `${tool} → ${category}`;
   const reason = `ATP profile ${settings.profile}: ${target} is ${result.decision.replace('_', ' ')}${result.reason ? ` (${result.reason})` : ''}`;

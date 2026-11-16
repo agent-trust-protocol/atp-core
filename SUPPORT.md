@@ -16,9 +16,11 @@ Get instant help from our ATP-powered support agent:
 
 ## 💬 **Community Support**
 
+[Rate your package setup or find package-specific support](docs/package-feedback.md). Include the exact package, installed version, runtime, expected result, and a sanitized reproduction.
+
 ### **GitHub Discussions**
-- **Questions:** [GitHub Discussions](https://github.com/agent-trust-protocol/core/discussions)
-- **Bug Reports:** [GitHub Issues](https://github.com/agent-trust-protocol/core/issues)
+- **Questions:** [GitHub Discussions](https://github.com/agent-trust-protocol/atp-core/discussions)
+- **Bug Reports:** [GitHub Issues](https://github.com/agent-trust-protocol/atp-core/issues)
 
 ### **Developer Resources**
 - **Documentation:** [docs.agenttrustprotocol.com](https://docs.agenttrustprotocol.com)
@@ -42,10 +44,7 @@ Get instant help from our ATP-powered support agent:
 
 ## 🚨 **Security Issues**
 
-For security vulnerabilities, please email: **llewis@agenttrustprotocol.com**
-- **Do not** create public GitHub issues for security problems
-- Include detailed reproduction steps
-- We will acknowledge within 24 hours
+Follow the [private vulnerability reporting guidance](SECURITY.md#reporting-a-vulnerability). Keep vulnerability details and sensitive data out of public issues and discussions.
 
 ## 📈 **Feature Requests**
 

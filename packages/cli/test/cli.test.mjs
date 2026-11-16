@@ -25,7 +25,8 @@ const pre = (tool_name, tool_input = {}, extra = {}) => ({ hook_event_name: 'Pre
 test('help, version and one-shot modes', () => {
   const s = sandbox();
   try {
-    assert.match(s.run(['--version']).stdout, /^0\.1\.0/);
+    const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+    assert.equal(s.run(['--version']).stdout.trim(), version);
     assert.match(s.run(['help']).stdout, /guard install claude-code/);
     const viaP = s.run(['-p', '/profile check Bash', '--json']);
     assert.equal(viaP.status, 0);
@@ -74,6 +75,29 @@ test('Claude Code hook never returns allow and fails closed', () => {
         assert.doesNotMatch(s.hook('claude-code', pre(tool)).stdout, new RegExp(`"${decision}"`));
       }
     }
+  } finally { s.cleanup(); }
+});
+
+test('approval requests fail closed in permission modes that may not prompt', () => {
+  const s = sandbox();
+  const out = (tool, input, mode) => s.hook('claude-code', pre(tool, input, mode === undefined ? {} : { permission_mode: mode }));
+  try {
+    for (const mode of [undefined, 'default', 'plan', 'acceptEdits']) {
+      assert.equal(JSON.parse(out('Bash', { command: 'ls' }, mode).stdout).hookSpecificOutput.permissionDecision, 'ask', String(mode));
+    }
+    for (const mode of ['auto', 'dontAsk', 'bypassPermissions', 'some-future-mode']) {
+      const result = out('Bash', { command: 'ls' }, mode);
+      assert.equal(result.status, 0, mode);
+      const hso = JSON.parse(result.stdout).hookSpecificOutput;
+      assert.equal(hso.permissionDecision, 'deny', mode);
+      assert.match(hso.permissionDecisionReason, /approval_unavailable_in_/);
+    }
+    // Allowed and denied decisions are unaffected by the mode.
+    assert.equal(out('Read', { file_path: '/tmp/x' }, 'auto').stdout, '');
+    assert.equal(JSON.parse(out('Write', { file_path: '/tmp/x', content: 'y' }, 'auto').stdout).hookSpecificOutput.permissionDecision, 'deny');
+    // The signed audit records the fail-closed denial.
+    const audit = readFileSync(join(s.env.ATP_HOME, 'audit.jsonl'), 'utf8');
+    assert.match(audit, /"decision":"deny"[^\n]*approval_unavailable_in_auto_mode/);
   } finally { s.cleanup(); }
 });
 

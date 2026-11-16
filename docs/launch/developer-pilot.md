@@ -14,6 +14,12 @@ Start with Hermes users who already want to restrict file or terminal access. We
 
 The script is a demonstration of a fixed-file boundary. It does not authorize arbitrary paths or commands, verify signed mandates, implement remote revocation, or issue signed receipts. Closing the local demo session is not revoking a mandate.
 
+## First independent session
+
+Ask one developer who already uses Hermes to follow the guide in a disposable test profile with its native permissions and sandbox left in place. Let them start without coaching; note the first step where help is needed. Stop and record the blocker if they cannot complete setup.
+
+A completed session means the participant read the approved test file, saw the terminal attempt blocked, and independently confirmed that the attempted output file was absent. Ask them to file a [sanitized result](https://github.com/agent-trust-protocol/atp-core/issues/new?template=developer-pilot.yml), including setup time and the first point of friction. If they found ATP useful, they can [star ATP Core](https://github.com/agent-trust-protocol/atp-core) to follow the project. A star is optional and is not pilot evidence.
+
 ## What counts as success
 
 | Stage | Evidence | Counts toward the five? |

@@ -1,12 +1,15 @@
 blank_issues_enabled: true
 contact_links:
+  - name: Package ratings and feedback
+    url: https://github.com/agent-trust-protocol/atp-core/blob/main/docs/package-feedback.md
+    about: Share setup feedback or find support for your ATP package
   - name: GitHub Discussions
-    url: https://github.com/agent-trust-protocol/core/discussions
+    url: https://github.com/agent-trust-protocol/atp-core/discussions
     about: Ask questions and discuss ideas with the community
   - name: Documentation
-    url: https://github.com/agent-trust-protocol/core/tree/main/docs
+    url: https://github.com/agent-trust-protocol/atp-core/tree/main/docs
     about: Check our documentation for guides and API reference
   - name: Security Issue
-    url: https://github.com/agent-trust-protocol/core/security
+    url: https://github.com/agent-trust-protocol/atp-core/blob/main/SECURITY.md#reporting-a-vulnerability
     about: Report security vulnerabilities privately
 

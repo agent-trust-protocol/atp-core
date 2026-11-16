@@ -1,0 +1,477 @@
+{
+  "schema": "atp-trust-demonstration/1",
+  "runAt": "2026-11-13T16:54:28.102Z",
+  "node": "v24.22.1",
+  "source": {
+    "repository": "https://github.com/agent-trust-protocol/atp-core",
+    "commit": "f4ced09aaad2c10fc371fc8e7a0cde642984790f",
+    "files": [
+      {
+        "path": "examples/action-boundary/boundary.mjs",
+        "sha256": "fe99a07341d373b8319a947eddb32cf885e4e7ca6d4172af28dc2158a879bef1"
+      },
+      {
+        "path": "examples/action-boundary/demo.test.mjs",
+        "sha256": "efe76b05dcabb927f937483027e2d7af248d17ba209a29e1d42d540f5137be1e"
+      },
+      {
+        "path": "examples/hermes-hook/atp-hook.mjs",
+        "sha256": "4ce97b47b764cb3688124a6b7e01edc521437c8296949f15b75383ad86948ff6"
+      },
+      {
+        "path": "examples/hermes-hook/atp-hook.test.mjs",
+        "sha256": "525eaa5a653e0f3f56bfba596ae38f48b30864d63f9cf91dc47a935375bc26c0"
+      },
+      {
+        "path": "examples/operator-authority/fixture-policy.mjs",
+        "sha256": "7874f935209a5eadbf994274d9966b54c0a278cd707e37837120b9e1ce1ec669"
+      },
+      {
+        "path": "examples/operator-authority/fixture-policy.test.mjs",
+        "sha256": "09403052a4f5625178422ed3dc130a52ce07a5e2a1eda7c2851c05a3dbc98026"
+      },
+      {
+        "path": "examples/operator-authority/signed-mandate.mjs",
+        "sha256": "fff1de332827066b6254e9614fe33441fa77357d1ed206e7ab74ba6ae2d0da45"
+      },
+      {
+        "path": "examples/operator-authority/signed-mandate.test.mjs",
+        "sha256": "11a0e3f95d9731645cf5607a7e0847f75631bf53662c014df5789b201cab8898"
+      },
+      {
+        "path": "examples/operator-authority/two-agent.test.mjs",
+        "sha256": "86e26a1b21a6efba4a5ce4b4a54334a1a63b239e2fdfc6a4053a96352d276203"
+      },
+      {
+        "path": "examples/operator-authority/revision-3/live-read-policy.mjs",
+        "sha256": "8d1c3280bc46088ab607f99f91534416534a41956fd0c23173d70351b4a7f059"
+      },
+      {
+        "path": "packages/sdk/src/utils/crypto.ts",
+        "sha256": "5eda598a5152746b4ae0b0c22b691623616842d92d4e23fca6a8e7b984ca3847"
+      },
+      {
+        "path": "examples/action-boundary/package-lock.json",
+        "sha256": "2e10d789043b974fd30f3cbd78a1ff064ebd5a5a6b2149fa3907ac2aaf10c494"
+      },
+      {
+        "path": "examples/hermes-hook/package-lock.json",
+        "sha256": "b650bc35a6f50cd6bb2a8e18604c936fe1afc26edaf303f8ed4f745b7cd4ea7c"
+      },
+      {
+        "path": "packages/sdk/package-lock.json",
+        "sha256": "bafa3bc3e229bcdeb72c933d522f8d5d35d07ce17e93d44511654498bf45bb6f"
+      }
+    ],
+    "profilesVersion": "3.0.0"
+  },
+  "provenance": "ATP-authored local assessment; not independent certification",
+  "suites": [
+    {
+      "name": "action boundary",
+      "command": "node --test --test-reporter=tap examples/action-boundary/demo.test.mjs",
+      "exit": 0,
+      "pass": 3,
+      "fail": 0,
+      "skipped": 0
+    },
+    {
+      "name": "Hermes hook subprocess (no Hermes runtime)",
+      "command": "node --test --test-reporter=tap examples/hermes-hook/atp-hook.test.mjs",
+      "exit": 0,
+      "pass": 3,
+      "fail": 0,
+      "skipped": 0
+    },
+    {
+      "name": "synthetic policy",
+      "command": "node --test --test-reporter=tap examples/operator-authority/fixture-policy.test.mjs",
+      "exit": 0,
+      "pass": 12,
+      "fail": 0,
+      "skipped": 0
+    },
+    {
+      "name": "experimental Ed25519 mandate",
+      "command": "node --test --test-reporter=tap examples/operator-authority/signed-mandate.test.mjs",
+      "exit": 0,
+      "pass": 12,
+      "fail": 0,
+      "skipped": 0
+    },
+    {
+      "name": "experimental signed requests and replay",
+      "command": "node --test --test-reporter=tap examples/operator-authority/two-agent.test.mjs",
+      "exit": 0,
+      "pass": 10,
+      "fail": 0,
+      "skipped": 0
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "B01 permitted fixed read",
+      "layer": "published profile + upstream boundary",
+      "expected": {
+        "decision": "allow",
+        "executions": 1
+      },
+      "observed": {
+        "decision": "allow",
+        "executions": 1
+      },
+      "passed": true
+    },
+    {
+      "id": "B02 approval-required callback held",
+      "layer": "published profile + upstream boundary",
+      "expected": {
+        "decision": "require_approval",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "require_approval",
+        "executions": 0
+      },
+      "passed": true
+    },
+    {
+      "id": "B03 completed session refuses next read",
+      "layer": "published profile + upstream boundary",
+      "expected": {
+        "decision": "deny",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "deny",
+        "executions": 0
+      },
+      "passed": true
+    },
+    {
+      "id": "B04 unknown tool",
+      "layer": "published profile + upstream boundary",
+      "expected": {
+        "decision": "deny",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "deny",
+        "executions": 0
+      },
+      "passed": true
+    },
+    {
+      "id": "H01 fixed read",
+      "layer": "real hook subprocess + assessor dispatcher",
+      "expected": {
+        "decision": "allow",
+        "executions": 1
+      },
+      "observed": {
+        "decision": "allow",
+        "executions": 1,
+        "response": {}
+      },
+      "passed": true
+    },
+    {
+      "id": "H02 terminal",
+      "layer": "real hook subprocess + assessor dispatcher",
+      "expected": {
+        "decision": "block",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "block",
+        "executions": 0,
+        "response": {
+          "action": "block",
+          "message": "ATP: terminal requires a separate approval or is denied"
+        }
+      },
+      "passed": true
+    },
+    {
+      "id": "H03 write",
+      "layer": "real hook subprocess + assessor dispatcher",
+      "expected": {
+        "decision": "block",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "block",
+        "executions": 0,
+        "response": {
+          "action": "block",
+          "message": "ATP: only the fixed read fixture is permitted"
+        }
+      },
+      "passed": true
+    },
+    {
+      "id": "H04 patch",
+      "layer": "real hook subprocess + assessor dispatcher",
+      "expected": {
+        "decision": "block",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "block",
+        "executions": 0,
+        "response": {
+          "action": "block",
+          "message": "ATP: only the fixed read fixture is permitted"
+        }
+      },
+      "passed": true
+    },
+    {
+      "id": "H05 outside path",
+      "layer": "real hook subprocess + assessor dispatcher",
+      "expected": {
+        "decision": "block",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "block",
+        "executions": 0,
+        "response": {
+          "action": "block",
+          "message": "ATP: read path is outside the fixed fixture"
+        }
+      },
+      "passed": true
+    },
+    {
+      "id": "H06 unknown tool",
+      "layer": "real hook subprocess + assessor dispatcher",
+      "expected": {
+        "decision": "block",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "block",
+        "executions": 0,
+        "response": {
+          "action": "block",
+          "message": "ATP: unrecognized tool event"
+        }
+      },
+      "passed": true
+    },
+    {
+      "id": "L01 valid",
+      "layer": "synthetic policy; status and identity/approval trust are fixtures",
+      "expected": {
+        "decision": "ALLOW",
+        "executions": 1
+      },
+      "observed": {
+        "decision": "ALLOW",
+        "executions": 1,
+        "reason": "authorized",
+        "statusReads": 1
+      },
+      "passed": true
+    },
+    {
+      "id": "L02 wrong action",
+      "layer": "synthetic policy; status and identity/approval trust are fixtures",
+      "expected": {
+        "decision": "DENY",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "DENY",
+        "executions": 0,
+        "reason": "out_of_scope",
+        "statusReads": 1
+      },
+      "passed": true
+    },
+    {
+      "id": "L03 wrong resource",
+      "layer": "synthetic policy; status and identity/approval trust are fixtures",
+      "expected": {
+        "decision": "DENY",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "DENY",
+        "executions": 0,
+        "reason": "out_of_scope",
+        "statusReads": 0
+      },
+      "passed": true
+    },
+    {
+      "id": "L04 expired",
+      "layer": "synthetic policy; status and identity/approval trust are fixtures",
+      "expected": {
+        "decision": "DENY",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "DENY",
+        "executions": 0,
+        "reason": "mandate_expired",
+        "statusReads": 0
+      },
+      "passed": true
+    },
+    {
+      "id": "L05 not yet valid",
+      "layer": "synthetic policy; status and identity/approval trust are fixtures",
+      "expected": {
+        "decision": "DENY",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "DENY",
+        "executions": 0,
+        "reason": "mandate_expired",
+        "statusReads": 0
+      },
+      "passed": true
+    },
+    {
+      "id": "L06 revoked",
+      "layer": "synthetic policy; status and identity/approval trust are fixtures",
+      "expected": {
+        "decision": "DENY",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "DENY",
+        "executions": 0,
+        "reason": "mandate_revoked",
+        "statusReads": 1
+      },
+      "passed": true
+    },
+    {
+      "id": "L07 stale status",
+      "layer": "synthetic policy; status and identity/approval trust are fixtures",
+      "expected": {
+        "decision": "DENY",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "DENY",
+        "executions": 0,
+        "reason": "status_not_current",
+        "statusReads": 1
+      },
+      "passed": true
+    },
+    {
+      "id": "L08 unavailable status",
+      "layer": "synthetic policy; status and identity/approval trust are fixtures",
+      "expected": {
+        "decision": "DENY",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "DENY",
+        "executions": 0,
+        "reason": "status_not_current",
+        "statusReads": 1
+      },
+      "passed": true
+    },
+    {
+      "id": "L09 missing approval",
+      "layer": "synthetic policy; status and identity/approval trust are fixtures",
+      "expected": {
+        "decision": "REQUIRE_APPROVAL",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "REQUIRE_APPROVAL",
+        "executions": 0,
+        "reason": "approval_required",
+        "statusReads": 1
+      },
+      "passed": true
+    },
+    {
+      "id": "L10 wrong approval binding",
+      "layer": "synthetic policy; status and identity/approval trust are fixtures",
+      "expected": {
+        "decision": "REQUIRE_APPROVAL",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "REQUIRE_APPROVAL",
+        "executions": 0,
+        "reason": "approval_required",
+        "statusReads": 1
+      },
+      "passed": true
+    },
+    {
+      "id": "L11 simulated matching approval",
+      "layer": "synthetic policy; status and identity/approval trust are fixtures",
+      "expected": {
+        "decision": "ALLOW",
+        "executions": 1
+      },
+      "observed": {
+        "decision": "ALLOW",
+        "executions": 1,
+        "reason": "authorized",
+        "statusReads": 1
+      },
+      "passed": true
+    },
+    {
+      "id": "L12 inactive operator",
+      "layer": "synthetic policy; status and identity/approval trust are fixtures",
+      "expected": {
+        "decision": "DENY",
+        "executions": 0
+      },
+      "observed": {
+        "decision": "DENY",
+        "executions": 0,
+        "reason": "operator_not_authorized",
+        "statusReads": 0
+      },
+      "passed": true
+    }
+  ],
+  "controls": [
+    {
+      "name": "deny everything fails positive control",
+      "detected": true
+    },
+    {
+      "name": "deny but execute fails prevention control",
+      "detected": true
+    },
+    {
+      "name": "direct unguarded callback remains callable",
+      "observedExecutions": 1,
+      "interpretation": "All consequential paths must be mediated; these examples are not an OS sandbox."
+    }
+  ],
+  "notTested": [
+    "real Hermes runtime",
+    "ARIA integration or DNS/key discovery",
+    "V19 integration",
+    "authenticated remote revocation",
+    "durable replay protection",
+    "atomic revocation/execution",
+    "durable signed audit or external checkpoint",
+    "human/organization identity attribution",
+    "normative mandate conformance",
+    "post-quantum mandate signatures"
+  ],
+  "summary": {
+    "upstreamPassed": 40,
+    "scenariosPassed": 22,
+    "scenarioCount": 22,
+    "failures": 0
+  }
+}

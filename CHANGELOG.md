@@ -5,6 +5,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **`@atpdeveloper/atp-cli` 0.1.1 (release pending).** Documentation-only patch: the
+  README on the npm page told users to run `npm install -g atp-cli`, a package name that
+  does not exist on npm. It now says `npm install -g @atpdeveloper/atp-cli`. No code
+  changes from 0.1.0.
+
 ### Added
 - **`@atpdeveloper/atp-cli` 0.1.0 (published to npm 2026-11-06 under the `@atpdeveloper` scope; first release was a local publish, so it carries no provenance).** The `atp` terminal tool in `packages/cli`, modelled on
   Claude Code's interactive CLI: slash commands, Tab completion, history and a status
@@ -32,11 +38,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 - **`@atpdeveloper/atp-cli` (unreleased): depends on atp-sdk ^6.0.1 (was ^5.0.0).**
-  Installs now resolve atp-sdk 6.0.1 and `@atpdeveloper/did-atp` 0.2.0 instead of
-  5.0.0 and 0.1.1. The SDK 6 breaking changes are in DID resolution and JWK
-  thumbprints, which the CLI does not call. For the calls it does make (DID
-  generation, e1/pq1 fingerprints, Ed25519 sign and verify), SDK 5 and SDK 6
-  produce identical output, so existing identities and audit logs read unchanged.
+  New installs resolve SDK 6 and its current DID implementation. The CLI uses DID
+  generation, fingerprints, and Ed25519 signatures rather than the SDK 6 breaking
+  DID resolution and JWK thumbprint APIs. Existing identities and audit logs remain
+  readable. The CLI release version is unchanged by this dependency update.
 - **BREAKING (audit-logger): audit integrity hash redefined.** The per-event
   SHA-256 integrity hash and HMAC signature are now computed over a stable,
   storage-independent field set (`id`, `timestamp`, `source`, `action`,

@@ -1,6 +1,6 @@
 {
   "name": "atp-hermes-hook",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Fail-closed Hermes Agent pre_tool_call hook that enforces Agent Trust Protocol (ATP) security profiles at the tool boundary",
   "type": "module",
   "main": "./src/index.mjs",
