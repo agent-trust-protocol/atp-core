@@ -1,0 +1,71 @@
+TAP version 13
+# Subtest: separate agent and operator keys authorize one protected execution
+ok 1 - separate agent and operator keys authorize one protected execution
+  ---
+  duration_ms: 53.822587
+  type: 'test'
+  ...
+# Subtest: replayed valid signed request cannot execute again
+ok 2 - replayed valid signed request cannot execute again
+  ---
+  duration_ms: 23.034264
+  type: 'test'
+  ...
+# Subtest: forged request signature cannot execute
+ok 3 - forged request signature cannot execute
+  ---
+  duration_ms: 14.616166
+  type: 'test'
+  ...
+# Subtest: signed peer trust claim does not add authority
+ok 4 - signed peer trust claim does not add authority
+  ---
+  duration_ms: 14.672539
+  type: 'test'
+  ...
+# Subtest: scope and audience mutation denied
+ok 5 - scope and audience mutation denied
+  ---
+  duration_ms: 41.402956
+  type: 'test'
+  ...
+# Subtest: revoked authority denies at T=30, T=60, T=119
+ok 6 - revoked authority denies at T=30, T=60, T=119
+  ---
+  duration_ms: 17.004574
+  type: 'test'
+  ...
+# Subtest: status outage fails closed
+ok 7 - status outage fails closed
+  ---
+  duration_ms: 10.779475
+  type: 'test'
+  ...
+# Subtest: mandate expiration fails closed
+ok 8 - mandate expiration fails closed
+  ---
+  duration_ms: 9.880502
+  type: 'test'
+  ...
+# Subtest: request freshness required at action boundary
+ok 9 - request freshness required at action boundary
+  ---
+  duration_ms: 8.07349
+  type: 'test'
+  ...
+# Subtest: signed mandate with missing validity bounds cannot execute
+ok 10 - signed mandate with missing validity bounds cannot execute
+  ---
+  duration_ms: 24.272237
+  type: 'test'
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 383.120905
+

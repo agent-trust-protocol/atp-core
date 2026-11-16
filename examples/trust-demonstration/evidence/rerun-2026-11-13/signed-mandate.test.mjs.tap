@@ -1,0 +1,83 @@
+TAP version 13
+# Subtest: valid signed bounded mandate
+ok 1 - valid signed bounded mandate
+  ---
+  duration_ms: 5.314807
+  type: 'test'
+  ...
+# Subtest: tampered payload invalidates signature
+ok 2 - tampered payload invalidates signature
+  ---
+  duration_ms: 5.130366
+  type: 'test'
+  ...
+# Subtest: signature from untrusted actor is rejected
+ok 3 - signature from untrusted actor is rejected
+  ---
+  duration_ms: 2.873962
+  type: 'test'
+  ...
+# Subtest: untrusted issuer is rejected
+ok 4 - untrusted issuer is rejected
+  ---
+  duration_ms: 0.802091
+  type: 'test'
+  ...
+# Subtest: unexpected issuer is rejected
+ok 5 - unexpected issuer is rejected
+  ---
+  duration_ms: 0.748572
+  type: 'test'
+  ...
+# Subtest: expired grant denied
+ok 6 - expired grant denied
+  ---
+  duration_ms: 2.160191
+  type: 'test'
+  ...
+# Subtest: future grant denied
+ok 7 - future grant denied
+  ---
+  duration_ms: 2.849857
+  type: 'test'
+  ...
+# Subtest: wrong audience, resource, action or agent denied
+ok 8 - wrong audience, resource, action or agent denied
+  ---
+  duration_ms: 8.583372
+  type: 'test'
+  ...
+# Subtest: mid-lease revocation denies at 30,60,119
+ok 9 - mid-lease revocation denies at 30,60,119
+  ---
+  duration_ms: 7.454789
+  type: 'test'
+  ...
+# Subtest: unavailable or stale revocation status denies
+ok 10 - unavailable or stale revocation status denies
+  ---
+  duration_ms: 4.431096
+  type: 'test'
+  ...
+# Subtest: missing scope fields on both grant and request fail closed
+ok 11 - missing scope fields on both grant and request fail closed
+  ---
+  duration_ms: 8.354043
+  type: 'test'
+  ...
+# Subtest: malformed signature encoding fails closed without throwing
+ok 12 - malformed signature encoding fails closed without throwing
+  ---
+  duration_ms: 3.045496
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 297.297028
+

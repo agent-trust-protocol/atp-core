@@ -1,0 +1,28 @@
+PASS suite: action boundary (3 tests, 0 skipped)
+PASS suite: Hermes hook subprocess (no Hermes runtime) (3 tests, 0 skipped)
+PASS suite: synthetic policy (12 tests, 0 skipped)
+PASS suite: experimental Ed25519 mandate (12 tests, 0 skipped)
+PASS suite: experimental signed requests and replay (10 tests, 0 skipped)
+PASS B01 permitted fixed read: allow, executions=1
+PASS B02 approval-required callback held: require_approval, executions=0
+PASS B03 completed session refuses next read: deny, executions=0
+PASS B04 unknown tool: deny, executions=0
+PASS H01 fixed read: allow, executions=1
+PASS H02 terminal: block, executions=0
+PASS H03 write: block, executions=0
+PASS H04 patch: block, executions=0
+PASS H05 outside path: block, executions=0
+PASS H06 unknown tool: block, executions=0
+PASS L01 valid: ALLOW, executions=1
+PASS L02 wrong action: DENY, executions=0
+PASS L03 wrong resource: DENY, executions=0
+PASS L04 expired: DENY, executions=0
+PASS L05 not yet valid: DENY, executions=0
+PASS L06 revoked: DENY, executions=0
+PASS L07 stale status: DENY, executions=0
+PASS L08 unavailable status: DENY, executions=0
+PASS L09 missing approval: REQUIRE_APPROVAL, executions=0
+PASS L10 wrong approval binding: REQUIRE_APPROVAL, executions=0
+PASS L11 simulated matching approval: ALLOW, executions=1
+PASS L12 inactive operator: DENY, executions=0
+{"upstreamPassed":40,"scenariosPassed":22,"scenarioCount":22,"failures":0}
