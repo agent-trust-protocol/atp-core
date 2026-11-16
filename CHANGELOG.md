@@ -37,6 +37,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `atp-profiles` and `atp-sdk` until the next planned major release.
 
 ### Changed
+- **`@atpdeveloper/atp-cli` (unreleased): depends on atp-sdk ^6.0.1 (was ^5.0.0).**
+  New installs resolve SDK 6 and its current DID implementation. The CLI uses DID
+  generation, fingerprints, and Ed25519 signatures rather than the SDK 6 breaking
+  DID resolution and JWK thumbprint APIs. Existing identities and audit logs remain
+  readable. The CLI release version is unchanged by this dependency update.
 - **BREAKING (audit-logger): audit integrity hash redefined.** The per-event
   SHA-256 integrity hash and HMAC signature are now computed over a stable,
   storage-independent field set (`id`, `timestamp`, `source`, `action`,
