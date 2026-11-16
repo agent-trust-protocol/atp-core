@@ -51,7 +51,7 @@ test('setup preserves YAML, other hooks and credentials; repeated setup is idemp
     assert.equal(config.hooks.pre_tool_call[0].command, '/my/existing-hook');
     assert.equal(config.hooks.post_tool_call[0].command, '/my/observer');
     assert.equal(config.hooks.pre_tool_call[1].fail_closed, true);
-    assert.equal(config.hooks.pre_tool_call[1].matcher, '^(read_file|terminal|write_file|patch)$');
+    assert.equal(config.hooks.pre_tool_call[1].matcher, '.*');
     assert.equal(readFileSync(result.backup, 'utf8'), initial);
     assert.equal(readFileSync(join(s.home, 'profiles', 'atp-pilot', '.env'), 'utf8'), 'SECRET=keep-me\n');
     const policy = readFileSync(result.policyFile, 'utf8');
@@ -62,6 +62,8 @@ test('setup preserves YAML, other hooks and credentials; repeated setup is idemp
     assert.equal(s.output.filter((line) => line === 'PASS: fixture read allowed').length, 2);
     assert.ok(s.output.includes('PASS: terminal blocked'));
     assert.ok(s.output.includes('PASS: write blocked'));
+    assert.ok(s.output.includes('PASS: execute_code blocked'));
+    assert.ok(s.output.includes('PASS: unmapped tool blocked'));
     assert.ok(!s.calls.some(({ args }) => args.includes('--accept-hooks') || args.includes('restart')));
     assert.equal(s.calls[0].options.env.HERMES_HOME, s.home);
   } finally { s.cleanup(); }
@@ -76,6 +78,29 @@ test('malformed YAML and malformed existing hooks fail before npm or config chan
       assert.ok(!s.calls.some(({ command }) => command === 'npm'));
     } finally { s.cleanup(); }
   }
+});
+
+test('upgrade closes the four-tool matcher gap for execute_code and future tools', () => {
+  const s = sandbox();
+  try {
+    const installed = s.setup();
+    const old = parse(readFileSync(s.file, 'utf8'));
+    old.hooks.pre_tool_call[0].matcher = '^(read_file|terminal|write_file|patch)$';
+    writeFileSync(s.file, JSON.stringify(old));
+    s.setup();
+    const hooks = parse(readFileSync(s.file, 'utf8')).hooks.pre_tool_call;
+    assert.equal(hooks.length, 1);
+    for (const tool_name of ['execute_code', 'delegate_task', 'browser_exec', 'future_execution_tool']) {
+      assert.ok(new RegExp(hooks[0].matcher).test(tool_name), `${tool_name} must reach ATP`);
+      const result = spawnSync(process.execPath, [installed.stableBin, '--config', installed.policyFile], {
+        encoding: 'utf8', input: JSON.stringify({ hook_event_name: 'pre_tool_call', tool_name,
+          tool_input: { code: 'import subprocess' } }),
+      });
+      assert.equal(result.status, 2);
+      assert.equal(JSON.parse(result.stdout).action, 'block');
+      assert.match(JSON.parse(result.stdout).message, /not mapped/);
+    }
+  } finally { s.cleanup(); }
 });
 
 test('a missing profile is created through Hermes before installing the hook', () => {

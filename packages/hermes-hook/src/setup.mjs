@@ -7,7 +7,9 @@ import { randomUUID } from 'node:crypto';
 import { parseDocument } from 'yaml';
 import { loadConfig } from './index.mjs';
 
-const MATCHER = '^(read_file|terminal|write_file|patch)$';
+// Dispatch every tool through ATP. Otherwise an unmapped execution tool (for
+// example execute_code -> subprocess) can route around a blocked terminal call.
+const MATCHER = '.*';
 const packageRoot = fileURLToPath(new URL('../', import.meta.url));
 
 function run(command, args, options = {}) {
@@ -96,6 +98,8 @@ export function setupHermes({ profile = 'atp-pilot', hermesHome = process.env.HE
   const tests = [
     ['terminal blocked', { tool_name: 'terminal', tool_input: { command: 'echo ATP-test' } }, 2],
     ['write blocked', { tool_name: 'write_file', tool_input: { path: fixture, content: 'must not be written' } }, 2],
+    ['execute_code blocked', { tool_name: 'execute_code', tool_input: { code: 'import subprocess' } }, 2],
+    ['unmapped tool blocked', { tool_name: 'future_execution_tool', tool_input: {} }, 2],
   ];
   // The default fixture is the only read scope we can prove without reading a user's files.
   if (config.roots.read.includes(fixtureDir)) {
@@ -131,7 +135,7 @@ export function setupHermes({ profile = 'atp-pilot', hermesHome = process.env.HE
   output(`Configured Hermes profile: ${profile}`);
   if (backup) output(`Backup: ${backup}`);
   output(`Policy: ${policyFile}`);
-  output('Scope: read_file, terminal, write_file and patch only. Other tools are outside this matcher.');
+  output('Scope: every pre_tool_call is checked. Unmapped tools, including execute_code, are blocked.');
   output('Standalone self-tests passed. Live Hermes enforcement is not verified yet.');
   output(`Next: hermes -p ${profile} hooks test pre_tool_call --for-tool terminal`);
   output('Review and approve the local hook when Hermes requests first-use consent.');

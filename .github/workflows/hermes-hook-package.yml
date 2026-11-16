@@ -82,7 +82,7 @@ jobs:
           npm install --ignore-scripts "$RUNNER_TEMP"/atp-hermes-hook-*.tgz
       - run: uv sync --frozen --python 3.14 --no-dev
         working-directory: hermes-atp-pilot
-      - name: Verify scoped read runs; terminal, write and out-of-scope read are blocked
+      - name: Verify scoped read runs; terminal, execute_code subprocess, write and out-of-scope read are blocked
         run: >-
           .venv/bin/python ../atp-core/packages/hermes-hook/test/verify-live-hermes.py
           --hook "$RUNNER_TEMP/installed/node_modules/atp-hermes-hook/bin/atp-hermes-hook.mjs"

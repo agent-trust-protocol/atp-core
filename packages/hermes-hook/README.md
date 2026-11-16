@@ -9,13 +9,14 @@ Requires Node.js 20 or newer. Want to see the decisions before changing Hermes s
 Requires Hermes on your PATH and Node.js 20 or newer. From any directory, run:
 
 ```bash
-npx --yes atp-hermes-hook@0.2.0 setup
+npx --yes atp-hermes-hook@0.2.1 setup
 ```
 
 This creates an `atp-pilot` Hermes profile if needed, installs a fixed copy under
 `~/.hermes/agent-hooks/atp`, and creates a `safe-default` policy that allows reads
 only within a disposable test folder. Terminal, write and patch calls are blocked.
-It runs standalone read/terminal/write decision checks, backs up the profile's
+Every tool call is intercepted; unmapped tools, including `execute_code`, are blocked.
+It runs standalone read/terminal/write and unmapped-tool decision checks, backs up the profile's
 `config.yaml`, and merges a fail-closed hook while preserving other hooks and
 settings. It does not install packages into your current directory.
 
@@ -39,7 +40,7 @@ Standalone checks do not prove live enforcement or signed mandate verification.
 To choose another profile and read scope:
 
 ```bash
-npx --yes atp-hermes-hook@0.2.0 setup --hermes-profile my-test-profile --read /absolute/path/to/docs
+npx --yes atp-hermes-hook@0.2.1 setup --hermes-profile my-test-profile --read /absolute/path/to/docs
 ```
 
 `--read` may be repeated; it replaces the default test-folder read scope on first
@@ -50,8 +51,20 @@ use manual installation for different policies per profile. `--hermes-home` sele
 a custom Hermes root. Setup rejects malformed YAML, preserves existing ATP policies,
 and refuses to replace their read scope implicitly. Rerunning setup does not add
 duplicate copies of the same command. Existing manually configured ATP commands
-are preserved with other hooks; review them separately if migrating. Other tool
-names are outside the default four-tool matcher. Use WSL on Windows.
+are preserved with other hooks; review them separately if migrating. Unmapped
+tools are blocked, so features such as code execution, browser automation and
+delegation are unavailable until explicitly mapped and reviewed. Use WSL on Windows.
+
+### Upgrade from 0.2.0 or a manual four-tool matcher
+
+The earlier `^(read_file|terminal|write_file|patch)$` matcher did not intercept
+`execute_code`. A live pilot reported a blocked terminal call followed by a
+successful Python subprocess through that alternate tool. The four-tool check
+therefore did not establish execution containment. Re-run setup at 0.2.1 to
+replace the installer's matcher with `.*`, or update your manual matcher below.
+Upgrading the package alone does not update profile YAML. Restart the affected
+CLI session (and deliberately restart any affected gateway) after configuration
+changes. Verify both `terminal` and `execute_code` are blocked through Hermes.
 
 To undo the YAML change, restore the exact backup path printed by setup. This
 restores the whole pre-setup file, so preserve later configuration edits first.
@@ -106,7 +119,7 @@ Then add the hook to your Hermes profile's `config.yaml`, using absolute paths:
 ```yaml
 hooks:
   pre_tool_call:
-    - matcher: "^(read_file|terminal|write_file|patch)$"
+    - matcher: ".*"
       command: "/home/me/.hermes/agent-hooks/atp/node_modules/.bin/atp-hermes-hook --config /home/me/.hermes/agent-hooks/atp/atp-hermes.json"
       timeout: 10
       fail_closed: true
@@ -139,7 +152,10 @@ Every block writes `{"action":"block","message":"ATP: ..."}` and **exits with co
 | `patch` | `filesystem` (write) | `path` |
 | `terminal` | `shell` | — |
 
-To cover more tools, map them and widen the Hermes `matcher` to match:
+Every tool reaches this hook. To permit another tool, map it explicitly after
+reviewing its capabilities. Do not map a general interpreter to a harmless
+category: `execute_code` can run subprocesses and access files directly.
+For example, to evaluate a network tool and remove the terminal mapping:
 
 ```json
 {

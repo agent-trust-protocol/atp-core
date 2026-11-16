@@ -38,7 +38,7 @@ with tempfile.TemporaryDirectory(prefix='atp-hermes-') as directory:
         f"appendFileSync({json.dumps(str(trace))},JSON.stringify({{tool:JSON.parse(input).tool_name,response:JSON.parse(r.stdout)}})+'\\n');\n"
         "process.stdout.write(r.stdout);\n")
     command = f'node {shlex.quote(str(wrapper))}'
-    config = {'hooks': {'pre_tool_call': [{'matcher': '^(read_file|terminal|write_file|patch)$', 'command': command, 'timeout': 10, 'fail_closed': True}]}}
+    config = {'hooks': {'pre_tool_call': [{'matcher': '.*', 'command': command, 'timeout': 10, 'fail_closed': True}]}}
     (home / 'config.yaml').write_text(json.dumps(config))
     os.environ.update(HERMES_HOME=str(home), TERMINAL_ENV='local', NO_PROXY='127.0.0.1,localhost', no_proxy='127.0.0.1,localhost')
 

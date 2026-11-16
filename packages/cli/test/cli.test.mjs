@@ -218,6 +218,7 @@ test('Hermes guard uses atp-hermes-hook decisions, audits them and blocks with e
     const installed = s.json(['guard', 'install', 'hermes', '--read', docs]);
     assert.match(installed.snippet, /guard hook hermes/);
     assert.match(installed.snippet, /fail_closed: true/);
+    assert.match(installed.snippet, /matcher: "\.\*"/);
     const event = (tool_name, tool_input) => ({ hook_event_name: 'pre_tool_call', tool_name, tool_input, cwd: s.proj });
     const read = s.hook('hermes', event('read_file', { path: join(docs, 'a.txt') }));
     assert.equal(read.status, 0);
@@ -225,9 +226,12 @@ test('Hermes guard uses atp-hermes-hook decisions, audits them and blocks with e
     const terminal = s.hook('hermes', event('terminal', { command: 'id' }));
     assert.equal(terminal.status, 2);
     assert.equal(JSON.parse(terminal.stdout).action, 'block');
+    const code = s.hook('hermes', event('execute_code', { code: 'import subprocess' }));
+    assert.equal(code.status, 2);
+    assert.match(JSON.parse(code.stdout).message, /not mapped/);
     assert.equal(s.hook('hermes', 'garbage').status, 2);
     const sources = s.json(['audit']).entries.map((e) => `${e.source}:${e.decision}`);
-    assert.deepEqual(sources, ['hermes:allow', 'hermes:deny']);
+    assert.deepEqual(sources, ['hermes:allow', 'hermes:deny', 'hermes:deny']);
   } finally { s.cleanup(); }
 });
 

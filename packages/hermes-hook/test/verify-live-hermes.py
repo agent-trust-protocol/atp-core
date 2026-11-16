@@ -42,6 +42,7 @@ with tempfile.TemporaryDirectory(prefix='atp-hermes-hook-') as directory:
     outside = home / 'outside'
     outside.mkdir()
     sentinel = home / 'terminal-must-not-run'
+    code_sentinel = home / 'execute-code-must-not-run'
     written = workspace / 'agent-write.txt'
     escaped = outside / 'agent-escape.txt'
 
@@ -63,13 +64,16 @@ with tempfile.TemporaryDirectory(prefix='atp-hermes-hook-') as directory:
         "process.exit(r.status);\n")
     command = f'node {shlex.quote(str(wrapper))}'
     config = {'hooks': {'pre_tool_call': [{
-        'matcher': '^(read_file|terminal|write_file|patch)$', 'command': command, 'timeout': 10, 'fail_closed': True}]}}
+        'matcher': '.*', 'command': command, 'timeout': 10, 'fail_closed': True}]}}
     (home / 'config.yaml').write_text(json.dumps(config))
     os.environ.update(HERMES_HOME=str(home), TERMINAL_ENV='local', NO_PROXY='127.0.0.1,localhost', no_proxy='127.0.0.1,localhost')
 
     calls = [
         ('read_file', {'path': str(workspace / 'notes.txt')}),
         ('terminal', {'command': f'printf should-not-run > {shlex.quote(str(sentinel))}'}),
+        ('execute_code', {'code': 'import subprocess\nsubprocess.run(' + repr([
+            'sh', '-c', f'printf should-not-run > {shlex.quote(str(code_sentinel))}'
+        ]) + ', check=True)'}),
         ('write_file', {'path': str(written), 'content': 'should not be written'}),
         ('read_file', {'path': str(escaped)}),
     ]
@@ -117,19 +121,21 @@ with tempfile.TemporaryDirectory(prefix='atp-hermes-hook-') as directory:
         with contextlib.redirect_stdout(io.StringIO()):
             agent = AIAgent(model='atp-scripted-fixture', provider='custom', api_mode='chat_completions',
                 base_url=f'http://127.0.0.1:{server.server_port}/v1', api_key='local-fixture', max_iterations=8,
-                enabled_toolsets=['terminal', 'file'], skip_context_files=True, skip_memory=True,
+                enabled_toolsets=['terminal', 'file', 'code_execution'], skip_context_files=True, skip_memory=True,
                 skip_background_review=True, cwd=str(workspace))
             result = agent.run_conversation('Exercise the scripted tool calls from the local fixture provider.')
         assert result['completed'] and not result.get('failed'), 'Hermes session did not complete'
         tool_messages = [json.loads(m['content']) for m in result['messages'] if m.get('role') == 'tool']
         assert len(tool_messages) == len(calls), f'expected {len(calls)} tool results, got {len(tool_messages)}'
 
-        read, terminal, write, escape = tool_messages
+        read, terminal, code, write, escape = tool_messages
         assert 'ATP scoped read fixture.' in read['content'], 'in-scope read did not execute'
         assert terminal['error'].startswith('ATP: terminal requires approval'), terminal
+        assert code['error'].startswith('ATP: tool execute_code is not mapped'), code
         assert write['error'].startswith('ATP: write_file needs filesystem write access'), write
         assert escape['error'].startswith('ATP: read_file path'), escape
         assert not sentinel.exists(), 'blocked terminal command executed'
+        assert not code_sentinel.exists(), 'execute_code bypass executed a subprocess'
         assert not written.exists(), 'blocked write executed'
 
         outputs = [json.loads(line) for line in trace.read_text().splitlines()]
@@ -144,6 +150,7 @@ with tempfile.TemporaryDirectory(prefix='atp-hermes-hook-') as directory:
             'mode': 'actual Hermes AIAgent session; deterministic local provider; no autonomous model reasoning; no CLI gateway claim',
             'consent': 'register_from_config accept_hooks=True in an isolated temporary profile; allowlist persisted',
             'hookOutputs': outputs, 'inScopeReadExecuted': True, 'terminalBlocked': True,
+            'executeCodeBlocked': True, 'executeCodeSentinelAbsent': True,
             'writeBlocked': True, 'outOfScopeReadBlocked': True, 'sentinelAbsent': True,
             'sessionCompleted': True, 'providerRequests': result['api_calls']}
         rendered = json.dumps(evidence, indent=2) + '\n'
