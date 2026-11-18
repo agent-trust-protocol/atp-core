@@ -72,7 +72,8 @@ def resolve_did(did, *, timeout=10.0, max_redirects=3):
                             'not_found', 'invalid_response', 'response_too_large', 'transport_failed'}:
                 code = reported
         except (ValueError, AttributeError, TypeError):
-            pass
+            # Malformed worker output must retain a generic failure without leaking details.
+            code = 'transport_failed'
         raise DidResolutionError(code, 'DID HTTPS retrieval failed: ' + code)
     if len(result.stdout) > MAX_BYTES:
         raise DidResolutionError('response_too_large', 'DID response exceeds 64 KiB')
