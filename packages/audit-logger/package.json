@@ -33,6 +33,9 @@
     "tsx": "^4.0.0",
     "jest": "30.5.2"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "overrides": {
     "@istanbuljs/load-nyc-config": {
       "js-yaml": "4.3.2"

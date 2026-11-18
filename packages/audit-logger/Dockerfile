@@ -1,5 +1,5 @@
 # Multi-stage build for monorepo
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -33,7 +33,7 @@ RUN cd packages/shared && npm run build
 RUN cd packages/audit-logger && npm run build
 
 # Production stage
-FROM node:18-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 

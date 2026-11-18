@@ -28,6 +28,13 @@ untrusted patterns. Tests cover the exact match, expiry, mixed findings, severit
 thresholds, malformed reports and unresolved dependency graphs.
 
 The real libp2p decoder advisory GHSA-rvfr-cqwq-rc4j is not excepted. The audit
-logger moves to a coherent current Helia HTTP/JSON/strings stack rather than
+logger moves to a coherent Helia HTTP/JSON/strings stack rather than
 forcing crypto v5 underneath dependencies expecting crypto v4. A local offline
 JSON/string round trip and the standard audit gates must pass before merging.
+
+The upgraded private audit-logger service requires Node 22 or newer. Its package
+engine, service Docker files and audit compatibility-test runtime are aligned
+with that requirement. Other packages keep their existing runtime requirements.
+Helia HTTP 3.1.4, JSON 5.1.1 and strings 5.1.1 preserve createHeliaHTTP and the
+local JSON/string APIs while resolving the fixed crypto dependency. No queue
+version is forced below its consumer's range.
