@@ -1,0 +1,31 @@
+name: Hermes quick feedback
+description: One answer and an optional sentence about trying the Hermes hook.
+title: '[Feedback] Hermes hook'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This optional response is public and associated with your GitHub account.
+        Opening this form does not submit feedback; review it and click Submit new issue.
+        Do not include secrets, local paths, private logs, contact details or customer data.
+        For vulnerabilities, use [private reporting](https://github.com/agent-trust-protocol/atp-core/blob/main/SECURITY.md#reporting-a-vulnerability).
+  - type: input
+    id: outcome
+    attributes:
+      label: Did it work?
+      description: 'Use Worked, Got stuck, or Just exploring. You can edit the prefilled answer.'
+      placeholder: Worked / Got stuck / Just exploring
+    validations:
+      required: true
+  - type: textarea
+    id: comment
+    attributes:
+      label: Anything you want us to know? (optional)
+      description: One sentence about what worked or where you stopped is enough.
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: |
+        Want to help with a deeper test? [Join the existing developer pilot](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/launch/developer-pilot.md).
+        You do not need to complete a pilot report to send this answer.

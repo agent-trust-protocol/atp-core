@@ -50,3 +50,34 @@ The current application asks for 500-character explanations. Draft factual text 
 - Participant evidence: actual completed independent integrations and seven-day returns, once available.
 
 Official references checked in the parent analysis: https://openai.com/form/codex-for-oss/ and https://developers.openai.com/community/codex-for-oss . They describe discretionary selection; this plan does not treat 5,000 downloads as guaranteed qualification.
+
+## Low-friction Hermes feedback experiment
+
+The package README and hook walkthrough offer Worked / Got stuck / Just exploring
+links to `.github/ISSUE_TEMPLATE/hermes-quick-feedback.yml`. Each link prefills the
+outcome text and title; the developer must sign in, review and explicitly submit.
+The only required form field is the outcome. The optional sentence and existing
+pilot link let developers provide more evidence without making it a prerequisite.
+No install-time request, automatic telemetry or download gate is added.
+
+Record the merge/deployment date before comparing results. GitHub README links
+become active on main after merge; the npm README needs the normal next package
+publication. Record those exposure dates separately. No package is republished
+solely by editing these docs.
+
+Review submitted quick-feedback issues weekly using title prefix `[Feedback] Hermes hook`.
+Normalize outcome text to the three choices; classify other/blank answers as
+unclassified, never as success. Count distinct non-bot GitHub author IDs as
+**responding accounts**, deduplicating repeat submissions. Keep maintainer
+responses separate. Accounts are a participation proxy, not verified people or
+all unique ATP developers. Link repeat feedback and detailed pilot reports rather
+than adding the same respondent twice. Do not infer independent activation from
+Worked, and do not treat Just exploring as a failed setup.
+
+Compare absolute submissions, responding accounts and reported blockers with
+the preceding equal seven-day period after each surface is exposed. Missing
+history is unavailable, not zero. There is no impression counter, so do not report
+a response/conversion percentage using npm requests as the denominator. Link
+reproducible blockers to existing bug reports, and invite willing respondents to
+the detailed pilot within their thread. Do not scrape contact details or send
+unsolicited messages. Keep the original activation and seven-day-return criteria.

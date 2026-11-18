@@ -32,6 +32,21 @@ After `npm ci`, run `npm run demo`. It sends four events through the actual hook
 
 The walkthrough does not execute any of these tools or start Hermes. A nonzero exit means an expected response failed. This is an integration-contract reproduction, not evidence of live Hermes activation or signed mandate verification.
 
+## Did it work?
+
+[Worked](https://github.com/agent-trust-protocol/atp-core/issues/new?template=hermes-quick-feedback.yml&title=%5BFeedback%5D%20Hermes%20hook%3A%20Worked&outcome=Worked) · [Got stuck](https://github.com/agent-trust-protocol/atp-core/issues/new?template=hermes-quick-feedback.yml&title=%5BFeedback%5D%20Hermes%20hook%3A%20Got%20stuck&outcome=Got%20stuck) · [Just exploring](https://github.com/agent-trust-protocol/atp-core/issues/new?template=hermes-quick-feedback.yml&title=%5BFeedback%5D%20Hermes%20hook%3A%20Just%20exploring&outcome=Just%20exploring)
+
+Choose an answer to open a short GitHub form, optionally add one sentence, then
+click **Submit new issue**. GitHub sign-in is required; your submitted response
+and account name are public. Opening a link sends no feedback. Participation is
+optional and never required to install or use ATP. Please omit secrets, local
+paths and private data; report vulnerabilities through
+[SECURITY.md](https://github.com/agent-trust-protocol/atp-core/blob/main/SECURITY.md#reporting-a-vulnerability).
+
+Want to help test further? The [developer pilot](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/launch/developer-pilot.md)
+has an optional detailed form. A quick “Worked” response is setup feedback, not
+proof of live enforcement or a verified independent activation.
+
 ## Connect a live Hermes profile
 
 To try it in a Hermes profile, put an **absolute path** to this installed script in the profile's `config.yaml`. Hermes requires first-use consent for shell hooks; approve this exact local hook after reviewing its code. Keep `fail_closed: true` so a failed, missing or timed-out script blocks the matched tool.
