@@ -129,6 +129,21 @@ Hermes asks for consent the first time it sees this hook. Review the installed c
 
 Verify the hook in a test profile: [allow one test-file read and confirm that the terminal attempt is blocked](https://github.com/agent-trust-protocol/atp-core/blob/main/examples/hermes-hook/README.md#check-blocking-in-your-own-test-profile). If that helped you protect a tool action, [star ATP Core](https://github.com/agent-trust-protocol/atp-core) to follow the project. [Share your result or setup blocker](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/launch/developer-pilot.md).
 
+## Did it work?
+
+[Worked](https://github.com/agent-trust-protocol/atp-core/issues/new?template=hermes-quick-feedback.yml&title=%5BFeedback%5D%20Hermes%20hook%3A%20Worked&outcome=Worked) · [Got stuck](https://github.com/agent-trust-protocol/atp-core/issues/new?template=hermes-quick-feedback.yml&title=%5BFeedback%5D%20Hermes%20hook%3A%20Got%20stuck&outcome=Got%20stuck) · [Just exploring](https://github.com/agent-trust-protocol/atp-core/issues/new?template=hermes-quick-feedback.yml&title=%5BFeedback%5D%20Hermes%20hook%3A%20Just%20exploring&outcome=Just%20exploring)
+
+Choose an answer to open a short GitHub form, optionally add one sentence, then
+click **Submit new issue**. GitHub sign-in is required; your submitted response
+and account name are public. Opening a link sends no feedback. Participation is
+optional and never required to install or use ATP. Please omit secrets, local
+paths and private data; report vulnerabilities through
+[SECURITY.md](https://github.com/agent-trust-protocol/atp-core/blob/main/SECURITY.md#reporting-a-vulnerability).
+
+Want to help test further? The [developer pilot](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/launch/developer-pilot.md)
+has an optional detailed form. A quick “Worked” response is setup feedback, not
+proof of live enforcement or a verified independent activation.
+
 ## Feedback and support
 
 [Rate your setup experience](https://github.com/agent-trust-protocol/atp-core/blob/main/docs/package-feedback.md#hermes), leave a comment, or report a reproducible issue. Include `atp-hermes-hook`, its installed version, your runtime, and what you expected to happen. Remove secrets and private data from examples and logs. For vulnerabilities, follow the [private reporting guidance](https://github.com/agent-trust-protocol/atp-core/blob/main/SECURITY.md#reporting-a-vulnerability).
