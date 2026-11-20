@@ -1,6 +1,7 @@
 # ATP DID primitives for Python (experimental)
 
-Offline Python counterpart of `@atpdeveloper/did-atp`. The distribution name
+Python counterpart of `@atpdeveloper/did-atp`, with optional document verification
+and public HTTPS retrieval in unreleased source. The distribution name
 is `atp-did`; check PyPI for release availability. This module is experimental.
 Python 3.9+ for base primitives; no base runtime dependencies. Optional signing
 is experimental and currently exercised on Linux/Python 3.12. This is not the
@@ -34,7 +35,7 @@ select required public members and ignore optional/private members.
 
 A matching fingerprint does not prove key possession, cryptographic signature
 validity, trust, current status or authorization. The base module has no key generation or
-signing. There is no network resolver, production keystore, mandate verifier, sandbox or
+signing. Published 0.1.0 has no network resolver, production keystore, mandate verifier, sandbox or
 host adapter. The optional crypto module below adds key generation and signing.
 No W3C certification or full SDK parity is claimed. Community Group drafts and
 implementation releases have separate lifecycles.
@@ -169,10 +170,77 @@ constrained to the expected methods and classical signed timestamp.
 A verified saved document can be old. Signature validity does not establish
 current publication, domain control, a live agent, revocation status or action
 permission. `created` is integrity-checked, not used as a freshness policy.
-Network destination controls, HTTPS retrieval, challenge expiry/replay storage
-and mandate authorization remain separate work. No network request is made.
+The verifier itself makes no network request. The optional resolver below adds
+HTTPS retrieval; challenge expiry/replay storage and mandate authorization remain
+separate work.
 
 Run the installed-wheel suite with `ATP_TEST_CRYPTO=1 ATP_TEST_DOCUMENT=1` and
 `ATP_SDK_MODULE` pointing to published `atp-sdk@6.0.2`. It uses ephemeral
 SDK-signed documents with Unicode and numeric service data, then tests tampered
 proofs, keys, metadata, document IDs, JSON and JWS headers.
+
+## Public HTTPS resolution (unreleased)
+
+The same source-only `[document]` extra enables the resolver; no additional
+network dependency is required. This API is not in PyPI version 0.1.0.
+
+```python
+from atp_did.resolver import resolve_did, DidResolutionError
+
+try:
+    identity = resolve_did(expected_did, timeout=10, max_redirects=3)
+except DidResolutionError as error:
+    print(error.code)  # Reject the identity; never fall back to one signature.
+else:
+    print(identity.did, identity.document_url)
+    # identity.public_keys is immutable and has passed both document proofs.
+```
+
+`did_document_url(did)` maps a bound path DID to
+`https://<domain>/<path>/did.json`; encoded domain ports are supported. It makes
+no network request. Root/unbound identifiers, invalid ports, dot path segments
+and URLs longer than 8 KiB are refused. `resolve_did` fetches that URL and verifies the exact requested DID
+using the preceding offline verifier before returning immutable public keys.
+`document_url` is the initial DID-derived URL; redirects do not alter the DID.
+
+Retrieval policy:
+
+- TLS certificates and hostnames use Python's default trusted certificate store.
+- Every DNS answer must be a public unicast address. Private, loopback,
+  link-local, reserved, multicast and IPv4-mapped private addresses are blocked.
+  Connections use the checked numeric address with the original TLS hostname,
+  preventing a second DNS lookup from changing the destination.
+- Only same-origin HTTPS redirects are accepted, at most three by default
+  (configurable from zero to five). Each hop resolves and checks DNS again.
+  URL credentials, query strings, fragments, backslashes and whitespace are
+  rejected. No browser cookies, authorization headers or environment proxies
+  are sent. There is no private-network or certificate-verification bypass.
+- Responses must be HTTP 200 and uncompressed. Both advertised and actual
+  bodies are bounded to 64 KiB, matching the document verifier. Ambiguous
+  framing, truncated bodies, invalid JSON and either invalid proof fail closed.
+- A short-lived isolated Python interpreter performs transport. The parent
+  terminates and reaps it when the deadline expires, including DNS, TLS,
+  redirects and stalled headers/body reads. The timeout defaults to 10 seconds
+  (greater than zero and at most 60); process creation overhead and subsequent
+  cryptographic verification are outside that budget. No shell is invoked.
+
+This strict transport currently tries the first validated DNS address and does
+not retry other addresses or cache results. Process creation adds overhead and
+requires a normal Python runtime that permits subprocesses; this is not an
+in-process async or high-throughput resolver. The tested crypto/resolution target
+remains Linux/Python 3.12. Network tests use mocked sockets/responses, a real
+isolated-worker private-IP rejection, and a real deadline-terminated process;
+they do not claim a successful live public DID deployment.
+
+Stable failure codes are `invalid_did`, `insecure_url`,
+`destination_not_allowed`, `redirect_limit`, `not_found`, `invalid_response`,
+`response_too_large`, `transport_failed`, `timeout` and `verification_failed`.
+Invalid timeout/redirect configuration raises `ValueError` before launching
+transport. A TLS failure is `transport_failed`, never a reason to retry without
+certificate validation.
+
+Successful retrieval and signatures do not prove who owns the domain or grant
+permission for an action. There is no cache-based revocation guarantee or
+challenge-response protocol here. Next is a scoped, expiring challenge with
+atomic one-time consumption, then a separately tested mandate authorization
+boundary.
