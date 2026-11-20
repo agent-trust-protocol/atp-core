@@ -16,3 +16,5 @@ Import from `atp_profiles` and follow the [Python quickstart](https://pypi.org/p
 Not to be confused with the unrelated `atp-core` package on PyPI ("Attested Transport Protocol").
 
 Apache-2.0. Source: [ATP Core](https://github.com/agent-trust-protocol/atp-core).
+
+For the shared three-outcome exercise and optional feedback, see [First useful ATP result](../../docs/launch/first-success.md#try-python-decisions).

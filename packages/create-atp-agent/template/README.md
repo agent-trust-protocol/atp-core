@@ -5,3 +5,5 @@ Run `npm start` after installing dependencies (Node.js 20 or newer). This calls 
 Without ATP services, the SDK generates ephemeral local keys. That identifier is not publicly resolvable and will change on the next run. Persist keys securely and configure DID resolution before relying on it across systems.
 
 The optional `.atp.json` file is configuration metadata from the local wizard; the starter does not load or enforce its profile and capabilities. Wire policy evaluation into your own runtime.
+
+The starter also previews `filesystem => allow`, `shell => require_approval`, and `unmapped => deny` under safe-default. It does not execute tools or install a guard. Enforce the decision at the host boundary before a tool runs.

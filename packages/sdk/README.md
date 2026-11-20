@@ -34,7 +34,7 @@ This runs without a hosted ATP service. Standalone identity material is local an
 
 Got a `did:atp:...` identifier and `true` from `isStandalone()`? If the quickstart helped, [star ATP Core](https://github.com/agent-trust-protocol/atp-core) to follow the project.
 
-Prefer a scaffold? The [starter CLI](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/create-atp-agent/README.md) sets up a runnable project. Version 1.6.1 generates projects on SDK 5.x; use the migration guide if you move the generated project to SDK 6.
+Prefer a scaffold? The [starter CLI](https://github.com/agent-trust-protocol/atp-core/blob/main/packages/create-atp-agent/README.md) sets up a runnable project. Version 1.7.0 generates projects on SDK 6.x (minimum 6.0.2).
 
 ## Feedback and support
 

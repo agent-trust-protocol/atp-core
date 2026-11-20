@@ -1,6 +1,7 @@
 // Command registry shared by subcommands (`atp profile check Bash`), one-shot
 // mode (`atp -p "/profile check Bash"`) and the interactive shell. Every command
 // returns { ok, text, data } so `--json` can print `data` unchanged.
+import { doctor } from './doctor.mjs';
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { BUILTIN_PROFILES, evaluateActionWithProfile } from 'atp-profiles';
@@ -15,6 +16,7 @@ export const VERSION = JSON.parse(readFileSync(new URL('../package.json', import
 
 export const COMMANDS = [
   ['help', 'Show commands'],
+  ['doctor', 'Check local versions and settings; show guard verification gaps'],
   ['status', 'Profile, identity, guards and audit at a glance'],
   ['init [name]', 'Create a starter agent project (runs create-atp-agent)'],
   ['identity create [--name n] [--domain d] [--force]', 'Create a local did:atp identity (hybrid Ed25519 + ML-DSA-65)'],
@@ -184,6 +186,9 @@ export async function runCommand(tokens, { cwd = process.cwd() } = {}) {
         return ok(helpText(), { commands: COMMANDS.map(([usage, description]) => ({ usage, description })) });
       case 'version':
         return ok(VERSION, { version: VERSION });
+      case 'doctor':
+        if (positional.length || Object.keys(flags).length) return fail('usage: atp doctor [--json]');
+        return doctor({ cwd });
       case 'status':
         return status(cwd);
       case 'identity':

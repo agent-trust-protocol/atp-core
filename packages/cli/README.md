@@ -9,6 +9,17 @@ atp profile check Bash --profile safe-default
 
 Expect `ask`: the profile requires approval for shell commands. This previews the decision without running Bash or installing a hook. Run `atp` for the interactive shell.
 
+## Check your setup
+
+```bash
+atp doctor
+atp doctor --json
+```
+
+Doctor reads local package versions, ATP settings and CLI-managed guard registration. It changes no files, runs no tools and makes no network requests. `PASS` means the named local check passed; `WARN` gives a next step; `FAIL` exits with code 1. A healthy local configuration exits 0 even when live enforcement is unverified. Command/input errors exit 2 at the executable boundary. JSON includes `checks`, `readOnly` and `liveEnforcement`.
+
+A registered command does not prove matcher coverage, host consent, a restarted session or a blocked live action. Standalone Hermes setup uses a separate policy; doctor does not discover or certify that installation. Follow the [first-success guide](../../docs/launch/first-success.md) for a disposable live check. Reinstall CLI guards after moving Node or the CLI.
+
 ## The interactive shell
 
 Run `atp` with no arguments for an interactive session, in the spirit of Claude Code. The welcome screen shows the ATP shield logo in colour beside your working directory, profile and identity. Narrow terminals, `NO_COLOR` and piped output get a plain text panel. Then you get `/` commands with Tab completion, persistent history, and a status line showing your profile, identity and audit count after every command.
