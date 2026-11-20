@@ -61,3 +61,5 @@ npm pack --dry-run
 ```
 
 ATP specifications are Community Group drafts, not W3C Standards. The CLI is an implementation tool, not a conformance certificate.
+
+The starter also previews `filesystem => allow`, `shell => require_approval`, and `unmapped => deny` under safe-default. It does not execute tools or install a guard. Enforce the decision at the host boundary before a tool runs.

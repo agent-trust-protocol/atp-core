@@ -294,3 +294,42 @@ test('the ATP shield logo renders 12 aligned lines with ATP on the badge, and de
   assert.doesNotMatch(narrow, /█/);
   assert.match(narrow, /Agent Trust Protocol™/);
 });
+
+test('doctor is read-only, reports missing guards and never claims live enforcement', () => {
+  const s = sandbox();
+  try {
+    const r = s.run(['doctor', '--json']);
+    assert.equal(r.status, 0, r.stderr || r.stdout);
+    const d = JSON.parse(r.stdout);
+    assert.equal(d.readOnly, true);
+    assert.equal(d.liveEnforcement, 'unverified');
+    assert.ok(d.checks.some(c => c.id === 'guards' && c.status === 'warn'));
+    assert.throws(() => statSync(s.env.ATP_HOME), /ENOENT/);
+    assert.equal(s.run(['doctor', '--fix']).status, 1);
+    mkdirSync(s.env.ATP_HOME);
+    const file = join(s.env.ATP_HOME, 'settings.json');
+    writeFileSync(file, '{broken secret-value');
+    const bad = s.run(['doctor', '--json']);
+    assert.equal(bad.status, 1);
+    assert.ok(JSON.parse(bad.stdout).checks.some(c => c.id === 'settings' && c.status === 'fail'));
+    assert.ok(!bad.stdout.includes('secret-value'));
+    assert.equal(readFileSync(file, 'utf8'), '{broken secret-value');
+  } finally { s.cleanup(); }
+});
+
+test('doctor identifies stale Claude commands and malformed Hermes policy independently', () => {
+  const s = sandbox();
+  try {
+    assert.equal(s.run(['guard', 'install', 'claude-code']).status, 0);
+    const file = join(s.env.CLAUDE_CONFIG_DIR, 'settings.json');
+    const config = JSON.parse(readFileSync(file, 'utf8'));
+    config.hooks.PreToolUse[0].hooks[0].command = 'missing-node missing-atp guard hook claude-code';
+    writeFileSync(file, JSON.stringify(config));
+    mkdirSync(s.env.ATP_HOME, { recursive: true });
+    writeFileSync(join(s.env.ATP_HOME, 'hermes-hook.json'), '{}');
+    const d = s.json(['doctor']);
+    assert.equal(d.ok, false);
+    assert.ok(d.checks.some(c => c.id === 'claude-user' && c.status === 'fail'));
+    assert.equal(d.liveEnforcement, 'unverified');
+  } finally { s.cleanup(); }
+});

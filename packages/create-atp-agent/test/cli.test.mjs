@@ -19,6 +19,9 @@ test('terminal-only scaffold creates a runnable ESM starter without an invented 
     const agent = await readFile(path.join(cwd, 'test-agent/agent.mjs'), 'utf8');
     assert.match(agent, /Agent.quickstart\('test-agent'\)/);
     assert.doesNotMatch(agent, /getTrustScore/);
+    assert.match(agent, /evaluateActionWithProfile/);
+    assert.match(agent, /'filesystem', 'shell', 'unmapped'/);
+    assert.match(agent, /no tools are executed/);
     const pkg = JSON.parse(await readFile(path.join(cwd, 'test-agent/package.json'), 'utf8'));
     assert.equal(pkg.dependencies['atp-sdk'], '^6.0.2');
     assert.equal(pkg.engines.node, '>=20.0.0');

@@ -41,9 +41,9 @@
     "url": "https://github.com/agent-trust-protocol/atp-core/issues"
   },
   "dependencies": {
-    "atp-hermes-hook": "^0.1.0",
+    "atp-hermes-hook": "^0.2.1",
     "atp-profiles": "^3.0.0",
-    "atp-sdk": "^6.0.1"
+    "atp-sdk": "^6.0.2"
   },
   "engines": {
     "node": ">=20.0.0"

@@ -1,6 +1,6 @@
 {
   "name": "create-atp-agent",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Create Agent Trust Protocol agents",
   "type": "module",
   "bin": {

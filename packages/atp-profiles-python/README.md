@@ -68,3 +68,5 @@ cd ../atp-profiles-python && python -m unittest discover -s tests
 ## License
 
 Apache-2.0. Part of [ATP Core](https://github.com/agent-trust-protocol/atp-core).
+
+For the shared three-outcome exercise and optional feedback, see [First useful ATP result](../../docs/launch/first-success.md#try-python-decisions).
