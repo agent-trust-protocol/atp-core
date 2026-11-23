@@ -1,0 +1,36 @@
+{
+  "id": "F4-forced-llama3.2-3b-v2",
+  "title": "Coerced runner v2, llama3.2:3b with all tools bound: no structured call; call emitted as JSON text",
+  "evidence_class": "session-log-recovery",
+  "environment": "Developer Mac (darwin), local Ollama at loopback; isolated local harness: disposable Docker PostgreSQL + Fastify listener mounting the Studio mandate SQL route. Not a Studio deployment.",
+  "paid_or_hosted_inference": false,
+  "observed": {
+    "filtered_output_excerpt": [
+      "[coerce] bind_tools names=['write_todos', 'ls', 'read_file', 'write_file', 'edit_file', 'glob', 'grep', 'task', 'sql_db_query', 'sql_db_schema', 'sql_db_list_tables', 'sql_db_query_checker'] tool_choice=sql_db_query",
+      "  \"atpEnabled\": true,",
+      "  \"error\": null,",
+      "  \"agentToolCallSequence\": [],",
+      "  \"atpToolResults\": [],",
+      "  \"finalAnswer\": \"{\\\"name\\\":\\\"sql_db_query\\\",\\\"parameters\\\":{\\\"query\\\":\\\"SELECT COUNT(*) AS CanadianCustomers FROM Customer WHERE Country = \\\"Canada\\\"\\\"}}\",",
+      "    \"sqlCallbackDelta\": 0,"
+    ]
+  },
+  "sources": [
+    {
+      "session_id": "5e15d028-c516-40da-be90-359f6628bb47",
+      "jsonl_line_0based": 230,
+      "timestamp": "2026-10-18T04:54:56.223Z",
+      "tool_use_id": "toolu_01T2CUTiXJGNGRuKTpCPT8bo",
+      "private_record": "private/transcript-records/5e15d028-L00230-tool_result.json",
+      "private_record_sha256": "bfbc8c78a3ff30d5f3b2aba02474975266f8be39ecd44ecbf6bc0733288c2136",
+      "invoked_at": "2026-10-18T04:54:37.537Z"
+    }
+  ],
+  "runner_recovered_source_sha256": {
+    "ollama_coerced_runner.v2.py.recovered": "e9dd37eda76260714a0a8845a800d944a668498b3cff8e0d8bda3c185fee7dbf"
+  },
+  "server_recovered_source_sha256": {
+    "_liveproof_persistent.tmp.mjs.recovered": "3adf498d3f05947f0922e2d7a67f1fc9bcb9a6653e829f903df065ab558da484"
+  },
+  "notes": "tool_choice forced to sql_db_query; all 12 tools bound"
+}

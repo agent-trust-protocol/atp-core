@@ -1,0 +1,47 @@
+{
+  "id": "A2-autonomous-qwen2.5-coder-7b",
+  "title": "Autonomous qwen2.5-coder:7b: no structured tool invocation",
+  "evidence_class": "original-artifact",
+  "environment": "Developer Mac (darwin), local Ollama at loopback; isolated local harness: disposable Docker PostgreSQL + Fastify listener mounting the Studio mandate SQL route. Not a Studio deployment.",
+  "paid_or_hosted_inference": false,
+  "observed": {
+    "question": "How many customers are from Canada?",
+    "model": "ollama:qwen2.5-coder:7b",
+    "atpEnabled": true,
+    "elapsedSeconds": 32.15,
+    "timedOut": false,
+    "error": null,
+    "agentToolCallSequence": [],
+    "atpToolResults": [],
+    "finalAnswer": "```sql\nSELECT COUNT(*) AS CanadianCustomers FROM Customer WHERE Country = 'Canada'\n```",
+    "server": {
+      "sqlCallbackDelta": 0,
+      "successReceipt": null,
+      "chainOk": true,
+      "chinookBefore": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15",
+      "chinookAfter": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15"
+    }
+  },
+  "sources": [
+    {
+      "session_id": "61f8c86b-1fde-479c-ac94-14baa103a23e",
+      "jsonl_line_0based": 2854,
+      "timestamp": "2026-10-18T02:58:31.886Z",
+      "tool_use_id": "toolu_017gHgKKRxrja2g1diGH8xJy",
+      "private_record": "private/transcript-records/61f8c86b-L02854-tool_result.json",
+      "private_record_sha256": "0e657589248351a5bbfa4afa7c8021174ea0740a31777340ac8ce54bf2813ac4",
+      "invoked_at": "2026-10-18T02:57:56.651Z"
+    }
+  ],
+  "runner_recovered_source_sha256": {
+    "ollama_agent_runner.qwen.py.recovered": "0d1a41720d80bdcf87b5f99fc255d0019744729c5db7b4e5244874b265d2e3b4"
+  },
+  "server_recovered_source_sha256": {
+    "_liveserver.tmp.mjs.recovered": "b1e99eccd7d01b616859cba58c92ae8277a340dd309279d03b8e2f6d9e995929"
+  },
+  "original_artifact": {
+    "file": "live-proof-ollama-agent.json (Desktop session copy)",
+    "sha256": "a527a2511038d9d99d5771a96f4def27fa69281b3c581f77d6b0724cb5293706",
+    "identical_to_session_log_output": true
+  }
+}

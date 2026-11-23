@@ -1,0 +1,138 @@
+{
+  "id": "M1-enforcement-matrix",
+  "title": "Enforcement matrix via real pairing -> mandate -> mandate SQL route (no model)",
+  "evidence_class": "original-artifact",
+  "environment": "Developer Mac (darwin), local Ollama at loopback; isolated local harness: disposable Docker PostgreSQL + Fastify listener mounting the Studio mandate SQL route. Not a Studio deployment.",
+  "paid_or_hosted_inference": false,
+  "observed": {
+    "scope": "chinook sql_db_query, bounded SELECT",
+    "pinnedSql": "SELECT COUNT(*) AS CanadianCustomers FROM Customer WHERE Country = 'Canada'",
+    "dbImage": "postgres:16-alpine",
+    "pairing": {
+      "ownershipProofHasKey": true,
+      "verifiedAt": "2026-10-18T02:54:40.816Z"
+    },
+    "mandateId": "mnd_01M56EXK5ZH52H9Z76C2B9C4EW",
+    "mandateDigest": "sha256:3fddbc3a8e13441d2c364fb96b7345e03aa7ab92842e1c3c65e091b8b8e8ef02",
+    "chinookBefore": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15",
+    "cases": {
+      "allow": {
+        "httpStatus": 200,
+        "decision": "SUCCEEDED",
+        "rows": [
+          {
+            "CanadianCustomers": 8
+          }
+        ],
+        "receiptId": "mrx_01M56EXK9X5K6E582KCKY0KBN2",
+        "receiptState": "SUCCEEDED",
+        "auditEventId": "evt_01M56EXKG7JF27NPXBTC0JZE9H",
+        "sqlCallbackRan": true,
+        "chinookBefore": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15",
+        "chinookAfter": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15"
+      },
+      "wrongScopeDeny": {
+        "decision": "DENIED",
+        "reasonCode": "resource_out_of_scope",
+        "sqlCallbackRan": false,
+        "chinookUnchanged": true
+      },
+      "replay": {
+        "firstDecision": "SUCCEEDED",
+        "replayDecision": "DENIED",
+        "replayReason": "origin_unverified",
+        "sqlCallbackRanOnReplay": false
+      },
+      "expiredOrigin": {
+        "httpStatus": 200,
+        "decision": "DENIED",
+        "reasonCode": "origin_unverified",
+        "sqlCallbackRan": false,
+        "chinookUnchanged": true
+      },
+      "paused": {
+        "decision": "DENIED",
+        "reasonCode": "mandate_paused",
+        "sqlCallbackRan": false
+      },
+      "resume": {
+        "decision": "SUCCEEDED",
+        "rows": [
+          {
+            "CanadianCustomers": 8
+          }
+        ]
+      },
+      "revoked": {
+        "decision": "DENIED",
+        "reasonCode": "mandate_revoked",
+        "sqlCallbackRan": false,
+        "chinookUnchanged": true
+      },
+      "wrongTenantAudience": {
+        "decision": "DENIED",
+        "reasonCode": "action_payload_mismatch",
+        "httpStatus": 200,
+        "sqlCallbackRan": false
+      },
+      "payloadTamper": {
+        "decision": "DENIED",
+        "reasonCode": "invalid_action",
+        "sqlCallbackRan": false,
+        "chinookUnchanged": true
+      },
+      "verifierUnavailable": {
+        "httpStatus": 500,
+        "decision": "(no decision envelope)",
+        "reasonCode": null,
+        "succeeded": false,
+        "sqlCallbackRan": false,
+        "chinookUnchanged": true
+      }
+    },
+    "finalStatus": {
+      "sqlCallbackCount": 3,
+      "chainOk": true,
+      "chinookAfter": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15",
+      "receipts": [
+        {
+          "id": "mrx_01M56EXK9X5K6E582KCKY0KBN2",
+          "state": "SUCCEEDED",
+          "result_digest": "sha256:34712ecde966a274b7b039bfc186f6698bd66ebd495be0c2b21fce6b513244d6"
+        },
+        {
+          "id": "mrx_01M56EXKKMG3GS54BZPQD89MH7",
+          "state": "SUCCEEDED",
+          "result_digest": "sha256:34712ecde966a274b7b039bfc186f6698bd66ebd495be0c2b21fce6b513244d6"
+        },
+        {
+          "id": "mrx_01M56EXKP0AAF3PJHAF0T3DWH2",
+          "state": "SUCCEEDED",
+          "result_digest": "sha256:34712ecde966a274b7b039bfc186f6698bd66ebd495be0c2b21fce6b513244d6"
+        }
+      ]
+    },
+    "chinookUnchangedOverall": true
+  },
+  "sources": [
+    {
+      "session_id": "61f8c86b-1fde-479c-ac94-14baa103a23e",
+      "jsonl_line_0based": 2784,
+      "timestamp": "2026-10-18T02:54:47.817Z",
+      "tool_use_id": "toolu_01TA1yuCZ69WUo8ogPBRxjkF",
+      "private_record": "private/transcript-records/61f8c86b-L02784-tool_result.json",
+      "private_record_sha256": "43566524aedd1e3ad9111a99299f4ddac3018456da6810d6c392bd4687410776",
+      "invoked_at": "2026-10-18T02:54:46.680Z"
+    }
+  ],
+  "server_recovered_source_sha256": {
+    "_liveproof.tmp.mjs.recovered": "f70924dcc69ed818c754c4f184d77fc43a79c8cd37ac7b55084d1530711f5899"
+  },
+  "notes": "serverUrl removed. No model involved. 'Expired capability credential' is N/A on this path (binds via mandate).",
+  "original_artifact": {
+    "file": "live-proof-enforcement-matrix.json (Desktop session copy)",
+    "sha256": "48bc76698ebfe3686c282b20642f49dcd1c9a146f7f35ae6223ab77b675c1a55",
+    "committed_reference_hash": null,
+    "cases_identical_to_session_log_output": true
+  }
+}

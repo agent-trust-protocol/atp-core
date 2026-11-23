@@ -1,0 +1,20 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> create-atp-agent@1.3.3 test
+> npm run build && node --test test/*.test.mjs
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> create-atp-agent@1.3.3 build
+> tsc
+
+✔ terminal-only scaffold creates a runnable ESM starter without an invented identity (100.207792ms)
+✔ local configuration endpoint never claims to have issued a DID or keys (115.120053ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 323.890107

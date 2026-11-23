@@ -1,0 +1,15 @@
+9cb6d5e13180ba5c65daebb3a1c8c91d5f236de84a187eb9c6f336a39801b9da  A0-autonomous-llama3.2-3b-harness-error.json
+72a3df232f4fe55b3e84d4f20d41e6a4d68215dc37c732366606a577dbac4664  A1-autonomous-llama3.2-3b.json
+a2b8226b0a1749bca56c749ae93712c298d1f0e2a705714e84ea36da05be98e9  A2-autonomous-qwen2.5-coder-7b.json
+bfe07a08e8dac1edcf45857cca9a4ad5d7dfc942a952609b105e955fd03c5390  F1-forced-qwen2.5-coder-7b-v1.json
+8a3a3c93713e9ab60c055901fd48191482f2944de7b7f69216d0fee683f64762  F2-forced-qwen2.5-coder-7b-v2.json
+82b85ef106a396ba0103dc55eff6f24bd65aeab43f618d3fb605557b6d88d58d  F3-direct-bind-tools-probe-qwen-llama.json
+0ad1b1a626621aa4df4afa5c9b97f8c0e91f0690729cf65e14098399407ad680  F4-forced-llama3.2-3b-v2.json
+4e3a77954f9ff2ddf467119ff9b1cff187fe5740228e26c52ae0c722823e2fbb  F5-forced-llama3.2-3b-v3-run1.json
+058be46a4c8459cc78e2ce3eee4ce1225ebe2f9d9012f320e25ae14249d9e4fe  F6-forced-qwen2.5-coder-7b-v3.json
+fa3637ecfebc7eb4aef621d94d323e8d527b5d9e088a26da4001dad5570c4dfe  F7-direct-probe-llama3.2-3b-quotes.json
+4f2435af21faf176a1bc79922984a8d21c6d60fc3a43a5164d18e73f0b3e8cb9  F8-forced-llama3.2-3b-v3-final.json
+8d7046acf3991514e7b9b563e9e9f61441f26e197330701f9bb009034c623747  G1-gemma4-26b-load-timeout.json
+6438db52a81609b828226b99df06a91ea0e263d0ad0a759817198c924016fcaf  M1-enforcement-matrix.json
+6700d145aa80624256ac134954f6d6ff9dce2a44fd83d58e7948c62dcbb67d98  P1-paid-allow-claude-sonnet-5-5.json
+1befb04a4ac5922776284ee092e7b0ca2ae1d56b74a69f6e285c05540c183d44  README.md

@@ -1,0 +1,44 @@
+{
+  "id": "F5-forced-llama3.2-3b-v3-run1",
+  "title": "Coerced runner v3, llama3.2:3b: two structured sql_db_query calls, both DENIED invalid_payload",
+  "evidence_class": "session-log-recovery",
+  "environment": "Developer Mac (darwin), local Ollama at loopback; isolated local harness: disposable Docker PostgreSQL + Fastify listener mounting the Studio mandate SQL route. Not a Studio deployment.",
+  "paid_or_hosted_inference": false,
+  "observed": {
+    "filtered_output_excerpt": [
+      "[coerce] bind_tools bound=['sql_db_query'] tool_choice=sql_db_query",
+      "[coerce] bind_tools bound=['sql_db_query'] tool_choice=sql_db_query",
+      "[coerce] bind_tools bound=['sql_db_query'] tool_choice=sql_db_query",
+      "  \"atpEnabled\": true,",
+      "  \"error\": null,",
+      "  \"agentToolCallSequence\": [",
+      "      \"name\": \"sql_db_query\",",
+      "        \"query\": \"SELECT COUNT(*) AS CanadianCustomers FROM Customer WHERE Country = \"",
+      "      \"name\": \"sql_db_query\",",
+      "        \"query\": \"SELECT COUNT(*) AS CanadianCustomers FROM Customer WHERE Country = \"",
+      "  \"atpToolResults\": [",
+      "    \"{\\\"atp\\\": \\\"DENIED\\\", \\\"reasonCode\\\": \\\"invalid_payload\\\", \\\"auditEventId\\\": null}\",",
+      "    \"{\\\"atp\\\": \\\"DENIED\\\", \\\"reasonCode\\\": \\\"invalid_payload\\\", \\\"auditEventId\\\": null}\"",
+      "  \"finalAnswer\": \"I will try again with a different query.\\n\\n{\\\"name\\\": \\\"sql_db_query\\\", \\\"parameters\\\": {\\\"query\\\":\\\"SELECT COUNT(*) AS CanadianCustomers FROM Customer WHERE Country = \\\\\\\"Canada\\\\\\\"\\\"}}\",",
+      "    \"sqlCallbackDelta\": 0,"
+    ]
+  },
+  "sources": [
+    {
+      "session_id": "5e15d028-c516-40da-be90-359f6628bb47",
+      "jsonl_line_0based": 240,
+      "timestamp": "2026-10-18T04:55:35.156Z",
+      "tool_use_id": "toolu_01QMDZJGRes8jD335L5ABp3N",
+      "private_record": "private/transcript-records/5e15d028-L00240-tool_result.json",
+      "private_record_sha256": "772c8aed63b84695e835899a52537668f680c6757182918e0c58263b50bcbfe2",
+      "invoked_at": "2026-10-18T04:55:21.332Z"
+    }
+  ],
+  "runner_recovered_source_sha256": {
+    "ollama_coerced_runner.v3.py.recovered": "cb43cd351e7c09dfb4aaeacfa687662ea611ba963ac44f63457f987f445ea9b0"
+  },
+  "server_recovered_source_sha256": {
+    "_liveproof_persistent.tmp.mjs.recovered": "3adf498d3f05947f0922e2d7a67f1fc9bcb9a6653e829f903df065ab558da484"
+  },
+  "notes": "tool_choice forced to sql_db_query AND bound tools narrowed to sql_db_query only. Output grep-filtered at capture time; see F8 for the complete record of the repeat run."
+}

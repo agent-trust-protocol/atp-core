@@ -1,0 +1,37 @@
+{
+  "id": "A0-autonomous-llama3.2-3b-harness-error",
+  "title": "Autonomous llama3.2:3b, first launch: runner TypeError before any model call",
+  "evidence_class": "session-log-recovery",
+  "environment": "Developer Mac (darwin), local Ollama at loopback; isolated local harness: disposable Docker PostgreSQL + Fastify listener mounting the Studio mandate SQL route. Not a Studio deployment.",
+  "paid_or_hosted_inference": false,
+  "observed": {
+    "question": "How many customers are from Canada?",
+    "model": "ollama:llama3.2:3b",
+    "atpEnabled": true,
+    "elapsedSeconds": 0.01,
+    "timedOut": false,
+    "error": "TypeError: isinstance() arg 2 must be a type, a tuple of types, or a union",
+    "agentToolCallSequence": [],
+    "atpToolResults": [],
+    "finalAnswer": null,
+    "server": {
+      "sqlCallbackDelta": 0,
+      "successReceipt": null,
+      "chainOk": true,
+      "chinookBefore": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15",
+      "chinookAfter": "7651ba378ac2fcd0dfc3c66fb101f7a7eed3ba39a612ec642b96e20702061f15"
+    }
+  },
+  "sources": [
+    {
+      "session_id": "61f8c86b-1fde-479c-ac94-14baa103a23e",
+      "jsonl_line_0based": 2830,
+      "timestamp": "2026-10-18T02:56:37.474Z",
+      "tool_use_id": "toolu_01YW4w3hnsb9Twe7Eo3nrekp",
+      "private_record": "private/transcript-records/61f8c86b-L02830-tool_result.json",
+      "private_record_sha256": "527f9111cbb161c7a9c3b01bed95fd7b1ef5f48ffd1a0d0f11591c4dc52e351d",
+      "invoked_at": "2026-10-18T02:56:35.143Z"
+    }
+  ],
+  "notes": "Harness bug in the first runner draft; fixed by the edit at 2026-10-18T02:56:49Z. Not a model result."
+}

@@ -1,0 +1,8 @@
+{
+  "name": "atp-cli-existing-agent-boundary-proof",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "vitest run --config vitest.config.ts", "test:sdk": "ATP_PROOF_SDK_TESTS=1 vitest run --config vitest.config.ts" },
+  "dependencies": { "langchain": "1.5.18", "zod": "3.24.1" },
+  "devDependencies": { "vitest": "2.1.8" }
+}

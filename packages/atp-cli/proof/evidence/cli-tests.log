@@ -1,0 +1,51 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @atpdeveloper/cli@0.0.0-development test
+> node --test test/*.test.mjs
+
+✔ LangChain manifest is discovered without running scripts or granting authority (9.893394ms)
+✔ refuses parent directory and symlinked workspace escape (3.991794ms)
+✔ refuses symlinked manifest and oversized manifests (3.632877ms)
+✔ invalid manifest fails, and not-discovered is not a verified framework (6.191616ms)
+✔ handles untrusted package names without terminal control codes (2.401831ms)
+✔ simulated approved tool invokes existing tool once (1.33595ms)
+✔ simulated denied tool does not invoke the original agent tool (0.679693ms)
+✔ missing or forged-looking verdict shapes fail closed (0.403725ms)
+✔ gate failure blocks tool and cannot be bypassed by user input (0.28368ms)
+✔ only valid configuration accepted (0.276789ms)
+✔ help advertises only defined preview commands (1.622443ms)
+✔ status and integration commands do not claim authorization (0.304272ms)
+✔ arbitrary natural language cannot execute work in preview (0.811567ms)
+✔ help works noninteractively and shell refuses non-TTY (126.421362ms)
+✔ read-only local ATP access is off by default (1.92361ms)
+✔ ports are validated and requests target loopback only (0.564915ms)
+✔ agent listing is explicitly registry data, not verified identity (0.79351ms)
+✔ trust registry record does not imply verified identity or Guardian decision (0.423997ms)
+✔ grants are read-only and never assert current authorization (0.377424ms)
+✔ missing, failed and malformed responses fail closed (1.127777ms)
+✔ untrusted remote status strings are stripped of terminal control characters (0.512865ms)
+✔ understands relevant trust tasks without executing them (2.919151ms)
+✔ mutating natural language requires approval and ATP authorization (0.219901ms)
+✔ unrecognized input stays non-executing (0.261705ms)
+✔ does not treat slash commands as natural-language operations (0.178086ms)
+✔ default selects Ollama loopback and makes no request (1.954387ms)
+✔ hosted free requires explicit network access and credentials (0.563252ms)
+✔ paid inference requires independent opt-ins and exact model (0.388832ms)
+✔ local model request uses mocked Ollama with no remote fallback (0.704772ms)
+✔ free router request only uses free model (0.236626ms)
+✔ failed local request never uses a hosted fallback (0.34858ms)
+✔ never make a request without required explicit consent (0.150743ms)
+✔ Studio inspection fails closed without opt-in or session (1.988139ms)
+✔ historical DENY formats evidence without asserting current permission (0.501397ms)
+✔ requires event ID and fails on mismatched response (0.578486ms)
+✔ uses authenticated GET against local Studio only; never writes (0.421062ms)
+✔ denies malformed, unauthenticated and unreachable events (0.588381ms)
+✔ remote ANSI control sequences are not rendered (0.196935ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 253.724225

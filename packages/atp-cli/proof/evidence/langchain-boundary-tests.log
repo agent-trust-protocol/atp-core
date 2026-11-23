@@ -1,0 +1,15 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> test
+> vitest run --config vitest.config.ts
+
+
+ RUN  v2.1.8 /workspace/scratch/97d6ec8d01b3/atp-core/packages/atp-cli/proof
+
+ ✓ langchain-studio-boundary.test.ts (5 tests) 147ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  22:29:53
+   Duration  996ms (transform 162ms, setup 0ms, collect 601ms, tests 147ms, environment 0ms, prepare 54ms)
+
