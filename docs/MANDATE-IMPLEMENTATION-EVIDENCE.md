@@ -27,10 +27,10 @@ To run the fixtures, as the fixtures' README describes (Node 24, after installin
 
 ```sh
 npm ci --include=dev --ignore-scripts --prefix packages/sdk
-node --test examples/operator-authority/*.test.mjs
+node --test examples/operator-authority/*.test.mjs examples/operator-authority/revision-3/*.test.mjs
 ```
 
-The lab-corpus tests report an explicit skip unless a pinned corpus path is supplied; the README gives the variables.
+This is the same test set the operator-authority CI workflow runs. The lab-corpus tests report an explicit skip unless the pinned corpus paths are supplied; the [revision-3 reproduction steps](https://github.com/agent-trust-protocol/atp-core/blob/b0a1ac1c8b3dd88e7ef6db6b119e35e0f03f43cb/examples/operator-authority/revision-3/REVISION-3-EVIDENCE-MAPPING.md) give both corpus variables and the pinned lab commit.
 
 Limits, as the fixtures themselves state: no canonical wire format, no authenticated revocation source, no durable replay protection, no chained delegation, and no production enforcement. Fixture ALLOW is not permission for a real tool.
 
