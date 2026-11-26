@@ -5,7 +5,7 @@
 ## Where work lives
 - ATP open reference tests: https://github.com/agent-trust-protocol/atp-core/pull/172 (draft).
 - ATP Core planning: https://github.com/agent-trust-protocol/atp-core/issues/169.
-- ATP Studio separate real-Guardian validation: https://github.com/agent-trust-protocol/atp-studio/issues/94.
+- ATP Studio separate real-Guardian validation: tracked privately; public summary in [docs/MANDATE-IMPLEMENTATION-EVIDENCE.md](../../docs/MANDATE-IMPLEMENTATION-EVIDENCE.md).
 - Proposed external host: https://github.com/Agent-Authority-Conformance/aps-conformance-suite .
 - Related lab case: https://github.com/Agent-Authority-Conformance/aps-conformance-suite/issues/140 (APS ancestor revocation; **not ATP validation**).
 - Related lab candidate case families: https://github.com/Agent-Authority-Conformance/aps-conformance-suite/issues/122 (proposed lifecycle text; **not conformance claims**).

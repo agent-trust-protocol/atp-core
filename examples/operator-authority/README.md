@@ -32,7 +32,7 @@ The fixture models four separate concerns: a current operator, a resource-bound 
 
 It does not model atomic revocation/execution consistency, signed evidence, replay defenses, cryptographic proof of possession, chained delegations, approval consumption, or multi-tenant storage. Those remain pending implementation gates under #169 and must be enforced independently.
 
-Run results must include the actual command, Node version, branch commit, and pass/fail output. Do not describe repository acceptance as independent verification. Studio comparisons live in https://github.com/agent-trust-protocol/atp-studio/issues/94. Shared cross-stack fixtures need separate admission by Agent Authority Conformance Lab maintainers.
+Run results must include the actual command, Node version, branch commit, and pass/fail output. Do not describe repository acceptance as independent verification. Studio comparisons are tracked privately; a public summary is in [docs/MANDATE-IMPLEMENTATION-EVIDENCE.md](../../docs/MANDATE-IMPLEMENTATION-EVIDENCE.md). Shared cross-stack fixtures need separate admission by Agent Authority Conformance Lab maintainers.
 
 Approval fields are also fixture-only inputs. `verifiedByTrustedOperator` must be derived from real authenticated operator checks in a future implementation, never accepted from the requesting agent; approval replay/atomic consumption is not implemented here.
 
