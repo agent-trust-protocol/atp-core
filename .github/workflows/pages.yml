@@ -16,6 +16,8 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  # Lets the deploy job list this run's artifacts while it waits for the upload.
+  actions: read
 
 # Allow one concurrent deployment; cancel in-progress runs for the same ref.
 concurrency:
@@ -23,10 +25,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,6 +38,33 @@ jobs:
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
           path: docs
+
+  deploy:
+    # A separate job, as in GitHub's own Pages starter workflows. Since
+    # 20 Nov 2026 deploy-pages has looked up the artifact within a second of
+    # the upload, found none and failed, though the artifact was there moments
+    # later. It does not retry, so we wait until the artifact is listed.
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for the github-pages artifact to be listed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in $(seq 1 24); do
+            count=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts?name=github-pages" --jq '.total_count' || echo 0)
+            if [ "${count}" -ge 1 ]; then
+              echo "github-pages artifact is listed (attempt ${attempt})."
+              exit 0
+            fi
+            echo "Not listed yet (attempt ${attempt}); waiting 5s."
+            sleep 5
+          done
+          echo "::error::The github-pages artifact was not listed after 2 minutes."
+          exit 1
 
       - name: Deploy to GitHub Pages
         id: deployment
