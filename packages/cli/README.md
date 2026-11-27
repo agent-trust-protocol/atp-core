@@ -127,3 +127,11 @@ A profile is a category and state gate, not a sandbox. It does not inspect comma
 ## License
 
 Apache-2.0. Part of [ATP Core](https://github.com/agent-trust-protocol/atp-core).
+
+## Agent Watch demo
+
+Run `atp watch --demo` from a build containing Agent Watch. It opens a local browser view with a built-in simulation. Use `--no-open` to print the URL without launching a browser.
+
+Select **Play replay** to follow the agent through an allowed read and a denied write. Use **Pause**, **Step**, **Reset**, or select a timeline entry to inspect the same decision record. **List view** preserves the selected event and **Reduce motion** removes transitions. Press Ctrl+C in the terminal to stop the local server.
+
+The demo uses synthetic events and serves bundled files on loopback. The sample file, policy, and event IDs are illustrative. It does not install an agent hook, read local logs, or enforce policy.

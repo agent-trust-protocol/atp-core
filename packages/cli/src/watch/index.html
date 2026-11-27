@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ATP Agent Watch</title>
+<link rel="stylesheet" href="./watch.css">
+<script src="./watch.js" defer></script>
+<header class="top"><span class="brand">◆ &nbsp; Agent Trust Protocol™</span><span class="badge">● &nbsp; SIMULATION</span></header>
+<main>
+  <div class="intro"><div><p class="eyebrow">ATP / DEVELOPER TOOLS</p><h1>Agent Watch</h1><p>Follow an agent from request to policy decision.</p></div><div class="controls"><button id="play">Play replay</button><button id="step">Step</button><button id="reset">Reset</button><button id="view" aria-pressed="false" aria-controls="floor">List view</button></div></div>
+  <div class="layout">
+    <section class="scene" id="floor" aria-label="Command floor animation" aria-hidden="true">
+      <div class="scene-title">COMMAND FLOOR <span>01 / READ-ONLY POLICY</span></div>
+      <div class="grid"></div><div class="route" id="route"></div>
+      <div class="station desk"><i></i><span>Workspace</span></div>
+      <div class="station gate"><i></i><span>Policy gate</span></div>
+      <div class="station vault"><i></i><span>Protected file</span></div>
+      <div class="agent" id="agent"><div class="robot"><i></i></div><span>Agent 01</span></div>
+      <p class="scene-note" id="sceneNote">Ready at workspace</p>
+    </section>
+    <section class="evidence" aria-labelledby="evidenceTitle"><p class="eyebrow">INSPECT</p><h2 id="evidenceTitle">Decision evidence</h2>
+      <div id="outcome" class="result" aria-live="polite">Ready</div>
+      <dl><dt>Action</dt><dd id="action">—</dd><dt>Policy</dt><dd>Read-only profile</dd><dt>Reason</dt><dd id="reason">Select a recorded step to inspect it.</dd><dt>Event</dt><dd id="eventId">—</dd></dl>
+      <label class="motion"><input id="motion" type="checkbox"> Reduce motion</label>
+    </section>
+    <section class="timeline" aria-labelledby="timelineTitle"><p class="eyebrow">REPLAY</p><h2 id="timelineTitle">Action timeline</h2><ol id="events"></ol></section>
+  </div>
+</main>
+</html>
