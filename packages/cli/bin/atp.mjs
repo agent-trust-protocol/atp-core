@@ -10,6 +10,15 @@ import { runShell } from '../src/shell.mjs';
 import { tokenize } from '../src/tokenize.mjs';
 
 async function main(argv) {
+  if (argv[0] === 'watch') {
+    if (argv[1] === '--demo' && (argv.length === 2 || (argv.length === 3 && argv[2] === '--no-open'))) {
+      const { watchDemo } = await import('../src/watch.mjs');
+      await watchDemo({ open: argv.length === 2 });
+      return 0;
+    }
+    process.stderr.write('Usage: atp watch --demo [--no-open]\n');
+    return 2;
+  }
   // Hook mode first: this path runs on every guarded tool call and must stay minimal.
   if (argv[0] === 'guard' && argv[1] === 'hook') {
     if (argv[2] === 'claude-code') return runClaudeHook();

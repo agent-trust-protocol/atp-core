@@ -16,6 +16,7 @@ export const VERSION = JSON.parse(readFileSync(new URL('../package.json', import
 
 export const COMMANDS = [
   ['help', 'Show commands'],
+  ['watch --demo [--no-open]', 'Replay a simulated agent policy decision in your browser'],
   ['doctor', 'Check local versions and settings; show guard verification gaps'],
   ['status', 'Profile, identity, guards and audit at a glance'],
   ['init [name]', 'Create a starter agent project (runs create-atp-agent)'],
